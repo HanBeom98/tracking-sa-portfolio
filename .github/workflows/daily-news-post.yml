@@ -2,13 +2,17 @@ name: Daily AI News Post
 
 on:
   schedule:
-    - cron: '0 22 * * *' # UTC 22:00 = KST 07:00
-    - cron: '0 12 * * *' # UTC 12:00 = KST 21:00
-  workflow_dispatch: # Allows manual triggering from GitHub Actions tab
+    - cron: '6 22 * * *'  # UTC 22:06 = KST 07:06 (오전 7시 6분)
+    - cron: '12 12 * * *' # UTC 12:12 = KST 21:12 (오후 9시 12분)
+  workflow_dispatch: # 직접 실행 버튼 활성화
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    # 깃허브 액션이 저장소에 글을 쓸 수 있도록 권한 부여
+    permissions:
+      contents: write
+      
     steps:
       - uses: actions/checkout@v3
 
@@ -19,9 +23,17 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install feedparser python-dotenv requests markdown google-generativeai
+          pip install feedparser python-dotenv requests markdown
 
       - name: Run Script
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python main.py
+
+      - name: Commit and Push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Auto-post news updates $(date +'%Y-%m-%d %H:%M')" || echo "No changes to commit"
+          git push

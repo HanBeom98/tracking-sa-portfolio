@@ -6,6 +6,7 @@ import requests
 import re
 from dotenv import load_dotenv
 import markdown # Import the markdown library
+import shutil # Import the shutil module for file operations
 
 import hashlib # For creating a more robust unique ID if needed
 
@@ -142,13 +143,14 @@ def generate_index_html(articles_meta):
     print(f"🏠 인덱스 HTML 생성 완료: {output_path}")
 
 def copy_static_assets():
-    """Copies static assets (CSS, JS, animal_face_test.html etc.) to public directory."""
+    """Copies static assets (CSS, JS, animal_face_test.html etc.) to public directory using shutil."""
     os.makedirs(PUBLIC_DIR, exist_ok=True)
+    
     # List of files/dirs to copy. Adjust as needed.
+    # Removed firebase-config.js from here to handle it separately.
     assets_to_copy = [
         "style.css",
         "common.js",
-        "firebase-config.js",
         "animal_face_test.html",
         "edit.html",
         "edit.js",
@@ -161,22 +163,44 @@ def copy_static_assets():
         "about.html",
         "contact.html",
         "privacy-policy.html",
-        "layout" # Copy the whole layout directory
     ]
 
     for item in assets_to_copy:
         src = item
         dst = os.path.join(PUBLIC_DIR, item)
         if os.path.isdir(src):
-            if os.path.exists(dst): # Remove existing dir before copying
-                subprocess.run(["rm", "-rf", dst], check=True)
-            subprocess.run(["cp", "-r", src, dst], check=True)
+            if os.path.exists(dst): 
+                shutil.rmtree(dst) # Remove existing dir before copying
+            shutil.copytree(src, dst)
             print(f"📂 디렉토리 복사 완료: {src} -> {dst}")
         elif os.path.isfile(src):
-            subprocess.run(["cp", src, dst], check=True)
+            shutil.copy2(src, dst)
             print(f"📄 파일 복사 완료: {src} -> {dst}")
         else:
             print(f"⚠️ 경고: '{item}'을 찾을 수 없거나 복사할 수 없습니다.")
+
+    # Handle 'layout' directory separately
+    layout_src = "layout"
+    layout_dst = os.path.join(PUBLIC_DIR, layout_src)
+    if os.path.exists(layout_src) and os.path.isdir(layout_src):
+        if os.path.exists(layout_dst):
+            shutil.rmtree(layout_dst)
+        shutil.copytree(layout_src, layout_dst)
+        print(f"📂 디렉토리 복사 완료: {layout_src} -> {layout_dst}")
+    else:
+        print(f"⚠️ 경고: '{layout_src}' 디렉토리를 찾을 수 없습니다.")
+
+    # Handle firebase-config.js specifically due to potential ignore patterns
+    firebase_config_src = "firebase-config.js"
+    firebase_config_dst = os.path.join(PUBLIC_DIR, firebase_config_src)
+    try:
+        if os.path.exists(firebase_config_src) and os.path.isfile(firebase_config_src):
+            shutil.copy2(firebase_config_src, firebase_config_dst)
+            print(f"📄 파일 복사 완료: {firebase_config_src} -> {firebase_config_dst}")
+        else:
+            print(f"⚠️ 경고: '{firebase_config_src}' 파일을 찾을 수 없거나 복사할 수 없습니다. 이 파일은 무시 패턴에 의해 제외되었을 수 있습니다.")
+    except Exception as e:
+        print(f"⚠️ 경고: '{firebase_config_src}' 파일 복사 중 오류 발생: {e}")
 
 # --- Original main.py functions (modified for SSG) ---
 
@@ -288,14 +312,13 @@ def git_push_changes(new_article_processed=False):
         generate_index_html(articles_meta)
 
         # Git operations
-        subprocess.run(["git", "config", "user.name", "Gemini Bot"], check=False)
-        subprocess.run(["git", "config", "user.email", "bot@gemini.ai"], check=False)
+        subprocess.run(["git", "config", "user.name", "github-actions[bot]"], check=False)
+        subprocess.run(["git", "config", "user.email", "github-actions[bot]@users.noreply.github.com"], check=False)
         
         # Add public directory and posts directory and processed articles log
         subprocess.run(["git", "add", PUBLIC_DIR], check=True)
         subprocess.run(["git", "add", NEWS_POSTS_DIR], check=True) # Also add raw markdown files
-        subprocess.run(["git", "add", "index.html"], check=True) # Ensure base index.html is also added, if it's meant to be used for something else.
-        subprocess.run(["git", "add", PROCESSED_ARTICLES_LOG], check=False) # Add log, if it exists                                                                # But for SSG, only public/ is deployed.
+        subprocess.run(["git", "add", PROCESSED_ARTICLES_LOG], check=False) # Add log, if it exists
 
         # Commit only if there are changes to avoid empty commits
         result = subprocess.run(["git", "diff", "--cached", "--exit-code"], capture_output=True, text=True)
