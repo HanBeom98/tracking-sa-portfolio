@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>글쓰기 - TrackingSA</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="header-placeholder"></div>
+
+    <main>
+        <section class="write-form-section section-card">
+            <h1>자유게시판 글쓰기</h1>
+            <form id="write-form" class="inquiry-form">
+                <div class="form-field full-width">
+                    <label for="title">제목</label>
+                    <input type="text" id="title" placeholder="제목을 입력하세요" required>
+                </div>
+                <div class="form-field full-width">
+                    <label for="content">내용</label>
+                    <textarea id="content" rows="15" placeholder="내용을 입력하세요" required></textarea>
+                </div>
+                <div class="form-field">
+                    <label for="password">비밀번호</label>
+                    <input type="password" id="password" placeholder="수정/삭제 시 사용할 비밀번호" required>
+                </div>
+                <div class="form-field">
+                    <label for="password-confirm">비밀번호 확인</label>
+                    <input type="password" id="password-confirm" placeholder="비밀번호를 다시 한번 입력하세요" required>
+                </div>
+                <button type="submit" id="submit-button" class="go-test-button">등록하기</button>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 TrackingSA. 모든 권리 보유.</p>
+    </footer>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    
+    <!-- crypto-js for password hashing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    
+    <!-- Firebase-config -->
+    <script src="firebase-config.js"></script>
+    
+    <script src="common.js"></script>
+    <!-- 글쓰기 로직을 위한 별도의 스크립트 -->
+    <script src="write.js"></script>
+</body>
+</html>

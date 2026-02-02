@@ -1,17 +1,19 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>뉴스 홈</title>
+    <title>게시물 - TrackingSA</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="header-placeholder"></div>
 
     <main>
-        <!-- News content will be injected here by the Python script -->
+        <section id="post-section" class="section-card">
+            <!-- 게시물 내용이 여기에 동적으로 추가됩니다. -->
+            <p>게시물을 불러오는 중...</p>
+        </section>
     </main>
 
     <footer>
@@ -29,5 +31,7 @@
     <script src="firebase-config.js"></script>
     
     <script src="common.js"></script>
+    <!-- 게시물 상세 로직을 위한 별도의 스크립트 -->
+    <script src="post.js"></script>
 </body>
 </html>
