@@ -360,3 +360,63 @@ body.light-mode .section-card {
     margin-bottom: 1rem; /* 파일 업로드 버튼과 결과 확인 버튼 사이 간격 */
 }
 
+
+/* Board Page Styles */
+.post-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 2rem;
+}
+.post-table th, .post-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+.post-table th {
+    font-size: 1.1rem;
+}
+.post-table tbody tr {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.post-table tbody tr:hover {
+    background-color: var(--card-background);
+}
+.post-table td:nth-child(1) { width: 20%; } /* 닉네임 */
+.post-table td:nth-child(2) { width: 60%; } /* 제목 */
+.post-table td:nth-child(3) { width: 20%; text-align: right; } /* 작성일 */
+
+
+/* Post Page Styles */
+.post-meta {
+    color: #aaa;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+}
+.post-content {
+    line-height: 1.8;
+    font-size: 1.1rem;
+    padding: 2rem 0;
+    white-space: pre-wrap; /* \n 줄바꿈 및 공백 유지 */
+}
+.post-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+.go-test-button.delete {
+    background-color: #e74c3c; /* 삭제 버튼은 붉은색 계열 */
+}
+.go-test-button.delete:hover {
+    background-color: #c0392b;
+}
+.go-test-button.cancel {
+    background-color: #95a5a6; /* 취소 버튼은 회색 계열 */
+}
+.go-test-button.cancel:hover {
+    background-color: #7f8c8d;
+}
+
+
