@@ -1,10 +1,3 @@
-const themeToggle = document.getElementById('color-change');
-const body = document.body;
-
-themeToggle.addEventListener('click', () => {
-    body.classList.toggle('light-mode');
-});
-
 const URL = "https://teachablemachine.withgoogle.com/models/5FtcgpOmH/";
 
 let model, labelContainer, maxPredictions;
