@@ -11,40 +11,24 @@
     <div id="header-placeholder"></div>
 
     <main>
-        <section class="animal-face-test">
-            <h1>당신은 어떤 동물을 닮았나요?</h1>
-            <p>당신이 고양이상인지 강아지상인지 알아보세요!</p>
-            <p>이미지를 업로드하여 당신이 개상인지 고양이상인지 확인해보세요!</p>
-            <input type="file" id="image-upload" accept="image/*">
-            <button type="button" id="predict-button">결과 확인</button>
-            <div id="image-preview-container">
-                <img id="image-preview" src="" alt="이미지 미리보기">
+        <section class="test-hub">
+            <h1>테스트 목록</h1>
+            <p>다양한 테스트에 참여해보세요!</p>
+            <div class="test-list">
+                <div class="test-card">
+                    <h2>동물상 테스트</h2>
+                    <p>나는 강아지상일까, 고양이상일까? AI가 당신의 얼굴을 분석해 알려드립니다.</p>
+                    <a href="animal_face_test.html" class="go-test-button">테스트 하러가기</a>
+                </div>
+                <!-- 새로운 테스트가 추가될 때마다 여기에 .test-card를 추가할 수 있습니다. -->
             </div>
-            <div id="label-container"></div>
         </section>
-
-        <div id="disqus_thread"></div>
     </main>
-
-    <script>
-        var disqus_config = function () {
-            this.page.url = window.location.href;  // Use current page URL
-            this.page.identifier = 'index'; // Unique identifier for index page
-        };
-        (function() { // DON'T EDIT BELOW THIS LINE
-            var d = document, s = d.createElement('script');
-            s.src = 'https://tracking-sa.disqus.com/embed.js';
-            s.setAttribute('data-timestamp', +new Date());
-            (d.head || d.body).appendChild(s);
-        })();
-    </script>
-    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 
     <footer>
         <p>&copy; 2026 TrackingSA. 모든 권리 보유.</p>
     </footer>
 
     <script src="common.js"></script>
-    <script src="main.js" type="module"></script>
 </body>
 </html>

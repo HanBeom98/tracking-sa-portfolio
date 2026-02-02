@@ -1,159 +1,50 @@
 :root {
-    --background-color: #1a1a1a;
-    --text-color: #f0f0f0;
-    --primary-color: #ff6b6b;
-    --card-background: #2b2b2b;
-    --border-color: #444;
+    --background-color: #121212;
+    --text-color: #e0e0e0;
+    --primary-color: #ff6b6b; /* 강렬한 핑크/코랄 */
+    --card-background: #1e1e1e; /* 약간 밝은 다크 그레이 */
+    --border-color: #333;
+    --shadow-color: rgba(0, 0, 0, 0.2);
+    --shadow-color-hover: rgba(255, 107, 107, 0.4);
 }
 
 body.light-mode {
-    --background-color: #f0f0f0;
-    --text-color: #1a1a1a;
+    --background-color: #f5f5f5;
+    --text-color: #121212;
     --primary-color: #ff6b6b;
     --card-background: #ffffff;
-    --border-color: #ddd;
+    --border-color: #e0e0e0;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --shadow-color-hover: rgba(255, 107, 107, 0.3);
 }
 
 body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
     background-color: var(--background-color);
     color: var(--text-color);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    margin: 0;
-    line-height: 1.6;
+    transition: background-color 0.3s, color 0.3s;
 }
 
-header {
-    padding: 1rem;
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-#color-change {
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
-}
-
-#color-change:hover {
-    background-color: #ff8787;
-}
-
-nav ul {
-    list-style: none;
-    display: flex;
-    justify-content: center;
-    padding: 0;
-    margin: 0;
-}
-
-nav li {
-    margin: 0 1rem;
-}
-
-nav a {
-    color: var(--text-color);
-    text-decoration: none;
-    font-weight: bold;
-    transition: color 0.3s ease;
-}
-
-nav a:hover {
+/* Global Link Styles */
+a {
     color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+a:hover {
+    color: #ff8787;
 }
 
+/* Main Layout */
 main {
-    padding: 2rem;
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-height: 80vh;
-}
-
-.animal-face-test {
-    text-align: center;
-    margin-bottom: 3rem;
     padding: 2rem;
-    background-color: var(--card-background);
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    max-width: 600px;
-    width: 100%;
-}
-
-.animal-face-test h1 {
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
-    color: var(--text-color);
-}
-
-.animal-face-test p {
-    font-size: 1.1rem;
-    color: #aaa;
-    margin-bottom: 1.5rem;
-}
-
-#image-upload {
-    margin-bottom: 1rem;
-    color: var(--text-color);
-}
-
-#predict-button {
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    padding: 0.8rem 1.5rem;
-    font-size: 1rem;
-    font-weight: bold;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    margin-top: 1rem;
-}
-
-#predict-button:hover {
-    background-color: #ff8787;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-}
-
-#image-preview-container {
-    margin-top: 2rem;
-    border: 2px dashed var(--border-color);
-    border-radius: 8px;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 200px;
-    background-color: var(--background-color);
-}
-
-#image-preview {
-    max-width: 100%;
-    max-height: 400px;
-}
-
-#label-container {
-    margin-top: 1.5rem;
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: var(--text-color);
-}
-
-#label-container div {
-    padding: 0.5rem 0;
-    border-bottom: 1px solid var(--border-color);
-}
-
-#label-container div:last-child {
-    border-bottom: none;
+    min-height: calc(100vh - 120px); /* 헤더, 푸터 높이 고려 */
+    box-sizing: border-box; /* 패딩이 높이에 포함되도록 */
 }
 
 footer {
@@ -166,60 +57,160 @@ footer {
     width: 100%;
 }
 
-@media (max-width: 768px) {
-    .animal-face-test h1 {
-        font-size: 2rem;
-    }
-
-    .animal-face-test p {
-        font-size: 1rem;
-    }
-
-    .animal-face-test {
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-    }
+/* Header Styles (from layout/header.html, global for simplicity) */
+header {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--card-background); /* 헤더 배경색도 카드와 통일 */
+}
+header #color-change {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+header #color-change:hover {
+    background-color: #ff8787;
+}
+header nav ul {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+}
+header nav li {
+    margin: 0 1rem;
+}
+header nav a {
+    color: var(--text-color);
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+header nav a:hover {
+    color: var(--primary-color);
 }
 
-/* Inquiry Form Section Styles */
-.inquiry-form-section {
+
+/* Reusable Section Card Style */
+.section-card {
     text-align: center;
     margin-bottom: 3rem;
     padding: 2rem;
     background-color: var(--card-background);
     border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    max-width: 800px; /* 너비 확장 */
-    width: 100
-/* Inquiry Form Section Styles */
-.inquiry-form-section {
-    text-align: center;
-    margin-bottom: 3rem;
-    padding: 2rem;
-    background-color: var(--card-background);
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    max-width: 800px; /* 너비 확장 */
+    box-shadow: 0 4px 8px var(--shadow-color);
+    max-width: 800px;
     width: 100%;
+    transition: box-shadow 0.3s;
 }
-
-.inquiry-form-section h1 {
+body.light-mode .section-card {
+    box-shadow: 0 4px 8px var(--shadow-color);
+}
+.section-card h1 {
     font-size: 2.5rem;
     margin-bottom: 0.5rem;
+    color: var(--text-color);
 }
-
-.inquiry-form-section p {
+.section-card p {
     font-size: 1.1rem;
     color: #aaa;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
 }
 
+
+/* Animal Face Test Specific Styles */
+.animal-face-test {
+    /* section-card 스타일 상속 및 오버라이드 */
+    @extend .section-card; /* SASS/LESS가 아니므로 수동으로 복사 */
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 2rem;
+    background-color: var(--card-background);
+    border-radius: 8px;
+    box-shadow: 0 4px 8px var(--shadow-color);
+    max-width: 600px; /* 기존 너비 유지 */
+    width: 100%;
+}
+.animal-face-test h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+}
+.animal-face-test p {
+    font-size: 1.1rem;
+    color: #aaa;
+    margin-bottom: 1.5rem;
+}
+.animal-face-test #image-upload {
+    margin-bottom: 1rem;
+    color: var(--text-color);
+}
+.animal-face-test #predict-button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 4px 15px var(--shadow-color);
+    margin-top: 1rem;
+}
+.animal-face-test #predict-button:hover {
+    background-color: #ff8787;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); /* 호버 시 그림자 강하게 */
+}
+.animal-face-test #image-preview-container {
+    margin-top: 2rem;
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+    background-color: var(--background-color);
+}
+.animal-face-test #image-preview {
+    max-width: 100%;
+    max-height: 400px;
+}
+.animal-face-test #label-container {
+    margin-top: 1.5rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--text-color);
+}
+.animal-face-test #label-container div {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+.animal-face-test #label-container div:last-child {
+    border-bottom: none;
+}
+
+
+/* Inquiry Form Section Styles (Cleaned up and integrated) */
+.inquiry-form-section {
+    @extend .section-card; /* section-card 스타일 상속 */
+    max-width: 800px; /* 너비 확장 */
+}
 .inquiry-form {
     display: grid;
     gap: 1.5rem;
     text-align: left;
 }
-
 /* 데스크톱용 2단 레이아웃 */
 @media (min-width: 768px) {
     .inquiry-form {
@@ -230,18 +221,15 @@ footer {
         grid-column: 1 / -1;
     }
 }
-
-.inquiry-form .form-field {
+.form-field {
     display: flex;
     flex-direction: column;
 }
-
 .inquiry-form label {
     display: block;
     margin-bottom: 0.5rem;
     font-weight: bold;
 }
-
 .inquiry-form input,
 .inquiry-form textarea {
     width: 100%;
@@ -251,17 +239,15 @@ footer {
     background-color: var(--background-color);
     color: var(--text-color);
     font-size: 1rem;
-    box-sizing: border-box; /* 패딩과 보더가 너비에 포함되도록 설정 */
+    box-sizing: border-box;
     transition: border-color 0.3s, box-shadow 0.3s;
 }
-
 .inquiry-form input:focus,
 .inquiry-form textarea:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
 }
-
 .inquiry-form button {
     background-color: var(--primary-color);
     color: white;
@@ -272,11 +258,75 @@ footer {
     cursor: pointer;
     border-radius: 5px;
     transition: background-color 0.3s, transform 0.2s;
-    grid-column: 1 / -1; /* 버튼은 항상 전체 너비 차지 */
+    grid-column: 1 / -1;
 }
-
 .inquiry-form button:hover {
     background-color: #ff8787;
     transform: translateY(-2px);
 }
 
+
+/* Test Hub Page Styles */
+.test-hub {
+    @extend .section-card; /* section-card 스타일 상속 */
+    max-width: 1200px; /* 더 넓은 너비 */
+}
+.test-hub h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+.test-hub > p {
+    font-size: 1.2rem;
+    color: #aaa;
+    margin-bottom: 3rem;
+}
+.test-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin: 0 auto;
+}
+.test-card {
+    background-color: var(--card-background);
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 4px 8px var(--shadow-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.test-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px var(--shadow-color-hover);
+}
+.test-card h2 {
+    font-size: 1.8rem;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+}
+.test-card p {
+    flex-grow: 1;
+    margin-bottom: 2rem;
+}
+.go-test-button {
+    background-color: var(--primary-color);
+    color: white;
+    text-decoration: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 5px;
+    font-weight: bold;
+    /* transition은 이미 있음 */
+    box-shadow: 0 4px 15px var(--shadow-color); /* 그림자 추가 */
+}
+.go-test-button:hover {
+    background-color: #ff8787;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--shadow-color-hover); /* 호버 시 그림자 강하게 */
+}
+.go-test-button:active {
+    transform: translateY(1px); /* 클릭 시 살짝 들어가는 효과 */
+    box-shadow: 0 2px 5px var(--shadow-color); /* 클릭 시 그림자 약하게 */
+}
