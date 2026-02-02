@@ -2,30 +2,24 @@
 
 ## Overview
 
-This project is a modern, community-focused website named **TrackingSA**, inspired by 3rd.supply. It will feature a clean, dark design, a grid-based layout for showcasing content, and interactive elements to engage users. The site will be built using modern web standards, including Web Components for modularity.
+This project is a simple web page that displays a gallery of projects. It is built with HTML, CSS, and JavaScript, and it uses web components for the project cards. The page also includes a theme toggle for switching between light and dark modes.
 
-## Design and Features
+## Features
 
-### Visuals
+*   **Project Gallery:** Displays a grid of project cards with images, titles, and descriptions.
+*   **Web Components:** Uses a `project-card` web component to encapsulate the structure and styling of each project card.
+*   **Theme Toggle:** Allows users to switch between a light and dark theme.
 
-*   **Theme:** Dark theme with a textured background.
-*   **Accent Colors:** Vibrant colors for interactive elements and highlights.
-*   **Typography:** Expressive and modern fonts to create a strong visual hierarchy.
-*   **Layout:** A responsive grid layout that adapts to different screen sizes.
-*   **Iconography:** Use of icons to enhance navigation and user understanding.
-*   **Effects:** Subtle animations and hover effects to create a dynamic user experience.
+## File Structure
 
-### Features
+*   `index.html`: The main HTML file.
+*   `style.css`: The main stylesheet, including styles for both light and dark themes.
+*   `main.js`: The main JavaScript file, which includes the theme toggle logic and the `project-card` web component definition.
+*   `blueprint.md`: This file.
 
-*   **Hero Section:** A prominent hero section with a welcoming message and a call to action.
-*   **Community Showcase:** A grid of cards to display community projects, members, or content.
-*   **Navigation:** A clear and intuitive navigation bar.
-*   **Web Components:** Use of Web Components to create reusable UI elements, such as project cards.
+## Changes Made
 
-## Current Plan
-
-*   **Objective:** Rename the site to **TrackingSA**.
-*   **Steps:**
-    1.  Update the `<title>` and `<h1>` in `index.html` to **TrackingSA**.
-    2.  Update the footer in `index.html` to **TrackingSA**.
-    3.  Update the `blueprint.md` to reflect the name change.
+*   Added a theme toggle button to the header in `index.html`.
+*   Added a `light-mode` class to `style.css` to define the light theme.
+*   Added styles for the theme toggle button.
+*   Added JavaScript to `main.js` to handle the theme toggling.
