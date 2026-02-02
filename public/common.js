@@ -16,7 +16,7 @@ async function loadLayout() {
 
     if (themeToggle && body) {
         themeToggle.addEventListener('click', () => {
-            body.classList.toggle('light-mode');
+            body.classList.toggle('dark-mode');
         });
     }
 }
