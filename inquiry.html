@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Partnership Inquiry - TrackingSA</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="#">Projects</a></li>
+                <li><a href="#">Members</a></li>
+                <li><a href="#">About</a></li>
+                <li><a href="inquiry.html">Partnership Inquiry</a></li>
+            </ul>
+        </nav>
+        <button id="theme-toggle">Toggle Theme</button>
+    </header>
+
+    <main>
+        <section class="inquiry-form-section">
+            <h1>Partnership Inquiry</h1>
+            <p>Interested in partnering with TrackingSA? Fill out the form below to get in touch!</p>
+            <form action="https://formspree.io/f/{your-formspree-id}" method="POST" class="inquiry-form">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="_replyto" required>
+
+                <label for="message">Message:</label>
+                <textarea id="message" name="message" rows="8" required></textarea>
+
+                <button type="submit">Send Inquiry</button>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 TrackingSA. All rights reserved.</p>
+    </footer>
+
+    <script src="main.js" type="module"></script>
+</body>
+</html>
