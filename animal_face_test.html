@@ -13,9 +13,12 @@
         <section class="animal-face-test">
             <h1>당신은 어떤 동물을 닮았나요?</h1>
             <p>당신이 고양이상인지 강아지상인지 알아보세요!</p>
-            <p>이미지를 업로드하여 당신이 개상인지 고양이상인지 확인해보세요!</p>
-            <input type="file" id="image-upload" accept="image/*">
-            <button type="button" id="predict-button">결과 확인</button>
+            <p>이미지를 업로드하여 당신이 강아지상인지 고양이상인지 확인해보세요!</p>
+            <div class="file-input-wrapper">
+                <input type="file" id="image-upload" accept="image/*" style="display: none;">
+                <label for="image-upload" class="custom-file-upload">이미지 선택</label>
+            </div>
+            <button type="button" id="predict-button" class="go-test-button">결과 확인</button>
             <div id="image-preview-container">
                 <img id="image-preview" src="" alt="이미지 미리보기">
             </div>

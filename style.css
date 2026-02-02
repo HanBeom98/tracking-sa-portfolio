@@ -330,3 +330,33 @@ body.light-mode .section-card {
     transform: translateY(1px); /* 클릭 시 살짝 들어가는 효과 */
     box-shadow: 0 2px 5px var(--shadow-color); /* 클릭 시 그림자 약하게 */
 }
+/* Custom File Upload Button Styles */
+.custom-file-upload {
+    background-color: var(--primary-color);
+    color: white;
+    text-decoration: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    box-shadow: 0 4px 15px var(--shadow-color); /* 그림자 추가 */
+    display: inline-block; /* 라벨을 버튼처럼 보이게 함 */
+    margin-bottom: 1rem; /* input 다음에 버튼이 오도록 간격 추가 */
+}
+
+.custom-file-upload:hover {
+    background-color: #ff8787;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--shadow-color-hover); /* 호버 시 그림자 강하게 */
+}
+
+.custom-file-upload:active {
+    transform: translateY(1px); /* 클릭 시 살짝 들어가는 효과 */
+    box-shadow: 0 2px 5px var(--shadow-color); /* 클릭 시 그림자 약하게 */
+}
+
+.file-input-wrapper {
+    margin-bottom: 1rem; /* 파일 업로드 버튼과 결과 확인 버튼 사이 간격 */
+}
+
