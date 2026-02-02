@@ -3,9 +3,181 @@ import os
 import datetime
 import subprocess
 import requests
+import re
 from dotenv import load_dotenv
+import markdown # Import the markdown library
+
+import hashlib # For creating a more robust unique ID if needed
 
 load_dotenv()
+
+PUBLIC_DIR = "public"
+NEWS_POSTS_DIR = "posts" # Keep this for raw markdown files
+PROCESSED_ARTICLES_LOG = "processed_articles.log" # Log file for preventing duplicates
+ADSENSE_CLIENT_ID = "ca-pub-7263630893992216" # Google AdSense Client ID
+
+# --- Helper functions for SSG ---
+def extract_title_from_md(md_content):
+    title_match = re.search(r'^#\s*(.+)', md_content, re.MULTILINE)
+    if title_match:
+        return title_match.group(1).strip()
+    return "새로운 뉴스"
+
+def clean_filename(title):
+    """
+    제목을 기반으로 파일 이름으로 사용할 수 있도록 정리합니다.
+    """
+    title = re.sub(r'[^\w\s-]', '', title).strip().lower()
+    title = re.sub(r'[-\s]+', '-', title)
+    return title
+
+def generate_article_html(md_content, title, date_str, output_path):
+    # Basic HTML template for an article page
+    html_template = f"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} - 뉴스</title>
+    <link rel="stylesheet" href="../style.css"> <!-- Adjust path for CSS -->
+    <script src="../common.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={ADSENSE_CLIENT_ID}" crossorigin="anonymous"></script>
+    <meta name="google-adsense-account" content="{ADSENSE_CLIENT_ID}">
+</head>
+<body>
+    <div id="header-placeholder"></div>
+    <main class="article-detail-main">
+        <a href="../index.html" class="back-to-list-button">← 목록으로 돌아가기</a>
+        <article class="news-article-container">
+            <div class="article-title-display">{title}</div>
+            <p class="article-meta">게시일: {date_str}</p>
+            <div class="article-content">
+                {markdown.markdown(md_content)}
+            </div>
+        </article>
+    </main>
+    <footer>
+        <p>&copy; 2026 TrackingSA. All rights reserved.</p>
+        <p>
+            <a href="../about.html">회사 소개</a> |
+            <a href="../contact.html">문의</a> |
+            <a href="../privacy-policy.html">개인정보처리방침</a>
+        </p>
+    </footer>
+</body>
+</html>
+    """
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(html_template)
+    print(f"📄 HTML 기사 생성 완료: {output_path}")
+
+def generate_index_html(articles_meta):
+    # Read the base index.html template (the one we just simplified)
+    with open("index.html", "r", encoding="utf-8") as f:
+        base_html = f.read()
+
+    # Inject AdSense tags into the <head>
+    adsense_head_tags = f"""
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={ADSENSE_CLIENT_ID}" crossorigin="anonymous"></script>
+    <meta name="google-adsense-account" content="{ADSENSE_CLIENT_ID}">
+</head>"""
+    base_html = base_html.replace("</head>", adsense_head_tags)
+
+    news_list_items = ""
+    if not articles_meta:
+        news_list_items = "<p class='no-news-message'>아직 게시된 뉴스가 없습니다.</p>"
+    else:
+        for article in articles_meta:
+            news_list_items += f"""
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="{article['url']}" class="news-card-link">{article['title']}</a></h2>
+                <p class="news-card-date">{article['date']}</p>
+                <!-- Add a placeholder image or excerpt if available -->
+                <div class="news-card-excerpt">
+                    <!-- Excerpt can be extracted from markdown content if desired -->
+                </div>
+            </article>
+            """
+        news_list_items = f'<div class="news-grid">{news_list_items}</div>'
+
+
+    # Inject the news list into the base HTML template
+    # Look for <!-- News content will be injected here by the Python script -->
+    updated_html = base_html.replace(
+        "<!-- News content will be injected here by the Python script -->",
+        f"""
+        <section class="news-section-main">
+            <h1 class="section-title">최신 뉴스</h1>
+            {news_list_items}
+        </section>
+        """
+    )
+    
+    # Ensure public directory exists
+    os.makedirs(PUBLIC_DIR, exist_ok=True)
+    output_path = os.path.join(PUBLIC_DIR, "index.html")
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(updated_html)
+    print(f"🏠 인덱스 HTML 생성 완료: {output_path}")
+
+def copy_static_assets():
+    """Copies static assets (CSS, JS, animal_face_test.html etc.) to public directory."""
+    os.makedirs(PUBLIC_DIR, exist_ok=True)
+    # List of files/dirs to copy. Adjust as needed.
+    assets_to_copy = [
+        "style.css",
+        "common.js",
+        "firebase-config.js",
+        "animal_face_test.html",
+        "edit.html",
+        "edit.js",
+        "inquiry.html",
+        "main.js", # This main.js is likely related to the original static site, not the python script
+        "post.html",
+        "post.js",
+        "write.html",
+        "write.js",
+        "about.html",
+        "contact.html",
+        "privacy-policy.html",
+        "layout" # Copy the whole layout directory
+    ]
+
+    for item in assets_to_copy:
+        src = item
+        dst = os.path.join(PUBLIC_DIR, item)
+        if os.path.isdir(src):
+            if os.path.exists(dst): # Remove existing dir before copying
+                subprocess.run(["rm", "-rf", dst], check=True)
+            subprocess.run(["cp", "-r", src, dst], check=True)
+            print(f"📂 디렉토리 복사 완료: {src} -> {dst}")
+        elif os.path.isfile(src):
+            subprocess.run(["cp", src, dst], check=True)
+            print(f"📄 파일 복사 완료: {src} -> {dst}")
+        else:
+            print(f"⚠️ 경고: '{item}'을 찾을 수 없거나 복사할 수 없습니다.")
+
+# --- Original main.py functions (modified for SSG) ---
+
+# --- Duplicate checking functions ---
+def get_processed_articles():
+    if not os.path.exists(PROCESSED_ARTICLES_LOG):
+        return set()
+    with open(PROCESSED_ARTICLES_LOG, "r", encoding="utf-8") as f:
+        return set(line.strip() for line in f if line.strip())
+
+def record_processed_article(article_unique_id):
+    with open(PROCESSED_ARTICLES_LOG, "a", encoding="utf-8") as f:
+        f.write(f"{article_unique_id}\n")
+    print(f"✅ 기사 기록 완료: {article_unique_id}")
+
+def is_duplicate_article(article_unique_id):
+    processed = get_processed_articles()
+    return article_unique_id in processed
+
+# --- Original main.py functions (modified for SSG) ---
 
 def fetch_ai_news(rss_url):
     feed = feedparser.parse(rss_url)
@@ -14,15 +186,18 @@ def fetch_ai_news(rss_url):
     return None
 
 def generate_ai_content(api_key, news_title, news_summary):
-    # 님의 목록에서 확인된 정확한 이름 'gemini-flash-latest'를 사용합니다.
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={api_key}"
     headers = {'Content-Type': 'application/json'}
     payload = {
-        "contents": [{
-            "parts": [{
-                "text": f"뉴스 제목: {news_title}\n뉴스 요약: {news_summary}\n\n위 내용을 바탕으로 한국어 마크다운 포스팅을 작성해줘. 제목, 본문, 수익화 아이디어 3가지를 포함해줘."
-            }]
-        }]
+        "contents": [
+            {
+                "parts": [
+                    {
+                        "text": f"뉴스 제목: {news_title}\n뉴스 요약: {news_summary}\n\n위 내용을 바탕으로 한국어 마크다운 포스팅을 작성해줘. 제목, 본문, 수익화 아이디어 3가지를 포함해줘."
+                    }
+                ]
+            }
+        ]
     }
     
     try:
@@ -38,25 +213,84 @@ def generate_ai_content(api_key, news_title, news_summary):
         print(f"네트워크 오류: {e}")
         return None
 
-def save_post(content, post_dir="posts"):
-    os.makedirs(post_dir, exist_ok=True)
+def save_post_and_generate_html(content):
+    os.makedirs(NEWS_POSTS_DIR, exist_ok=True)
     today_date = datetime.date.today().strftime("%Y-%m-%d")
-    filename = os.path.join(post_dir, f"{today_date}-ai-analysis.md")
-    with open(filename, "w", encoding="utf-8") as f:
+    
+    title_from_md = extract_title_from_md(content)
+    cleaned_title = clean_filename(title_from_md)
+    
+    md_filename = f"{today_date}-{cleaned_title}.md"
+    md_filepath = os.path.join(NEWS_POSTS_DIR, md_filename)
+    with open(md_filepath, "w", encoding="utf-8") as f:
         f.write(content)
-    print(f"💾 파일 저장 완료: {filename}")
-    return filename
+    print(f"💾 마크다운 파일 저장 완료: {md_filepath}")
 
-def git_push_changes():
+    # Now generate the HTML for this article
+    html_filename = f"{today_date}-{cleaned_title}.html"
+    html_filepath = os.path.join(PUBLIC_DIR, html_filename)
+    
+    generate_article_html(content, title_from_md, today_date, html_filepath)
+    return html_filepath, title_from_md, today_date
+
+def git_push_changes(new_article_processed=False):
     try:
+        # Clean public directory before copying latest assets
+        if os.path.exists(PUBLIC_DIR):
+             subprocess.run(["rm", "-rf", PUBLIC_DIR], check=True)
+
+        # Copy static assets to the public directory
+        copy_static_assets()
+        
+        # Gather all articles metadata to generate the index.html
+        articles_meta = []
+        if os.path.exists(NEWS_POSTS_DIR):
+            for filename in sorted(os.listdir(NEWS_POSTS_DIR), reverse=True):
+                if filename.endswith('.md'):
+                    filepath = os.path.join(NEWS_POSTS_DIR, filename)
+                    with open(filepath, 'r', encoding='utf-8') as f:
+                        md_content = f.read()
+                    
+                    title = extract_title_from_md(md_content)
+                    date_match = re.match(r'(\d{4}-\d{2}-\d{2})', filename)
+                    date_str = date_match.group(1) if date_match else '날짜 미상'
+                    cleaned_title = clean_filename(title)
+                    html_filename = f"{date_str}-{cleaned_title}.html"
+
+                    articles_meta.append({
+                        'title': title,
+                        'date': date_str,
+                        'url': html_filename # Relative path for linking
+                    })
+                    # Ensure each article's HTML is generated if not already (e.g., if re-generating index)
+                    generate_article_html(md_content, title, date_str, os.path.join(PUBLIC_DIR, html_filename))
+
+        # Generate the main index.html for the public directory
+        generate_index_html(articles_meta)
+
+        # Git operations
         subprocess.run(["git", "config", "user.name", "Gemini Bot"], check=False)
         subprocess.run(["git", "config", "user.email", "bot@gemini.ai"], check=False)
-        subprocess.run(["git", "add", "."], check=True)
-        subprocess.run(["git", "commit", "-m", f"Auto-post {datetime.date.today()}"], check=True)
-        subprocess.run(["git", "push"], check=True)
-        print("🚀 GitHub 푸시 성공!")
+        
+        # Add public directory and posts directory and processed articles log
+        subprocess.run(["git", "add", PUBLIC_DIR], check=True)
+        subprocess.run(["git", "add", NEWS_POSTS_DIR], check=True) # Also add raw markdown files
+        subprocess.run(["git", "add", "index.html"], check=True) # Ensure base index.html is also added, if it's meant to be used for something else.
+        subprocess.run(["git", "add", PROCESSED_ARTICLES_LOG], check=False) # Add log, if it exists                                                                # But for SSG, only public/ is deployed.
+
+        # Commit only if there are changes to avoid empty commits
+        result = subprocess.run(["git", "diff", "--cached", "--exit-code"], capture_output=True, text=True)
+        if result.returncode != 0: # Changes exist
+            subprocess.run(["git", "commit", "-m", f"Auto-post and SSG update {datetime.date.today()}"], check=True)
+            subprocess.run(["git", "push"], check=True)
+            print("🚀 GitHub 푸시 성공!")
+        else:
+            print("➡️ 변경 사항 없음. GitHub 푸시 건너뜀.")
+
+    except subprocess.CalledProcessError as e:
+        print(f"⚠️ Git 오류: {e.cmd}\nStdout: {e.stdout}\nStderr: {e.stderr}")
     except Exception as e:
-        print(f"⚠️ Git 오류: {e}")
+        print(f"⚠️ 기타 오류: {e}")
 
 def main():
     rss_url = "https://techcrunch.com/category/artificial-intelligence/feed/"
@@ -69,15 +303,27 @@ def main():
     print("📡 최신 AI 뉴스 수집 중...")
     news = fetch_ai_news(rss_url)
     if news:
-        print(f"📰 뉴스 발견: {news.title}")
-        print("🤖 AI 분석 글 생성 중...")
-        content = generate_ai_content(api_key, news.title, news.summary)
-        if content:
-            save_post(content)
-            print("📤 GitHub 업로드 시도 중...")
-            git_push_changes()
+        # Create a unique ID for the article (e.g., based on the cleaned title)
+        article_unique_id = clean_filename(news.title)
+        
+        if is_duplicate_article(article_unique_id):
+            print(f"⚠️ 중복 기사 발견: '{news.title}'. 콘텐츠 생성을 건너뜀.")
+            git_push_changes(new_article_processed=False) # Still do SSG and push if other changes.
         else:
-            print("🛑 콘텐츠 생성 실패.")
+            print(f"📰 뉴스 발견: {news.title}")
+            print("🤖 AI 분석 글 생성 중...")
+            content = generate_ai_content(api_key, news.title, news.summary)
+            if content:
+                print("🏗️ 정적 사이트 생성 및 GitHub 업로드 시도 중...")
+                html_article_path, title, date = save_post_and_generate_html(content)
+                record_processed_article(article_unique_id) # Record after successful processing
+                print(f"🎉 새 뉴스 기사 생성 완료: {title} ({html_article_path})")
+                git_push_changes(new_article_processed=True) # Indicate new article was processed
+            else:
+                print("🛑 콘텐츠 생성 실패.")
+    else:
+        print("➡️ 새로운 뉴스 없음. 정적 사이트 재생성만 시도합니다.")
+        git_push_changes(new_article_processed=False) # Regenerate public/ to ensure consistency even if no new news.
 
 if __name__ == "__main__":
     main()

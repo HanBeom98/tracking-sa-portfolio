@@ -1,0 +1,27 @@
+name: Daily AI News Post
+
+on:
+  schedule:
+    - cron: '0 22 * * *' # UTC 22:00 = KST 07:00
+    - cron: '0 12 * * *' # UTC 12:00 = KST 21:00
+  workflow_dispatch: # Allows manual triggering from GitHub Actions tab
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install feedparser python-dotenv requests markdown google-generativeai
+
+      - name: Run Script
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python main.py
