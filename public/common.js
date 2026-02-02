@@ -10,13 +10,30 @@ async function loadLayout() {
         }
     }
 
+    // Load theme from localStorage on page load
+    const savedTheme = localStorage.getItem('theme');
+    const body = document.body;
+    if (body) {
+        if (savedTheme === 'dark') {
+            body.classList.add('dark-mode');
+        } else {
+            // Ensure light-mode is default or applied if explicitly saved as light
+            body.classList.remove('dark-mode');
+        }
+    }
+
     // 2. 헤더가 삽입된 후, 테마 변경 버튼에 이벤트 리스너를 추가합니다.
     const themeToggle = document.getElementById('color-change');
-    const body = document.body;
-
+    
     if (themeToggle && body) {
         themeToggle.addEventListener('click', () => {
             body.classList.toggle('dark-mode');
+            // Save theme preference to localStorage
+            if (body.classList.contains('dark-mode')) {
+                localStorage.setItem('theme', 'dark');
+            } else {
+                localStorage.setItem('theme', 'light');
+            }
         });
     }
 }
