@@ -4,25 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>동물상 테스트</title>
+    <title>뉴스 홈</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="header-placeholder"></div>
 
     <main>
-        <section class="test-hub">
-            <h1>테스트 목록</h1>
-            <p>다양한 테스트에 참여해보세요!</p>
-            <div class="test-list">
-                <div class="test-card">
-                    <h2>동물상 테스트</h2>
-                    <p>나는 강아지상일까, 고양이상일까? AI가 당신의 얼굴을 분석해 알려드립니다.</p>
-                    <a href="animal_face_test.html" class="go-test-button">테스트 하러가기</a>
-                </div>
-                <!-- 새로운 테스트가 추가될 때마다 여기에 .test-card를 추가할 수 있습니다. -->
-            </div>
-        </section>
+        <div id="news-app"></div>
     </main>
 
     <footer>
@@ -35,10 +24,14 @@
     
     <!-- crypto-js for password hashing -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
+    <!-- Markdown Parser -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.0/marked.min.js"></script>
     
     <!-- Firebase-config -->
     <script src="firebase-config.js"></script>
     
     <script src="common.js"></script>
+    <script src="news-app.js" type="module"></script>
 </body>
 </html>
