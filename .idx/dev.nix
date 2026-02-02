@@ -4,9 +4,14 @@
   # Which nixpkgs channel to use.
   channel = "stable-23.11"; # or "unstable"
   # Use https://search.nixos.org/packages to find packages
+  # Use https://search.nixos.org/packages to find packages
   packages = [
     pkgs.nodejs_20
-    pkgs.python3
+    pkgs.python311
+    pkgs.python311Packages.pip
+    pkgs.python311Packages.feedparser
+    pkgs.python311Packages.python-dotenv
+    pkgs.python311Packages.google-generativeai
   ];
   # Sets environment variables in the workspace
   env = {};
@@ -34,6 +39,7 @@
         # npm-install = "npm install";
         # Open editors for the following files by default, if they exist:
         default.openFiles = [ "style.css" "main.js" "index.html" ];
+        install-python-packages = "python3 -m ensurepip && python3 -m pip install feedparser python-dotenv google-generativeai";
       };
       # Runs when the workspace is (re)started
       onStart = {
