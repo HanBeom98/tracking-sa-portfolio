@@ -46,6 +46,16 @@ def generate_article_html(md_content, title, date_str, output_path):
     <meta name="google-adsense-account" content="{ADSENSE_CLIENT_ID}">
 </head>
 <body>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){{dataLayer.push(arguments);}}
+      gtag('js', new Date());
+
+      gtag('config', 'G-TGD3WRNKPZ');
+    </script>
+
     <div id="header-placeholder"></div>
     <main class="article-detail-main">
         <a href="../index.html" class="back-to-list-button">← 목록으로 돌아가기</a>
@@ -82,6 +92,15 @@ def generate_index_html(articles_meta):
     adsense_head_tags = f"""
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={ADSENSE_CLIENT_ID}" crossorigin="anonymous"></script>
     <meta name="google-adsense-account" content="{ADSENSE_CLIENT_ID}">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){{dataLayer.push(arguments);}}
+      gtag('js', new Date());
+
+      gtag('config', 'G-TGD3WRNKPZ');
+    </script>
 </head>"""
     base_html = base_html.replace("</head>", adsense_head_tags)
 
