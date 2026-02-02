@@ -14,41 +14,30 @@
             <h1>Partnership Inquiry</h1>
             <p>Interested in partnering with TrackingSA? Fill out the form below to get in touch!</p>
             <form action="https://formspree.io/f/xrellpvn" method="POST" class="inquiry-form">
-                <label for="name">Name:</label>
-                <input type="text" id="name" name="name" placeholder="Your Name" required>
-
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="_replyto" placeholder="your@example.com" required>
-
-                <label for="subject">Subject:</label>
-                <input type="text" id="subject" name="_subject" placeholder="Inquiry Subject" required>
-
-                <label for="message">Message:</label>
-                <textarea id="message" name="message" rows="8" placeholder="Your message here..." required></textarea>
-
+                <div class="form-field">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="name" placeholder="Your Name" required>
+                </div>
+                <div class="form-field">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="_replyto" placeholder="your@example.com" required>
+                </div>
+                <div class="form-field full-width">
+                    <label for="subject">Subject:</label>
+                    <input type="text" id="subject" name="_subject" placeholder="Inquiry Subject" required>
+                </div>
+                <div class="form-field full-width">
+                    <label for="message">Message:</label>
+                    <textarea id="message" name="message" rows="8" placeholder="Your message here..." required></textarea>
+                </div>
                 <button type="submit">Send Inquiry</button>
             </form>
         </section>
 
-        <div id="disqus_thread"></div>
     </main>
 
-    <script>
-        var disqus_config = function () {
-            this.page.url = window.location.href;  // Use current page URL
-            this.page.identifier = 'inquiry'; // Unique identifier for inquiry page
-        };
-        (function() { // DON'T EDIT BELOW THIS LINE
-            var d = document, s = d.createElement('script');
-            s.src = 'https://tracking-sa.disqus.com/embed.js';
-            s.setAttribute('data-timestamp', +new Date());
-            (d.head || d.body).appendChild(s);
-        })();
-    </script>
-    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-
     <footer>
-        <p>&copy; 2026 TrackingSA. All rights reserved.</p>
+        <p>&copy; 2026 TrackingSA. 모든 권리 보유.</p>
     </footer>
 
     <script src="common.js"></script>

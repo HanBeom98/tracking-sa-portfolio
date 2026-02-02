@@ -180,3 +180,103 @@ footer {
         margin-bottom: 2rem;
     }
 }
+
+/* Inquiry Form Section Styles */
+.inquiry-form-section {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 2rem;
+    background-color: var(--card-background);
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    max-width: 800px; /* 너비 확장 */
+    width: 100
+/* Inquiry Form Section Styles */
+.inquiry-form-section {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 2rem;
+    background-color: var(--card-background);
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    max-width: 800px; /* 너비 확장 */
+    width: 100%;
+}
+
+.inquiry-form-section h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.inquiry-form-section p {
+    font-size: 1.1rem;
+    color: #aaa;
+    margin-bottom: 2rem;
+}
+
+.inquiry-form {
+    display: grid;
+    gap: 1.5rem;
+    text-align: left;
+}
+
+/* 데스크톱용 2단 레이아웃 */
+@media (min-width: 768px) {
+    .inquiry-form {
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem 2rem;
+    }
+    .form-field.full-width {
+        grid-column: 1 / -1;
+    }
+}
+
+.inquiry-form .form-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.inquiry-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+.inquiry-form input,
+.inquiry-form textarea {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-size: 1rem;
+    box-sizing: border-box; /* 패딩과 보더가 너비에 포함되도록 설정 */
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.inquiry-form input:focus,
+.inquiry-form textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+}
+
+.inquiry-form button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s, transform 0.2s;
+    grid-column: 1 / -1; /* 버튼은 항상 전체 너비 차지 */
+}
+
+.inquiry-form button:hover {
+    background-color: #ff8787;
+    transform: translateY(-2px);
+}
+
