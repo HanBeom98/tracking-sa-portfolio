@@ -16,10 +16,3 @@ This project is a simple web page that displays a gallery of projects. It is bui
 *   `style.css`: The main stylesheet, including styles for both light and dark themes.
 *   `main.js`: The main JavaScript file, which includes the theme toggle logic and the `project-card` web component definition.
 *   `blueprint.md`: This file.
-
-## Changes Made
-
-*   Added a theme toggle button to the header in `index.html`.
-*   Added a `light-mode` class to `style.css` to define the light theme.
-*   Added styles for the theme toggle button.
-*   Added JavaScript to `main.js` to handle the theme toggling.
