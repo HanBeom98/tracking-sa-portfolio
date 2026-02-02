@@ -1,4 +1,3 @@
-
 :root {
     --background-color: #1a1a1a;
     --text-color: #f0f0f0;
@@ -31,7 +30,7 @@ header {
     align-items: center;
 }
 
-#theme-toggle {
+#color-change {
     background-color: var(--primary-color);
     color: white;
     border: none;
@@ -42,7 +41,7 @@ header {
     transition: background-color 0.3s ease;
 }
 
-#theme-toggle:hover {
+#color-change:hover {
     background-color: #ff8787;
 }
 
@@ -71,24 +70,41 @@ nav a:hover {
 
 main {
     padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 80vh;
 }
 
-.hero {
+.animal-face-test {
     text-align: center;
     margin-bottom: 3rem;
+    padding: 2rem;
+    background-color: var(--card-background);
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    max-width: 600px;
+    width: 100%;
 }
 
-.hero h1 {
-    font-size: 3rem;
+.animal-face-test h1 {
+    font-size: 2.5rem;
     margin-bottom: 0.5rem;
+    color: var(--text-color);
 }
 
-.hero p {
-    font-size: 1.2rem;
+.animal-face-test p {
+    font-size: 1.1rem;
     color: #aaa;
+    margin-bottom: 1.5rem;
 }
 
-button {
+#image-upload {
+    margin-bottom: 1rem;
+    color: var(--text-color);
+}
+
+#predict-button {
     background-color: var(--primary-color);
     color: white;
     border: none;
@@ -99,112 +115,68 @@ button {
     border-radius: 5px;
     transition: background-color 0.3s ease;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    margin-top: 1rem;
 }
 
-button:hover {
+#predict-button:hover {
     background-color: #ff8787;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
-.community-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
-}
-
-project-card {
-    background-color: var(--card-background);
-    border: 1px solid var(--border-color);
+#image-preview-container {
+    margin-top: 2rem;
+    border: 2px dashed var(--border-color);
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+    background-color: var(--background-color);
 }
 
-project-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+#image-preview {
+    max-width: 100%;
+    max-height: 400px;
+}
+
+#label-container {
+    margin-top: 1.5rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+#label-container div {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+#label-container div:last-child {
+    border-bottom: none;
 }
 
 footer {
     text-align: center;
     padding: 1rem;
     border-top: 1px solid var(--border-color);
-    margin-top: 2rem;
+    margin-top: auto;
     font-size: 0.9rem;
     color: #aaa;
-}
-
-
-.inquiry-form-section {
-    max-width: 600px;
-    margin: 3rem auto;
-    padding: 2rem;
-    background-color: var(--card-background);
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.inquiry-form-section h1 {
-    text-align: center;
-    color: var(--text-color);
-    margin-bottom: 1rem;
-}
-
-.inquiry-form-section p {
-    text-align: center;
-    color: #aaa;
-    margin-bottom: 2rem;
-}
-
-.inquiry-form label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: var(--text-color);
-    font-weight: bold;
-}
-
-.inquiry-form input[type="text"],
-.inquiry-form input[type="email"],
-.inquiry-form textarea {
     width: 100%;
-    padding: 0.8rem;
-    margin-bottom: 1rem;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    background-color: var(--background-color);
-    color: var(--text-color);
-    box-sizing: border-box; /* Ensures padding doesn't affect total width */
-}
-
-.inquiry-form input[type="text"]:focus,
-.inquiry-form input[type="email"]:focus,
-.inquiry-form textarea:focus {
-    border-color: var(--primary-color);
-    outline: none;
-}
-
-.inquiry-form button[type="submit"] {
-    width: 100%;
-    padding: 1rem;
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 1.1rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.inquiry-form button[type="submit"]:hover {
-    background-color: #ff8787;
 }
 
 @media (max-width: 768px) {
-    .inquiry-form-section {
-        margin: 1.5rem;
+    .animal-face-test h1 {
+        font-size: 2rem;
+    }
+
+    .animal-face-test p {
+        font-size: 1rem;
+    }
+
+    .animal-face-test {
         padding: 1.5rem;
+        margin-bottom: 2rem;
     }
 }
-

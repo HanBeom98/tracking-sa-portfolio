@@ -4,37 +4,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TrackingSA</title>
+    <title>동물상 테스트</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
         <nav>
             <ul>
-                <li><a href="#">Home</a></li>
-                <li><a href="#">Projects</a></li>
-                <li><a href="#">Members</a></li>
-                <li><a href="#">About</a></li>
-                <li><a href="inquiry.html">Partnership Inquiry</a></li>
+                <li><a href="#">홈</a></li>
+                <li><a href="#">프로젝트</a></li>
+                <li><a href="#">멤버</a></li>
+                <li><a href="#">소개</a></li>
+                <li><a href="animal_face_test.html">동물상 테스트</a></li>
+                <li><a href="inquiry.html">파트너십 문의</a></li>
             </ul>
         </nav>
-        <button id="color-change">Toggle Theme</button>
+        <button id="color-change">테마 변경</button>
     </header>
 
     <main>
-        <section class="hero">
-            <h1>Welcome to TrackingSA</h1>
-            <p>A place to connect, create, and collaborate.</p>
-            <button>Join Now</button>
+        <section class="animal-face-test">
+            <h1>당신은 어떤 동물을 닮았나요?</h1>
+            <p>당신이 고양이상인지 강아지상인지 알아보세요!</p>
+            <p>이미지를 업로드하여 당신이 개상인지 고양이상인지 확인해보세요!</p>
+            <input type="file" id="image-upload" accept="image/*">
+            <button type="button" id="predict-button">결과 확인</button>
+            <div id="image-preview-container">
+                <img id="image-preview" src="" alt="이미지 미리보기">
+            </div>
+            <div id="label-container"></div>
         </section>
 
-        <section class="community-grid">
-            <!-- Project cards will be dynamically inserted here -->
-        </section>
+        <div id="disqus_thread"></div>
     </main>
 
+    <script>
+        var disqus_config = function () {
+            this.page.url = window.location.href;  // Use current page URL
+            this.page.identifier = 'index'; // Unique identifier for index page
+        };
+        (function() { // DON'T EDIT BELOW THIS LINE
+            var d = document, s = d.createElement('script');
+            s.src = 'https://tracking-sa.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
     <footer>
-        <p>&copy; 2026 TrackingSA. All rights reserved.</p>
+        <p>&copy; 2026 TrackingSA. 모든 권리 보유.</p>
     </footer>
 
     <script src="main.js" type="module"></script>

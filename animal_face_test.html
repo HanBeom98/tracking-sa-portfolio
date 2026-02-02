@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animal Face Test</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        button, input[type="file"] {
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #image-preview {
+            max-width: 300px;
+            max-height: 300px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        #label-container {
+            font-size: 1.2em;
+            color: #27ae60;
+            text-align: center;
+        }
+        #label-container div {
+            margin: 5px 0;
+            padding: 8px;
+            background-color: #e8f8f5;
+            border-radius: 4px;
+            border: 1px solid #d1enee;
+        }
+        a {
+            margin-top: 20px;
+            color: #3498db;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Animal Face Test</h1>
+    <p>Upload an image to see if you look more like a cat or a dog!</p>
+    
+    <input type="file" id="image-upload" accept="image/*">
+    <img id="image-preview" src="" alt="Image Preview" style="display:none;"/>
+    <button type="button" id="predict-button" style="display:none;">Predict</button>
+
+    <div id="label-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+    <script type="text/javascript">
+        const URL = "https://teachablemachine.withgoogle.com/models/5FtcgpOmH/";
+        let model, labelContainer, maxPredictions;
+
+        async function init() {
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
+
+            model = await tmImage.load(modelURL, metadataURL);
+            maxPredictions = model.getTotalClasses();
+
+            labelContainer = document.getElementById("label-container");
+            for (let i = 0; i < maxPredictions; i++) {
+                labelContainer.appendChild(document.createElement("div"));
+            }
+
+            const imageUpload = document.getElementById("image-upload");
+            const imagePreview = document.getElementById("image-preview");
+            const predictButton = document.getElementById("predict-button");
+
+            imageUpload.addEventListener("change", (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        imagePreview.src = e.target.result;
+                        imagePreview.style.display = "block";
+                        predictButton.style.display = "block";
+                        labelContainer.innerHTML = ''; // Clear previous results
+                         for (let i = 0; i < maxPredictions; i++) {
+                            labelContainer.appendChild(document.createElement("div"));
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            predictButton.addEventListener("click", () => predict());
+        }
+
+        async function predict() {
+            const image = document.getElementById("image-preview");
+            const prediction = await model.predict(image);
+            for (let i = 0; i < maxPredictions; i++) {
+                const classPrediction =
+                    prediction[i].className + ": " + prediction[i].probability.toFixed(2);
+                labelContainer.childNodes[i].innerHTML = classPrediction;
+            }
+        }
+        
+        // Initialize the model when the page loads
+        window.onload = () => {
+            init();
+        };
+    </script>
+    <a href="index.html">Go back to Home</a>
+</body>
+</html>
