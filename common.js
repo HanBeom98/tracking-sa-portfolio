@@ -85,6 +85,7 @@ async function loadLayout() {
 
     // 언어 선택 버튼 추가 (language-switcher div가 있다면)
     const languageSwitcher = document.getElementById('language-switcher');
+    console.log("Language switcher div found:", languageSwitcher);
     if (languageSwitcher) {
         const createLangButton = (langCode, label) => {
             const button = document.createElement('button');
@@ -105,6 +106,7 @@ async function loadLayout() {
     }
 
     // 초기 로드 시 번역 적용 (언어 버튼 생성 후 호출되어야 함)
+    console.log("Translations object:", translations);
     applyTranslations(currentLang);
 }
 
