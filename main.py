@@ -35,7 +35,7 @@ COMMON_HEAD_SCRIPTS = """
         y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
     }})(window, document, "clarity", "script", "vb9q33ggpa");
     </script>
-"""
+"""""
 
 COMMON_BODY_INJECTIONS = """
 <header>
@@ -54,7 +54,7 @@ COMMON_BODY_INJECTIONS = """
         <div id="language-switcher"></div>
     </div>
 </header>
-"""
+"""""
 
 COMMON_FOOTER = """
     <footer>
@@ -65,7 +65,7 @@ COMMON_FOOTER = """
             <a href="/privacy-policy.html" data-i18n="privacy_policy">개인정보처리방침</a>
         </p>
     </footer>
-"""
+"""""
 
 # --- Helper functions ---
 def extract_title_from_md(md_content):
@@ -99,7 +99,7 @@ def generate_article_html(md_content, title, date_str, output_path):
     </main>
 </body>
 </html>
-    "
+    """
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(html_template)
@@ -119,7 +119,7 @@ def generate_index_html(articles_meta):
                 <h2 class="news-card-title"><a href="/{article['url']}" class="news-card-link">{article['title']}</a></h2>
                 <p class="news-card-date">{article['date']}</p>
             </article>
-            """
+            """""
         news_list_items = f'<div class="news-grid">{news_list_items}</div>'
 
     updated_html = base_html.replace(
@@ -190,7 +190,7 @@ def generate_ai_content(api_key, news_title, news_summary):
 - # 제목
 - 본문
 - 수익화 아이디어 3개
-"""
+"""""
 
     try:
         response = model.generate_content(prompt)
