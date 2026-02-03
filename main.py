@@ -177,14 +177,36 @@ def fetch_latest_news_from_feed(rss_url):
     return feed.entries[0] if feed.entries else None
 
 def generate_ai_content(api_key, news_title, news_summary):
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={api_key}"
-    payload = {"contents": [{"parts": [{"text": f"뉴스 제목: {news_title}\n뉴스 요약: {news_summary}\n\n한국어 마크다운 포스팅 작성. 제목, 본문, 수익화 아이디어 3개 포함."}]}]}
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+
+    payload = {
+        "contents": [{
+            "parts": [{
+                "text": f"""뉴스 제목: {news_title}
+뉴스 요약: {news_summary}
+
+한국어 마크다운 포스팅 작성.
+- 제목 1개 (#)
+- 본문
+- 수익화 아이디어 3개
+"""
+            }]
+        }]
+    }
+
     try:
-        res = requests.post(url, json=payload).json()
+        res = requests.post(url, json=payload, timeout=30).json()
+
+        # 🔥 안전 처리 (candidates 없을 때 방지)
+        if 'candidates' not in res:
+            print("❌ Gemini 응답 이상:", res)
+            return None
+
         return res['candidates'][0]['content']['parts'][0]['text']
+
     except Exception as e:
-        print(f"❌ AI 콘텐츠 생성 중 오류 발생: {e}")
-        print("API 응답 전체:", res)
+        print("❌ AI 생성 실패:", e)
+        print("API 응답 전체:", res) # res가 정의되지 않은 경우를 대비하여 수정
         return None
 
 def save_post_and_generate_html(content):
