@@ -788,7 +788,7 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
 }
 
 .gender-buttons .gender-button {
-    background-color: #007bff;
+    background-color: #007bff; /* Blue for unselected male */
     color: white;
     border: none;
     padding: 10px 20px;
@@ -799,6 +799,13 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
     margin: 0 5px;
 }
 
+#gender-female {
+    background-color: #dc3545; /* Red for unselected female */
+}
+#gender-female:hover {
+    background-color: #c82333; /* Darker red on hover */
+}
+
 .gender-buttons .gender-button:hover {
     background-color: #0056b3;
     transform: translateY(-2px);
@@ -806,7 +813,7 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
 
 .gender-buttons .gender-button.active {
     background-color: #28a745; /* Green for active */
-    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3), inset 0 2px 4px rgba(0, 0, 0, 0.2); /* Added inset shadow */
 }
 
 .gender-buttons .gender-button.active:hover {
