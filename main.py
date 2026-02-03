@@ -142,9 +142,9 @@ def process_html_file_for_common_elements(filepath):
         content = re.sub(r'<footer>[\s\S]*?</footer>', '', content, flags=re.DOTALL)
 
         # Inject common elements
-        content = content.replace('</head>', f'{{COMMON_HEAD_SCRIPTS}}\n</head>')
-        content = content.replace('<body>', f'<body>\n{{COMMON_BODY_INJECTIONS}}')
-        content = content.replace('</body>', f'{{COMMON_FOOTER}}\n</body>')
+        content = content.replace('</head>', f'{COMMON_HEAD_SCRIPTS}\n</head>')
+        content = content.replace('<body>', f'<body>\n{COMMON_BODY_INJECTIONS}')
+        content = content.replace('</body>', f'{COMMON_FOOTER}\n</body>')
 
         with open(filepath, "w", encoding="utf-8") as f:
             f.write(content)
