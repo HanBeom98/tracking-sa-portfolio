@@ -58,9 +58,7 @@ function setLanguage(lang) {
 
 // 페이지가 로드되었을 때 공통 레이아웃을 삽입하는 함수
 async function loadLayout() {
-
-
-    // 3. 헤더가 삽입된 후, 테마 변경 버튼에 이벤트 리스너를 추가합니다.
+    // 테마 변경 버튼에 이벤트 리스너를 추가합니다.
     const themeToggle = document.getElementById('color-change');
     const body = document.body;
 
@@ -75,22 +73,38 @@ async function loadLayout() {
     }
 
     if (themeToggle && body) {
-
-
-
+        themeToggle.addEventListener('click', () => {
             body.classList.toggle('dark-mode');
-
             if (body.classList.contains('dark-mode')) {
                 localStorage.setItem('theme', 'dark');
-
             } else {
                 localStorage.setItem('theme', 'light');
-
             }
         });
+    }
 
+    // 언어 선택 버튼 추가 (language-switcher div가 있다면)
+    const languageSwitcher = document.getElementById('language-switcher');
+    if (languageSwitcher) {
+        const createLangButton = (langCode, label) => {
+            const button = document.createElement('button');
+            button.textContent = label;
+            button.dataset.lang = langCode;
+            button.classList.add('lang-button');
+            // 'active' class will be set by setLanguage call later
+            button.addEventListener('click', () => {
+                setLanguage(langCode);
+            });
+            return button;
+        };
 
-    // 초기 로드 시 번역 적용
+        // Clear existing content to avoid duplicates if loadLayout is called multiple times
+        languageSwitcher.innerHTML = ''; 
+        languageSwitcher.appendChild(createLangButton('ko', '한글'));
+        languageSwitcher.appendChild(createLangButton('en', 'ENG'));
+    }
+
+    // 초기 로드 시 번역 적용 (언어 버튼 생성 후 호출되어야 함)
     applyTranslations(currentLang);
 }
 
