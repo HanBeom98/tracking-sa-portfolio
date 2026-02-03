@@ -171,7 +171,8 @@ def record_processed_article(article_id):
 def is_duplicate_article(article_id):
     return article_id in get_processed_articles()
 
-def fetch_ai_news(rss_url):
+def fetch_latest_news_from_feed(rss_url):
+    print(f"📡 {rss_url}에서 최신 뉴스 수집 중...")
     feed = feedparser.parse(rss_url)
     return feed.entries[0] if feed.entries else None
 
@@ -212,15 +213,32 @@ def generate_public_site():
 
 def main():
     api_key = os.getenv("GEMINI_API_KEY")
-    if not api_key: return
-    news = fetch_ai_news("https://techcrunch.com/category/artificial-intelligence/feed/")
-    if news:
-        article_id = clean_filename(news.title)
-        if not is_duplicate_article(article_id):
-            content = generate_ai_content(api_key, news.title, news.summary)
-            if content:
-                save_post_and_generate_html(content)
-                record_processed_article(article_id)
+    if not api_key: 
+        print("에러: .env 파일에 GEMINI_API_KEY가 없습니다.")
+        return
+
+    rss_urls = [
+        "https://techcrunch.com/category/artificial-intelligence/feed/",
+        "https://techcrunch.com/category/startups/feed/",
+        "https://techcrunch.com/category/enterprise/feed/"
+    ]
+
+    for rss_url in rss_urls:
+        news = fetch_latest_news_from_feed(rss_url)
+        if news:
+            article_id = clean_filename(news.title)
+            if not is_duplicate_article(article_id):
+                print(f"📰 새 뉴스 발견: {news.title}")
+                content = generate_ai_content(api_key, news.title, news.summary)
+                if content:
+                    save_post_and_generate_html(content)
+                    record_processed_article(article_id)
+            else:
+                print(f"⚠️ 중복 기사 발견: '{news.title}'. 건너뜁니다.")
+        else:
+            print(f"➡️ {rss_url}에서 새로운 뉴스를 찾지 못했습니다.")
+    
+    print("\n✅ 모든 피드 확인 완료. 최종 사이트를 생성합니다.")
     generate_public_site()
 
 if __name__ == "__main__":
