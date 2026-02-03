@@ -223,6 +223,7 @@ def generate_ai_content(api_key, news_title, news_summary):
 - # 제목
 - 본문
 - 수익화 아이디어 3개
+- 관련 해시태그 5개 (뉴스 내용과 관련된 키워드, 한국어/영어 혼용, #키워드 형식)
 '''
 
     try:
