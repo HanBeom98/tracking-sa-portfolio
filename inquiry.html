@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="partnership_inquiry">파트너십 문의 - TrackingSA</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-TGD3WRNKPZ');
+    </script>
+    <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "vb9q33ggpa");
+</script>
+</head>
+<body>
+    <div id="header-placeholder"></div>
+
+    <main>
+        <section class="inquiry-form-section">
+            <h1 data-i18n="partnership_inquiry_title">파트너십 문의</h1>
+            <p data-i18n="partnership_inquiry_description">TrackingSA와 파트너십에 관심 있으신가요? 아래 양식을 작성하여 문의해 주세요!</p>
+            <form action="https://formspree.io/f/xrellpvn" method="POST" class="inquiry-form">
+                <div class="form-field">
+                    <label for="name" data-i18n="name">이름:</label>
+                    <input type="text" id="name" name="name" data-i18n-placeholder="your_name" placeholder="귀하의 이름" required>
+                </div>
+                <div class="form-field">
+                    <label for="email" data-i18n="email">이메일:</label>
+                    <input type="email" id="email" name="_replyto" data-i18n-placeholder="your_email" placeholder="Your Email" required>
+                </div>
+                <div class="form-field full-width">
+                    <label for="subject" data-i18n="subject">제목:</label>
+                    <input type="text" id="subject" name="_subject" data-i18n-placeholder="inquiry_subject" placeholder="문의 제목" required>
+                </div>
+                <div class="form-field full-width">
+                    <label for="message" data-i18n="message">메시지:</label>
+                    <textarea id="message" name="message" rows="8" data-i18n-placeholder="your_message_here" placeholder="메시지를 여기에 작성해주세요..." required></textarea>
+                </div>
+                <button type="submit" data-i18n="send_inquiry">문의 보내기</button>
+            </form>
+        </section>
+
+    </main>
+
+    <footer>
+        <p data-i18n="footer_copyright"></p>
+    </footer>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    
+    <!-- crypto-js for password hashing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    
+    <!-- Firebase-config -->
+    <script src="firebase-config.js"></script>
+    
+    <script src="translations.js"></script>
+    <script src="common.js"></script>
+</body>
+</html>
