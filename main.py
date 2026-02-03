@@ -36,7 +36,7 @@ COMMON_HEAD_SCRIPTS = """
         y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
     }})(window, document, "clarity", "script", "vb9q33ggpa");
     </script>
-"
+"""
 
 COMMON_BODY_INJECTIONS = """
 <header>
@@ -55,7 +55,7 @@ COMMON_BODY_INJECTIONS = """
         <div id="language-switcher"></div>
     </div>
 </header>
-"
+"""
 
 COMMON_FOOTER = """
     <footer>
@@ -66,7 +66,7 @@ COMMON_FOOTER = """
             <a href="/privacy-policy.html" data-i18n="privacy_policy">개인정보처리방침</a>
         </p>
     </footer>
-"
+"""
 
 # --- Helper functions ---
 def extract_title_from_md(md_content):
@@ -215,7 +215,7 @@ def generate_public_site():
                 date = re.match(r'(\d{4}-\d{2}-\d{2})', fn).group(1)
                 url = f"{date}-{clean_filename(title)}.html"
                 articles_meta.append({'title': title, 'date': date, 'url': url})
-                generate_article_html(content, title, date, os.path.join(PUBLIC_DIR, url)))
+                generate_article_html(content, title, date, os.path.join(PUBLIC_DIR, url))
     generate_index_html(articles_meta)
 
 def main():
