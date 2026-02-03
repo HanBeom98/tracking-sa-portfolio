@@ -177,7 +177,7 @@ def fetch_latest_news_from_feed(rss_url):
     return feed.entries[0] if feed.entries else None
 
 def generate_ai_content(api_key, news_title, news_summary):
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+    url = f'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={api_key}'
 
     payload = {
         "contents": [{
