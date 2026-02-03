@@ -1,3 +1,4 @@
+// This is a test comment to force a new deployment.
 // 현재 언어를 저장하는 변수 (기본값은 한국어)
 let currentLang = localStorage.getItem('lang') || 'ko';
 
