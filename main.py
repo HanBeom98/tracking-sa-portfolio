@@ -278,6 +278,10 @@ def generate_public_site():
     _generate_sitemap(articles_meta)
 
 def main():
+    # For debugging: Remove processed articles log to force regeneration
+    if os.path.exists(PROCESSED_ARTICLES_LOG):
+        os.remove(PROCESSED_ARTICLES_LOG)
+
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key: 
         print("에러: .env 파일에 GEMINI_API_KEY가 없습니다.")
