@@ -100,7 +100,7 @@ def generate_article_html(md_content, title, date_str, output_path):
     </main>
 </body>
 </html>
-    "
+"""
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(html_template)
