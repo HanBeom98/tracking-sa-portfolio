@@ -806,6 +806,10 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
     background-color: #c82333; /* Darker red on hover */
 }
 
+#gender-female.active {
+    background-color: #28a745; /* Green for active female */
+}
+
 .gender-buttons .gender-button:hover {
     background-color: #0056b3;
     transform: translateY(-2px);
@@ -813,7 +817,7 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
 
 .gender-buttons .gender-button.active {
     background-color: #28a745; /* Green for active */
-    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3), inset 0 2px 4px rgba(0, 0, 0, 0.2); /* Added inset shadow */
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3), inset 0 0 8px rgba(0, 0, 0, 0.5); /* Enhanced inset shadow */
 }
 
 .gender-buttons .gender-button.active:hover {
