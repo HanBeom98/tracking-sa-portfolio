@@ -184,6 +184,7 @@ def generate_ai_content(api_key, news_title, news_summary):
         return res['candidates'][0]['content']['parts'][0]['text']
     except Exception as e:
         print(f"❌ AI 콘텐츠 생성 중 오류 발생: {e}")
+        print("API 응답 전체:", res)
         return None
 
 def save_post_and_generate_html(content):
