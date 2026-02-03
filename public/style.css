@@ -812,6 +812,62 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
     background-color: #218838;
 }
 
+/* Specific colors for Gender Buttons */
+#gender-male {
+    background-color: #007bff; /* Blue */
+}
+#gender-male:hover {
+    background-color: #0056b3; /* Darker Blue */
+}
+#gender-male.active {
+    background-color: #004085; /* Even darker blue for active */
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+}
+#gender-male.active:hover {
+    background-color: #002752;
+}
+
+#gender-female {
+    background-color: #dc3545; /* Red */
+}
+#gender-female:hover {
+    background-color: #c82333; /* Darker Red */
+}
+#gender-female.active {
+    background-color: #a71d2a; /* Even darker red for active */
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+#gender-female.active:hover {
+    background-color: #88151f;
+}
+
+/* Dark mode adjustments for gender buttons */
+body.dark-mode #gender-male {
+    background-color: #0056b3; /* Dark mode blue */
+}
+body.dark-mode #gender-male:hover {
+    background-color: #007bff;
+}
+body.dark-mode #gender-male.active {
+    background-color: #004085;
+}
+body.dark-mode #gender-male.active:hover {
+    background-color: #002752;
+}
+
+body.dark-mode #gender-female {
+    background-color: #c82333; /* Dark mode red */
+}
+body.dark-mode #gender-female:hover {
+    background-color: #dc3545;
+}
+body.dark-mode #gender-female.active {
+    background-color: #a71d2a;
+}
+body.dark-mode #gender-female.active:hover {
+    background-color: #88151f;
+}
+
 /* Image Upload Section */
 .image-upload-section {
     margin-bottom: 30px;
