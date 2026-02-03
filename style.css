@@ -1120,3 +1120,14 @@ body.dark-mode #retake-button {
 body.dark-mode #retake-button:hover {
     background-color: #777777;
 }
+
+/* Privacy Note for Animal Face Test */
+.privacy-note {
+    font-size: 0.85em; /* Smaller font size */
+    color: #6c757d; /* Light gray color */
+    margin-top: 10px; /* Space from the text above */
+}
+
+body.dark-mode .privacy-note {
+    color: #aaaaaa; /* Lighter gray for dark mode */
+}
