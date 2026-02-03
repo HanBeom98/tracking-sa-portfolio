@@ -1,4 +1,4 @@
-const URL = "https://teachablemachine.withgoogle.com/models/5FtcgpOmH/"; // Replace with your Teachable Machine model URL
+const URL = "https://teachablemachine.withgoogle.com/models/Jtg0ClWaE/"; // Replace with your Teachable Machine model URL
 
 let model, maxPredictions;
 let selectedGender = null; // To store selected gender
