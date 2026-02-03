@@ -12,7 +12,7 @@ function applyTranslations(lang) {
     elements.forEach(element => {
         const key = element.getAttribute('data-i18n');
         if (translations[lang] && translations[lang][key]) {
-            element.textContent = translations[lang][key];
+            element.innerHTML = translations[lang][key]; // Changed to innerHTML
             console.log(`[applyTranslations] Translated key "${key}" for element:`, element);
         } else {
             console.warn(`[applyTranslations] No translation found for key "${key}" in language "${lang}". Element:`, element);
