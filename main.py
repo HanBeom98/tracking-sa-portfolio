@@ -17,6 +17,7 @@ PUBLIC_DIR = "public"
 NEWS_POSTS_DIR = "posts" 
 PROCESSED_ARTICLES_LOG = "processed_articles.log" 
 ADSENSE_CLIENT_ID = "ca-pub-7263630893992216" 
+SITEMAP_PATH = os.path.join(PUBLIC_DIR, "sitemap.xml")
 
 # Use absolute paths for all assets
 COMMON_HEAD_SCRIPTS = """
@@ -76,6 +77,36 @@ def extract_title_from_md(md_content):
 def clean_filename(title):
     title = re.sub(r'[^\w\s-]', '', title).strip().lower()
     return re.sub(r'[-\s]+', '-', title)
+
+def _generate_sitemap(articles_info):
+    # articles_info will be a list of {'url': '...', 'lastmod': 'YYYY-MM-DD'}
+    # Use current date as last modified date for the index page for simplicity
+    current_date = datetime.date.today().strftime("%Y-%m-%d")
+    
+    sitemap_content = f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+        <loc>https://example.com/index.html</loc>
+        <lastmod>{current_date}</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>1.0</priority>
+    </url>
+"""
+
+    for article in articles_info:
+        sitemap_content += f"""    <url>
+        <loc>https://example.com/{article['url']}</loc>
+        <lastmod>{article['date']}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+"""
+
+    sitemap_content += """</urlset>"""
+
+    os.makedirs(os.path.dirname(SITEMAP_PATH), exist_ok=True)
+    with open(SITEMAP_PATH, "w", encoding="utf-8") as f:
+        f.write(sitemap_content)
 
 def generate_article_html(md_content, title, date_str, output_path):
     html_template = f"""
@@ -230,6 +261,7 @@ def generate_public_site():
                 articles_meta.append({'title': title, 'date': date, 'url': url})
                 generate_article_html(content, title, date, os.path.join(PUBLIC_DIR, url))
     generate_index_html(articles_meta)
+    _generate_sitemap(articles_meta)
 
 def main():
     api_key = os.getenv("GEMINI_API_KEY")
