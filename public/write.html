@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>글쓰기 - TrackingSA</title>
+    <title data-i18n="write_post_title">글쓰기 - TrackingSA</title>
     <link rel="stylesheet" href="style.css">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
@@ -27,25 +27,25 @@
 
     <main>
         <section class="write-form-section section-card">
-            <h1>자유게시판 글쓰기</h1>
+            <h1 data-i18n="write_post_h1">자유게시판 글쓰기</h1>
             <form id="write-form" class="inquiry-form">
                 <div class="form-field full-width">
-                    <label for="title">제목</label>
-                    <input type="text" id="title" placeholder="제목을 입력하세요" required>
+                    <label for="title" data-i18n="title">제목</label>
+                    <input type="text" id="title" data-i18n-placeholder="enter_title" placeholder="제목을 입력하세요" required>
                 </div>
                 <div class="form-field full-width">
-                    <label for="content">내용</label>
-                    <textarea id="content" rows="15" placeholder="내용을 입력하세요" required></textarea>
+                    <label for="content" data-i18n="content">내용</label>
+                    <textarea id="content" rows="15" data-i18n-placeholder="enter_content" placeholder="내용을 입력하세요" required></textarea>
                 </div>
                 <div class="form-field">
-                    <label for="password">비밀번호</label>
-                    <input type="password" id="password" placeholder="수정/삭제 시 사용할 비밀번호" required>
+                    <label for="password" data-i18n="password">비밀번호</label>
+                    <input type="password" id="password" data-i18n-placeholder="password_for_edit_delete" placeholder="수정/삭제 시 사용할 비밀번호" required>
                 </div>
                 <div class="form-field">
-                    <label for="password-confirm">비밀번호 확인</label>
-                    <input type="password" id="password-confirm" placeholder="비밀번호를 다시 한번 입력하세요" required>
+                    <label for="password-confirm" data-i18n="confirm_password">비밀번호 확인</label>
+                    <input type="password" id="password-confirm" data-i18n-placeholder="re_enter_password" placeholder="비밀번호를 다시 한번 입력하세요" required>
                 </div>
-                <button type="submit" id="submit-button" class="go-test-button">등록하기</button>
+                <button type="submit" id="submit-button" class="go-test-button" data-i18n="register">등록하기</button>
             </form>
         </section>
     </main>
@@ -64,6 +64,7 @@
     <!-- Firebase-config -->
     <script src="firebase-config.js"></script>
     
+    <script src="translations.js"></script>
     <script src="common.js"></script>
     <!-- 글쓰기 로직을 위한 별도의 스크립트 -->
     <script src="write.js"></script>

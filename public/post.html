@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>게시물 - TrackingSA</title>
+    <title data-i18n="post_title">게시물 - TrackingSA</title>
     <link rel="stylesheet" href="style.css">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
@@ -28,7 +28,7 @@
     <main>
         <section id="post-section" class="section-card">
             <!-- 게시물 내용이 여기에 동적으로 추가됩니다. -->
-            <p>게시물을 불러오는 중...</p>
+            <p data-i18n="loading_post">게시물을 불러오는 중...</p>
         </section>
     </main>
 
@@ -46,6 +46,7 @@
     <!-- Firebase-config -->
     <script src="firebase-config.js"></script>
     
+    <script src="translations.js"></script>
     <script src="common.js"></script>
     <!-- 게시물 상세 로직을 위한 별도의 스크립트 -->
     <script src="post.js"></script>
