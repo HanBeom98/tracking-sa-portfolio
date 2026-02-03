@@ -179,7 +179,7 @@ def fetch_latest_news_from_feed(rss_url):
     return feed.entries[:3] if feed.entries else None
 
 def generate_ai_content(api_key, news_title, news_summary):
-    client = genai.Client(api_key=api_key, http_options={'api_version': 'v1'})
+    client = genai.Client(api_key=api_key)
     prompt = f'뉴스 제목: {news_title}\n뉴스 요약: {news_summary}\n\n한국어 마크다운 뉴스 글 작성\n- # 제목\n- 본문\n- 수익화 아이디어 3개'
     try:
         response = client.models.generate_content(
