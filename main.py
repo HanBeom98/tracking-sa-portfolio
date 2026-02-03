@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 import markdown 
 import shutil 
 import hashlib 
-import google.generativeai as genai
+from google import genai
 
 load_dotenv()
 
@@ -35,7 +35,7 @@ COMMON_HEAD_SCRIPTS = """
         y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
     }})(window, document, "clarity", "script", "vb9q33ggpa");
     </script>
-"""""
+"""
 
 COMMON_BODY_INJECTIONS = """
 <header>
@@ -54,7 +54,7 @@ COMMON_BODY_INJECTIONS = """
         <div id="language-switcher"></div>
     </div>
 </header>
-"""""
+"""
 
 COMMON_FOOTER = """
     <footer>
@@ -65,7 +65,7 @@ COMMON_FOOTER = """
             <a href="/privacy-policy.html" data-i18n="privacy_policy">개인정보처리방침</a>
         </p>
     </footer>
-"""""
+"""
 
 # --- Helper functions ---
 def extract_title_from_md(md_content):
@@ -119,7 +119,7 @@ def generate_index_html(articles_meta):
                 <h2 class="news-card-title"><a href="/{article['url']}" class="news-card-link">{article['title']}</a></h2>
                 <p class="news-card-date">{article['date']}</p>
             </article>
-            """""
+            """
         news_list_items = f'<div class="news-grid">{news_list_items}</div>'
 
     updated_html = base_html.replace(
@@ -178,25 +178,16 @@ def fetch_latest_news_from_feed(rss_url):
     return feed.entries[0] if feed.entries else None
 
 def generate_ai_content(api_key, news_title, news_summary):
-    genai.configure(api_key=api_key)
-
-    model = genai.GenerativeModel("gemini-1.5-flash")
-
-    prompt = f"""
-뉴스 제목: {news_title}
-뉴스 요약: {news_summary}
-
-한국어 마크다운 뉴스 글 작성
-- # 제목
-- 본문
-- 수익화 아이디어 3개
-"""""
-
+    client = genai.Client(api_key=api_key)
+    prompt = f'뉴스 제목: {news_title}\n뉴스 요약: {news_summary}\n\n한국어 마크다운 뉴스 글 작성\n- # 제목\n- 본문\n- 수익화 아이디어 3개'
     try:
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model='gemini-1.5-flash',
+            contents=prompt
+        )
         return response.text
     except Exception as e:
-        print("🚨 Gemini SDK 오류:", e)
+        print(f'🚨 Gemini 최신 SDK 오류: {e}')
         return None
 
 def save_post_and_generate_html(content):
