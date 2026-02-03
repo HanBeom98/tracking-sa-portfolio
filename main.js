@@ -60,7 +60,7 @@ function selectGender(gender) {
     } else {
         genderFemaleButton.classList.add('active');
     }
-    console.log('Selected gender:', selectedGender);
+    // console.log('Selected gender:', selectedGender);
 }
 
 function handleDragOver(event) {
@@ -91,7 +91,7 @@ function handleFileSelect(event) {
 
 function processFile(file) {
     if (!file.type.startsWith('image/')) {
-        alert('이미지 파일만 업로드할 수 있습니다.'); // Only image files
+        alert(translations[currentLang]['only_image_files_alert']); // Only image files
         return;
     }
     currentImageFile = file;
@@ -107,7 +107,7 @@ function processFile(file) {
 
 async function predict() {
     if (!currentImageFile) {
-        alert(translations[currentLang]['select_image_first'] || "먼저 이미지를 선택해주세요.");
+        alert(translations[currentLang]['select_image_first']);
         return;
     }
 
@@ -199,7 +199,7 @@ function setupShareButtons(animalName, confidence) {
                 link.click();
                 document.body.removeChild(link);
             } else {
-                alert('다운로드할 이미지가 없습니다.');
+                alert(translations[currentLang]['no_image_to_download_alert']);
             }
         };
     }
