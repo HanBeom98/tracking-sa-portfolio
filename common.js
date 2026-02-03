@@ -35,6 +35,16 @@ function setLanguage(lang) {
     currentLang = lang;
     localStorage.setItem('lang', lang);
     applyTranslations(lang);
+
+    // Update active class on language buttons
+    const langButtons = document.querySelectorAll('.lang-button');
+    langButtons.forEach(button => {
+        if (button.dataset.lang === lang) {
+            button.classList.add('active');
+        } else {
+            button.classList.remove('active');
+        }
+    });
 }
 
 // 페이지가 로드되었을 때 공통 레이아웃을 삽입하는 함수
@@ -50,19 +60,25 @@ async function loadLayout() {
     }
 
     // 2. 언어 선택 버튼 추가
-    const languageSelectorPlaceholder = document.getElementById('language-selector-placeholder');
-    if (languageSelectorPlaceholder) {
-        const langSelect = document.createElement('select');
-        langSelect.id = 'language-selector';
-        langSelect.innerHTML = `
-            <option value="ko">한국어</option>
-            <option value="en">English</option>
-        `;
-        langSelect.value = currentLang; // Set selected language
-        langSelect.addEventListener('change', (event) => {
-            setLanguage(event.target.value);
-        });
-        languageSelectorPlaceholder.appendChild(langSelect);
+    const languageSwitcher = document.getElementById('language-switcher');
+    if (languageSwitcher) {
+        const createLangButton = (langCode, label) => {
+            const button = document.createElement('button');
+            button.textContent = label;
+            button.dataset.lang = langCode;
+            button.classList.add('lang-button');
+            if (currentLang === langCode) {
+                button.classList.add('active');
+            }
+            button.addEventListener('click', () => {
+                setLanguage(langCode);
+                // The setLanguage function will now handle updating active classes for all buttons.
+            });
+            return button;
+        };
+
+        languageSwitcher.appendChild(createLangButton('ko', 'KO'));
+        languageSwitcher.appendChild(createLangButton('en', 'EN'));
     }
 
     // 3. 헤더가 삽입된 후, 테마 변경 버튼에 이벤트 리스너를 추가합니다.
@@ -80,14 +96,22 @@ async function loadLayout() {
     }
 
     if (themeToggle && body) {
+        console.log('Theme toggle button found and body exists.');
         themeToggle.addEventListener('click', () => {
+            console.log('Theme toggle button clicked!');
+            console.log('Before toggle body classes:', body.classList);
             body.classList.toggle('dark-mode');
+            console.log('After toggle body classes:', body.classList);
             if (body.classList.contains('dark-mode')) {
                 localStorage.setItem('theme', 'dark');
+                console.log('Theme set to dark.');
             } else {
                 localStorage.setItem('theme', 'light');
+                console.log('Theme set to light.');
             }
         });
+    } else {
+        console.warn('Theme toggle button or body not found. themeToggle:', themeToggle, 'body:', body);
     }
 
     // 초기 로드 시 번역 적용

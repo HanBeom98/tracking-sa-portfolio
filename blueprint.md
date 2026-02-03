@@ -43,6 +43,13 @@ The goal is to ensure the website fully complies with Google AdSense policies, p
 4.  **Modified `main.py` and `style.css` to prevent duplicate `h1` tags in generated article HTML.**
     - Improves SEO and semantic structure by ensuring only one main `<h1>` per article, which is generated from the markdown content itself.
 
+### Recent Enhancements and Fixes:
+1.  **Theme Change Debugging:** Added console logging to `common.js` to assist in diagnosing the "theme not changing" issue. This provides visibility into the JavaScript's execution flow for easier troubleshooting.
+2.  **Multi-language Support Implementation:**
+    *   Refactored `layout/header.html` to integrate a `language-switcher` div within a new `utility-buttons` container, alongside the existing theme change button, ensuring a unified and organized header utility area.
+    *   Modified `common.js` to dynamically create button-style language selectors (KO, EN) instead of a traditional dropdown. The `setLanguage` function was enhanced to visually manage the active state of these new language buttons.
+    *   Introduced new CSS rules in `style.css` to properly style these language selection buttons and the `utility-buttons` container, positioning them effectively in the top-right of the navigation. Existing `header` display properties were also updated to accommodate these changes.
+
 ### Next Steps (for user consideration):
 1.  **Review and address "Thin Content" pages:**
     *   **`inquiry.html`:** Enhance this page with substantial content explaining the partnership inquiry process, privacy considerations, etc., to avoid being flagged as thin content.
