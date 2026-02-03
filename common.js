@@ -15,8 +15,7 @@ function applyTranslations(lang) {
         const key = element.getAttribute('data-i18n');
         if (translations[lang] && translations[lang][key]) {
             element.innerHTML = translations[lang][key]; // Changed to innerHTML
-
-
+        } // Missing curly brace here
     });
 
     const placeholders = document.querySelectorAll('[data-i18n-placeholder]');
@@ -25,8 +24,7 @@ function applyTranslations(lang) {
         const key = element.getAttribute('data-i18n-placeholder');
         if (translations[lang] && translations[lang][key]) {
             element.placeholder = translations[lang][key];
-
-
+        } // Missing curly brace here
     });
 
     const titleElement = document.querySelector('title');
@@ -34,8 +32,7 @@ function applyTranslations(lang) {
         const key = titleElement.getAttribute('data-i18n');
         if (translations[lang] && translations[lang][key]) {
             titleElement.textContent = translations[lang][key];
-
-
+        } // Missing curly brace here
     }
 }
 
