@@ -32,11 +32,11 @@ COMMON_HEAD_SCRIPTS = f"""
     <script src="translations.js"></script>
     <script src="common.js"></script>
     <script type="text/javascript">
-    (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+    (function(c,l,a,r,i,t,y){{
+        c[a]=c[a]||function(){{(c[a].q=c[a].q||[]).push(arguments)}};
         t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
         y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-    })(window, document, "clarity", "script", "vb9q33ggpa");
+    }})(window, document, "clarity", "script", "vb9q33ggpa");
 </script>
 """
 
