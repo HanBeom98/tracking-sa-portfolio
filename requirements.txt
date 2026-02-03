@@ -2,3 +2,4 @@ feedparser
 python-dotenv
 requests
 markdown
+google-generativeai

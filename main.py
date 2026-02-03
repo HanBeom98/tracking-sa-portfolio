@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 import markdown 
 import shutil 
 import hashlib 
+import google.generativeai as genai
 
 load_dotenv()
 
@@ -34,7 +35,7 @@ COMMON_HEAD_SCRIPTS = """
         y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
     }})(window, document, "clarity", "script", "vb9q33ggpa");
     </script>
-"""
+"
 
 COMMON_BODY_INJECTIONS = """
 <header>
@@ -53,7 +54,7 @@ COMMON_BODY_INJECTIONS = """
         <div id="language-switcher"></div>
     </div>
 </header>
-"""
+"
 
 COMMON_FOOTER = """
     <footer>
@@ -64,7 +65,7 @@ COMMON_FOOTER = """
             <a href="/privacy-policy.html" data-i18n="privacy_policy">개인정보처리방침</a>
         </p>
     </footer>
-"""
+"
 
 # --- Helper functions ---
 def extract_title_from_md(md_content):
@@ -98,7 +99,7 @@ def generate_article_html(md_content, title, date_str, output_path):
     </main>
 </body>
 </html>
-    """
+    "
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(html_template)
@@ -142,9 +143,9 @@ def process_html_file_for_common_elements(filepath):
         content = re.sub(r'<footer>[\s\S]*?</footer>', '', content, flags=re.DOTALL)
 
         # Inject common elements
-        content = content.replace('</head>', f'{COMMON_HEAD_SCRIPTS}\n</head>')
-        content = content.replace('<body>', f'<body>\n{COMMON_BODY_INJECTIONS}')
-        content = content.replace('</body>', f'{COMMON_FOOTER}\n</body>')
+        content = content.replace('</head>', f'{{COMMON_HEAD_SCRIPTS}}\n</head>')
+        content = content.replace('<body>', f'<body>\n{{COMMON_BODY_INJECTIONS}')
+        content = content.replace('</body>', f'{{COMMON_FOOTER}}\n</body>')
 
         with open(filepath, "w", encoding="utf-8") as f:
             f.write(content)
@@ -177,36 +178,25 @@ def fetch_latest_news_from_feed(rss_url):
     return feed.entries[0] if feed.entries else None
 
 def generate_ai_content(api_key, news_title, news_summary):
-    url = f'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={api_key}'
+    genai.configure(api_key=api_key)
 
-    payload = {
-        "contents": [{
-            "parts": [{
-                "text": f"""뉴스 제목: {news_title}
+    model = genai.GenerativeModel("gemini-1.5-flash")
+
+    prompt = f"""
+뉴스 제목: {news_title}
 뉴스 요약: {news_summary}
 
-한국어 마크다운 포스팅 작성.
-- 제목 1개 (#)
+한국어 마크다운 뉴스 글 작성
+- # 제목
 - 본문
 - 수익화 아이디어 3개
 """
-            }]
-        }]
-    }
 
     try:
-        res = requests.post(url, json=payload, timeout=30).json()
-
-        # 🔥 안전 처리 (candidates 없을 때 방지)
-        if 'candidates' not in res:
-            print("❌ Gemini 응답 이상:", res)
-            return None
-
-        return res['candidates'][0]['content']['parts'][0]['text']
-
+        response = model.generate_content(prompt)
+        return response.text
     except Exception as e:
-        print("❌ AI 생성 실패:", e)
-        print("API 응답 전체:", res) # res가 정의되지 않은 경우를 대비하여 수정
+        print("🚨 Gemini SDK 오류:", e)
         return None
 
 def save_post_and_generate_html(content):

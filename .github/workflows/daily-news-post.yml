@@ -24,7 +24,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install feedparser python-dotenv requests markdown
+          pip install feedparser python-dotenv requests markdown google-generativeai
 
       - name: Show posts directory before script runs
         run: |
