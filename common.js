@@ -58,8 +58,10 @@ function setLanguage(lang) {
 
 // 페이지가 로드되었을 때 공통 레이아웃을 삽입하는 함수
 async function loadLayout() {
+    console.log("loadLayout function executed");
     // 테마 변경 버튼에 이벤트 리스너를 추가합니다.
     const themeToggle = document.getElementById('color-change');
+    console.log("Theme toggle button found:", themeToggle);
     const body = document.body;
 
     if (body) {
@@ -73,6 +75,7 @@ async function loadLayout() {
     }
 
     if (themeToggle && body) {
+        console.log("Click event listener added to theme toggle button");
         themeToggle.addEventListener('click', () => {
             body.classList.toggle('dark-mode');
             if (body.classList.contains('dark-mode')) {
