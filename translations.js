@@ -65,7 +65,12 @@ const translations = {
         'edit_post_title': '글 수정',
         'edit_post_h1': '게시물 수정',
         'loading_post_info': '게시물 정보를 불러오는 중...',
-        'footer_copyright': '&copy; 2026 TrackingSA. 모든 권리 보유.'
+        'footer_copyright': '&copy; 2026 TrackingSA. 모든 권리 보유.',
+        'select_gender': '성별 선택',
+        'drag_drop_image': '여기에 이미지를 드래그하거나 클릭하여 업로드',
+        'analyzing_image': '이미지 분석 중...',
+        'your_animal_face_is': '당신의 동물상은:',
+        'retake_test': '다시 테스트'
     },
     'en': {
         'news_home': 'News Home',
@@ -133,6 +138,11 @@ const translations = {
         'edit_post_title': 'Edit Post',
         'edit_post_h1': 'Edit Post',
         'loading_post_info': 'Loading post information...',
-        'footer_copyright': '&copy; 2026 TrackingSA. All rights reserved.'
+        'footer_copyright': '&copy; 2026 TrackingSA. All rights reserved.',
+        'select_gender': 'Select Gender',
+        'drag_drop_image': 'Drag & drop image here or click to upload',
+        'analyzing_image': 'Analyzing image...',
+        'your_animal_face_is': 'Your animal face is:',
+        'retake_test': 'Retake Test'
     }
 };
