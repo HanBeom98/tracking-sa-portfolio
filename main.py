@@ -182,7 +182,7 @@ def generate_ai_content(api_key, news_title, news_summary):
     prompt = f'뉴스 제목: {news_title}\n뉴스 요약: {news_summary}\n\n한국어 마크다운 뉴스 글 작성\n- # 제목\n- 본문\n- 수익화 아이디어 3개'
     try:
         response = client.models.generate_content(
-            model='gemini-1.5-flash',
+            model="gemini-2.0-flash",
             contents=prompt
         )
         return response.text
