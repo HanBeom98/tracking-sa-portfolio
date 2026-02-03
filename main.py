@@ -339,63 +339,41 @@ def save_post_and_generate_html(content):
     generate_article_html(content, title_from_md, today_date, html_filepath)
     return html_filepath, title_from_md, today_date
 
-def git_push_changes(new_article_processed=False):
-    try:
-        # Clean public directory before copying latest assets
-        if os.path.exists(PUBLIC_DIR):
-             subprocess.run(["rm", "-rf", PUBLIC_DIR], check=True)
+def generate_public_site():
+    # Clean public directory before copying latest assets
+    if os.path.exists(PUBLIC_DIR):
+         shutil.rmtree(PUBLIC_DIR)
+    os.makedirs(PUBLIC_DIR, exist_ok=True) # Recreate empty public directory
 
-        # Copy static assets to the public directory
-        copy_static_assets()
-        
-        # Gather all articles metadata to generate the index.html
-        articles_meta = []
-        if os.path.exists(NEWS_POSTS_DIR):
-            for filename in sorted(os.listdir(NEWS_POSTS_DIR), reverse=True):
-                if filename.endswith('.md'):
-                    filepath = os.path.join(NEWS_POSTS_DIR, filename)
-                    with open(filepath, 'r', encoding='utf-8') as f:
-                        md_content = f.read()
-                    
-                    title = extract_title_from_md(md_content)
-                    date_match = re.match(r'(\d{4}-\d{2}-\d{2})', filename)
-                    date_str = date_match.group(1) if date_match else '날짜 미상'
-                    cleaned_title = clean_filename(title)
-                    html_filename = f"{date_str}-{cleaned_title}.html"
+    # Copy static assets to the public directory
+    copy_static_assets()
+    
+    # Gather all articles metadata to generate the index.html
+    articles_meta = []
+    if os.path.exists(NEWS_POSTS_DIR):
+        for filename in sorted(os.listdir(NEWS_POSTS_DIR), reverse=True):
+            if filename.endswith('.md'):
+                filepath = os.path.join(NEWS_POSTS_DIR, filename)
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    md_content = f.read()
+                
+                title = extract_title_from_md(md_content)
+                date_match = re.match(r'(\d{4}-\d{2}-\d{2})', filename)
+                date_str = date_match.group(1) if date_match else '날짜 미상'
+                cleaned_title = clean_filename(title)
+                html_filename = f"{date_str}-{cleaned_title}.html"
 
-                    articles_meta.append({
-                        'title': title,
-                        'date': date_str,
-                        'url': html_filename # Relative path for linking
-                    })
-                    # Ensure each article's HTML is generated if not already (e.g., if re-generating index)
-                    generate_article_html(md_content, title, date_str, os.path.join(PUBLIC_DIR, html_filename))
+                articles_meta.append({
+                    'title': title,
+                    'date': date_str,
+                    'url': html_filename # Relative path for linking
+                })
+                # Ensure each article's HTML is generated if not already (e.g., if re-generating index)
+                generate_article_html(md_content, title, date_str, os.path.join(PUBLIC_DIR, html_filename))
 
-        # Generate the main index.html for the public directory
-        generate_index_html(articles_meta)
-
-        # Git operations
-        subprocess.run(["git", "config", "user.name", "github-actions[bot]"], check=False)
-        subprocess.run(["git", "config", "user.email", "github-actions[bot]@users.noreply.github.com"], check=False)
-        
-        # Add public directory and posts directory and processed articles log
-        subprocess.run(["git", "add", PUBLIC_DIR], check=True)
-        subprocess.run(["git", "add", NEWS_POSTS_DIR], check=True) # Also add raw markdown files
-        subprocess.run(["git", "add", PROCESSED_ARTICLES_LOG], check=False) # Add log, if it exists
-
-        # Commit only if there are changes to avoid empty commits
-        result = subprocess.run(["git", "diff", "--cached", "--exit-code"], capture_output=True, text=True)
-        if result.returncode != 0: # Changes exist
-            subprocess.run(["git", "commit", "-m", f"Auto-post and SSG update {datetime.date.today()}"], check=True)
-            subprocess.run(["git", "push"], check=True)
-            print("🚀 GitHub 푸시 성공!")
-        else:
-            print("➡️ 변경 사항 없음. GitHub 푸시 건너뜀.")
-
-    except subprocess.CalledProcessError as e:
-        print(f"⚠️ Git 오류: {e.cmd}\nStdout: {e.stdout}\nStderr: {e.stderr}")
-    except Exception as e:
-        print(f"⚠️ 기타 오류: {e}")
+    # Generate the main index.html for the public directory
+    generate_index_html(articles_meta)
+    print("✅ Public 디렉토리 생성 및 업데이트 완료!")
 
 def main():
     rss_url = "https://techcrunch.com/category/artificial-intelligence/feed/"
@@ -413,7 +391,6 @@ def main():
         
         if is_duplicate_article(article_unique_id):
             print(f"⚠️ 중복 기사 발견: '{news.title}'. 콘텐츠 생성을 건너뜀.")
-            git_push_changes(new_article_processed=False) # Still do SSG and push if other changes.
         else:
             print(f"📰 뉴스 발견: {news.title}")
             print("🤖 AI 분석 글 생성 중...")
@@ -423,12 +400,12 @@ def main():
                 html_article_path, title, date = save_post_and_generate_html(content)
                 record_processed_article(article_unique_id) # Record after successful processing
                 print(f"🎉 새 뉴스 기사 생성 완료: {title} ({html_article_path})")
-                git_push_changes(new_article_processed=True) # Indicate new article was processed
             else:
                 print("🛑 콘텐츠 생성 실패.")
     else:
         print("➡️ 새로운 뉴스 없음. 정적 사이트 재생성만 시도합니다.")
-        git_push_changes(new_article_processed=False) # Regenerate public/ to ensure consistency even if no new news.
+    
+    generate_public_site()
 
 if __name__ == "__main__":
     main()
