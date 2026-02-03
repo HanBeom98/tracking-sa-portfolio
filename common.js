@@ -101,7 +101,7 @@ async function loadLayout() {
 
         // Clear existing content to avoid duplicates if loadLayout is called multiple times
         languageSwitcher.innerHTML = ''; 
-        languageSwitcher.appendChild(createLangButton('ko', '한글'));
+        languageSwitcher.appendChild(createLangButton('ko', 'KOR'));
         languageSwitcher.appendChild(createLangButton('en', 'ENG'));
     }
 
