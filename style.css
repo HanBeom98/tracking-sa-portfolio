@@ -1143,3 +1143,18 @@ body.dark-mode #retake-button:hover {
 body.dark-mode .privacy-note {
     color: #aaaaaa; /* Lighter gray for dark mode */
 }
+/* New style for hashtags */
+.hashtags {
+    font-size: 0.8rem;
+    color: #6c757d; /* A lighter gray color, similar to article meta */
+    margin-top: 20px; /* Add some space above the hashtags */
+    padding-top: 10px;
+    border-top: 1px solid #eee; /* Optional: a subtle separator */
+    text-align: right; /* Align to the right, as often seen with tags */
+}
+
+/* Dark mode adjustment for hashtags */
+body.dark-mode .hashtags {
+    color: #aaaaaa; /* Lighter gray for dark mode */
+    border-top-color: #444;
+}

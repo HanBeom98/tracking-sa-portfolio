@@ -108,7 +108,7 @@ def _generate_sitemap(articles_info):
     with open(SITEMAP_PATH, "w", encoding="utf-8") as f:
         f.write(sitemap_content)
 
-def generate_article_html(md_content, title, date_str, output_path):
+def generate_article_html(md_content, title, date_str, output_path, hashtags_html=""):
     html_template = f"""
 <!DOCTYPE html>
 <html lang="ko">
@@ -127,6 +127,7 @@ def generate_article_html(md_content, title, date_str, output_path):
             <p class="article-meta">게시일: {date_str}</p>
             <div class="article-content">
                 {markdown.markdown(md_content)}
+                {hashtags_html}
             </div>
         </article>
     </main>
@@ -223,7 +224,7 @@ def generate_ai_content(api_key, news_title, news_summary):
 - # 제목
 - 본문
 - 수익화 아이디어 3개
-- 관련 해시태그 5개 (뉴스 내용과 관련된 키워드, 한국어/영어 혼용, #키워드 형식)
+- 해시태그: (항상 "##HASHTAGS##: #tag1 #tag2 #tag3 #tag4 #tag5" 형식으로 뉴스 내용과 관련된 키워드 5개 출력)
 '''
 
     try:
@@ -241,10 +242,22 @@ def save_post_and_generate_html(content):
     today = datetime.date.today().strftime("%Y-%m-%d")
     title = extract_title_from_md(content)
     cleaned = clean_filename(title)
+
+    hashtags_html = ""
+    hashtags_match = re.search(r'##HASHTAGS##: (.+)', content, re.MULTILINE)
+    if hashtags_match:
+        hashtags_string = hashtags_match.group(1).strip()
+        # Remove the hashtag line from the content before markdown conversion
+        content = re.sub(r'##HASHTAGS##: (.+)', '', content, flags=re.MULTILINE).strip()
+        
+        # Format hashtags for display
+        hashtags_html = f'<div class="hashtags">{hashtags_string}</div>'
+
     md_path = os.path.join(NEWS_POSTS_DIR, f"{today}-{cleaned}.md")
     with open(md_path, "w", encoding="utf-8") as f: f.write(content)
+    
     html_filename = f"{today}-{cleaned}.html"
-    generate_article_html(content, title, today, os.path.join(PUBLIC_DIR, html_filename))
+    generate_article_html(content, title, today, os.path.join(PUBLIC_DIR, html_filename), hashtags_html)
     return html_filename, title, today
 
 def generate_public_site():
