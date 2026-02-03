@@ -4,21 +4,30 @@ let currentLang = localStorage.getItem('lang') || 'ko';
 
 // 번역을 적용하는 함수
 function applyTranslations(lang) {
+    console.log(`[applyTranslations] Attempting to apply translations for language: ${lang}`);
     document.documentElement.lang = lang; // Set HTML lang attribute
 
     const elements = document.querySelectorAll('[data-i18n]');
+    console.log(`[applyTranslations] Found ${elements.length} elements with data-i18n.`);
     elements.forEach(element => {
         const key = element.getAttribute('data-i18n');
         if (translations[lang] && translations[lang][key]) {
             element.textContent = translations[lang][key];
+            console.log(`[applyTranslations] Translated key "${key}" for element:`, element);
+        } else {
+            console.warn(`[applyTranslations] No translation found for key "${key}" in language "${lang}". Element:`, element);
         }
     });
 
     const placeholders = document.querySelectorAll('[data-i18n-placeholder]');
+    console.log(`[applyTranslations] Found ${placeholders.length} elements with data-i18n-placeholder.`);
     placeholders.forEach(element => {
         const key = element.getAttribute('data-i18n-placeholder');
         if (translations[lang] && translations[lang][key]) {
             element.placeholder = translations[lang][key];
+            console.log(`[applyTranslations] Translated placeholder key "${key}" for element:`, element);
+        } else {
+            console.warn(`[applyTranslations] No placeholder translation found for key "${key}" in language "${lang}". Element:`, element);
         }
     });
 
@@ -27,6 +36,9 @@ function applyTranslations(lang) {
         const key = titleElement.getAttribute('data-i18n');
         if (translations[lang] && translations[lang][key]) {
             titleElement.textContent = translations[lang][key];
+            console.log(`[applyTranslations] Translated title key "${key}".`);
+        } else {
+            console.warn(`[applyTranslations] No title translation found for key "${key}" in language "${lang}".`);
         }
     }
 }

@@ -17,6 +17,44 @@ NEWS_POSTS_DIR = "posts" # Keep this for raw markdown files
 PROCESSED_ARTICLES_LOG = "processed_articles.log" # Log file for preventing duplicates
 ADSENSE_CLIENT_ID = "ca-pub-7263630893992216" # Google AdSense Client ID
 
+# Common script and style injections for all HTML files
+COMMON_HEAD_SCRIPTS = f"""
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    
+    <!-- crypto-js for password hashing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    
+    <!-- Firebase-config -->
+    <script src="firebase-config.js"></script>
+    
+    <script src="translations.js"></script>
+    <script src="common.js"></script>
+    <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "vb9q33ggpa");
+</script>
+"""
+
+COMMON_BODY_INJECTIONS = """
+    <div id="header-placeholder"></div>
+"""
+
+COMMON_FOOTER = """
+    <footer>
+        <p data-i18n="footer_copyright"></p>
+        <p>
+            <a href="about.html" data-i18n="about_us">회사 소개</a> |
+            <a href="contact.html" data-i18n="contact">문의</a> |
+            <a href="privacy-policy.html" data-i18n="privacy_policy">개인정보처리방침</a>
+        </p>
+    </footer>
+"""
+
 # --- Helper functions for SSG ---
 def extract_title_from_md(md_content):
     title_match = re.search(r'^#\s*(.+)', md_content, re.MULTILINE)
@@ -36,28 +74,16 @@ def generate_article_html(md_content, title, date_str, output_path):
     # Basic HTML template for an article page
     html_template = f"""
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{title} - 뉴스</title>
+    <title data-i18n="news_home">{title} - 뉴스</title>
     <link rel="stylesheet" href="../style.css"> <!-- Adjust path for CSS -->
-    <script src="../common.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={ADSENSE_CLIENT_ID}" crossorigin="anonymous"></script>
     <meta name="google-adsense-account" content="{ADSENSE_CLIENT_ID}">
 </head>
 <body>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){{dataLayer.push(arguments);}}
-      gtag('js', new Date());
-
-      gtag('config', 'G-TGD3WRNKPZ');
-    </script>
-
-    <div id="header-placeholder"></div>
     <main class="article-detail-main">
         <a href="../index.html" class="back-to-list-button">← 목록으로 돌아가기</a>
         <article class="news-article-container">
@@ -68,20 +94,14 @@ def generate_article_html(md_content, title, date_str, output_path):
             </div>
         </article>
     </main>
-    <footer>
-        <p>&copy; 2026 TrackingSA. All rights reserved.</p>
-        <p>
-            <a href="../about.html">회사 소개</a> |
-            <a href="../contact.html">문의</a> |
-            <a href="../privacy-policy.html">개인정보처리방침</a>
-        </p>
-    </footer>
 </body>
 </html>
     """
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(html_template)
+    # After writing the basic article HTML, process it for common elements
+    process_html_file_for_common_elements(output_path, is_article=True)
     print(f"📄 HTML 기사 생성 완료: {output_path}")
 
 def generate_index_html(articles_meta):
@@ -89,22 +109,7 @@ def generate_index_html(articles_meta):
     with open("index.html", "r", encoding="utf-8") as f:
         base_html = f.read()
 
-    # Inject AdSense tags into the <head>
-    adsense_head_tags = f"""
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={ADSENSE_CLIENT_ID}" crossorigin="anonymous"></script>
-    <meta name="google-adsense-account" content="{ADSENSE_CLIENT_ID}">
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){{dataLayer.push(arguments);}}
-      gtag('js', new Date());
-
-      gtag('config', 'G-TGD3WRNKPZ');
-    </script>
-</head>"""
-    base_html = base_html.replace("</head>", adsense_head_tags)
-
+    # news_list_items = ""
     news_list_items = ""
     if not articles_meta:
         news_list_items = "<p class='no-news-message'>아직 게시된 뉴스가 없습니다.</p>"
@@ -140,7 +145,61 @@ def generate_index_html(articles_meta):
     output_path = os.path.join(PUBLIC_DIR, "index.html")
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(updated_html)
+    # After writing the basic index HTML, process it for common elements
+    process_html_file_for_common_elements(output_path)
     print(f"🏠 인덱스 HTML 생성 완료: {output_path}")
+
+
+def process_html_file_for_common_elements(filepath, is_article=False):
+    """
+    Reads an HTML file, injects common scripts (translations, common.js, firebase etc.),
+    header placeholder, and ensures a translatable footer.
+    """
+    try:
+        with open(filepath, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        # 1. Ensure HTML lang attribute is present (or set to 'ko' by default)
+        if '<html lang=' not in content:
+            content = content.replace('<html', '<html lang="ko"', 1) # Default to ko
+
+        # 2. Clean up existing script/link tags that will be injected
+        # Remove Firebase, CryptoJS, firebase-config, translations, common.js, Clarity
+        content = re.sub(r'<script\s+(async\s+)?src="(https://www\.gstatic\.com/firebasejs/8\.10\.1/firebase-app\.js|https://www\.gstatic\.com/firebasejs/8\.10\.1/firebase-firestore\.js|https://cdnjs\.cloudflare\.com/ajax/libs/crypto-js/4\.1\.1/crypto-js\.min\.js|firebase-config\.js|translations\.js|common\.js)"></script>', '', content)
+        content = re.sub(r'<script\s+type="text/javascript">[\s\S]*?clarity\.ms/tag[\s\S]*?</script>', '', content)
+        # Remove default footer if it exists and replace it
+        content = re.sub(r'<footer>[\s\S]*?</footer>', '', content, flags=re.DOTALL)
+
+
+        # 3. Inject common head scripts (translations.js, common.js, firebase, clarity)
+        if is_article:
+            # Adjust paths for scripts for article pages (which are one level deeper from public/)
+            # This is a hacky way to adjust paths; a more robust solution would parse the HTML.
+            adjusted_common_head_scripts = COMMON_HEAD_SCRIPTS.replace('src="', 'src="../')
+            adjusted_common_head_scripts = adjusted_common_head_scripts.replace('href="', 'href="../') # For style.css
+            content = content.replace('</head>', f'{adjusted_common_head_scripts}\n</head>')
+        else:
+            content = content.replace('</head>', f'{COMMON_HEAD_SCRIPTS}\n</head>')
+
+        # 4. Inject header placeholder immediately after <body>
+        content = content.replace('<body>', f'<body>\n{COMMON_BODY_INJECTIONS}')
+
+        # 5. Inject translatable footer just before </body>
+        if is_article:
+            # Adjust paths for links in footer for article pages
+            adjusted_common_footer = COMMON_FOOTER.replace('href="', 'href="../')
+            content = content.replace('</body>', f'{adjusted_common_footer}\n</body>')
+        else:
+            content = content.replace('</body>', f'{COMMON_FOOTER}\n</body>')
+
+
+        with open(filepath, "w", encoding="utf-8") as f:
+            f.write(content)
+        print(f"🛠️ HTML 파일 처리 완료: {filepath}")
+
+    except Exception as e:
+        print(f"⚠️ HTML 파일 처리 중 오류 발생 '{filepath}': {e}")
+
 
 def copy_static_assets():
     """Copies static assets (CSS, JS, animal_face_test.html etc.) to public directory using shutil."""
@@ -151,6 +210,7 @@ def copy_static_assets():
     assets_to_copy = [
         "style.css",
         "common.js",
+        "translations.js", # ADDED THIS LINE
         "animal_face_test.html",
         "edit.html",
         "edit.js",
@@ -176,6 +236,9 @@ def copy_static_assets():
         elif os.path.isfile(src):
             shutil.copy2(src, dst)
             print(f"📄 파일 복사 완료: {src} -> {dst}")
+            # If the copied file is an HTML file, process it for common elements
+            if item.endswith('.html'):
+                process_html_file_for_common_elements(dst)
         else:
             print(f"⚠️ 경고: '{item}'을 찾을 수 없거나 복사할 수 없습니다.")
 

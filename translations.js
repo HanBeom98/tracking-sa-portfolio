@@ -64,7 +64,8 @@ const translations = {
         'register': '등록하기',
         'edit_post_title': '글 수정',
         'edit_post_h1': '게시물 수정',
-        'loading_post_info': '게시물 정보를 불러오는 중...'
+        'loading_post_info': '게시물 정보를 불러오는 중...',
+        'footer_copyright': '&copy; 2026 TrackingSA. 모든 권리 보유.'
     },
     'en': {
         'news_home': 'News Home',
@@ -131,6 +132,7 @@ const translations = {
         'register': 'Register',
         'edit_post_title': 'Edit Post',
         'edit_post_h1': 'Edit Post',
-        'loading_post_info': 'Loading post information...'
+        'loading_post_info': 'Loading post information...',
+        'footer_copyright': '&copy; 2026 TrackingSA. All rights reserved.'
     }
 };
