@@ -142,6 +142,8 @@ const translations = {
         'loading_post_info': 'Loading post information...', 
         'footer_copyright': '&copy; 2026 TrackingSA. All rights reserved.',
         'select_gender': 'Select Gender',
+        'gender_male': 'Male',
+        'gender_female': 'Female',
         'drag_drop_image': 'Drag & drop image here or click to upload',
         'analyzing_image': 'Analyzing image...', 
         'your_animal_face_is': 'Your animal face is:',
