@@ -67,6 +67,8 @@ const translations = {
         'loading_post_info': '게시물 정보를 불러오는 중...', 
         'footer_copyright': '&copy; 2026 TrackingSA. 모든 권리 보유.',
         'select_gender': '성별 선택',
+        'gender_male': '남성',
+        'gender_female': '여성',
         'drag_drop_image': '여기에 이미지를 드래그하거나 클릭하여 업로드',
         'analyzing_image': '이미지 분석 중...', 
         'your_animal_face_is': '당신의 동물상은:',
