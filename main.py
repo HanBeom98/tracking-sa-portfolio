@@ -9,6 +9,7 @@ import markdown
 import shutil 
 import hashlib 
 from google import genai
+import time
 
 load_dotenv()
 
@@ -35,7 +36,7 @@ COMMON_HEAD_SCRIPTS = """
         y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
     }})(window, document, "clarity", "script", "vb9q33ggpa");
     </script>
-"""
+"
 
 COMMON_BODY_INJECTIONS = """
 <header>
@@ -54,7 +55,7 @@ COMMON_BODY_INJECTIONS = """
         <div id="language-switcher"></div>
     </div>
 </header>
-"""
+"
 
 COMMON_FOOTER = """
     <footer>
@@ -65,7 +66,7 @@ COMMON_FOOTER = """
             <a href="/privacy-policy.html" data-i18n="privacy_policy">개인정보처리방침</a>
         </p>
     </footer>
-"""
+"
 
 # --- Helper functions ---
 def extract_title_from_md(md_content):
@@ -99,7 +100,7 @@ def generate_article_html(md_content, title, date_str, output_path):
     </main>
 </body>
 </html>
-    """
+    "
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(html_template)
@@ -175,14 +176,14 @@ def is_duplicate_article(article_id):
 def fetch_latest_news_from_feed(rss_url):
     print(f"📡 {rss_url}에서 최신 뉴스 수집 중...")
     feed = feedparser.parse(rss_url)
-    return feed.entries[0] if feed.entries else None
+    return feed.entries[:3] if feed.entries else None
 
 def generate_ai_content(api_key, news_title, news_summary):
-    client = genai.Client(api_key=api_key)
+    client = genai.Client(api_key=api_key, http_options={'api_version': 'v1'})
     prompt = f'뉴스 제목: {news_title}\n뉴스 요약: {news_summary}\n\n한국어 마크다운 뉴스 글 작성\n- # 제목\n- 본문\n- 수익화 아이디어 3개'
     try:
         response = client.models.generate_content(
-            model="gemini-2.0-flash",
+            model='gemini-1.5-flash',
             contents=prompt
         )
         return response.text
@@ -214,7 +215,7 @@ def generate_public_site():
                 date = re.match(r'(\d{4}-\d{2}-\d{2})', fn).group(1)
                 url = f"{date}-{clean_filename(title)}.html"
                 articles_meta.append({'title': title, 'date': date, 'url': url})
-                generate_article_html(content, title, date, os.path.join(PUBLIC_DIR, url))
+                generate_article_html(content, title, date, os.path.join(PUBLIC_DIR, url)))
     generate_index_html(articles_meta)
 
 def main():
@@ -230,17 +231,19 @@ def main():
     ]
 
     for rss_url in rss_urls:
-        news = fetch_latest_news_from_feed(rss_url)
-        if news:
-            article_id = clean_filename(news.title)
-            if not is_duplicate_article(article_id):
-                print(f"📰 새 뉴스 발견: {news.title}")
-                content = generate_ai_content(api_key, news.title, news.summary)
-                if content:
-                    save_post_and_generate_html(content)
-                    record_processed_article(article_id)
-            else:
-                print(f"⚠️ 중복 기사 발견: '{news.title}'. 건너뜁니다.")
+        news_items = fetch_latest_news_from_feed(rss_url)
+        if news_items:
+            for news in news_items:
+                article_id = clean_filename(news.title)
+                if not is_duplicate_article(article_id):
+                    print(f"📰 새 뉴스 발견: {news.title}")
+                    content = generate_ai_content(api_key, news.title, news.summary)
+                    if content:
+                        save_post_and_generate_html(content)
+                        record_processed_article(article_id)
+                else:
+                    print(f"⚠️ 중복 기사 발견: '{news.title}'. 건너뜁니다.")
+            time.sleep(10) # Add delay between processing each RSS feed
         else:
             print(f"➡️ {rss_url}에서 새로운 뉴스를 찾지 못했습니다.")
     
