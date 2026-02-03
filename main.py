@@ -182,7 +182,9 @@ def generate_ai_content(api_key, news_title, news_summary):
     try:
         res = requests.post(url, json=payload).json()
         return res['candidates'][0]['content']['parts'][0]['text']
-    except: return None
+    except Exception as e:
+        print(f"❌ AI 콘텐츠 생성 중 오류 발생: {e}")
+        return None
 
 def save_post_and_generate_html(content):
     os.makedirs(NEWS_POSTS_DIR, exist_ok=True)
