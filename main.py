@@ -177,7 +177,7 @@ def fetch_latest_news_from_feed(rss_url):
     return feed.entries[0] if feed.entries else None
 
 def generate_ai_content(api_key, news_title, news_summary):
-    url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={api_key}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={api_key}"
     payload = {"contents": [{"parts": [{"text": f"뉴스 제목: {news_title}\n뉴스 요약: {news_summary}\n\n한국어 마크다운 포스팅 작성. 제목, 본문, 수익화 아이디어 3개 포함."}]}]}
     try:
         res = requests.post(url, json=payload).json()
