@@ -18,8 +18,7 @@ PROCESSED_ARTICLES_LOG = "processed_articles.log" # Log file for preventing dupl
 ADSENSE_CLIENT_ID = "ca-pub-7263630893992216" # Google AdSense Client ID
 
 # Common script and style injections for all HTML files
-COMMON_HEAD_SCRIPTS = f"
-    <!-- Firebase -->
+COMMON_HEAD_SCRIPTS = """    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     
@@ -38,7 +37,7 @@ COMMON_HEAD_SCRIPTS = f"
         y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
     })(window, document, "clarity", "script", "vb9q33ggpa");
 </script>
-"
+"""
 
 COMMON_BODY_INJECTIONS = ""
     <header>
@@ -57,7 +56,7 @@ COMMON_BODY_INJECTIONS = ""
         <div id="language-switcher"></div>
     </div>
 </header>
-"
+"""
 
 COMMON_FOOTER = ""
     <footer>
@@ -68,7 +67,7 @@ COMMON_FOOTER = ""
             <a href="privacy-policy.html" data-i18n="privacy_policy">개인정보처리방침</a>
         </p>
     </footer>
-"
+"""
 
 # --- Helper functions for SSG ---
 def extract_title_from_md(md_content):
