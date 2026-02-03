@@ -39,7 +39,7 @@ COMMON_HEAD_SCRIPTS = """    <!-- Firebase -->
 </script>
 """
 
-COMMON_BODY_INJECTIONS = ""
+COMMON_BODY_INJECTIONS = """
     <header>
     <nav>
         <ul>
@@ -56,9 +56,9 @@ COMMON_BODY_INJECTIONS = ""
         <div id="language-switcher"></div>
     </div>
 </header>
-"""
+"""""
 
-COMMON_FOOTER = ""
+COMMON_FOOTER = """
     <footer>
         <p data-i18n="footer_copyright"></p>
         <p>
@@ -129,7 +129,7 @@ def generate_index_html(articles_meta):
         news_list_items = "<p class='no-news-message'>아직 게시된 뉴스가 없습니다.</p>"
     else:
         for article in articles_meta:
-            news_list_items += f"
+            news_list_items += f"""
             <article class="news-card">
                 <h2 class="news-card-title"><a href="{article['url']}" class="news-card-link">{article['title']}</a></h2>
                 <p class="news-card-date">{article['date']}</p>
@@ -138,7 +138,7 @@ def generate_index_html(articles_meta):
                     <!-- Excerpt can be extracted from markdown content if desired -->
                 </div>
             </article>
-            "
+            """
         news_list_items = f'<div class="news-grid">{news_list_items}</div>'
 
 
@@ -146,12 +146,12 @@ def generate_index_html(articles_meta):
     # Look for <!-- News content will be injected here by the Python script -->
     updated_html = base_html.replace(
         "<!-- News content will be injected here by the Python script -->",
-        f"
+        f"""
         <section class="news-section-main">
             <h1 class="section-title">최신 뉴스</h1>
             {news_list_items}
         </section>
-        "
+        """
     )
     
     # Ensure public directory exists
