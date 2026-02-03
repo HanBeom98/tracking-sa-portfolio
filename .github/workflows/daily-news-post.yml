@@ -25,10 +25,25 @@ jobs:
         run: |
           pip install feedparser python-dotenv requests markdown
 
+      - name: Show posts directory before script runs
+        run: |
+          echo "--- Contents of posts/ before running main.py ---"
+          ls -R posts/ || echo "posts/ directory does not exist yet."
+
       - name: Run Script
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python main.py
+
+      - name: Show posts directory after script runs
+        run: |
+          echo "--- Contents of posts/ after running main.py ---"
+          ls -R posts/ || echo "posts/ directory not found."
+
+      - name: Check git status
+        run: |
+          echo "--- Git status after running main.py ---"
+          git status
 
       - name: Commit and Push changes
         run: |
