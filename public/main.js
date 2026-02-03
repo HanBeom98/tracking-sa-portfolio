@@ -1,4 +1,4 @@
-const URL = "https://teachablemachine.withgoogle.com/models/5FtcgpOmH/";
+const URL = "https://teachablemachine.withgoogle.com/models/Jtg0ClWaE/";
 
 let model, labelContainer, maxPredictions;
 
