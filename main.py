@@ -179,7 +179,7 @@ def process_html_file_for_common_elements(filepath, is_article=False):
 
         # 2. Clean up existing script/link tags that will be injected
         # Remove Firebase, CryptoJS, firebase-config, translations, common.js, Clarity
-        content = re.sub(r'<script\s+[^>]*?src="([^"]*?firebase[^"]*?|[^>]*?crypto-js[^"]*?|firebase-config\.js|translations\.js|common\.js)"[^>]*?>\s*</script>', '', content, flags=re.DOTALL)
+        content = re.sub(r'<!--.*?-->\s*<script.*?(firebase|crypto-js|firebase-config\.js|translations\.js|common\.js).*?</script>', '', content, flags=re.DOTALL)
         content = re.sub(r'<script\s+type="text/javascript">[\s\S]*?clarity\.ms/tag[\s\S]*?</script>', '', content, flags=re.DOTALL)
         # Remove default footer if it exists and replace it
         content = re.sub(r'<footer>[\s\S]*?</footer>', '', content, flags=re.DOTALL)
