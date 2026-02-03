@@ -4,6 +4,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
+app.log
+cron.log
+processed_articles.log
 
 # Firebase
 .firebase
@@ -21,6 +24,7 @@ public/
 # Dependencies
 node_modules
 .venv/
+myenv/
 __pycache__/
 
 # Misc
