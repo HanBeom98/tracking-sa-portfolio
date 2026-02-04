@@ -248,43 +248,45 @@ def _extract_and_format_hashtags(original_content, log_prefix=""):
     modified_content = original_content
     found_hashtags = [] # Collect all found hashtags
 
-    # --- Attempt to find a flexible hashtag header ---
-    # This regex is made more flexible for the prefix and captures the rest of the line
+    # --- Attempt to find a flexible hashtag header (e.g., ##HASHTAGS##: #tag1 #tag2) ---
     header_pattern = re.compile(r'(##)?(HASHTAGS|해시태그)##?:\s*(.+)', re.MULTILINE | re.IGNORECASE)
     header_match = header_pattern.search(modified_content)
 
     if header_match:
         hashtags_string_from_header = header_match.group(3).strip()
         if hashtags_string_from_header:
-            # Extract individual hashtags from the header string
-            found_hashtags.extend(re.findall(r'#(\w+)', hashtags_string_from_header))
+            # Improved regex to find #tags, ensuring it's not part of a markdown header like ###
+            found_hashtags.extend(re.findall(r'(?<!#|\w)#([가-힣\w]+)\b', hashtags_string_from_header))
             # Remove the matched header line from the content
             modified_content = header_pattern.sub('', modified_content, 1).strip()
             print(f"{log_prefix}✅ 해시태그 추출 성공 (헤더): {', '.join(found_hashtags)}")
         else:
-            print(f"{log_prefix}⚠️ 해시태그 헤더는 찾았으나, 내용이 없습니다. 본문 마지막 10%에서 추출 시도합니다.")
+            print(f"{log_prefix}⚠️ 해시태그 헤더는 찾았으나, 내용이 없습니다. 본문 후반 50%에서 추출 시도합니다.")
     
-    # --- Stronger Fallback: Extract from the last 10% of the content ---
-    # This is always attempted if header doesn't yield hashtags, or if header was empty
+    # --- Fallback: Extract from the latter 50% of the content if no hashtags found yet ---
     if not found_hashtags: # Check if found_hashtags is still empty
         content_length = len(original_content)
-        # Calculate the start index for the last 10% of the content
-        last_10_percent_start = int(content_length * 0.9)
-        last_10_percent_content = original_content[last_10_percent_start:]
+        # Calculate the start index for the latter 50% of the content
+        # Ensure it's at least 0 to prevent negative slice start if content is very short
+        latter_50_percent_start = max(0, int(content_length * 0.5)) 
+        latter_50_percent_content = original_content[latter_50_percent_start:]
         
-        fallback_hashtags_from_body = re.findall(r'#(\w+)', last_10_percent_content)
+        # Improved regex for finding hashtags in the content
+        fallback_hashtags_from_body = re.findall(r'(?<!#|\w)#([가-힣\w]+)\b', latter_50_percent_content)
         if fallback_hashtags_from_body:
             found_hashtags.extend(fallback_hashtags_from_body)
-            print(f"{log_prefix}✅ 해시태그 추출 성공 (본문 마지막 10% 폴백): {', '.join(found_hashtags)}")
+            print(f"{log_prefix}✅ 해시태그 추출 성공 (본문 후반 50% 폴백): {', '.join(found_hashtags)}")
         else:
-            print(f"{log_prefix}❌ 해시태그 추출 실패: 본문 마지막 10%에서도 찾지 못했습니다.")
+            print(f"{log_prefix}❌ 해시태그 추출 실패: 본문 후반 50%에서도 찾지 못했습니다.")
 
     # --- Final Formatting ---
     if found_hashtags:
-        # Deduplicate and limit to 5, then format
+        # Deduplicate and limit to 5, then format into the new HTML structure
         unique_hashtags = list(dict.fromkeys(found_hashtags)) # Remove duplicates while preserving order
-        final_hashtags_string = " ".join([f"#{tag}" for tag in unique_hashtags[:5]])
-        hashtags_html = f'<div class="hashtags">{final_hashtags_string}</div>'
+        
+        # Format each hashtag into a <span> and wrap them in a <div>
+        hashtags_html_spans = "".join([f'<span class="hashtag">#{tag}</span>' for tag in unique_hashtags[:5]])
+        hashtags_html = f'<div class="hashtag-container">{hashtags_html_spans}</div>'
     else:
         # If no hashtags found at all, return empty HTML to hide the area
         print(f"{log_prefix}❌ 최종 해시태그 없음. 영역을 숨깁니다.")
