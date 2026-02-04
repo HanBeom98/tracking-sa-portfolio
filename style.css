@@ -19,7 +19,7 @@ header {
     flex-wrap: wrap; /* Allow wrapping on smaller screens */
 }
 
-header .site-title {
+header .site-title { /* Not used in current HTML but good to keep if it's a general style */
     font-size: 1.8em;
     font-weight: bold;
     color: white;
@@ -74,20 +74,6 @@ footer {
     gap: 10px;
     align-items: center;
     margin-left: auto; /* Push to the right */
-}
-
-#color-change {
-    background-color: #6c757d; /* Gray */
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-#color-change:hover {
-    background-color: #5a6268;
 }
 
 .lang-button {
@@ -565,7 +551,6 @@ footer {
     padding: 10px 20px;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 0.95em;
     transition: background-color 0.3s ease, transform 0.2s ease;
 }
 

@@ -33,7 +33,9 @@ The Tracking-SA project is a framework-less web application (HTML, CSS, JavaScri
 
 ### 2. Navigation Update: `index.html`
 
-*   **Header Structure Integrated**: The `index.html` file now contains only one `<header>` element with a green background (`#22c55e`). This header includes the main navigation bar and the utility buttons (theme change and language selection).
+*   **Header Structure Integrated**: The `index.html` file now contains only one `<header>` element with a green background (`#22c55e`). This header includes the main navigation bar and the utility buttons (only language selection remains).
+*   **"뉴스 홈" Removed**: The "뉴스 홈" link has been removed from the navigation.
+*   **"테스트" Dropdown Position**: The "테스트" dropdown menu now effectively replaces the original "동물상 테스트" button's position as the primary navigation item.
 *   **Dropdown Menu Implementation**:
     *   The navigation menu now includes a "테스트" (Test) dropdown item.
     *   This dropdown, on hover, reveals "동물상 테스트" (Animal Face Test) and "AI 성향 테스트" (AI Tendency Test) as sub-menu links.
@@ -70,6 +72,7 @@ All requested changes have been implemented in the following files:
     *   Restore core styling for the entire site (header, layout, news cards, dark mode).
     *   Correctly integrate styles for `ai-test.html` and the `.hero-banner`.
     *   Set header background to green (`#22c55e`), with horizontal menu and white text.
+    *   Remove all CSS associated with the deleted `#color-change` button.
     *   Configure main container for `max-width: 1200px` and `margin: auto`.
     *   Style news cards with white background, soft shadow, rounded corners, and grid layout.
     *   Define dark mode styles for body background and card colors.
@@ -78,12 +81,14 @@ All requested changes have been implemented in the following files:
     *   Removed any potential redundant header-related CSS, ensuring a clean and unified stylesheet.
 4.  **`index.html`**:
     *   **Consolidated to a single `<header>`** element with the main navigation bar and utility buttons.
-    *   The new "테스트" dropdown menu structure has been implemented.
+    *   Removed the "뉴스 홈" link.
+    *   Removed the `#color-change` moon icon button.
+    *   The new "테스트" dropdown menu structure has been implemented in the correct position.
     *   The hero banner section is correctly placed and styled, with its button linking to `ai-test.html`.
 5.  **`translations.js`**: New translation keys for the AI test and hero banner content have been added.
 
 **Final Check Summary:**
-*   **Home screen cleanliness:** `index.html` displays a single menu bar, the promotion banner, and the news list cleanly.
+*   **Home screen cleanliness:** `index.html` displays a single menu bar (now with no "뉴스 홈" and "테스트" dropdown in place of "동물상 테스트"), the promotion banner, and the news list cleanly.
 *   **'테스트' menu dropdown:** Hovering over '테스트' correctly displays the sub-menus ('동물상 테스트', 'AI 성향 테스트').
-*   **'테마 변경' and language buttons:** These are correctly placed at the right end of the header and remain functional.
+*   **'테마 변경' and language buttons:** Only the language selection button remains on the right end of the header and remains functional. The theme change button has been removed.
 *   **'테스트 시작하기' redirection:** Clicking the button on the hero banner successfully navigates to the independent `ai-test.html` page where the quiz resides.
