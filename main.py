@@ -224,7 +224,7 @@ def generate_ai_content(api_key, news_title, news_summary):
 - # 제목
 - 본문
 - 수익화 아이디어 3개
-- 해시태그: (항상 "##HASHTAGS##: #tag1 #tag2 #tag3 #tag4 #tag5" 형식으로 뉴스 내용과 관련된 키워드 5개 출력)
+- 해시태그: (해시태그 섹션을 작성할 때 반드시, 절대로 생략하지 말고 "##HASHTAGS##: #키워드1 #키워드2 #키워드3 #키워드4 #키워드5" 형식으로 뉴스 내용과 관련된 키워드 5개 출력. 출력 예시: ##HASHTAGS##: #기술 #혁신 #인공지능 #미래 #트렌드)
 '''
 
     try:
@@ -253,7 +253,13 @@ def save_post_and_generate_html(content):
         # Format hashtags for display
         hashtags_html = f'<div class="hashtags">{hashtags_string}</div>'
     else:
-        hashtags_html = '<div class="hashtags">해시태그 없음</div>' # Debugging line
+        # Fallback: Search for # prefixed words in the content
+        fallback_hashtags = re.findall(r'#(\w+)', content)
+        if fallback_hashtags:
+            hashtags_string = " ".join([f"#{tag}" for tag in fallback_hashtags[:5]]) # Take up to 5
+            hashtags_html = f'<div class="hashtags">{hashtags_string}</div>'
+        else:
+            hashtags_html = '<div class="hashtags">해시태그 없음</div>' # Debugging line
 
     md_path = os.path.join(NEWS_POSTS_DIR, f"{today}-{cleaned}.md")
     with open(md_path, "w", encoding="utf-8") as f: f.write(content)
