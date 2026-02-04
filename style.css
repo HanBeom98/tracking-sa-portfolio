@@ -16,7 +16,10 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    /* Removed flex-wrap: wrap; to prevent menu from splitting into two lines */
+    position: sticky; /* Make header sticky */
+    top: 0; /* Stick to the top */
+    z-index: 1000; /* Ensure header stays above other content */
 }
 
 header .site-title { /* Not used in current HTML but good to keep if it's a general style */
@@ -32,9 +35,9 @@ nav ul {
     padding: 0;
     margin: 0;
     display: flex;
+    /* Removed flex-wrap: wrap; to prevent menu from splitting into two lines */
     justify-content: center;
     gap: 20px;
-    flex-wrap: wrap; /* Allow wrapping on smaller screens */
 }
 
 nav a {
@@ -163,47 +166,6 @@ footer {
     flex-grow: 1; /* Makes excerpt take available space */
 }
 
-/* Hero Banner Styling */
-.hero-banner {
-    background: linear-gradient(to right, #f0fdf4, #e0ffe0); /* Very light green gradient */
-    color: #155724; /* Darker green for text */
-    padding: 30px 20px;
-    margin: 20px auto;
-    max-width: 1200px; /* Constrain width to match main */
-    border-radius: 15px; /* Rounded corners */
-    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1); /* Soft shadow */
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-.hero-banner h2 {
-    font-size: 2.5em;
-    margin-bottom: 10px;
-    line-height: 1.2;
-}
-
-.hero-banner p {
-    font-size: 1.2em;
-    margin-bottom: 20px;
-}
-
-.hero-banner .action-button {
-    background-color: #22c55e; /* Main green color */
-    color: white;
-    padding: 12px 30px;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: bold;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.hero-banner .action-button:hover {
-    background-color: #1eaf53; /* Slightly darker green on hover */
-    transform: translateY(-2px);
-}
 
 /* AI Test Page Styling (ai-test.html) */
 .ai-test-page {

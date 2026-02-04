@@ -73,9 +73,10 @@ All requested changes have been implemented in the following files:
     *   Style news cards with white background, soft shadow, rounded corners, and grid layout.
     *   Define dark mode styles for body background and card colors.
     *   **Removed `.hero-banner` related CSS.**
-    *   Applied `position: sticky; top: 0;` to the main `header` for a fixed-on-scroll effect.
+    *   **Applied `position: sticky; top: 0; z-index: 1000;` to the main `header` for a fixed-on-scroll effect.**
+    *   Removed `flex-wrap: wrap;` from `header` and `nav ul` to prevent the menu from splitting into two lines.
     *   Added robust styles for the new dropdown menu (hide by default, show on hover, white background, black text, soft shadow, correct positioning).
-    *   Removed any potential redundant header-related CSS, ensuring a clean and unified stylesheet and addressing the "two-tier" visual issue.
+    *   Removed any potential redundant header-related CSS, ensuring a clean and unified stylesheet.
 4.  **`index.html`**:
     *   Consolidated to a single `<header>` element with the main navigation bar and utility buttons (only language switcher remains).
     *   Removed the "뉴스 홈" link.
