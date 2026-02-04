@@ -1,0 +1,265 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="news_home">뉴스 홈</title>
+    
+    <!-- Google tag (gtag.js) -->
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    
+    <link rel="stylesheet" href="/style.css">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <script src="/firebase-config.js"></script>
+    <script src="/translations.js"></script>
+    <script src="/common.js"></script>
+    
+    <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){{
+        c[a]=c[a]||function(){{(c[a].q=c[a].q||[]).push(arguments)}};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    }})(window, document, "clarity", "script", "vb9q33ggpa");
+    </script>
+
+</head>
+<body>
+
+<header>
+    <nav>
+        <ul>
+            <li><a href="/index.html" data-i18n="news_home">홈</a></li>
+            <li class="dropdown">
+                <a href="#" class="dropbtn">테스트</a>
+                <div class="dropdown-content">
+                    <a href="/animal_face_test.html" data-i18n="animal_face_test">동물상 테스트</a>
+                    <a href="/ai-test.html" data-i18n="ai_tendency_test">AI 성향 테스트</a>
+                </div>
+            </li>
+            <li><a href="/inquiry.html" data-i18n="partnership_inquiry">파트너십 문의</a></li>
+            <li><a href="/about.html" data-i18n="about_us">회사 소개</a></li>
+            <li><a href="/contact.html" data-i18n="contact">문의</a></li>
+            <li><a href="/privacy-policy.html" data-i18n="privacy_policy">개인정보처리방침</a></li>
+        </ul>
+    </nav>
+    <div class="utility-buttons">
+        <div id="language-switcher"></div>
+    </div>
+</header>
+
+    
+
+
+
+
+    <main>
+        <section class="news-section-main"><h1 class="section-title">최신 뉴스</h1><div class="news-grid">
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-04-포지트론-23억-달러-시리즈-b-투자-유치-엔비디아-ai-칩에-도전.html" class="news-card-link">포지트론, 2.3억 달러 시리즈 B 투자 유치… 엔비디아 AI 칩에 도전</a></h2>
+                <p class="news-card-date">2026-02-04</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-04-틱톡처럼-즐기는-미니-앱-플랫폼-gizmo-나만의-바이브-코딩-앱-만들고-공유하는-방법.html" class="news-card-link">틱톡처럼 즐기는 미니 앱 플랫폼 'Gizmo', 나만의 바이브 코딩 앱 만들고 공유하는 방법</a></h2>
+                <p class="news-card-date">2026-02-04</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-04-인텔-엔비디아가-지배하는-gpu-시장에-도전.html" class="news-card-link">인텔, 엔비디아가 지배하는 GPU 시장에 도전</a></h2>
+                <p class="news-card-date">2026-02-04</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-04-인텔-엔비디아-독점-gpu-시장에-도전장을-내밀다.html" class="news-card-link">인텔, 엔비디아 독점 GPU 시장에 도전장을 내밀다</a></h2>
+                <p class="news-card-date">2026-02-04</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-04-인텔-엔비디아-독점-gpu-시장-도전-게이밍-pc-조립-시-cpu-gpu-조합-추천-및-성능-분석-가이드.html" class="news-card-link">인텔, 엔비디아 독점 GPU 시장 도전! 게이밍 PC 조립 시 CPU-GPU 조합 추천 및 성능 분석 가이드</a></h2>
+                <p class="news-card-date">2026-02-04</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-04-인도-바라하-글로벌-사우스-탄소-제거-확대를-위해-2천만-달러-투자-유치.html" class="news-card-link">인도 바라하, 글로벌 사우스 탄소 제거 확대를 위해 2천만 달러 투자 유치</a></h2>
+                <p class="news-card-date">2026-02-04</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-04-에프스타인-연루설-도는-장수-전문가-피터-아티아-데이비드-프로틴-떠나자신의-스타트업은-노코멘트.html" class="news-card-link">에프스타인 연루설 도는 장수 전문가 피터 아티아, 데이비드 프로틴 떠나...자신의 스타트업은 '노코멘트'</a></h2>
+                <p class="news-card-date">2026-02-04</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-04-에프스타인-연루설-도는-수명-연장-전문가-피터-아티아-데이비드-프로테인과-결별-자신의-스타트업은-노코멘트.html" class="news-card-link">에프스타인 연루설 도는 수명 연장 전문가 피터 아티아, 데이비드 프로테인과 결별, 자신의 스타트업은 '노코멘트'</a></h2>
+                <p class="news-card-date">2026-02-04</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-04-어도비-애니메이트-ai-집중-위해-서비스-종료-발표-2026년-3월-1일.html" class="news-card-link">어도비 애니메이트, AI 집중 위해 서비스 종료 발표 (2026년 3월 1일)</a></h2>
+                <p class="news-card-date">2026-02-04</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-04-아마존-영화tv-제작-ai-툴-테스트-시작-영화-제작-비용-절감-및-효율성-극대화-방법은.html" class="news-card-link">아마존, 영화/TV 제작 AI 툴 테스트 시작! 영화 제작 비용 절감 및 효율성 극대화 방법은?</a></h2>
+                <p class="news-card-date">2026-02-04</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-04-미니애폴리스-기술-커뮤니티-긴장되고-어려운-시기에도-굳건히-버텨.html" class="news-card-link"># 미니애폴리스 기술 커뮤니티, '긴장되고 어려운 시기'에도 굳건히 버텨</a></h2>
+                <p class="news-card-date">2026-02-04</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-04-루나-에너지-2억-3200만-달러-투자-유치-가정용-배터리로-전력망-안정화-우리-집도-참여-가능할까-투자-방법-장단점-분석.html" class="news-card-link">루나 에너지, 2억 3200만 달러 투자 유치! 가정용 배터리로 전력망 안정화, 우리 집도 참여 가능할까? (투자 방법 & 장단점 분석)</a></h2>
+                <p class="news-card-date">2026-02-04</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-04-xcode-openai-및-anthropic-통합으로-에이전트-코딩-시대-개막.html" class="news-card-link">Xcode, OpenAI 및 Anthropic 통합으로 에이전트 코딩 시대 개막</a></h2>
+                <p class="news-card-date">2026-02-04</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-04-snowflake-openai와의-계약이-기업-ai-경쟁에-시사하는-점.html" class="news-card-link"># Snowflake, OpenAI와의 계약이 기업 AI 경쟁에 시사하는 점</a></h2>
+                <p class="news-card-date">2026-02-04</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-04-lotus-health-무료-ai-의사로-3500만-달러-투자-유치.html" class="news-card-link">Lotus Health, 무료 AI 의사로 3500만 달러 투자 유치</a></h2>
+                <p class="news-card-date">2026-02-04</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-04-fibr-ai-마케팅-에이전시-없이-웹사이트-개인화-accel-투자-배경-및-기업-맞춤형-ai-에이전트-도입-효과-분석.html" class="news-card-link">Fibr AI, 마케팅 에이전시 없이 웹사이트 개인화? Accel 투자 배경 및 기업 맞춤형 AI 에이전트 도입 효과 분석</a></h2>
+                <p class="news-card-date">2026-02-04</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-04-ai-sre-resolve-ai-1억-2500만-달러-투자-유치-성공-유니콘-기업-등극-ai-기반-사이트-안정성-엔지니어링-솔루션-개발자-업무-효율-극대화-방법은.html" class="news-card-link">AI SRE Resolve AI, 1억 2500만 달러 투자 유치 성공, 유니콘 기업 등극! - AI 기반 사이트 안정성 엔지니어링 솔루션, 개발자 업무 효율 극대화 방법은?</a></h2>
+                <p class="news-card-date">2026-02-04</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-04-adobe-animate-서비스-종료-철회-유지보수-모드로-전환-기존-사용자들은-안도-대체재-찾아야-할까-향후-업데이트-방향은.html" class="news-card-link">Adobe Animate 서비스 종료 철회! 유지보수 모드로 전환, 기존 사용자들은 안도! 대체재 찾아야 할까? 향후 업데이트 방향은?</a></h2>
+                <p class="news-card-date">2026-02-04</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-04-adobe-animate-ai-집중-위해-서비스-종료-결정.html" class="news-card-link"># Adobe Animate, AI 집중 위해 서비스 종료 결정</a></h2>
+                <p class="news-card-date">2026-02-04</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-04-accel-fibr-ai에-두-배로-투자-에이전트가-정적-웹사이트를-일대일-경험으로-전환.html" class="news-card-link">Accel, Fibr AI에 두 배로 투자: 에이전트가 정적 웹사이트를 일대일 경험으로 전환</a></h2>
+                <p class="news-card-date">2026-02-04</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-03-어도비-애니메이트-ai-집중-위해-서비스-종료-결정.html" class="news-card-link"># 어도비 애니메이트, AI 집중 위해 서비스 종료 결정</a></h2>
+                <p class="news-card-date">2026-02-03</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-03-미니애폴리스-기술-커뮤니티-긴장되고-어려운-시기-속에서도-굳건히-버텨.html" class="news-card-link"># 미니애폴리스 기술 커뮤니티, '긴장되고 어려운 시기' 속에서도 굳건히 버텨</a></h2>
+                <p class="news-card-date">2026-02-03</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-03-yc-스타트업-스테이블-코인으로-투자금-수령-가능.html" class="news-card-link"># YC 스타트업, 스테이블 코인으로 투자금 수령 가능!</a></h2>
+                <p class="news-card-date">2026-02-03</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-03-xcode-에이전트-코딩-시대로-openai-anthropic-통합-강화.html" class="news-card-link"># Xcode, 에이전트 코딩 시대로! OpenAI & Anthropic 통합 강화</a></h2>
+                <p class="news-card-date">2026-02-03</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-03-xcode-263-anthropic과-openai의-agentic-coding-기능으로-개발-혁신을-예고.html" class="news-card-link"># Xcode 26.3, Anthropic과 OpenAI의 Agentic Coding 기능으로 개발 혁신을 예고</a></h2>
+                <p class="news-card-date">2026-02-03</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-03-techcrunch-startup-battlefield-200-2026년-계획-발표.html" class="news-card-link"># TechCrunch Startup Battlefield 200, 2026년 계획 발표!</a></h2>
+                <p class="news-card-date">2026-02-03</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-03-skyryse-3억-달러-추가-투자-유치-헬리콥터-조종을-더욱-쉽고-안전하게.html" class="news-card-link"># Skyryse, 3억 달러 추가 투자 유치! 헬리콥터 조종을 더욱 쉽고 안전하게</a></h2>
+                <p class="news-card-date">2026-02-03</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-03-lotus-health-무료-ai-의사-서비스-위해-3500만-달러-투자-유치.html" class="news-card-link"># Lotus Health, 무료 AI 의사 서비스 위해 3500만 달러 투자 유치</a></h2>
+                <p class="news-card-date">2026-02-03</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-03-intel-nvidia-독점-gpu-시장에-도전장을-내밀다.html" class="news-card-link"># Intel, Nvidia 독점 GPU 시장에 도전장을 내밀다</a></h2>
+                <p class="news-card-date">2026-02-03</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-03-fitbit-창업자-가족-건강-모니터링-ai-플랫폼-luffu-출시.html" class="news-card-link"># Fitbit 창업자, 가족 건강 모니터링 AI 플랫폼 'Luffu' 출시</a></h2>
+                <p class="news-card-date">2026-02-03</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-02-일론-머스크의-우주-야심-스페이스x-xai-인수-합병으로-우주-데이터-센터-시대-연다.html" class="news-card-link"># 🚀 일론 머스크의 우주 야심: 스페이스X, xAI 인수 합병으로 '우주 데이터 센터' 시대 연다</a></h2>
+                <p class="news-card-date">2026-02-02</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-02-에이전트-코딩의-새-지평-openai-강력한-macos-앱-출시-codex-기반.html" class="news-card-link"># 🤖 에이전트 코딩의 새 지평! OpenAI, 강력한 macOS 앱 출시 (Codex 기반)</a></h2>
+                <p class="news-card-date">2026-02-02</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-02-스노우플레이크의-멀티-벤더-전략-엔터프라이즈-ai-전쟁에서-살아남는-법.html" class="news-card-link">스노우플레이크의 '멀티 벤더' 전략: 엔터프라이즈 AI 전쟁에서 살아남는 법</a></h2>
+                <p class="news-card-date">2026-02-02</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-02-링ring-카메라-없어도-실종견-찾는다-ring-수색대search-party-기능-미국-전역-개방.html" class="news-card-link">링(Ring) 카메라 없어도 실종견 찾는다! Ring, '수색대(Search Party)' 기능 미국 전역 개방</a></h2>
+                <p class="news-card-date">2026-02-02</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-02-뉴스-요약-firefox-생성형-ai-기능-차단-옵션-제공-예정.html" class="news-card-link"># 📰 뉴스 요약: Firefox, 생성형 AI 기능 차단 옵션 제공 예정</a></h2>
+                <p class="news-card-date">2026-02-02</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-02-강아지를-잃어버렸다면-링ring-비非카메라-사용자에게도-수색대search-party-기능-전면-개방.html" class="news-card-link">🚨강아지를 잃어버렸다면? 링(Ring), 비(非)카메라 사용자에게도 '수색대(Search Party)' 기능 전면 개방!</a></h2>
+                <p class="news-card-date">2026-02-02</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-02-링ring-이제-카메라-없어도-실종-반려견-찾기-서치-파티에-참여-가능.html" class="news-card-link">링(Ring), 이제 카메라 없어도 실종 반려견 찾기 '서치 파티'에 참여 가능!</a></h2>
+                <p class="news-card-date">2026-02-02</p>
+            </article>
+            </div></section>
+    </main>
+
+    <!-- Firebase -->
+    
+    <!-- crypto-js for password hashing -->
+    
+    <!-- Firebase-config -->
+
+    <footer>
+        <p data-i18n="footer_copyright"></p>
+        <p>
+            <a href="/about.html" data-i18n="about_us">회사 소개</a> |
+            <a href="/contact.html" data-i18n="contact">문의</a> |
+            <a href="/privacy-policy.html" data-i18n="privacy_policy">개인정보처리방침</a>
+        </p>
+    </footer>
+
+</body>
+</html>

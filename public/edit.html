@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="edit_post_title">글 수정 - TrackingSA</title>
+    
+    <!-- Google tag (gtag.js) -->
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    
+    <link rel="stylesheet" href="/style.css">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <script src="/firebase-config.js"></script>
+    <script src="/translations.js"></script>
+    <script src="/common.js"></script>
+    
+    <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){{
+        c[a]=c[a]||function(){{(c[a].q=c[a].q||[]).push(arguments)}};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    }})(window, document, "clarity", "script", "vb9q33ggpa");
+    </script>
+
+</head>
+<body>
+
+<header>
+    <nav>
+        <ul>
+            <li><a href="/index.html" data-i18n="news_home">홈</a></li>
+            <li class="dropdown">
+                <a href="#" class="dropbtn">테스트</a>
+                <div class="dropdown-content">
+                    <a href="/animal_face_test.html" data-i18n="animal_face_test">동물상 테스트</a>
+                    <a href="/ai-test.html" data-i18n="ai_tendency_test">AI 성향 테스트</a>
+                </div>
+            </li>
+            <li><a href="/inquiry.html" data-i18n="partnership_inquiry">파트너십 문의</a></li>
+            <li><a href="/about.html" data-i18n="about_us">회사 소개</a></li>
+            <li><a href="/contact.html" data-i18n="contact">문의</a></li>
+            <li><a href="/privacy-policy.html" data-i18n="privacy_policy">개인정보처리방침</a></li>
+        </ul>
+    </nav>
+    <div class="utility-buttons">
+        <div id="language-switcher"></div>
+    </div>
+</header>
+
+
+
+    <main>
+        <section class="edit-form-section section-card">
+            <h1 data-i18n="edit_post_h1">게시물 수정</h1>
+            <form id="edit-form" class="inquiry-form">
+                <!-- 기존 내용이 여기에 동적으로 채워집니다. -->
+                <p data-i18n="loading_post_info">게시물 정보를 불러오는 중...</p>
+            </form>
+        </section>
+    </main>
+
+    
+
+    <!-- Firebase -->
+    
+    <!-- crypto-js for password hashing -->
+    
+    <!-- Firebase-config -->
+    <!-- 글 수정 로직을 위한 별도의 스크립트 -->
+    <script src="edit.js"></script>
+
+    <footer>
+        <p data-i18n="footer_copyright"></p>
+        <p>
+            <a href="/about.html" data-i18n="about_us">회사 소개</a> |
+            <a href="/contact.html" data-i18n="contact">문의</a> |
+            <a href="/privacy-policy.html" data-i18n="privacy_policy">개인정보처리방침</a>
+        </p>
+    </footer>
+
+</body>
+</html>

@@ -50,6 +50,6 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add posts/ processed_articles.log
+          git add .
           git commit -m "Auto-post news updates $(date +'%Y-%m-%d %H:%M')" || echo "No changes to commit"
           git push

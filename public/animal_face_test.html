@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="animal_face_test_title">Animal Face Test - TrackingSA</title>
+    
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    
+    <link rel="stylesheet" href="/style.css">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <script src="/firebase-config.js"></script>
+    <script src="/translations.js"></script>
+    <script src="/common.js"></script>
+    
+    <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){{
+        c[a]=c[a]||function(){{(c[a].q=c[a].q||[]).push(arguments)}};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    }})(window, document, "clarity", "script", "vb9q33ggpa");
+    </script>
+
+</head>
+<body>
+
+<header>
+    <nav>
+        <ul>
+            <li><a href="/index.html" data-i18n="news_home">홈</a></li>
+            <li class="dropdown">
+                <a href="#" class="dropbtn">테스트</a>
+                <div class="dropdown-content">
+                    <a href="/animal_face_test.html" data-i18n="animal_face_test">동물상 테스트</a>
+                    <a href="/ai-test.html" data-i18n="ai_tendency_test">AI 성향 테스트</a>
+                </div>
+            </li>
+            <li><a href="/inquiry.html" data-i18n="partnership_inquiry">파트너십 문의</a></li>
+            <li><a href="/about.html" data-i18n="about_us">회사 소개</a></li>
+            <li><a href="/contact.html" data-i18n="contact">문의</a></li>
+            <li><a href="/privacy-policy.html" data-i18n="privacy_policy">개인정보처리방침</a></li>
+        </ul>
+    </nav>
+    <div class="utility-buttons">
+        <div id="language-switcher"></div>
+    </div>
+</header>
+
+    <main>
+        <section class="animal-face-test">
+            <h1 data-i18n="animal_face_test_h1">당신은 어떤 동물을 닮았나요?</h1>
+            <p data-i18n="animal_face_test_p1">당신은 어떤 동물을 닮았는지 알아보세요!</p>
+            <p data-i18n="animal_face_test_p2">이미지를 업로드하여 당신의 동물상을 확인해보세요!</p>
+
+            <!-- Gender Selection Placeholder -->
+            <div id="gender-selection" class="gender-selection-wrapper">
+                <label data-i18n="select_gender">성별 선택:</label>
+                <div class="gender-buttons">
+                    <button id="gender-male" class="gender-button" data-gender="male" data-i18n="gender_male">남성</button>
+                    <button id="gender-female" class="gender-button" data-gender="female" data-i18n="gender_female">여성</button>
+                </div>
+            </div>
+
+            <!-- Image Upload Section -->
+            <div class="image-upload-section">
+                <div id="drop-zone" class="drop-zone">
+                    <p data-i18n="drag_drop_image">여기에 이미지를 드래그하거나 클릭하여 업로드</p>
+                    <input type="file" id="image-upload" accept="image/*" style="display: none;">
+                    <label for="image-upload" class="custom-file-upload" data-i18n="select_image">이미지 선택</label>
+                </div>
+                <div id="image-preview-container">
+                    <img id="image-preview" src="" alt="이미지 미리보기">
+                    <button type="button" id="predict-button" class="go-test-button" data-i18n="check_result">결과 확인</button>
+                </div>
+            </div>
+            
+            <!-- Loading Indicator -->
+            <div id="loading-indicator" class="loading-indicator" style="display:none;">
+                <div class="spinner"></div>
+                <p data-i18n="analyzing_image">이미지 분석 중...</p>
+                <p class="privacy-note">🔒 사진은 저장되지 않습니다.</p>
+            </div>
+
+            <!-- Result Display Section -->
+            <div id="result-section" class="result-section" style="display:none;">
+                <h2 data-i18n="your_animal_face_is">당신의 동물상은:</h2>
+                <div id="prediction-result" class="prediction-result"></div>
+                <div id="confidence-score" class="confidence-score"></div>
+                <!-- Share Buttons Placeholder -->
+                <div id="share-buttons" class="share-buttons">
+                    <button class="share-button" data-platform="twitter">Twitter</button>
+                    <button class="share-button" data-platform="facebook">Facebook</button>
+                    <button class="share-button" data-platform="download">결과 다운로드</button>
+                </div>
+                <button type="button" id="retake-button" class="go-test-button" data-i18n="retake_test">다시 테스트</button>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+    <script src="main.js" type="module"></script>
+
+    <footer>
+        <p data-i18n="footer_copyright"></p>
+        <p>
+            <a href="/about.html" data-i18n="about_us">회사 소개</a> |
+            <a href="/contact.html" data-i18n="contact">문의</a> |
+            <a href="/privacy-policy.html" data-i18n="privacy_policy">개인정보처리방침</a>
+        </p>
+    </footer>
+
+</body>
+</html>
