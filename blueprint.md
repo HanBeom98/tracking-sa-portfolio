@@ -43,9 +43,10 @@ The Tracking-SA project is a framework-less web application (HTML, CSS, JavaScri
 *   **Sub-headline:** "간단한 테스트로 나의 AI 성향을 알아보세요!" (Find out your AI personality with a simple test!)
 *   **Call-to-Action Button:** "테스트 시작하기" (Start Test), which links to `ai-test.html`.
 *   **Styling:**
-    *   Light green gradient background.
+    *   Light green gradient background (`linear-gradient(to right, #f0fdf4, #e0ffe0)`).
     *   Rounded corners (`border-radius: 15px`).
     *   Soft shadow (`box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1)`).
+    *   Constrained `max-width` to `1200px` to harmonize with main content.
     *   Designed to harmonise with existing news cards and overall site aesthetic.
 *   **Responsiveness:** Fully responsive, adjusting gracefully to different screen sizes.
 *   **Dark Mode:** Styles adapted for dark mode.
@@ -60,9 +61,14 @@ All requested changes have been implemented in the following files:
 
 1.  **`ai-test.html`**: Created the new HTML structure for the quiz.
 2.  **`ai-test.js`**: Implemented the core JavaScript logic for the quiz.
-3.  **`style.css`**: Added all necessary CSS for `ai-test.html` and the `.hero-banner` to maintain visual consistency and responsiveness, including dark mode support. Also, corrected a previous duplication error.
+3.  **`style.css`**: Completely rewritten to restore core styling for the entire site (header, layout, news cards, dark mode) and correctly integrate styles for `ai-test.html` and the `.hero-banner`. This involved:
+    *   Setting header background to green (`#22c55e`), with horizontal menu and white text.
+    *   Configuring main container for `max-width: 1200px` and `margin: auto`.
+    *   Styling news cards with white background, soft shadow, rounded corners, and grid layout.
+    *   Defining dark mode styles for body background and card colors.
+    *   Ensuring `.hero-banner` width matches main content and uses a light green gradient.
 4.  **`index.html`**:
-    *   Inserted the `<header>` element with the main navigation bar.
-    *   Added the new "AI 성향 테스트" link to the navigation.
-    *   Inserted the hero banner section.
-5.  **`translations.js`**: Added new translation keys for the AI test and hero banner content.
+    *   The `<header>` element with the main navigation bar and utility buttons has been confirmed.
+    *   The new "AI 성향 테스트" link is present in the navigation.
+    *   The hero banner section is correctly placed.
+5.  **`translations.js`**: New translation keys for the AI test and hero banner content have been added.

@@ -1,12 +1,191 @@
+/* General Layout */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f7f6;
+    color: #333;
+}
+
+header {
+    background-color: #22c55e; /* Main Green */
+    color: white;
+    padding: 1rem 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+}
+
+header .site-title {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+    margin-right: 20px;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+nav a:hover {
+    background-color: #1eaf53; /* Darker Green */
+}
+
+main {
+    padding: 20px;
+    max-width: 1200px; /* Constrain width */
+    margin: 20px auto; /* Center align */
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    margin-top: 40px;
+    background-color: #343a40; /* Dark Gray */
+    color: white;
+    font-size: 0.9em;
+}
+
+/* Utility buttons and Language Switcher (from common.js logic) */
+.utility-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-left: auto; /* Push to the right */
+}
+
+#color-change {
+    background-color: #6c757d; /* Gray */
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#color-change:hover {
+    background-color: #5a6268;
+}
+
+.lang-button {
+    background-color: #007bff; /* Blue */
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.lang-button:hover {
+    background-color: #0056b3; /* Darker Blue */
+}
+
+.lang-button.active {
+    background-color: #28a745; /* Green to indicate active */
+    font-weight: bold;
+}
+
+.lang-button.active:hover {
+    background-color: #218838; /* Darker Green */
+}
+
+/* News Section Styling (Homepage) */
+.news-section-main {
+    padding: 20px 0;
+}
+
+.news-section-main .section-title {
+    text-align: center;
+    color: #28a745; /* Dark Green */
+    margin-bottom: 40px;
+    font-size: 2.5em;
+    font-weight: 700;
+}
+
+.news-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.news-card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.news-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+}
+
+.news-card-title {
+    font-size: 1.5em;
+    margin: 15px 15px 5px 15px;
+    line-height: 1.3;
+}
+
+.news-card-title a {
+    color: #333;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.news-card-title a:hover {
+    color: #007bff; /* Blue for hover */
+}
+
+.news-card-date {
+    font-size: 0.85em;
+    color: #6c757d; /* Gray */
+    margin: 0 15px 15px 15px;
+}
+
+.news-card-excerpt {
+    font-size: 1em;
+    color: #555;
+    padding: 0 15px 15px 15px;
+    flex-grow: 1; /* Makes excerpt take available space */
+}
+
 /* Hero Banner Styling */
 .hero-banner {
-    background: linear-gradient(to right, #d4edda, #c3e6cb); /* Light green gradient */
+    background: linear-gradient(to right, #f0fdf4, #e0ffe0); /* Very light green gradient */
     color: #155724; /* Darker green for text */
     padding: 30px 20px;
     margin: 20px auto;
-    max-width: 1200px;
-    border-radius: 15px; /* Equivalent to rounded-2xl in Tailwind, adjust as needed */
-    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1); /* Equivalent to shadow-lg */
+    max-width: 1200px; /* Constrain width to match main */
+    border-radius: 15px; /* Rounded corners */
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1); /* Soft shadow */
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -40,11 +219,444 @@
     transform: translateY(-2px);
 }
 
-/* Responsive adjustments for Hero Banner */
+/* AI Test Page Styling (ai-test.html) */
+.ai-test-page {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    text-align: center;
+}
+
+.ai-test-page h1 {
+    color: #28a745; /* Dark Green */
+    font-size: 2.5em;
+    margin-bottom: 15px;
+}
+
+.ai-test-page p {
+    font-size: 1.1em;
+    color: #555;
+    margin-bottom: 30px;
+}
+
+.action-button { /* Re-using action-button for consistency */
+    background-color: #22c55e; /* Main green color */
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin: 10px;
+}
+
+.action-button:hover {
+    background-color: #1eaf53; /* Darker green */
+    transform: translateY(-2px);
+}
+
+.quiz-section {
+    margin-top: 30px;
+}
+
+.quiz-section h2 {
+    color: #333;
+    font-size: 1.8em;
+    margin-bottom: 25px;
+}
+
+.answers-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.answer-button {
+    background-color: #f0f0f0;
+    color: #333;
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1em;
+    text-align: left;
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+}
+
+.answer-button:hover:not(:disabled) {
+    background-color: #e0e0e0;
+    border-color: #c0c0c0;
+    transform: translateY(-1px);
+}
+
+.answer-button.selected {
+    background-color: #22c55e; /* Green for selected */
+    color: white;
+    border-color: #22c55e;
+}
+
+.answer-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.ai-result {
+    margin-top: 30px;
+}
+
+.result-emoji {
+    font-size: 5em;
+    margin-bottom: 10px;
+}
+
+.result-name {
+    font-size: 2.2em;
+    font-weight: bold;
+    color: #22c55e;
+    margin-bottom: 15px;
+}
+
+.result-description {
+    font-size: 1.1em;
+    color: #555;
+    line-height: 1.7;
+    margin-bottom: 30px;
+}
+
+.result-actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+/* Styling for Animal Face Test Page (animal_face_test.html) */
+.animal-face-test {
+    text-align: center;
+    padding: 40px 20px;
+    max-width: 900px;
+    margin: 20px auto;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.07);
+}
+
+.animal-face-test h1 {
+    font-size: 2.8em;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.animal-face-test p {
+    font-size: 1.1em;
+    color: #555;
+    margin-bottom: 25px;
+}
+
+.gender-selection-wrapper {
+    margin-bottom: 30px;
+}
+
+.gender-selection-wrapper label {
+    font-weight: bold;
+    color: #333;
+    margin-right: 15px;
+    font-size: 1.1em;
+}
+
+.gender-buttons .gender-button {
+    background-color: #007bff; /* Blue for unselected male */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin: 0 5px;
+}
+
+#gender-female {
+    background-color: #dc3545; /* Red for unselected female */
+}
+#gender-female:hover {
+    background-color: #c82333; /* Darker red on hover */
+}
+
+#gender-female.active {
+    background-color: #28a745; /* Green for active female */
+}
+
+.gender-buttons .gender-button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+.gender-buttons .gender-button.active {
+    background-color: #28a745; /* Green for active */
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3), inset 0 0 8px rgba(0, 0, 0, 0.5); /* Enhanced inset shadow */
+}
+
+.gender-buttons .gender-button.active:hover {
+    background-color: #218838;
+}
+
+.image-upload-section {
+    margin-bottom: 30px;
+}
+
+.drop-zone {
+    border: 2px dashed #007bff;
+    border-radius: 10px;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    margin-bottom: 20px;
+    background-color: #f8faff;
+    color: #007bff;
+}
+
+.drop-zone.drag-over {
+    background-color: #e6f0ff;
+    border-color: #0056b3;
+}
+
+.drop-zone p {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.1em;
+    color: #007bff;
+}
+
+.image-upload-section .custom-file-upload {
+    background-color: #28a745;
+    color: white;
+    padding: 12px 25px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    display: inline-block;
+}
+
+.image-upload-section .custom-file-upload:hover {
+    background-color: #218838;
+}
+
+#image-preview-container {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    text-align: center;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#image-preview {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    display: none; /* Hidden until image is loaded */
+}
+
+#predict-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    display: none; /* Hidden until image is loaded */
+}
+
+#predict-button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+/* Loading Indicator */
+.loading-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 50px;
+}
+
+.loading-indicator .spinner {
+    border: 8px solid rgba(0, 123, 255, 0.1);
+    border-top: 8px solid #007bff;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-indicator p {
+    font-size: 1.2em;
+    color: #007bff;
+    font-weight: bold;
+}
+
+/* Result Section */
+.result-section {
+    margin-top: 40px;
+    padding: 30px;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.result-section h2 {
+    color: #28a745;
+    font-size: 2.2em;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.prediction-result {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #007bff;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.confidence-score {
+    font-size: 1.5em;
+    color: #6c757d;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+/* Share Buttons */
+.share-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.share-buttons .share-button {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.95em;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.share-buttons .share-button[data-platform="twitter"] { background-color: #1da1f2; }
+.share-buttons .share-button[data-platform="facebook"] { background-color: #3b5998; }
+.share-buttons .share-button[data-platform="download"] { background-color: #28a745; }
+
+.share-buttons .share-button:hover {
+    transform: translateY(-2px);
+}
+
+.share-buttons .share-button[data-platform="twitter"]:hover { background-color: #1a8cd8; }
+.share-buttons .share-button[data-platform="facebook"]:hover { background-color: #2d4373; }
+.share-buttons .share-button[data-platform="download"]:hover { background-color: #218838; }
+
+#retake-button {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-top: 15px;
+}
+
+#retake-button:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+}
+
+/* Privacy Note for Animal Face Test */
+.privacy-note {
+    font-size: 0.85em; /* Smaller font size */
+    color: #6c757d; /* Light gray color */
+    margin-top: 10px; /* Space from the text above */
+}
+
+/* New style for hashtags */
+.hashtags {
+    font-size: 0.8rem;
+    color: #6c757d; /* A lighter gray color, similar to article meta */
+    margin-top: 20px; /* Add some space above the hashtags */
+    padding-top: 10px;
+    border-top: 1px solid #eee; /* Optional: a subtle separator */
+    text-align: right; /* Align to the right, as often seen with tags */
+}
+
+/* Responsive adjustments */
 @media (max-width: 768px) {
-    .hero-banner {
-        padding: 20px 15px;
-        margin: 15px auto;
+    header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1rem;
+    }
+
+    header .site-title {
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+
+    nav ul {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        width: 100%;
+    }
+    nav a {
+        padding: 0.5rem;
+        width: calc(100% - 1rem); /* Full width minus padding */
+        text-align: left;
+    }
+    .utility-buttons {
+        margin-top: 10px;
+        margin-left: 0;
+        width: 100%;
+        justify-content: flex-start;
+    }
+    .news-grid {
+        grid-template-columns: 1fr; /* Single column on small screens */
+    }
+    .news-section-main .section-title {
+        font-size: 2em;
+    }
+    .news-article-container .article-title {
+        font-size: 2em;
+    }
+    .article-detail-main {
+        padding: 20px;
     }
     .hero-banner h2 {
         font-size: 1.8em;
@@ -56,9 +668,86 @@
         padding: 10px 25px;
         font-size: 1em;
     }
+    .ai-test-page {
+        margin: 20px auto;
+        padding: 20px;
+    }
+    .ai-test-page h1 {
+        font-size: 2em;
+    }
+    .quiz-section h2 {
+        font-size: 1.5em;
+    }
+    .answer-button {
+        padding: 12px;
+    }
+    .result-emoji {
+        font-size: 4em;
+    }
+    .result-name {
+        font-size: 1.8em;
+    }
+    .ai-test-page .action-button {
+        padding: 10px 20px;
+        font-size: 1em;
+    }
 }
 
-/* Dark mode for Hero Banner */
+/* Dark Mode Styles */
+body.dark-mode {
+    background-color: #1a1a1a; /* Dark background */
+    color: #e0e0e0; /* Light text */
+}
+
+body.dark-mode header {
+    background-color: #1c923f; /* Darker green header */
+}
+
+body.dark-mode nav a:hover {
+    background-color: #156d2e; /* Darker hover for nav */
+}
+
+body.dark-mode main {
+    background-color: #2a2a2a; /* Dark main content area */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+body.dark-mode footer {
+    background-color: #111111; /* Even darker footer */
+    color: #bbbbbb;
+}
+
+body.dark-mode .news-section-main .section-title {
+    color: #66cc66; /* Lighter green for titles in dark mode */
+}
+
+body.dark-mode .news-card {
+    background-color: #333333;
+    border-color: #444444;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+}
+
+body.dark-mode .news-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+}
+
+body.dark-mode .news-card-title a {
+    color: #eeeeee;
+}
+
+body.dark-mode .news-card-title a:hover {
+    color: #99ccff; /* Lighter blue for hover */
+}
+
+body.dark-mode .news-card-date {
+    color: #aaaaaa;
+}
+
+body.dark-mode .news-card-excerpt {
+    color: #cccccc;
+}
+
 body.dark-mode .hero-banner {
     background: linear-gradient(to right, #1d3323, #2a4730); /* Darker green gradient */
     color: #c3e6cb; /* Lighter text color */
@@ -79,4 +768,178 @@ body.dark-mode .hero-banner .action-button {
 
 body.dark-mode .hero-banner .action-button:hover {
     background-color: #22c55e;
+}
+
+body.dark-mode .ai-test-page {
+    background-color: #2a2a2a;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+}
+
+body.dark-mode .ai-test-page h1 {
+    color: #66cc66; /* Lighter green */
+}
+
+body.dark-mode .ai-test-page p {
+    color: #cccccc;
+}
+
+body.dark-mode .ai-test-page .action-button {
+    background-color: #1eaf53;
+}
+
+body.dark-mode .ai-test-page .action-button:hover {
+    background-color: #22c55e;
+}
+
+body.dark-mode .quiz-section h2 {
+    color: #eeeeee;
+}
+
+body.dark-mode .answer-button {
+    background-color: #333333;
+    color: #eeeeee;
+    border-color: #555555;
+}
+
+body.dark-mode .answer-button:hover:not(:disabled) {
+    background-color: #444444;
+    border-color: #666666;
+}
+
+body.dark-mode .answer-button.selected {
+    background-color: #1eaf53;
+    color: white;
+    border-color: #1eaf53;
+}
+
+body.dark-mode .ai-result .result-name {
+    color: #66cc66;
+}
+
+body.dark-mode .ai-result .result-description {
+    color: #cccccc;
+}
+
+body.dark-mode .animal-face-test {
+    background-color: #2a2a2a;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+body.dark-mode .animal-face-test h1 {
+    color: #eeeeee;
+}
+
+body.dark-mode .animal-face-test p {
+    color: #cccccc;
+}
+
+body.dark-mode .gender-selection-wrapper label {
+    color: #eeeeee;
+}
+
+body.dark-mode .gender-buttons .gender-button {
+    background-color: #0056b3;
+}
+body.dark-mode .gender-buttons .gender-button:hover {
+    background-color: #007bff;
+}
+body.dark-mode .gender-buttons .gender-button.active {
+    background-color: #1eaf53;
+}
+body.dark-mode .gender-buttons .gender-button.active:hover {
+    background-color: #22c55e;
+}
+
+body.dark-mode .drop-zone {
+    border-color: #0056b3;
+    background-color: #333333;
+    color: #99ccff;
+}
+
+body.dark-mode .drop-zone.drag-over {
+    background-color: #444444;
+    border-color: #007bff;
+}
+
+body.dark-mode .drop-zone p {
+    color: #99ccff;
+}
+
+body.dark-mode .image-upload-section .custom-file-upload {
+    background-color: #1eaf53;
+}
+
+body.dark-mode .image-upload-section .custom-file-upload:hover {
+    background-color: #22c55e;
+}
+
+body.dark-mode #image-preview-container {
+    border-color: #444;
+    background-color: #333;
+}
+
+body.dark-mode #predict-button {
+    background-color: #0056b3;
+}
+
+body.dark-mode #predict-button:hover {
+    background-color: #007bff;
+}
+
+body.dark-mode .loading-indicator p {
+    color: #99ccff;
+}
+
+body.dark-mode .loading-indicator .spinner {
+    border-top-color: #99ccff;
+}
+
+body.dark-mode .result-section {
+    background-color: #2a2a2a;
+    border-color: #444;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+body.dark-mode .result-section h2 {
+    color: #66cc66;
+}
+
+body.dark-mode .prediction-result {
+    color: #99ccff;
+}
+
+body.dark-mode .confidence-score {
+    color: #aaaaaa;
+}
+
+body.dark-mode .share-buttons .share-button {
+    background-color: #555555;
+}
+
+body.dark-mode .share-buttons .share-button:hover {
+    background-color: #777777;
+}
+
+body.dark-mode .share-buttons .share-button[data-platform="twitter"] { background-color: #1a8cd8; }
+body.dark-mode .share-buttons .share-button[data-platform="twitter"]:hover { background-color: #1da1f2; }
+body.dark-mode .share-buttons .share-button[data-platform="facebook"] { background-color: #2d4373; }
+body.dark-mode .share-buttons .share-button[data-platform="facebook"]:hover { background-color: #3b5998; }
+body.dark-mode .share-buttons .share-button[data-platform="download"] { background-color: #1eaf53; }
+body.dark-mode .share-buttons .share-button[data-platform="download"]:hover { background-color: #22c55e; }
+
+body.dark-mode #retake-button {
+    background-color: #555555;
+}
+
+body.dark-mode #retake-button:hover {
+    background-color: #777777;
+}
+
+body.dark-mode .privacy-note {
+    color: #aaaaaa;
+}
+
+body.dark-mode .hashtags {
+    color: #aaaaaa;
+    border-top-color: #444;
 }
