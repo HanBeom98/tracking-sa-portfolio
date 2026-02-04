@@ -257,12 +257,13 @@ def _extract_and_format_hashtags(original_content, log_prefix=""):
             modified_content = header_pattern.sub('', modified_content, 1).strip()
             print(f"{log_prefix}✅ 해시태그 추출 성공 (헤더): {', '.join(found_hashtags)}")
         else:
-            print(f"{log_prefix}⚠️ 해시태그 헤더는 찾았으나, 내용이 없습니다. 본문에서 추출 시도합니다.")
+            print(f"{log_prefix}⚠️ 해시태그 헤더는 찾았으나, 내용이 없습니다. 본문 마지막 10%에서 추출 시도합니다.")
     
-    # --- Fallback: Extract from the last 10% of the content ---
-    # Only if no hashtags were found via the header or header was empty
+    # --- Stronger Fallback: Extract from the last 10% of the content ---
+    # This is always attempted if header doesn't yield hashtags, or if header was empty
     if not found_hashtags: # Check if found_hashtags is still empty
         content_length = len(original_content)
+        # Calculate the start index for the last 10% of the content
         last_10_percent_start = int(content_length * 0.9)
         last_10_percent_content = original_content[last_10_percent_start:]
         
