@@ -237,35 +237,54 @@ def generate_ai_content(api_key, news_title, news_summary):
         print(f'🚨 Gemini 최신 SDK 오류: {e}')
         return None
 
+def _extract_and_format_hashtags(original_content, log_prefix=""):
+    hashtags_html = ""
+    modified_content = original_content
+    hashtags_found_by_header = False
+    
+    # Attempt to find a flexible hashtag header (e.g., ##HASHTAGS##: #tag1, HASHTAGS: #tag1, ##해시태그##: #tag1)
+    # This regex is made more flexible for the prefix and captures the rest of the line
+    header_pattern = re.compile(r'(##)?(HASHTAGS|해시태그)##?:\s*(.+)', re.MULTILINE | re.IGNORECASE)
+    header_match = header_pattern.search(modified_content)
+
+    if header_match:
+        hashtags_string_from_header = header_match.group(3).strip()
+        if hashtags_string_from_header:
+            hashtags_html = f'<div class="hashtags">{hashtags_string_from_header}</div>'
+            # Remove the matched header line from the content
+            modified_content = header_pattern.sub('', modified_content, 1).strip()
+            hashtags_found_by_header = True
+            print(f"{log_prefix}✅ 해시태그 추출 성공 (헤더): {hashtags_string_from_header}")
+        else:
+            print(f"{log_prefix}⚠️ 해시태그 헤더는 찾았으나, 내용이 없습니다. 본문에서 추출 시도.")
+            
+    if not hashtags_found_by_header:
+        # Stronger Fallback: Search for # prefixed words in the entire (original) content
+        fallback_hashtags = re.findall(r'#(\w+)', original_content) # Use original_content for fallback
+        if fallback_hashtags:
+            hashtags_string_from_fallback = " ".join([f"#{tag}" for tag in fallback_hashtags[:5]]) # Take up to 5
+            hashtags_html = f'<div class="hashtags">{hashtags_string_from_fallback}</div>'
+            print(f"{log_prefix}✅ 해시태그 추출 성공 (본문 폴백): {hashtags_string_from_fallback}")
+        else:
+            hashtags_html = '<div class="hashtags">해시태그 없음</div>'
+            print(f"{log_prefix}❌ 해시태그 추출 실패: '해시태그 없음'으로 표시됩니다.")
+            
+    return modified_content, hashtags_html
+
 def save_post_and_generate_html(content):
     os.makedirs(NEWS_POSTS_DIR, exist_ok=True)
     today = datetime.date.today().strftime("%Y-%m-%d")
     title = extract_title_from_md(content)
     cleaned = clean_filename(title)
 
-    hashtags_html = ""
-    hashtags_match = re.search(r'##HASHTAGS##: (.+)', content, re.MULTILINE)
-    if hashtags_match:
-        hashtags_string = hashtags_match.group(1).strip()
-        # Remove the hashtag line from the content before markdown conversion
-        content = re.sub(r'##HASHTAGS##: (.+)', '', content, flags=re.MULTILINE).strip()
-        
-        # Format hashtags for display
-        hashtags_html = f'<div class="hashtags">{hashtags_string}</div>'
-    else:
-        # Fallback: Search for # prefixed words in the content
-        fallback_hashtags = re.findall(r'#(\w+)', content)
-        if fallback_hashtags:
-            hashtags_string = " ".join([f"#{tag}" for tag in fallback_hashtags[:5]]) # Take up to 5
-            hashtags_html = f'<div class="hashtags">{hashtags_string}</div>'
-        else:
-            hashtags_html = '<div class="hashtags">해시태그 없음</div>' # Debugging line
+    # Use the new helper function for hashtag extraction and formatting
+    processed_content, hashtags_html = _extract_and_format_hashtags(content, log_prefix="[save_post_and_generate_html] ")
 
     md_path = os.path.join(NEWS_POSTS_DIR, f"{today}-{cleaned}.md")
-    with open(md_path, "w", encoding="utf-8") as f: f.write(content)
+    with open(md_path, "w", encoding="utf-8") as f: f.write(processed_content) # Use processed_content
     
     html_filename = f"{today}-{cleaned}.html"
-    generate_article_html(content, title, today, os.path.join(PUBLIC_DIR, html_filename), hashtags_html)
+    generate_article_html(processed_content, title, today, os.path.join(PUBLIC_DIR, html_filename), hashtags_html) # Use processed_content
     return html_filename, title, today
 
 def generate_public_site():
@@ -276,23 +295,16 @@ def generate_public_site():
     if os.path.exists(NEWS_POSTS_DIR):
         for fn in sorted(os.listdir(NEWS_POSTS_DIR), reverse=True):
             if fn.endswith('.md'):
-                with open(os.path.join(NEWS_POSTS_DIR, fn), 'r', encoding='utf-8') as f: content = f.read()
+                with open(os.path.join(NEWS_POSTS_DIR, fn), 'r', encoding='utf-8') as f: original_content = f.read() # Read into original_content
                 
-                hashtags_html = ""
-                hashtags_match = re.search(r'##HASHTAGS##: (.+)', content, re.MULTILINE)
-                if hashtags_match:
-                    hashtags_string = hashtags_match.group(1).strip()
-                    # Remove the hashtag line from the content before markdown conversion
-                    content = re.sub(r'##HASHTAGS##: (.+)', '', content, flags=re.MULTILINE).strip()
-                    
-                    # Format hashtags for display
-                    hashtags_html = f'<div class="hashtags">{hashtags_string}</div>'
+                # Use the new helper function for hashtag extraction and formatting
+                processed_content, hashtags_html = _extract_and_format_hashtags(original_content, log_prefix=f"[generate_public_site - {fn}] ")
 
-                title = extract_title_from_md(content)
+                title = extract_title_from_md(processed_content) # Use processed_content for title extraction as well
                 date = re.match(r'(\d{4}-\d{2}-\d{2})', fn).group(1)
                 url = f"{date}-{clean_filename(title)}.html"
                 articles_meta.append({'title': title, 'date': date, 'url': url})
-                generate_article_html(content, title, date, os.path.join(PUBLIC_DIR, url), hashtags_html)
+                generate_article_html(processed_content, title, date, os.path.join(PUBLIC_DIR, url), hashtags_html) # Use processed_content
     generate_index_html(articles_meta)
     _generate_sitemap(articles_meta)
 
