@@ -1,10 +1,10 @@
 # AI Model Personality Test Integration
 
-This blueprint details the integration of a "Which AI Model Are You Most Like?" personality test into the Tracking-SA web project. The integration includes creating a new dedicated test page, updating the main navigation, and adding a prominent hero banner on the homepage.
+This blueprint details the integration of a "Which AI Model Are You Most Like?" personality test into the Tracking-SA web project. The integration includes creating a new dedicated test page, updating the main navigation, and removing the promotional banner from the home screen for a cleaner layout.
 
 ## Project Overview
 
-The Tracking-SA project is a framework-less web application (HTML, CSS, JavaScript) focusing on news and insights related to AI and technology. It features a dark mode toggle, language switching, and an existing "Animal Face Test" functionality.
+The Tracking-SA project is a framework-less web application (HTML, CSS, JavaScript) focusing on news and insights related to AI and technology. It features dark mode and language switching.
 
 ## Detailed Outline of Implemented Features
 
@@ -20,7 +20,7 @@ The Tracking-SA project is a framework-less web application (HTML, CSS, JavaScri
     *   Tie-breaking: Currently, the first AI model encountered with the highest score wins in case of a tie.
 *   **Design:**
     *   Utilizes the main site's green color (`#22c55e`) for buttons and accents.
-    *   Styled with standard CSS to maintain consistency with `style.css` (no Tailwind CSS directly used, as it's not integrated into the project).
+    *   Styled with standard CSS to maintain consistency with `style.css`.
     *   Result screen displays the winning AI model's emoji, name, and a descriptive sentence.
 *   **Functionality:**
     *   "Start Test" button initiates the quiz.
@@ -29,32 +29,28 @@ The Tracking-SA project is a framework-less web application (HTML, CSS, JavaScri
     *   "Retake Test" button resets the quiz.
 *   **Responsiveness:** Designed to be fully responsive for mobile and desktop screens.
 *   **Dark Mode:** Styles adapted for dark mode.
-*   **Header Consistency:** The header in `ai-test.html` now matches the consolidated header structure in `index.html`, including the '테스트' dropdown menu.
+*   **Header Consistency:** The header in `ai-test.html` matches the consolidated header structure in `index.html`, including the '테스트' dropdown menu.
 
 ### 2. Navigation Update: `index.html`
 
 *   **Header Structure Integrated**: The `index.html` file now contains only one `<header>` element with a green background (`#22c55e`). This header includes the main navigation bar and the utility buttons (only language selection remains).
+*   **Menu Order and Composition**: The main navigation menu items are now ordered as:
+    *   홈 (`index.html`)
+    *   테스트 (Dropdown parent for "동물상 테스트" and "AI 성향 테스트")
+    *   파트너십 문의 (`inquiry.html`)
+    *   회사 소개 (`about.html`)
+    *   문의 (`contact.html`)
+    *   개인정보처리방침 (`privacy-policy.html`)
 *   **"뉴스 홈" Removed**: The "뉴스 홈" link has been removed from the navigation.
-*   **"테스트" Dropdown Position**: The "테스트" dropdown menu now effectively replaces the original "동물상 테스트" button's position as the primary navigation item.
+*   **"테스트" Dropdown Position**: The "테스트" dropdown menu effectively replaces the original "동물상 테스트" button's position.
 *   **Dropdown Menu Implementation**:
-    *   The navigation menu now includes a "테스트" (Test) dropdown item.
     *   This dropdown, on hover, reveals "동물상 테스트" (Animal Face Test) and "AI 성향 테스트" (AI Tendency Test) as sub-menu links.
 *   The links within the dropdown point to `animal_face_test.html` and `ai-test.html` respectively.
 
-### 3. Homepage Hero Banner: `index.html`
+### 3. Homepage Clean-up: `index.html`
 
-*   A prominent horizontal banner has been added above the "최신 뉴스" section on the `index.html` homepage.
-*   **Headline:** "나와 가장 닮은 인공지능 모델은? 🤖" (Which AI Model Are You Most Like? 🤖) (large font).
-*   **Sub-headline:** "간단한 테스트로 나의 AI 성향을 알아보세요!" (Find out your AI personality with a simple test!)
-*   **Call-to-Action Button:** "테스트 시작하기" (Start Test), which explicitly links to `ai-test.html`. The home screen does not display the quiz questions, only the promotional banner.
-*   **Styling:**
-    *   Light green gradient background (`linear-gradient(to right, #f0fdf4, #e0ffe0)`).
-    *   Rounded corners (`border-radius: 15px`).
-    *   Soft shadow (`box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1)`).
-    *   Constrained `max-width` to `1200px` to harmonize with main content (matching news list width).
-    *   Designed to harmonise with existing news cards and overall site aesthetic.
-*   **Responsiveness:** Fully responsive, adjusting gracefully to different screen sizes.
-*   **Dark Mode:** Styles adapted for dark mode.
+*   **Promotional Banner Removed**: The `<section class="hero-banner">` has been completely removed from `index.html`.
+*   The home screen (`index.html`) now displays only the consolidated header menu and the latest news list, providing a clean and professional look without any AI test promotional banners.
 
 ### 4. Translation Support: `translations.js`
 
@@ -66,29 +62,32 @@ All requested changes have been implemented in the following files:
 
 1.  **`ai-test.html`**:
     *   Created the new HTML structure for the quiz.
-    *   **Updated its header to match the new dropdown navigation for consistency.**
+    *   Updated its header to match the new dropdown navigation for consistency.
 2.  **`ai-test.js`**: Implemented the core JavaScript logic for the quiz.
 3.  **`style.css`**: Completely rewritten and refined to:
     *   Restore core styling for the entire site (header, layout, news cards, dark mode).
-    *   Correctly integrate styles for `ai-test.html` and the `.hero-banner`.
+    *   Correctly integrate styles for `ai-test.html`.
     *   Set header background to green (`#22c55e`), with horizontal menu and white text.
-    *   Remove all CSS associated with the deleted `#color-change` button.
+    *   Remove all CSS associated with the deleted `#color-change` moon icon button.
     *   Configure main container for `max-width: 1200px` and `margin: auto`.
     *   Style news cards with white background, soft shadow, rounded corners, and grid layout.
     *   Define dark mode styles for body background and card colors.
-    *   Ensure `.hero-banner` width matches main content and uses a light green gradient.
-    *   **Added robust styles for the new dropdown menu** (hide by default, show on hover, white background, black text, soft shadow, correct positioning).
-    *   Removed any potential redundant header-related CSS, ensuring a clean and unified stylesheet.
+    *   **Removed `.hero-banner` related CSS.**
+    *   Applied `position: sticky; top: 0;` to the main `header` for a fixed-on-scroll effect.
+    *   Added robust styles for the new dropdown menu (hide by default, show on hover, white background, black text, soft shadow, correct positioning).
+    *   Removed any potential redundant header-related CSS, ensuring a clean and unified stylesheet and addressing the "two-tier" visual issue.
 4.  **`index.html`**:
-    *   **Consolidated to a single `<header>`** element with the main navigation bar and utility buttons.
+    *   Consolidated to a single `<header>` element with the main navigation bar and utility buttons (only language switcher remains).
     *   Removed the "뉴스 홈" link.
     *   Removed the `#color-change` moon icon button.
-    *   The new "테스트" dropdown menu structure has been implemented in the correct position.
-    *   The hero banner section is correctly placed and styled, with its button linking to `ai-test.html`.
+    *   The `nav ul` has been reconstructed to follow the exact order `[홈 / 테스트(드롭다운) / 파트너십 문의 / 회사 소개 / 문의 / 개인정보처리방침]`.
+    *   **The `<section class="hero-banner">` has been completely removed.**
+    *   The home screen now shows only the menu bar and the news list.
 5.  **`translations.js`**: New translation keys for the AI test and hero banner content have been added.
 
 **Final Check Summary:**
-*   **Home screen cleanliness:** `index.html` displays a single menu bar (now with no "뉴스 홈" and "테스트" dropdown in place of "동물상 테스트"), the promotion banner, and the news list cleanly.
-*   **'테스트' menu dropdown:** Hovering over '테스트' correctly displays the sub-menus ('동물상 테스트', 'AI 성향 테스트').
-*   **'테마 변경' and language buttons:** Only the language selection button remains on the right end of the header and remains functional. The theme change button has been removed.
-*   **'테스트 시작하기' redirection:** Clicking the button on the hero banner successfully navigates to the independent `ai-test.html` page where the quiz resides.
+*   **Home screen cleanliness:** `index.html` displays a single, integrated green menu bar with the specified order and a functioning '테스트' dropdown. The page is free of any AI test promotional banners, showing only the menu and the news list.
+*   **'테스트' menu dropdown:** Hovering over '테스트' correctly displays the sub-menus ('동물상 테스트', 'AI 성향 테스트') with the correct styling.
+*   **Utility buttons:** Only the language selection button remains on the right end of the header and remains functional. The theme change button and its icon are gone.
+*   **'AI 성향 테스트' redirection:** The 'AI 성향 테스트' link within the dropdown successfully navigates to the independent `ai-test.html` page where the quiz resides.
+*   **Sticky Header:** The main header bar is fixed at the top during scrolling.
