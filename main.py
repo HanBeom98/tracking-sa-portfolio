@@ -42,10 +42,16 @@ COMMON_HEAD_SCRIPTS = """
 
 COMMON_BODY_INJECTIONS = """
 <header>
-    <nav class="main-nav">
+    <nav>
         <ul>
-            <li><a href="/index.html" data-i18n="home">홈</a></li>
-            <li><a href="/animal_face_test.html" data-i18n="animal_face_test">동물상 테스트</a></li>
+            <li><a href="/index.html" data-i18n="news_home">홈</a></li>
+            <li class="dropdown">
+                <a href="#" class="dropbtn">테스트</a>
+                <div class="dropdown-content">
+                    <a href="/animal_face_test.html" data-i18n="animal_face_test">동물상 테스트</a>
+                    <a href="/ai-test.html" data-i18n="ai_tendency_test">AI 성향 테스트</a>
+                </div>
+            </li>
             <li><a href="/inquiry.html" data-i18n="partnership_inquiry">파트너십 문의</a></li>
             <li><a href="/about.html" data-i18n="about_us">회사 소개</a></li>
             <li><a href="/contact.html" data-i18n="contact">문의</a></li>
@@ -53,7 +59,6 @@ COMMON_BODY_INJECTIONS = """
         </ul>
     </nav>
     <div class="utility-buttons">
-        <button id="color-change" data-i18n="theme_change">테마 변경</button>
         <div id="language-switcher"></div>
     </div>
 </header>

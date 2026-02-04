@@ -16,7 +16,7 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    /* Removed flex-wrap: wrap; to prevent menu from splitting into two lines */
+    /* flex-wrap: wrap; removed to prevent menu from splitting into two lines */
     position: sticky; /* Make header sticky */
     top: 0; /* Stick to the top */
     z-index: 1000; /* Ensure header stays above other content */
@@ -30,13 +30,19 @@ header .site-title { /* Not used in current HTML but good to keep if it's a gene
     margin-right: 20px;
 }
 
+header nav {
+    flex-grow: 1; /* Allow nav to take available space */
+    display: flex; /* Ensure flex context for ul */
+    justify-content: flex-start; /* Align nav items to the start */
+}
+
 nav ul {
     list-style: none;
     padding: 0;
     margin: 0;
     display: flex;
-    /* Removed flex-wrap: wrap; to prevent menu from splitting into two lines */
-    justify-content: center;
+    /* flex-wrap: wrap; removed to prevent menu from splitting into two lines */
+    /* justify-content: center; removed to allow items to align left within nav */
     gap: 20px;
 }
 
