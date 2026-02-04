@@ -269,11 +269,22 @@ def generate_public_site():
         for fn in sorted(os.listdir(NEWS_POSTS_DIR), reverse=True):
             if fn.endswith('.md'):
                 with open(os.path.join(NEWS_POSTS_DIR, fn), 'r', encoding='utf-8') as f: content = f.read()
+                
+                hashtags_html = ""
+                hashtags_match = re.search(r'##HASHTAGS##: (.+)', content, re.MULTILINE)
+                if hashtags_match:
+                    hashtags_string = hashtags_match.group(1).strip()
+                    # Remove the hashtag line from the content before markdown conversion
+                    content = re.sub(r'##HASHTAGS##: (.+)', '', content, flags=re.MULTILINE).strip()
+                    
+                    # Format hashtags for display
+                    hashtags_html = f'<div class="hashtags">{hashtags_string}</div>'
+
                 title = extract_title_from_md(content)
                 date = re.match(r'(\d{4}-\d{2}-\d{2})', fn).group(1)
                 url = f"{date}-{clean_filename(title)}.html"
                 articles_meta.append({'title': title, 'date': date, 'url': url})
-                generate_article_html(content, title, date, os.path.join(PUBLIC_DIR, url))
+                generate_article_html(content, title, date, os.path.join(PUBLIC_DIR, url), hashtags_html)
     generate_index_html(articles_meta)
     _generate_sitemap(articles_meta)
 
