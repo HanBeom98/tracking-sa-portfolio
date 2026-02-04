@@ -240,9 +240,9 @@ def generate_ai_content(api_key, news_title, news_summary):
 def _extract_and_format_hashtags(original_content, log_prefix=""):
     hashtags_html = ""
     modified_content = original_content
-    hashtags_found_by_header = False
-    
-    # Attempt to find a flexible hashtag header (e.g., ##HASHTAGS##: #tag1, HASHTAGS: #tag1, ##해시태그##: #tag1)
+    found_hashtags = [] # Collect all found hashtags
+
+    # --- Attempt to find a flexible hashtag header ---
     # This regex is made more flexible for the prefix and captures the rest of the line
     header_pattern = re.compile(r'(##)?(HASHTAGS|해시태그)##?:\s*(.+)', re.MULTILINE | re.IGNORECASE)
     header_match = header_pattern.search(modified_content)
@@ -250,25 +250,39 @@ def _extract_and_format_hashtags(original_content, log_prefix=""):
     if header_match:
         hashtags_string_from_header = header_match.group(3).strip()
         if hashtags_string_from_header:
-            hashtags_html = f'<div class="hashtags">{hashtags_string_from_header}</div>'
+            # Extract individual hashtags from the header string
+            found_hashtags.extend(re.findall(r'#(\w+)', hashtags_string_from_header))
             # Remove the matched header line from the content
             modified_content = header_pattern.sub('', modified_content, 1).strip()
-            hashtags_found_by_header = True
-            print(f"{log_prefix}✅ 해시태그 추출 성공 (헤더): {hashtags_string_from_header}")
+            print(f"{log_prefix}✅ 해시태그 추출 성공 (헤더): {', '.join(found_hashtags)}")
         else:
-            print(f"{log_prefix}⚠️ 해시태그 헤더는 찾았으나, 내용이 없습니다. 본문에서 추출 시도.")
-            
-    if not hashtags_found_by_header:
-        # Stronger Fallback: Search for # prefixed words in the entire (original) content
-        fallback_hashtags = re.findall(r'#(\w+)', original_content) # Use original_content for fallback
-        if fallback_hashtags:
-            hashtags_string_from_fallback = " ".join([f"#{tag}" for tag in fallback_hashtags[:5]]) # Take up to 5
-            hashtags_html = f'<div class="hashtags">{hashtags_string_from_fallback}</div>'
-            print(f"{log_prefix}✅ 해시태그 추출 성공 (본문 폴백): {hashtags_string_from_fallback}")
+            print(f"{log_prefix}⚠️ 해시태그 헤더는 찾았으나, 내용이 없습니다. 본문에서 추출 시도합니다.")
+    
+    # --- Fallback: Extract from the last 10% of the content ---
+    # Only if no hashtags were found via the header or header was empty
+    if not found_hashtags: # Check if found_hashtags is still empty
+        content_length = len(original_content)
+        last_10_percent_start = int(content_length * 0.9)
+        last_10_percent_content = original_content[last_10_percent_start:]
+        
+        fallback_hashtags_from_body = re.findall(r'#(\w+)', last_10_percent_content)
+        if fallback_hashtags_from_body:
+            found_hashtags.extend(fallback_hashtags_from_body)
+            print(f"{log_prefix}✅ 해시태그 추출 성공 (본문 마지막 10% 폴백): {', '.join(found_hashtags)}")
         else:
-            hashtags_html = '<div class="hashtags">해시태그 없음</div>'
-            print(f"{log_prefix}❌ 해시태그 추출 실패: '해시태그 없음'으로 표시됩니다.")
-            
+            print(f"{log_prefix}❌ 해시태그 추출 실패: 본문 마지막 10%에서도 찾지 못했습니다.")
+
+    # --- Final Formatting ---
+    if found_hashtags:
+        # Deduplicate and limit to 5, then format
+        unique_hashtags = list(dict.fromkeys(found_hashtags)) # Remove duplicates while preserving order
+        final_hashtags_string = " ".join([f"#{tag}" for tag in unique_hashtags[:5]])
+        hashtags_html = f'<div class="hashtags">{final_hashtags_string}</div>'
+    else:
+        # If no hashtags found at all, return empty HTML to hide the area
+        print(f"{log_prefix}❌ 최종 해시태그 없음. 영역을 숨깁니다.")
+        hashtags_html = "" # Ensure it's empty to hide the div
+
     return modified_content, hashtags_html
 
 def save_post_and_generate_html(content):
