@@ -26,6 +26,7 @@ COMMON_HEAD_SCRIPTS = """
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     
     <link rel="stylesheet" href="/style.css">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <script src="/firebase-config.js"></script>
     <script src="/translations.js"></script>
     <script src="/common.js"></script>
@@ -187,7 +188,7 @@ def process_html_file_for_common_elements(filepath):
         print(f"⚠️ 에러: {filepath} 처리 중 {e}")
 
 def copy_static_assets():
-    assets = ["style.css", "common.js", "translations.js", "animal_face_test.html", "edit.html", "edit.js", "inquiry.html", "main.js", "post.html", "post.js", "write.html", "write.js", "about.html", "contact.html", "privacy-policy.html", "firebase-config.js"]
+    assets = ["style.css", "common.js", "translations.js", "animal_face_test.html", "edit.html", "edit.js", "inquiry.html", "main.js", "post.html", "post.js", "write.html", "write.js", "about.html", "contact.html", "privacy-policy.html", "firebase-config.js", "favicon.svg"]
     for item in assets:
         if os.path.isfile(item):
             shutil.copy2(item, os.path.join(PUBLIC_DIR, item))
