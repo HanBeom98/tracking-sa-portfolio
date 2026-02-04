@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나와 가장 닮은 인공지능 모델은?</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="index.html" data-i18n="news_home">뉴스 홈</a></li>
+                <li><a href="animal_face_test.html" data-i18n="animal_face_test">동물상 테스트</a></li>
+                <li><a href="ai-test.html" data-i18n="ai_tendency_test">AI 성향 테스트</a></li>
+            </ul>
+        </nav>
+        <div class="utility-buttons">
+            <button id="color-change">🌙</button>
+            <div id="language-switcher"></div>
+        </div>
+    </header>
+
+    <main class="ai-test-page">
+        <section class="test-intro">
+            <h1>나와 가장 닮은 인공지능 모델은?</h1>
+            <p>간단한 질문에 답하고, 당신의 AI 성향을 알아보세요!</p>
+            <button id="start-test-button" class="action-button">테스트 시작하기</button>
+        </section>
+
+        <section id="quiz-section" class="quiz-section" style="display: none;">
+            <h2 id="question-text"></h2>
+            <div id="answers-container" class="answers-container">
+                <!-- Answers will be dynamically loaded here -->
+            </div>
+            <button id="next-button" class="action-button">다음</button>
+        </section>
+
+        <section id="result-section" class="result-section" style="display: none;">
+            <h2>당신과 가장 닮은 AI 모델은...</h2>
+            <div class="ai-result">
+                <p id="result-emoji" class="result-emoji"></p>
+                <p id="result-name" class="result-name"></p>
+                <p id="result-description" class="result-description"></p>
+            </div>
+            <div class="result-actions">
+                <button id="copy-link-button" class="action-button">결과 링크 복사</button>
+                <button id="retake-test-button" class="action-button">다시 테스트하기</button>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 AI News. All rights reserved.</p>
+    </footer>
+
+    <script src="translations.js"></script>
+    <script src="common.js"></script>
+    <script src="ai-test.js"></script>
+</body>
+</html>

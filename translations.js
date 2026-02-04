@@ -74,6 +74,10 @@ const translations = {
         'your_animal_face_is': '당신의 동물상은:',
         'retake_test': '다시 테스트',
         'only_image_files_alert': '이미지 파일만 업로드할 수 있습니다.',
+        'ai_tendency_test': 'AI 성향 테스트',
+        'hero_title': '나와 가장 닮은 인공지능 모델은? 🤖',
+        'hero_subtitle': '간단한 테스트로 나의 AI 성향을 알아보세요!',
+        'start_test_button': '테스트 시작하기',
         'no_image_to_download_alert': '다운로드할 이미지가 없습니다.'
     },
     'en': {
@@ -152,5 +156,9 @@ const translations = {
                 'retake_test': 'Retake Test',
                 'only_image_files_alert': 'Only image files can be uploaded.',
                 'select_image_first': 'Please select an image first.',
-                'no_image_to_download_alert': 'No image available for download.'
+                'no_image_to_download_alert': 'No image available for download.',
+                'ai_tendency_test': 'AI Tendency Test',
+                'hero_title': 'Which AI Model Are You Most Like? 🤖',
+                'hero_subtitle': 'Find out your AI personality with a simple test!',
+                'start_test_button': 'Start Test'
             }};
