@@ -252,6 +252,8 @@ def save_post_and_generate_html(content):
         
         # Format hashtags for display
         hashtags_html = f'<div class="hashtags">{hashtags_string}</div>'
+    else:
+        hashtags_html = '<div class="hashtags">해시태그 없음</div>' # Debugging line
 
     md_path = os.path.join(NEWS_POSTS_DIR, f"{today}-{cleaned}.md")
     with open(md_path, "w", encoding="utf-8") as f: f.write(content)

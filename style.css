@@ -1145,8 +1145,8 @@ body.dark-mode .privacy-note {
 }
 /* New style for hashtags */
 .hashtags {
-    font-size: 0.8rem;
-    color: #6c757d; /* A lighter gray color, similar to article meta */
+    font-size: 1rem;
+    color: #000; /* A lighter gray color, similar to article meta */
     margin-top: 20px; /* Add some space above the hashtags */
     padding-top: 10px;
     border-top: 1px solid #eee; /* Optional: a subtle separator */
