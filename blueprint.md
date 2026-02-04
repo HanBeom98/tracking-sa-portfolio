@@ -32,8 +32,9 @@ The Tracking-SA project is a framework-less web application (HTML, CSS, JavaScri
 
 ### 2. Navigation Update: `index.html`
 
-*   A new navigation link, "AI 성향 테스트" (AI Tendency Test), has been added to the main header navigation bar.
-*   Positioned directly after the "동물상 테스트" link.
+*   **Dropdown Menu Implementation**:
+    *   The navigation menu now includes a "테스트" (Test) dropdown item.
+    *   This dropdown, on hover, reveals "동물상 테스트" (Animal Face Test) and "AI 성향 테스트" (AI Tendency Test) as sub-menu links.
 *   The link points to `ai-test.html`.
 
 ### 3. Homepage Hero Banner: `index.html`
@@ -46,7 +47,7 @@ The Tracking-SA project is a framework-less web application (HTML, CSS, JavaScri
     *   Light green gradient background (`linear-gradient(to right, #f0fdf4, #e0ffe0)`).
     *   Rounded corners (`border-radius: 15px`).
     *   Soft shadow (`box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1)`).
-    *   Constrained `max-width` to `1200px` to harmonize with main content.
+    *   Constrained `max-width` to `1200px` to harmonize with main content (matching news list width).
     *   Designed to harmonise with existing news cards and overall site aesthetic.
 *   **Responsiveness:** Fully responsive, adjusting gracefully to different screen sizes.
 *   **Dark Mode:** Styles adapted for dark mode.
@@ -67,8 +68,9 @@ All requested changes have been implemented in the following files:
     *   Styling news cards with white background, soft shadow, rounded corners, and grid layout.
     *   Defining dark mode styles for body background and card colors.
     *   Ensuring `.hero-banner` width matches main content and uses a light green gradient.
+    *   Added styles for the new dropdown menu (hide by default, show on hover, white background, black text, soft shadow, correct positioning).
 4.  **`index.html`**:
     *   The `<header>` element with the main navigation bar and utility buttons has been confirmed.
-    *   The new "AI 성향 테스트" link is present in the navigation.
-    *   The hero banner section is correctly placed.
+    *   The new "테스트" dropdown menu structure has been implemented.
+    *   The hero banner section is correctly placed and styled.
 5.  **`translations.js`**: New translation keys for the AI test and hero banner content have been added.

@@ -943,3 +943,70 @@ body.dark-mode .hashtags {
     color: #aaaaaa;
     border-top-color: #444;
 }
+/* Dropdown Menu Styles */
+nav ul li.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9; /* White background */
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); /* Soft shadow */
+    z-index: 1;
+    border-radius: 5px;
+    overflow: hidden; /* Ensure rounded corners apply to children */
+}
+
+.dropdown-content a {
+    color: black; /* Black text */
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    text-align: left;
+    font-weight: normal;
+    background-color: #f9f9f9; /* Ensure white background */
+}
+
+.dropdown-content a:hover {
+    background-color: #f1f1f1; /* Light gray on hover */
+    color: #333;
+}
+
+nav ul li.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Adjustments for main nav links to look consistent */
+nav ul li.dropdown .dropbtn {
+    padding: 0.5rem 1rem; /* Match existing nav a padding */
+    display: block; /* Make the whole area clickable */
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    background-color: transparent; /* Ensure button background is transparent */
+}
+
+nav ul li.dropdown .dropbtn:hover {
+    background-color: #1eaf53; /* Darker Green on hover, match nav a:hover */
+}
+
+/* Dark mode for dropdown */
+body.dark-mode .dropdown-content {
+    background-color: #333333; /* Dark background */
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.4);
+}
+
+body.dark-mode .dropdown-content a {
+    color: #e0e0e0; /* Light text */
+    background-color: #333333;
+}
+
+body.dark-mode .dropdown-content a:hover {
+    background-color: #444444; /* Slightly lighter dark on hover */
+    color: #eeeeee;
+}
