@@ -82,6 +82,9 @@ The Tracking-SA project is a framework-less web application (HTML, CSS, JavaScri
 *   **`style.css` Modifications**:
     *   The `.utility-buttons` class and its styles were replaced with a new `.utility-controls` class. This new class uses `display: flex; gap: 10px; align-items: center; margin-left: auto;` to position the utility buttons to the top right of the header for desktop views.
     *   The mobile responsive styles within `@media (max-width: 768px)` were also updated to target `.utility-controls`.
+    *   Updated mobile `@media (max-width: 768px)` styles for `.utility-controls` to `flex-direction: column; align-items: center; justify-content: center;` to stack and center its children.
+    *   Updated mobile `@media (max-width: 768px)` styles for `.header-content` to `flex-direction: column; justify-content: center; align-items: center;` to stack the logo and hamburger menu vertically.
+
 
 ## Resolved Issues & Further Actions:
 

@@ -1214,8 +1214,9 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
 
     .header-content { /* New wrapper for header items */
         display: flex;
+        flex-direction: column; /* Stack children vertically */
         width: 100%;
-        justify-content: space-between;
+        justify-content: center;
         align-items: center;
     }
 
@@ -1281,11 +1282,13 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
         color: white; /* White text on green menu background */
     }
     .utility-controls {
+        flex-direction: column; /* Stack children vertically */
+        align-items: center;   /* Center children horizontally */
+        justify-content: center; /* Center children vertically (if space allows) */
         margin-top: 10px;
         margin-left: 0;
         width: 100%;
-        justify-content: center; /* Center utility buttons horizontally */
-        gap: 15px; /* Spacing between utility buttons */
+        gap: 15px; /* Spacing between stacked items */
         padding-bottom: 10px;
     }
     .lang-button {
