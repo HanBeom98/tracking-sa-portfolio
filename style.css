@@ -1237,7 +1237,7 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
     }
 
     .hamburger-menu-toggle {
-        display: block; /* Show hamburger on mobile */
+        display: block !important; /* Ensure it's visible on mobile */
         background: none;
         border: none;
         font-size: 2em;
@@ -1245,10 +1245,13 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
         cursor: pointer;
         padding: 5px;
         z-index: 1100; /* Ensure it's above other content */
+        position: absolute; /* Position to top right */
+        top: 10px;
+        right: 20px;
     }
 
     .desktop-menu-container {
-        display: flex; /* Show by default (visually hidden by max-height:0) */
+        display: none; /* Hidden by default on mobile */
         flex-direction: column;
         width: 100%;
         background-color: #22c55e; /* Green background for opened menu */
@@ -1264,6 +1267,7 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
 
     .desktop-menu-container.menu-open {
         display: flex; /* Show when open */
+        height: auto; /* Allow height to adjust to content */
         max-height: 500px; /* Arbitrary large value for slide-down */
         /* Add margin-bottom to push content down */
         margin-bottom: 20px;
