@@ -91,16 +91,38 @@ async function loadLayout() {
         });
     }
 
-    // Hamburger menu toggle logic
-    const hamburgerToggle = document.querySelector('.hamburger-menu-toggle');
-    const desktopMenuContainer = document.querySelector('.desktop-menu-container'); // Corrected selector
+    // Scroll-hide/show header logic for mobile
+    let lastScrollY = 0;
+    let header = document.querySelector('header');
+    const mediaQuery = window.matchMedia('(max-width: 768px)');
 
-    if (hamburgerToggle && desktopMenuContainer) {
-        hamburgerToggle.addEventListener('click', () => {
-            desktopMenuContainer.classList.toggle('menu-open');
-            // Removed hamburgerToggle.classList.toggle('is-active') as it's not defined in style.css or requested
-        });
+    function handleScroll() {
+        if (mediaQuery.matches) { // Only apply on mobile
+            if (window.scrollY === 0) {
+                header.style.transform = 'translateY(0)'; // Always show header at top
+            } else if (window.scrollY > lastScrollY) {
+                header.style.transform = 'translateY(-100%)'; // Scroll down, hide header
+            } else {
+                header.style.transform = 'translateY(0)'; // Scroll up, show header
+            }
+            lastScrollY = window.scrollY;
+        } else {
+            // Ensure header is visible on PC if it was hidden by mobile logic
+            header.style.transform = 'translateY(0)';
+        }
     }
+
+    // Add event listener when DOM is loaded
+    document.addEventListener('scroll', handleScroll);
+
+    // Also handle changes in media query (e.g., rotating device from mobile to PC)
+    mediaQuery.addEventListener('change', () => {
+        if (!mediaQuery.matches) {
+            header.style.transform = 'translateY(0)'; // Ensure header visible on PC
+        }
+    });
+
+
 
     // 언어 선택 버튼 추가 (language-switcher div가 있다면)
     const languageSwitcher = document.getElementById('language-switcher');

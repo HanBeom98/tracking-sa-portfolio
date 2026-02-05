@@ -1216,6 +1216,7 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
         height: auto !important; /* Ensure height expands */
         padding: 15px 0; /* Adjusted padding for mobile */
         background-color: #22c55e; /* Brand green background */
+        transition: transform 0.3s ease-in-out; /* Added for smooth hide/show */
     }
 
     .header-content { /* New wrapper for header items */
@@ -1253,14 +1254,14 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
     nav ul {
         flex-direction: column;
         align-items: center; /* Center menu items */
-        gap: 12px; /* Adjusted gap for touchability */
+        gap: 5px; /* Adjusted gap for touchability */
         width: 100%;
         margin-top: 10px; /* Space above nav items */
         margin-bottom: 10px; /* Space below nav items */
         padding: 10px 0;
     }
     nav a {
-        padding: 0.8rem 1rem; /* Larger touch area */
+        padding: 5px 0; /* Reduced padding for minimal vertical length */
         width: auto; /* Let content define width, then center */
         text-align: center; /* Center text within buttons */
         font-size: 1.1em; /* Larger font for readability */
