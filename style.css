@@ -1215,8 +1215,9 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
         align-items: center; /* Center items vertically in column layout */
         justify-content: space-between; /* Space out title and hamburger */
         flex-wrap: wrap; /* Allow items to wrap */
-        height: auto; /* Allow header to expand as content wraps */
+        height: auto !important; /* Ensure height expands */
         padding: 10px; /* Adjust padding for mobile */
+        padding-bottom: 20px; /* Added padding-bottom to prevent overlap */
         background-color: #22c55e; /* Brand green background */
     }
 
@@ -1247,7 +1248,7 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
     }
 
     .desktop-menu-container {
-        display: none; /* Hidden by default on mobile */
+        display: flex; /* Show by default (visually hidden by max-height:0) */
         flex-direction: column;
         width: 100%;
         background-color: #22c55e; /* Green background for opened menu */
