@@ -1,5 +1,15 @@
 const URL = "https://teachablemachine.withgoogle.com/models/Jtg0ClWaE/"; // Replace with your Teachable Machine model URL
 
+// Mapping of animal names to emojis
+const animalEmojis = {
+    '강아지상': '🐶',
+    '고양이상': '🐱',
+    '다람쥐상': '🐿️',
+    '곰상': '🐻',
+    '토끼상': '🐰',
+    '여우상': '🦊',
+};
+
 let model, maxPredictions;
 let selectedGender = null; // To store selected gender
 let imagePreview = document.getElementById("image-preview");
@@ -124,7 +134,8 @@ async function predict() {
     const animalName = topPrediction.className;
     const confidence = (topPrediction.probability * 100).toFixed(2);
 
-    predictionResult.textContent = animalName;
+    const emoji = animalEmojis[animalName] || ''; // Get emoji, or empty string if not found
+    predictionResult.textContent = `${animalName} ${emoji}`; // Display animal name with emoji
     confidenceScore.textContent = `${confidence}%`;
 
     hideLoadingIndicator();
