@@ -37,11 +37,12 @@ header .site-title { /* Not used in current HTML but good to keep if it's a gene
 
 
 .desktop-menu-container {
-    flex-grow: 1;
+    /* Remove flex-grow to let it take natural width */
     display: flex; /* Ensure it's a flex container for its children */
-    justify-content: center; /* Center navigation items */
+    justify-content: flex-start; /* Align nav items to the start (left) */
     align-items: center; /* Vertically center nav items */
     height: 100%; /* Fill height of header */
+    /* Remove margin-right: auto (it doesn't have it, but mentioned in guidance) */
 }
 
 nav ul {

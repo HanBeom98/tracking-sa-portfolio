@@ -37,7 +37,6 @@ COMMON_HEAD_SCRIPTS = """
 
 COMMON_BODY_INJECTIONS = """
 <header>
-    <a href="/index.html" class="site-logo" data-i18n="news_home">홈</a>
     <button class="hamburger-menu-toggle" aria-label="메뉴 토글">
         <span class="hamburger-icon"></span>
     </button>
