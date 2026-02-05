@@ -33,8 +33,9 @@ const imagePreviewContainer = document.getElementById('image-preview-container')
 
 
 async function init() {
-    const modelURL = URL + "model.json";
-    const metadataURL = URL + "metadata.json";
+    const timestamp = new Date().getTime();
+    const modelURL = URL + "model.json?v=" + timestamp;
+    const metadataURL = URL + "metadata.json?v=" + timestamp;
 
     // Load the model
     model = await tmImage.load(modelURL, metadataURL);
