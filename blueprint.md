@@ -62,6 +62,7 @@ The Tracking-SA project is a framework-less web application (HTML, CSS, JavaScri
     *   Restored `header` background-color to brand green (`#22c55e`) and `color` to `white` for desktop.
     *   Restored `nav a` and `nav ul li.dropdown .dropbtn` `color` to `white`.
     *   Restored `body.dark-mode header` `background-color` to `#1c923f` (darker green).
+    *   Moved "테스트" button 3 pixels up using `transform: translateY(-3px)` on `.dropbtn`.
     *   Added comprehensive mobile-specific responsive overrides within `@media (max-width: 768px)`:
         *   `header`: Flex direction changed to column, items centered, background color set to brand green.
         *   `.header-content`: New flex container to manage site title and hamburger toggle.
@@ -69,10 +70,18 @@ The Tracking-SA project is a framework-less web application (HTML, CSS, JavaScri
         *   `.hamburger-menu-toggle`: Displayed on mobile, white icon.
         *   `.desktop-menu-container`: Hidden by default, slides down when opened, green background for menu items.
         *   `nav ul`, `nav a`, `nav ul li.dropdown .dropbtn`: Flex direction changed to column, items centered, white text on green menu background.
-        *   `.utility-buttons`: Centered, white background and green text for language buttons.
+        *   `.utility-controls`: Centered, white background and green text for language buttons.
         *   News grid and hero card adjustments (single column layout) are maintained.
 *   **`common.js` Modifications**:
     *   Implemented JavaScript logic to toggle the `menu-open` class on `.desktop-menu-container` when `.hamburger-menu-toggle` is clicked, providing the hamburger menu functionality.
+
+### 6. Utility Buttons Position
+
+*   **`main.py` Modifications**:
+    *   The `COMMON_BODY_INJECTIONS` constant was updated to wrap the theme change button and language switcher in a new `div` with the class `utility-controls`.
+*   **`style.css` Modifications**:
+    *   The `.utility-buttons` class and its styles were replaced with a new `.utility-controls` class. This new class uses `display: flex; gap: 10px; align-items: center; margin-left: auto;` to position the utility buttons to the top right of the header for desktop views.
+    *   The mobile responsive styles within `@media (max-width: 768px)` were also updated to target `.utility-controls`.
 
 ## Resolved Issues & Further Actions:
 
@@ -88,7 +97,7 @@ The Tracking-SA project is a framework-less web application (HTML, CSS, JavaScri
 **Final Check Summary:**
 *   **Home screen cleanliness:** `index.html` displays a single, integrated green menu bar with the specified order and a functioning '테스트' dropdown. The page is free of any AI test promotional banners, showing only the menu and the news list.
 *   **'테스트' menu dropdown:** Hovering over '테스트' correctly displays the sub-menus ('동물상 테스트', 'AI 성향 테스트') with the correct styling.
-*   **Utility buttons:** Only the language selection button remains on the right end of the header and remains functional. The theme change button and its icon are gone.
+*   **Utility buttons:** The language selection button and theme change button are correctly positioned to the top right of the header for desktop views and centered on mobile. They remain functional.
 *   **'AI 성향 테스트' redirection:** The 'AI 성향 테스트' link within the dropdown successfully navigates to the independent `ai-test.html` page where the quiz resides.
 *   **Sticky Header:** The main header bar is fixed at the top during scrolling.
 *   **Mobile UI Fixes**: The mobile header background is brand green, the hamburger menu functions correctly, menu items are vertically and centrally aligned with proper spacing, and news content does not overlap with the header. The hero/grid layout and card visual details are responsive and correct.

@@ -59,7 +59,7 @@ COMMON_BODY_INJECTIONS = """
                     <li><a href="/privacy-policy.html" data-i18n="privacy_policy">개인정보처리방침</a></li>
                 </ul>
             </nav>
-            <div class="utility-buttons">
+            <div class="utility-controls"> <!-- New wrapper for utility buttons -->
                 <button id="color-change">🌙</button> <!-- Theme change button re-added -->
                 <div id="language-switcher"></div>
             </div>
