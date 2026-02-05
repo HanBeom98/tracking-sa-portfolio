@@ -91,7 +91,7 @@ def _generate_sitemap(articles_info):
     sitemap_content = f"""<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-        <loc>https://example.com/index.html</loc>
+        <loc>https://tracking-sa.pages.dev/index.html</loc>
         <lastmod>{current_date}</lastmod>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
@@ -100,7 +100,7 @@ def _generate_sitemap(articles_info):
 
     for article in articles_info:
         sitemap_content += f"""    <url>
-        <loc>https://example.com/{article['url']}</loc>
+        <loc>https://tracking-sa.pages.dev/{article['url']}</loc>
         <lastmod>{article['date']}</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
