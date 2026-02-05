@@ -198,6 +198,7 @@ function resetUI() {
     dropZone.style.display = 'block';
     imagePreviewContainer.style.display = 'none';
     imageUploadInput.value = ''; // Clear the file input
+    document.querySelector('.image-upload-section').style.display = 'block'; // Ensure parent section is visible
 }
 
 function setupShareButtons(animalName, confidence) {
