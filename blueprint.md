@@ -56,6 +56,24 @@ The Tracking-SA project is a framework-less web application (HTML, CSS, JavaScri
 
 *   New translation keys (`ai_tendency_test`, `hero_title`, `hero_subtitle`, `start_test_button`) have been added to `translations.js` for both Korean (`ko`) and English (`en`) languages to ensure multi-language support for the new features.
 
+### 5. Mobile Responsiveness & Hamburger Menu
+
+*   **`style.css` Modifications**:
+    *   Restored `header` background-color to brand green (`#22c55e`) and `color` to `white` for desktop.
+    *   Restored `nav a` and `nav ul li.dropdown .dropbtn` `color` to `white`.
+    *   Restored `body.dark-mode header` `background-color` to `#1c923f` (darker green).
+    *   Added comprehensive mobile-specific responsive overrides within `@media (max-width: 768px)`:
+        *   `header`: Flex direction changed to column, items centered, background color set to brand green.
+        *   `.header-content`: New flex container to manage site title and hamburger toggle.
+        *   `.site-logo`: White text on green background.
+        *   `.hamburger-menu-toggle`: Displayed on mobile, white icon.
+        *   `.desktop-menu-container`: Hidden by default, slides down when opened, green background for menu items.
+        *   `nav ul`, `nav a`, `nav ul li.dropdown .dropbtn`: Flex direction changed to column, items centered, white text on green menu background.
+        *   `.utility-buttons`: Centered, white background and green text for language buttons.
+        *   News grid and hero card adjustments (single column layout) are maintained.
+*   **`common.js` Modifications**:
+    *   Implemented JavaScript logic to toggle the `menu-open` class on `.desktop-menu-container` when `.hamburger-menu-toggle` is clicked, providing the hamburger menu functionality.
+
 ## Resolved Issues & Further Actions:
 
 *   **Deployment Blockage**: Resolved by removing `public/` from `.gitignore` and modifying the GitHub Actions workflow (`.github/workflows/daily-news-post.yml`) to use `git add .` for comprehensive staging of all generated files.
@@ -73,4 +91,5 @@ The Tracking-SA project is a framework-less web application (HTML, CSS, JavaScri
 *   **Utility buttons:** Only the language selection button remains on the right end of the header and remains functional. The theme change button and its icon are gone.
 *   **'AI 성향 테스트' redirection:** The 'AI 성향 테스트' link within the dropdown successfully navigates to the independent `ai-test.html` page where the quiz resides.
 *   **Sticky Header:** The main header bar is fixed at the top during scrolling.
+*   **Mobile UI Fixes**: The mobile header background is brand green, the hamburger menu functions correctly, menu items are vertically and centrally aligned with proper spacing, and news content does not overlap with the header. The hero/grid layout and card visual details are responsive and correct.
 *   **News Update**: The site should now correctly update news and reflect all changes upon deployment via GitHub Actions.

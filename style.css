@@ -9,8 +9,8 @@ body {
 }
 
 header {
-    background-color: #ffffff; /* Changed to white */
-    color: #333; /* Changed to dark gray */
+    background-color: #22c55e; /* Main Green - RESTORED */
+    color: white; /* RESTORED */
     height: 50px; /* Adjusted height for the header bar */
     padding: 0 20px; /* Adjust padding due to fixed height */
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -54,7 +54,7 @@ nav ul li {
 }
 
 nav a {
-    color: #22c55e; /* Changed to green */
+    color: white; /* RESTORED */
     text-decoration: none;
     font-weight: bold;
     padding: 0.5rem 1rem;
@@ -321,20 +321,6 @@ body.dark-mode .news-card-date {
 @media (max-width: 992px) { /* Tablet size */
     .news-grid {
         grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); /* 2 columns */
-    }
-}
-
-@media (max-width: 768px) { /* Mobile size */
-    .news-grid {
-        grid-template-columns: 1fr; /* 1 column */
-        gap: 20px;
-    }
-    .hero-card {
-        padding: 20px;
-        margin-bottom: 25px;
-    }
-    .hero-card-title {
-        font-size: 2em;
     }
 }
 
@@ -734,83 +720,6 @@ body.dark-mode .news-card-date {
     text-align: right; /* Align to the right, as often seen with tags */
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    header {
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 1rem;
-    }
-
-    header .site-title {
-        margin-right: 0;
-        margin-bottom: 10px;
-    }
-
-    nav ul {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-        width: 100%;
-    }
-    nav a {
-        padding: 0.5rem;
-        width: calc(100% - 1rem); /* Full width minus padding */
-        text-align: left;
-    }
-    .utility-buttons {
-        margin-top: 10px;
-        margin-left: 0;
-        width: 100%;
-        justify-content: flex-start;
-    }
-    .news-grid {
-        grid-template-columns: 1fr; /* Single column on small screens */
-    }
-    .news-section-main .section-title {
-        font-size: 2em;
-    }
-    .news-article-container .article-title {
-        font-size: 2em;
-    }
-    .article-detail-main {
-        padding: 20px;
-    }
-    .hero-banner h2 {
-        font-size: 1.8em;
-    }
-    .hero-banner p {
-        font-size: 1em;
-    }
-    .hero-banner .action-button {
-        padding: 10px 25px;
-        font-size: 1em;
-    }
-    .ai-test-page {
-        margin: 20px auto;
-        padding: 20px;
-    }
-    .ai-test-page h1 {
-        font-size: 2em;
-    }
-    .quiz-section h2 {
-        font-size: 1.5em;
-    }
-    .answer-button {
-        padding: 12px;
-    }
-    .result-emoji {
-        font-size: 4em;
-    }
-    .result-name {
-        font-size: 1.8em;
-    }
-    .ai-test-page .action-button {
-        padding: 10px 20px;
-        font-size: 1em;
-    }
-}
-
 /* Dark Mode Styles */
 body.dark-mode {
     background-color: #1a1a1a; /* Dark background */
@@ -818,15 +727,15 @@ body.dark-mode {
 }
 
 body.dark-mode header {
-    background-color: #1a1a1a; /* Dark background */
+    background-color: #1c923f; /* Darker green header - RESTORED */
 }
 
 body.dark-mode nav a {
-    color: #66cc66; /* Lighter green for dark mode */
+    color: white; /* RESTORED */
 }
 
 body.dark-mode nav ul li.dropdown .dropbtn {
-    color: #66cc66; /* Lighter green for dark mode */
+    color: white; /* RESTORED */
 }
 
 body.dark-mode nav a:hover {
@@ -1046,7 +955,7 @@ body.dark-mode .share-buttons .share-button:hover {
     background-color: #777777;
 }
 
-body.dark-mode .share-buttons .share-button[data-platform="twitter"] { background-color: #1a8cd8; }
+body.dark-mode .share-buttons .share-button[data-platform="twitter"] { background-color: #1da1f2; }
 body.dark-mode .share-buttons .share-button[data-platform="twitter"]:hover { background-color: #1da1f2; }
 body.dark-mode .share-buttons .share-button[data-platform="facebook"] { background-color: #2d4373; }
 body.dark-mode .share-buttons .share-button[data-platform="facebook"]:hover { background-color: #3b5998; }
@@ -1109,7 +1018,7 @@ nav ul li.dropdown:hover .dropdown-content {
 nav ul li.dropdown .dropbtn {
     padding: 0.5rem 1rem; /* Match existing nav a padding */
     display: block; /* Make the whole area clickable */
-    color: #22c55e; /* Changed to green */
+    color: white; /* RESTORED */
     text-decoration: none;
     font-weight: bold;
     border-radius: 5px;
@@ -1289,4 +1198,170 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
     .inquiry-form-section h1 {
         font-size: 2em;
     }
+}
+
+/* Mobile Responsive Overrides for Header and Navigation (max-width: 768px) */
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        align-items: center; /* Center items vertically in column layout */
+        justify-content: space-between; /* Space out title and hamburger */
+        flex-wrap: wrap; /* Allow items to wrap */
+        height: auto; /* Allow header to expand as content wraps */
+        padding: 10px; /* Adjust padding for mobile */
+        background-color: #22c55e; /* Brand green background */
+    }
+
+    .header-content { /* New wrapper for header items */
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .site-logo {
+        font-size: 1.8em;
+        font-weight: bold;
+        color: white; /* White text for logo on green background */
+        text-decoration: none;
+    }
+
+    .hamburger-menu-toggle {
+        display: block; /* Show hamburger on mobile */
+        background: none;
+        border: none;
+        font-size: 2em;
+        color: white; /* White icon on green background */
+        cursor: pointer;
+        padding: 5px;
+        z-index: 1100; /* Ensure it's above other content */
+    }
+
+    .desktop-menu-container {
+        display: none; /* Hidden by default on mobile */
+        flex-direction: column;
+        width: 100%;
+        background-color: #22c55e; /* Green background for opened menu */
+        position: absolute; /* Position relative to header */
+        top: 50px; /* Below the header */
+        left: 0;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        z-index: 999; /* Below hamburger, above content */
+        max-height: 0; /* For slide-down animation */
+        overflow: hidden;
+        transition: max-height 0.3s ease-out;
+    }
+
+    .desktop-menu-container.menu-open {
+        display: flex; /* Show when open */
+        max-height: 500px; /* Arbitrary large value for slide-down */
+        /* Add margin-bottom to push content down */
+        margin-bottom: 20px;
+    }
+
+    nav ul {
+        flex-direction: column;
+        align-items: center; /* Center menu items */
+        gap: 15px; /* Increased gap for touchability */
+        width: 100%;
+        margin-top: 10px; /* Space above nav items */
+        margin-bottom: 10px; /* Space below nav items */
+        padding: 10px 0;
+    }
+    nav a {
+        padding: 0.8rem 1rem; /* Larger touch area */
+        width: auto; /* Let content define width, then center */
+        text-align: center; /* Center text within buttons */
+        font-size: 1.1em; /* Larger font for readability */
+        color: white; /* White text on green menu background */
+    }
+    nav ul li.dropdown .dropbtn {
+        transform: translateY(0); /* Reset specific button adjustment */
+        padding: 0.8rem 1rem; /* Match other nav a padding */
+        color: white; /* White text on green menu background */
+    }
+    .utility-buttons {
+        margin-top: 10px;
+        margin-left: 0;
+        width: 100%;
+        justify-content: center; /* Center utility buttons horizontally */
+        gap: 15px; /* Spacing between utility buttons */
+        padding-bottom: 10px;
+    }
+    .lang-button {
+        padding: 10px 15px; /* Larger touch area */
+        font-size: 1em; /* Readable font size */
+        color: #22c55e; /* Green text for language buttons */
+        background-color: white; /* White background for language buttons */
+    }
+    .lang-button.active {
+        background-color: #1eaf53; /* Darker green for active */
+        color: white;
+    }
+
+    /* News Grid and Hero Card adjustments (restored from previous state) */
+    .news-grid {
+        grid-template-columns: 1fr; /* Single column on small screens */
+        gap: 20px;
+    }
+    .hero-card {
+        padding: 20px;
+        margin-bottom: 25px;
+    }
+    .hero-card-title {
+        font-size: 2em;
+    }
+
+    .news-section-main .section-title {
+        font-size: 2em;
+    }
+    .news-article-container .article-title {
+        font-size: 2em;
+    }
+    .article-detail-main {
+        padding: 20px;
+    }
+    /* Assuming hero-banner related styles were intended for another component not directly news-grid */
+    /* .hero-banner h2 { font-size: 1.8em; } */
+    /* .hero-banner p { font-size: 1em; } */
+    /* .hero-banner .action-button { padding: 10px 25px; font-size: 1em; } */
+    .ai-test-page {
+        margin: 20px auto;
+        padding: 20px;
+    }
+    .ai-test-page h1 {
+        font-size: 2em;
+    }
+    .quiz-section h2 {
+        font-size: 1.5em;
+    }
+    .answer-button {
+        padding: 12px;
+    }
+    .result-emoji {
+        font-size: 4em;
+    }
+    .result-name {
+        font-size: 1.8em;
+    }
+    .ai-test-page .action-button {
+        padding: 10px 20px;
+        font-size: 1em;
+    }
+}
+
+/* Dark Mode specific overrides for the mobile menu */
+body.dark-mode .desktop-menu-container {
+    background-color: #1c923f; /* Darker green for opened menu in dark mode */
+}
+body.dark-mode .desktop-menu-container a {
+    color: white; /* White text on dark green background */
+}
+body.dark-mode .desktop-menu-container .lang-button {
+    color: #66cc66; /* Lighter green text for language buttons in dark mode */
+    background-color: #333333; /* Dark background for language buttons */
+}
+body.dark-mode .desktop-menu-container .lang-button.active {
+    background-color: #156d2e; /* Even darker green for active */
+    color: white;
 }

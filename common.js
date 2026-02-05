@@ -91,14 +91,14 @@ async function loadLayout() {
         });
     }
 
-    // 햄버거 메뉴 토글 로직 추가
+    // Hamburger menu toggle logic
     const hamburgerToggle = document.querySelector('.hamburger-menu-toggle');
-    const mobileMenuContainer = document.getElementById('mobile-menu-container');
+    const desktopMenuContainer = document.querySelector('.desktop-menu-container'); // Corrected selector
 
-    if (hamburgerToggle && mobileMenuContainer) {
+    if (hamburgerToggle && desktopMenuContainer) {
         hamburgerToggle.addEventListener('click', () => {
-            mobileMenuContainer.classList.toggle('menu-open');
-            hamburgerToggle.classList.toggle('is-active'); // For animating the icon
+            desktopMenuContainer.classList.toggle('menu-open');
+            // Removed hamburgerToggle.classList.toggle('is-active') as it's not defined in style.css or requested
         });
     }
 
