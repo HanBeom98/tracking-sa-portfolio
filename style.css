@@ -576,7 +576,7 @@ body.dark-mode .news-card-date {
 #image-preview {
     max-width: 100%;
     height: auto;
-    border-radius: 5px;
+    border-radius: 10px;
     margin-bottom: 15px;
     display: none; /* Hidden until image is loaded */
 }

@@ -29,6 +29,7 @@ const genderSelection = document.getElementById('gender-selection');
 const genderMaleButton = document.getElementById('gender-male');
 const genderFemaleButton = document.getElementById('gender-female');
 const shareButtonsContainer = document.getElementById('share-buttons');
+const imagePreviewContainer = document.getElementById('image-preview-container'); // NEW
 
 
 async function init() {
@@ -42,7 +43,8 @@ async function init() {
     // Initial UI state
     hideLoadingIndicator();
     hideResultSection();
-    document.querySelector('.image-upload-section').style.display = 'block'; // Show upload section
+    dropZone.style.display = 'block'; // Ensure drop zone is visible initially
+    imagePreviewContainer.style.display = 'none'; // Ensure preview container is hidden initially
 
     // Event Listeners
     dropZone.addEventListener('dragover', handleDragOver);
@@ -112,6 +114,10 @@ function processFile(file) {
         imagePreview.style.display = 'block';
         predictButton.style.display = 'block'; // Show predict button after image is loaded
         hideResultSection();
+        
+        // NEW: Hide dropZone and show imagePreviewContainer
+        dropZone.style.display = 'none';
+        imagePreviewContainer.style.display = 'block';
     };
     reader.readAsDataURL(file);
 }
@@ -186,7 +192,9 @@ function resetUI() {
     genderFemaleButton.classList.remove('active');
     hideResultSection();
     hideLoadingIndicator();
-    document.querySelector('.image-upload-section').style.display = 'block'; // Show upload section
+    // NEW: Show dropZone and hide imagePreviewContainer
+    dropZone.style.display = 'block';
+    imagePreviewContainer.style.display = 'none';
 }
 
 function setupShareButtons(animalName, confidence) {
