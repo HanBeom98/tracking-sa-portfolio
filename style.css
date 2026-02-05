@@ -11,7 +11,7 @@ body {
 header {
     background-color: #22c55e; /* Main Green */
     color: white;
-    height: 60px; /* Fixed height for the header bar */
+    height: 50px; /* Adjusted height for the header bar */
     padding: 0 20px; /* Adjust padding due to fixed height */
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     display: flex;
