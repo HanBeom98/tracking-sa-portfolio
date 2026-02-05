@@ -1,14 +1,10 @@
-import feedparser
+import argparse
 import os
 import datetime
 import subprocess
-import requests
 import re
-from dotenv import load_dotenv
 import markdown 
-import shutil 
-import hashlib 
-from google import genai
+import shutil
 import time
 
 load_dotenv()
@@ -341,39 +337,53 @@ def generate_public_site():
     _generate_sitemap(articles_meta)
 
 def main():
-    # For debugging: Remove processed articles log to force regeneration
-    if os.path.exists(PROCESSED_ARTICLES_LOG):
-        os.remove(PROCESSED_ARTICLES_LOG)
+    parser = argparse.ArgumentParser(description="Generate static news site with optional AI content generation.")
+    parser.add_argument("--build-only", action="store_true", 
+                        help="Only build the site from existing markdown files, skip fetching new news and AI content generation.")
+    args = parser.parse_args()
 
-    api_key = os.getenv("GEMINI_API_KEY")
-    if not api_key: 
-        print("에러: .env 파일에 GEMINI_API_KEY가 없습니다.")
-        return
+    if not args.build_only:
+        import feedparser # Moved here to be conditional
+        import requests # Moved here to be conditional
+        from google import genai # Moved here to be conditional
+        from dotenv import load_dotenv # Moved here to be conditional
+        load_dotenv() # Load environment variables here
+        # For debugging: Remove processed articles log to force regeneration
+        if os.path.exists(PROCESSED_ARTICLES_LOG):
+            os.remove(PROCESSED_ARTICLES_LOG)
 
-    rss_urls = [
-        "https://techcrunch.com/category/artificial-intelligence/feed/",
-        "https://techcrunch.com/category/startups/feed/",
-        "https://techcrunch.com/category/enterprise/feed/"
-    ]
+        api_key = os.getenv("GEMINI_API_KEY")
+        if not api_key: 
+            print("에러: .env 파일에 GEMINI_API_KEY가 없습니다.")
+            # Do not return here if build-only is false, still need to generate_public_site
+        
+        rss_urls = [
+            "https://techcrunch.com/category/artificial-intelligence/feed/",
+            "https://techcrunch.com/category/startups/feed/",
+            "https://techcrunch.com/category/enterprise/feed/"
+        ]
 
-    for rss_url in rss_urls:
-        news_items = fetch_latest_news_from_feed(rss_url)
-        if news_items:
-            for news in news_items:
-                article_id = clean_filename(news.title)
-                if not is_duplicate_article(article_id):
-                    print(f"📰 새 뉴스 발견: {news.title}")
-                    content = generate_ai_content(api_key, news.title, news.summary)
-                    if content:
-                        save_post_and_generate_html(content)
-                        record_processed_article(article_id)
-                else:
-                    print(f"⚠️ 중복 기사 발견: '{news.title}'. 건너뜁니다.")
-            time.sleep(10) # Add delay between processing each RSS feed
-        else:
-            print(f"➡️ {rss_url}에서 새로운 뉴스를 찾지 못했습니다.")
-    
-    print("\n✅ 모든 피드 확인 완료. 최종 사이트를 생성합니다.")
+        for rss_url in rss_urls:
+            news_items = fetch_latest_news_from_feed(rss_url)
+            if news_items:
+                for news in news_items:
+                    article_id = clean_filename(news.title)
+                    if not is_duplicate_article(article_id):
+                        print(f"📰 새 뉴스 발견: {news.title}")
+                        content = generate_ai_content(api_key, news.title, news.summary)
+                        if content:
+                            save_post_and_generate_html(content)
+                            record_processed_article(article_id)
+                    else:
+                        print(f"⚠️ 중복 기사 발견: '{news.title}'. 건너뜜니다.")
+                time.sleep(10) # Add delay between processing each RSS feed
+            else:
+                print(f"➡️ {rss_url}에서 새로운 뉴스를 찾지 못했습니다.")
+        
+        print("\n✅ 모든 피드 확인 완료. 최종 사이트를 생성합니다.")
+    else:
+        print("\n⚙️ '--build-only' 플래그가 지정되어 새로운 뉴스를 가져오거나 AI 콘텐츠를 생성하지 않고 사이트를 빌드합니다.")
+
     generate_public_site()
 
 if __name__ == "__main__":

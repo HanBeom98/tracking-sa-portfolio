@@ -47,6 +47,12 @@ nav ul {
     gap: 20px;
 }
 
+nav ul li {
+    display: flex;
+    align-items: center;
+    height: 100%; /* Ensure li takes full height of parent ul */
+}
+
 nav a {
     color: white;
     text-decoration: none;
