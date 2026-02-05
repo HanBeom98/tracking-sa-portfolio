@@ -30,9 +30,7 @@ header .site-title { /* Not used in current HTML but good to keep if it's a gene
     margin-right: 20px;
 }
 
-.hamburger-menu-toggle {
-    display: none;
-}
+
 
 
 
@@ -1216,8 +1214,7 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
         justify-content: space-between; /* Space out title and hamburger */
         flex-wrap: wrap; /* Allow items to wrap */
         height: auto !important; /* Ensure height expands */
-        padding: 10px; /* Adjust padding for mobile */
-        padding-bottom: 20px; /* Added padding-bottom to prevent overlap */
+        padding: 15px 0; /* Adjusted padding for mobile */
         background-color: #22c55e; /* Brand green background */
     }
 
@@ -1236,47 +1233,27 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
         text-decoration: none;
     }
 
-    .hamburger-menu-toggle {
-        display: block !important; /* Ensure it's visible on mobile */
-        background: none;
-        border: none;
-        font-size: 2em;
-        color: white; /* White icon on green background */
-        cursor: pointer;
-        padding: 5px;
-        z-index: 1100; /* Ensure it's above other content */
-        position: absolute; /* Position to top right */
-        top: 10px;
-        right: 20px;
-    }
+
 
     .desktop-menu-container {
-        display: none; /* Hidden by default on mobile */
+        display: flex !important; /* Always visible on mobile */
         flex-direction: column;
         width: 100%;
         background-color: #22c55e; /* Green background for opened menu */
-        position: absolute; /* Position relative to header */
-        top: 50px; /* Below the header */
-        left: 0;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        z-index: 999; /* Below hamburger, above content */
-        max-height: 0; /* For slide-down animation */
-        overflow: hidden;
-        transition: max-height 0.3s ease-out;
+        position: relative; /* Position relative to header flow */
+        top: auto; /* Reset top */
+        left: auto; /* Reset left */
+        box-shadow: none; /* Remove shadow */
+        z-index: auto; /* Reset z-index */
+        /* Removed max-height, overflow, transition */
     }
 
-    .desktop-menu-container.menu-open {
-        display: flex; /* Show when open */
-        height: auto; /* Allow height to adjust to content */
-        max-height: 500px; /* Arbitrary large value for slide-down */
-        /* Add margin-bottom to push content down */
-        margin-bottom: 20px;
-    }
+
 
     nav ul {
         flex-direction: column;
         align-items: center; /* Center menu items */
-        gap: 15px; /* Increased gap for touchability */
+        gap: 12px; /* Adjusted gap for touchability */
         width: 100%;
         margin-top: 10px; /* Space above nav items */
         margin-bottom: 10px; /* Space below nav items */

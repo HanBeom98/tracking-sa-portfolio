@@ -37,9 +37,6 @@ COMMON_HEAD_SCRIPTS = """
 
 COMMON_BODY_INJECTIONS = """
 <header>
-    <button class="hamburger-menu-toggle" aria-label="메뉴 토글">
-        <span class="hamburger-icon"></span>
-    </button>
     <div class="desktop-menu-container" id="mobile-menu-container">
         <nav>
             <ul>
