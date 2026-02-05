@@ -145,22 +145,46 @@ def generate_index_html(articles_meta):
     with open("index.html", "r", encoding="utf-8") as f:
         base_html = f.read()
 
-    news_list_items = ""
+    hero_card_html = ""
+    grid_news_html = ""
+    
     if not articles_meta:
-        news_list_items = "<p class='no-news-message'>아직 게시된 뉴스가 없습니다.</p>"
+        hero_card_html = "<p class='no-news-message'>아직 게시된 뉴스가 없습니다.</p>"
     else:
-        for article in articles_meta:
-            news_list_items += f"""
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/{article['url']}" class="news-card-link">{article['title']}</a></h2>
-                <p class="news-card-date">{article['date']}</p>
+        # The first article is the hero article (articles_meta is already sorted by date, newest first)
+        hero_article = articles_meta[0]
+        hero_card_html = f"""
+            <article class="hero-card">
+                <h2 class="hero-card-title"><a href="/{hero_article['url']}" class="hero-card-link">{hero_article['title']}</a></h2>
+                <p class="hero-card-date">{hero_article['date']}</p>
+                <!-- Add more hero card specific content here, e.g., image, excerpt if available -->
             </article>
-            """
-        news_list_items = f'<div class="news-grid">{news_list_items}</div>'
+        """
 
+        # Remaining articles for the grid
+        grid_articles = articles_meta[1:]
+        if grid_articles:
+            grid_news_items = ""
+            for article in grid_articles:
+                grid_news_items += f"""
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/{article['url']}" class="news-card-link">{article['title']}</a></h2>
+                    <p class="news-card-date">{article['date']}</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                """
+            grid_news_html = f'<div class="news-grid">{grid_news_items}</div>'
+        
     updated_html = base_html.replace(
         "<!-- News content will be injected here by the Python script -->",
-        f'<section class="news-section-main"><h1 class="section-title">최신 뉴스</h1>{news_list_items}</section>'
+        f"""
+        <section class="news-section-main">
+            <h1 class="section-title" data-i18n="latest_news_hero_title">최신 뉴스</h1>
+            {hero_card_html}
+            <h1 class="section-title" data-i18n="all_news_grid_title">모든 뉴스</h1>
+            {grid_news_html}
+        </section>
+        """
     )
     
     output_path = os.path.join(PUBLIC_DIR, "index.html")

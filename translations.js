@@ -1,6 +1,8 @@
 const translations = {
     'ko': {
         'news_home': '뉴스 홈',
+        'latest_news_hero_title': '주요 뉴스',
+        'all_news_grid_title': '최신 기사',
         'home': '홈',
         'animal_face_test': '동물상 테스트',
         'partnership_inquiry': '파트너십 문의',
@@ -82,6 +84,8 @@ const translations = {
     },
     'en': {
         'news_home': 'News Home',
+        'latest_news_hero_title': 'Featured News',
+        'all_news_grid_title': 'Latest Articles',
         'home': 'Home',
         'animal_face_test': 'Animal Face Test',
         'partnership_inquiry': 'Partnership Inquiry',
