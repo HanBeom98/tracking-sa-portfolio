@@ -1,13 +1,19 @@
 const URL = "https://teachablemachine.withgoogle.com/models/Jtg0ClWaE/"; // Replace with your Teachable Machine model URL
 
-// Mapping of animal names to emojis
-const animalEmojis = {
-    '강아지상': '🐶',
-    '고양이상': '🐱',
-    '다람쥐상': '🐿️',
-    '곰상': '🐻',
-    '토끼상': '🐰',
-    '여우상': '🦊',
+// Mapping of animal names to emojis with Korean names
+const animalData = {
+    'dog': { emoji: '🐶', kor: '강아지상' },
+    'cat': { emoji: '🐱', kor: '고양이상' },
+    'squirrel': { emoji: '🐿️', kor: '다람쥐상' },
+    'bear': { emoji: '🐻', kor: '곰상' },
+    'rabbit': { emoji: '🐰', kor: '토끼상' },
+    'fox': { emoji: '🦊', kor: '여우상' },
+    '강아지상': { emoji: '🐶', kor: '강아지상' }, // 한글 결과 대응
+    '고양이상': { emoji: '🐱', kor: '고양이상' },
+    '다람쥐상': { emoji: '🐿️', kor: '다람쥐상' },
+    '곰상': { emoji: '🐻', kor: '곰상' },
+    '토끼상': { emoji: '🐰', kor: '토끼상' },
+    '여우상': { emoji: '🦊', kor: '여우상' }
 };
 
 let model, maxPredictions;
@@ -21,6 +27,7 @@ const imageUploadInput = document.getElementById('image-upload');
 const predictButton = document.getElementById('predict-button');
 const loadingIndicator = document.getElementById('loading-indicator');
 const resultSection = document.getElementById('result-section');
+const resultEmoji = document.getElementById('result-emoji'); // New: get reference to the emoji div
 const predictionResult = document.getElementById('prediction-result');
 const confidenceScore = document.getElementById('confidence-score');
 const retakeButton = document.getElementById('retake-button');
@@ -131,12 +138,23 @@ async function predict() {
     prediction.sort((a, b) => b.probability - a.probability);
 
     const topPrediction = prediction[0];
-    const animalName = topPrediction.className;
+    const animalName = topPrediction.className; // e.g., 'dog' or '강아지상'
     const confidence = (topPrediction.probability * 100).toFixed(2);
 
-    const emoji = animalEmojis[animalName] || ''; // Get emoji, or empty string if not found
-    predictionResult.textContent = `${animalName} ${emoji}`; // Display animal name with emoji
-    confidenceScore.textContent = `${confidence}%`;
+    // Find the correct animal data based on the prediction class name
+    const animalInfo = animalData[animalName];
+
+    // Update resultEmoji, predictionResult, and confidenceScore
+    if (animalInfo) {
+        resultEmoji.innerHTML = animalInfo.emoji;
+        predictionResult.innerText = "당신과 가장 닮은 동물은 '" + animalInfo.kor + "' 입니다!";
+    } else {
+        // Fallback if animalName is not found in animalData
+        resultEmoji.innerHTML = '❓'; // Unknown emoji
+        predictionResult.innerText = "당신과 가장 닮은 동물은 '" + animalName + "' 입니다! (데이터 없음)";
+    }
+    
+    confidenceScore.innerText = "AI 분석 결과 " + confidence + "%의 매칭률을 보입니다.";
 
     hideLoadingIndicator();
     showResultSection();
@@ -167,6 +185,7 @@ function resetUI() {
     imagePreview.src = '';
     imagePreview.style.display = 'none';
     predictButton.style.display = 'none';
+    resultEmoji.innerHTML = ''; // New: clear emoji content
     predictionResult.textContent = '';
     confidenceScore.textContent = '';
     selectedGender = null;

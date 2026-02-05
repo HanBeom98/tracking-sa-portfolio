@@ -1359,3 +1359,23 @@ body.dark-mode .desktop-menu-container .lang-button.active {
     background-color: #156d2e; /* Even darker green for active */
     color: white;
 }
+
+/* Styles for large emoji in animal face test results */
+.result-large-emoji {
+    font-size: 8rem;
+    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+    animation: popIn 0.5s ease;
+}
+
+@keyframes popIn {
+    from {
+        transform: scale(0);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
