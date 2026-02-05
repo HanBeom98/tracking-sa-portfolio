@@ -37,25 +37,33 @@ COMMON_HEAD_SCRIPTS = """
 
 COMMON_BODY_INJECTIONS = """
 <header>
-    <nav>
-        <ul>
-            <li><a href="/index.html" data-i18n="news_home">홈</a></li>
-            <li class="dropdown">
-                <a href="#" class="dropbtn">테스트</a>
-                <div class="dropdown-content">
-                    <a href="/animal_face_test.html" data-i18n="animal_face_test">동물상 테스트</a>
-                    <a href="/ai-test.html" data-i18n="ai_tendency_test">AI 성향 테스트</a>
-                </div>
-            </li>
-            <li><a href="/inquiry.html" data-i18n="partnership_inquiry">파트너십 문의</a></li>
-            <li><a href="/about.html" data-i18n="about_us">회사 소개</a></li>
-            <li><a href="/contact.html" data-i18n="contact">문의</a></li>
-            <li><a href="/privacy-policy.html" data-i18n="privacy_policy">개인정보처리방침</a></li>
-        </ul>
-    </nav>
-    <div class="utility-buttons">
-        <button id="color-change">🌙</button> <!-- Theme change button re-added -->
-        <div id="language-switcher"></div>
+    <div class="header-content">
+        <a href="/index.html" class="site-logo" data-i18n="news_home">홈</a>
+        <button class="hamburger-menu-toggle" aria-label="메뉴 토글">
+            <span class="hamburger-icon"></span>
+        </button>
+        <div class="desktop-menu-container" id="mobile-menu-container">
+            <nav>
+                <ul>
+                    <li><a href="/index.html" data-i18n="news_home">홈</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropbtn">테스트</a>
+                        <div class="dropdown-content">
+                            <a href="/animal_face_test.html" data-i18n="animal_face_test">동물상 테스트</a>
+                            <a href="/ai-test.html" data-i18n="ai_tendency_test">AI 성향 테스트</a>
+                        </div>
+                    </li>
+                    <li><a href="/inquiry.html" data-i18n="partnership_inquiry">파트너십 문의</a></li>
+                    <li><a href="/about.html" data-i18n="about_us">회사 소개</a></li>
+                    <li><a href="/contact.html" data-i18n="contact">문의</a></li>
+                    <li><a href="/privacy-policy.html" data-i18n="privacy_policy">개인정보처리방침</a></li>
+                </ul>
+            </nav>
+            <div class="utility-buttons">
+                <button id="color-change">🌙</button> <!-- Theme change button re-added -->
+                <div id="language-switcher"></div>
+            </div>
+        </div>
     </div>
 </header>
 """

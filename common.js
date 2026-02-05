@@ -91,6 +91,17 @@ async function loadLayout() {
         });
     }
 
+    // 햄버거 메뉴 토글 로직 추가
+    const hamburgerToggle = document.querySelector('.hamburger-menu-toggle');
+    const mobileMenuContainer = document.getElementById('mobile-menu-container');
+
+    if (hamburgerToggle && mobileMenuContainer) {
+        hamburgerToggle.addEventListener('click', () => {
+            mobileMenuContainer.classList.toggle('menu-open');
+            hamburgerToggle.classList.toggle('is-active'); // For animating the icon
+        });
+    }
+
     // 언어 선택 버튼 추가 (language-switcher div가 있다면)
     const languageSwitcher = document.getElementById('language-switcher');
     console.log("Language switcher div found:", languageSwitcher);

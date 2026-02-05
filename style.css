@@ -9,8 +9,8 @@ body {
 }
 
 header {
-    background-color: #22c55e; /* Main Green */
-    color: white;
+    background-color: #ffffff; /* Changed to white */
+    color: #333; /* Changed to dark gray */
     height: 50px; /* Adjusted height for the header bar */
     padding: 0 20px; /* Adjust padding due to fixed height */
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -54,7 +54,7 @@ nav ul li {
 }
 
 nav a {
-    color: white;
+    color: #22c55e; /* Changed to green */
     text-decoration: none;
     font-weight: bold;
     padding: 0.5rem 1rem;
@@ -818,7 +818,15 @@ body.dark-mode {
 }
 
 body.dark-mode header {
-    background-color: #1c923f; /* Darker green header */
+    background-color: #1a1a1a; /* Dark background */
+}
+
+body.dark-mode nav a {
+    color: #66cc66; /* Lighter green for dark mode */
+}
+
+body.dark-mode nav ul li.dropdown .dropbtn {
+    color: #66cc66; /* Lighter green for dark mode */
 }
 
 body.dark-mode nav a:hover {
@@ -846,8 +854,8 @@ body.dark-mode .news-card {
 }
 
 body.dark-mode .news-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+    transform: translateY(-8px);
+    box-shadow: 0 12px 35px rgba(0,0,0,0.5);
 }
 
 body.dark-mode .news-card-title a {
@@ -1101,7 +1109,7 @@ nav ul li.dropdown:hover .dropdown-content {
 nav ul li.dropdown .dropbtn {
     padding: 0.5rem 1rem; /* Match existing nav a padding */
     display: block; /* Make the whole area clickable */
-    color: white;
+    color: #22c55e; /* Changed to green */
     text-decoration: none;
     font-weight: bold;
     border-radius: 5px;
@@ -1280,111 +1288,5 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
 
     .inquiry-form-section h1 {
         font-size: 2em;
-    }
-}
-/* Mobile Responsive Overrides for Header and Navigation (max-width: 768px) */
-@media (max-width: 768px) {
-    header {
-        flex-direction: column;
-        align-items: center; /* Center items vertically in column layout */
-        justify-content: center; /* Center items horizontally */
-        flex-wrap: wrap; /* Allow items to wrap */
-        height: auto; /* Allow header to expand as content wraps */
-        padding: 10px; /* Adjust padding for mobile */
-    }
-
-    header .site-title {
-        margin-right: 0;
-        margin-bottom: 10px;
-        font-size: 1.5em; /* Smaller title for mobile */
-    }
-
-    nav ul {
-        flex-direction: column;
-        align-items: center; /* Center menu items */
-        gap: 15px; /* Increased gap for touchability */
-        width: 100%;
-        margin-bottom: 10px; /* Space below nav items */
-    }
-    nav a {
-        padding: 0.8rem 1rem; /* Larger touch area */
-        width: auto; /* Let content define width, then center */
-        text-align: center; /* Center text within buttons */
-        font-size: 1.1em; /* Larger font for readability */
-    }
-    nav ul li.dropdown .dropbtn {
-        transform: translateY(0); /* Reset specific button adjustment */
-        padding: 0.8rem 1rem; /* Match other nav a padding */
-    }
-    .utility-buttons {
-        margin-top: 10px;
-        margin-left: 0;
-        width: 100%;
-        justify-content: center; /* Center utility buttons horizontally */
-        gap: 15px; /* Spacing between utility buttons */
-    }
-    .lang-button {
-        padding: 10px 15px; /* Larger touch area */
-        font-size: 1em; /* Readable font size */
-    }
-
-    /* Existing responsive adjustments for news grid and hero card from the original media query
-       will now be overridden or supplemented by these rules.
-       Duplication of news-grid/hero-card mobile styles from the original media query
-       is acceptable in this context to ensure header/nav overrides are applied reliably.
-    */
-    .news-grid {
-        grid-template-columns: 1fr; /* Single column on small screens */
-        gap: 20px;
-    }
-    .hero-card {
-        padding: 20px;
-        margin-bottom: 25px;
-    }
-    .hero-card-title {
-        font-size: 2em;
-    }
-
-    .news-section-main .section-title {
-        font-size: 2em;
-    }
-    .news-article-container .article-title {
-        font-size: 2em;
-    }
-    .article-detail-main {
-        padding: 20px;
-    }
-    .hero-banner h2 {
-        font-size: 1.8em;
-    }
-    .hero-banner p {
-        font-size: 1em;
-    }
-    .hero-banner .action-button {
-        padding: 10px 25px;
-        font-size: 1em;
-    }
-    .ai-test-page {
-        margin: 20px auto;
-        padding: 20px;
-    }
-    .ai-test-page h1 {
-        font-size: 2em;
-    }
-    .quiz-section h2 {
-        font-size: 1.5em;
-    }
-    .answer-button {
-        padding: 12px;
-    }
-    .result-emoji {
-        font-size: 4em;
-    }
-    .result-name {
-        font-size: 1.8em;
-    }
-    .ai-test-page .action-button {
-        padding: 10px 20px;
-        font-size: 1em;
     }
 }
