@@ -519,7 +519,17 @@ body.dark-mode .news-card-date {
 }
 
 .image-upload-section {
-    margin-bottom: 30px;
+    /* margin-bottom: 30px; */ /* Removed to let wrapper manage spacing */
+}
+
+.upload-wrapper {
+    max-width: 500px; /* Unify width with result section */
+    margin: 0 auto 30px auto; /* Center and add bottom margin */
+    padding: 15px; /* Add some internal padding */
+    border: 1px solid #e0e0e0; /* Subtle border */
+    border-radius: 10px; /* Rounded corners */
+    background-color: #f9f9f9; /* Light background */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* Soft shadow */
 }
 
 .drop-zone {
@@ -568,7 +578,7 @@ body.dark-mode .news-card-date {
     border-radius: 8px;
     background-color: #f9f9f9;
     text-align: center;
-    max-width: 500px;
+    /* max-width: 500px; */ /* Managed by .upload-wrapper now */
     margin-left: auto;
     margin-right: auto;
 }
@@ -576,7 +586,7 @@ body.dark-mode .news-card-date {
 #image-preview {
     max-width: 100%;
     height: auto;
-    border-radius: 10px;
+    border-radius: 15px; /* Apply border-radius as requested */
     margin-bottom: 15px;
     display: none; /* Hidden until image is loaded */
 }
@@ -637,6 +647,9 @@ body.dark-mode .news-card-date {
     border-radius: 10px;
     background-color: #f9f9f9;
     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    max-width: 500px; /* Unify width with upload-wrapper */
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .result-section h2 {

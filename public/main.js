@@ -118,6 +118,8 @@ function processFile(file) {
         // NEW: Hide dropZone and show imagePreviewContainer
         dropZone.style.display = 'none';
         imagePreviewContainer.style.display = 'block';
+        imagePreview.style.display = 'block'; // Make sure the image itself is visible
+        predictButton.style.display = 'block'; // Show predict button after image is loaded
     };
     reader.readAsDataURL(file);
 }
@@ -192,9 +194,10 @@ function resetUI() {
     genderFemaleButton.classList.remove('active');
     hideResultSection();
     hideLoadingIndicator();
-    // NEW: Show dropZone and hide imagePreviewContainer
+    // Show dropZone and hide imagePreviewContainer
     dropZone.style.display = 'block';
     imagePreviewContainer.style.display = 'none';
+    imageUploadInput.value = ''; // Clear the file input
 }
 
 function setupShareButtons(animalName, confidence) {

@@ -70,14 +70,16 @@
 
             <!-- Image Upload Section -->
             <div class="image-upload-section">
-                <div id="drop-zone" class="drop-zone">
-                    <p data-i18n="drag_drop_image">여기에 이미지를 드래그하거나 클릭하여 업로드</p>
-                    <input type="file" id="image-upload" accept="image/*" style="display: none;">
-                    <label for="image-upload" class="custom-file-upload" data-i18n="select_image">이미지 선택</label>
-                </div>
-                <div id="image-preview-container">
-                    <img id="image-preview" src="" alt="이미지 미리보기">
-                    <button type="button" id="predict-button" class="go-test-button" data-i18n="check_result">결과 확인</button>
+                <div class="upload-wrapper">
+                    <div id="drop-zone" class="drop-zone">
+                        <p data-i18n="drag_drop_image">여기에 이미지를 드래그하거나 클릭하여 업로드</p>
+                        <input type="file" id="image-upload" accept="image/*" style="display: none;">
+                        <label for="image-upload" class="custom-file-upload" data-i18n="select_image">이미지 선택</label>
+                    </div>
+                    <div id="image-preview-container">
+                        <img id="image-preview" src="" alt="이미지 미리보기">
+                        <button type="button" id="predict-button" class="go-test-button" data-i18n="check_result">결과 확인</button>
+                    </div>
                 </div>
             </div>
             
