@@ -3,11 +3,10 @@ import os
 import datetime
 import subprocess
 import re
+from dotenv import load_dotenv # Moved here
 import markdown 
 import shutil
 import time
-
-load_dotenv()
 
 PUBLIC_DIR = "public"
 NEWS_POSTS_DIR = "posts" 
@@ -346,7 +345,6 @@ def main():
         import feedparser # Moved here to be conditional
         import requests # Moved here to be conditional
         from google import genai # Moved here to be conditional
-        from dotenv import load_dotenv # Moved here to be conditional
         load_dotenv() # Load environment variables here
         # For debugging: Remove processed articles log to force regeneration
         if os.path.exists(PROCESSED_ARTICLES_LOG):
