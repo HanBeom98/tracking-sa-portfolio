@@ -396,9 +396,9 @@ def main():
             load_dotenv() # Load environment variables here, only if not --build-only
         except ImportError:
             print("Warning: python-dotenv not installed. Environment variables will not be loaded from .env file.")
-        # For debugging: Remove processed articles log to force regeneration
-        if os.path.exists(PROCESSED_ARTICLES_LOG):
-            os.remove(PROCESSED_ARTICLES_LOG)
+        # This line is removed to prevent forced regeneration of all articles
+        # if os.path.exists(PROCESSED_ARTICLES_LOG):
+        #     os.remove(PROCESSED_ARTICLES_LOG)
 
         api_key = os.getenv("GEMINI_API_KEY")
         if not api_key: 
