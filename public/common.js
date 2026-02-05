@@ -96,16 +96,30 @@ async function loadLayout() {
     let header = document.querySelector('header');
     const mediaQuery = window.matchMedia('(max-width: 768px)');
 
+    // Define thresholds for scroll sensitivity
+    const scrollUpThreshold = 60;   // Show header if scrolled up by at least 60px
+    const scrollDownThreshold = 30; // Hide header if scrolled down by at least 30px
+    const topOfPageThreshold = 10;  // Always show header if scrollY is less than 10px
+
     function handleScroll() {
         if (mediaQuery.matches) { // Only apply on mobile
-            if (window.scrollY === 0) {
-                header.style.transform = 'translateY(0)'; // Always show header at top
-            } else if (window.scrollY > lastScrollY) {
-                header.style.transform = 'translateY(-100%)'; // Scroll down, hide header
-            } else {
-                header.style.transform = 'translateY(0)'; // Scroll up, show header
+            let currentScrollY = window.scrollY;
+            let scrollDifference = lastScrollY - currentScrollY; // Positive when scrolling up, negative when scrolling down
+
+            // If at the very top of the page, always show the header
+            if (currentScrollY < topOfPageThreshold) {
+                header.style.transform = 'translateY(0)';
+            } 
+            // If scrolling up significantly, show the header
+            else if (scrollDifference > scrollUpThreshold) {
+                header.style.transform = 'translateY(0)';
+            } 
+            // If scrolling down significantly, hide the header
+            else if (scrollDifference < -scrollDownThreshold) {
+                header.style.transform = 'translateY(-100%)';
             }
-            lastScrollY = window.scrollY;
+            
+            lastScrollY = currentScrollY;
         } else {
             // Ensure header is visible on PC if it was hidden by mobile logic
             header.style.transform = 'translateY(0)';
