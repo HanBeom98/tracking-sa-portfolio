@@ -33,21 +33,45 @@ const imagePreviewContainer = document.getElementById('image-preview-container')
 
 
 async function init() {
+    // Show initial loading indicator
+    showLoadingIndicator("모델 로딩 중..."); // Pass a message for clarity
+    
+    // Disable interactive elements
+    predictButton.disabled = true;
+    dropZone.style.pointerEvents = 'none'; // Disable dropZone interaction
+    genderMaleButton.disabled = true;
+    genderFemaleButton.disabled = true;
+
     const timestamp = new Date().getTime();
     const modelURL = URL + "model.json?v=" + timestamp;
     const metadataURL = URL + "metadata.json?v=" + timestamp;
 
-    // Load the model
-    model = await tmImage.load(modelURL, metadataURL);
-    maxPredictions = model.getTotalClasses();
+    try {
+        // Load the model
+        model = await tmImage.load(modelURL, metadataURL);
+        maxPredictions = model.getTotalClasses();
 
-    // Initial UI state
-    hideLoadingIndicator();
-    hideResultSection();
-    dropZone.style.display = 'block'; // Ensure drop zone is visible initially
-    imagePreviewContainer.style.display = 'none'; // Ensure preview container is hidden initially
+        // Enable interactive elements after model is loaded
+        predictButton.disabled = false;
+        dropZone.style.pointerEvents = 'auto'; // Enable dropZone interaction
+        genderMaleButton.disabled = false;
+        genderFemaleButton.disabled = false;
 
-    // Event Listeners
+        // Hide initial loading indicator
+        hideLoadingIndicator();
+
+        // Initial UI state
+        hideResultSection();
+        dropZone.style.display = 'block'; // Ensure drop zone is visible initially
+        imagePreviewContainer.style.display = 'none'; // Ensure preview container is hidden initially
+
+    } catch (error) {
+        console.error("Error loading the model:", error);
+        alert("AI 모델 로딩에 실패했습니다. 페이지를 새로고침 해주세요.");
+        hideLoadingIndicator(); // Hide loading indicator even on error
+    }
+
+    // Event Listeners - these are registered regardless of model loading success
     dropZone.addEventListener('dragover', handleDragOver);
     dropZone.addEventListener('dragleave', handleDragLeave);
     dropZone.addEventListener('drop', handleFileDrop);
@@ -126,6 +150,11 @@ function processFile(file) {
 }
 
 async function predict() {
+    if (!model) {
+        alert("AI 모델이 아직 로딩 중입니다. 잠시만 기다려 주세요.");
+        return;
+    }
+
     if (!currentImageFile) {
         alert(translations[currentLang]['select_image_first']);
         return;
@@ -166,7 +195,8 @@ async function predict() {
     document.querySelector('.image-upload-section').style.display = 'none'; // Hide upload section
 }
 
-function showLoadingIndicator() {
+function showLoadingIndicator(message = "이미지 분석 중...") {
+    loadingIndicator.querySelector('p').innerText = message;
     loadingIndicator.style.display = 'flex';
 }
 

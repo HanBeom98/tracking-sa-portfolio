@@ -611,11 +611,17 @@ body.dark-mode .news-card-date {
 
 /* Loading Indicator */
 .loading-indicator {
+    position: fixed; /* Fixed position to cover the entire viewport */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    margin-top: 50px;
+    z-index: 9999; /* Ensure it's on top of everything else */
 }
 
 .loading-indicator .spinner {
@@ -639,17 +645,95 @@ body.dark-mode .news-card-date {
     font-weight: bold;
 }
 
-/* Result Section */
-.result-section {
-    margin-top: 40px;
-    padding: 30px;
-    border: 1px solid #e0e0e0;
-    border-radius: 10px;
-    background-color: #f9f9f9;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    max-width: 500px; /* Unify width with upload-wrapper */
-    margin-left: auto;
-    margin-right: auto;
+/* Styling for Animal Face Test Page (animal_face_test.html) */
+.animal-face-test {
+    text-align: center;
+    padding: 40px 20px;
+    max-width: 900px;
+    margin: 20px auto;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.07);
+    position: relative; /* Needed for z-index context */
+    z-index: 1; /* Ensure content is above background if any */
+}
+
+.animal-face-test h1 {
+    font-size: 2.8em;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.animal-face-test p {
+    font-size: 1.1em;
+    color: #555;
+    margin-bottom: 25px;
+}
+
+.gender-selection-wrapper {
+    margin-bottom: 30px;
+    position: relative; /* Needed for z-index to work */
+    z-index: 10; /* Ensure gender buttons are clickable */
+}
+
+.gender-selection-wrapper label {
+    font-weight: bold;
+    color: #333;
+    margin-right: 15px;
+    font-size: 1.1em;
+}
+
+.gender-buttons .gender-button {
+    background-color: #007bff; /* Blue for unselected male */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin: 0 5px;
+}
+
+#gender-female {
+    background-color: #dc3545; /* Red for unselected female */
+}
+#gender-female:hover {
+    background-color: #c82333; /* Darker red on hover */
+}
+
+#gender-female.active {
+    background-color: #28a745; /* Green for active female */
+}
+
+.gender-buttons .gender-button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+.gender-buttons .gender-button.active {
+    background-color: #28a745; /* Green for active */
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3), inset 0 0 8px rgba(0, 0, 0, 0.5); /* Enhanced inset shadow */
+}
+
+.gender-buttons .gender-button.active:hover {
+    background-color: #218838;
+}
+
+.image-upload-section {
+    position: relative; /* Needed for z-index context */
+    z-index: 5; /* Ensure upload section is clickable */
+    /* margin-bottom: 30px; */ /* Removed to let wrapper manage spacing */
+}
+
+.upload-wrapper {
+    max-width: 500px; /* Unify width with result section */
+    margin: 0 auto 30px auto; /* Center and add bottom margin */
+    padding: 15px; /* Add some internal padding */
+    border: 1px solid #e0e0e0; /* Subtle border */
+    border-radius: 10px; /* Rounded corners */
+    background-color: #f9f9f9; /* Light background */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* Soft shadow */
 }
 
 .result-section h2 {
