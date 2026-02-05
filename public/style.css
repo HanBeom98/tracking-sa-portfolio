@@ -9,9 +9,9 @@ body {
 }
 
 header {
-    background-color: #22c55e; /* Main Green */
-    color: white;
-    height: 60px; /* Fixed height for the header bar */
+    background-color: #22c55e; /* Main Green - RESTORED */
+    color: white; /* RESTORED */
+    height: 50px; /* Adjusted height for the header bar */
     padding: 0 20px; /* Adjust padding due to fixed height */
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     display: flex;
@@ -30,11 +30,17 @@ header .site-title { /* Not used in current HTML but good to keep if it's a gene
     margin-right: 20px;
 }
 
-header nav {
-    flex-grow: 1; /* Allow nav to take available space */
-    display: flex; /* Ensure flex context for ul */
-    justify-content: flex-start; /* Align nav items to the start */
-    height: 100%; /* Make nav fill the height of its flex parent header */
+
+
+
+
+.desktop-menu-container {
+    /* Remove flex-grow to let it take natural width */
+    display: flex; /* Ensure it's a flex container for its children */
+    justify-content: flex-start; /* Align nav items to the start (left) */
+    align-items: center; /* Vertically center nav items */
+    height: 100%; /* Fill height of header */
+    /* Remove margin-right: auto (it doesn't have it, but mentioned in guidance) */
 }
 
 nav ul {
@@ -47,8 +53,14 @@ nav ul {
     gap: 20px;
 }
 
+nav ul li {
+    display: flex;
+    align-items: center;
+    height: 100%; /* Ensure li takes full height of parent ul */
+}
+
 nav a {
-    color: white;
+    color: white; /* RESTORED */
     text-decoration: none;
     font-weight: bold;
     padding: 0.5rem 1rem;
@@ -78,8 +90,8 @@ footer {
     font-size: 0.9em;
 }
 
-/* Utility buttons and Language Switcher (from common.js logic) */
-.utility-buttons {
+/* Utility controls (theme and language switchers) */
+.utility-controls {
     display: flex;
     gap: 10px;
     align-items: center;
@@ -173,6 +185,150 @@ footer {
     flex-grow: 1; /* Makes excerpt take available space */
 }
 
+/* Hero Card Specific Styling */
+.hero-card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15); /* Deeper shadow for hero */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    padding: 30px;
+    margin-bottom: 40px; /* Space below hero card */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.hero-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 35px rgba(0,0,0,0.25); /* Even deeper shadow on hover */
+}
+
+.hero-card-title {
+    font-size: 2.5em;
+    margin-bottom: 15px;
+    line-height: 1.2;
+}
+
+.hero-card-title a {
+    color: #22c55e; /* Main Green for hero title */
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.hero-card-title a:hover {
+    color: #1eaf53; /* Darker Green on hover */
+}
+
+.hero-card-date {
+    font-size: 1em;
+    color: #6c757d; /* Gray */
+    margin-bottom: 20px;
+}
+
+/* Updated News Grid and Card Styling */
+.news-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+    padding-top: 20px; /* Add some space between hero and grid */
+}
+
+.news-card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px; /* Changed from 10px */
+    overflow: hidden;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1); /* Slightly deeper shadow */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    text-align: left; /* Align text within cards */
+    padding: 20px; /* Add padding inside cards */
+}
+
+.news-card:hover {
+    transform: translateY(-8px); /* Deeper lift on hover */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.18); /* Deeper shadow on hover */
+}
+
+.news-card-title {
+    font-size: 1.6em; /* Slightly larger title */
+    margin: 0 0 10px 0; /* Adjust margin */
+    line-height: 1.3;
+}
+
+.news-card-title a {
+    color: #333;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.news-card-title a:hover {
+    color: #007bff;
+}
+
+.news-card-date {
+    font-size: 0.9em; /* Slightly larger date */
+    color: #6c757d;
+    margin: 0 0 15px 0;
+}
+
+/* Dark mode adjustments for Hero and News Cards */
+body.dark-mode .hero-card {
+    background-color: #333333;
+    border-color: #444444;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+}
+
+body.dark-mode .hero-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 35px rgba(0,0,0,0.5);
+}
+
+body.dark-mode .hero-card-title a {
+    color: #66cc66;
+}
+
+body.dark-mode .hero-card-title a:hover {
+    color: #5cb85c;
+}
+
+body.dark-mode .hero-card-date {
+    color: #aaaaaa;
+}
+
+body.dark-mode .news-card {
+    background-color: #333333;
+    border-color: #444444;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+}
+
+body.dark-mode .news-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+body.dark-mode .news-card-title a {
+    color: #eeeeee;
+}
+
+body.dark-mode .news-card-title a:hover {
+    color: #99ccff;
+}
+
+body.dark-mode .news-card-date {
+    color: #aaaaaa;
+}
+
+/* Responsive adjustments for news grid */
+@media (max-width: 992px) { /* Tablet size */
+    .news-grid {
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); /* 2 columns */
+    }
+}
 
 /* AI Test Page Styling (ai-test.html) */
 .ai-test-page {
@@ -570,83 +726,6 @@ footer {
     text-align: right; /* Align to the right, as often seen with tags */
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    header {
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 1rem;
-    }
-
-    header .site-title {
-        margin-right: 0;
-        margin-bottom: 10px;
-    }
-
-    nav ul {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-        width: 100%;
-    }
-    nav a {
-        padding: 0.5rem;
-        width: calc(100% - 1rem); /* Full width minus padding */
-        text-align: left;
-    }
-    .utility-buttons {
-        margin-top: 10px;
-        margin-left: 0;
-        width: 100%;
-        justify-content: flex-start;
-    }
-    .news-grid {
-        grid-template-columns: 1fr; /* Single column on small screens */
-    }
-    .news-section-main .section-title {
-        font-size: 2em;
-    }
-    .news-article-container .article-title {
-        font-size: 2em;
-    }
-    .article-detail-main {
-        padding: 20px;
-    }
-    .hero-banner h2 {
-        font-size: 1.8em;
-    }
-    .hero-banner p {
-        font-size: 1em;
-    }
-    .hero-banner .action-button {
-        padding: 10px 25px;
-        font-size: 1em;
-    }
-    .ai-test-page {
-        margin: 20px auto;
-        padding: 20px;
-    }
-    .ai-test-page h1 {
-        font-size: 2em;
-    }
-    .quiz-section h2 {
-        font-size: 1.5em;
-    }
-    .answer-button {
-        padding: 12px;
-    }
-    .result-emoji {
-        font-size: 4em;
-    }
-    .result-name {
-        font-size: 1.8em;
-    }
-    .ai-test-page .action-button {
-        padding: 10px 20px;
-        font-size: 1em;
-    }
-}
-
 /* Dark Mode Styles */
 body.dark-mode {
     background-color: #1a1a1a; /* Dark background */
@@ -654,7 +733,15 @@ body.dark-mode {
 }
 
 body.dark-mode header {
-    background-color: #1c923f; /* Darker green header */
+    background-color: #1c923f; /* Darker green header - RESTORED */
+}
+
+body.dark-mode nav a {
+    color: white; /* RESTORED */
+}
+
+body.dark-mode nav ul li.dropdown .dropbtn {
+    color: white; /* RESTORED */
 }
 
 body.dark-mode nav a:hover {
@@ -682,8 +769,8 @@ body.dark-mode .news-card {
 }
 
 body.dark-mode .news-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+    transform: translateY(-8px);
+    box-shadow: 0 12px 35px rgba(0,0,0,0.5);
 }
 
 body.dark-mode .news-card-title a {
@@ -874,7 +961,7 @@ body.dark-mode .share-buttons .share-button:hover {
     background-color: #777777;
 }
 
-body.dark-mode .share-buttons .share-button[data-platform="twitter"] { background-color: #1a8cd8; }
+body.dark-mode .share-buttons .share-button[data-platform="twitter"] { background-color: #1da1f2; }
 body.dark-mode .share-buttons .share-button[data-platform="twitter"]:hover { background-color: #1da1f2; }
 body.dark-mode .share-buttons .share-button[data-platform="facebook"] { background-color: #2d4373; }
 body.dark-mode .share-buttons .share-button[data-platform="facebook"]:hover { background-color: #3b5998; }
@@ -937,12 +1024,13 @@ nav ul li.dropdown:hover .dropdown-content {
 nav ul li.dropdown .dropbtn {
     padding: 0.5rem 1rem; /* Match existing nav a padding */
     display: block; /* Make the whole area clickable */
-    color: white;
+    color: white; /* RESTORED */
     text-decoration: none;
     font-weight: bold;
     border-radius: 5px;
     transition: background-color 0.3s ease;
     background-color: transparent; /* Ensure button background is transparent */
+    transform: translateY(0.4px); /* Adjusted to move it 0.4px down */
 }
 
 nav ul li.dropdown .dropbtn:hover {
@@ -963,4 +1051,311 @@ body.dark-mode .dropdown-content a {
 body.dark-mode .dropdown-content a:hover {
     background-color: #444444; /* Slightly lighter dark on hover */
     color: #eeeeee;
+}
+
+/* Inquiry Form Section Styling */
+.inquiry-form-section {
+    max-width: 700px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.inquiry-form-section h1 {
+    color: #28a745; /* Dark Green */
+    font-size: 2.5em;
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+.inquiry-form-section p {
+    font-size: 1.1em;
+    color: #555;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+.inquiry-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    text-align: left; /* Align form labels/inputs left */
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-field.full-width {
+    grid-column: 1 / -1; /* Occupy full width for these fields */
+}
+
+.inquiry-form label {
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #333;
+    font-size: 1em;
+}
+
+.inquiry-form input[type="text"],
+.inquiry-form input[type="email"],
+.inquiry-form textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    font-size: 1em;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box; /* Include padding in width */
+}
+
+.inquiry-form input[type="text"]:focus,
+.inquiry-form input[type="email"]:focus,
+.inquiry-form textarea:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    outline: none;
+}
+
+.inquiry-form textarea {
+    resize: vertical; /* Allow vertical resizing */
+    min-height: 120px;
+}
+
+.inquiry-form button[type="submit"] {
+    grid-column: 1 / -1; /* Occupy full width */
+    background-color: #28a745; /* Green submit button */
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.2em;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    margin-top: 20px;
+    box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2);
+}
+
+.inquiry-form button[type="submit"]:hover {
+    background-color: #218838; /* Darker green on hover */
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(40, 167, 69, 0.3);
+}
+
+/* Dark mode for Inquiry Form */
+body.dark-mode .inquiry-form-section {
+    background-color: #2a2a2a;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+}
+
+body.dark-mode .inquiry-form-section h1 {
+    color: #66cc66; /* Lighter green */
+}
+
+body.dark-mode .inquiry-form-section p {
+    color: #cccccc;
+}
+
+body.dark-mode .inquiry-form label {
+    color: #e0e0e0;
+}
+
+body.dark-mode .inquiry-form input[type="text"],
+body.dark-mode .inquiry-form input[type="email"],
+body.dark-mode .inquiry-form textarea {
+    background-color: #3b3b3b;
+    color: #e0e0e0;
+    border-color: #555;
+}
+
+body.dark-mode .inquiry-form input[type="text"]:focus,
+body.dark-mode .inquiry-form input[type="email"]:focus,
+body.dark-mode .inquiry-form textarea:focus {
+    border-color: #66cc66;
+    box-shadow: 0 0 0 0.2rem rgba(102, 204, 102, 0.25);
+}
+
+body.dark-mode .inquiry-form button[type="submit"] {
+    background-color: #1eaf53;
+    box-shadow: 0 4px 10px rgba(30, 175, 83, 0.2);
+}
+
+body.dark-mode .inquiry-form button[type="submit"]:hover {
+    background-color: #22c55e;
+    box-shadow: 0 6px 15px rgba(30, 175, 83, 0.3);
+}
+
+/* Responsive adjustments for Inquiry Form */
+@media (max-width: 600px) {
+    .inquiry-form {
+        grid-template-columns: 1fr; /* Stack columns on small screens */
+    }
+
+    .inquiry-form-section {
+        margin: 20px auto;
+        padding: 20px;
+    }
+
+    .inquiry-form-section h1 {
+        font-size: 2em;
+    }
+}
+
+/* Mobile Responsive Overrides for Header and Navigation (max-width: 768px) */
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        align-items: center; /* Center items vertically in column layout */
+        justify-content: space-between; /* Space out title and hamburger */
+        flex-wrap: wrap; /* Allow items to wrap */
+        height: auto !important; /* Ensure height expands */
+        padding: 15px 0; /* Adjusted padding for mobile */
+        background-color: #22c55e; /* Brand green background */
+        transition: transform 0.3s ease-in-out; /* Added for smooth hide/show */
+    }
+
+    .header-content { /* New wrapper for header items */
+        display: flex;
+        flex-direction: column; /* Stack children vertically */
+        width: 100%;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .site-logo {
+        font-size: 1.8em;
+        font-weight: bold;
+        color: white; /* White text for logo on green background */
+        text-decoration: none;
+    }
+
+
+
+    .desktop-menu-container {
+        display: flex !important; /* Always visible on mobile */
+        flex-direction: column;
+        width: 100%;
+        background-color: #22c55e; /* Green background for opened menu */
+        position: relative; /* Position relative to header flow */
+        top: auto; /* Reset top */
+        left: auto; /* Reset left */
+        box-shadow: none; /* Remove shadow */
+        z-index: auto; /* Reset z-index */
+        /* Removed max-height, overflow, transition */
+    }
+
+
+
+    nav ul {
+        flex-direction: column;
+        align-items: center; /* Center menu items */
+        gap: 5px; /* Adjusted gap for touchability */
+        width: 100%;
+        margin-top: 10px; /* Space above nav items */
+        margin-bottom: 10px; /* Space below nav items */
+        padding: 10px 0;
+    }
+    nav a {
+        padding: 5px 0; /* Reduced padding for minimal vertical length */
+        width: auto; /* Let content define width, then center */
+        text-align: center; /* Center text within buttons */
+        font-size: 1.1em; /* Larger font for readability */
+        color: white; /* White text on green menu background */
+    }
+    nav ul li.dropdown .dropbtn {
+        transform: translateY(0); /* Reset specific button adjustment */
+        padding: 0.8rem 1rem; /* Match other nav a padding */
+        color: white; /* White text on green menu background */
+    }
+    .utility-controls {
+        flex-direction: column; /* Stack children vertically */
+        align-items: center;   /* Center children horizontally */
+        justify-content: center; /* Center children vertically (if space allows) */
+        margin-top: 10px;
+        margin-left: 0;
+        width: 100%;
+        gap: 15px; /* Spacing between stacked items */
+        padding-bottom: 10px;
+    }
+    .lang-button {
+        padding: 10px 15px; /* Larger touch area */
+        font-size: 1em; /* Readable font size */
+        color: #22c55e; /* Green text for language buttons */
+        background-color: white; /* White background for language buttons */
+    }
+    .lang-button.active {
+        background-color: #1eaf53; /* Darker green for active */
+        color: white;
+    }
+
+    /* News Grid and Hero Card adjustments (restored from previous state) */
+    .news-grid {
+        grid-template-columns: 1fr; /* Single column on small screens */
+        gap: 20px;
+    }
+    .hero-card {
+        padding: 20px;
+        margin-bottom: 25px;
+    }
+    .hero-card-title {
+        font-size: 2em;
+    }
+
+    .news-section-main .section-title {
+        font-size: 2em;
+    }
+    .news-article-container .article-title {
+        font-size: 2em;
+    }
+    .article-detail-main {
+        padding: 20px;
+    }
+    /* Assuming hero-banner related styles were intended for another component not directly news-grid */
+    /* .hero-banner h2 { font-size: 1.8em; } */
+    /* .hero-banner p { font-size: 1em; } */
+    /* .hero-banner .action-button { padding: 10px 25px; font-size: 1em; } */
+    .ai-test-page {
+        margin: 20px auto;
+        padding: 20px;
+    }
+    .ai-test-page h1 {
+        font-size: 2em;
+    }
+    .quiz-section h2 {
+        font-size: 1.5em;
+    }
+    .answer-button {
+        padding: 12px;
+    }
+    .result-emoji {
+        font-size: 4em;
+    }
+    .result-name {
+        font-size: 1.8em;
+    }
+    .ai-test-page .action-button {
+        padding: 10px 20px;
+        font-size: 1em;
+    }
+}
+
+/* Dark Mode specific overrides for the mobile menu */
+body.dark-mode .desktop-menu-container {
+    background-color: #1c923f; /* Darker green for opened menu in dark mode */
+}
+body.dark-mode .desktop-menu-container a {
+    color: white; /* White text on dark green background */
+}
+body.dark-mode .desktop-menu-container .lang-button {
+    color: #66cc66; /* Lighter green text for language buttons in dark mode */
+    background-color: #333333; /* Dark background for language buttons */
+}
+body.dark-mode .desktop-menu-container .lang-button.active {
+    background-color: #156d2e; /* Even darker green for active */
+    color: white;
 }

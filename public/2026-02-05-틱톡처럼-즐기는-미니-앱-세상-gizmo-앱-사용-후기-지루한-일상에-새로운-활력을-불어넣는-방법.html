@@ -2,12 +2,19 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>틱톡처럼 즐기는 미니 앱 세상? Gizmo 앱 사용 후기: 지루한 일상에 새로운 활력을 불어넣는 방법 - 뉴스</title>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7263630893992216" crossorigin="anonymous"></script>
 
+    <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7263630893992216" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "vb9q33ggpa");
+    </script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
@@ -17,36 +24,30 @@
     <script src="/firebase-config.js"></script>
     <script src="/translations.js"></script>
     <script src="/common.js"></script>
-    
-    <script type="text/javascript">
-    (function(c,l,a,r,i,t,y){{
-        c[a]=c[a]||function(){{(c[a].q=c[a].q||[]).push(arguments)}};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-    }})(window, document, "clarity", "script", "vb9q33ggpa");
-    </script>
 
 </head>
 <body>
 
 <header>
-    <nav>
-        <ul>
-            <li><a href="/index.html" data-i18n="news_home">홈</a></li>
-            <li class="dropdown">
-                <a href="#" class="dropbtn">테스트</a>
-                <div class="dropdown-content">
-                    <a href="/animal_face_test.html" data-i18n="animal_face_test">동물상 테스트</a>
-                    <a href="/ai-test.html" data-i18n="ai_tendency_test">AI 성향 테스트</a>
-                </div>
-            </li>
-            <li><a href="/inquiry.html" data-i18n="partnership_inquiry">파트너십 문의</a></li>
-            <li><a href="/about.html" data-i18n="about_us">회사 소개</a></li>
-            <li><a href="/contact.html" data-i18n="contact">문의</a></li>
-            <li><a href="/privacy-policy.html" data-i18n="privacy_policy">개인정보처리방침</a></li>
-        </ul>
-    </nav>
-    <div class="utility-buttons">
+    <div class="desktop-menu-container" id="mobile-menu-container">
+        <nav>
+            <ul>
+                <li><a href="/index.html" data-i18n="news_home">홈</a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropbtn">테스트</a>
+                    <div class="dropdown-content">
+                        <a href="/animal_face_test.html" data-i18n="animal_face_test">동물상 테스트</a>
+                        <a href="/ai-test.html" data-i18n="ai_tendency_test">AI 성향 테스트</a>
+                    </div>
+                </li>
+                <li><a href="/inquiry.html" data-i18n="partnership_inquiry">파트너십 문의</a></li>
+                <li><a href="/about.html" data-i18n="about_us">회사 소개</a></li>
+                <li><a href="/contact.html" data-i18n="contact">문의</a></li>
+                <li><a href="/privacy-policy.html" data-i18n="privacy_policy">개인정보처리방침</a></li>
+            </ul>
+        </nav>
+    </div>
+    <div class="utility-controls"> <!-- New wrapper for utility buttons -->
         <button id="color-change">🌙</button> <!-- Theme change button re-added -->
         <div id="language-switcher"></div>
     </div>

@@ -8,6 +8,15 @@
     <title data-i18n="news_home">뉴스 홈</title>
     <!-- CSS and other head elements will be injected by main.py -->
 
+    <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7263630893992216" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "vb9q33ggpa");
+    </script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
@@ -17,36 +26,30 @@
     <script src="/firebase-config.js"></script>
     <script src="/translations.js"></script>
     <script src="/common.js"></script>
-    
-    <script type="text/javascript">
-    (function(c,l,a,r,i,t,y){{
-        c[a]=c[a]||function(){{(c[a].q=c[a].q||[]).push(arguments)}};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-    }})(window, document, "clarity", "script", "vb9q33ggpa");
-    </script>
 
 </head>
 <body>
 
 <header>
-    <nav>
-        <ul>
-            <li><a href="/index.html" data-i18n="news_home">홈</a></li>
-            <li class="dropdown">
-                <a href="#" class="dropbtn">테스트</a>
-                <div class="dropdown-content">
-                    <a href="/animal_face_test.html" data-i18n="animal_face_test">동물상 테스트</a>
-                    <a href="/ai-test.html" data-i18n="ai_tendency_test">AI 성향 테스트</a>
-                </div>
-            </li>
-            <li><a href="/inquiry.html" data-i18n="partnership_inquiry">파트너십 문의</a></li>
-            <li><a href="/about.html" data-i18n="about_us">회사 소개</a></li>
-            <li><a href="/contact.html" data-i18n="contact">문의</a></li>
-            <li><a href="/privacy-policy.html" data-i18n="privacy_policy">개인정보처리방침</a></li>
-        </ul>
-    </nav>
-    <div class="utility-buttons">
+    <div class="desktop-menu-container" id="mobile-menu-container">
+        <nav>
+            <ul>
+                <li><a href="/index.html" data-i18n="news_home">홈</a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropbtn">테스트</a>
+                    <div class="dropdown-content">
+                        <a href="/animal_face_test.html" data-i18n="animal_face_test">동물상 테스트</a>
+                        <a href="/ai-test.html" data-i18n="ai_tendency_test">AI 성향 테스트</a>
+                    </div>
+                </li>
+                <li><a href="/inquiry.html" data-i18n="partnership_inquiry">파트너십 문의</a></li>
+                <li><a href="/about.html" data-i18n="about_us">회사 소개</a></li>
+                <li><a href="/contact.html" data-i18n="contact">문의</a></li>
+                <li><a href="/privacy-policy.html" data-i18n="privacy_policy">개인정보처리방침</a></li>
+            </ul>
+        </nav>
+    </div>
+    <div class="utility-controls"> <!-- New wrapper for utility buttons -->
         <button id="color-change">🌙</button> <!-- Theme change button re-added -->
         <div id="language-switcher"></div>
     </div>
@@ -58,197 +61,290 @@
 
 
     <main>
-        <section class="news-section-main"><h1 class="section-title">최신 뉴스</h1><div class="news-grid">
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-05-틱톡처럼-즐기는-미니-앱-세상-gizmo-앱-사용-후기-지루한-일상에-새로운-활력을-불어넣는-방법.html" class="news-card-link">틱톡처럼 즐기는 미니 앱 세상? Gizmo 앱 사용 후기: 지루한 일상에 새로운 활력을 불어넣는 방법</a></h2>
-                <p class="news-card-date">2026-02-05</p>
-            </article>
+        
+        <section class="news-section-main">
+            <h1 class="section-title" data-i18n="latest_news_hero_title">최신 뉴스</h1>
             
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-05-틱톡-스타일-미니-앱-플랫폼-gizmo-지루한-일상-탈출구-나만의-앱-제작-수익-창출-방법.html" class="news-card-link">틱톡 스타일 미니 앱 플랫폼 'Gizmo', 지루한 일상 탈출구? 나만의 앱 제작 & 수익 창출 방법</a></h2>
-                <p class="news-card-date">2026-02-05</p>
+            <article class="hero-card">
+                <h2 class="hero-card-title"><a href="/2026-02-05-틱톡처럼-즐기는-미니-앱-세상-gizmo-앱-사용-후기-지루한-일상에-새로운-활력을-불어넣는-방법.html" class="hero-card-link">틱톡처럼 즐기는 미니 앱 세상? Gizmo 앱 사용 후기: 지루한 일상에 새로운 활력을 불어넣는 방법</a></h2>
+                <p class="hero-card-date">2026-02-05</p>
+                <!-- Add more hero card specific content here, e.g., image, excerpt if available -->
             </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-05-어도비-애니메이트-종료-철회-유지-보수-모드로-전환-애니메이션-제작자에게는-희소식-대안-프로그램-비교-분석.html" class="news-card-link">어도비 애니메이트 종료 철회! 유지 보수 모드로 전환, 애니메이션 제작자에게는 희소식? 대안 프로그램 비교 분석</a></h2>
-                <p class="news-card-date">2026-02-05</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-05-어도비-애니메이트-종료-번복-유지보수-모드로-전환-애니메이션-제작자-안도-이유와-향후-전망은.html" class="news-card-link">어도비 애니메이트 종료 번복! 유지보수 모드로 전환, 애니메이션 제작자 안도 - 이유와 향후 전망은?</a></h2>
-                <p class="news-card-date">2026-02-05</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-05-어도비-애니메이트-서비스-종료-철회-갑작스런-종료-논란과-유지-결정-배경-앞으로의-업데이트-방향은.html" class="news-card-link">어도비 애니메이트 서비스 종료 철회! 갑작스런 종료 논란과 유지 결정 배경, 앞으로의 업데이트 방향은?</a></h2>
-                <p class="news-card-date">2026-02-05</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-05-샘-알트만-클로드-슈퍼볼-광고에-격분-왜-오픈ai-vs-앤트로픽-ai-경쟁-심화-분석-및-향후-전망.html" class="news-card-link">샘 알트만, 클로드 슈퍼볼 광고에 격분! 왜? 오픈AI vs 앤트로픽 AI 경쟁 심화 분석 및 향후 전망</a></h2>
-                <p class="news-card-date">2026-02-05</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-05-구글-애플-ai-협력설-함구-투자자-질문에도-묵묵부답-배경-및-전망-분석.html" class="news-card-link">구글-애플 AI 협력설 함구, 투자자 질문에도 묵묵부답? 배경 및 전망 분석</a></h2>
-                <p class="news-card-date">2026-02-05</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-05-구글-애플-ai-협력설-주가-영향은-투자자들이-알아야-할-alphabet-침묵의-의미.html" class="news-card-link">구글-애플 AI 협력설, 주가 영향은? 투자자들이 알아야 할 Alphabet 침묵의 의미</a></h2>
-                <p class="news-card-date">2026-02-05</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-05-구글-애플-ai-협력-왜-알파벳은-함구할까-투자자도-모르는-속사정-분석-및-향후-전망.html" class="news-card-link">구글-애플 AI 협력, 왜 알파벳은 함구할까? 투자자도 모르는 속사정 분석 및 향후 전망</a></h2>
-                <p class="news-card-date">2026-02-05</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-05-구글-gemini-앱-7억-5천만-사용자-돌파-chatgpt-meta-ai와-비교-분석-나에게-맞는-ai-앱은.html" class="news-card-link">구글 Gemini 앱 7억 5천만 사용자 돌파! ChatGPT, Meta AI와 비교 분석: 나에게 맞는 AI 앱은?</a></h2>
-                <p class="news-card-date">2026-02-05</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-05-구글-gemini-앱-7억-5천만-사용자-돌파-chatgpt-meta-ai-경쟁-속-사용자-급증-비결은-꿀팁-활용법.html" class="news-card-link">구글 Gemini 앱, 7억 5천만 사용자 돌파! ChatGPT, Meta AI 경쟁 속 사용자 급증 비결은? 꿀팁 활용법</a></h2>
-                <p class="news-card-date">2026-02-05</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-05-구글-gemini-7억-5천만-mau-돌파-chatgpt-meta-ai-대항마-gemini-활용-꿀팁-및-경쟁력-비교-분석.html" class="news-card-link">구글 Gemini 7억 5천만 MAU 돌파! ChatGPT, Meta AI 대항마? Gemini 활용 꿀팁 및 경쟁력 비교 분석</a></h2>
-                <p class="news-card-date">2026-02-05</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-05-가정용-배터리-전력망-안정화에-기여-lunar-energy-232억-달러-투자-유치-성공-에너지-자립-및-투자-기회-분석.html" class="news-card-link">가정용 배터리, 전력망 안정화에 기여? Lunar Energy 2.32억 달러 투자 유치 성공 - 에너지 자립 및 투자 기회 분석</a></h2>
-                <p class="news-card-date">2026-02-05</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-05-stripe-출신-창업-duna-3천만-유로-투자-유치-성공-유럽-사업자-신원-확인-솔루션-스타트업-투자-유치-비결은.html" class="news-card-link">Stripe 출신 창업, Duna 3천만 유로 투자 유치 성공! - 유럽 사업자 신원 확인 솔루션, 스타트업 투자 유치 비결은?</a></h2>
-                <p class="news-card-date">2026-02-05</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-05-stripe-출신-창업-duna-390억-투자-유치-성공-사업자-신원-확인-솔루션-선택-가이드-유럽-스타트업-투자-성공-비결.html" class="news-card-link">Stripe 출신 창업 Duna, 390억 투자 유치 성공! 사업자 신원 확인 솔루션 선택 가이드 & 유럽 스타트업 투자 성공 비결</a></h2>
-                <p class="news-card-date">2026-02-05</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-05-stripe-출신-창업-duna-300억-투자-유치-유럽-사업자-신원-확인-스타트업-성공-비결-및-투자-전략은.html" class="news-card-link">Stripe 출신 창업, Duna 300억 투자 유치! 유럽 사업자 신원 확인, 스타트업 성공 비결 및 투자 전략은?</a></h2>
-                <p class="news-card-date">2026-02-05</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-05-gizmo-앱-써보니-틱톡-스타일-미니-앱-플랫폼-나만을-위한-맞춤형-앱-찾기-활용법.html" class="news-card-link">Gizmo 앱 써보니: 틱톡 스타일 미니 앱 플랫폼, 나만을 위한 맞춤형 앱 찾기 & 활용법</a></h2>
-                <p class="news-card-date">2026-02-05</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-05-fibr-ai-정적-웹사이트를-11-맞춤형-경험으로-accel-투자-배경-및-기업-맞춤형-ai-에이전트-활용법.html" class="news-card-link">Fibr AI, 정적 웹사이트를 1:1 맞춤형 경험으로! Accel 투자 배경 및 기업 맞춤형 AI 에이전트 활용법</a></h2>
-                <p class="news-card-date">2026-02-05</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-05-fibr-ai-정적-웹사이트를-11-맞춤-경험으로-accel-투자-확대-배경과-기업-맞춤형-ai-에이전트-도입-효과.html" class="news-card-link">Fibr AI, 정적 웹사이트를 1:1 맞춤 경험으로! Accel 투자 확대 배경과 기업 맞춤형 AI 에이전트 도입 효과</a></h2>
-                <p class="news-card-date">2026-02-05</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-05-ai-기반-sre-스타트업-resolve-ai-1억-2천-5백만-달러-투자-유치-성공-유니콘-기업-등극-비결은-lightspeed-투자-주도-시리즈-a.html" class="news-card-link">AI 기반 SRE 스타트업 Resolve AI, 1억 2천 5백만 달러 투자 유치 성공! 유니콘 기업 등극 비결은? (Lightspeed 투자 주도, 시리즈 A)</a></h2>
-                <p class="news-card-date">2026-02-05</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-05-ai-sre-해결사-resolve-ai-1억-2500만-달러-투자-유치-성공-기업-가치-1조-원-돌파-it-서비스-안정성-확보-비법은.html" class="news-card-link">AI SRE 해결사 Resolve AI, 1억 2500만 달러 투자 유치 성공! 기업 가치 1조 원 돌파, IT 서비스 안정성 확보 비법은?</a></h2>
-                <p class="news-card-date">2026-02-05</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-05-ai-sre-resolve-ai-1억-2500만-달러-투자-유치-성공-유니콘-기업-등극-배경-및-ai-기반-sre-솔루션-도입-효과-분석.html" class="news-card-link">AI SRE Resolve AI, 1억 2500만 달러 투자 유치 성공! 유니콘 기업 등극 배경 및 AI 기반 SRE 솔루션 도입 효과 분석</a></h2>
-                <p class="news-card-date">2026-02-05</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-05-accel-fibr-ai에-두-배-투자-웹사이트-개인화-마케팅-비용-절감하는-ai-에이전트-솔루션-비교-및-도입-가이드.html" class="news-card-link">Accel, Fibr AI에 두 배 투자! 웹사이트 개인화, 마케팅 비용 절감하는 AI 에이전트 솔루션 비교 및 도입 가이드</a></h2>
-                <p class="news-card-date">2026-02-05</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-04-구글-애플-ai-협력설-함구-알파벳-침묵-이유는-투자자-불안감-증폭-ai-주식-투자-전략은.html" class="news-card-link">구글-애플 AI 협력설 함구, 알파벳 침묵 이유는? 투자자 불안감 증폭, AI 주식 투자 전략은?</a></h2>
-                <p class="news-card-date">2026-02-04</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-04-xcode-openai-및-anthropic-통합으로-에이전트-코딩-시대-개막.html" class="news-card-link">Xcode, OpenAI 및 Anthropic 통합으로 에이전트 코딩 시대 개막</a></h2>
-                <p class="news-card-date">2026-02-04</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-04-snowflake-openai와의-계약이-기업-ai-경쟁에-시사하는-점.html" class="news-card-link"># Snowflake, OpenAI와의 계약이 기업 AI 경쟁에 시사하는 점</a></h2>
-                <p class="news-card-date">2026-02-04</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-03-yc-스타트업-스테이블-코인으로-투자금-수령-가능.html" class="news-card-link"># YC 스타트업, 스테이블 코인으로 투자금 수령 가능!</a></h2>
-                <p class="news-card-date">2026-02-03</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-03-xcode-에이전트-코딩-시대로-openai-anthropic-통합-강화.html" class="news-card-link"># Xcode, 에이전트 코딩 시대로! OpenAI & Anthropic 통합 강화</a></h2>
-                <p class="news-card-date">2026-02-03</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-03-xcode-263-anthropic과-openai의-agentic-coding-기능으로-개발-혁신을-예고.html" class="news-card-link"># Xcode 26.3, Anthropic과 OpenAI의 Agentic Coding 기능으로 개발 혁신을 예고</a></h2>
-                <p class="news-card-date">2026-02-03</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-03-techcrunch-startup-battlefield-200-2026년-계획-발표.html" class="news-card-link"># TechCrunch Startup Battlefield 200, 2026년 계획 발표!</a></h2>
-                <p class="news-card-date">2026-02-03</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-03-skyryse-3억-달러-추가-투자-유치-헬리콥터-조종을-더욱-쉽고-안전하게.html" class="news-card-link"># Skyryse, 3억 달러 추가 투자 유치! 헬리콥터 조종을 더욱 쉽고 안전하게</a></h2>
-                <p class="news-card-date">2026-02-03</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-03-lotus-health-무료-ai-의사-서비스-위해-3500만-달러-투자-유치.html" class="news-card-link"># Lotus Health, 무료 AI 의사 서비스 위해 3500만 달러 투자 유치</a></h2>
-                <p class="news-card-date">2026-02-03</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-03-fitbit-창업자-가족-건강-모니터링-ai-플랫폼-luffu-출시.html" class="news-card-link"># Fitbit 창업자, 가족 건강 모니터링 AI 플랫폼 'Luffu' 출시</a></h2>
-                <p class="news-card-date">2026-02-03</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-02-일론-머스크의-우주-야심-스페이스x-xai-인수-합병으로-우주-데이터-센터-시대-연다.html" class="news-card-link"># 🚀 일론 머스크의 우주 야심: 스페이스X, xAI 인수 합병으로 '우주 데이터 센터' 시대 연다</a></h2>
-                <p class="news-card-date">2026-02-02</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-02-에이전트-코딩의-새-지평-openai-강력한-macos-앱-출시-codex-기반.html" class="news-card-link"># 🤖 에이전트 코딩의 새 지평! OpenAI, 강력한 macOS 앱 출시 (Codex 기반)</a></h2>
-                <p class="news-card-date">2026-02-02</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-02-스노우플레이크의-멀티-벤더-전략-엔터프라이즈-ai-전쟁에서-살아남는-법.html" class="news-card-link">스노우플레이크의 '멀티 벤더' 전략: 엔터프라이즈 AI 전쟁에서 살아남는 법</a></h2>
-                <p class="news-card-date">2026-02-02</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-02-뉴스-요약-firefox-생성형-ai-기능-차단-옵션-제공-예정.html" class="news-card-link"># 📰 뉴스 요약: Firefox, 생성형 AI 기능 차단 옵션 제공 예정</a></h2>
-                <p class="news-card-date">2026-02-02</p>
-            </article>
-            
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="/2026-02-02-링ring-이제-카메라-없어도-실종-반려견-찾기-서치-파티에-참여-가능.html" class="news-card-link">링(Ring), 이제 카메라 없어도 실종 반려견 찾기 '서치 파티'에 참여 가능!</a></h2>
-                <p class="news-card-date">2026-02-02</p>
-            </article>
-            </div></section>
+        
+            <h1 class="section-title" data-i18n="all_news_grid_title">모든 뉴스</h1>
+            <div class="news-grid">
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-05-틱톡-스타일-미니-앱-플랫폼-gizmo-지루한-일상-탈출구-나만의-앱-제작-수익-창출-방법.html" class="news-card-link">틱톡 스타일 미니 앱 플랫폼 'Gizmo', 지루한 일상 탈출구? 나만의 앱 제작 & 수익 창출 방법</a></h2>
+                    <p class="news-card-date">2026-02-05</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-05-어도비-애니메이트-종료-철회-유지-보수-모드로-전환-애니메이션-제작자에게는-희소식-대안-프로그램-비교-분석.html" class="news-card-link">어도비 애니메이트 종료 철회! 유지 보수 모드로 전환, 애니메이션 제작자에게는 희소식? 대안 프로그램 비교 분석</a></h2>
+                    <p class="news-card-date">2026-02-05</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-05-어도비-애니메이트-종료-번복-유지보수-모드로-전환-애니메이션-제작자-안도-이유와-향후-전망은.html" class="news-card-link">어도비 애니메이트 종료 번복! 유지보수 모드로 전환, 애니메이션 제작자 안도 - 이유와 향후 전망은?</a></h2>
+                    <p class="news-card-date">2026-02-05</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-05-어도비-애니메이트-서비스-종료-철회-갑작스런-종료-논란과-유지-결정-배경-앞으로의-업데이트-방향은.html" class="news-card-link">어도비 애니메이트 서비스 종료 철회! 갑작스런 종료 논란과 유지 결정 배경, 앞으로의 업데이트 방향은?</a></h2>
+                    <p class="news-card-date">2026-02-05</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-05-어도비-애니메이트-서비스-종료-철회-갑작스러운-종료-발표-후-유지-결정-이유는-유지-모드-전환-의미-분석.html" class="news-card-link">어도비 애니메이트 서비스 종료 철회! 갑작스러운 종료 발표 후 유지 결정, 이유는? 유지 모드 전환 의미 분석</a></h2>
+                    <p class="news-card-date">2026-02-05</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-05-샘-올트먼-클로드-슈퍼볼-광고에-격분-ai-경쟁-심화-챗gpt-사용자-이탈-가속화될까-openai-vs-anthropic.html" class="news-card-link">샘 올트먼, 클로드 슈퍼볼 광고에 격분! AI 경쟁 심화, 챗GPT 사용자 이탈 가속화될까? (OpenAI vs Anthropic)</a></h2>
+                    <p class="news-card-date">2026-02-05</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-05-샘-알트만-클로드-슈퍼볼-광고에-격분-왜-오픈ai-vs-앤트로픽-ai-경쟁-심화-분석-및-향후-전망.html" class="news-card-link">샘 알트만, 클로드 슈퍼볼 광고에 격분! 왜? 오픈AI vs 앤트로픽 AI 경쟁 심화 분석 및 향후 전망</a></h2>
+                    <p class="news-card-date">2026-02-05</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-05-구글-애플-ai-협력설-함구-투자자-질문에도-묵묵부답-배경-및-전망-분석.html" class="news-card-link">구글-애플 AI 협력설 함구, 투자자 질문에도 묵묵부답? 배경 및 전망 분석</a></h2>
+                    <p class="news-card-date">2026-02-05</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-05-구글-애플-ai-협력설-주가-영향은-투자자들이-알아야-할-alphabet-침묵의-의미.html" class="news-card-link">구글-애플 AI 협력설, 주가 영향은? 투자자들이 알아야 할 Alphabet 침묵의 의미</a></h2>
+                    <p class="news-card-date">2026-02-05</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-05-구글-애플-ai-협력설-알파벳-함구-투자자들은-왜-궁금해할까-주가-영향-분석-및-향후-전망.html" class="news-card-link">구글-애플 AI 협력설, 알파벳 함구! 투자자들은 왜 궁금해할까? 주가 영향 분석 및 향후 전망</a></h2>
+                    <p class="news-card-date">2026-02-05</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-05-구글-애플-ai-협력-왜-알파벳은-함구할까-투자자도-모르는-속사정-분석-및-향후-전망.html" class="news-card-link">구글-애플 AI 협력, 왜 알파벳은 함구할까? 투자자도 모르는 속사정 분석 및 향후 전망</a></h2>
+                    <p class="news-card-date">2026-02-05</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-05-구글-gemini-앱-7억-5천만-사용자-돌파-chatgpt-meta-ai와-비교-분석-나에게-맞는-ai-앱은.html" class="news-card-link">구글 Gemini 앱 7억 5천만 사용자 돌파! ChatGPT, Meta AI와 비교 분석: 나에게 맞는 AI 앱은?</a></h2>
+                    <p class="news-card-date">2026-02-05</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-05-구글-gemini-앱-7억-5천만-사용자-돌파-chatgpt-meta-ai-와-경쟁-속-gemini-활용법-및-꿀팁은.html" class="news-card-link">구글 Gemini 앱 7억 5천만 사용자 돌파! ChatGPT, Meta AI 와 경쟁 속, Gemini 활용법 및 꿀팁은?</a></h2>
+                    <p class="news-card-date">2026-02-05</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-05-구글-gemini-앱-7억-5천만-사용자-돌파-chatgpt-meta-ai-경쟁-속-사용자-급증-비결은-꿀팁-활용법.html" class="news-card-link">구글 Gemini 앱, 7억 5천만 사용자 돌파! ChatGPT, Meta AI 경쟁 속 사용자 급증 비결은? 꿀팁 활용법</a></h2>
+                    <p class="news-card-date">2026-02-05</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-05-구글-gemini-7억-5천만-mau-돌파-chatgpt-meta-ai-대항마-gemini-활용-꿀팁-및-경쟁력-비교-분석.html" class="news-card-link">구글 Gemini 7억 5천만 MAU 돌파! ChatGPT, Meta AI 대항마? Gemini 활용 꿀팁 및 경쟁력 비교 분석</a></h2>
+                    <p class="news-card-date">2026-02-05</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-05-가정용-배터리-전력망-안정화에-기여-lunar-energy-232억-달러-투자-유치-성공-에너지-자립-및-투자-기회-분석.html" class="news-card-link">가정용 배터리, 전력망 안정화에 기여? Lunar Energy 2.32억 달러 투자 유치 성공 - 에너지 자립 및 투자 기회 분석</a></h2>
+                    <p class="news-card-date">2026-02-05</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-05-stripe-출신-창업-기업-신원-인증-스타트업-duna-390억원-투자-유치-유럽-스타트업-성공-비결은.html" class="news-card-link">Stripe 출신 창업, 기업 신원 인증 스타트업 Duna, 390억원 투자 유치! - 유럽 스타트업 성공 비결은?</a></h2>
+                    <p class="news-card-date">2026-02-05</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-05-stripe-출신-창업-duna-3천만-유로-투자-유치-성공-유럽-사업자-신원-확인-솔루션-스타트업-투자-유치-비결은.html" class="news-card-link">Stripe 출신 창업, Duna 3천만 유로 투자 유치 성공! - 유럽 사업자 신원 확인 솔루션, 스타트업 투자 유치 비결은?</a></h2>
+                    <p class="news-card-date">2026-02-05</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-05-stripe-출신-창업-duna-390억-투자-유치-성공-사업자-신원-확인-솔루션-선택-가이드-유럽-스타트업-투자-성공-비결.html" class="news-card-link">Stripe 출신 창업 Duna, 390억 투자 유치 성공! 사업자 신원 확인 솔루션 선택 가이드 & 유럽 스타트업 투자 성공 비결</a></h2>
+                    <p class="news-card-date">2026-02-05</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-05-stripe-출신-창업-duna-300억-투자-유치-유럽-사업자-신원-확인-스타트업-성공-비결-및-투자-전략은.html" class="news-card-link">Stripe 출신 창업, Duna 300억 투자 유치! 유럽 사업자 신원 확인, 스타트업 성공 비결 및 투자 전략은?</a></h2>
+                    <p class="news-card-date">2026-02-05</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-05-gizmo-앱-써보니-틱톡-스타일-미니-앱-플랫폼-나만을-위한-맞춤형-앱-찾기-활용법.html" class="news-card-link">Gizmo 앱 써보니: 틱톡 스타일 미니 앱 플랫폼, 나만을 위한 맞춤형 앱 찾기 & 활용법</a></h2>
+                    <p class="news-card-date">2026-02-05</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-05-gizmo-앱-바이브-코딩-미니-앱-tiktok-등장-10대-취향-저격-인터랙티브-앱-추천-및-사용법-완벽-분석.html" class="news-card-link">Gizmo 앱: 바이브 코딩 미니 앱 TikTok 등장! 10대 취향 저격 인터랙티브 앱 추천 및 사용법 완벽 분석</a></h2>
+                    <p class="news-card-date">2026-02-05</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-05-fibr-ai-정적-웹사이트를-11-맞춤형-경험으로-accel-투자-배경-및-기업-맞춤형-ai-에이전트-활용법.html" class="news-card-link">Fibr AI, 정적 웹사이트를 1:1 맞춤형 경험으로! Accel 투자 배경 및 기업 맞춤형 AI 에이전트 활용법</a></h2>
+                    <p class="news-card-date">2026-02-05</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-05-fibr-ai-정적-웹사이트를-11-맞춤-경험으로-accel-투자-확대-배경과-기업-맞춤형-ai-에이전트-도입-효과.html" class="news-card-link">Fibr AI, 정적 웹사이트를 1:1 맞춤 경험으로! Accel 투자 확대 배경과 기업 맞춤형 AI 에이전트 도입 효과</a></h2>
+                    <p class="news-card-date">2026-02-05</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-05-fibr-ai-에이전트-기반-개인화-솔루션으로-정적-웹사이트를-11-맞춤-경험으로-accel-투자-확대-배경은.html" class="news-card-link">Fibr AI, 에이전트 기반 개인화 솔루션으로 정적 웹사이트를 1:1 맞춤 경험으로! Accel 투자 확대 배경은?</a></h2>
+                    <p class="news-card-date">2026-02-05</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-05-ai-기반-sre-스타트업-resolve-ai-1억-2천-5백만-달러-투자-유치-성공-유니콘-기업-등극-비결은-lightspeed-투자-주도-시리즈-a.html" class="news-card-link">AI 기반 SRE 스타트업 Resolve AI, 1억 2천 5백만 달러 투자 유치 성공! 유니콘 기업 등극 비결은? (Lightspeed 투자 주도, 시리즈 A)</a></h2>
+                    <p class="news-card-date">2026-02-05</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-05-ai-sre-해결사-resolve-ai-1억-2500만-달러-투자-유치-성공-기업-가치-1조-원-돌파-it-서비스-안정성-확보-비법은.html" class="news-card-link">AI SRE 해결사 Resolve AI, 1억 2500만 달러 투자 유치 성공! 기업 가치 1조 원 돌파, IT 서비스 안정성 확보 비법은?</a></h2>
+                    <p class="news-card-date">2026-02-05</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-05-ai-sre-스타트업-resolve-ai-1억-2천-5백만-달러-투자-유치-성공-유니콘-기업-등극-비결은-lightspeed-투자-배경-및-sre-자동화-도입-효과-분석.html" class="news-card-link">AI SRE 스타트업 Resolve AI, 1억 2천 5백만 달러 투자 유치 성공! 유니콘 기업 등극 비결은? Lightspeed 투자 배경 및 SRE 자동화 도입 효과 분석</a></h2>
+                    <p class="news-card-date">2026-02-05</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-05-ai-sre-resolve-ai-1억-2500만-달러-투자-유치-성공-유니콘-기업-등극-배경-및-ai-기반-sre-솔루션-도입-효과-분석.html" class="news-card-link">AI SRE Resolve AI, 1억 2500만 달러 투자 유치 성공! 유니콘 기업 등극 배경 및 AI 기반 SRE 솔루션 도입 효과 분석</a></h2>
+                    <p class="news-card-date">2026-02-05</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-05-accel-fibr-ai에-두-배-투자-웹사이트-개인화-마케팅-비용-절감하는-ai-에이전트-솔루션-비교-및-도입-가이드.html" class="news-card-link">Accel, Fibr AI에 두 배 투자! 웹사이트 개인화, 마케팅 비용 절감하는 AI 에이전트 솔루션 비교 및 도입 가이드</a></h2>
+                    <p class="news-card-date">2026-02-05</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-04-구글-애플-ai-협력설-함구-알파벳-침묵-이유는-투자자-불안감-증폭-ai-주식-투자-전략은.html" class="news-card-link">구글-애플 AI 협력설 함구, 알파벳 침묵 이유는? 투자자 불안감 증폭, AI 주식 투자 전략은?</a></h2>
+                    <p class="news-card-date">2026-02-04</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-04-xcode-openai-및-anthropic-통합으로-에이전트-코딩-시대-개막.html" class="news-card-link">Xcode, OpenAI 및 Anthropic 통합으로 에이전트 코딩 시대 개막</a></h2>
+                    <p class="news-card-date">2026-02-04</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-04-snowflake-openai와의-계약이-기업-ai-경쟁에-시사하는-점.html" class="news-card-link"># Snowflake, OpenAI와의 계약이 기업 AI 경쟁에 시사하는 점</a></h2>
+                    <p class="news-card-date">2026-02-04</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-03-yc-스타트업-스테이블-코인으로-투자금-수령-가능.html" class="news-card-link"># YC 스타트업, 스테이블 코인으로 투자금 수령 가능!</a></h2>
+                    <p class="news-card-date">2026-02-03</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-03-xcode-에이전트-코딩-시대로-openai-anthropic-통합-강화.html" class="news-card-link"># Xcode, 에이전트 코딩 시대로! OpenAI & Anthropic 통합 강화</a></h2>
+                    <p class="news-card-date">2026-02-03</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-03-xcode-263-anthropic과-openai의-agentic-coding-기능으로-개발-혁신을-예고.html" class="news-card-link"># Xcode 26.3, Anthropic과 OpenAI의 Agentic Coding 기능으로 개발 혁신을 예고</a></h2>
+                    <p class="news-card-date">2026-02-03</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-03-techcrunch-startup-battlefield-200-2026년-계획-발표.html" class="news-card-link"># TechCrunch Startup Battlefield 200, 2026년 계획 발표!</a></h2>
+                    <p class="news-card-date">2026-02-03</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-03-skyryse-3억-달러-추가-투자-유치-헬리콥터-조종을-더욱-쉽고-안전하게.html" class="news-card-link"># Skyryse, 3억 달러 추가 투자 유치! 헬리콥터 조종을 더욱 쉽고 안전하게</a></h2>
+                    <p class="news-card-date">2026-02-03</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-03-lotus-health-무료-ai-의사-서비스-위해-3500만-달러-투자-유치.html" class="news-card-link"># Lotus Health, 무료 AI 의사 서비스 위해 3500만 달러 투자 유치</a></h2>
+                    <p class="news-card-date">2026-02-03</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-03-fitbit-창업자-가족-건강-모니터링-ai-플랫폼-luffu-출시.html" class="news-card-link"># Fitbit 창업자, 가족 건강 모니터링 AI 플랫폼 'Luffu' 출시</a></h2>
+                    <p class="news-card-date">2026-02-03</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-02-일론-머스크의-우주-야심-스페이스x-xai-인수-합병으로-우주-데이터-센터-시대-연다.html" class="news-card-link"># 🚀 일론 머스크의 우주 야심: 스페이스X, xAI 인수 합병으로 '우주 데이터 센터' 시대 연다</a></h2>
+                    <p class="news-card-date">2026-02-02</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-02-에이전트-코딩의-새-지평-openai-강력한-macos-앱-출시-codex-기반.html" class="news-card-link"># 🤖 에이전트 코딩의 새 지평! OpenAI, 강력한 macOS 앱 출시 (Codex 기반)</a></h2>
+                    <p class="news-card-date">2026-02-02</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-02-스노우플레이크의-멀티-벤더-전략-엔터프라이즈-ai-전쟁에서-살아남는-법.html" class="news-card-link">스노우플레이크의 '멀티 벤더' 전략: 엔터프라이즈 AI 전쟁에서 살아남는 법</a></h2>
+                    <p class="news-card-date">2026-02-02</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-02-뉴스-요약-firefox-생성형-ai-기능-차단-옵션-제공-예정.html" class="news-card-link"># 📰 뉴스 요약: Firefox, 생성형 AI 기능 차단 옵션 제공 예정</a></h2>
+                    <p class="news-card-date">2026-02-02</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                
+                <article class="news-card">
+                    <h2 class="news-card-title"><a href="/2026-02-02-링ring-이제-카메라-없어도-실종-반려견-찾기-서치-파티에-참여-가능.html" class="news-card-link">링(Ring), 이제 카메라 없어도 실종 반려견 찾기 '서치 파티'에 참여 가능!</a></h2>
+                    <p class="news-card-date">2026-02-02</p>
+                    <!-- Add more news card specific content here -->
+                </article>
+                </div>
+        </section>
+        
     </main>
 
 
