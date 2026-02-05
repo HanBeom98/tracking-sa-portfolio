@@ -3,17 +3,12 @@ import os
 import datetime
 import subprocess
 import re
-from dotenv import load_dotenv # Moved here
 import feedparser # Global import
 import requests # Global import
 from google import genai # Global import
-import markdown 
+import markdown
 import shutil
 import time
-
-# Load environment variables globally
-load_dotenv()
-
 PUBLIC_DIR = "public"
 NEWS_POSTS_DIR = "posts" 
 PROCESSED_ARTICLES_LOG = "processed_articles.log" 
@@ -351,18 +346,41 @@ def generate_public_site():
     copy_static_assets()
     articles_meta = []
     if os.path.exists(NEWS_POSTS_DIR):
-        for fn in sorted(os.listdir(NEWS_POSTS_DIR), reverse=True):
+        # Collect all markdown files with their dates and modification times
+        all_md_files = []
+        for fn in os.listdir(NEWS_POSTS_DIR):
             if fn.endswith('.md'):
-                with open(os.path.join(NEWS_POSTS_DIR, fn), 'r', encoding='utf-8') as f: original_content = f.read() # Read into original_content
+                file_path = os.path.join(NEWS_POSTS_DIR, fn)
                 
-                # Use the new helper function for hashtag extraction and formatting
-                processed_content, hashtags_html = _extract_and_format_hashtags(original_content, log_prefix=f"[generate_public_site - {fn}] ")
+                # Extract date from filename
+                date_match = re.match(r'(\d{4}-\d{2}-\d{2})', fn)
+                if date_match:
+                    date_str = date_match.group(1)
+                    date_obj = datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
+                else:
+                    # Fallback for files without a date in the name, treat as very old
+                    date_obj = datetime.date.min # Or handle as an error
+                    date_str = "0000-00-00"
 
-                title = extract_title_from_md(processed_content) # Use processed_content for title extraction as well
-                date = re.match(r'(\d{4}-\d{2}-\d{2})', fn).group(1)
-                url = f"{date}-{clean_filename(title)}.html"
-                articles_meta.append({'title': title, 'date': date, 'url': url})
-                generate_article_html(processed_content, title, date, os.path.join(PUBLIC_DIR, url), hashtags_html) # Use processed_content
+                mod_time = os.path.getmtime(file_path)
+                all_md_files.append({'filename': fn, 'date_obj': date_obj, 'date_str': date_str, 'mod_time': mod_time})
+
+        # Sort primarily by date (descending), then by modification time (descending)
+        all_md_files.sort(key=lambda x: (x['date_obj'], x['mod_time']), reverse=True)
+
+        for file_info in all_md_files:
+            fn = file_info['filename']
+            date_str = file_info['date_str'] # Use the extracted date string
+            
+            with open(os.path.join(NEWS_POSTS_DIR, fn), 'r', encoding='utf-8') as f: original_content = f.read()
+                
+            processed_content, hashtags_html = _extract_and_format_hashtags(original_content, log_prefix=f"[generate_public_site - {fn}] ")
+
+            title = extract_title_from_md(processed_content)
+            # Ensure the date used for the URL is the one extracted from the filename
+            url = f"{date_str}-{clean_filename(title)}.html"
+            articles_meta.append({'title': title, 'date': date_str, 'url': url})
+            generate_article_html(processed_content, title, date_str, os.path.join(PUBLIC_DIR, url), hashtags_html) # Use processed_content
     generate_index_html(articles_meta)
     _generate_sitemap(articles_meta)
 
@@ -373,6 +391,11 @@ def main():
     args = parser.parse_args()
 
     if not args.build_only:
+        try:
+            from dotenv import load_dotenv
+            load_dotenv() # Load environment variables here, only if not --build-only
+        except ImportError:
+            print("Warning: python-dotenv not installed. Environment variables will not be loaded from .env file.")
         # For debugging: Remove processed articles log to force regeneration
         if os.path.exists(PROCESSED_ARTICLES_LOG):
             os.remove(PROCESSED_ARTICLES_LOG)
