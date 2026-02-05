@@ -1,4 +1,4 @@
-const URL = "https://teachablemachine.withgoogle.com/models/Jtg0ClWaE/"; // Replace with your Teachable Machine model URL
+const URL = "https://teachablemachine.withgoogle.com/models/e52yfi_eK/"; // Updated Teachable Machine model URL
 
 // Mapping of animal names to emojis with Korean names. Keys match AI model's class names.
 const animalData = {
