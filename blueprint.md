@@ -56,40 +56,21 @@ The Tracking-SA project is a framework-less web application (HTML, CSS, JavaScri
 
 *   New translation keys (`ai_tendency_test`, `hero_title`, `hero_subtitle`, `start_test_button`) have been added to `translations.js` for both Korean (`ko`) and English (`en`) languages to ensure multi-language support for the new features.
 
-## Plan and Steps for Current Requested Change
+## Resolved Issues & Further Actions:
 
-All requested changes have been implemented in the following files:
+*   **Deployment Blockage**: Resolved by removing `public/` from `.gitignore` and modifying the GitHub Actions workflow (`.github/workflows/daily-news-post.yml`) to use `git add .` for comprehensive staging of all generated files.
+*   **Header Duplication/Inconsistency**: Resolved by:
+    *   Updating `main.py`'s `COMMON_BODY_INJECTIONS` constant with the correct single-line header structure, menu order, and dropdown, and without the theme change button.
+    *   Enhancing `process_html_file_for_common_elements` in `main.py` to robustly remove any existing `<header>` tags from HTML files before injecting the new header.
+    *   Refining `style.css` to ensure single-line header display by removing `flex-wrap: wrap;` from `header` and `nav ul` rules, applying `position: sticky`, and cleaning up all unused styling.
+*   **Python Dependencies**: Ensured `main.py` runs correctly by explicitly executing it with the virtual environment's Python interpreter, resolving `ModuleNotFoundError`.
+*   **AI Test Page Deployment**: Confirmed `ai-test.html` and `ai-test.js` are included in the `assets` list within `main.py`'s `copy_static_assets` function, ensuring their proper copying to the `public/` directory.
 
-1.  **`main.py`**: The `COMMON_BODY_INJECTIONS` constant has been updated to inject the correct, single-line header with the new menu structure and dropdown, and without the `#color-change` button.
-2.  **`ai-test.html`**:
-    *   Created the new HTML structure for the quiz.
-    *   Updated its header to match the new dropdown navigation for consistency.
-3.  **`ai-test.js`**: Implemented the core JavaScript logic for the quiz.
-4.  **`style.css`**: Completely rewritten and refined to:
-    *   Restore core styling for the entire site (header, layout, news cards, dark mode).
-    *   Correctly integrate styles for `ai-test.html`.
-    *   Set header background to green (`#22c55e`), with horizontal menu and white text.
-    *   Remove all CSS associated with the deleted `#color-change` moon icon button.
-    *   Configure main container for `max-width: 1200px` and `margin: auto`.
-    *   Style news cards with white background, soft shadow, rounded corners, and grid layout.
-    *   Define dark mode styles for body background and card colors.
-    *   **Removed `.hero-banner` related CSS.**
-    *   **Applied `position: sticky; top: 0; z-index: 1000;` to the main `header` for a fixed-on-scroll effect.**
-    *   Removed `flex-wrap: wrap;` from `header` and `nav ul` in `style.css` to prevent the menu from splitting into two lines.
-    *   Added robust styles for the new dropdown menu (hide by default, show on hover, white background, black text, soft shadow, correct positioning).
-    *   Removed any potential redundant header-related CSS, ensuring a clean and unified stylesheet.
-5.  **`index.html`**:
-    *   Consolidated to a single `<header>` element with the main navigation bar and utility buttons (only language switcher remains).
-    *   Removed the "뉴스 홈" link.
-    *   Removed the `#color-change` moon icon button.
-    *   The `nav ul` has been reconstructed to follow the exact order `[홈 / 테스트(드롭다운) / 파트너십 문의 / 회사 소개 / 문의 / 개인정보처리방침]`.
-    *   **The `<section class="hero-banner">` has been completely removed.**
-    *   The home screen now shows only the menu bar and the news list.
-6.  **`translations.js`**: New translation keys for the AI test and hero banner content have been added.
-
+---
 **Final Check Summary:**
 *   **Home screen cleanliness:** `index.html` displays a single, integrated green menu bar with the specified order and a functioning '테스트' dropdown. The page is free of any AI test promotional banners, showing only the menu and the news list.
 *   **'테스트' menu dropdown:** Hovering over '테스트' correctly displays the sub-menus ('동물상 테스트', 'AI 성향 테스트') with the correct styling.
 *   **Utility buttons:** Only the language selection button remains on the right end of the header and remains functional. The theme change button and its icon are gone.
 *   **'AI 성향 테스트' redirection:** The 'AI 성향 테스트' link within the dropdown successfully navigates to the independent `ai-test.html` page where the quiz resides.
 *   **Sticky Header:** The main header bar is fixed at the top during scrolling.
+*   **News Update**: The site should now correctly update news and reflect all changes upon deployment via GitHub Actions.

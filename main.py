@@ -59,6 +59,7 @@ COMMON_BODY_INJECTIONS = """
         </ul>
     </nav>
     <div class="utility-buttons">
+        <button id="color-change">🌙</button> <!-- Theme change button re-added -->
         <div id="language-switcher"></div>
     </div>
 </header>

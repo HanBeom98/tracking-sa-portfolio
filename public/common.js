@@ -66,8 +66,14 @@ async function loadLayout() {
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'dark') {
             body.classList.add('dark-mode');
+            if (themeToggle) { // Ensure button exists before changing icon
+                themeToggle.innerHTML = '☀️'; // Sun icon for dark mode
+            }
         } else {
             body.classList.remove('dark-mode');
+            if (themeToggle) { // Ensure button exists before changing icon
+                themeToggle.innerHTML = '🌙'; // Moon icon for light mode
+            }
         }
     }
 
@@ -77,8 +83,10 @@ async function loadLayout() {
             body.classList.toggle('dark-mode');
             if (body.classList.contains('dark-mode')) {
                 localStorage.setItem('theme', 'dark');
+                themeToggle.innerHTML = '☀️'; // Change to sun for dark mode
             } else {
                 localStorage.setItem('theme', 'light');
+                themeToggle.innerHTML = '🌙'; // Change to moon for light mode
             }
         });
     }

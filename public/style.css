@@ -11,14 +11,14 @@ body {
 header {
     background-color: #22c55e; /* Main Green */
     color: white;
-    padding: 1rem 20px;
+    height: 60px; /* Fixed height for the header bar */
+    padding: 0 20px; /* Adjust padding due to fixed height */
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    /* flex-wrap: wrap; removed to prevent menu from splitting into two lines */
-    position: sticky; /* Make header sticky */
-    top: 0; /* Stick to the top */
+    align-items: center; /* Ensures vertical centering of direct children */
+    position: sticky;
+    top: 0;
     z-index: 1000; /* Ensure header stays above other content */
 }
 
@@ -34,6 +34,7 @@ header nav {
     flex-grow: 1; /* Allow nav to take available space */
     display: flex; /* Ensure flex context for ul */
     justify-content: flex-start; /* Align nav items to the start */
+    height: 100%; /* Make nav fill the height of its flex parent header */
 }
 
 nav ul {
