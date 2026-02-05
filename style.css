@@ -970,3 +970,156 @@ body.dark-mode .dropdown-content a:hover {
     background-color: #444444; /* Slightly lighter dark on hover */
     color: #eeeeee;
 }
+
+/* Inquiry Form Section Styling */
+.inquiry-form-section {
+    max-width: 700px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.inquiry-form-section h1 {
+    color: #28a745; /* Dark Green */
+    font-size: 2.5em;
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+.inquiry-form-section p {
+    font-size: 1.1em;
+    color: #555;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+.inquiry-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    text-align: left; /* Align form labels/inputs left */
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-field.full-width {
+    grid-column: 1 / -1; /* Occupy full width for these fields */
+}
+
+.inquiry-form label {
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #333;
+    font-size: 1em;
+}
+
+.inquiry-form input[type="text"],
+.inquiry-form input[type="email"],
+.inquiry-form textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    font-size: 1em;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box; /* Include padding in width */
+}
+
+.inquiry-form input[type="text"]:focus,
+.inquiry-form input[type="email"]:focus,
+.inquiry-form textarea:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    outline: none;
+}
+
+.inquiry-form textarea {
+    resize: vertical; /* Allow vertical resizing */
+    min-height: 120px;
+}
+
+.inquiry-form button[type="submit"] {
+    grid-column: 1 / -1; /* Occupy full width */
+    background-color: #28a745; /* Green submit button */
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.2em;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    margin-top: 20px;
+    box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2);
+}
+
+.inquiry-form button[type="submit"]:hover {
+    background-color: #218838; /* Darker green on hover */
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(40, 167, 69, 0.3);
+}
+
+/* Dark mode for Inquiry Form */
+body.dark-mode .inquiry-form-section {
+    background-color: #2a2a2a;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+}
+
+body.dark-mode .inquiry-form-section h1 {
+    color: #66cc66; /* Lighter green */
+}
+
+body.dark-mode .inquiry-form-section p {
+    color: #cccccc;
+}
+
+body.dark-mode .inquiry-form label {
+    color: #e0e0e0;
+}
+
+body.dark-mode .inquiry-form input[type="text"],
+body.dark-mode .inquiry-form input[type="email"],
+body.dark-mode .inquiry-form textarea {
+    background-color: #3b3b3b;
+    color: #e0e0e0;
+    border-color: #555;
+}
+
+body.dark-mode .inquiry-form input[type="text"]:focus,
+body.dark-mode .inquiry-form input[type="email"]:focus,
+body.dark-mode .inquiry-form textarea:focus {
+    border-color: #66cc66;
+    box-shadow: 0 0 0 0.2rem rgba(102, 204, 102, 0.25);
+}
+
+body.dark-mode .inquiry-form button[type="submit"] {
+    background-color: #1eaf53;
+    box-shadow: 0 4px 10px rgba(30, 175, 83, 0.2);
+}
+
+body.dark-mode .inquiry-form button[type="submit"]:hover {
+    background-color: #22c55e;
+    box-shadow: 0 6px 15px rgba(30, 175, 83, 0.3);
+}
+
+/* Responsive adjustments for Inquiry Form */
+@media (max-width: 600px) {
+    .inquiry-form {
+        grid-template-columns: 1fr; /* Stack columns on small screens */
+    }
+
+    .inquiry-form-section {
+        margin: 20px auto;
+        padding: 20px;
+    }
+
+    .inquiry-form-section h1 {
+        font-size: 2em;
+    }
+}
