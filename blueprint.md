@@ -62,7 +62,7 @@ The Tracking-SA project is a framework-less web application (HTML, CSS, JavaScri
     *   Restored `header` background-color to brand green (`#22c55e`) and `color` to `white` for desktop.
     *   Restored `nav a` and `nav ul li.dropdown .dropbtn` `color` to `white`.
     *   Restored `body.dark-mode header` `background-color` to `#1c923f` (darker green).
-    *   Moved "테스트" button 0.5 pixels down using `transform: translateY(0.5px)` on `.dropbtn`.
+    *   Moved "테스트" button 1.9 pixels down using `transform: translateY(1.9px)` on `.dropbtn`.
     *   Added comprehensive mobile-specific responsive overrides within `@media (max-width: 768px)`:
         *   `header`: Flex direction changed to column, items centered, background color set to brand green.
         *   `.header-content`: New flex container to manage site title and hamburger toggle.
