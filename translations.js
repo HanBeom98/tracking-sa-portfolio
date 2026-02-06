@@ -83,7 +83,12 @@ const translations = {
         'no_image_to_download_alert': '다운로드할 이미지가 없습니다.',
         'saju_test': 'AI 사주 테스트',
         'menu_test': '테스트',
-        'sitemap': '사이트맵'
+        'sitemap': '사이트맵',
+        'year_label': '년',
+        'month_label': '월',
+        'day_label': '일',
+        'hour_label': '시',
+        'unknown_option': '모름'
     },
     'en': {
         'news_home': 'News Home',
@@ -189,5 +194,11 @@ const translations = {
                 'ai_tendency_test': 'AI Tendency Test',
                 'hero_title': 'Which AI Model Are You Most Like? 🤖',
                 'hero_subtitle': 'Find out your AI personality with a simple test!',
-                'start_test_button': 'Start Test'
+                'start_test_button': 'Start Test',
+        'year_label': '년',
+        'month_label': '월',
+        'day_label': '일',
+        'hour_label': '시',
+        'unknown_option': '모름'
             }};
+

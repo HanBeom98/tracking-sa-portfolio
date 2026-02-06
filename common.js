@@ -19,7 +19,7 @@ window.applyTranslations = function(lang) {
     elements.forEach(element => {
         const key = element.getAttribute('data-i18n');
         if (key && translations[lang] && translations[lang][key]) {
-            element.innerHTML = translations[lang][key];
+            element.textContent = translations[lang][key];
         }
     });
 
