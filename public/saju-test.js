@@ -60,15 +60,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const gender = genderMaleRadio.checked ? 'male' : 'female';
 
         if (!name || !birthYear || !birthMonth || !birthDay) {
-            alert('이름과 생년월일을 모두 입력해주세요.');
+            const currentLanguage = document.documentElement.lang || 'ko';
+            alert(getTranslation(currentLanguage, 'saju_input_missing'));
             return;
         }
 
         loadingIndicator.style.display = 'flex';
         resultContainer.style.display = 'none';
         sajuReadingText.textContent = '';
+        getSajuButton.disabled = true; // Disable button to prevent duplicate clicks
 
         try {
+            const currentLanguage = document.documentElement.lang || 'ko'; // Detect current language
             const response = await fetch('/api/saju', { // Call the Cloudflare Function endpoint
                 method: 'POST',
                 headers: {
@@ -82,7 +85,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         day: birthDay
                     },
                     birthTime: birthHour,
-                    gender
+                    gender,
+                    language: currentLanguage // Send language parameter
                 })
             });
 
@@ -91,15 +95,18 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 sajuReadingText.textContent = data.sajuReading;
             } else {
-                sajuReadingText.textContent = `사주 풀이 중 오류 발생: ${data.error || response.statusText}`;
+                // Use translations for error messages
+                sajuReadingText.textContent = getTranslation(currentLanguage, 'saju_api_error') + (data.error || response.statusText);
             }
 
         } catch (error) {
             console.error('Frontend Saju API call error:', error);
-            sajuReadingText.textContent = '네트워크 오류가 발생했습니다. 다시 시도해주세요.';
+            // Use translations for network error messages
+            sajuReadingText.textContent = getTranslation(currentLanguage, 'saju_network_error');
         } finally {
             loadingIndicator.style.display = 'none';
             resultContainer.style.display = 'block';
+            getSajuButton.disabled = false; // Re-enable button
         }
     });
 
