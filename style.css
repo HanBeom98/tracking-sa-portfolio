@@ -12,7 +12,7 @@ header {
     background-color: #22c55e; /* Main Green - RESTORED */
     color: white; /* RESTORED */
     height: 50px; /* Adjusted height for the header bar */
-    padding: 0 20px; /* Adjust padding due to fixed height */
+    padding: 10px 20px; /* Adjust padding due to fixed height */
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     display: flex;
     justify-content: space-between;
@@ -31,25 +31,32 @@ header {
     /* font-size: 1.8em;  Match original site title font size */
     margin-right: 20px;
     height: 50px; /* Ensure logo area takes up header height for vertical centering */
+    margin-left: 20px;
     /* padding-left: 20px; */ /* Removed as header handles padding now */
 }
 
-.site-logo-link img {
-    height: 40px; /* Fixed height for the logo image */
+.site-logo-link img.site-logo {
+    height: 45px; /* Fixed height for the logo image */
+    width: auto;
     vertical-align: middle;
     /* margin-right: 10px; */ /* Removed as only image now */
 }
 
 /* Hero Banner Styles */
 .hero-banner {
-    width: 100%;
+    box-sizing: border-box; /* Added for consistent sizing */
+    width: 95%; /* Adjusted width */
+    max-width: 1200px; /* Max width for centering */
+    margin: 0 auto 60px auto; /* Center alignment and bottom margin */
     padding: 60px 20px;
     text-align: center;
     color: white;
     background: linear-gradient(to right, #1eaf53, #189e47); /* Darker, more muted green gradient */
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    margin-bottom: 60px; /* Space before the news section */
-    border-radius: 8px; /* Slightly rounded corners */
+    border-radius: 15px; /* Rounded corners */
+    display: flex; /* For text and button centering */
+    flex-direction: column; /* Stack children vertically */
+    align-items: center; /* Center children horizontally */
 }
 
 .hero-banner h2 {
@@ -160,7 +167,7 @@ footer {
 /* Utility controls (theme and language switchers) */
 .utility-controls {
     display: flex;
-    gap: 10px;
+    gap: 20px; /* Changed from 10px to 20px */
     align-items: center;
 }
 
@@ -1746,7 +1753,7 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
         justify-content: center;
         margin-top: 20px;
         width: 100%;
-        gap: 10px; /* Spacing between buttons */
+        gap: 20px; /* Changed from 10px to 20px */ /* Spacing between buttons */
     }
 
     #slide-out-menu .lang-button {

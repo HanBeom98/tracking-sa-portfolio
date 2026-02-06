@@ -40,7 +40,7 @@ COMMON_HEAD_SCRIPTS = f"""
 COMMON_BODY_INJECTIONS = """
 <header>
     <a href="/index.html" class="site-logo-link">
-        <img src="/logo.svg" alt="TRACKING SA Logo" style="height: 40px;">
+        <img src="/logo.svg" alt="TRACKING SA" class="site-logo">
     </a>
     <button class="hamburger-menu" id="mobile-menu-toggle" aria-label="Open menu">
         <span></span>
