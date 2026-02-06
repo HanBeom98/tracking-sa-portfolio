@@ -165,5 +165,32 @@ async function loadLayout() {
     applyTranslations(currentLang);
 }
 
+    // Mobile menu toggle logic
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const slideOutMenu = document.getElementById('slide-out-menu');
+    const bodyElement = document.body;
+
+    // Create and append overlay element
+    const overlay = document.createElement('div');
+    overlay.classList.add('overlay');
+    bodyElement.appendChild(overlay);
+
+    if (mobileMenuToggle && slideOutMenu && bodyElement) {
+        mobileMenuToggle.addEventListener('click', () => {
+            bodyElement.classList.toggle('mobile-menu-open');
+        });
+
+        overlay.addEventListener('click', () => {
+            bodyElement.classList.remove('mobile-menu-open');
+        });
+
+        // Close menu if a link inside is clicked
+        slideOutMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                bodyElement.classList.remove('mobile-menu-open');
+            });
+        });
+    }
+
 // DOM이 로드되면 레이아웃을 불러옵니다.
 document.addEventListener('DOMContentLoaded', loadLayout);

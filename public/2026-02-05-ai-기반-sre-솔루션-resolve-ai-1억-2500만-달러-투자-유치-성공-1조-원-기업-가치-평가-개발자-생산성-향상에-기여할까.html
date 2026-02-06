@@ -29,7 +29,13 @@
 <body>
 
 <header>
-    <div class="desktop-menu-container" id="mobile-menu-container">
+    <a href="/index.html" class="site-title" data-i18n="news_home">홈</a> <!-- Site title for both desktop and mobile -->
+    <button class="hamburger-menu" id="mobile-menu-toggle" aria-label="Open menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+    <div class="desktop-menu-container" id="slide-out-menu"> <!-- This container now serves as the slide-out for mobile -->
         <nav>
             <ul>
                 <li><a href="/index.html" data-i18n="news_home">홈</a></li>
@@ -46,10 +52,10 @@
                 <li><a href="/privacy-policy.html" data-i18n="privacy_policy">개인정보처리방침</a></li>
             </ul>
         </nav>
-    </div>
-    <div class="utility-controls"> <!-- New wrapper for utility buttons -->
-        <button id="color-change">🌙</button> <!-- Theme change button re-added -->
-        <div id="language-switcher"></div>
+        <div class="utility-controls">
+            <button id="color-change">🌙</button>
+            <div id="language-switcher"></div>
+        </div>
     </div>
 </header>
 

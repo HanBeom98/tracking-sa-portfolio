@@ -30,9 +30,10 @@ header .site-title { /* Not used in current HTML but good to keep if it's a gene
     margin-right: 20px;
 }
 
-
-
-
+/* Hide hamburger menu on desktop */
+.hamburger-menu {
+    display: none;
+}
 
 .desktop-menu-container {
     /* Remove flex-grow to let it take natural width */
@@ -1305,90 +1306,204 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
 
 /* Mobile Responsive Overrides for Header and Navigation (max-width: 768px) */
 @media (max-width: 768px) {
+    /* Header layout for mobile */
     header {
-        flex-direction: column;
-        align-items: center; /* Center items vertically in column layout */
+        flex-direction: row; /* Align items horizontally */
         justify-content: space-between; /* Space out title and hamburger */
-        flex-wrap: wrap; /* Allow items to wrap */
-        height: auto !important; /* Ensure height expands */
-        padding: 2px 0; /* Adjusted padding for mobile */
-        background-color: #22c55e; /* Brand green background */
-        transition: transform 0.3s ease-in-out; /* Added for smooth hide/show */
+        align-items: center; /* Center items vertically */
+        padding: 5px 20px; /* Minimal padding, keep some horizontal */
+        height: auto; /* Allow height to adjust */
     }
 
-    .header-content { /* New wrapper for header items */
-        display: flex;
-        flex-direction: column; /* Stack children vertically */
+    .site-title {
+        font-size: 1.5em; /* Adjust site title size for mobile */
+        margin-right: 0; /* Reset margin */
+        order: 1; /* Place title first */
+    }
+
+    /* Hamburger Menu Button */
+    .hamburger-menu {
+        display: flex; /* Show hamburger menu */
+        flex-direction: column;
+        justify-content: space-around;
+        width: 30px;
+        height: 25px;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        z-index: 1100; /* Above slide-out menu */
+        order: 3; /* Place hamburger last */
+    }
+
+    .hamburger-menu span {
+        display: block;
         width: 100%;
-        justify-content: center;
+        height: 3px;
+        background: white;
+        border-radius: 3px;
+        transition: all 0.3s ease-in-out;
+    }
+
+    /* Hide desktop navigation and utility controls */
+    .desktop-menu-container {
+        display: none; /* Hide desktop menu on mobile by default */
+    }
+    .utility-controls {
+        display: none; /* Hide desktop utility controls on mobile by default */
+    }
+
+    /* Slide-out Mobile Menu Container */
+    #slide-out-menu {
+        display: flex; /* Make it a flex container */
+        flex-direction: column;
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 70%; /* Adjust as needed */
+        max-width: 300px; /* Max width for larger mobile screens */
+        height: 100%;
+        background-color: #22c55e; /* Green background */
+        box-shadow: -2px 0 5px rgba(0,0,0,0.2);
+        transform: translateX(100%); /* Start off-screen to the right */
+        transition: transform 0.3s ease-in-out;
+        z-index: 1000;
+        padding-top: 60px; /* Space for header content */
+        justify-content: flex-start; /* Align content to the top */
         align-items: center;
     }
 
-    .site-logo {
-        font-size: 1.8em;
-        font-weight: bold;
-        color: white; /* White text for logo on green background */
+    /* When menu is open */
+    body.mobile-menu-open #slide-out-menu {
+        transform: translateX(0); /* Slide into view */
+    }
+    body.mobile-menu-open .overlay {
+        display: block; /* Show overlay */
+    }
+    body.mobile-menu-open {
+        overflow: hidden; /* Prevent scrolling on body */
+    }
+
+    /* Overlay for when menu is open */
+    .overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+    }
+
+    /* Mobile Navigation List Styling */
+    #slide-out-menu nav ul {
+        flex-direction: column;
+        width: 100%;
+        padding: 0;
+        margin: 0;
+        align-items: center; /* Center list items */
+        list-style: none;
+        gap: 10px; /* Spacing between menu items */
+    }
+
+    #slide-out-menu nav a,
+    #slide-out-menu nav ul li.dropdown .dropbtn {
+        display: block;
+        padding: 10px 20px;
+        width: 100%;
+        text-align: center;
+        color: white;
         text-decoration: none;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
     }
 
-    .desktop-menu-container {
-        display: flex !important; /* Always visible on mobile */
-        flex-direction: column;
-        width: 100%;
-        background-color: #22c55e; /* Green background for opened menu */
-        position: relative; /* Position relative to header flow */
-        top: auto; /* Reset top */
-        left: auto; /* Reset left */
-        box-shadow: none; /* Remove shadow */
-        z-index: auto; /* Reset z-index */
-        /* Removed max-height, overflow, transition */
+    #slide-out-menu nav a:hover,
+    #slide-out-menu nav ul li.dropdown .dropbtn:hover {
+        background-color: #1eaf53; /* Darker green on hover */
     }
 
-    nav ul {
-        flex-direction: column;
-        align-items: center; /* Center menu items */
-        gap: 0; /* Adjusted gap for touchability */
+    /* Dropdown specific mobile styles */
+    #slide-out-menu .dropdown-content {
+        position: relative; /* Make dropdown content flow normally */
+        background-color: transparent; /* No background */
+        box-shadow: none;
         width: 100%;
-        margin-top: 2px; /* Space above nav items */
-        margin-bottom: 2px; /* Space below nav items */
-        padding: 2px 0;
     }
-    nav a {
-        padding: 1px 0; /* Reduced padding for minimal vertical length */
-        width: auto; /* Let content define width, then center */
-        text-align: center; /* Center text within buttons */
-        font-size: 1.1em; /* Larger font for readability */
-        color: white; /* White text on green menu background */
+
+    #slide-out-menu .dropdown-content a {
+        padding-left: 30px; /* Indent dropdown items */
+        color: rgba(255, 255, 255, 0.8); /* Slightly lighter text */
+        background-color: rgba(0,0,0,0.1); /* Subtle background for dropdown items */
     }
-    nav ul li.dropdown .dropbtn {
-        transform: translateY(0); /* Reset specific button adjustment */
-        padding: 0.2rem 1rem; /* Reduced padding for dropdown button */
-        color: white; /* White text on green menu background */
+    #slide-out-menu .dropdown-content a:hover {
+        background-color: rgba(0,0,0,0.2);
     }
-    .utility-controls {
-        flex-direction: row; /* Changed to row for horizontal alignment */
-        align-items: center;   /* Center children horizontally */
-        justify-content: center; /* Center children vertically (if space allows) */
-        margin-top: 2px;
-        margin-left: 0;
+
+    /* Utility controls within the slide-out menu */
+    #slide-out-menu .utility-controls {
+        display: flex; /* Show utility controls */
+        flex-direction: row; /* Horizontal alignment */
+        justify-content: center;
+        margin-top: 20px;
         width: 100%;
-        gap: 5px; /* Spacing between stacked items */
-        padding-bottom: 2px;
+        gap: 10px; /* Spacing between buttons */
     }
-    .lang-button {
-        padding: 8px 12px; /* Reduced touch area */
-        font-size: 1em; /* Readable font size */
-        color: #22c55e; /* Green text for language buttons */
-        background-color: white; /* White background for language buttons */
+
+    #slide-out-menu .lang-button {
+        color: #22c55e;
+        background-color: white;
+        border-radius: 5px;
     }
-    .lang-button.active {
-        background-color: #1eaf53; /* Darker green for active */
+    #slide-out-menu .lang-button.active {
+        background-color: #1eaf53;
         color: white;
     }
 
-    /* News Grid and Hero Card adjustments (restored from previous state) */
+    /* Dark mode for mobile menu */
+    body.dark-mode #slide-out-menu {
+        background-color: #1c923f; /* Darker green */
+        box-shadow: -2px 0 5px rgba(0,0,0,0.4);
+    }
+    body.dark-mode #slide-out-menu nav a,
+    body.dark-mode #slide-out-menu nav ul li.dropdown .dropbtn {
+        color: white;
+    }
+    body.dark-mode #slide-out-menu nav a:hover,
+    body.dark-mode #slide-out-menu nav ul li.dropdown .dropbtn:hover {
+        background-color: #156d2e;
+    }
+    body.dark-mode #slide-out-menu .dropdown-content a {
+        color: rgba(255, 255, 255, 0.8);
+        background-color: rgba(0,0,0,0.2);
+    }
+    body.dark-mode #slide-out-menu .dropdown-content a:hover {
+        background-color: rgba(0,0,0,0.3);
+    }
+    body.dark-mode #slide-out-menu .lang-button {
+        color: #66cc66;
+        background-color: #333333;
+    }
+    body.dark-mode #slide-out-menu .lang-button.active {
+        background-color: #156d2e;
+        color: white;
+    }
+
+    /* Hamburger menu icon animation when open */
+    body.mobile-menu-open .hamburger-menu span:nth-child(1) {
+        transform: translateY(11px) rotate(45deg);
+    }
+    body.mobile-menu-open .hamburger-menu span:nth-child(2) {
+        opacity: 0;
+    }
+    body.mobile-menu-open .hamburger-menu span:nth-child(3) {
+        transform: translateY(-11px) rotate(-45deg);
+    }
+
+    /* News Grid and Hero Card adjustments (preserved previous settings) */
     .news-grid {
-        grid-template-columns: 1fr; /* Single column on small screens */
+        grid-template-columns: 1fr;
         gap: 20px;
     }
     .hero-card {
@@ -1398,7 +1513,6 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
     .hero-card-title {
         font-size: 2em;
     }
-
     .news-section-main .section-title {
         font-size: 2em;
     }
@@ -1408,10 +1522,6 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
     .article-detail-main {
         padding: 20px;
     }
-    /* Assuming hero-banner related styles were intended for another component not directly news-grid */
-    /* .hero-banner h2 { font-size: 1.8em; } */
-    /* .hero-banner p { font-size: 1em; } */
-    /* .hero-banner .action-button { padding: 10px 25px; font-size: 1em; } */
     .ai-test-page {
         margin: 20px auto;
         padding: 20px;
@@ -1434,41 +1544,5 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
     .ai-test-page .action-button {
         padding: 10px 20px;
         font-size: 1em;
-    }
-}
-
-/* Dark Mode specific overrides for the mobile menu */
-body.dark-mode .desktop-menu-container {
-    background-color: #1c923f; /* Darker green for opened menu in dark mode */
-}
-body.dark-mode .desktop-menu-container a {
-    color: white; /* White text on dark green background */
-}
-body.dark-mode .desktop-menu-container .lang-button {
-    color: #66cc66; /* Lighter green text for language buttons in dark mode */
-    background-color: #333333; /* Dark background for language buttons */
-}
-body.dark-mode .desktop-menu-container .lang-button.active {
-    background-color: #156d2e; /* Even darker green for active */
-    color: white;
-}
-
-/* Styles for large emoji in animal face test results */
-.result-large-emoji {
-    font-size: 8rem;
-    margin: 20px 0;
-    display: flex;
-    justify-content: center;
-    animation: popIn 0.5s ease;
-}
-
-@keyframes popIn {
-    from {
-        transform: scale(0);
-        opacity: 0;
-    }
-    to {
-        transform: scale(1);
-        opacity: 1;
     }
 }
