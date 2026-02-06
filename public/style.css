@@ -1567,14 +1567,26 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
         width: 70%; /* Adjust as needed */
         max-width: 300px; /* Max width for larger mobile screens */
         height: 100%;
-        background-color: #22c55e; /* Green background */
+        background-color: rgba(34, 197, 94, 0.95); /* Green background with opacity */
         box-shadow: -2px 0 5px rgba(0,0,0,0.2);
+        backdrop-filter: blur(10px);
         transform: translateX(100%); /* Start off-screen to the right */
-        transition: transform 0.3s ease-in-out;
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         z-index: 1000;
         padding-top: 60px; /* Space for header content */
         justify-content: flex-start; /* Align content to the top */
         align-items: center;
+    }
+
+    /* Close button for slide-out menu */
+    .slide-out-menu-close-button {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 1.5em; /* Slightly larger */
+        color: white;
+        cursor: pointer;
+        z-index: 100; /* Ensure it's above other menu content */
     }
 
     /* When menu is open */
@@ -1606,9 +1618,22 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
         width: 100%;
         padding: 0;
         margin: 0;
-        align-items: center; /* Center list items */
+        /* align-items: center; */ /* Removed for left alignment */
         list-style: none;
-        gap: 10px; /* Spacing between menu items */
+        gap: 0; /* Managed by padding and borders on li */
+        text-align: left; /* Align text content of children to the left */
+        padding-top: 20px; /* Add some padding at the top of the menu list */
+    }
+
+    #slide-out-menu nav ul li {
+        padding-left: 30px; /* Left align menu items */
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Thin, transparent separator */
+        padding-top: 12px; /* Increase vertical spacing */
+        padding-bottom: 12px; /* Increase vertical spacing */
+    }
+
+    #slide-out-menu nav ul li:last-child {
+        border-bottom: none; /* No border for the last item */
     }
 
     #slide-out-menu nav a,
@@ -1616,11 +1641,12 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
         display: block;
         padding: 10px 20px;
         width: 100%;
-        text-align: center;
+        /* text-align: center; */ /* Removed for left alignment, handled by parent */
         color: white;
         text-decoration: none;
         font-weight: bold;
         transition: background-color 0.3s ease;
+        margin-left: -20px; /* Adjust to align with padding-left on li */
     }
 
     #slide-out-menu nav a:hover,
@@ -1658,11 +1684,13 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
     #slide-out-menu .lang-button {
         color: #22c55e;
         background-color: white;
-        border-radius: 5px;
+        border-radius: 20px; /* Increased border-radius for a more rounded look */
+        padding: 8px 15px; /* Adjust padding slightly for new shape */
     }
     #slide-out-menu .lang-button.active {
         background-color: #1eaf53;
         color: white;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add emphasis with shadow */
     }
 
     /* Dark mode for mobile menu */
