@@ -1585,6 +1585,11 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
 
 /* Mobile Responsive Overrides for Header and Navigation (max-width: 768px) */
 @media (max-width: 768px) {
+    html, body {
+        overflow-x: hidden;
+    }
+
+
     /* Header layout for mobile */
     header {
         flex-direction: row; /* Align items horizontally */
@@ -1723,19 +1728,17 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
     #slide-out-menu nav a,
     #slide-out-menu nav ul li.dropdown .dropbtn {
         display: block;
-        padding: 10px 20px;
+        padding: 10px 0; /* Remove left/right padding to rely on li's padding */
         width: 100%;
         /* text-align: center; */ /* Removed for left alignment, handled by parent */
         color: white;
         text-decoration: none;
-        font-weight: bold;
+        font-weight: normal; /* Lighter font weight */
         transition: background-color 0.3s ease;
         /* margin-left: -20px; */ /* Adjusted to align with padding-left on li */
     }
     
-    #slide-out-menu nav ul li.dropdown .dropbtn {
-        margin-left: -10px; /* Fine-tune adjustment for .dropbtn alignment */
-    }
+
 
 
     #slide-out-menu nav a:hover,
