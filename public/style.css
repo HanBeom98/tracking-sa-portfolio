@@ -1025,7 +1025,7 @@ body.dark-mode .share-buttons .share-button:hover {
 body.dark-mode .share-buttons .share-button[data-platform="twitter"] { background-color: #1da1f2; }
 body.dark-mode .share-buttons .share-button[data-platform="twitter"]:hover { background-color: #1a8cd8; }
 body.dark-mode .share-buttons .share-button[data-platform="facebook"] { background-color: #2d4373; }
-body.dark-buttons .share-button[data-platform="facebook"]:hover { background-color: #3b5998; }
+body.dark-mode .share-buttons .share-button[data-platform="facebook"]:hover { background-color: #3b5998; }
 body.dark-mode .share-buttons .share-button[data-platform="download"] { background-color: #60a5fa; }
 body.dark-mode .share-buttons .share-button[data-platform="download"]:hover { background-color: #3b82f6; }
 
@@ -1558,10 +1558,11 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
         font-size: 1em;
     }
 
-    /* Saju Test Page Specific Styles */
+    /* Saju Test Page Specific Styles (Global/PC) */
     .saju-input-section {
-        background: rgba(255, 255, 255, 0.7);
+        background: rgba(255, 255, 255, 0.75);
         backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
         border: 1px solid rgba(255, 255, 255, 0.3);
         border-radius: 20px;
         padding: 40px;
@@ -1593,7 +1594,7 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
 
     .saju-input-section .input-form-group label {
         display: inline-block;
-        width: 100px; /* Fixed width for labels */
+        width: 100px; /* Fixed width for labels for PC */
         flex-shrink: 0; /* Prevent label from shrinking */
         font-weight: bold;
         color: #333;
@@ -1622,8 +1623,8 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
     }
 
     .go-test-button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
         border-radius: 12px;
         font-weight: bold;
         cursor: pointer;
@@ -1651,21 +1652,21 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
 /* Mobile Responsive Overrides for Saju Test Page */
 @media (max-width: 768px) {
     .saju-input-section {
-        padding: 20px 15px; /* Reduced padding */
-        width: 95%; /* Set width */
+        padding: 25px 15px; /* Reduced padding for mobile */
+        width: 95%; /* Set width for mobile */
     }
     .saju-input-section .gender-buttons label {
         padding: 15px 20px; /* Adjust padding for gender buttons */
     }
 
     .saju-input-section .input-form-group {
-        flex-direction: column;
-        align-items: stretch; /* Change from flex-start to stretch */
+        flex-direction: column; /* Change to column for mobile */
+        align-items: stretch; /* Stretch items to fill width */
         gap: 5px;
     }
 
     .saju-input-section .input-form-group label {
-        width: auto; /* Change from 100% to auto */
+        width: auto; /* Label takes natural width on mobile */
         font-size: 0.9em; /* Reduced font size */
         margin-bottom: 5px;
     }
@@ -1678,7 +1679,7 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
     }
 
     .saju-input-section .birthdate-selectors select {
-        flex: 1; /* Change from width: calc(33% - 10px) to flex: 1 */
+        flex: 1; /* Ensure select boxes fill width */
     }
 
     .saju-input-section .go-test-button {
