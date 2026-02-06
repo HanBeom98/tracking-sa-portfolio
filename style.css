@@ -1311,7 +1311,7 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
         justify-content: space-between; /* Space out title and hamburger */
         flex-wrap: wrap; /* Allow items to wrap */
         height: auto !important; /* Ensure height expands */
-        padding: 5px 0; /* Adjusted padding for mobile */
+        padding: 2px 0; /* Adjusted padding for mobile */
         background-color: #22c55e; /* Brand green background */
         transition: transform 0.3s ease-in-out; /* Added for smooth hide/show */
     }
@@ -1349,12 +1349,12 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
         align-items: center; /* Center menu items */
         gap: 0; /* Adjusted gap for touchability */
         width: 100%;
-        margin-top: 5px; /* Space above nav items */
-        margin-bottom: 5px; /* Space below nav items */
-        padding: 5px 0;
+        margin-top: 2px; /* Space above nav items */
+        margin-bottom: 2px; /* Space below nav items */
+        padding: 2px 0;
     }
     nav a {
-        padding: 2px 0; /* Reduced padding for minimal vertical length */
+        padding: 1px 0; /* Reduced padding for minimal vertical length */
         width: auto; /* Let content define width, then center */
         text-align: center; /* Center text within buttons */
         font-size: 1.1em; /* Larger font for readability */
@@ -1362,18 +1362,18 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
     }
     nav ul li.dropdown .dropbtn {
         transform: translateY(0); /* Reset specific button adjustment */
-        padding: 0.5rem 1rem; /* Reduced padding for dropdown button */
+        padding: 0.2rem 1rem; /* Reduced padding for dropdown button */
         color: white; /* White text on green menu background */
     }
     .utility-controls {
-        flex-direction: column; /* Stack children vertically */
+        flex-direction: row; /* Changed to row for horizontal alignment */
         align-items: center;   /* Center children horizontally */
         justify-content: center; /* Center children vertically (if space allows) */
-        margin-top: 5px;
+        margin-top: 2px;
         margin-left: 0;
         width: 100%;
-        gap: 10px; /* Spacing between stacked items */
-        padding-bottom: 5px;
+        gap: 5px; /* Spacing between stacked items */
+        padding-bottom: 2px;
     }
     .lang-button {
         padding: 8px 12px; /* Reduced touch area */
