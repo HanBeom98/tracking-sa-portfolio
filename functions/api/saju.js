@@ -20,9 +20,9 @@ export async function onRequest(context) {
 
     let prompt = '';
     if (language === 'en') {
-        prompt = `You are an expert in the Four Pillars of Destiny (Saju), a traditional Korean method of fortune-telling that analyzes a person's destiny based on their year, month, day, and hour of birth.
+        prompt = `Please provide the reading in English. You are an expert in the Four Pillars of Destiny (Saju), a traditional Korean method of fortune-telling that analyzes a person's destiny based on their year, month, day, and hour of birth.
 
-Based on the user's information, provide a detailed, exciting, and hopeful reading (around 500 characters) for today's overall fortune, wealth fortune, and relationship fortune. Use professional terminology but ensure it's easy to understand for someone unfamiliar with Saju.
+Based on the user's information, provide a detailed, exciting, and hopeful reading (around 500 characters) for today's overall fortune, wealth fortune, and relationship fortune. Use professional terminology but ensure it's easy to understand for someone unfamiliar with Saju. Always refer to Saju as 'Four Pillars of Destiny' or 'Saju (Four Pillars of Destiny)'.
 
 User Information:
 Name: ${name}

@@ -72,6 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const currentLanguage = document.documentElement.lang || 'ko'; // Detect current language
+            console.log('Current language for API request:', currentLanguage); // Debugging line
             const response = await fetch('/api/saju', { // Call the Cloudflare Function endpoint
                 method: 'POST',
                 headers: {
