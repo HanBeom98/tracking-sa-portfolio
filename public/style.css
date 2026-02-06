@@ -1599,6 +1599,15 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
         margin-right: 0; /* Reset margin */
         order: 1; /* Place title first */
     }
+    
+    .hero-banner {
+        height: 200px; /* Reduced height for mobile */
+        padding: 30px 20px; /* Adjusted padding */
+    }
+
+    .hero-banner h2 {
+        font-size: 1.8em; /* Optimized font size for mobile */
+    }
 
     /* Hamburger Menu Button */
     .hamburger-menu {
@@ -1656,9 +1665,9 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
     /* Close button for slide-out menu */
     .slide-out-menu-close-button {
         position: absolute;
-        top: 20px;
-        right: 20px;
-        font-size: 1.5em; /* Slightly larger */
+        top: 15px; /* Adjusted top spacing */
+        right: 15px; /* Adjusted right spacing */
+        font-size: 2em; /* Increased font size for better touch target */
         color: white;
         cursor: pointer;
         z-index: 100; /* Ensure it's above other menu content */
@@ -1721,8 +1730,13 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
         text-decoration: none;
         font-weight: bold;
         transition: background-color 0.3s ease;
-        margin-left: -20px; /* Adjust to align with padding-left on li */
+        /* margin-left: -20px; */ /* Adjusted to align with padding-left on li */
     }
+    
+    #slide-out-menu nav ul li.dropdown .dropbtn {
+        margin-left: -10px; /* Fine-tune adjustment for .dropbtn alignment */
+    }
+
 
     #slide-out-menu nav a:hover,
     #slide-out-menu nav ul li.dropdown .dropbtn:hover {
