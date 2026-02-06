@@ -8,12 +8,15 @@ export async function onRequest(context) {
 
     const { name, birthDate, birthTime, gender } = await request.json();
 
-    if (!name || !birthDate || !gender) {
-        return new Response('Missing required fields: name, birthDate, gender', { status: 400 });
+    if (!name || !birthDate || !birthTime || !gender) {
+        return new Response(JSON.stringify({ error: '이름, 생년월일, 성별 정보를 모두 입력해주세요.' }), {
+            status: 400,
+            headers: { 'Content-Type': 'application/json' },
+        });
     }
 
     const GEMINI_API_KEY = env.GEMINI_API_KEY; // Access API key from Cloudflare environment variables
-    const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+    const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
     const prompt = `너는 20년 경력의 베테랑 명리학자야. 사용자의 정보를 분석해서 오늘의 총운, 재물운, 연애운을 500자 내외로 매우 상세하고 흥미진진하며 희망적으로 풀이해줘. 전문 용어를 섞어가며 신뢰감 있게 작성해줘.
 
@@ -48,7 +51,8 @@ export async function onRequest(context) {
             });
         } else {
             console.error('Gemini API Error:', geminiData);
-            return new Response(JSON.stringify({ error: 'Failed to get Saju reading from AI.' }), {
+            const errorMessage = geminiData.error?.message || '사주 풀이를 가져오는 데 실패했습니다. 잠시 후 다시 시도해주세요.';
+            return new Response(JSON.stringify({ error: errorMessage }), {
                 headers: { 'Content-Type': 'application/json' },
                 status: geminiResponse.status || 500
             });
@@ -56,7 +60,7 @@ export async function onRequest(context) {
 
     } catch (error) {
         console.error('Function execution error:', error);
-        return new Response(JSON.stringify({ error: 'Internal server error.' }), {
+        return new Response(JSON.stringify({ error: `서버 내부 오류가 발생했습니다: ${error.message}` }), {
             headers: { 'Content-Type': 'application/json' },
             status: 500
         });

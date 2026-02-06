@@ -81,11 +81,13 @@ const translations = {
         'hero_subtitle': '간단한 테스트로 나의 AI 성향을 알아보세요!',
         'start_test_button': '테스트 시작하기',
         'no_image_to_download_alert': '다운로드할 이미지가 없습니다.',
+        'saju_test': 'AI 사주 테스트',
         'menu_test': '테스트'
     },
     'en': {
         'news_home': 'News Home',
         'latest_news_hero_title': 'Featured News',
+        'saju_test': 'AI Saju Test',
         'menu_test': 'Tests',
         'all_news_grid_title': 'Latest Articles',
         'home': 'Home',
