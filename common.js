@@ -1,8 +1,21 @@
 // 현재 언어를 저장하는 변수 (기본값은 한국어)
-let currentLang = localStorage.getItem('lang') || navigator.language.split('-')[0];
-if (!translations[currentLang]) {
-    currentLang = 'en'; // Fallback to English if browser language is not available in translations
+let currentLang = localStorage.getItem('lang');
+if (!currentLang || !translations[currentLang]) {
+    const browserLang = navigator.language.split('-')[0];
+    if (translations[browserLang]) {
+        currentLang = browserLang;
+    } else {
+        currentLang = 'ko'; // Fallback to Korean
+    }
 }
+
+// Ensure the HTML lang attribute is set immediately
+if (document.documentElement) {
+    document.documentElement.lang = currentLang;
+}
+
+// Apply translations immediately after determining currentLang
+window.applyTranslations(currentLang);
 
 // 번역 맵에서 특정 키에 대한 번역을 가져오는 헬퍼 함수
 window.getTranslation = function(lang, key) {
@@ -18,11 +31,8 @@ window.applyTranslations = function(lang) {
     const elements = document.querySelectorAll('[data-i18n]');
     elements.forEach(element => {
         const key = element.getAttribute('data-i18n');
-        if (key) { // Only clear if data-i18n attribute is present
-            element.innerHTML = ''; // Clear existing content to prevent overlap
-            if (translations[lang] && translations[lang][key]) {
-                element.textContent = translations[lang][key];
-            }
+        if (key && translations[lang] && translations[lang][key]) {
+            element.textContent = translations[lang][key];
         }
     });
 

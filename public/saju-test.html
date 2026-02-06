@@ -68,43 +68,43 @@
 
     <main>
         <section class="animal-face-test"> <!-- Reusing .animal-face-test for general styling -->
-            <h1 data-i18n='saju_title'></h1>
-            <p data-i18n='saju_desc1'></p>
-            <p data-i18n='saju_desc2'></p>
+            <h1 data-i18n='saju_title'>AI 실시간 사주 테스트</h1>
+            <p data-i18n='saju_desc1'>이름과 생년월일시 정보를 입력하여 AI가 분석한 사주 풀이를 확인해보세요.</p>
+            <p data-i18n='saju_desc2'>20년 경력의 명리학자가 풀이해주는 것처럼 상세하고 희망적인 메시지를 드립니다.</p>
 
             <div class="saju-input-section">
                 <div class="input-form-group">
-                    <label for="user-name" data-i18n="name_label"></label>
+                    <label for="user-name" data-i18n="name_label">이름:</label>
                     <input type="text" id="user-name" placeholder="이름을 입력하세요">
                 </div>
 
                 <div class="input-form-group">
-                    <label data-i18n="birthdate_label"></label>
+                    <label data-i18n="birthdate_label">생년월일:</label>
                     <div class="birthdate-selectors">
                         <select id="birth-year"></select>
-                        <span class="unit-span" data-i18n="year_unit"></span>
+                        <span class="unit-span" data-i18n="year_unit">년</span>
                         <select id="birth-month"></select>
-                        <span class="unit-span" data-i18n="month_unit"></span>
+                        <span class="unit-span" data-i18n="month_unit">월</span>
                         <select id="birth-day"></select>
-                        <span class="unit-span" data-i18n="day_unit"></span>
+                        <span class="unit-span" data-i18n="day_unit">일</span>
                     </div>
                 </div>
 
                 <div class="input-form-group">
-                    <label for="birth-hour" data-i18n="birthtime_label"></label>
+                    <label for="birth-hour" data-i18n="birthtime_label">태어난 시간:</label>
                     <select id="birth-hour">
-                        <option value="unknown" data-i18n="unknown_option"></option>
+                        <option value="unknown" data-i18n="unknown_option">모름</option>
                     </select>
-                    <span class="unit-span" data-i18n="hour_unit"></span>
+                    <span class="unit-span" data-i18n="hour_unit">시</span>
                 </div>
 
                 <div class="input-form-group">
-                    <label data-i18n="gender_select_label"></label>
+                    <label data-i18n="gender_select_label">성별:</label>
                     <div class="gender-buttons">
                         <input type="radio" id="gender-male" name="gender" value="male" checked>
-                        <label for="gender-male" data-i18n="gender_male_label"></label>
+                        <label for="gender-male" data-i18n="gender_male_label">남성</label>
                         <input type="radio" id="gender-female" name="gender" value="female">
-                        <label for="gender-female" data-i18n="gender_female_label"></label>
+                        <label for="gender-female" data-i18n="gender_female_label">여성</label>
                     </div>
                 </div>
 
