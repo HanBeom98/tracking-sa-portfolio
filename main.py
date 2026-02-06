@@ -35,7 +35,6 @@ COMMON_HEAD_SCRIPTS = f"""
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <script src="/firebase-config.js"></script>
     <script src="/translations.js"></script>
-    <script src="/common.js"></script>
 """
 
 COMMON_BODY_INJECTIONS = """
@@ -117,7 +116,7 @@ def process_html_file_for_common_elements(filepath):
         # Inject common elements
         content = content.replace('</head>', f'{COMMON_HEAD_SCRIPTS}\n</head>')
         content = content.replace('<body>', f'<body>\n{COMMON_BODY_INJECTIONS}')
-        content = content.replace('</body>', f'{COMMON_FOOTER}\n</body>')
+        content = content.replace('</body>', f'{COMMON_FOOTER}\n    <script src="/common.js"></script>\n</body>')
 
         with open(filepath, "w", encoding="utf-8") as f:
             f.write(content)

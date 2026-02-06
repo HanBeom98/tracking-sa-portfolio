@@ -50,8 +50,8 @@ export function applyTranslations(lang) {
     }
 }
 
-// 언어를 변경하는 함수
-export function setLanguage(lang) {
+// 언어를 변경하는 함수 (전역으로 선언)
+window.setLanguage = function(lang) {
     currentLang = lang;
     localStorage.setItem('lang', lang);
     applyTranslations(lang);
@@ -154,8 +154,6 @@ async function loadLayout() {
         }
     });
 
-
-
     // 언어 선택 버튼 추가 (language-switcher div가 있다면)
     const languageSwitcher = document.getElementById('language-switcher');
     console.log("Language switcher div found:", languageSwitcher);
@@ -167,7 +165,7 @@ async function loadLayout() {
             button.classList.add('lang-button');
             // 'active' class will be set by setLanguage call later
             button.addEventListener('click', () => {
-                setLanguage(langCode);
+                window.setLanguage(langCode); // Call the global function
             });
             return button;
         };
