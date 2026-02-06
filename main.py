@@ -230,7 +230,7 @@ def process_html_file_for_common_elements(filepath):
         print(f"⚠️ 에러: {filepath} 처리 중 {e}")
 
 def copy_static_assets():
-    assets = ["style.css", "common.js", "translations.js", "animal_face_test.html", "edit.html", "edit.js", "inquiry.html", "main.js", "post.html", "post.js", "write.html", "write.js", "about.html", "contact.html", "privacy-policy.html", "firebase-config.js", "favicon.svg", "ai-test.html", "ai-test.js"]
+    assets = ["style.css", "common.js", "translations.js", "animal_face_test.html", "edit.html", "edit.js", "inquiry.html", "main.js", "post.html", "post.js", "write.html", "write.js", "about.html", "contact.html", "privacy-policy.html", "firebase-config.js", "favicon.svg", "logo.svg", "ai-test.html", "ai-test.js"]
     for item in assets:
         if os.path.isfile(item):
             shutil.copy2(item, os.path.join(PUBLIC_DIR, item))
