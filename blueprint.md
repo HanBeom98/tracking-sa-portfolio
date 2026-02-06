@@ -3,7 +3,7 @@
 ## Project Overview
 The `tracking-sa` project is a web application with several HTML pages, CSS styling, and JavaScript functionality. The goal is to create a visually appealing, functional, and modern web experience.
 
-## Implemented Style, Design, and Features (Initial Version)
+## Implemented Style, Design, and Features
 -   **General Layout:** Responsive design with a sticky header, main content area, and footer.
 -   **Navigation:** Desktop navigation with hover effects.
 -   **Hero Banner:** Prominent hero section with action button.
@@ -13,29 +13,63 @@ The `tracking-sa` project is a web application with several HTML pages, CSS styl
 -   **AI Test Page (`ai-test.html`):** Styling for quiz-like interactive elements.
 -   **Animal Face Test Page (`animal_face_test.html`):** Styling for image upload, gender selection, and prediction results.
 -   **"Back to List" Button:** Redesigned button on news detail pages.
+-   **SEO Enhancement:** Cleaned header, enhanced footer with sitemap/RSS links, and favicon generation logic.
 
-## Current Task: SEO Enhancement and Header Cleanup (Focus on `main.py` common elements)
+## Current Task: Integrate "AI Real-time Saju Test" Feature with Cloudflare Functions for API Security
 
 ### Plan for Current Change
-The user wants to improve SEO and clean up header code by modifying common element variables directly within `main.py`. This involves removing duplicate meta tags, enhancing footer navigation, and ensuring favicon availability. AdSense and Clarity scripts must be preserved.
+The user wants to add a new "AI Real-time Saju Test" feature. The key requirement is to integrate this feature securely using Cloudflare Functions to handle the Gemini API key, preventing its exposure in the browser. This involves updating navigation, creating new HTML and JavaScript files, and implementing a Cloudflare Function for API proxying.
 
 ### Detailed Steps:
 
-#### 1. Header Cleanup (`COMMON_HEAD_SCRIPTS` in `main.py`)
--   **Identify Duplicate `google-site-verification`:** Inspect `COMMON_HEAD_SCRIPTS` within `main.py`. If the `<meta name="google-site-verification" ... />` tag appears more than once, remove the duplicates, leaving only one instance. (Initial analysis of `COMMON_HEAD_SCRIPTS` shows only one instance, but a careful check will be performed again.)
--   **Preserve Critical Scripts:** Explicitly ensure that AdSense (`adsbygoogle.js`), Clarity (`clarity.ms`), Firebase, and other common JS/CSS links are not removed or modified.
+#### 1. Menu and Common Elements Update (Modify `main.py`)
+-   Locate the `COMMON_BODY_INJECTIONS` variable.
+-   Find the "테스트" dropdown menu (`<div class="dropdown-content">`).
+-   Add the new link: `<a href="/saju-test.html" data-i18n="saju_test">AI 사주 테스트</a>`.
+-   Ensure existing links ("동물상 테스트", "AI 성향 테스트") remain untouched.
 
-#### 2. Footer Link Enhancement (`COMMON_FOOTER` in `main.py`)
--   Locate the `COMMON_FOOTER` variable in `main.py`.
--   Add two new links next to "개인정보처리방침" (Privacy Policy) using the existing `|` separator style:
-    -   `<a href="/sitemap.xml">사이트맵</a>`
-    -   `<a href="/rss.xml">RSS Feed</a>`
+#### 2. Create New Page (`saju-test.html`)
+-   Create a new file named `saju-test.html` in the root directory.
+-   Copy the entire layout and design tone from `animal_face_test.html` as a base to ensure visual consistency.
+-   **Main Area (`<main>`):**
+    -   Replace image upload/prediction sections with a clean input form for:
+        -   Name (text input)
+        -   Birth Date (separate selectors for year, month, day - `<select>` elements)
+        -   Birth Time (optional, `<select>` element for hours or text input, including "모름" (unknown) option)
+        -   Gender (radio buttons or `<select>` element)
+    -   Include a prominent button to trigger the Saju reading.
+-   **Result Display Area (`div#result-container`):**
+    -   Add this `div` to display the Saju test results.
+    -   Inside it, include a placeholder for a smooth loading animation (spinner) and the message `'AI가 당신의 운명을 읽는 중입니다...'`.
 
-#### 3. Resource Check and Creation (Favicon)
--   **Check `favicon.svg`:** Before copying assets, check if `favicon.svg` exists in the project's root directory.
--   **Extract SVG Logo:** If `favicon.svg` is missing, extract the entire `<svg> ... </svg>` code block from the `COMMON_BODY_INJECTIONS` variable in `main.py`.
--   **Create `favicon.svg`:** Create a new file named `favicon.svg` in the root directory and populate it with the extracted SVG logo code. This step will be integrated into the `copy_static_assets` function or executed before `generate_public_site` to ensure it's available for copying.
+#### 3. Implement Security Logic and API (Cloudflare Functions & `saju-test.js`)
 
-#### 4. Build and Reflect
--   After all code modifications are complete, run `python main.py --build-only` from the terminal to apply changes to all generated HTML files (including `index.html` and news posts).
+##### 3.1. Create Cloudflare Function (`/functions/api/saju.js`)
+-   Create a new directory `/functions/api/` in the project root.
+-   Create `saju.js` inside `/functions/api/`. This file will serve as the backend proxy.
+-   **Functionality:**
+    -   It will receive requests from the frontend (`saju-test.js`) containing user input data.
+    -   It will access the `GEMINI_API_KEY` from Cloudflare environment variables (available in Cloudflare Workers).
+    -   It will construct a detailed prompt for the Gemini API using the user's input.
+    -   It will make a request to the Gemini API (`gemini-2.0-flash` model).
+    -   It will parse the Gemini API response and return the Saju reading to the browser.
+-   **Prompt:** The function will use the following prompt: `'너는 20년 경력의 베테랑 명리학자야. 사용자의 [이름, 생년월일, 시간, 성별] 데이터를 분석해서 오늘의 총운, 재물운, 연애운을 500자 내외로 매우 상세하고 흥미진진하며 희망적으로 풀이해줘. 전문 용어를 섞어가며 신뢰감 있게 작성해줘.'`
+
+##### 3.2. Implement Frontend Logic (`saju-test.js`)
+-   Create a new file named `saju-test.js` in the root directory.
+-   Implement JavaScript logic to:
+    -   Collect user input from the form in `saju-test.html`.
+    -   Handle the click event for the Saju reading button.
+    -   **Secure API Call:** Instead of directly calling the Gemini API, send the user input data to the Cloudflare Function endpoint (`/api/saju`).
+    -   Display the loading animation and message `'AI가 당신의 운명을 읽는 중입니다...'` in `div#result-container` while waiting for the response.
+    -   Parse the response from `/api/saju` and display the Saju reading in `div#result-container`.
+    -   **No API Key in Browser:** Ensure that no API keys are hardcoded or exposed in this frontend JavaScript file.
+-   Integrate this script into `saju-test.html`.
+
+#### 4. Update `style.css` (if necessary)
+-   Review `saju-test.html`'s new form elements and loading spinner. Add any new or modified styles needed for consistent and appealing presentation that are not covered by existing styles from `animal_face_test.html`.
+
+#### 5. Resource Check and Final Build
+-   The existing logic in `main.py` for `favicon.svg` creation will ensure it's handled.
+-   After all code modifications and file creations are complete, run `python main.py --build-only` from the terminal to apply changes to all generated HTML files (including `index.html`, news posts, and the new `saju-test.html`).
 -   Upon successful build, commit the changes with a descriptive message and push them to the remote repository.

@@ -1036,6 +1036,10 @@ body.dark-mode .hashtags {
     border-top-color: #444;
 }
 
+body.dark-mode .gender-buttons input[type="radio"] + label:hover {
+    background-color: #2d3748;
+}
+
 /* Dropdown Menu Styles */
 nav ul li.dropdown {
     position: relative;
