@@ -12,39 +12,30 @@ The `tracking-sa` project is a web application with several HTML pages, CSS styl
 -   **Utility Controls:** Theme and language switchers in the header.
 -   **AI Test Page (`ai-test.html`):** Styling for quiz-like interactive elements.
 -   **Animal Face Test Page (`animal_face_test.html`):** Styling for image upload, gender selection, and prediction results.
+-   **"Back to List" Button:** Redesigned button on news detail pages.
 
-## Current Task: Redesign "Back to List" Button on News Detail Page
+## Current Task: SEO Enhancement and Header Cleanup (Focus on `main.py` common elements)
 
 ### Plan for Current Change
-The user wants to visually upgrade the "Back to list" button on the news detail page with a trendy design. This involves modifying the HTML structure in `main.py` to include an icon and updating `style.css` with new styles for appearance, shape, animations, and dark mode compatibility, all while maintaining existing layout and menu structure.
+The user wants to improve SEO and clean up header code by modifying common element variables directly within `main.py`. This involves removing duplicate meta tags, enhancing footer navigation, and ensuring favicon availability. AdSense and Clarity scripts must be preserved.
 
 ### Detailed Steps:
 
-#### 1. HTML Structure Change (in `main.py`)
--   Locate the code responsible for generating the news detail page, specifically the "Back to list" link.
--   Modify the link to use the following structure: `<a href="/" class="back-to-list"><i class="fas fa-arrow-left"></i> 목록으로 돌아가기</a>`.
--   **Pre-check for Font Awesome:** Before using `<i>` tags with `fas fa-arrow-left`, I need to verify if Font Awesome is already included in `index.html` or a similar base template, or if it needs to be added (e.g., via CDN). Assuming it's available for now based on common patterns.
+#### 1. Header Cleanup (`COMMON_HEAD_SCRIPTS` in `main.py`)
+-   **Identify Duplicate `google-site-verification`:** Inspect `COMMON_HEAD_SCRIPTS` within `main.py`. If the `<meta name="google-site-verification" ... />` tag appears more than once, remove the duplicates, leaving only one instance. (Initial analysis of `COMMON_HEAD_SCRIPTS` shows only one instance, but a careful check will be performed again.)
+-   **Preserve Critical Scripts:** Explicitly ensure that AdSense (`adsbygoogle.js`), Clarity (`clarity.ms`), Firebase, and other common JS/CSS links are not removed or modified.
 
-#### 2. Style Update (in `style.css`)
--   Create or update the `.back-to-list` CSS class.
--   **Basic Design:**
-    -   `background-color: transparent;`
-    -   `border: 1px solid rgba(0, 82, 204, 0.1);` (light blue border)
-    -   `color: #0052cc;` (main blue text)
--   **Shape & Padding:**
-    -   `border-radius: 50px;` (fully rounded)
-    -   `padding: 10px 20px;`
--   **Animation:**
-    -   `transition: all 0.3s ease;` (smooth transition)
-    -   On hover (`.back-to-list:hover`):
-        -   `background-color: rgba(0, 82, 204, 0.1);` (fill with light blue)
-        -   `transform: translateX(-3px);` (move slightly left)
--   **Display:** Ensure it's displayed as an inline-block or block element to allow padding and margin to apply correctly (e.g., `display: inline-flex; align-items: center; gap: 8px;`).
+#### 2. Footer Link Enhancement (`COMMON_FOOTER` in `main.py`)
+-   Locate the `COMMON_FOOTER` variable in `main.py`.
+-   Add two new links next to "개인정보처리방침" (Privacy Policy) using the existing `|` separator style:
+    -   `<a href="/sitemap.xml">사이트맵</a>`
+    -   `<a href="/rss.xml">RSS Feed</a>`
 
-#### 3. Placement Adjustment (in `style.css`)
--   Add `margin-top: 30px;` to `.back-to-list` to provide sufficient spacing from the content above.
--   **Dark Mode Compatibility:** Add a dark mode rule for `.back-to-list` to ensure `color: #60a5fa;` (bright blue) when `body.dark-mode` is active.
+#### 3. Resource Check and Creation (Favicon)
+-   **Check `favicon.svg`:** Before copying assets, check if `favicon.svg` exists in the project's root directory.
+-   **Extract SVG Logo:** If `favicon.svg` is missing, extract the entire `<svg> ... </svg>` code block from the `COMMON_BODY_INJECTIONS` variable in `main.py`.
+-   **Create `favicon.svg`:** Create a new file named `favicon.svg` in the root directory and populate it with the extracted SVG logo code. This step will be integrated into the `copy_static_assets` function or executed before `generate_public_site` to ensure it's available for copying.
 
-#### 4. Finalization
--   After all code modifications are complete, run `python main.py --build-only` to ensure the changes are reflected and the site builds successfully.
+#### 4. Build and Reflect
+-   After all code modifications are complete, run `python main.py --build-only` from the terminal to apply changes to all generated HTML files (including `index.html` and news posts).
 -   Upon successful build, commit the changes with a descriptive message and push them to the remote repository.

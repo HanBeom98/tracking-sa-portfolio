@@ -84,7 +84,9 @@ COMMON_FOOTER = """
         <p>
             <a href="/about.html" data-i18n="about_us">회사 소개</a> |
             <a href="/contact.html" data-i18n="contact">문의</a> |
-            <a href="/privacy-policy.html" data-i18n="privacy_policy">개인정보처리방침</a>
+            <a href="/privacy-policy.html" data-i18n="privacy_policy">개인정보처리방침</a> |
+            <a href="/sitemap.xml">사이트맵</a> |
+            <a href="/rss.xml">RSS Feed</a>
         </p>
     </footer>
 """
@@ -97,6 +99,29 @@ def extract_title_from_md(md_content):
 def clean_filename(title):
     title = re.sub(r'[^\w\s-]', '', title).strip().lower()
     return re.sub(r'[-\s]+', '-', title)
+
+def process_html_file_for_common_elements(filepath):
+    try:
+        with open(filepath, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        # Robustly clean up old tags
+        # --- NEW: Remove existing <header> tags ---
+        content = re.sub(r'<header[\s\S]*?</header>', '', content, flags=re.DOTALL | re.IGNORECASE)
+        # --- END NEW ---
+        content = re.sub(r'\s*<script.*?(firebase|crypto-js|config|translations|common|clarity).*?</script>', '', content, flags=re.DOTALL | re.IGNORECASE)
+        content = re.sub(r'<link.*?href=".*?style\.css".*?>', '', content, flags=re.DOTALL | re.IGNORECASE)
+        content = re.sub(r'<footer>[\s\S]*?</footer>', '', content, flags=re.DOTALL)
+
+        # Inject common elements
+        content = content.replace('</head>', f'{COMMON_HEAD_SCRIPTS}\n</head>')
+        content = content.replace('<body>', f'<body>\n{COMMON_BODY_INJECTIONS}')
+        content = content.replace('</body>', f'{COMMON_FOOTER}\n</body>')
+
+        with open(filepath, "w", encoding="utf-8") as f:
+            f.write(content)
+    except Exception as e:
+        print(f"⚠️ 에러: {filepath} 처리 중 {e}")
 
 def _generate_sitemap(articles_info):
     # articles_info will be a list of {'url': '...', 'lastmod': 'YYYY-MM-DD'}
@@ -212,31 +237,28 @@ def generate_index_html(articles_meta):
         f.write(updated_html)
     process_html_file_for_common_elements(output_path)
 
-def process_html_file_for_common_elements(filepath):
-    try:
-        with open(filepath, "r", encoding="utf-8") as f:
-            content = f.read()
-
-        # Robustly clean up old tags
-        # --- NEW: Remove existing <header> tags ---
-        content = re.sub(r'<header[\s\S]*?</header>', '', content, flags=re.DOTALL | re.IGNORECASE)
-        # --- END NEW ---
-        content = re.sub(r'\s*<script.*?(firebase|crypto-js|config|translations|common|clarity).*?</script>', '', content, flags=re.DOTALL | re.IGNORECASE)
-        content = re.sub(r'<link.*?href=".*?style\.css".*?>', '', content, flags=re.DOTALL | re.IGNORECASE)
-        content = re.sub(r'<footer>[\s\S]*?</footer>', '', content, flags=re.DOTALL)
-
-        # Inject common elements
-        content = content.replace('</head>', f'{COMMON_HEAD_SCRIPTS}\n</head>')
-        content = content.replace('<body>', f'<body>\n{COMMON_BODY_INJECTIONS}')
-        content = content.replace('</body>', f'{COMMON_FOOTER}\n</body>')
-
-        with open(filepath, "w", encoding="utf-8") as f:
-            f.write(content)
-    except Exception as e:
-        print(f"⚠️ 에러: {filepath} 처리 중 {e}")
+def extract_svg_logo_from_common_body_injections():
+    # Regex to find the <svg> tag within COMMON_BODY_INJECTIONS
+    svg_match = re.search(r'(<svg[^>]*>.*?<\/svg>)', COMMON_BODY_INJECTIONS, re.DOTALL | re.IGNORECASE)
+    if svg_match:
+        return svg_match.group(1)
+    return None
 
 def copy_static_assets():
-    assets = ["style.css", "common.js", "translations.js", "animal_face_test.html", "edit.html", "edit.js", "inquiry.html", "main.js", "post.html", "post.js", "write.html", "write.js", "about.html", "contact.html", "privacy-policy.html", "firebase-config.js", "favicon.svg", "logo.svg", "ai-test.html", "ai-test.js"]
+    assets = ["style.css", "common.js", "translations.js", "animal_face_test.html", "edit.html", "edit.js", "inquiry.html", "main.js", "post.html", "post.js", "write.html", "write.js", "about.html", "contact.html", "privacy-policy.html", "firebase-config.js", "logo.svg", "ai-test.html", "ai-test.js"] # Removed favicon.svg from here
+
+    # Favicon check and creation
+    favicon_path = "favicon.svg"
+    if not os.path.exists(favicon_path):
+        print("ℹ️ favicon.svg not found. Attempting to create from logo SVG.")
+        svg_logo_content = extract_svg_logo_from_common_body_injections()
+        if svg_logo_content:
+            with open(favicon_path, "w", encoding="utf-8") as f:
+                f.write(svg_logo_content)
+            print(f"✅ Created {favicon_path} from extracted SVG logo.")
+        else:
+            print("⚠️ Could not extract SVG logo from COMMON_BODY_INJECTIONS to create favicon.svg.")
+    
     for item in assets:
         if os.path.isfile(item):
             shutil.copy2(item, os.path.join(PUBLIC_DIR, item))
@@ -445,7 +467,7 @@ def main():
                             save_post_and_generate_html(content)
                             record_processed_article(article_id)
                     else:
-                        print(f"⚠️ 중복 기사 발견: '{news.title}'. 건너뜜니다.")
+                        print(f"⚠️ 중복 기사 발견: '{news.title}'. 건너뜁니다.")
                 time.sleep(10) # Add delay between processing each RSS feed
             else:
                 print(f"➡️ {rss_url}에서 새로운 뉴스를 찾지 못했습니다.")
