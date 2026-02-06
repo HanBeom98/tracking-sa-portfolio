@@ -21,7 +21,7 @@ const updateSajuContent = () => {
         for (let i = currentYear; i >= 1900; i--) {
             const option = document.createElement('option');
             option.value = i;
-            option.textContent = `${i}${window.getTranslation(lang, 'year_label')}`; // Combine number and translated unit
+            option.textContent = `${i}${window.getTranslation(lang, 'year_unit')}`; // Combine number and translated unit
             birthYearSelect.appendChild(option);
         }
 
@@ -29,7 +29,7 @@ const updateSajuContent = () => {
         for (let i = 1; i <= 12; i++) {
             const option = document.createElement('option');
             option.value = i;
-            option.textContent = `${i}${window.getTranslation(lang, 'month_label')}`; // Combine number and translated unit
+            option.textContent = `${i}${window.getTranslation(lang, 'month_unit')}`; // Combine number and translated unit
             birthMonthSelect.appendChild(option);
         }
 
@@ -37,7 +37,7 @@ const updateSajuContent = () => {
         for (let i = 1; i <= 31; i++) {
             const option = document.createElement('option');
             option.value = i;
-            option.textContent = `${i}${window.getTranslation(lang, 'day_label')}`; // Combine number and translated unit
+            option.textContent = `${i}${window.getTranslation(lang, 'day_unit')}`; // Combine number and translated unit
             birthDaySelect.appendChild(option);
         }
 
@@ -52,7 +52,7 @@ const updateSajuContent = () => {
         for (let i = 0; i <= 23; i++) {
             const option = document.createElement('option');
             option.value = i;
-            option.textContent = `${String(i).padStart(2, '0')}${window.getTranslation(lang, 'hour_label')}`; // Combine number and translated unit
+            option.textContent = `${String(i).padStart(2, '0')}${window.getTranslation(lang, 'hour_unit')}`; // Combine number and translated unit
             birthHourSelect.appendChild(option);
         }
         birthHourSelect.value = 'unknown'; // Set "Unknown" as default
