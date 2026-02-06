@@ -1,11 +1,16 @@
 // 현재 언어를 저장하는 변수 (기본값은 한국어)
-let currentLang = localStorage.getItem('lang') || navigator.language.split('-')[0];
+export let currentLang = localStorage.getItem('lang') || navigator.language.split('-')[0];
 if (!translations[currentLang]) {
     currentLang = 'en'; // Fallback to English if browser language is not available in translations
 }
 
+// 번역 맵에서 특정 키에 대한 번역을 가져오는 헬퍼 함수
+export function getTranslation(lang, key) {
+    return (translations[lang] && translations[lang][key]) ? translations[lang][key] : key;
+}
+
 // 번역을 적용하는 함수
-function applyTranslations(lang) {
+export function applyTranslations(lang) {
 
     document.documentElement.lang = lang; // Set HTML lang attribute
 
@@ -46,7 +51,7 @@ function applyTranslations(lang) {
 }
 
 // 언어를 변경하는 함수
-function setLanguage(lang) {
+export function setLanguage(lang) {
     currentLang = lang;
     localStorage.setItem('lang', lang);
     applyTranslations(lang);
@@ -60,6 +65,10 @@ function setLanguage(lang) {
             button.classList.remove('active');
         }
     });
+
+    // Dispatch custom event after language change
+    const event = new CustomEvent('languageChanged', { detail: { lang: lang } });
+    window.dispatchEvent(event);
 }
 
 // 페이지가 로드되었을 때 공통 레이아웃을 삽입하는 함수
