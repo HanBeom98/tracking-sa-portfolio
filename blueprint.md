@@ -1,31 +1,37 @@
-# AI Model Personality Test Integration
-
-This blueprint details the integration of a "Which AI Model Are You Most Like?" personality test into the Tracking-SA web project. The integration includes creating a new dedicated test page, updating the main navigation, and removing the promotional banner from the home screen for a cleaner layout.
+# Project Blueprint: Modernizing `tracking-sa` Styles
 
 ## Project Overview
+The `tracking-sa` project is a web application with several HTML pages, CSS styling, and JavaScript functionality. The goal is to create a visually appealing, functional, and modern web experience.
 
-The Tracking-SA project is a framework-less web application (HTML, CSS, JavaScript) focusing on news and insights related to AI and technology. It features dark mode and language switching.
+## Implemented Style, Design, and Features (Initial Version)
+-   **General Layout:** Responsive design with a sticky header, main content area, and footer.
+-   **Navigation:** Desktop navigation with hover effects.
+-   **Hero Banner:** Prominent hero section with action button.
+-   **News Section:** Grid-based display for news cards, with distinct styling for hero cards.
+-   **Dark Mode:** Basic dark mode support for various elements.
+-   **Utility Controls:** Theme and language switchers in the header.
+-   **AI Test Page (`ai-test.html`):** Styling for quiz-like interactive elements.
+-   **Animal Face Test Page (`animal_face_test.html`):** Styling for image upload, gender selection, and prediction results.
 
-## Detailed Outline of Implemented Features
+## Current Task: Style.css Refactoring and Modernization
 
-### 1. New Test Page: `ai-test.html`
+### Plan for Current Change (Revised based on user feedback)
+The user explicitly requests **only code cleaning and refactoring without any design changes (colors, layout, sizes, etc.)**. The goal is to remove duplicate CSS blocks and logically align common styles and media queries, preserving the exact visual output.
 
-*   **Topic:** "나와 가장 닮은 인공지능 모델은?" (Which AI Model Are You Most Like?)
-*   **Target AI Models:** ChatGPT (Logic/Efficiency), Claude (Emotion/Detail), Gemini (Creativity/Multitasking), Perplexity (Fact-checking/Exploration).
-*   **Quiz Logic:**
-    *   Consists of 5 multiple-choice questions, each with 4 options.
-    *   Each option is associated with a score for one of the four AI models.
-    *   Scores are aggregated based on user selections.
-    *   The AI model with the highest accumulated score is determined as the "most alike."
-    *   Tie-breaking: Currently, the first AI model encountered with the highest score wins in case of a tie.
-*   **Design:**
-    *   Utilizes the main site's green color (`#22c55e`) for buttons and accents.
-    *   Styled with standard CSS to maintain consistency with `style.css`.
-    *   Result screen displays the winning AI model's emoji, name, and a descriptive sentence.
-*   **Functionality:**
-    *   "Start Test" button initiates the quiz.
-    *   "Next" button progresses through questions after an answer is selected.
-    *   "Copy Result Link" button copies the URL, which includes the test result as a query parameter (`?result=ai_model_name`), allowing users to share their specific result.
-    *   "Retake Test" button resets the quiz.
-*   **Responsive...
-<truncated>
+### Detailed Steps:
+
+#### 1. Analyze `style.css`
+-   **Identify Duplicates:** Scan the file for identical or highly redundant CSS blocks, specifically focusing on `.animal-face-test`, `.gender-buttons .gender-button`, and `.drop-zone`.
+-   **Map Media Queries:** Note the current placement and content of all `@media` blocks.
+
+#### 2. Consolidate Duplicates (Strictly No Design Changes)
+-   **`.animal-face-test`:** There are two identical blocks for `.animal-face-test`. The second one was removed.
+-   **`.gender-buttons .gender-button`:** Reviewed for any full block duplicates. No full block duplicates were found, only specific properties are overridden (e.g., `#gender-female` changing `background-color`), these overrides were preserved.
+-   **`.drop-zone`:** Reviewed for any full block duplicates. No full block duplicates were found.
+-   **General Duplicates:** No other exact duplicate selector blocks were found.
+
+#### 3. Logical Alignment (No Design Changes)
+-   **Media Query Placement:** All `@media` blocks were moved to the end of the `style.css` file. All general, non-responsive styles are now defined before any media queries. The internal order of rules within existing media queries was maintained.
+
+#### 4. Finalization
+-   After all CSS modifications were complete, `python main.py --build-only` was run to ensure the site's functionality and visual appearance remain identical to the original, confirming only refactoring has occurred.
