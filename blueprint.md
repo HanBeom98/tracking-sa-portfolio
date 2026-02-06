@@ -13,25 +13,28 @@ The `tracking-sa` project is a web application with several HTML pages, CSS styl
 -   **AI Test Page (`ai-test.html`):** Styling for quiz-like interactive elements.
 -   **Animal Face Test Page (`animal_face_test.html`):** Styling for image upload, gender selection, and prediction results.
 
-## Current Task: Style.css Refactoring and Modernization
+## Current Task: Apply Trendy Design System (Visual Elements Only)
 
-### Plan for Current Change (Revised based on user feedback)
-The user explicitly requests **only code cleaning and refactoring without any design changes (colors, layout, sizes, etc.)**. The goal is to remove duplicate CSS blocks and logically align common styles and media queries, preserving the exact visual output.
+### Plan for Current Change
+The user wants to apply a modern, trendy design system to the `style.css` file. Crucially, the existing layout (positions, menu structure) must remain untouched. Only visual elements like colors, gradients, shapes, shadows, and animations are to be modified.
 
 ### Detailed Steps:
 
-#### 1. Analyze `style.css`
--   **Identify Duplicates:** Scan the file for identical or highly redundant CSS blocks, specifically focusing on `.animal-face-test`, `.gender-buttons .gender-button`, and `.drop-zone`.
--   **Map Media Queries:** Note the current placement and content of all `@media` blocks.
+#### 1. Colors and Gradients
+-   **`body` background:** Change to a soft sky gradient: `linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)`.
+-   **`header` background:** Apply a deep premium blue gradient: `linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)`.
 
-#### 2. Consolidate Duplicates (Strictly No Design Changes)
--   **`.animal-face-test`:** There are two identical blocks for `.animal-face-test`. The second one was removed.
--   **`.gender-buttons .gender-button`:** Reviewed for any full block duplicates. No full block duplicates were found, only specific properties are overridden (e.g., `#gender-female` changing `background-color`), these overrides were preserved.
--   **`.drop-zone`:** Reviewed for any full block duplicates. No full block duplicates were found.
--   **General Duplicates:** No other exact duplicate selector blocks were found.
+#### 2. Shape and Depth
+-   **Rounded Corners:** Set `border-radius` to `20px` for `.hero-banner`, `.news-card`, and `.hero-card`.
+-   **Subtle Shadows:** Apply `box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1)` to `.hero-banner`, `.news-card`, and `.hero-card` for a sophisticated, diffused look.
 
-#### 3. Logical Alignment (No Design Changes)
--   **Media Query Placement:** All `@media` blocks were moved to the end of the `style.css` file. All general, non-responsive styles are now defined before any media queries. The internal order of rules within existing media queries was maintained.
+#### 3. Smooth Animations (Micro-interactions)
+-   **Smooth Transitions:** Apply `transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1)` to all buttons and cards (any elements with `cursor: pointer` or explicit `transition` properties) for a "쫀득한" (chewy/elastic) animation feel.
+-   **Floating Hover Effect:** For `.news-card:hover` and `.hero-card:hover`, add `transform: translateY(-8px)` to create a floating effect when moused over. Ensure existing hover effects are merged or overridden correctly.
 
-#### 4. Finalization
--   After all CSS modifications were complete, `python main.py --build-only` was run to ensure the site's functionality and visual appearance remain identical to the original, confirming only refactoring has occurred.
+#### 4. Hero Banner Pulse Effect
+-   Implement a subtle pulsing animation for the `.hero-banner` background. This will involve defining `@keyframes` for a slight scale/opacity change and applying it to a pseudo-element or the background itself to ensure it doesn't affect the content.
+
+#### 5. Finalization
+-   After all CSS modifications are complete, run `python main.py --build-only` to ensure the changes are reflected and the site builds successfully.
+-   Upon successful build, commit the changes with a descriptive message and push them to the remote repository.
