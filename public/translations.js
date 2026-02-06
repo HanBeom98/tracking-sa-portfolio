@@ -82,7 +82,8 @@ const translations = {
         'start_test_button': '테스트 시작하기',
         'no_image_to_download_alert': '다운로드할 이미지가 없습니다.',
         'saju_test': 'AI 사주 테스트',
-        'menu_test': '테스트'
+        'menu_test': '테스트',
+        'sitemap': '사이트맵'
     },
     'en': {
         'news_home': 'News Home',
@@ -90,6 +91,7 @@ const translations = {
         'saju_test': 'AI Four Pillars of Destiny',
         'saju_test_description': 'Based on traditional Korean Horoscope',
         'menu_test': 'Tests',
+        'sitemap': 'Sitemap',
         'saju_test_title': 'AI Four Pillars of Destiny (Saju Reading) - TrackingSA',
         'saju_test_h1': 'AI Real-time Saju Test',
         'saju_test_p1': 'Enter your name, birth date, and time to get your Saju reading analyzed by AI.',
