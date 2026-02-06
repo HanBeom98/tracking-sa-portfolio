@@ -194,17 +194,19 @@ footer {
 
 /* Utility controls (theme and language switchers) */
 .utility-controls {
-    display: flex;
+    display: flex !important;
     gap: 20px;
     align-items: center;
+    visibility: visible !important; /* Ensure visibility */
+    z-index: 10001 !important; /* Higher z-index than header */
 }
 
 #language-switcher {
-    z-index: 10000 !important;
+    z-index: 10001 !important;
 }
 
 #color-change {
-    z-index: 10000 !important;
+    z-index: 10001 !important;
 }
 
 .lang-button {
@@ -1339,9 +1341,6 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
     .desktop-menu-container {
         display: none;
     }
-    .utility-controls {
-        display: none;
-    }
 
     #slide-out-menu {
         display: flex;
@@ -1455,12 +1454,13 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
     }
 
     #slide-out-menu .utility-controls {
-        display: flex;
+        display: flex !important;
         flex-direction: row;
         justify-content: center;
         margin-top: 20px;
         width: 100%;
         gap: 20px;
+        z-index: 10001 !important; /* Ensure visibility */
     }
 
     #slide-out-menu .lang-button {

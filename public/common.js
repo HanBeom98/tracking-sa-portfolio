@@ -1,21 +1,5 @@
-// 현재 언어를 저장하는 변수 (기본값은 한국어)
-let currentLang = localStorage.getItem('lang');
-if (!currentLang || !translations[currentLang]) {
-    const browserLang = navigator.language.split('-')[0];
-    if (translations[browserLang]) {
-        currentLang = browserLang;
-    } else {
-        currentLang = 'ko'; // Fallback to Korean
-    }
-}
-
-// Ensure the HTML lang attribute is set immediately
-if (document.documentElement) {
-    document.documentElement.lang = currentLang;
-}
-
-// Apply translations immediately after determining currentLang
-window.applyTranslations(currentLang);
+// 현재 언어를 저장하는 변수 (전역에서 접근 가능하도록 let으로 선언)
+let currentLang;
 
 // 번역 맵에서 특정 키에 대한 번역을 가져오는 헬퍼 함수
 window.getTranslation = function(lang, key) {
@@ -31,6 +15,7 @@ window.applyTranslations = function(lang) {
     const elements = document.querySelectorAll('[data-i18n]');
     elements.forEach(element => {
         const key = element.getAttribute('data-i18n');
+        // Only update if a translation is found, otherwise keep original HTML text
         if (key && translations[lang] && translations[lang][key]) {
             element.textContent = translations[lang][key];
         }
@@ -83,9 +68,30 @@ window.setLanguage = function(lang) {
     window.dispatchEvent(event);
 }
 
-// 페이지가 로드되었을 때 공통 레이아웃을 삽입하는 함수
-async function loadLayout() {
-    console.log("loadLayout function executed");
+// 초기화 함수
+async function initLayout() {
+    // Determine current language
+    let storedLang = localStorage.getItem('lang');
+    if (!storedLang || !translations[storedLang]) {
+        const browserLang = navigator.language.split('-')[0];
+        if (translations[browserLang]) {
+            currentLang = browserLang;
+        } else {
+            currentLang = 'ko'; // Fallback to Korean
+        }
+    } else {
+        currentLang = storedLang;
+    }
+    
+    // Set HTML lang attribute immediately
+    if (document.documentElement) {
+        document.documentElement.lang = currentLang;
+    }
+
+    // Apply translations immediately
+    window.applyTranslations(currentLang);
+
+    console.log("initLayout function executed");
     // 테마 변경 버튼에 이벤트 리스너를 추가합니다.
     const themeToggle = document.getElementById('color-change');
     const body = document.body; // body is guaranteed to exist by DOMContentLoaded
@@ -141,11 +147,11 @@ async function loadLayout() {
             // If at the very top of the page, always show the header
             if (currentScrollY < topOfPageThreshold) {
                 header.style.transform = 'translateY(0)';
-            } 
+            }
             // If scrolling up significantly, show the header
             else if (scrollDifference > scrollUpThreshold) {
                 header.style.transform = 'translateY(0)';
-            } 
+            }
             // If scrolling down significantly, hide the header
             else if (scrollDifference < -scrollDownThreshold) {
                 header.style.transform = 'translateY(-100%)';
@@ -185,8 +191,8 @@ async function loadLayout() {
             return button;
         };
 
-        // Clear existing content to avoid duplicates if loadLayout is called multiple times
-        languageSwitcher.innerHTML = ''; 
+        // Clear existing content to avoid duplicates if initLayout is called multiple times
+        languageSwitcher.innerHTML = '';
         languageSwitcher.appendChild(createLangButton('ko', 'KOR'));
         languageSwitcher.appendChild(createLangButton('en', 'ENG'));
         
@@ -197,9 +203,7 @@ async function loadLayout() {
         }
     }
 
-    // 초기 로드 시 번역 적용 (언어 버튼 생성 후 호출되어야 함)
     console.log("Translations object:", translations);
-    window.applyTranslations(currentLang); // Call the global applyTranslations
 
     // Mobile menu toggle logic
     const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
@@ -237,7 +241,7 @@ async function loadLayout() {
                 if (parentDropdown) {
                     parentDropdown.classList.toggle('dropdown-active'); // Toggle class for CSS to show/hide dropdown content
                 }
-            } 
+            }
             // If a link inside a dropdown or a regular navigation link is clicked
             else if (target && target.tagName === 'A') { // Defensive check for target
                 // If it's a link within a dropdown, close the main menu
@@ -256,4 +260,4 @@ async function loadLayout() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', loadLayout);
+document.addEventListener('DOMContentLoaded', initLayout);
