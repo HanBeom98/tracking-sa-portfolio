@@ -39,7 +39,10 @@ COMMON_HEAD_SCRIPTS = f"""
 
 COMMON_BODY_INJECTIONS = """
 <header>
-    <a href="/index.html" class="site-title" data-i18n="news_home">홈</a> <!-- Site title for both desktop and mobile -->
+    <a href="/index.html" class="site-logo">
+        <img src="/logo.svg" alt="TRACKING SA Logo" style="height: 35px; vertical-align: middle;">
+        <span class="site-title-text">TRACKING SA</span>
+    </a>
     <button class="hamburger-menu" id="mobile-menu-toggle" aria-label="Open menu">
         <span></span>
         <span></span>
@@ -186,6 +189,10 @@ def generate_index_html(articles_meta):
     updated_html = base_html.replace(
         "<!-- News content will be injected here by the Python script -->",
         f"""
+        <section class="hero-banner">
+            <h2>AI와 데이터로 미래를 추적합니다</h2>
+            <button class="action-button" onclick="window.location.href='/ai-test.html'">테스트 시작하기</button>
+        </section>
         <section class="news-section-main">
             <h1 class="section-title" data-i18n="latest_news_hero_title">최신 뉴스</h1>
             {hero_card_html}
