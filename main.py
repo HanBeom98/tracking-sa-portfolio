@@ -273,7 +273,7 @@ def generate_ai_content(api_key, news_title, news_summary):
 - # 제목
 - 본문
 - 수익화 아이디어 3개
-- 해시태그: (해시태그 섹션을 작성할 때 반드시, 절대로 생략하지 말고 "##HASHTAGS##: #키워드1 #키워드2 #키워드3 #키워드4 #키워드5" 형식으로 뉴스 내용과 관련된 키워드 5개 출력. 출력 예시: ##HASHTAGS##: #기술 #혁신 #인공지능 #미래 #트렌드)
+- 해시태그: (해시태그 섹션을 작성할 때 반드시, 절대로 생략하지 말고 "##HASHTAGS##: #키워드1 #키워드2 #키워드3 #키워드4 #키워드5" 형식으로 뉴스 내용과 관련된 키워드 5개 출력. 출력 예시: ##기술 #혁신 #인공지능 #미래 #트렌드)
 '''
 
     try:
@@ -286,54 +286,58 @@ def generate_ai_content(api_key, news_title, news_summary):
         print(f'🚨 Gemini 최신 SDK 오류: {e}')
         return None
 
+def _extract_hashtags_from_string(text_with_hashtags):
+    # Improved regex to find #tags, ensuring it's not part of a markdown header like ###
+    # and handles cases where there might be extra spaces or other characters
+    return re.findall(r'#([가-힣\w]+)\b', text_with_hashtags)
+
 def _extract_and_format_hashtags(original_content, log_prefix=""):
     hashtags_html = ""
     modified_content = original_content
-    found_hashtags = [] # Collect all found hashtags
+    found_hashtags = []
+    
+    # Extract title for potential default hashtags
+    title = extract_title_from_md(original_content)
 
-    # --- Attempt to find a flexible hashtag header (e.g., ##HASHTAGS##: #tag1 #tag2) ---
-    header_pattern = re.compile(r'(##)?(HASHTAGS|해시태그)##?:\s*(.+)', re.MULTILINE | re.IGNORECASE)
-    header_match = header_pattern.search(modified_content)
+    # 1. Attempt to find the ##HASHTAGS##: header and extract from there
+    header_pattern = re.compile(r'(.*?)?((##)?(HASHTAGS|해시태그)##?:\s*)(.+)', re.MULTILINE | re.IGNORECASE)
+    header_match = header_pattern.search(original_content)
 
     if header_match:
-        hashtags_string_from_header = header_match.group(3).strip()
-        if hashtags_string_from_header:
-            # Improved regex to find #tags, ensuring it's not part of a markdown header like ###
-            found_hashtags.extend(re.findall(r'(?<!#|\w)#([가-힣\w]+)\b', hashtags_string_from_header))
-            # Remove the matched header line from the content
-            modified_content = header_pattern.sub('', modified_content, 1).strip()
+        hashtags_string_from_header = header_match.group(5).strip()
+        found_hashtags.extend(_extract_hashtags_from_string(hashtags_string_from_header))
+        
+        modified_content = header_pattern.sub(header_match.group(1) or '', modified_content, 1).strip()
+        
+        if found_hashtags:
             print(f"{log_prefix}✅ 해시태그 추출 성공 (헤더): {', '.join(found_hashtags)}")
         else:
-            print(f"{log_prefix}⚠️ 해시태그 헤더는 찾았으나, 내용이 없습니다. 본문 후반 50%에서 추출 시도합니다.")
+            print(f"{log_prefix}⚠️ 해시태그 헤더는 찾았으나, 내용이 없습니다. 전체 본문에서 추출 시도합니다.")
     
-    # --- Fallback: Extract from the latter 50% of the content if no hashtags found yet ---
-    if not found_hashtags: # Check if found_hashtags is still empty
-        content_length = len(original_content)
-        # Calculate the start index for the latter 50% of the content
-        # Ensure it's at least 0 to prevent negative slice start if content is very short
-        latter_50_percent_start = max(0, int(content_length * 0.5)) 
-        latter_50_percent_content = original_content[latter_50_percent_start:]
-        
-        # Improved regex for finding hashtags in the content
-        fallback_hashtags_from_body = re.findall(r'(?<!#|\w)#([가-힣\w]+)\b', latter_50_percent_content)
-        if fallback_hashtags_from_body:
-            found_hashtags.extend(fallback_hashtags_from_body)
-            print(f"{log_prefix}✅ 해시태그 추출 성공 (본문 후반 50% 폴백): {', '.join(found_hashtags)}")
-        else:
-            print(f"{log_prefix}❌ 해시태그 추출 실패: 본문 후반 50%에서도 찾지 못했습니다.")
-
+    # 2. If no hashtags found via header, or header was empty, fallback to searching the entire (original) content
+    if not found_hashtags:
+        found_hashtags.extend(_extract_hashtags_from_string(original_content))
+        if found_hashtags:
+            print(f"{log_prefix}✅ 해시태그 추출 성공 (전체 본문 폴백): {', '.join(found_hashtags)}")
+        # No '❌ 해시태그 추출 실패' print here because default generation is the next step
+    
+    # 3. Generate default hashtags if still no hashtags found
+    if not found_hashtags and title:
+        default_tags_raw = re.sub(r'[^\w\s]', '', title).split()
+        default_hashtags = [clean_filename(word) for word in default_tags_raw if len(word) > 1][:5]
+        if default_tags_raw: # Check if there are any words to form default hashtags
+            found_hashtags.extend(default_hashtags)
+            print(f"{log_prefix}ℹ️ 해시태그 없음: 제목에서 기본 해시태그 생성함: {', '.join(found_hashtags)}")
+    
     # --- Final Formatting ---
     if found_hashtags:
-        # Deduplicate and limit to 5, then format into the new HTML structure
-        unique_hashtags = list(dict.fromkeys(found_hashtags)) # Remove duplicates while preserving order
-        
-        # Format each hashtag into a <span> and wrap them in a <div>
+        unique_hashtags = list(dict.fromkeys(found_hashtags))
         hashtags_html_spans = "".join([f'<span class="hashtag">#{tag}</span>' for tag in unique_hashtags[:5]])
         hashtags_html = f'<div class="hashtag-container">{hashtags_html_spans}</div>'
     else:
-        # If no hashtags found at all, return empty HTML to hide the area
+        # If no hashtags found at all (even default), return empty HTML to hide the area
         print(f"{log_prefix}❌ 최종 해시태그 없음. 영역을 숨깁니다.")
-        hashtags_html = "" # Ensure it's empty to hide the div
+        hashtags_html = ""
 
     return modified_content, hashtags_html
 
