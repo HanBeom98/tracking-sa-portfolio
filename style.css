@@ -39,7 +39,10 @@ header {
     height: 45px; /* Fixed height for the logo image */
     width: auto;
     vertical-align: middle;
-    /* margin-right: 10px; */ /* Removed as only image now */
+}
+
+.site-logo-dark {
+    display: none; /* Hidden by default in light mode */
 }
 
 /* Hero Banner Styles */
@@ -907,9 +910,15 @@ body.dark-mode header {
     background-color: #0a0d14; /* Darker navy header */
 }
 
-body.dark-mode .site-logo-link img.site-logo {
-    filter: brightness(0) invert(1) sepia(1) saturate(10000%) hue-rotate(180deg) brightness(1.5); /* Adjust for white logo on dark blue background */
+body.dark-mode .site-logo-light {
+    display: none;
 }
+
+body.dark-mode .site-logo-dark {
+    display: block;
+}
+
+
 
 body.dark-mode nav a {
     color: white; /* RESTORED */
