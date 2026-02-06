@@ -1237,6 +1237,7 @@ body.dark-mode .inquiry-form input[type="email"]:focus,
 body.dark-mode .inquiry-form textarea:focus {
     border-color: #60a5fa;
     box-shadow: 0 0 0 0.2rem rgba(0, 82, 204, 0.25);
+    outline: none;
 }
 
 body.dark-mode .inquiry-form button[type="submit"] {
@@ -1568,9 +1569,22 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.saju-input-section .input-form-group {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between label and input */
+}
+
+.saju-input-section .input-form-group label {
+    min-width: 100px; /* Fixed width for labels */
+    flex-shrink: 0; /* Prevent label from shrinking */
+    font-weight: bold;
+    color: #333;
+}
+
 .saju-input-section input[type='text'],
 .saju-input-section select {
-    width: calc(100% - 24px); /* Adjust for padding */
+    flex: 1; /* Take up remaining space */
     padding: 12px;
     border: none; /* Remove default border */
     border-radius: 8px;
@@ -1618,6 +1632,18 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
 
 /* Mobile Responsive Overrides for Saju Test Page */
 @media (max-width: 768px) {
+    .saju-input-section .input-form-group {
+        flex-direction: column;
+        align-items: flex-start; /* Align labels to the left */
+        gap: 5px;
+    }
+
+    .saju-input-section .input-form-group label {
+        min-width: unset; /* Remove fixed width on mobile */
+        width: 100%; /* Label takes full width */
+        margin-bottom: 5px;
+    }
+
     .saju-input-section input[type='text'],
     .saju-input-section select {
         width: 100%; /* Full width on mobile */
