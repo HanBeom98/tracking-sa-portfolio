@@ -34,6 +34,15 @@ function applyTranslations(lang) {
             titleElement.textContent = translations[lang][key];
         }
     }
+
+    // Explicitly update the mobile menu's '테스트' button
+    const mobileMenuTestButton = document.querySelector('#slide-out-menu .dropbtn');
+    if (mobileMenuTestButton && mobileMenuTestButton.dataset.i18n) {
+        const key = mobileMenuTestButton.dataset.i18n;
+        if (translations[lang] && translations[lang][key]) {
+            mobileMenuTestButton.textContent = translations[lang][key];
+        }
+    }
 }
 
 // 언어를 변경하는 함수

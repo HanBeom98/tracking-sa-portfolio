@@ -80,11 +80,13 @@ const translations = {
         'hero_title': '나와 가장 닮은 인공지능 모델은? 🤖',
         'hero_subtitle': '간단한 테스트로 나의 AI 성향을 알아보세요!',
         'start_test_button': '테스트 시작하기',
-        'no_image_to_download_alert': '다운로드할 이미지가 없습니다.'
+        'no_image_to_download_alert': '다운로드할 이미지가 없습니다.',
+        'menu_test': '테스트'
     },
     'en': {
         'news_home': 'News Home',
         'latest_news_hero_title': 'Featured News',
+        'menu_test': 'Tests',
         'all_news_grid_title': 'Latest Articles',
         'home': 'Home',
         'animal_face_test': 'Animal Face Test',
