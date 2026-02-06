@@ -183,11 +183,32 @@ async function loadLayout() {
             bodyElement.classList.remove('mobile-menu-open');
         });
 
-        // Close menu if a link inside is clicked
-        slideOutMenu.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
+        // Handle clicks inside the slide-out menu
+        slideOutMenu.addEventListener('click', (event) => {
+            const target = event.target;
+
+            // If a dropdown button is clicked
+            if (target.classList.contains('dropbtn')) {
+                event.preventDefault(); // Prevent default link behavior (e.g., navigating)
+                event.stopPropagation(); // Stop propagation to prevent menu from closing
+
+                const parentDropdown = target.closest('li.dropdown');
+                if (parentDropdown) {
+                    parentDropdown.classList.toggle('dropdown-active'); // Toggle class for CSS to show/hide dropdown content
+                }
+            } 
+            // If a link inside a dropdown or a regular navigation link is clicked
+            else if (target.tagName === 'A') {
+                // If it's a link within a dropdown, close the main menu
+                // If it's a regular nav link, close the main menu
+                // If it's a .dropbtn, the above if condition handles it.
+                // This condition handles actual navigation links.
                 bodyElement.classList.remove('mobile-menu-open');
-            });
+                // Also, close any open dropdowns
+                slideOutMenu.querySelectorAll('li.dropdown.dropdown-active').forEach(dropdown => {
+                    dropdown.classList.remove('dropdown-active');
+                });
+            }
         });
     }
 }

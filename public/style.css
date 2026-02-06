@@ -1752,10 +1752,17 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
         background-color: transparent; /* No background */
         box-shadow: none;
         width: 100%;
+        max-height: 0; /* Initially hidden */
+        overflow: hidden;
+        transition: max-height 0.3s ease-out; /* Smooth transition */
+    }
+
+    #slide-out-menu li.dropdown.dropdown-active .dropdown-content {
+        max-height: 200px; /* Adjust as needed, ensure it's taller than content */
     }
 
     #slide-out-menu .dropdown-content a {
-        padding-left: 30px; /* Indent dropdown items */
+        /* Removed padding-left to align with parent li's padding */
         color: rgba(255, 255, 255, 0.8); /* Slightly lighter text */
         background-color: rgba(0,0,0,0.1); /* Subtle background for dropdown items */
     }
