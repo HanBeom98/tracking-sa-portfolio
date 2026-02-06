@@ -246,7 +246,7 @@ def extract_svg_logo_from_common_body_injections():
     return None
 
 def copy_static_assets():
-    assets = ["style.css", "common.js", "translations.js", "animal_face_test.html", "edit.html", "edit.js", "inquiry.html", "main.js", "post.html", "post.js", "write.html", "write.js", "about.html", "contact.html", "privacy-policy.html", "firebase-config.js", "logo.svg", "ai-test.html", "ai-test.js"] # Removed favicon.svg from here
+    assets = ["style.css", "common.js", "translations.js", "animal_face_test.html", "edit.html", "edit.js", "inquiry.html", "main.js", "post.html", "post.js", "write.html", "write.js", "about.html", "contact.html", "privacy-policy.html", "firebase-config.js", "logo.svg", "ai-test.html", "ai-test.js", "saju-test.html", "saju-test.js"] # Added saju-test.html and saju-test.js
 
     # Favicon check and creation
     favicon_path = "favicon.svg"
