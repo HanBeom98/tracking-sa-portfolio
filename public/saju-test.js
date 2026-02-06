@@ -58,13 +58,14 @@ const updateSajuContent = () => {
         birthHourSelect.value = 'unknown'; // Set "Unknown" as default
     };
 
-    populateSelectors(currentLang);
-    window.applyTranslations(currentLang); // Apply translations to static elements
+    populateSelectors(window.currentLang);
+    window.applyTranslations(window.currentLang); // Apply translations to static elements
 };
 
 
 document.addEventListener('DOMContentLoaded', () => {
     const userNameInput = document.getElementById('user-name');
+    userNameInput.placeholder = window.getTranslation(window.currentLang, 'name_placeholder'); // Apply placeholder translation
     const sajuForm = document.querySelector('.saju-input-section'); // More general selector for saju page
     
     // Defensive check for sajuForm. If not present, this is not the saju page, so return.
@@ -84,6 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Listen for custom event dispatched when language changes in common.js
     window.addEventListener('languageChanged', (event) => {
         updateSajuContent(); // Re-render dynamic content with new language
+        userNameInput.placeholder = window.getTranslation(window.currentLang, 'name_placeholder'); // Update placeholder translation on language change
     });
 
     getSajuButton.addEventListener('click', async () => {
@@ -96,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const gender = genderMaleRadio.checked ? 'male' : 'female';
 
         if (!name || !birthYear || !birthMonth || !birthDay) {
-            alert(window.getTranslation(currentLang, 'saju_input_missing'));
+            alert(window.getTranslation(window.currentLang, 'saju_input_missing'));
             return;
         }
 
@@ -108,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            console.log('Current language for API request:', currentLang); // Debugging line
+            console.log('Current language for API request:', window.currentLang); // Debugging line
             const response = await fetch('/api/saju', { // Call the Cloudflare Function endpoint
                 method: 'POST',
                 headers: {
@@ -123,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     },
                     birthTime: birthHour,
                     gender,
-                    language: currentLang // Send language parameter
+                    language: window.currentLang // Send language parameter
                 })
             });
 
@@ -132,12 +134,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 sajuReadingText.textContent = data.sajuReading;
             } else {
-                sajuReadingText.textContent = window.getTranslation(currentLang, 'saju_api_error') + (data.error || response.statusText);
+                sajuReadingText.textContent = window.getTranslation(window.currentLang, 'saju_api_error') + (data.error || response.statusText);
             }
 
         } catch (error) {
             console.error('Frontend Saju API call error:', error);
-            sajuReadingText.textContent = window.getTranslation(currentLang, 'saju_network_error');
+            sajuReadingText.textContent = window.getTranslation(window.currentLang, 'saju_network_error');
         } finally {
             if (loadingIndicator) loadingIndicator.style.display = 'none'; // Defensive check
             if (resultContainer) resultContainer.style.display = 'block'; // Defensive check

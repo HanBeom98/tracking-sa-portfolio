@@ -1645,9 +1645,7 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
     .saju-input-section .gender-buttons label {
         padding: 15px 20px; /* Adjust padding for gender buttons */
     }
-}
 
-@media (max-width: 600px) {
     .saju-input-section .input-form-group {
         flex-direction: column;
         align-items: flex-start; /* Align labels to the left */

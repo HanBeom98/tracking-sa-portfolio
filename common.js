@@ -6,7 +6,7 @@ if (!translations[currentLang]) {
 
 // 번역 맵에서 특정 키에 대한 번역을 가져오는 헬퍼 함수
 window.getTranslation = function(lang, key) {
-    return (translations[lang] && translations[lang][key]) ? translations[lang][key] : key;
+    return (translations[lang] && translations[lang][key]) ? translations[lang][key] : ''; // Return empty string if key not found
 }
 
 // 번역을 적용하는 함수
@@ -18,8 +18,11 @@ window.applyTranslations = function(lang) {
     const elements = document.querySelectorAll('[data-i18n]');
     elements.forEach(element => {
         const key = element.getAttribute('data-i18n');
-        if (key && translations[lang] && translations[lang][key]) {
-            element.textContent = translations[lang][key];
+        if (key) { // Only clear if data-i18n attribute is present
+            element.innerHTML = ''; // Clear existing content to prevent overlap
+            if (translations[lang] && translations[lang][key]) {
+                element.textContent = translations[lang][key];
+            }
         }
     });
 
