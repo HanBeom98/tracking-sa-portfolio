@@ -11,23 +11,22 @@ export function getTranslation(lang, key) {
 
 // 번역을 적용하는 함수
 export function applyTranslations(lang) {
-
-    document.documentElement.lang = lang; // Set HTML lang attribute
+    if (document.documentElement) {
+        document.documentElement.lang = lang; // Set HTML lang attribute
+    }
 
     const elements = document.querySelectorAll('[data-i18n]');
-
     elements.forEach(element => {
         const key = element.getAttribute('data-i18n');
-        if (translations[lang] && translations[lang][key]) {
+        if (key && translations[lang] && translations[lang][key]) {
             element.innerHTML = translations[lang][key];
         }
     });
 
     const placeholders = document.querySelectorAll('[data-i18n-placeholder]');
-
     placeholders.forEach(element => {
         const key = element.getAttribute('data-i18n-placeholder');
-        if (translations[lang] && translations[lang][key]) {
+        if (key && translations[lang] && translations[lang][key]) {
             element.placeholder = translations[lang][key];
         }
     });
@@ -35,7 +34,7 @@ export function applyTranslations(lang) {
     const titleElement = document.querySelector('title');
     if (titleElement) {
         const key = titleElement.getAttribute('data-i18n');
-        if (translations[lang] && translations[lang][key]) {
+        if (key && translations[lang] && translations[lang][key]) {
             titleElement.textContent = translations[lang][key];
         }
     }
@@ -44,7 +43,7 @@ export function applyTranslations(lang) {
     const mobileMenuTestButton = document.querySelector('#slide-out-menu .dropbtn');
     if (mobileMenuTestButton && mobileMenuTestButton.dataset.i18n) {
         const key = mobileMenuTestButton.dataset.i18n;
-        if (translations[lang] && translations[lang][key]) {
+        if (key && translations[lang] && translations[lang][key]) {
             mobileMenuTestButton.textContent = translations[lang][key];
         }
     }
@@ -59,9 +58,9 @@ window.setLanguage = function(lang) {
     // Update active class on language buttons
     const langButtons = document.querySelectorAll('.lang-button');
     langButtons.forEach(button => {
-        if (button.dataset.lang === lang) {
+        if (button && button.dataset.lang === lang) { // Defensive check for button
             button.classList.add('active');
-        } else {
+        } else if (button) {
             button.classList.remove('active');
         }
     });
@@ -76,8 +75,7 @@ async function loadLayout() {
     console.log("loadLayout function executed");
     // 테마 변경 버튼에 이벤트 리스너를 추가합니다.
     const themeToggle = document.getElementById('color-change');
-    console.log("Theme toggle button found:", themeToggle);
-    const body = document.body;
+    const body = document.body; // body is guaranteed to exist by DOMContentLoaded
 
     if (body) {
         // Load theme preference from localStorage
@@ -98,20 +96,22 @@ async function loadLayout() {
     if (themeToggle && body) {
         console.log("Click event listener added to theme toggle button");
         themeToggle.addEventListener('click', () => {
-            body.classList.toggle('dark-mode');
-            if (body.classList.contains('dark-mode')) {
-                localStorage.setItem('theme', 'dark');
-                themeToggle.innerHTML = '☀️'; // Change to sun for dark mode
-            } else {
-                localStorage.setItem('theme', 'light');
-                themeToggle.innerHTML = '🌙'; // Change to moon for light mode
+            if (body) { // Defensive check for body
+                body.classList.toggle('dark-mode');
+                if (body.classList.contains('dark-mode')) {
+                    localStorage.setItem('theme', 'dark');
+                    themeToggle.innerHTML = '☀️'; // Change to sun for dark mode
+                } else {
+                    localStorage.setItem('theme', 'light');
+                    themeToggle.innerHTML = '🌙'; // Change to moon for light mode
+                }
             }
         });
     }
 
     // Scroll-hide/show header logic for mobile
     let lastScrollY = 0;
-    let header = document.querySelector('header');
+    const header = document.querySelector('header'); // Header is always injected by main.py
     const mediaQuery = window.matchMedia('(max-width: 768px)');
 
     // Define thresholds for scroll sensitivity
@@ -120,6 +120,7 @@ async function loadLayout() {
     const topOfPageThreshold = 10;  // Always show header if scrollY is less than 10px
 
     function handleScroll() {
+        if (!header) return; // Defensive check for header
         if (mediaQuery.matches) { // Only apply on mobile
             let currentScrollY = window.scrollY;
             let scrollDifference = lastScrollY - currentScrollY; // Positive when scrolling up, negative when scrolling down
@@ -149,15 +150,16 @@ async function loadLayout() {
 
     // Also handle changes in media query (e.g., rotating device from mobile to PC)
     mediaQuery.addEventListener('change', () => {
+        if (!header) return; // Defensive check for header
         if (!mediaQuery.matches) {
             header.style.transform = 'translateY(0)'; // Ensure header visible on PC
         }
     });
 
     // 언어 선택 버튼 추가 (language-switcher div가 있다면)
-    const languageSwitcher = document.getElementById('language-switcher');
+    const languageSwitcher = document.getElementById('language-switcher'); // Language switcher is always injected by main.py
     console.log("Language switcher div found:", languageSwitcher);
-    if (languageSwitcher) {
+    if (languageSwitcher) { // Defensive check for languageSwitcher
         const createLangButton = (langCode, label) => {
             const button = document.createElement('button');
             button.textContent = label;
@@ -174,6 +176,12 @@ async function loadLayout() {
         languageSwitcher.innerHTML = ''; 
         languageSwitcher.appendChild(createLangButton('ko', 'KOR'));
         languageSwitcher.appendChild(createLangButton('en', 'ENG'));
+        
+        // Set initial active class for language buttons
+        const currentActiveButton = languageSwitcher.querySelector(`.lang-button[data-lang="${currentLang}"]`);
+        if (currentActiveButton) {
+            currentActiveButton.classList.add('active');
+        }
     }
 
     // 초기 로드 시 번역 적용 (언어 버튼 생성 후 호출되어야 함)
@@ -183,20 +191,24 @@ async function loadLayout() {
     // Mobile menu toggle logic
     const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
     const slideOutMenu = document.getElementById('slide-out-menu');
-    const bodyElement = document.body;
+    // bodyElement is guaranteed to exist
 
     // Create and append overlay element
     const overlay = document.createElement('div');
     overlay.classList.add('overlay');
-    bodyElement.appendChild(overlay);
+    document.body.appendChild(overlay); // body is guaranteed to exist
 
-    if (mobileMenuToggle && slideOutMenu && bodyElement) {
+    if (mobileMenuToggle && slideOutMenu) { // Defensive check for these elements
         mobileMenuToggle.addEventListener('click', () => {
-            bodyElement.classList.toggle('mobile-menu-open');
+            if (body) { // Defensive check for body
+                body.classList.toggle('mobile-menu-open');
+            }
         });
 
         overlay.addEventListener('click', () => {
-            bodyElement.classList.remove('mobile-menu-open');
+            if (body) { // Defensive check for body
+                body.classList.remove('mobile-menu-open');
+            }
         });
 
         // Handle clicks inside the slide-out menu
@@ -204,7 +216,7 @@ async function loadLayout() {
             const target = event.target;
 
             // If a dropdown button is clicked
-            if (target.classList.contains('dropbtn')) {
+            if (target && target.classList.contains('dropbtn')) { // Defensive check for target
                 event.preventDefault(); // Prevent default link behavior (e.g., navigating)
                 event.stopPropagation(); // Stop propagation to prevent menu from closing
 
@@ -214,12 +226,14 @@ async function loadLayout() {
                 }
             } 
             // If a link inside a dropdown or a regular navigation link is clicked
-            else if (target.tagName === 'A') {
+            else if (target && target.tagName === 'A') { // Defensive check for target
                 // If it's a link within a dropdown, close the main menu
                 // If it's a regular nav link, close the main menu
                 // If it's a .dropbtn, the above if condition handles it.
                 // This condition handles actual navigation links.
-                bodyElement.classList.remove('mobile-menu-open');
+                if (body) { // Defensive check for body
+                    body.classList.remove('mobile-menu-open');
+                }
                 // Also, close any open dropdowns
                 slideOutMenu.querySelectorAll('li.dropdown.dropdown-active').forEach(dropdown => {
                     dropdown.classList.remove('dropdown-active');
