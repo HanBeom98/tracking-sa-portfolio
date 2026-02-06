@@ -13,28 +13,38 @@ The `tracking-sa` project is a web application with several HTML pages, CSS styl
 -   **AI Test Page (`ai-test.html`):** Styling for quiz-like interactive elements.
 -   **Animal Face Test Page (`animal_face_test.html`):** Styling for image upload, gender selection, and prediction results.
 
-## Current Task: Apply Trendy Design System (Visual Elements Only)
+## Current Task: Redesign "Back to List" Button on News Detail Page
 
 ### Plan for Current Change
-The user wants to apply a modern, trendy design system to the `style.css` file. Crucially, the existing layout (positions, menu structure) must remain untouched. Only visual elements like colors, gradients, shapes, shadows, and animations are to be modified.
+The user wants to visually upgrade the "Back to list" button on the news detail page with a trendy design. This involves modifying the HTML structure in `main.py` to include an icon and updating `style.css` with new styles for appearance, shape, animations, and dark mode compatibility, all while maintaining existing layout and menu structure.
 
 ### Detailed Steps:
 
-#### 1. Colors and Gradients
--   **`body` background:** Change to a soft sky gradient: `linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)`.
--   **`header` background:** Apply a deep premium blue gradient: `linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)`.
+#### 1. HTML Structure Change (in `main.py`)
+-   Locate the code responsible for generating the news detail page, specifically the "Back to list" link.
+-   Modify the link to use the following structure: `<a href="/" class="back-to-list"><i class="fas fa-arrow-left"></i> 목록으로 돌아가기</a>`.
+-   **Pre-check for Font Awesome:** Before using `<i>` tags with `fas fa-arrow-left`, I need to verify if Font Awesome is already included in `index.html` or a similar base template, or if it needs to be added (e.g., via CDN). Assuming it's available for now based on common patterns.
 
-#### 2. Shape and Depth
--   **Rounded Corners:** Set `border-radius` to `20px` for `.hero-banner`, `.news-card`, and `.hero-card`.
--   **Subtle Shadows:** Apply `box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1)` to `.hero-banner`, `.news-card`, and `.hero-card` for a sophisticated, diffused look.
+#### 2. Style Update (in `style.css`)
+-   Create or update the `.back-to-list` CSS class.
+-   **Basic Design:**
+    -   `background-color: transparent;`
+    -   `border: 1px solid rgba(0, 82, 204, 0.1);` (light blue border)
+    -   `color: #0052cc;` (main blue text)
+-   **Shape & Padding:**
+    -   `border-radius: 50px;` (fully rounded)
+    -   `padding: 10px 20px;`
+-   **Animation:**
+    -   `transition: all 0.3s ease;` (smooth transition)
+    -   On hover (`.back-to-list:hover`):
+        -   `background-color: rgba(0, 82, 204, 0.1);` (fill with light blue)
+        -   `transform: translateX(-3px);` (move slightly left)
+-   **Display:** Ensure it's displayed as an inline-block or block element to allow padding and margin to apply correctly (e.g., `display: inline-flex; align-items: center; gap: 8px;`).
 
-#### 3. Smooth Animations (Micro-interactions)
--   **Smooth Transitions:** Apply `transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1)` to all buttons and cards (any elements with `cursor: pointer` or explicit `transition` properties) for a "쫀득한" (chewy/elastic) animation feel.
--   **Floating Hover Effect:** For `.news-card:hover` and `.hero-card:hover`, add `transform: translateY(-8px)` to create a floating effect when moused over. Ensure existing hover effects are merged or overridden correctly.
+#### 3. Placement Adjustment (in `style.css`)
+-   Add `margin-top: 30px;` to `.back-to-list` to provide sufficient spacing from the content above.
+-   **Dark Mode Compatibility:** Add a dark mode rule for `.back-to-list` to ensure `color: #60a5fa;` (bright blue) when `body.dark-mode` is active.
 
-#### 4. Hero Banner Pulse Effect
--   Implement a subtle pulsing animation for the `.hero-banner` background. This will involve defining `@keyframes` for a slight scale/opacity change and applying it to a pseudo-element or the background itself to ensure it doesn't affect the content.
-
-#### 5. Finalization
--   After all CSS modifications are complete, run `python main.py --build-only` to ensure the changes are reflected and the site builds successfully.
+#### 4. Finalization
+-   After all code modifications are complete, run `python main.py --build-only` to ensure the changes are reflected and the site builds successfully.
 -   Upon successful build, commit the changes with a descriptive message and push them to the remote repository.
