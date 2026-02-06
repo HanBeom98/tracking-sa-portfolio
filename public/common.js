@@ -1,16 +1,16 @@
 // 현재 언어를 저장하는 변수 (기본값은 한국어)
-export let currentLang = localStorage.getItem('lang') || navigator.language.split('-')[0];
+let currentLang = localStorage.getItem('lang') || navigator.language.split('-')[0];
 if (!translations[currentLang]) {
     currentLang = 'en'; // Fallback to English if browser language is not available in translations
 }
 
 // 번역 맵에서 특정 키에 대한 번역을 가져오는 헬퍼 함수
-export function getTranslation(lang, key) {
+window.getTranslation = function(lang, key) {
     return (translations[lang] && translations[lang][key]) ? translations[lang][key] : key;
 }
 
 // 번역을 적용하는 함수
-export function applyTranslations(lang) {
+window.applyTranslations = function(lang) {
     if (document.documentElement) {
         document.documentElement.lang = lang; // Set HTML lang attribute
     }
@@ -53,7 +53,7 @@ export function applyTranslations(lang) {
 window.setLanguage = function(lang) {
     currentLang = lang;
     localStorage.setItem('lang', lang);
-    applyTranslations(lang);
+    window.applyTranslations(lang); // Call the global applyTranslations
 
     // Update active class on language buttons
     const langButtons = document.querySelectorAll('.lang-button');
@@ -186,7 +186,7 @@ async function loadLayout() {
 
     // 초기 로드 시 번역 적용 (언어 버튼 생성 후 호출되어야 함)
     console.log("Translations object:", translations);
-    applyTranslations(currentLang);
+    window.applyTranslations(currentLang); // Call the global applyTranslations
 
     // Mobile menu toggle logic
     const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
