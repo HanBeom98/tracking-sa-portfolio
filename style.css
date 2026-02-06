@@ -36,12 +36,11 @@ header .site-title { /* Not used in current HTML but good to keep if it's a gene
 }
 
 .desktop-menu-container {
-    /* Remove flex-grow to let it take natural width */
-    display: flex; /* Ensure it's a flex container for its children */
-    justify-content: flex-start; /* Align nav items to the start (left) */
-    align-items: center; /* Vertically center nav items */
-    height: 100%; /* Fill height of header */
-    /* Remove margin-right: auto (it doesn't have it, but mentioned in guidance) */
+    display: flex;
+    flex-grow: 1; /* Allow it to grow and push utility-controls to the right */
+    justify-content: space-between; /* Space out nav and utility controls on desktop */
+    align-items: center;
+    height: 100%;
 }
 
 nav ul {
@@ -49,8 +48,7 @@ nav ul {
     padding: 0;
     margin: 0;
     display: flex;
-    /* flex-wrap: wrap; removed to prevent menu from splitting into two lines */
-    /* justify-content: center; removed to allow items to align left within nav */
+    justify-content: center; /* Center nav items on desktop */
     gap: 20px;
 }
 
@@ -96,7 +94,6 @@ footer {
     display: flex;
     gap: 10px;
     align-items: center;
-    margin-left: auto; /* Push to the right */
 }
 
 .lang-button {
@@ -457,6 +454,8 @@ body.dark-mode .news-card-date {
     background-color: white;
     border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.07);
+    position: relative; /* Needed for z-index context */
+    z-index: 1; /* Ensure content is above background if any */
 }
 
 .animal-face-test h1 {
@@ -473,6 +472,8 @@ body.dark-mode .news-card-date {
 
 .gender-selection-wrapper {
     margin-bottom: 30px;
+    position: relative; /* Needed for z-index to work */
+    z-index: 10; /* Ensure gender buttons are clickable */
 }
 
 .gender-selection-wrapper label {
@@ -489,7 +490,6 @@ body.dark-mode .news-card-date {
     padding: 10px 20px;
     border-radius: 25px;
     cursor: pointer;
-    font-size: 1em;
     transition: background-color 0.3s ease, transform 0.2s ease;
     margin: 0 5px;
 }
@@ -520,6 +520,8 @@ body.dark-mode .news-card-date {
 }
 
 .image-upload-section {
+    position: relative; /* Needed for z-index context */
+    z-index: 5; /* Ensure upload section is clickable */
     /* margin-bottom: 30px; */ /* Removed to let wrapper manage spacing */
 }
 
@@ -691,7 +693,206 @@ body.dark-mode .news-card-date {
     padding: 10px 20px;
     border-radius: 25px;
     cursor: pointer;
-    font-size: 1em;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin: 0 5px;
+}
+
+#gender-female {
+    background-color: #dc3545; /* Red for unselected female */
+}
+#gender-female:hover {
+    background-color: #c82333; /* Darker red on hover */
+}
+
+#gender-female.active {
+    background-color: #28a745; /* Green for active female */
+}
+
+.gender-buttons .gender-button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+.gender-buttons .gender-button.active {
+    background-color: #28a745; /* Green for active */
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3), inset 0 0 8px rgba(0, 0, 0, 0.5); /* Enhanced inset shadow */
+}
+
+.gender-buttons .gender-button.active:hover {
+    background-color: #218838;
+}
+
+.image-upload-section {
+    position: relative; /* Needed for z-index context */
+    z-index: 5; /* Ensure upload section is clickable */
+    /* margin-bottom: 30px; */ /* Removed to let wrapper manage spacing */
+}
+
+.upload-wrapper {
+    max-width: 500px; /* Unify width with result section */
+    margin: 0 auto 30px auto; /* Center and add bottom margin */
+    padding: 15px; /* Add some internal padding */
+    border: 1px solid #e0e0e0; /* Subtle border */
+    border-radius: 10px; /* Rounded corners */
+    background-color: #f9f9f9; /* Light background */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* Soft shadow */
+}
+
+.drop-zone {
+    border: 2px dashed #007bff;
+    border-radius: 10px;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    margin-bottom: 20px;
+    background-color: #f8faff;
+    color: #007bff;
+}
+
+.drop-zone.drag-over {
+    background-color: #e6f0ff;
+    border-color: #0056b3;
+}
+
+.drop-zone p {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.1em;
+    color: #007bff;
+}
+
+.image-upload-section .custom-file-upload {
+    background-color: #28a745;
+    color: white;
+    padding: 12px 25px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: inline-block;
+}
+
+.image-upload-section .custom-file-upload:hover {
+    background-color: #218838;
+}
+
+#image-preview-container {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    text-align: center;
+    /* max-width: 500px; */ /* Managed by .upload-wrapper now */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#image-preview {
+    max-width: 100%;
+    height: auto;
+    border-radius: 15px; /* Apply border-radius as requested */
+    margin-bottom: 15px;
+    display: none; /* Hidden until image is loaded */
+}
+
+#predict-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    display: none; /* Hidden until image is loaded */
+}
+
+#predict-button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+/* Loading Indicator */
+.loading-indicator {
+    position: fixed; /* Fixed position to cover the entire viewport */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999; /* Ensure it's on top of everything else */
+}
+
+.loading-indicator .spinner {
+    border: 8px solid rgba(0, 123, 255, 0.1);
+    border-top: 8px solid #007bff;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-indicator p {
+    font-size: 1.2em;
+    color: #007bff;
+    font-weight: bold;
+}
+
+/* Styling for Animal Face Test Page (animal_face_test.html) */
+.animal-face-test {
+    text-align: center;
+    padding: 40px 20px;
+    max-width: 900px;
+    margin: 20px auto;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.07);
+    position: relative; /* Needed for z-index context */
+    z-index: 1; /* Ensure content is above background if any */
+}
+
+.animal-face-test h1 {
+    font-size: 2.8em;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.animal-face-test p {
+    font-size: 1.1em;
+    color: #555;
+    margin-bottom: 25px;
+}
+
+.gender-selection-wrapper {
+    margin-bottom: 30px;
+    position: relative; /* Needed for z-index to work */
+    z-index: 10; /* Ensure gender buttons are clickable */
+}
+
+.gender-selection-wrapper label {
+    font-weight: bold;
+    color: #333;
+    margin-right: 15px;
+    font-size: 1.1em;
+}
+
+.gender-buttons .gender-button {
+    background-color: #007bff; /* Blue for unselected male */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
     transition: background-color 0.3s ease, transform 0.2s ease;
     margin: 0 5px;
 }
@@ -773,7 +974,6 @@ body.dark-mode .news-card-date {
     border: none;
     padding: 10px 20px;
     border-radius: 5px;
-    cursor: pointer;
     transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
@@ -796,8 +996,6 @@ body.dark-mode .news-card-date {
     padding: 12px 30px;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 1.1em;
-    font-weight: bold;
     transition: background-color 0.3s ease, transform 0.2s ease;
     margin-top: 15px;
 }
@@ -876,7 +1074,7 @@ body.dark-mode .news-card-title a {
 }
 
 body.dark-mode .news-card-title a:hover {
-    color: #99ccff; /* Lighter blue for hover */
+    color: #99ccff;
 }
 
 body.dark-mode .news-card-date {
@@ -990,14 +1188,20 @@ body.dark-mode .gender-buttons .gender-button.active:hover {
 }
 
 body.dark-mode .drop-zone {
-    border-color: #0056b3;
-    background-color: #333333;
-    color: #99ccff;
+    border: 2px dashed #007bff;
+    border-radius: 10px;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    margin-bottom: 20px;
+    background-color: #f8faff;
+    color: #007bff;
 }
 
 body.dark-mode .drop-zone.drag-over {
-    background-color: #444444;
-    border-color: #007bff;
+    background-color: #e6f0ff;
+    border-color: #0056b3;
 }
 
 body.dark-mode .drop-zone p {

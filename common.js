@@ -163,7 +163,6 @@ async function loadLayout() {
     // 초기 로드 시 번역 적용 (언어 버튼 생성 후 호출되어야 함)
     console.log("Translations object:", translations);
     applyTranslations(currentLang);
-}
 
     // Mobile menu toggle logic
     const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
@@ -191,6 +190,6 @@ async function loadLayout() {
             });
         });
     }
+}
 
-// DOM이 로드되면 레이아웃을 불러옵니다.
 document.addEventListener('DOMContentLoaded', loadLayout);
