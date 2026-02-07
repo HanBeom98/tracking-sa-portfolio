@@ -20,27 +20,37 @@ export async function onRequest(context) {
 
     let prompt = '';
     if (language === 'en') {
-        prompt = `Please provide the reading in English. You are an expert in the Four Pillars of Destiny (Saju), a traditional Korean method of fortune-telling that analyzes a person's destiny based on their year, month, day, and hour of birth.
+        prompt = `Please provide the daily fortune reading in English. You are a friendly and hopeful fortune teller. Explain the user's daily fortune in markdown format, following these guidelines:
 
-Based on the user's information, provide a detailed, exciting, and hopeful reading (around 500 characters) for today's overall fortune, wealth fortune, and relationship fortune. Use professional terminology but ensure it's easy to understand for someone unfamiliar with Saju. Always refer to Saju as 'Four Pillars of Destiny' or 'Saju (Four Pillars of Destiny)'.
+- (Like a title, in large font) A one-line comprehensive summary of all fortunes.
+- The body content must include:
+  - Today's General Fortune: Describe the overall flow with warm advice to start the user's day positively.
+  - Wealth Fortune: Provide specific and practical guidance regarding financial opportunities or points to be careful about.
+  - Lucky Item: Suggest a special item to enhance the user's fortune.
 
+Write everything in a polite and warm tone, like a friendly consultant. Avoid excessive use of emojis.
 User Information:
 Name: ${name}
 Date of Birth: ${birthDate.year} / ${birthDate.month} / ${birthDate.day}
 Time of Birth: ${birthTime === 'unknown' ? 'Unknown' : birthTime + ':00'}
 Gender: ${gender === 'male' ? 'Male' : 'Female'}
-
-Begin today's Saju reading:`;
+Begin today's fortune reading`;
     } else { // Default to Korean
-        prompt = `너는 20년 경력의 베테랑 명리학자야. 사용자의 정보를 분석해서 오늘의 총운, 재물운, 연애운을 500자 내외로 매우 상세하고 흥미진진하며 희망적으로 풀이해줘. 전문 용어를 섞어가며 신뢰감 있게 작성해줘.
+        prompt = `사용자의 이름, 생년월일시, 성별 정보가 주어지면, 오늘의 운세를 상담가처럼 친절하고 희망적인 어조로 자세히 설명하는 마크다운 글을 작성해 주세요. 다음 지침을 따르세요:
 
+- (타이틀처럼 글자크게)모든 운의 종합적인 요약 1줄
+- 본문 내용은 다음을 포함해야 합니다:
+  - 오늘의 총운: 당신의 하루를 긍정적으로 시작할 수 있도록, 따뜻한 조언과 함께 전반적인 흐름을 설명해 줍니다.
+  - 재물운: 재정적인 기회나 주의할 점에 대해 구체적이고 실용적인 지침을 제공합니다.
+  - 행운의 아이템: 당신의 운세를 더욱 좋게 만들 특별한 아이템을 제안합니다.
+
+모든 내용은 존댓말을 사용하여 친근하고 따뜻한 상담가 톤으로 작성해 주십시오. 과도한 이모지 사용은 자제해 주세요.
 사용자 정보:
 이름: ${name}
 생년월일: ${birthDate.year}년 ${birthDate.month}월 ${birthDate.day}일
 태어난 시간: ${birthTime === 'unknown' ? '모름' : birthTime}
 성별: ${gender === 'male' ? '남성' : '여성'}
-
-오늘의 사주 풀이를 시작합니다:`;
+오늘의 운세를 확인하는중`;
     }
 
     try {

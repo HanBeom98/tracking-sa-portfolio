@@ -227,8 +227,8 @@ def generate_index_html(articles_meta):
         "<!-- News content will be injected here by the Python script -->",
         f"""
         <section class="hero-banner">
-            <h2>AI와 데이터로 미래를 추적합니다</h2>
-            <button class="action-button" onclick="window.location.href='/ai-test.html'">테스트 시작하기</button>
+            <h2 data-i18n="hero_title"></h2>
+            <button class="action-button" onclick="window.location.href='/saju-test.html'" data-i18n="start_test_button"></button>
         </section>
         <section class="news-section-main">
             <h1 class="section-title" data-i18n="latest_news_hero_title">최신 뉴스</h1>
