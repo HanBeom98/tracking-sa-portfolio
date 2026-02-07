@@ -14,6 +14,8 @@ NEWS_POSTS_DIR = "posts"
 PROCESSED_ARTICLES_LOG = "processed_articles.log" 
 ADSENSE_CLIENT_ID = "ca-pub-7263630893992216" 
 SITEMAP_PATH = os.path.join(PUBLIC_DIR, "sitemap.xml")
+BASE_URL = os.getenv("BASE_URL", "https://tracking-sa.pages.dev/") # Added configurable base URL
+
 
 # Use absolute paths for all assets
 COMMON_HEAD_SCRIPTS = f"""<!-- Google tag (gtag.js) -->
@@ -110,7 +112,7 @@ def clean_filename(title):
     title = re.sub(r'[^\w\s-]', '', title).strip().lower()
     return re.sub(r'[-\s]+', '-', title)
 
-DEFAULT_OG_IMAGE_URL = "https://tracking-sa.pages.dev/logo.svg" # Placeholder for social sharing image
+DEFAULT_OG_IMAGE_URL = f"{BASE_URL}logo.svg" # Placeholder for social sharing image
 
 def extract_description_from_md(md_content):
     # Try to find a specific summary section or the first paragraph
@@ -172,7 +174,7 @@ def _generate_sitemap(articles_info):
     sitemap_content = f"""<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-        <loc>https://tracking-sa.pages.dev/index.html</loc>
+        <loc>{BASE_URL}index.html</loc>
         <lastmod>{current_date}</lastmod>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
@@ -181,7 +183,7 @@ def _generate_sitemap(articles_info):
 
     for article in articles_info:
         sitemap_content += f"""    <url>
-        <loc>https://tracking-sa.pages.dev/{article['url']}</loc>
+        <loc>{BASE_URL}{article['url']}</loc>
         <lastmod>{article['date']}</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
@@ -214,7 +216,7 @@ def generate_article_html(md_content, title, date_str, output_path, hashtags_htm
     <meta property="og:title" content="{title} - 뉴스">
     <meta property="og:description" content="{description}">
     <meta property="og:type" content="article">
-    <meta property="og:url" content="https://tracking-sa.pages.dev/{os.path.basename(output_path)}">
+    <meta property="og:url" content="{BASE_URL}{os.path.basename(output_path)}">
     <meta property="og:image" content="{image_url}">
 
     <!-- Twitter Card Tags -->
@@ -251,7 +253,7 @@ def generate_index_html(articles_meta):
     homepage_description = "매일 업데이트되는 최신 AI 관련 뉴스와 심층 분석 기사를 제공합니다. AI 기술 트렌드, 스타트업 소식, 산업 동향을 한눈에 확인하세요."
     homepage_title = "AI 뉴스 - 최신 AI 기술 동향 및 분석"
     homepage_image = DEFAULT_OG_IMAGE_URL
-    homepage_url = "https://tracking-sa.pages.dev/index.html"
+    homepage_url = f"{BASE_URL}index.html"
 
     # Inject static meta tags for the homepage
     meta_tags_for_homepage = f"""
