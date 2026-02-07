@@ -74,7 +74,7 @@ const translations = {
         // Saju page specific keys for main title and descriptions
         'saju_title': 'AI 실시간 오늘의 운세',
         'saju_desc1': '이름과 생년월일시 정보를 입력하여 AI가 분석한 오늘의 운세 풀이를 확인해보세요.',
-        'saju_desc2': '2수만 개의 데이터를 학습한 AI가 당신의 오늘을 정교하게 분석하여, 하루를 응원하는 따뜻한 조언과 행운의 메시지를 드립니다.',
+        'saju_desc2': '수만 개의 데이터를 학습한 AI가 당신의 오늘을 정교하게 분석하여, 하루를 응원하는 따뜻한 조언과 행운의 메시지를 드립니다.',
         // Saju page specific keys for input labels
         'name_label': '이름:',
         'birthdate_label': '생년월일:',
@@ -204,18 +204,7 @@ const translations = {
                 'saju_test': 'AI Daily Fortune',
                 'menu_test': 'Tests',
                 'sitemap': 'Sitemap',
-        'year_label': 'Year', // Old key
-        'month_label': 'Month', // Old key
-        'day_label': 'Day', // Old key
-        'hour_label': 'Hour', // Old key
-        'unknown_option': 'Unknown', // Old key
-        // Keys from previous modification round that might be redundant or incorrectly named
-        'input_name': 'Name:',
-        'input_birthdate': 'Birth Date:',
-        'input_birthtime': 'Birth Time:',
-        'select_gender': 'Select Gender',
-        'gender_male': 'Male',
-        'gender_female': 'Female',
+
         'ai_reading_fortune': 'AI is reading your fortune...',
         'saju_result_h2': 'Today\'s Daily Fortune',
         'saju_input_missing': 'Please enter all your name, birth date, and gender information for your Daily Fortune.',
