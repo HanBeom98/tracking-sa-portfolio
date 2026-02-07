@@ -16,7 +16,14 @@ ADSENSE_CLIENT_ID = "ca-pub-7263630893992216"
 SITEMAP_PATH = os.path.join(PUBLIC_DIR, "sitemap.xml")
 
 # Use absolute paths for all assets
-COMMON_HEAD_SCRIPTS = f"""
+COMMON_HEAD_SCRIPTS = f"""<!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){{dataLayer.push(arguments);}}
+      gtag('js', new Date());
+      gtag('config', 'G-TGD3WRNKPZ');
+    </script>
     <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={ADSENSE_CLIENT_ID}" crossorigin="anonymous"></script>
     <script type="text/javascript">
@@ -109,7 +116,7 @@ def process_html_file_for_common_elements(filepath):
         # --- NEW: Remove existing <header> tags ---
         content = re.sub(r'<header[\s\S]*?</header>', '', content, flags=re.DOTALL | re.IGNORECASE)
         # --- END NEW ---
-        content = re.sub(r'\s*<script.*?(firebase|crypto-js|config|translations|common|clarity).*?</script>', '', content, flags=re.DOTALL | re.IGNORECASE)
+        content = re.sub(r'\s*<script.*?(firebase|crypto-js|config|translations|common|clarity|googletagmanager).*?</script>', '', content, flags=re.DOTALL | re.IGNORECASE)
         content = re.sub(r'<link.*?href=".*?style\.css".*?>', '', content, flags=re.DOTALL | re.IGNORECASE)
         content = re.sub(r'<footer>[\s\S]*?</footer>', '', content, flags=re.DOTALL)
 
