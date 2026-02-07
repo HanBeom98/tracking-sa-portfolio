@@ -42,6 +42,9 @@ COMMON_HEAD_SCRIPTS = f"""<!-- Google tag (gtag.js) -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <script src="/firebase-config.js"></script>
     <script src="/translations.js"></script>
+    <script src="/common.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
 """
 
 COMMON_BODY_INJECTIONS = """
@@ -113,17 +116,23 @@ def process_html_file_for_common_elements(filepath):
             content = f.read()
 
         # Robustly clean up old tags
-        # --- NEW: Remove existing <header> tags ---
         content = re.sub(r'<header[\s\S]*?</header>', '', content, flags=re.DOTALL | re.IGNORECASE)
-        # --- END NEW ---
-        content = re.sub(r'\s*<script.*?(firebase|crypto-js|config|translations|common|clarity|googletagmanager).*?</script>', '', content, flags=re.DOTALL | re.IGNORECASE)
+        # Ensure this regex removes all common scripts, including tensorflow, teachablemachine, and main.js if present.
+        content = re.sub(r'\s*<script.*?(firebase|crypto-js|config|translations|common|clarity|googletagmanager|tensorflow|teachablemachine|main).*?</script>', '', content, flags=re.DOTALL | re.IGNORECASE)
         content = re.sub(r'<link.*?href=".*?style\.css".*?>', '', content, flags=re.DOTALL | re.IGNORECASE)
         content = re.sub(r'<footer>[\s\S]*?</footer>', '', content, flags=re.DOTALL)
 
         # Inject common elements
+        # COMMON_HEAD_SCRIPTS now contains all shared scripts including common.js, tensorflow, teachablemachine
         content = content.replace('</head>', f'{COMMON_HEAD_SCRIPTS}\n</head>')
         content = content.replace('<body>', f'<body>\n{COMMON_BODY_INJECTIONS}')
-        content = content.replace('</body>', f'{COMMON_FOOTER}\n    <script src="/common.js"></script>\n</body>')
+        content = content.replace('</body>', f'{COMMON_FOOTER}\n</body>')
+
+        # Conditionally inject main.js only for animal_face_test.html
+        if "animal_face_test.html" in filepath:
+            main_script_injection = '\n    <script src="/main.js"></script>'
+            # Insert main.js before the final </body> tag
+            content = content.replace('</body>', f'{main_script_injection}\n</body>')
 
         with open(filepath, "w", encoding="utf-8") as f:
             f.write(content)
@@ -370,7 +379,7 @@ def _extract_and_format_hashtags(original_content, log_prefix=""):
         default_tags_raw = re.sub(r'[^\w\s]', '', title).split()
         default_hashtags = [clean_filename(word) for word in default_tags_raw if len(word) > 1][:5]
         if default_tags_raw: # Check if there are any words to form default hashtags
-            found_hashtags.extend(default_hashtags)
+            found_hashtags.extend(default_tags_raw) # Use default_tags_raw here, not default_hashtags again
             print(f"{log_prefix}ℹ️ 해시태그 없음: 제목에서 기본 해시태그 생성함: {', '.join(found_hashtags)}")
     
     # --- Final Formatting ---
