@@ -89,7 +89,7 @@ const translations = {
         'hour_unit': '시',
         'unknown_option': '모름', // For the "Unknown" option in birth hour select
         'get_saju_reading': '오늘의 운세 풀이하기',
-        'ai_reading_fortune': 'AI가 당신의 운명을 읽는 중입니다...',
+        'ai_reading_fortune': 'AI가 당신의 운세를 읽는 중입니다...',
         'saju_result_h2': '오늘의 운세 풀이',
         'saju_input_missing': '이름, 생년월일, 성별 정보를 모두 입력해주세요.',
         'saju_api_error': '사주 풀이 실패. 잠시 후 다시 시도해주세요.',
