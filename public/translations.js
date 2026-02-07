@@ -46,7 +46,7 @@ const translations = {
         'contact_us_email': '이메일:',
         'contact_us_response_time': '모든 문의에 2-3 영업일 이내에 답변하는 것을 목표로 합니다.',
         'animal_face_test_title': '동물상 테스트',
-        'animal_face_test_h1': '',
+        'animal_face_test_h1': '당신은 어떤 동물을 닮았나요?',
         'animal_face_test_p1': '당신은 어떤 동물을 닮았는지 알아보세요!',
         'animal_face_test_p2': '이미지를 업로드하여 당신의 동물상을 확인해보세요!',
         'select_image': '이미지 선택',
@@ -108,7 +108,8 @@ const translations = {
         'gender_male': '남성',
         'gender_female': '여성',
         'download_result': '결과 다운로드',
-        'your_animal_face_is': '당신과 닮은 동물은'
+        'your_animal_face_is': '당신과 닮은 동물은',
+        'ai_matching_rate': 'AI 분석 결과 {confidence}%의 매칭률을 보입니다.'
     },
     'en': {
         'news_home': 'News Home',
@@ -185,7 +186,7 @@ const translations = {
         'contact_us_email': 'Email:',
         'contact_us_response_time': 'We aim to respond to all inquiries within 2-3 business days.',
         'animal_face_test_title': 'Animal Face Test',
-        'animal_face_test_h1': '',
+        'animal_face_test_h1': 'Which animal do you resemble?',
                 'animal_face_test_p1': 'Find out which animal you resemble!',
                 'animal_face_test_p2': 'Upload an image to find out your animal face type!',
                 'select_image': 'Select Image',
@@ -230,5 +231,6 @@ const translations = {
         'gender_male': 'Male',
         'gender_female': 'Female',
         'download_result': 'Download Result',
-        'your_animal_face_is': 'Your animal is'
+        'your_animal_face_is': 'The animal that resembles you is ',
+        'ai_matching_rate': 'AI analysis result shows {confidence}% matching rate.'
             }};

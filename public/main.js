@@ -188,7 +188,7 @@ async function predict() {
         setupShareButtons(rawName, confidence); // Use rawName for sharing
     }
     
-    confidenceScore.innerText = "AI 분석 결과 " + confidence + "%의 매칭률을 보입니다.";
+    confidenceScore.innerText = window.getTranslation(currentLang, 'ai_matching_rate').replace('{confidence}', confidence);
 
     hideLoadingIndicator();
     showResultSection();
