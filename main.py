@@ -16,6 +16,19 @@ ADSENSE_CLIENT_ID = "ca-pub-7263630893992216"
 SITEMAP_PATH = os.path.join(PUBLIC_DIR, "sitemap.xml")
 BASE_URL = os.getenv("BASE_URL", "https://tracking-sa.pages.dev/") # Added configurable base URL
 
+STATIC_PAGES_FOR_SITEMAP = [
+    "about.html",
+    "contact.html",
+    "inquiry.html",
+    "privacy-policy.html",
+    "animal_face_test.html",
+    "ai-test.html",
+    "saju-test.html",
+    "edit.html",
+    "write.html",
+    "post.html"
+]
+
 
 # Use absolute paths for all assets
 COMMON_HEAD_SCRIPTS = f"""<!-- Google tag (gtag.js) -->
@@ -178,6 +191,15 @@ def _generate_sitemap(articles_info):
         <lastmod>{current_date}</lastmod>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
+    </url>
+"""
+
+    for static_page in STATIC_PAGES_FOR_SITEMAP:
+        sitemap_content += f"""    <url>
+        <loc>{BASE_URL}{static_page}</loc>
+        <lastmod>{current_date}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
     </url>
 """
 
