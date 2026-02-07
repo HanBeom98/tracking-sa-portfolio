@@ -74,7 +74,7 @@ const translations = {
         // Saju page specific keys for main title and descriptions
         'saju_title': 'AI 실시간 오늘의 운세',
         'saju_desc1': '이름과 생년월일시 정보를 입력하여 AI가 분석한 오늘의 운세 풀이를 확인해보세요.',
-        'saju_desc2': '20년 경력의 명리학자가 풀이해주는 것처럼 상세하고 희망적인 메시지를 드립니다.',
+        'saju_desc2': '2수만 개의 데이터를 학습한 AI가 당신의 오늘을 정교하게 분석하여, 하루를 응원하는 따뜻한 조언과 행운의 메시지를 드립니다.',
         // Saju page specific keys for input labels
         'name_label': '이름:',
         'birthdate_label': '생년월일:',
@@ -88,7 +88,7 @@ const translations = {
         'day_unit': '일',
         'hour_unit': '시',
         'unknown_option': '모름', // For the "Unknown" option in birth hour select
-        'get_saju_reading': '오늘의 운세 풀이하기',
+        'get_saju_reading': '오늘의 운세 확인하기',
         'ai_reading_fortune': 'AI가 당신의 운세를 읽는 중입니다...',
         'saju_result_h2': '오늘의 운세 풀이',
         'saju_input_missing': '이름, 생년월일, 성별 정보를 모두 입력해주세요.',
@@ -114,7 +114,7 @@ const translations = {
         // Saju page specific keys for main title and descriptions
         'saju_title': 'AI Real-time Daily Fortune',
         'saju_desc1': 'Enter your name, birth date, and time to get your Daily Fortune analyzed by AI.',
-        'saju_desc2': 'We provide detailed and hopeful messages, as if explained by a 20-year experienced Fortune Teller.',
+        'saju_desc2': 'AI analyzes thousands of data points to provide precise daily insights, offering warm encouragement and lucky messages to support your day.',
         // Saju page specific keys for input labels
         'name_label': 'Name:',
         'birthdate_label': 'Birth Date:',
@@ -128,7 +128,7 @@ const translations = {
         'day_unit': 'Day',
         'hour_unit': 'Hour',
         'unknown_option': 'Unknown', // For the "Unknown" option in birth hour select
-        'get_saju_reading': 'Get My Fortune Reading',
+        'get_saju_reading': 'Check Today\'s Fortune',
         'ai_reading_fortune': 'AI is reading your fortune...',
         'saju_result_h2': 'Today\'s Daily Fortune',
         'saju_input_missing': 'Please enter all your name, birth date, and gender information for your Daily Fortune.',
