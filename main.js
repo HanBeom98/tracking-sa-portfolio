@@ -176,27 +176,19 @@ async function predict() {
     // Find the correct animal data based on the trimmed prediction class name
     const animalInfo = animalData[rawName];
 
-    // --- DEBUGGING LOGS START ---
-    console.log("DEBUG: currentLang is", currentLang);
-    console.log("DEBUG: Translation for 'your_animal_face_is' is", window.getTranslation(currentLang, 'your_animal_face_is'));
-    // --- DEBUGGING LOGS END ---
-
     // Update resultEmoji, predictionResult, and confidenceScore
     if (animalInfo) {
         resultEmoji.innerHTML = ''; // Removed as emoji is now part of predictionResult
         predictionResult.innerText = window.getTranslation(currentLang, 'your_animal_face_is') + " " + animalInfo.emoji;
-        console.log("DEBUG: predictionResult.innerText (if block) is", predictionResult.innerText); // Log the final assigned value
         setupShareButtons(animalInfo.kor, confidence); // Use Korean name for sharing
     } else {
         // Fallback if rawName is not found in animalData
         resultEmoji.innerHTML = ''; // Removed as emoji is now part of predictionResult
         predictionResult.innerText = window.getTranslation(currentLang, 'your_animal_face_is') + " " + '❓';
-        console.log("DEBUG: predictionResult.innerText (else block) is", predictionResult.innerText); // Log the final assigned value
         setupShareButtons(rawName, confidence); // Use rawName for sharing
     }
     
     confidenceScore.innerText = window.getTranslation(currentLang, 'ai_matching_rate').replace('{confidence}', confidence);
-    console.log("DEBUG: confidenceScore.innerText is", confidenceScore.innerText); // Log the final assigned value
 
     hideLoadingIndicator();
     showResultSection();
