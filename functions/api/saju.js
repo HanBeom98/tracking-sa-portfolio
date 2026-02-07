@@ -38,7 +38,7 @@ export async function onRequest(context) {
     Time of Birth: ${birthTime === 'unknown' ? 'Unknown' : birthTime + ':00'}
     Gender: ${gender === 'male' ? 'Male' : 'Female'}
     `;
-        }    } else { // Default to Korean
+        } else { // Default to Korean
         prompt = `오늘은 ${currentDate.year}년 ${currentDate.month}월 ${currentDate.day}일입니다. 반드시 이 날짜를 기준으로 운세를 풀이하세요.
 
 사용자의 이름, 생년월일시, 성별 정보가 주어지면, 오늘의 운세를 상담가처럼 친절하고 희망적인 어조로 자세히 설명하는 마크다운 글을 작성해 주세요. 다음 지침을 따르세요:
@@ -57,7 +57,6 @@ export async function onRequest(context) {
 태어난 시간: ${birthTime === 'unknown' ? '모름' : birthTime}
 성별: ${gender === 'male' ? '남성' : '여성'}
 `;
-    }
     }
 
     try {
