@@ -22,29 +22,30 @@ export async function onRequest(context) {
     if (language === 'en') {
         prompt = `Please provide the daily fortune reading in English. You are a friendly and hopeful fortune teller. Explain the user's daily fortune in markdown format, following these guidelines:
 
-- (Like a title, in large font) A one-line comprehensive summary of all fortunes.
-- The body content must include:
-  - Today's General Fortune: Describe the overall flow with warm advice to start the user's day positively.
-  - Wealth Fortune: Provide specific and practical guidance regarding financial opportunities or points to be careful about.
-  - Lucky Item: Suggest a special item to enhance the user's fortune.
+- Start the response with a one-line summary of the entire fortune, formatted as a markdown heading, e.g., "### 🌟 Today's One-Line Summary".
+- The body content must include the following markdown subheadings:
+  - ### 🍀 Today's General Fortune
+  - ### 💰 Wealth and Business
+  - ### ✨ Lucky Item
+- Each section's content should be explained specifically and clearly.
+- Write everything in a polite and warm tone, like a friendly consultant. Avoid excessive use of emojis.
 
-Write everything in a polite and warm tone, like a friendly consultant. Avoid excessive use of emojis.
 User Information:
 Name: ${name}
 Date of Birth: ${birthDate.year} / ${birthDate.month} / ${birthDate.day}
 Time of Birth: ${birthTime === 'unknown' ? 'Unknown' : birthTime + ':00'}
 Gender: ${gender === 'male' ? 'Male' : 'Female'}
-Begin today's fortune reading`;
-    } else { // Default to Korean
+Begin today's fortune reading`;    } else { // Default to Korean
         prompt = `사용자의 이름, 생년월일시, 성별 정보가 주어지면, 오늘의 운세를 상담가처럼 친절하고 희망적인 어조로 자세히 설명하는 마크다운 글을 작성해 주세요. 다음 지침을 따르세요:
 
-- (타이틀처럼 글자크게)모든 운의 종합적인 요약 1줄
-- 본문 내용은 다음을 포함해야 합니다:
-  - 오늘의 총운: 당신의 하루를 긍정적으로 시작할 수 있도록, 따뜻한 조언과 함께 전반적인 흐름을 설명해 줍니다.
-  - 재물운: 재정적인 기회나 주의할 점에 대해 구체적이고 실용적인 지침을 제공합니다.
-  - 행운의 아이템: 당신의 운세를 더욱 좋게 만들 특별한 아이템을 제안합니다.
+- 글의 시작은 항상 ### 🌟 오늘의 한 줄 요약 과 같은 형식으로 시작하여 전체 운세의 핵심 내용을 1줄 요약해 주십시오.
+- 본문 내용은 다음의 마크다운 소제목을 반드시 사용하여 구성해 주십시오:
+  - ### 🍀 오늘의 총운
+  - ### 💰 재물과 비즈니스
+  - ### ✨ 행운의 아이템
+- 각 섹션의 내용은 구체적이고 명확하게 설명해 주십시오.
+- 모든 내용은 존댓말을 사용하여 친근하고 따뜻한 상담가 톤으로 작성해 주십시오. 과도한 이모지 사용은 자제해 주세요.
 
-모든 내용은 존댓말을 사용하여 친근하고 따뜻한 상담가 톤으로 작성해 주십시오. 과도한 이모지 사용은 자제해 주세요.
 사용자 정보:
 이름: ${name}
 생년월일: ${birthDate.year}년 ${birthDate.month}월 ${birthDate.day}일

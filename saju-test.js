@@ -63,6 +63,20 @@ const updateSajuContent = () => {
 };
 
 
+// Function to format markdown content into HTML for fortune reading
+const formatFortuneContent = (markdownText) => {
+    let html = markdownText;
+
+    // Replace ### headings with h3 with class fortune-title
+    html = html.replace(/^###\s*(.*)$/gm, '<h3 class="fortune-title">$1</h3>');
+
+    // Replace --- with hr with class fortune-divider
+    html = html.replace(/^---\s*$/gm, '<hr class="fortune-divider">');
+
+    // Wrap the entire content
+    return `<div class="fortune-content-wrapper">${html}</div>`;
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     const userNameInput = document.getElementById('user-name');
     userNameInput.placeholder = window.getTranslation(window.currentLang, 'name_placeholder'); // Apply placeholder translation
@@ -132,7 +146,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
 
             if (response.ok) {
-                sajuReadingText.textContent = data.sajuReading;
+                const sajuReading = data.sajuReading;
+            sajuReadingText.innerHTML = formatFortuneContent(sajuReading);
+
             } else {
                 sajuReadingText.textContent = window.getTranslation(window.currentLang, 'saju_api_error') + (data.error || response.statusText);
             }
