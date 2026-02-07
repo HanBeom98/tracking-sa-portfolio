@@ -6,10 +6,10 @@ export async function onRequest(context) {
         return new Response('Method Not Allowed', { status: 405 });
     }
 
-    const { name, birthDate, birthTime, gender, language } = await request.json(); // Destructure language
+    const { name, birthDate, birthTime, gender, language, currentDate } = await request.json(); // Destructure language and currentDate
 
-    if (!name || !birthDate || !birthTime || !gender) {
-        return new Response(JSON.stringify({ error: '이름, 생년월일, 성별 정보를 모두 입력해주세요.' }), {
+    if (!name || !birthDate || !birthTime || !gender || !currentDate) {
+        return new Response(JSON.stringify({ error: '이름, 생년월일, 성별, 현재 날짜 정보를 모두 입력해주세요.' }), {
             status: 400,
             headers: { 'Content-Type': 'application/json' },
         });
@@ -19,26 +19,31 @@ export async function onRequest(context) {
     const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
     let prompt = '';
-    if (language === 'en') {
-        prompt = `Please provide the daily fortune reading in English. You are a friendly and hopeful fortune teller. Explain the user's daily fortune in markdown format, following these guidelines:
+        if (language === 'en') {
+            prompt = `Today is ${currentDate.year} / ${currentDate.month} / ${currentDate.day}. You must interpret the fortune based on this date.
+    
+    Please provide the daily fortune reading in English. You are a friendly and hopeful fortune teller. Explain the user's daily fortune in markdown format, following these guidelines:
+    
+    - Start the response with a one-line summary of the entire fortune, formatted as a markdown heading, e.g., "### 🌟 Today's Fortune (${currentDate.month}/${currentDate.day}) Summary".
+    - The body content must include the following markdown subheadings:
+      - ### 🍀 Today's General Fortune
+      - ### 💰 Wealth and Business
+      - ### ✨ Lucky Item
+    - Each section's content should be explained specifically and clearly.
+    - Write everything in a polite and warm tone, like a friendly consultant. Avoid excessive use of emojis.
+    
+    User Information:
+    Name: ${name}
+    Date of Birth: ${birthDate.year} / ${birthDate.month} / ${birthDate.day}
+    Time of Birth: ${birthTime === 'unknown' ? 'Unknown' : birthTime + ':00'}
+    Gender: ${gender === 'male' ? 'Male' : 'Female'}
+    `;
+        }    } else { // Default to Korean
+        prompt = `오늘은 ${currentDate.year}년 ${currentDate.month}월 ${currentDate.day}일입니다. 반드시 이 날짜를 기준으로 운세를 풀이하세요.
 
-- Start the response with a one-line summary of the entire fortune, formatted as a markdown heading, e.g., "### 🌟 Today's One-Line Summary".
-- The body content must include the following markdown subheadings:
-  - ### 🍀 Today's General Fortune
-  - ### 💰 Wealth and Business
-  - ### ✨ Lucky Item
-- Each section's content should be explained specifically and clearly.
-- Write everything in a polite and warm tone, like a friendly consultant. Avoid excessive use of emojis.
+사용자의 이름, 생년월일시, 성별 정보가 주어지면, 오늘의 운세를 상담가처럼 친절하고 희망적인 어조로 자세히 설명하는 마크다운 글을 작성해 주세요. 다음 지침을 따르세요:
 
-User Information:
-Name: ${name}
-Date of Birth: ${birthDate.year} / ${birthDate.month} / ${birthDate.day}
-Time of Birth: ${birthTime === 'unknown' ? 'Unknown' : birthTime + ':00'}
-Gender: ${gender === 'male' ? 'Male' : 'Female'}
-Begin today's fortune reading`;    } else { // Default to Korean
-        prompt = `사용자의 이름, 생년월일시, 성별 정보가 주어지면, 오늘의 운세를 상담가처럼 친절하고 희망적인 어조로 자세히 설명하는 마크다운 글을 작성해 주세요. 다음 지침을 따르세요:
-
-- 글의 시작은 항상 ### 🌟 오늘의 한 줄 요약 과 같은 형식으로 시작하여 전체 운세의 핵심 내용을 1줄 요약해 주십시오.
+- 글의 시작은 항상 ### 🌟 오늘의 운세 (${currentDate.month}월 ${currentDate.day}일) 한 줄 요약 과 같은 형식으로 시작하여 전체 운세의 핵심 내용을 1줄 요약해 주십시오.
 - 본문 내용은 다음의 마크다운 소제목을 반드시 사용하여 구성해 주십시오:
   - ### 🍀 오늘의 총운
   - ### 💰 재물과 비즈니스
@@ -51,7 +56,8 @@ Begin today's fortune reading`;    } else { // Default to Korean
 생년월일: ${birthDate.year}년 ${birthDate.month}월 ${birthDate.day}일
 태어난 시간: ${birthTime === 'unknown' ? '모름' : birthTime}
 성별: ${gender === 'male' ? '남성' : '여성'}
-오늘의 운세를 확인하는중`;
+`;
+    }
     }
 
     try {

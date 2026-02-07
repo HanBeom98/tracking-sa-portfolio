@@ -123,6 +123,12 @@ document.addEventListener('DOMContentLoaded', () => {
             getSajuButton.disabled = true; // Disable button to prevent duplicate clicks
         }
 
+        // Get current date
+        const today = new Date();
+        const currentYear = today.getFullYear();
+        const currentMonth = today.getMonth() + 1; // Month is 0-indexed
+        const currentDay = today.getDate();
+
         try {
             console.log('Current language for API request:', window.currentLang); // Debugging line
             const response = await fetch('/api/saju', { // Call the Cloudflare Function endpoint
@@ -139,7 +145,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     },
                     birthTime: birthHour,
                     gender,
-                    language: window.currentLang // Send language parameter
+                    language: window.currentLang, // Send language parameter
+                    currentDate: { // Send current date
+                        year: currentYear,
+                        month: currentMonth,
+                        day: currentDay
+                    }
                 })
             });
 
