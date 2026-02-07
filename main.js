@@ -48,7 +48,7 @@ async function init() {
 
     try {
         // Load the model
-        model = await tmImage.load(modelURL, metadataURL);
+        model = await window.tmImage.load(modelURL, metadataURL);
         maxPredictions = model.getTotalClasses();
 
         // Enable interactive elements after model is loaded
