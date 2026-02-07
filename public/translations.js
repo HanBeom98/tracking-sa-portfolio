@@ -102,7 +102,13 @@ const translations = {
         'hero_title': '매일 아침 업데이트되는 AI 인사이트 & 운세',
         'hero_subtitle': '간단한 테스트로 나의 AI 성향을 알아보세요!',
         'start_test_button': '무료 AI 오늘의 운세 확인하기',
-        'name_placeholder': '이름을 입력하세요' // New placeholder key
+        'name_placeholder': '이름을 입력하세요',
+        // New keys for animal face test page
+        'select_gender': '성별 선택:',
+        'gender_male': '남성',
+        'gender_female': '여성',
+        'download_result': '결과 다운로드',
+        'your_animal_face_is': '당신과 닮은 동물은'
     },
     'en': {
         'news_home': 'News Home',
@@ -218,5 +224,11 @@ const translations = {
         'hero_title': 'Daily AI Insights & Fortunes Updated Every Morning',
         'hero_subtitle': 'Find out your AI personality with a simple test!',
         'start_test_button': 'Get Your Free AI Fortune',
-        'name_placeholder': 'Enter your name' // New placeholder key
+        'name_placeholder': 'Enter your name',
+        // New keys for animal face test page
+        'select_gender': 'Select Gender:',
+        'gender_male': 'Male',
+        'gender_female': 'Female',
+        'download_result': 'Download Result',
+        'your_animal_face_is': 'Your animal is'
             }};

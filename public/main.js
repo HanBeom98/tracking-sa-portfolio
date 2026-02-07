@@ -179,12 +179,12 @@ async function predict() {
     // Update resultEmoji, predictionResult, and confidenceScore
     if (animalInfo) {
         resultEmoji.innerHTML = animalInfo.emoji;
-        predictionResult.innerText = "당신과 가장 닮은 동물은 '" + animalInfo.kor + "' 입니다!";
+        predictionResult.innerText = window.getTranslation(currentLang, 'your_animal_face_is') + " '" + animalInfo.kor + "' 입니다!";
         setupShareButtons(animalInfo.kor, confidence); // Use Korean name for sharing
     } else {
         // Fallback if rawName is not found in animalData
         resultEmoji.innerHTML = '❓'; // Unknown emoji
-        predictionResult.innerText = "당신과 가장 닮은 동물은 '" + rawName + "' 입니다!";
+        predictionResult.innerText = window.getTranslation(currentLang, 'your_animal_face_is') + " '" + rawName + "' 입니다!";
         setupShareButtons(rawName, confidence); // Use rawName for sharing
     }
     
