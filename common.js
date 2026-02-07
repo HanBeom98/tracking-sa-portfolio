@@ -17,7 +17,7 @@ window.applyTranslations = function(lang) {
         const key = element.getAttribute('data-i18n');
         // Only update if a translation is found, otherwise keep original HTML text
         if (key && translations[lang] && translations[lang][key]) {
-            element.textContent = translations[lang][key];
+            element.innerHTML = translations[lang][key];
         }
     });
 
