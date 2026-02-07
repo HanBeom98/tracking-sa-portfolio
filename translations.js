@@ -99,9 +99,9 @@ const translations = {
         'select_image_first': '이미지를 먼저 선택해주세요.',
         'no_image_to_download_alert': '다운로드할 이미지가 없습니다.',
         'ai_tendency_test': 'AI 성향 테스트',
-        'hero_title': '나와 가장 닮은 인공지능 모델은? 🤖',
+        'hero_title': '매일 아침 업데이트되는 AI 인사이트 & 운세',
         'hero_subtitle': '간단한 테스트로 나의 AI 성향을 알아보세요!',
-        'start_test_button': '테스트 시작하기',
+        'start_test_button': '무료 AI 오늘의 운세 확인하기',
         'name_placeholder': '이름을 입력하세요' // New placeholder key
     },
     'en': {
@@ -226,8 +226,8 @@ const translations = {
         'select_image_first': 'Please select an image first.',
         'no_image_to_download_alert': 'No image available for download.',
         'ai_tendency_test': 'AI Tendency Test',
-        'hero_title': 'Which AI Model Are You Most Like? 🤖',
+        'hero_title': 'Daily AI Insights & Fortunes Updated Every Morning',
         'hero_subtitle': 'Find out your AI personality with a simple test!',
-        'start_test_button': 'Start Test',
+        'start_test_button': 'Get Your Free AI Fortune',
         'name_placeholder': 'Enter your name' // New placeholder key
             }};
