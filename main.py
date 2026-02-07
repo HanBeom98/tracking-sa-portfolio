@@ -110,6 +110,31 @@ def clean_filename(title):
     title = re.sub(r'[^\w\s-]', '', title).strip().lower()
     return re.sub(r'[-\s]+', '-', title)
 
+DEFAULT_OG_IMAGE_URL = "https://tracking-sa.pages.dev/logo.svg" # Placeholder for social sharing image
+
+def extract_description_from_md(md_content):
+    # Try to find a specific summary section or the first paragraph
+    # Look for "뉴스 요약" or "## 뉴스 요약" and extract content until next heading or end of content
+    summary_match = re.search(r'(?:##\s*뉴스 요약\s*\n\n|\n\n##\s*뉴스 요약\s*\n\n)(.*?)(?=\n\n##|\Z)', md_content, re.DOTALL)
+    if summary_match:
+        description = summary_match.group(1).strip()
+        # Clean up markdown formatting like bullet points or bold text
+        description = re.sub(r'[-*]\s+', '', description) # Remove bullet points
+        description = re.sub(r'\*\*(.*?)\*\*', r'\1', description) # Remove bold markdown
+        first_sentence = re.split(r'[.?!]', description)[0]
+        return first_sentence[:150].strip() + "..." if len(first_sentence) > 150 else first_sentence.strip()
+
+    # Fallback to the first paragraph if no explicit summary
+    first_paragraph_match = re.search(r'^\s*([^\n#].*?)(?=\n\n|\Z)', md_content, re.DOTALL)
+    if first_paragraph_match:
+        description = first_paragraph_match.group(1).strip()
+        description = re.sub(r'[-*]\s+', '', description) # Remove bullet points
+        description = re.sub(r'\*\*(.*?)\*\*', r'\1', description) # Remove bold markdown
+        first_sentence = re.split(r'[.?!]', description)[0]
+        return first_sentence[:150].strip() + "..." if len(first_sentence) > 150 else first_sentence.strip()
+    
+    return "" # Return empty string if no description found
+
 def process_html_file_for_common_elements(filepath):
     try:
         with open(filepath, "r", encoding="utf-8") as f:
@@ -169,7 +194,13 @@ def _generate_sitemap(articles_info):
     with open(SITEMAP_PATH, "w", encoding="utf-8") as f:
         f.write(sitemap_content)
 
-def generate_article_html(md_content, title, date_str, output_path, hashtags_html=""):
+def generate_article_html(md_content, title, date_str, output_path, hashtags_html="", description="", image_url=""):
+    # Default values for description and image_url if not provided
+    if not description:
+        description = extract_description_from_md(md_content) or f"{title}에 대한 최신 뉴스입니다."
+    if not image_url:
+        image_url = DEFAULT_OG_IMAGE_URL # 이 상수는 나중에 전역적으로 정의됨
+
     html_template = f"""
 <!DOCTYPE html>
 <html lang="ko">
@@ -177,6 +208,20 @@ def generate_article_html(md_content, title, date_str, output_path, hashtags_htm
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{title} - 뉴스</title>
+    <meta name="description" content="{description}">
+
+    <!-- Open Graph Tags -->
+    <meta property="og:title" content="{title} - 뉴스">
+    <meta property="og:description" content="{description}">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://tracking-sa.pages.dev/{os.path.basename(output_path)}">
+    <meta property="og:image" content="{image_url}">
+
+    <!-- Twitter Card Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{title} - 뉴스">
+    <meta name="twitter:description" content="{description}">
+    <meta name="twitter:image" content="{image_url}">
 </head>
 <body>
     <main class="article-detail-main">
@@ -201,6 +246,36 @@ def generate_article_html(md_content, title, date_str, output_path, hashtags_htm
 def generate_index_html(articles_meta):
     with open("index.html", "r", encoding="utf-8") as f:
         base_html = f.read()
+
+    # Define static meta tags for the homepage
+    homepage_description = "매일 업데이트되는 최신 AI 관련 뉴스와 심층 분석 기사를 제공합니다. AI 기술 트렌드, 스타트업 소식, 산업 동향을 한눈에 확인하세요."
+    homepage_title = "AI 뉴스 - 최신 AI 기술 동향 및 분석"
+    homepage_image = DEFAULT_OG_IMAGE_URL
+    homepage_url = "https://tracking-sa.pages.dev/index.html"
+
+    # Inject static meta tags for the homepage
+    meta_tags_for_homepage = f"""
+    <meta name="description" content="{homepage_description}">
+
+    <!-- Open Graph Tags for Homepage -->
+    <meta property="og:title" content="{homepage_title}">
+    <meta property="og:description" content="{homepage_description}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{homepage_url}">
+    <meta property="og:image" content="{homepage_image}">
+
+    <!-- Twitter Card Tags for Homepage -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{homepage_title}">
+    <meta name="twitter:description" content="{homepage_description}">
+    <meta name="twitter:image" content="{homepage_image}">
+    """
+    
+    # Insert these meta tags before the injection comment
+    base_html = base_html.replace(
+        "    <!-- CSS and other head elements will be injected by main.py -->",
+        f"{meta_tags_for_homepage}\n    <!-- CSS and other head elements will be injected by main.py -->"
+    )
 
     hero_card_html = ""
     grid_news_html = ""
@@ -407,7 +482,8 @@ def save_post_and_generate_html(content):
     with open(md_path, "w", encoding="utf-8") as f: f.write(processed_content) # Use processed_content
     
     html_filename = f"{today}-{cleaned}.html"
-    generate_article_html(processed_content, title, today, os.path.join(PUBLIC_DIR, html_filename), hashtags_html) # Use processed_content
+    description_for_article = extract_description_from_md(processed_content)
+    generate_article_html(processed_content, title, today, os.path.join(PUBLIC_DIR, html_filename), hashtags_html, description=description_for_article)
     return html_filename, title, today
 
 def generate_public_site():
@@ -450,7 +526,8 @@ def generate_public_site():
             # Ensure the date used for the URL is the one extracted from the filename
             url = f"{date_str}-{clean_filename(title)}.html"
             articles_meta.append({'title': title, 'date': date_str, 'url': url})
-            generate_article_html(processed_content, title, date_str, os.path.join(PUBLIC_DIR, url), hashtags_html) # Use processed_content
+            description_for_article = extract_description_from_md(processed_content)
+            generate_article_html(processed_content, title, date_str, os.path.join(PUBLIC_DIR, url), hashtags_html, description=description_for_article)
     generate_index_html(articles_meta)
     _generate_sitemap(articles_meta)
 
