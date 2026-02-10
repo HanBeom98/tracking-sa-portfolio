@@ -28,7 +28,7 @@ jobs:
 
       - name: Create ads.txt
         run: |
-          echo "google.com, pub-7263630893992216, DIRECT, f08c47fec0942fa0" > ads.txt
+          echo "google.com, pub-7263630893992216, DIRECT, f08c47fec0942fa0" > public/ads.txt
 
       - name: Show posts directory before script runs
         run: |
