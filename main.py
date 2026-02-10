@@ -380,6 +380,13 @@ def copy_static_assets():
             if item.endswith('.html'):
                 process_html_file_for_common_elements(os.path.join(PUBLIC_DIR, item))
 
+def create_ads_txt():
+    ads_txt_content = f"google.com, {ADSENSE_CLIENT_ID}, DIRECT, f08c47fec0942fa0"
+    ads_txt_path = os.path.join(PUBLIC_DIR, "ads.txt")
+    with open(ads_txt_path, "w", encoding="utf-8") as f:
+        f.write(ads_txt_content)
+    print(f"✅ Created {ads_txt_path}")
+
 def get_processed_articles():
     if not os.path.exists(PROCESSED_ARTICLES_LOG): return set()
     with open(PROCESSED_ARTICLES_LOG, "r", encoding="utf-8") as f:
@@ -514,6 +521,7 @@ def generate_public_site():
     if os.path.exists(PUBLIC_DIR): shutil.rmtree(PUBLIC_DIR)
     os.makedirs(PUBLIC_DIR, exist_ok=True)
     copy_static_assets()
+    create_ads_txt() # Call the new function here
     articles_meta = []
     if os.path.exists(NEWS_POSTS_DIR):
         # Collect all markdown files with their dates and modification times
