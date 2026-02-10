@@ -12,7 +12,7 @@ import time
 PUBLIC_DIR = "public"
 NEWS_POSTS_DIR = "posts" 
 PROCESSED_ARTICLES_LOG = "processed_articles.log" 
-ADSENSE_CLIENT_ID = "ca-pub-7263630893992216" 
+ADSENSE_CLIENT_ID = "pub-7263630893992216"
 SITEMAP_PATH = os.path.join(PUBLIC_DIR, "sitemap.xml")
 BASE_URL = os.getenv("BASE_URL", "https://tracking-sa.pages.dev/") # Added configurable base URL
 
