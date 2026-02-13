@@ -14,7 +14,7 @@ NEWS_POSTS_DIR = "posts"
 PROCESSED_ARTICLES_LOG = "processed_articles.log" 
 ADSENSE_CLIENT_ID = "pub-7263630893992216"
 SITEMAP_PATH = os.path.join(PUBLIC_DIR, "sitemap.xml")
-BASE_URL = os.getenv("BASE_URL", "https://tracking-sa.pages.dev/") # Added configurable base URL
+BASE_URL = os.getenv("BASE_URL", "https://trackingsa.com/")
 
 STATIC_PAGES_FOR_SITEMAP = [
     "about.html",
@@ -167,6 +167,27 @@ def process_html_file_for_common_elements(filepath):
         content = content.replace('</head>', f'{COMMON_HEAD_SCRIPTS}\n</head>')
         content = content.replace('<body>', f'<body>\n{COMMON_BODY_INJECTIONS}')
         content = content.replace('</body>', f'{COMMON_FOOTER}\n</body>')
+
+        # --- New: Replace hardcoded old URLs in meta tags ---
+        content = re.sub(
+            r'(<meta property="og:url" content="https://)tracking-sa.pages.dev(/.*?">)',
+            r'\1trackingsa.com\2',
+            content,
+            flags=re.IGNORECASE
+        )
+        content = re.sub(
+            r'(<meta property="og:image" content="https://)tracking-sa.pages.dev(/.*?">)',
+            r'\1trackingsa.com\2',
+            content,
+            flags=re.IGNORECASE
+        )
+        content = re.sub(
+            r'(<meta name="twitter:image" content="https://)tracking-sa.pages.dev(/.*?">)',
+            r'\1trackingsa.com\2',
+            content,
+            flags=re.IGNORECASE
+        )
+        # --- End New ---
 
         # Conditionally inject main.js only for animal_face_test.html
         if "animal_face_test.html" in filepath:
