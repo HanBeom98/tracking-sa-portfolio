@@ -301,7 +301,7 @@ def generate_index_html(articles_on_page, current_page, total_pages):
     # Canonical URL should point to the first page for all paginated series
     homepage_url = f"{BASE_URL}index.html"
 
-    meta_tags_for_homepage = f\"\"\"
+    meta_tags_for_homepage = f"""
     <meta name="description" content="{homepage_description}">
     <meta property="og:title" content="{homepage_title}">
     <meta property="og:description" content="{homepage_description}">
@@ -312,7 +312,7 @@ def generate_index_html(articles_on_page, current_page, total_pages):
     <meta name="twitter:title" content="{homepage_title}">
     <meta name="twitter:description" content="{homepage_description}">
     <meta name="twitter:image" content="{homepage_image}">
-    \"\"\"
+    """
     
     base_html = base_html.replace(
         "    <!-- CSS and other head elements will be injected by main.py -->",
@@ -326,13 +326,13 @@ def generate_index_html(articles_on_page, current_page, total_pages):
     if current_page == 1 and articles_on_page:
         hero_article = articles_on_page[0]
         grid_articles = articles_on_page[1:]  # The rest go into the grid
-        hero_card_html = f\"\"\"
+        hero_card_html = f"""
             <h1 class="section-title" data-i18n="latest_news_hero_title">최신 뉴스</h1>
             <article class="hero-card">
                 <h2 class="hero-card-title"><a href="/{hero_article['url']}" class="hero-card-link">{hero_article['title']}</a></h2>
                 <p class="hero-card-date">{hero_article['date']}</p>
             </article>
-        \"\"\"
+        """
 
     grid_news_html = ""
     if not grid_articles:
@@ -341,12 +341,12 @@ def generate_index_html(articles_on_page, current_page, total_pages):
     else:
         grid_news_items = ""
         for article in grid_articles:
-            grid_news_items += f\"\"\"
+            grid_news_items += f"""
             <article class="news-card">
                 <h2 class="news-card-title"><a href="/{article['url']}" class="news-card-link">{article['title']}</a></h2>
                 <p class="news-card-date">{article['date']}</p>
             </article>
-            \"\"\"
+            """
         grid_news_html = f'<div class="news-grid">{grid_news_items}</div>'
 
     # Pagination HTML
@@ -363,16 +363,16 @@ def generate_index_html(articles_on_page, current_page, total_pages):
         pagination_html += f'<a href="/{next_page_url}" class="pagination-button" data-i18n="next_button">다음</a>'
     pagination_html += '</div>'
 
-    news_section_content = f\"\"\"
+    news_section_content = f"""
         {hero_card_html}
         <h1 class="section-title" data-i18n="all_news_grid_title">모든 뉴스</h1>
         {grid_news_html}
         {pagination_html if total_pages > 1 else ''}
-    \"\"\"
+    """
     
     updated_html = base_html.replace(
         "<!-- News content will be injected here by the Python script -->",
-        f\"\"\"
+        f"""
         <section class="hero-banner">
             <h2 data-i18n="hero_title"></h2>
             <button class="action-button" onclick="window.location.href='/saju-test.html'" data-i18n="start_test_button"></button>
@@ -380,7 +380,7 @@ def generate_index_html(articles_on_page, current_page, total_pages):
         <section class="news-section-main">
             {news_section_content}
         </section>
-        \"\"\"
+        """
     )
     
     output_filename = "index.html" if current_page == 1 else f"page-{current_page}.html"
