@@ -445,6 +445,7 @@ footer {
     font-weight: bold;
     color: #0052cc;
     margin-bottom: 15px;
+    text-align: center;
 }
 
 .result-description {
@@ -915,6 +916,11 @@ body.dark-mode .answer-button.selected {
     border-color: #60a5fa;
 }
 
+body.dark-mode .answer-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
 body.dark-mode .ai-result .result-name {
     color: #60a5fa;
 }
@@ -1120,6 +1126,14 @@ body.dark-mode .dropdown-content a {
 body.dark-mode .dropdown-content a:hover {
     background-color: #2d3748;
     color: #eeeeee;
+}
+
+body.dark-mode .dropdown-content .lang-button {
+    background-color: #3b82f6;
+}
+
+body.dark-mode .dropdown-content .lang-button.active {
+    background-color: #60a5fa;
 }
 
 /* Inquiry Form Section Styling */
@@ -1478,17 +1492,6 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
         overflow: hidden;
     }
 
-    .overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.5);
-        z-index: 999;
-    }
-
     #slide-out-menu nav ul {
         flex-direction: column;
         width: 100%;
@@ -1748,4 +1751,68 @@ body.dark-mode .fortune-content-wrapper .fortune-title {
 
 body.dark-mode .fortune-content-wrapper .fortune-divider {
     background-image: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0));
+}
+/* Pagination Styles */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 30px;
+    gap: 10px; /* Spacing between buttons */
+}
+
+.pagination-button, .page-number {
+    background-color: #0052cc;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-weight: bold;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex; /* For alignment of text/icon if any */
+    align-items: center;
+    justify-content: center;
+}
+
+.pagination-button:hover {
+    background-color: #1e40af; /* Slightly darker blue */
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.page-number.current {
+    background-color: white;
+    color: #0052cc;
+    cursor: default;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.page-number.current:hover {
+    background-color: white; /* No change on hover for current page */
+    color: #0052cc;
+    transform: none; /* No lift effect */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Keep same shadow */
+}
+
+/* Dark mode for Pagination */
+body.dark-mode .pagination-button,
+body.dark-mode .page-number {
+    background-color: #3b82f6; /* Lighter blue for dark mode */
+    color: white;
+}
+
+body.dark-mode .pagination-button:hover {
+    background-color: #60a5fa; /* Slightly lighter blue on hover in dark mode */
+}
+
+body.dark-mode .page-number.current {
+    background-color: #1a202c; /* Dark background for current in dark mode */
+    color: #60a5fa; /* Blue text for current in dark mode */
+}
+
+body.dark-mode .page-number.current:hover {
+    background-color: #1a202c; /* No change on hover for current page in dark mode */
+    color: #60a5fa;
 }
