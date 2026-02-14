@@ -54,7 +54,7 @@ COMMON_HEAD_SCRIPTS = f"""<!-- Google tag (gtag.js) -->
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="/style.css">
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg">
     <script src="/firebase-config.js"></script>
     <script src="/translations.js"></script>
     <script src="/common.js"></script>
