@@ -1,0 +1,179 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="news_home">뉴스 홈</title>
+
+    <meta name="description" content="매일 업데이트되는 최신 AI 관련 뉴스와 심층 분석 기사를 제공합니다. AI 기술 트렌드, 스타트업 소식, 산업 동향을 한눈에 확인하세요.">
+    <meta property="og:title" content="AI 뉴스 - 최신 AI 기술 동향 및 분석 (페이지 8)">
+    <meta property="og:description" content="매일 업데이트되는 최신 AI 관련 뉴스와 심층 분석 기사를 제공합니다. AI 기술 트렌드, 스타트업 소식, 산업 동향을 한눈에 확인하세요.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://trackingsa.com/index.html">
+    <meta property="og:image" content="https://trackingsa.com/logo.svg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="AI 뉴스 - 최신 AI 기술 동향 및 분석 (페이지 8)">
+    <meta name="twitter:description" content="매일 업데이트되는 최신 AI 관련 뉴스와 심층 분석 기사를 제공합니다. AI 기술 트렌드, 스타트업 소식, 산업 동향을 한눈에 확인하세요.">
+    <meta name="twitter:image" content="https://trackingsa.com/logo.svg">
+    
+    <!-- CSS and other head elements will be injected by main.py -->
+<!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-TGD3WRNKPZ');
+    </script>
+    <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=pub-7263630893992216" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "vb9q33ggpa");
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+    <script src="/firebase-config.js"></script>
+    <script src="/translations.js"></script>
+    <script src="/common.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+
+</head>
+<body>
+
+<header>
+    <a href="/index.html" class="site-logo-link">
+        <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="site-logo">
+            <circle cx="50" cy="50" r="48" stroke="white" stroke-width="4" fill="transparent"/>
+            <path d="M25 70L40 55L50 65L75 35" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="70" cy="35" r="12" stroke="white" stroke-width="6" fill="#0052cc"/>
+            <rect x="78" y="43" width="15" height="6" rx="3" transform="rotate(45 78 43)" fill="white"/>
+        </svg>
+    </a>
+    <button class="hamburger-menu" id="mobile-menu-toggle" aria-label="Open menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+    <div class="desktop-menu-container" id="slide-out-menu"> <!-- This container now serves as the slide-out for mobile -->
+        <nav>
+            <ul>
+                <li><a href="/index.html" data-i18n="news_home">홈</a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropbtn" data-i18n="menu_test">테스트</a>
+                    <div class="dropdown-content">
+                        <a href="/animal_face_test.html" data-i18n="animal_face_test">동물상 테스트</a>
+                        <a href="/ai-test.html" data-i18n="ai_tendency_test">AI 성향 테스트</a>
+                        <a href="/saju-test.html" data-i18n="saju_test">AI 사주 테스트</a>
+                    </div>
+                </li>
+                <li><a href="/inquiry.html" data-i18n="partnership_inquiry">파트너십 문의</a></li>
+                <li><a href="/about.html" data-i18n="about_us">회사 소개</a></li>
+                <li><a href="/contact.html" data-i18n="contact">문의</a></li>
+                <li><a href="/privacy-policy.html" data-i18n="privacy_policy">개인정보처리방침</a></li>
+            </ul>
+        </nav>
+        <div class="utility-controls">
+            <button id="color-change">🌙</button>
+            <div id="language-switcher"></div>
+        </div>
+    </div>
+</header>
+
+    <div style="max-width: 1200px; margin: 20px auto; background-color: white; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); padding: 10px 20px; box-sizing: border-box;">
+        <script type="module" src="https://widgets.tradingview-widget.com/w/kr/tv-ticker-tape.js"></script>
+        <tv-ticker-tape symbols='FOREXCOM:SPXUSD,FOREXCOM:NSXUSD,FOREXCOM:DJI,FX:EURUSD,BITSTAMP:BTCUSD,BITSTAMP:ETHUSD,CMCMARKETS:GOLD'></tv-ticker-tape>
+    </div>
+
+    <main>
+        
+        <section class="hero-banner">
+            <h2 data-i18n="hero_title"></h2>
+            <button class="action-button" onclick="window.location.href='/saju-test.html'" data-i18n="start_test_button"></button>
+        </section>
+        <section class="news-section-main">
+            
+        
+        <h1 class="section-title" data-i18n="all_news_grid_title">모든 뉴스</h1>
+        <div class="news-grid">
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-06-ai-변호사-opus-46-법률-시장-판도-변화-변호사-대체-가능성-및-미래-전망-심층-분석.html" class="news-card-link">AI 변호사 Opus 4.6, 법률 시장 판도 변화? 변호사 대체 가능성 및 미래 전망 심층 분석</a></h2>
+                <p class="news-card-date">2026-02-06</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-06-레딧reddit-ai-검색-도입-맞춤-정보-찾고-커뮤니티-추천-활용해-궁금증-해결하는-방법.html" class="news-card-link">레딧(Reddit) AI 검색 도입! 맞춤 정보 찾고, 커뮤니티 추천 활용해 궁금증 해결하는 방법</a></h2>
+                <p class="news-card-date">2026-02-06</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-06-워드프레스-사이트-분석-claude로-10분-만에-끝내기-트래픽-급상승-비법-내부-지표-활용-완벽-가이드.html" class="news-card-link">워드프레스 사이트 분석, Claude로 10분 만에 끝내기! 트래픽 급상승 비법 & 내부 지표 활용 완벽 가이드</a></h2>
+                <p class="news-card-date">2026-02-06</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-05-틱톡-스타일-미니-앱-플랫폼-gizmo-지루한-일상-탈출-나만의-앱-제작-수익-창출-방법-완벽-가이드.html" class="news-card-link">틱톡 스타일 미니 앱 플랫폼 'Gizmo', 지루한 일상 탈출? 나만의 앱 제작 & 수익 창출 방법 완벽 가이드</a></h2>
+                <p class="news-card-date">2026-02-05</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-05-어도비-애니메이트-서비스-종료-철회-왜-유지보수-모드-전환-배경-및-애니메이션-제작자를-위한-향후-업데이트-대안-완벽-분석.html" class="news-card-link">어도비 애니메이트 서비스 종료 철회! 왜? 유지보수 모드 전환 배경 및 애니메이션 제작자를 위한 향후 업데이트 & 대안 완벽 분석</a></h2>
+                <p class="news-card-date">2026-02-05</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-05-어도비-애니메이트-cc-종료-철회-대체-프로그램-찾아-방황하던-애니메이터-유지-모드-전환-배경과-향후-전망은.html" class="news-card-link">어도비 애니메이트 CC 종료 철회! 대체 프로그램 찾아 방황하던 애니메이터, 유지 모드 전환 배경과 향후 전망은?</a></h2>
+                <p class="news-card-date">2026-02-05</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-05-어도비-애니메이트-서비스-종료-번복-갑작스런-종료-논란-잠재우고-유지-결정-애니메이터들은-안도-향후-업데이트-계획-및-대체-프로그램-비교-분석.html" class="news-card-link">어도비 애니메이트 서비스 종료 번복! 갑작스런 종료 논란 잠재우고 유지 결정, 애니메이터들은 안도! 향후 업데이트 계획 및 대체 프로그램 비교 분석</a></h2>
+                <p class="news-card-date">2026-02-05</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-05-어도비-애니메이트-종료-위기-극복-유지보수-전환-배경과-애니메이션-제작자를-위한-최적-대안-프로그램-비교-분석.html" class="news-card-link">어도비 애니메이트 종료 위기 극복! 유지보수 전환 배경과 애니메이션 제작자를 위한 최적 대안 프로그램 비교 분석</a></h2>
+                <p class="news-card-date">2026-02-05</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-05-어도비-애니메이트-서비스-종료-번복-갑작스런-결정-철회-이유와-유지-모드-전환-의미-대안-프로그램-비교.html" class="news-card-link">어도비 애니메이트 서비스 종료 번복! 갑작스런 결정 철회 이유와 유지 모드 전환 의미 & 대안 프로그램 비교</a></h2>
+                <p class="news-card-date">2026-02-05</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-05-어도비-애니메이트-서비스-종료-철회-갑작스러운-종료-논란-이유는-유지보수-모드-전환-배경-분석-및-애니메이트-대체-프로그램-추천-사용자-대응-가이드.html" class="news-card-link">어도비 애니메이트 서비스 종료 철회! 갑작스러운 종료 논란 이유는? 유지보수 모드 전환 배경 분석 및 애니메이트 대체 프로그램 추천 & 사용자 대응 가이드</a></h2>
+                <p class="news-card-date">2026-02-05</p>
+            </article>
+            </div>
+        <div class="pagination"><a href="/page-7.html" class="pagination-button" data-i18n="prev_button">이전</a><span class="page-number">8 / 15</span><a href="/page-9.html" class="pagination-button" data-i18n="next_button">다음</a></div>
+    
+        </section>
+        
+    </main>
+
+
+    <footer>
+        <p data-i18n="footer_copyright"></p>
+        <p>
+            <a href="/about.html" data-i18n="about_us">회사 소개</a> |
+            <a href="/contact.html" data-i18n="contact">문의</a> |
+            <a href="/privacy-policy.html" data-i18n="privacy_policy">개인정보처리방침</a> |
+            <a href="/sitemap.xml" data-i18n="sitemap">사이트맵</a> |
+            <a href="/rss.xml">RSS Feed</a>
+        </p>
+    </footer>
+
+</body>
+</html>
