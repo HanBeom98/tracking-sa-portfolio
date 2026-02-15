@@ -1,27 +1,40 @@
+function addCORSHeaders(response) {
+    response.headers.set('Access-Control-Allow-Origin', 'https://trackingsa.com');
+    response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+    response.headers.set('Access-Control-Max-Age', '86400');
+    return response;
+}
+
 // /functions/api/saju.js
 export async function onRequest(context) {
+    if (request.method === 'OPTIONS') {
+        return addCORSHeaders(new Response(null, { status: 204 }));
+    }
+
     const { request, env } = context;
 
     // Early exit if API key is not configured
     if (!env.GEMINI_API_KEY) {
         console.error('CRITICAL: GEMINI_API_KEY environment variable not set.');
-        return new Response(JSON.stringify({ error: 'Server configuration error: API key is not set.' }), {
+        return addCORSHeaders(new Response(JSON.stringify({ error: 'Server configuration error: API key is not set.' }), {
             status: 500,
             headers: { 'Content-Type': 'application/json' },
-        });
+        }));
     }
 
     if (request.method !== 'POST') {
-        return new Response('Method Not Allowed', { status: 405 });
+        return addCORSHeaders(new Response('Method Not Allowed', { status: 405 }));
     }
 
     const { name, birthDate, birthTime, gender, language, currentDate } = await request.json(); // Destructure language and currentDate
 
     if (!name || !birthDate || !birthTime || !gender || !currentDate) {
-        return new Response(JSON.stringify({ error: '이름, 생년월일, 성별, 현재 날짜 정보를 모두 입력해주세요.' }), {
+        return addCORSHeaders(new Response(JSON.stringify({ error: '이름, 생년월일, 성별, 현재 날짜 정보를 모두 입력해주세요.' }), {
             status: 400,
             headers: { 'Content-Type': 'application/json' },
-        });
+        }));
+    }
     }
 
     const GEMINI_API_KEY = env.GEMINI_API_KEY; // Access API key from Cloudflare environment variables
@@ -86,24 +99,24 @@ export async function onRequest(context) {
 
         if (geminiResponse.ok && geminiData.candidates && geminiData.candidates.length > 0) {
             const sajuReading = geminiData.candidates[0].content.parts[0].text;
-            return new Response(JSON.stringify({ sajuReading }), {
+            return addCORSHeaders(new Response(JSON.stringify({ sajuReading }), {
                 headers: { 'Content-Type': 'application/json' },
                 status: 200
-            });
+            }));
         } else {
             console.error('Gemini API Error:', geminiData);
             const errorMessage = geminiData.error?.message || '사주 풀이를 가져오는 데 실패했습니다. 잠시 후 다시 시도해주세요.';
-            return new Response(JSON.stringify({ error: errorMessage }), {
+            return addCORSHeaders(new Response(JSON.stringify({ error: errorMessage }), {
                 headers: { 'Content-Type': 'application/json' },
                 status: geminiResponse.status || 500
-            });
+            }));
         }
 
     } catch (error) {
         console.error('Function execution error:', error);
-        return new Response(JSON.stringify({ error: `서버 내부 오류가 발생했습니다: ${error.message}` }), {
+        return addCORSHeaders(new Response(JSON.stringify({ error: `서버 내부 오류가 발생했습니다: ${error.message}` }), {
             headers: { 'Content-Type': 'application/json' },
             status: 500
-        });
+        }));
     }
 }
