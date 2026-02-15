@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     },
                     birthTime: birthHour,
                     gender,
-                    language: window.currentLang, // Send language parameter
+                    language: localStorage.getItem('lang') || 'ko', // Send language parameter
                     currentDate: { // Send current date
                         year: currentYear,
                         month: currentMonth,
