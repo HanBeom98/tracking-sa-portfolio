@@ -8,7 +8,7 @@ function addCORSHeaders(response) {
 
 export async function onRequest(context) {
     // 1. 에러 방지를 위해 변수 선언을 맨 위로 고정
-    const { request, env } = context; 
+    const { request, env } = context || {};
 
     if (request.method === 'OPTIONS') {
         return addCORSHeaders(new Response(null, { status: 204 }));
