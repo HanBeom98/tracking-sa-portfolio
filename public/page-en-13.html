@@ -1,0 +1,179 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="news_home">뉴스 홈</title>
+
+    <meta name="description" content="The latest AI news and in-depth analysis, updated daily. Check AI technology trends, startup news, and industry trends at a glance.">
+    <meta property="og:title" content="AI News - Latest AI Technology Trends and Analysis (Page 13)">
+    <meta property="og:description" content="The latest AI news and in-depth analysis, updated daily. Check AI technology trends, startup news, and industry trends at a glance.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://trackingsa.com/index-en.html">
+    <meta property="og:image" content="https://trackingsa.com/logo.svg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="AI News - Latest AI Technology Trends and Analysis (Page 13)">
+    <meta name="twitter:description" content="The latest AI news and in-depth analysis, updated daily. Check AI technology trends, startup news, and industry trends at a glance.">
+    <meta name="twitter:image" content="https://trackingsa.com/logo.svg">
+    
+    <!-- CSS and other head elements will be injected by main.py -->
+<!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-TGD3WRNKPZ');
+    </script>
+    <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=pub-7263630893992216" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "vb9q33ggpa");
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+    <script src="/firebase-config.js"></script>
+    <script src="/translations.js"></script>
+    <script src="/common.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+
+</head>
+<body>
+
+<header>
+    <a href="/index.html" class="site-logo-link">
+        <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="site-logo">
+            <circle cx="50" cy="50" r="48" stroke="white" stroke-width="4" fill="transparent"/>
+            <path d="M25 70L40 55L50 65L75 35" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="70" cy="35" r="12" stroke="white" stroke-width="6" fill="#0052cc"/>
+            <rect x="78" y="43" width="15" height="6" rx="3" transform="rotate(45 78 43)" fill="white"/>
+        </svg>
+    </a>
+    <button class="hamburger-menu" id="mobile-menu-toggle" aria-label="Open menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+    <div class="desktop-menu-container" id="slide-out-menu"> <!-- This container now serves as the slide-out for mobile -->
+        <nav>
+            <ul>
+                <li><a href="/index.html" data-i18n="news_home">홈</a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropbtn" data-i18n="menu_test">테스트</a>
+                    <div class="dropdown-content">
+                        <a href="/animal_face_test.html" data-i18n="animal_face_test">동물상 테스트</a>
+                        <a href="/ai-test.html" data-i18n="ai_tendency_test">AI 성향 테스트</a>
+                        <a href="/saju-test.html" data-i18n="saju_test">AI 사주 테스트</a>
+                    </div>
+                </li>
+                <li><a href="/inquiry.html" data-i18n="partnership_inquiry">파트너십 문의</a></li>
+                <li><a href="/about.html" data-i18n="about_us">회사 소개</a></li>
+                <li><a href="/contact.html" data-i18n="contact">문의</a></li>
+                <li><a href="/privacy-policy.html" data-i18n="privacy_policy">개인정보처리방침</a></li>
+            </ul>
+        </nav>
+        <div class="utility-controls">
+            <button id="color-change">🌙</button>
+            <div id="language-switcher"></div>
+        </div>
+    </div>
+</header>
+
+    <div style="max-width: 1200px; margin: 20px auto; background-color: white; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); padding: 10px 20px; box-sizing: border-box;">
+        <script type="module" src="https://widgets.tradingview-widget.com/w/kr/tv-ticker-tape.js"></script>
+        <tv-ticker-tape symbols='FOREXCOM:SPXUSD,FOREXCOM:NSXUSD,FOREXCOM:DJI,FX:EURUSD,BITSTAMP:BTCUSD,BITSTAMP:ETHUSD,CMCMARKETS:GOLD'></tv-ticker-tape>
+    </div>
+
+    <main>
+        
+        <section class="hero-banner">
+            <h2 data-i18n="hero_title"></h2>
+            <button class="action-button" onclick="window.location.href='/saju-test.html'" data-i18n="start_test_button"></button>
+        </section>
+        <section class="news-section-main">
+            
+        
+        <h1 class="section-title" data-i18n="all_news_grid_title"></h1>
+        <div class="news-grid">
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-05-elevenlabs-ceo-음성-ai-차세대-인터페이스-openai-google-apple-경쟁-속-음성-ai-활용-극대화-방법은-en.html" class="news-card-link">How to Maximize Voice AI: ElevenLabs CEO on the Future Interface, Competing with OpenAI, Google, and Apple, Plus Recommendation Services</a></h2>
+                <p class="news-card-date">2026-02-05</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-05-ai-기반-sre-스타트업-resolve-ai-1억-2천-5백만-달러-투자-유치-성공-유니콘-기업-등극-비결은-lightspeed-투자-주도-시리즈-a-en.html" class="news-card-link">AI-Powered SRE Startup Resolve AI Secures $125 Million Series A Funding: Achieving Unicorn Status and Automating Site Reliability Engineering</a></h2>
+                <p class="news-card-date">2026-02-05</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-05-ai-기반-sre-솔루션-resolve-ai-1억-2500만-달러-투자-유치-성공-1조-원-기업-가치-평가-개발자-생산성-향상에-기여할까-en.html" class="news-card-link">Resolve AI Secures $125 Million Investment: How AI-Powered SRE Solutions are Revolutionizing Developer Productivity & Achieving Site Reliability</a></h2>
+                <p class="news-card-date">2026-02-05</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-05-ai-sre-해결사-resolve-ai-1억-2500만-달러-투자-유치-성공-기업-가치-1조-원-돌파-it-서비스-안정성-확보-비법은-en.html" class="news-card-link">Resolve AI Secures $125 Million Investment: Achieving Unicorn Status with AI-Powered SRE & Ensuring IT Service Reliability</a></h2>
+                <p class="news-card-date">2026-02-05</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-05-ai-sre-스타트업-resolve-ai-1억-2천-5백만-달러-투자-유치-성공-유니콘-기업-등극-비결은-lightspeed-투자-배경-및-sre-자동화-도입-효과-분석-en.html" class="news-card-link">Resolve AI Achieves Unicorn Status with $125 Million Investment: A Deep Dive into SRE Automation, Lightspeed's Backing, and the Future of IT Reliability #</a></h2>
+                <p class="news-card-date">2026-02-05</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-05-ai-sre-솔루션-resolve-ai-1억-2천-5백만-달러-투자-유치-성공-기업-가치-1조-원-돌파-주요-투자-배경-및-향후-전망은-en.html" class="news-card-link">AI-Powered SRE Solution Resolve AI Secures $125 Million Funding: Achieving Unicorn Status and Driving Operational Efficiency for Modern IT Infrastructure</a></h2>
+                <p class="news-card-date">2026-02-05</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-05-ai-sre-resolve-ai-1억-2500만-달러-투자-유치-성공-유니콘-기업-등극-배경-및-ai-기반-sre-솔루션-도입-효과-분석-en.html" class="news-card-link">AI-Powered SRE Solution Resolve AI Achieves Unicorn Status with $125 Million Investment: Deep Dive into IT Infrastructure Automation and Success Factors</a></h2>
+                <p class="news-card-date">2026-02-05</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-05-accel-fibr-ai에-두-배-투자-웹사이트-개인화-마케팅-비용-절감하는-ai-에이전트-솔루션-비교-및-도입-가이드-en.html" class="news-card-link">How to Reduce Marketing Costs with AI: Accel Invests in Fibr AI & Compares Website Personalization Solutions</a></h2>
+                <p class="news-card-date">2026-02-05</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-04-구글-애플-ai-협력설-함구-알파벳-침묵-이유는-투자자-불안감-증폭-ai-주식-투자-전략은-en.html" class="news-card-link">Google Apple AI Collaboration Rumors: Alphabet's Silence, Investment Anxiety, and AI Stock Investment Strategy Guide</a></h2>
+                <p class="news-card-date">2026-02-04</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-04-xcode-openai-및-anthropic-통합으로-에이전트-코딩-시대-개막-en.html" class="news-card-link">Xcode OpenAI Anthropic Integration: How AI Coding Agents Will Boost Developer Productivity & Shape the Future of App Development</a></h2>
+                <p class="news-card-date">2026-02-04</p>
+            </article>
+            </div>
+        <div class="pagination"><a href="/page-en-12.html" class="pagination-button" data-i18n="prev_button"></a><span class="page-number">13 / 15</span><a href="/page-en-14.html" class="pagination-button" data-i18n="next_button"></a></div>
+    
+        </section>
+        
+    </main>
+
+
+    <footer>
+        <p data-i18n="footer_copyright"></p>
+        <p>
+            <a href="/about.html" data-i18n="about_us">회사 소개</a> |
+            <a href="/contact.html" data-i18n="contact">문의</a> |
+            <a href="/privacy-policy.html" data-i18n="privacy_policy">개인정보처리방침</a> |
+            <a href="/sitemap.xml" data-i18n="sitemap">사이트맵</a> |
+            <a href="/rss.xml">RSS Feed</a>
+        </p>
+    </footer>
+
+</body>
+</html>

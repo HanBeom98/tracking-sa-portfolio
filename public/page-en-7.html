@@ -1,0 +1,179 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="news_home">뉴스 홈</title>
+
+    <meta name="description" content="The latest AI news and in-depth analysis, updated daily. Check AI technology trends, startup news, and industry trends at a glance.">
+    <meta property="og:title" content="AI News - Latest AI Technology Trends and Analysis (Page 7)">
+    <meta property="og:description" content="The latest AI news and in-depth analysis, updated daily. Check AI technology trends, startup news, and industry trends at a glance.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://trackingsa.com/index-en.html">
+    <meta property="og:image" content="https://trackingsa.com/logo.svg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="AI News - Latest AI Technology Trends and Analysis (Page 7)">
+    <meta name="twitter:description" content="The latest AI news and in-depth analysis, updated daily. Check AI technology trends, startup news, and industry trends at a glance.">
+    <meta name="twitter:image" content="https://trackingsa.com/logo.svg">
+    
+    <!-- CSS and other head elements will be injected by main.py -->
+<!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-TGD3WRNKPZ');
+    </script>
+    <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=pub-7263630893992216" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "vb9q33ggpa");
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+    <script src="/firebase-config.js"></script>
+    <script src="/translations.js"></script>
+    <script src="/common.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+
+</head>
+<body>
+
+<header>
+    <a href="/index.html" class="site-logo-link">
+        <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="site-logo">
+            <circle cx="50" cy="50" r="48" stroke="white" stroke-width="4" fill="transparent"/>
+            <path d="M25 70L40 55L50 65L75 35" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="70" cy="35" r="12" stroke="white" stroke-width="6" fill="#0052cc"/>
+            <rect x="78" y="43" width="15" height="6" rx="3" transform="rotate(45 78 43)" fill="white"/>
+        </svg>
+    </a>
+    <button class="hamburger-menu" id="mobile-menu-toggle" aria-label="Open menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+    <div class="desktop-menu-container" id="slide-out-menu"> <!-- This container now serves as the slide-out for mobile -->
+        <nav>
+            <ul>
+                <li><a href="/index.html" data-i18n="news_home">홈</a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropbtn" data-i18n="menu_test">테스트</a>
+                    <div class="dropdown-content">
+                        <a href="/animal_face_test.html" data-i18n="animal_face_test">동물상 테스트</a>
+                        <a href="/ai-test.html" data-i18n="ai_tendency_test">AI 성향 테스트</a>
+                        <a href="/saju-test.html" data-i18n="saju_test">AI 사주 테스트</a>
+                    </div>
+                </li>
+                <li><a href="/inquiry.html" data-i18n="partnership_inquiry">파트너십 문의</a></li>
+                <li><a href="/about.html" data-i18n="about_us">회사 소개</a></li>
+                <li><a href="/contact.html" data-i18n="contact">문의</a></li>
+                <li><a href="/privacy-policy.html" data-i18n="privacy_policy">개인정보처리방침</a></li>
+            </ul>
+        </nav>
+        <div class="utility-controls">
+            <button id="color-change">🌙</button>
+            <div id="language-switcher"></div>
+        </div>
+    </div>
+</header>
+
+    <div style="max-width: 1200px; margin: 20px auto; background-color: white; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); padding: 10px 20px; box-sizing: border-box;">
+        <script type="module" src="https://widgets.tradingview-widget.com/w/kr/tv-ticker-tape.js"></script>
+        <tv-ticker-tape symbols='FOREXCOM:SPXUSD,FOREXCOM:NSXUSD,FOREXCOM:DJI,FX:EURUSD,BITSTAMP:BTCUSD,BITSTAMP:ETHUSD,CMCMARKETS:GOLD'></tv-ticker-tape>
+    </div>
+
+    <main>
+        
+        <section class="hero-banner">
+            <h2 data-i18n="hero_title"></h2>
+            <button class="action-button" onclick="window.location.href='/saju-test.html'" data-i18n="start_test_button"></button>
+        </section>
+        <section class="news-section-main">
+            
+        
+        <h1 class="section-title" data-i18n="all_news_grid_title"></h1>
+        <div class="news-grid">
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-07-뉴욕-데이터센터-건설-3년-중단-추진-국내-클라우드-서비스-확장에-미칠-영향은-데이터-주권-확보-vs-투자-위축-전문가-심층-분석-en.html" class="news-card-link">Will New York's Data Center Construction Halt Impact Korean Cloud Services? A Deep Dive into Data Sovereignty vs. Investment Concerns</a></h2>
+                <p class="news-card-date">2026-02-07</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-07-cerebras에-benchmark-2억-2500만-달러-추가-투자-엔비디아-독주-견제-가능할까-ai-반도체-경쟁-심화-전망-en.html" class="news-card-link">Can Cerebras Challenge NVIDIA's AI Chip Dominance? Benchmark Invests $225 Million More</a></h2>
+                <p class="news-card-date">2026-02-07</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-06-제목-en.html" class="news-card-link">AI Agent Autonomous Purchasing: Sapiom Secures $15 Million Funding, Empowering Businesses with AI-Driven Tech Acquisition</a></h2>
+                <p class="news-card-date">2026-02-06</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-06-워드프레스-사이트-분석-이제-claude로-더-쉽게-트래픽-분석-및-내부-지표-활용-방법-완벽-가이드-en.html" class="news-card-link">Use Claude AI to Analyze Your WordPress Site in 10 Minutes! Secrets to Rapid Traffic Growth & a Complete Guide to Utilizing Internal Metrics</a></h2>
+                <p class="news-card-date">2026-02-06</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-06-엘론-머스크-spacex-xai-합병-새로운-실리콘-밸리-권력-구조-설계-개인-복합-기업-성공-가능성과-투자-전략-분석-en.html" class="news-card-link">Elon Musk's SpaceX & xAI Merger: A Comprehensive Investment Guide for Retail Investors in the AI and Space Race 🚀</a></h2>
+                <p class="news-card-date">2026-02-06</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-06-스페이스x와-xai-합병-일론-머스크의-만물상-제국-꿈은-어디까지-개인-복합-기업-성공-가능성과-미래-전망-분석-en.html" class="news-card-link">Will the SpaceX xAI Merger Realize Elon Musk's Conglomerate Empire? Analyzing Success Factors & Investment Outlook</a></h2>
+                <p class="news-card-date">2026-02-06</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-06-스타트업-arr-집착-이제-그만-벤처-투자-거물-a16z가-말하는-진짜-성장-전략-en.html" class="news-card-link">Is Your Startup Obsessed with ARR? a16z's Sustainable Growth Strategy and Defining Real Growth in SaaS</a></h2>
+                <p class="news-card-date">2026-02-06</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-06-레딧-광고-기술adtech-기업-인수-검토-레딧-광고-효율-극대화-방법-및-관련주-전망-분석-en.html" class="news-card-link">Reddit AdTech Acquisition: How to Increase Ad Efficiency by 200% & Related Stock Investment Strategies</a></h2>
+                <p class="news-card-date">2026-02-06</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-06-기업-데이터-분석-막대한-양에-압도당했다면-fundamental의-2억-5천-5백만-달러-투자-유치-성공-비결과-데이터-분석-솔루션-비교-en.html" class="news-card-link">Comprehensive Guide to Data Analysis Solutions: Fundamental's $255 Million Funding, Solution Comparisons (Tableau, Power BI, Qlik Sense, Looker), and Business Intelligence Strategies</a></h2>
+                <p class="news-card-date">2026-02-06</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-06-reddit-ai-검색으로-재도약-노린다-레딧-활용-꿀팁-맞춤형-정보-검색-커뮤니티-기반-추천-활용법-en.html" class="news-card-link">Reddit AI Search: How to Use AI-Powered Search to Find Personalized Information, Community Recommendations, and Solve Your Problems</a></h2>
+                <p class="news-card-date">2026-02-06</p>
+            </article>
+            </div>
+        <div class="pagination"><a href="/page-en-6.html" class="pagination-button" data-i18n="prev_button"></a><span class="page-number">7 / 15</span><a href="/page-en-8.html" class="pagination-button" data-i18n="next_button"></a></div>
+    
+        </section>
+        
+    </main>
+
+
+    <footer>
+        <p data-i18n="footer_copyright"></p>
+        <p>
+            <a href="/about.html" data-i18n="about_us">회사 소개</a> |
+            <a href="/contact.html" data-i18n="contact">문의</a> |
+            <a href="/privacy-policy.html" data-i18n="privacy_policy">개인정보처리방침</a> |
+            <a href="/sitemap.xml" data-i18n="sitemap">사이트맵</a> |
+            <a href="/rss.xml">RSS Feed</a>
+        </p>
+    </footer>
+
+</body>
+</html>

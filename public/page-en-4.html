@@ -1,0 +1,179 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="news_home">뉴스 홈</title>
+
+    <meta name="description" content="The latest AI news and in-depth analysis, updated daily. Check AI technology trends, startup news, and industry trends at a glance.">
+    <meta property="og:title" content="AI News - Latest AI Technology Trends and Analysis (Page 4)">
+    <meta property="og:description" content="The latest AI news and in-depth analysis, updated daily. Check AI technology trends, startup news, and industry trends at a glance.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://trackingsa.com/index-en.html">
+    <meta property="og:image" content="https://trackingsa.com/logo.svg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="AI News - Latest AI Technology Trends and Analysis (Page 4)">
+    <meta name="twitter:description" content="The latest AI news and in-depth analysis, updated daily. Check AI technology trends, startup news, and industry trends at a glance.">
+    <meta name="twitter:image" content="https://trackingsa.com/logo.svg">
+    
+    <!-- CSS and other head elements will be injected by main.py -->
+<!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-TGD3WRNKPZ');
+    </script>
+    <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=pub-7263630893992216" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "vb9q33ggpa");
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+    <script src="/firebase-config.js"></script>
+    <script src="/translations.js"></script>
+    <script src="/common.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+
+</head>
+<body>
+
+<header>
+    <a href="/index.html" class="site-logo-link">
+        <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="site-logo">
+            <circle cx="50" cy="50" r="48" stroke="white" stroke-width="4" fill="transparent"/>
+            <path d="M25 70L40 55L50 65L75 35" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="70" cy="35" r="12" stroke="white" stroke-width="6" fill="#0052cc"/>
+            <rect x="78" y="43" width="15" height="6" rx="3" transform="rotate(45 78 43)" fill="white"/>
+        </svg>
+    </a>
+    <button class="hamburger-menu" id="mobile-menu-toggle" aria-label="Open menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+    <div class="desktop-menu-container" id="slide-out-menu"> <!-- This container now serves as the slide-out for mobile -->
+        <nav>
+            <ul>
+                <li><a href="/index.html" data-i18n="news_home">홈</a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropbtn" data-i18n="menu_test">테스트</a>
+                    <div class="dropdown-content">
+                        <a href="/animal_face_test.html" data-i18n="animal_face_test">동물상 테스트</a>
+                        <a href="/ai-test.html" data-i18n="ai_tendency_test">AI 성향 테스트</a>
+                        <a href="/saju-test.html" data-i18n="saju_test">AI 사주 테스트</a>
+                    </div>
+                </li>
+                <li><a href="/inquiry.html" data-i18n="partnership_inquiry">파트너십 문의</a></li>
+                <li><a href="/about.html" data-i18n="about_us">회사 소개</a></li>
+                <li><a href="/contact.html" data-i18n="contact">문의</a></li>
+                <li><a href="/privacy-policy.html" data-i18n="privacy_policy">개인정보처리방침</a></li>
+            </ul>
+        </nav>
+        <div class="utility-controls">
+            <button id="color-change">🌙</button>
+            <div id="language-switcher"></div>
+        </div>
+    </div>
+</header>
+
+    <div style="max-width: 1200px; margin: 20px auto; background-color: white; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); padding: 10px 20px; box-sizing: border-box;">
+        <script type="module" src="https://widgets.tradingview-widget.com/w/kr/tv-ticker-tape.js"></script>
+        <tv-ticker-tape symbols='FOREXCOM:SPXUSD,FOREXCOM:NSXUSD,FOREXCOM:DJI,FX:EURUSD,BITSTAMP:BTCUSD,BITSTAMP:ETHUSD,CMCMARKETS:GOLD'></tv-ticker-tape>
+    </div>
+
+    <main>
+        
+        <section class="hero-banner">
+            <h2 data-i18n="hero_title"></h2>
+            <button class="action-button" onclick="window.location.href='/saju-test.html'" data-i18n="start_test_button"></button>
+        </section>
+        <section class="news-section-main">
+            
+        
+        <h1 class="section-title" data-i18n="all_news_grid_title"></h1>
+        <div class="news-grid">
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-12-modal-labs-25억-달러-기업-가치로-투자-유치-추진-국내-개발자들에게-클라우드-기반-ai-추론-환경-구축-솔루션될까-en.html" class="news-card-link">Modal Labs Seeks $2.5 Billion Valuation: Will Cloud-Based AI Inference Platform Benefit Korean Developers?</a></h2>
+                <p class="news-card-date">2026-02-12</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-12-didero-360억-투자-유치-ai-기반-제조-구매-자동화-솔루션-도입-erp-연동-효과-및-국내-제조업-혁신-가능성은-en.html" class="news-card-link">Didero Secures $30 Million Investment: How AI-Powered Manufacturing Procurement Automation Solutions Integrate with ERP and Revolutionize the Korean Manufacturing Industry</a></h2>
+                <p class="news-card-date">2026-02-12</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-12-anthropic-300억-달러-투자-유치-openai-대항마-될까-기업-가치-3800억-달러-평가-한국-ai-시장-영향은-en.html" class="news-card-link">Anthropic Secures $30 Billion Investment: Can It Challenge OpenAI and What's the Impact on the Korean AI Market?</a></h2>
+                <p class="news-card-date">2026-02-12</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-12-310억-투자-유치한-ever-ai-기반-전기차-마켓플레이스-성공-비결은-중고-전기차-구매-가이드-시세-전망-en.html" class="news-card-link">AI-Powered Electric Vehicle Marketplace Ever Secures $31 Million Investment: A Guide to Buying Used EVs & Market Outlook</a></h2>
+                <p class="news-card-date">2026-02-12</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-11-일론-머스크-xai-달-공장-건설-계획-발표-배경은-투자-기회는-없을까-en.html" class="news-card-link">Elon Musk's xAI Moon Factory: Implications, Investment Opportunities, and Long-Term Strategies for Space Tech</a></h2>
+                <p class="news-card-date">2026-02-11</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-11-기업-ai-레이어-누가-소유할-것인가-glean-ceo에게-듣는-ai-워크-어시스턴트-도입-전략-및-성공-사례-en.html" class="news-card-link">How to Own the Enterprise AI Layer: AI Work Assistant Adoption Strategies and Success Stories - Insights from Glean CEO</a></h2>
+                <p class="news-card-date">2026-02-11</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-11-xai-창립팀-절반-이탈-남은-과제는-ipo-앞둔-xai의-미래-전망-및-투자-리스크-분석-en.html" class="news-card-link">xAI Founding Team Exodus: Analyzing the Impact, IPO Prospects, Investment Risks, and Lessons for AI Startups Worldwide</a></h2>
+                <p class="news-card-date">2026-02-11</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-11-uber-eats-ai-장보기-도우미-출시-냉장고-사진-한-장으로-장바구니-자동-완성-사용법-및-활용-꿀팁-en.html" class="news-card-link">Uber Eats Cart Assistant: How to Use the AI Grocery Shopping Helper, Maximize Savings, and Automatically Fill Your Cart with Just a Fridge Photo!</a></h2>
+                <p class="news-card-date">2026-02-11</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-11-siri-업데이트-지연-ios-264에서-만날-수-없나-최신-정보-및-사용자-대응-가이드-en.html" class="news-card-link">Siri Update Delayed: Not Coming in iOS 26.4? 🤔 Latest News and User Guidance</a></h2>
+                <p class="news-card-date">2026-02-11</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-11-openai-챗봇-성인-모드-반대-임원-차별-주장에-해고-챗gpt-윤리-논란-및-ai-규제-강화-전망-en.html" class="news-card-link">OpenAI Executive Fired Over "Adult Mode" Chatbot Concerns? Discrimination Claims Spark ChatGPT Ethics Debate and AI Regulation Push</a></h2>
+                <p class="news-card-date">2026-02-11</p>
+            </article>
+            </div>
+        <div class="pagination"><a href="/page-en-3.html" class="pagination-button" data-i18n="prev_button"></a><span class="page-number">4 / 15</span><a href="/page-en-5.html" class="pagination-button" data-i18n="next_button"></a></div>
+    
+        </section>
+        
+    </main>
+
+
+    <footer>
+        <p data-i18n="footer_copyright"></p>
+        <p>
+            <a href="/about.html" data-i18n="about_us">회사 소개</a> |
+            <a href="/contact.html" data-i18n="contact">문의</a> |
+            <a href="/privacy-policy.html" data-i18n="privacy_policy">개인정보처리방침</a> |
+            <a href="/sitemap.xml" data-i18n="sitemap">사이트맵</a> |
+            <a href="/rss.xml">RSS Feed</a>
+        </p>
+    </footer>
+
+</body>
+</html>

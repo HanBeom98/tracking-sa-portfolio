@@ -50,9 +50,33 @@ window.applyTranslations = function(lang) {
 // 언어를 변경하는 함수 (전역으로 선언)
 window.setLanguage = function(lang) {
     const currentPath = window.location.pathname;
-    const isArticlePage = /\/\d{4}-\d{2}-\d{2}-/.test(currentPath);
 
-    // --- New Redirection Logic for Pretty URLs ---
+    // Handle root, index.html, and their paginated versions
+    if (currentPath === '/' || currentPath.endsWith('/index.html') || /^\/page-\d+\.html$/.test(currentPath)) {
+        if (lang === 'en') {
+            let newPath = '/index-en.html';
+            if (currentPath.includes('page-')) {
+                newPath = currentPath.replace('/page-', '/page-en-');
+            }
+            window.location.href = newPath;
+            return;
+        }
+    }
+
+    // Handle index-en.html and its paginated versions
+    if (currentPath.endsWith('/index-en.html') || /^\/page-en-\d+\.html$/.test(currentPath)) {
+        if (lang === 'ko') {
+            let newPath = '/index.html';
+            if (currentPath.includes('page-en-')) {
+                newPath = currentPath.replace('/page-en-', '/page-');
+            }
+            window.location.href = newPath;
+            return;
+        }
+    }
+    
+    // Existing robust logic for article pages
+    const isArticlePage = /\/\d{4}-\d{2}-\d{2}-/.test(currentPath);
     if (isArticlePage) {
         const isEnglishVersion = currentPath.endsWith('-en') || currentPath.endsWith('-en.html');
 
@@ -75,7 +99,8 @@ window.setLanguage = function(lang) {
             return;
         }
     }
-    
+
+    // Fallback for non-redirect cases
     currentLang = lang;
     localStorage.setItem('lang', lang);
     window.applyTranslations(lang); // Call the global applyTranslations
