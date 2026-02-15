@@ -112,6 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const gender = genderMaleRadio.checked ? 'male' : 'female';
 
         if (!name || !birthYear || !birthMonth || !birthDay) {
+            console.log("Input validation failed: Not all required fields are filled.");
             alert(window.getTranslation(window.currentLang, 'saju_input_missing'));
             return;
         }
