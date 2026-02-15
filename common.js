@@ -50,64 +50,40 @@ window.applyTranslations = function(lang) {
 // 언어를 변경하는 함수 (전역으로 선언)
 window.setLanguage = function(lang) {
     const currentPath = window.location.pathname;
+    const isEnPath = currentPath.includes('index-en');
+    const isMainPath = currentPath === '/' || currentPath.endsWith('index.html') || /^\/page-\d+\.html$/.test(currentPath);
 
-    // TOP PRIORITY: Handle navigation from English main/paginated pages back to Korean root.
-    if (lang === 'ko' && (currentPath.includes('index-en') || currentPath.includes('page-en-'))) {
-        window.location.href = 'https://trackingsa.com/'; // Force redirect to the absolute root URL.
+    // 1. 메인 페이지 이동 로직 (주소 이동을 최우선으로)
+    if (lang === 'en' && isMainPath && !isEnPath) {
+        window.location.href = '/index-en';
+        return;
+    } 
+    if (lang === 'ko' && isEnPath) {
+        window.location.href = '/';
         return;
     }
 
-    // Handle navigation from Korean main/paginated pages to English version.
-    if (lang === 'en' && (currentPath === '/' || currentPath.endsWith('/index.html') || /^\/page-\d+\.html$/.test(currentPath))) {
-        let newPath = '/index-en.html';
-        if (currentPath.includes('page-')) {
-            newPath = currentPath.replace('/page-', '/page-en-');
-        }
-        window.location.href = newPath;
-        return;
-    }
-    
-    // Handle individual article pages (This logic is already robust for pretty URLs).
+    // 2. 기사 페이지 이동 로직
     const isArticlePage = /\/\d{4}-\d{2}-\d{2}-/.test(currentPath);
     if (isArticlePage) {
-        const isEnglishVersion = currentPath.endsWith('-en') || currentPath.endsWith('-en.html');
-
-        if (lang === 'en' && !isEnglishVersion) {
-            const newPath = currentPath.endsWith('.html')
-                ? currentPath.replace('.html', '-en.html')
-                : currentPath + '-en';
-            window.location.href = newPath;
+        const isEnArticle = currentPath.includes('-en');
+        if (lang === 'en' && !isEnArticle) {
+            window.location.href = currentPath.replace('.html', '') + '-en';
             return;
-        } else if (lang === 'ko' && isEnglishVersion) {
-            let newPath;
-            if (currentPath.endsWith('-en.html')) {
-                newPath = currentPath.replace('-en.html', '.html');
-            } else { // ends with '-en'
-                newPath = currentPath.slice(0, -3); // Remove '-en'
-            }
-            window.location.href = newPath;
+        }
+        if (lang === 'ko' && isEnArticle) {
+            window.location.href = currentPath.replace('-en', '').replace('.html', '');
             return;
         }
     }
 
-    // Fallback for non-redirect cases (e.g., about page, contact page)
+    // 3. 페이지 이동이 필요 없는 경우에만 내부 텍스트 변경
     currentLang = lang;
     localStorage.setItem('lang', lang);
-    window.applyTranslations(lang); 
-
-    // Update active class on language buttons
-    const langButtons = document.querySelectorAll('.lang-button');
-    langButtons.forEach(button => {
-        if (button && button.dataset.lang === lang) {
-            button.classList.add('active');
-        } else if (button) {
-            button.classList.remove('active');
-        }
+    window.applyTranslations(lang);
+    document.querySelectorAll('.lang-button').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === lang);
     });
-
-    // Dispatch custom event after language change
-    const event = new CustomEvent('languageChanged', { detail: { lang: lang } });
-    window.dispatchEvent(event);
 }
 
 // 초기화 함수
