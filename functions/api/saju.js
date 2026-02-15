@@ -2,6 +2,15 @@
 export async function onRequest(context) {
     const { request, env } = context;
 
+    // Early exit if API key is not configured
+    if (!env.GEMINI_API_KEY) {
+        console.error('CRITICAL: GEMINI_API_KEY environment variable not set.');
+        return new Response(JSON.stringify({ error: 'Server configuration error: API key is not set.' }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' },
+        });
+    }
+
     if (request.method !== 'POST') {
         return new Response('Method Not Allowed', { status: 405 });
     }
