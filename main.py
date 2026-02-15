@@ -3,9 +3,9 @@ import os
 import datetime
 import subprocess
 import re
-import feedparser # Global import
-import requests # Global import
-from google import genai # Global import
+import feedparser
+import requests
+from google import genai
 import markdown
 import shutil
 import time
