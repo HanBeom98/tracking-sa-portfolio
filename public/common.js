@@ -52,16 +52,27 @@ window.setLanguage = function(lang) {
     const currentPath = window.location.pathname;
     const isArticlePage = /\/\d{4}-\d{2}-\d{2}-/.test(currentPath);
 
-    // --- New Redirection Logic ---
+    // --- New Redirection Logic for Pretty URLs ---
     if (isArticlePage) {
-        if (lang === 'en' && !currentPath.endsWith('-en.html')) {
-            const newPath = currentPath.replace('.html', '-en.html');
+        const isEnglishVersion = currentPath.endsWith('-en') || currentPath.endsWith('-en.html');
+
+        if (lang === 'en' && !isEnglishVersion) {
+            // KO -> EN
+            const newPath = currentPath.endsWith('.html')
+                ? currentPath.replace('.html', '-en.html')
+                : currentPath + '-en';
             window.location.href = newPath;
-            return; 
-        } else if (lang === 'ko' && currentPath.endsWith('-en.html')) {
-            const newPath = currentPath.replace('-en.html', '.html');
+            return;
+        } else if (lang === 'ko' && isEnglishVersion) {
+            // EN -> KO
+            let newPath;
+            if (currentPath.endsWith('-en.html')) {
+                newPath = currentPath.replace('-en.html', '.html');
+            } else { // ends with '-en'
+                newPath = currentPath.slice(0, -3); // Remove '-en'
+            }
             window.location.href = newPath;
-            return; 
+            return;
         }
     }
     
