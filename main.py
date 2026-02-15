@@ -300,16 +300,20 @@ def generate_article_html(md_content, title, date_str, output_path, hashtags_htm
     process_html_file_for_common_elements(output_path)
 
 
-def generate_index_html(articles_on_page, current_page, total_pages):
+def generate_index_html(articles_on_page, current_page, total_pages, lang='ko'):
     with open("index.html", "r", encoding="utf-8") as f:
         base_html = f.read()
 
-    # Meta tags
-    homepage_description = "매일 업데이트되는 최신 AI 관련 뉴스와 심층 분석 기사를 제공합니다. AI 기술 트렌드, 스타트업 소식, 산업 동향을 한눈에 확인하세요."
-    homepage_title = f"AI 뉴스 - 최신 AI 기술 동향 및 분석 (페이지 {current_page})"
+    # Meta tags based on language
+    if lang == 'en':
+        homepage_description = "The latest AI news and in-depth analysis, updated daily. Check AI technology trends, startup news, and industry trends at a glance."
+        homepage_title = f"AI News - Latest AI Technology Trends and Analysis (Page {current_page})"
+    else: # Korean
+        homepage_description = "매일 업데이트되는 최신 AI 관련 뉴스와 심층 분석 기사를 제공합니다. AI 기술 트렌드, 스타트업 소식, 산업 동향을 한눈에 확인하세요."
+        homepage_title = f"AI 뉴스 - 최신 AI 기술 동향 및 분석 (페이지 {current_page})"
+
     homepage_image = DEFAULT_OG_IMAGE_URL
-    # Canonical URL should point to the first page for all paginated series
-    homepage_url = f"{BASE_URL}index.html"
+    homepage_url = f"{BASE_URL}index.html" if lang == 'ko' else f"{BASE_URL}index-en.html"
 
     meta_tags_for_homepage = f"""
     <meta name="description" content="{homepage_description}">
@@ -336,24 +340,27 @@ def generate_index_html(articles_on_page, current_page, total_pages):
     if current_page == 1 and articles_on_page:
         hero_article = articles_on_page[0]
         grid_articles = articles_on_page[1:]  # The rest go into the grid
+        # The link in the hero card must also be language-aware
+        hero_article_url = f"/{hero_article['url']}"
         hero_card_html = f"""
-            <h1 class="section-title" data-i18n="latest_news_hero_title">최신 뉴스</h1>
+            <h1 class="section-title" data-i18n="latest_news_hero_title"></h1>
             <article class="hero-card">
-                <h2 class="hero-card-title"><a href="/{hero_article['url']}" class="hero-card-link">{hero_article['title']}</a></h2>
+                <h2 class="hero-card-title"><a href="{hero_article_url}" class="hero-card-link">{hero_article['title']}</a></h2>
                 <p class="hero-card-date">{hero_article['date']}</p>
             </article>
         """
 
     grid_news_html = ""
     if not grid_articles:
-        if current_page == 1: # Only show 'no news' message if there are no articles at all
-             grid_news_html = "<p class='no-news-message'>아직 게시된 뉴스가 없습니다.</p>"
+        if current_page == 1:
+             grid_news_html = "<p class='no-news-message' data-i18n='no_news_yet'></p>"
     else:
         grid_news_items = ""
         for article in grid_articles:
+            article_url = f"/{article['url']}"
             grid_news_items += f"""
             <article class="news-card">
-                <h2 class="news-card-title"><a href="/{article['url']}" class="news-card-link">{article['title']}</a></h2>
+                <h2 class="news-card-title"><a href="{article_url}" class="news-card-link">{article['title']}</a></h2>
                 <p class="news-card-date">{article['date']}</p>
             </article>
             """
@@ -362,20 +369,26 @@ def generate_index_html(articles_on_page, current_page, total_pages):
     # Pagination HTML
     pagination_html = '<div class="pagination">'
     if current_page > 1:
-        prev_page_url = "index.html" if current_page == 2 else f"page-{current_page - 1}.html"
-        pagination_html += f'<a href="/{prev_page_url}" class="pagination-button" data-i18n="prev_button">이전</a>'
+        if lang == 'en':
+            prev_page_url = "index-en.html" if current_page == 2 else f"page-en-{current_page - 1}.html"
+        else:
+            prev_page_url = "index.html" if current_page == 2 else f"page-{current_page - 1}.html"
+        pagination_html += f'<a href="/{prev_page_url}" class="pagination-button" data-i18n="prev_button"></a>'
     
     if total_pages > 1:
         pagination_html += f'<span class="page-number">{current_page} / {total_pages}</span>'
 
     if current_page < total_pages:
-        next_page_url = f"page-{current_page + 1}.html"
-        pagination_html += f'<a href="/{next_page_url}" class="pagination-button" data-i18n="next_button">다음</a>'
+        if lang == 'en':
+            next_page_url = f"page-en-{current_page + 1}.html"
+        else:
+            next_page_url = f"page-{current_page + 1}.html"
+        pagination_html += f'<a href="/{next_page_url}" class="pagination-button" data-i18n="next_button"></a>'
     pagination_html += '</div>'
 
     news_section_content = f"""
         {hero_card_html}
-        <h1 class="section-title" data-i18n="all_news_grid_title">모든 뉴스</h1>
+        <h1 class="section-title" data-i18n="all_news_grid_title"></h1>
         {grid_news_html}
         {pagination_html if total_pages > 1 else ''}
     """
@@ -393,7 +406,11 @@ def generate_index_html(articles_on_page, current_page, total_pages):
         """
     )
     
-    output_filename = "index.html" if current_page == 1 else f"page-{current_page}.html"
+    if lang == 'en':
+        output_filename = "index-en.html" if current_page == 1 else f"page-en-{current_page}.html"
+    else:
+        output_filename = "index.html" if current_page == 1 else f"page-{current_page}.html"
+        
     output_path = os.path.join(PUBLIC_DIR, output_filename)
     
     with open(output_path, "w", encoding="utf-8") as f:
@@ -404,61 +421,95 @@ def generate_public_site():
     if os.path.exists(PUBLIC_DIR): shutil.rmtree(PUBLIC_DIR)
     os.makedirs(PUBLIC_DIR, exist_ok=True)
     copy_static_assets()
-    create_ads_txt() # Call the new function here
-    articles_meta = []
-    if os.path.exists(NEWS_POSTS_DIR):
-        # Collect all markdown files with their dates and modification times
-        all_md_files = []
-        for fn in os.listdir(NEWS_POSTS_DIR):
-            if fn.endswith('.md') and not fn.endswith('-en.md'):
-                file_path = os.path.join(NEWS_POSTS_DIR, fn)
-                
-                # Extract date from filename
-                date_match = re.match(r'(\d{4}-\d{2}-\d{2})', fn)
-                if date_match:
-                    date_str = date_match.group(1)
-                    date_obj = datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
-                else:
-                    # Fallback for files without a date in the name, treat as very old
-                    date_obj = datetime.date.min # Or handle as an error
-                    date_str = "0000-00-00"
+    create_ads_txt()
 
-                mod_time = os.path.getmtime(file_path)
-                all_md_files.append({'filename': fn, 'date_obj': date_obj, 'date_str': date_str, 'mod_time': mod_time})
+    if not os.path.exists(NEWS_POSTS_DIR):
+        # Generate empty index files if no posts directory
+        generate_index_html([], 1, 1, lang='ko')
+        generate_index_html([], 1, 1, lang='en')
+        _generate_sitemap([])
+        return
 
-        # Sort primarily by date (descending), then by modification time (descending)
-        all_md_files.sort(key=lambda x: (x['date_obj'], x['mod_time']), reverse=True)
+    # --- Korean Articles ---
+    all_ko_md_files = []
+    for fn in os.listdir(NEWS_POSTS_DIR):
+        if fn.endswith('.md') and not fn.endswith('-en.md'):
+            file_path = os.path.join(NEWS_POSTS_DIR, fn)
+            date_match = re.match(r'(\d{4}-\d{2}-\d{2})', fn)
+            date_str = date_match.group(1) if date_match else "0000-00-00"
+            date_obj = datetime.datetime.strptime(date_str, '%Y-%m-%d').date() if date_match else datetime.date.min
+            mod_time = os.path.getmtime(file_path)
+            all_ko_md_files.append({'filename': fn, 'date_obj': date_obj, 'date_str': date_str, 'mod_time': mod_time})
 
-        for file_info in all_md_files:
-            fn = file_info['filename']
-            date_str = file_info['date_str'] # Use the extracted date string
+    all_ko_md_files.sort(key=lambda x: (x['date_obj'], x['mod_time']), reverse=True)
+    
+    articles_meta_ko = []
+    for file_info in all_ko_md_files:
+        fn = file_info['filename']
+        date_str = file_info['date_str']
+        with open(os.path.join(NEWS_POSTS_DIR, fn), 'r', encoding='utf-8') as f:
+            original_content = f.read()
+        
+        processed_content, hashtags_html = _extract_and_format_hashtags(original_content, log_prefix=f"[ko - {fn}]")
+        title = extract_title_from_md(processed_content)
+        url = f"{date_str}-{clean_filename(title)}.html"
+        articles_meta_ko.append({'title': title, 'date': date_str, 'url': url})
+        description = extract_description_from_md(processed_content, lang="ko")
+        generate_article_html(processed_content, title, date_str, os.path.join(PUBLIC_DIR, url), hashtags_html, description=description, lang="ko")
+
+    # --- English Articles ---
+    all_en_md_files = []
+    for fn in os.listdir(NEWS_POSTS_DIR):
+        if fn.endswith('-en.md'):
+            file_path = os.path.join(NEWS_POSTS_DIR, fn)
+            date_match = re.match(r'(\d{4}-\d{2}-\d{2})', fn)
+            date_str = date_match.group(1) if date_match else "0000-00-00"
+            date_obj = datetime.datetime.strptime(date_str, '%Y-%m-%d').date() if date_match else datetime.date.min
+            mod_time = os.path.getmtime(file_path)
+            all_en_md_files.append({'filename': fn, 'date_obj': date_obj, 'date_str': date_str, 'mod_time': mod_time})
+
+    all_en_md_files.sort(key=lambda x: (x['date_obj'], x['mod_time']), reverse=True)
+
+    articles_meta_en = []
+    for file_info in all_en_md_files:
+        fn = file_info['filename']
+        date_str = file_info['date_str']
+        with open(os.path.join(NEWS_POSTS_DIR, fn), 'r', encoding='utf-8') as f:
+            original_content = f.read()
             
-            with open(os.path.join(NEWS_POSTS_DIR, fn), 'r', encoding='utf-8') as f: original_content = f.read()
-                
-            processed_content, hashtags_html = _extract_and_format_hashtags(original_content, log_prefix=f"[generate_public_site - {fn}] ")
-
-            title = extract_title_from_md(processed_content)
-            # Ensure the date used for the URL is the one extracted from the filename
-            url = f"{date_str}-{clean_filename(title)}.html"
-            articles_meta.append({'title': title, 'date': date_str, 'url': url})
-            description_for_article = extract_description_from_md(processed_content, lang="ko")
-            generate_article_html(processed_content, title, date_str, os.path.join(PUBLIC_DIR, url), hashtags_html, description=description_for_article)
+        processed_content, hashtags_html = _extract_and_format_hashtags(original_content, log_prefix=f"[en - {fn}]")
+        title = extract_title_from_md(processed_content)
+        # Generate the '-en.html' URL
+        url = f"{fn.replace('.md', '.html')}"
+        articles_meta_en.append({'title': title, 'date': date_str, 'url': url})
+        description = extract_description_from_md(processed_content, lang="en")
+        generate_article_html(processed_content, title, date_str, os.path.join(PUBLIC_DIR, url), hashtags_html, description=description, lang="en")
 
     # --- Pagination Logic ---
     ARTICLES_PER_PAGE = 10
     
-    if not articles_meta:
-        total_pages = 1
-        generate_index_html([], 1, 1)
+    # Korean Pagination
+    if not articles_meta_ko:
+        generate_index_html([], 1, 1, lang='ko')
     else:
-        total_pages = math.ceil(len(articles_meta) / ARTICLES_PER_PAGE)
+        total_pages = math.ceil(len(articles_meta_ko) / ARTICLES_PER_PAGE)
         for page_num in range(1, total_pages + 1):
             start_index = (page_num - 1) * ARTICLES_PER_PAGE
             end_index = start_index + ARTICLES_PER_PAGE
-            page_articles = articles_meta[start_index:end_index]
-            generate_index_html(page_articles, page_num, total_pages)
+            generate_index_html(articles_meta_ko[start_index:end_index], page_num, total_pages, lang='ko')
+            
+    # English Pagination
+    if not articles_meta_en:
+        generate_index_html([], 1, 1, lang='en')
+    else:
+        total_pages_en = math.ceil(len(articles_meta_en) / ARTICLES_PER_PAGE)
+        for page_num in range(1, total_pages_en + 1):
+            start_index = (page_num - 1) * ARTICLES_PER_PAGE
+            end_index = start_index + ARTICLES_PER_PAGE
+            generate_index_html(articles_meta_en[start_index:end_index], page_num, total_pages_en, lang='en')
 
-    _generate_sitemap(articles_meta)
+    # Combine all articles for the sitemap
+    _generate_sitemap(articles_meta_ko + articles_meta_en)
 
 def extract_svg_logo_from_common_body_injections():
     # Regex to find the <svg> tag within COMMON_BODY_INJECTIONS
