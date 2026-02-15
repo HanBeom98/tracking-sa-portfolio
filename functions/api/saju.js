@@ -35,7 +35,6 @@ export async function onRequest(context) {
             headers: { 'Content-Type': 'application/json' },
         }));
     }
-    }
 
     const GEMINI_API_KEY = env.GEMINI_API_KEY; // Access API key from Cloudflare environment variables
     const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent';
