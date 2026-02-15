@@ -112,6 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const gender = genderMaleRadio.checked ? 'male' : 'female';
 
         if (!name || !birthYear || !birthMonth || !birthDay) {
+            console.log("Input validation failed: Not all required fields are filled.");
             alert(window.getTranslation(window.currentLang, 'saju_input_missing'));
             return;
         }
@@ -145,7 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     },
                     birthTime: birthHour,
                     gender,
-                    language: window.currentLang, // Send language parameter
+                    language: localStorage.getItem('lang') || 'ko', // Send language parameter
                     currentDate: { // Send current date
                         year: currentYear,
                         month: currentMonth,
