@@ -1,4 +1,3 @@
-
 # Python
 __pycache__/
 *.pyc
@@ -22,28 +21,6 @@ storage.rules
 
 # VSCode
 .vscode/
-
-# Build output
-/public/*
-!/public/style.css
-!/public/common.js
-!/public/translations.js
-!/public/logo.svg
-!/public/favicon.svg
-!/public/ads.txt
-!/public/index.html
-!/public/index-en.html
-!/public/about.html
-!/public/contact.html
-!/public/inquiry.html
-!/public/privacy-policy.html
-!/public/write.html
-!/public/post.html
-!/public/edit.html
-!/public/ai-test.html
-!/public/saju-test.html
-!/public/animal_face_test.html
-!/public/posts/
 
 # Other
 *.log
