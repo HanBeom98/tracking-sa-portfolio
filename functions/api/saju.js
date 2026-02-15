@@ -8,11 +8,9 @@ function addCORSHeaders(response) {
 
 // /functions/api/saju.js
 export async function onRequest(context) {
-    if (request.method === 'OPTIONS') {
-        return addCORSHeaders(new Response(null, { status: 204 }));
-    }
-
     const { request, env } = context;
+
+    if (request.method === 'OPTIONS') {
 
     // Early exit if API key is not configured
     if (!env.GEMINI_API_KEY) {
