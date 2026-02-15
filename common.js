@@ -51,44 +51,34 @@ window.applyTranslations = function(lang) {
 window.setLanguage = function(lang) {
     const currentPath = window.location.pathname;
 
-    // Handle root, index.html, and their paginated versions
-    if (currentPath === '/' || currentPath.endsWith('/index.html') || /^\/page-\d+\.html$/.test(currentPath)) {
-        if (lang === 'en') {
-            let newPath = '/index-en.html';
-            if (currentPath.includes('page-')) {
-                newPath = currentPath.replace('/page-', '/page-en-');
-            }
-            window.location.href = newPath;
-            return;
-        }
+    // TOP PRIORITY: Handle navigation from English main/paginated pages back to Korean root.
+    if (lang === 'ko' && (currentPath.includes('index-en') || currentPath.includes('page-en-'))) {
+        window.location.href = 'https://trackingsa.com/'; // Force redirect to the absolute root URL.
+        return;
     }
 
-    // Handle index-en.html and its paginated versions
-    if (currentPath.endsWith('/index-en.html') || /^\/page-en-\d+\.html$/.test(currentPath)) {
-        if (lang === 'ko') {
-            let newPath = '/index.html';
-            if (currentPath.includes('page-en-')) {
-                newPath = currentPath.replace('/page-en-', '/page-');
-            }
-            window.location.href = newPath;
-            return;
+    // Handle navigation from Korean main/paginated pages to English version.
+    if (lang === 'en' && (currentPath === '/' || currentPath.endsWith('/index.html') || /^\/page-\d+\.html$/.test(currentPath))) {
+        let newPath = '/index-en.html';
+        if (currentPath.includes('page-')) {
+            newPath = currentPath.replace('/page-', '/page-en-');
         }
+        window.location.href = newPath;
+        return;
     }
     
-    // Existing robust logic for article pages
+    // Handle individual article pages (This logic is already robust for pretty URLs).
     const isArticlePage = /\/\d{4}-\d{2}-\d{2}-/.test(currentPath);
     if (isArticlePage) {
         const isEnglishVersion = currentPath.endsWith('-en') || currentPath.endsWith('-en.html');
 
         if (lang === 'en' && !isEnglishVersion) {
-            // KO -> EN
             const newPath = currentPath.endsWith('.html')
                 ? currentPath.replace('.html', '-en.html')
                 : currentPath + '-en';
             window.location.href = newPath;
             return;
         } else if (lang === 'ko' && isEnglishVersion) {
-            // EN -> KO
             let newPath;
             if (currentPath.endsWith('-en.html')) {
                 newPath = currentPath.replace('-en.html', '.html');
@@ -100,15 +90,15 @@ window.setLanguage = function(lang) {
         }
     }
 
-    // Fallback for non-redirect cases
+    // Fallback for non-redirect cases (e.g., about page, contact page)
     currentLang = lang;
     localStorage.setItem('lang', lang);
-    window.applyTranslations(lang); // Call the global applyTranslations
+    window.applyTranslations(lang); 
 
     // Update active class on language buttons
     const langButtons = document.querySelectorAll('.lang-button');
     langButtons.forEach(button => {
-        if (button && button.dataset.lang === lang) { // Defensive check for button
+        if (button && button.dataset.lang === lang) {
             button.classList.add('active');
         } else if (button) {
             button.classList.remove('active');
