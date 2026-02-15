@@ -1,5 +1,5 @@
 function addCORSHeaders(response) {
-    response.headers.set('Access-Control-Allow-Origin', 'https://trackingsa.com');
+    response.headers.set('Access-Control-Allow-Origin', '*'); 
     response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
     response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
     response.headers.set('Access-Control-Max-Age', '86400');
@@ -85,7 +85,7 @@ export async function onRequest(context) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'x-goog-api-client': 'gl-js/ saju-api/1.0.0' // Added safety header
+                'x-goog-api-client': 'gl-js/saju-api/1.0.0' // Added safety header
             },
             body: JSON.stringify({
                 contents: [{
