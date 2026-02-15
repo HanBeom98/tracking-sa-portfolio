@@ -27,7 +27,6 @@ storage.rules
 *.pot
 *.swp
 .DS_Store
-/functions/api/saju.js
 .env
 secrets.json
 .secret
@@ -46,7 +45,6 @@ credentials.json
 
 #tracking-sa
 /.firebase/
-/functions/api/
 .firebaserc
 /saju-test.js
 /saju-test.html

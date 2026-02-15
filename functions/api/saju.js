@@ -25,7 +25,7 @@ export async function onRequest(context) {
     }
 
     const GEMINI_API_KEY = env.GEMINI_API_KEY; // Access API key from Cloudflare environment variables
-    const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+    const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent';
 
     let prompt = '';
         if (language === 'en') {
@@ -72,7 +72,8 @@ export async function onRequest(context) {
         const geminiResponse = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'x-goog-api-client': 'gl-js/ saju-api/1.0.0' // Added safety header
             },
             body: JSON.stringify({
                 contents: [{
