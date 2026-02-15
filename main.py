@@ -129,10 +129,12 @@ def clean_filename(title):
 
 DEFAULT_OG_IMAGE_URL = f"{BASE_URL}logo.svg" # Placeholder for social sharing image
 
-def extract_description_from_md(md_content):
+def extract_description_from_md(md_content, lang="ko"):
     # Try to find a specific summary section or the first paragraph
     # Look for "뉴스 요약" or "## 뉴스 요약" and extract content until next heading or end of content
-    summary_match = re.search(r'(?:##\s*뉴스 요약\s*\n\n|\n\n##\s*뉴스 요약\s*\n\n)(.*?)(?=\n\n##|\Z)', md_content, re.DOTALL)
+    summary_keyword = "뉴스 요약" if lang == "ko" else "Deep Dive"
+    summary_match = re.search(r'(?:##\s*' + re.escape(summary_keyword) + r'\s*\n\n|\n\n##\s*' + re.escape(summary_keyword) + r'\s*\n\n)(.*?)(?=\n\n##|\Z)', md_content, re.DOTALL | re.IGNORECASE)
+
     if summary_match:
         description = summary_match.group(1).strip()
         # Clean up markdown formatting like bullet points or bold text
@@ -241,41 +243,48 @@ def _generate_sitemap(articles_info):
     with open(SITEMAP_PATH, "w", encoding="utf-8") as f:
         f.write(sitemap_content)
 
-def generate_article_html(md_content, title, date_str, output_path, hashtags_html="", description="", image_url=""):
+def generate_article_html(md_content, title, date_str, output_path, hashtags_html="", description="", image_url="", lang="ko"):
     # Default values for description and image_url if not provided
     if not description:
-        description = extract_description_from_md(md_content) or f"{title}에 대한 최신 뉴스입니다."
+        default_ko_desc = f"{title}에 대한 최신 뉴스입니다."
+        default_en_desc = f"Latest news about {title}."
+        description = extract_description_from_md(md_content, lang=lang) or (default_ko_desc if lang == "ko" else default_en_desc)
+
     if not image_url:
-        image_url = DEFAULT_OG_IMAGE_URL # 이 상수는 나중에 전역적으로 정의됨
+        image_url = DEFAULT_OG_IMAGE_URL
+
+    back_to_list_text = "목록으로 돌아가기" if lang == "ko" else "Back to List"
+    published_date_text = "게시일" if lang == "ko" else "Published on"
 
     html_template = f"""
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="{lang}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{title} - 뉴스</title>
+    <title>{title} - News</title>
     <meta name="description" content="{description}">
-
     <!-- Open Graph Tags -->
-    <meta property="og:title" content="{title} - 뉴스">
+    <meta property="og:title" content="{title} - News">
     <meta property="og:description" content="{description}">
     <meta property="og:type" content="article">
     <meta property="og:url" content="{BASE_URL}{os.path.basename(output_path)}">
     <meta property="og:image" content="{image_url}">
+    {f'<meta property="og:locale" content="ko_KR">' if lang == "ko" else ''}
+    {f'<meta property="og:locale:alternate" content="en_US">' if lang == "ko" else ''}
 
     <!-- Twitter Card Tags -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{title} - 뉴스">
+    <meta name="twitter:title" content="{title} - News">
     <meta name="twitter:description" content="{description}">
     <meta name="twitter:image" content="{image_url}">
 </head>
 <body>
     <main class="article-detail-main">
-        <a href="/index.html" class="back-to-list"><i class="fas fa-arrow-left"></i> 목록으로 돌아가기</a>
+        <a href="/index.html" class="back-to-list"><i class="fas fa-arrow-left"></i> {back_to_list_text}</a>
         <article class="news-article-container">
             <div class="article-title-display">{title}</div>
-            <p class="article-meta">게시일: {date_str}</p>
+            <p class="article-meta">{published_date_text}: {date_str}</p>
             <div class="article-content">
                 {markdown.markdown(md_content)}
                 {hashtags_html}
@@ -289,6 +298,7 @@ def generate_article_html(md_content, title, date_str, output_path, hashtags_htm
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(html_template)
     process_html_file_for_common_elements(output_path)
+
 
 def generate_index_html(articles_on_page, current_page, total_pages):
     with open("index.html", "r", encoding="utf-8") as f:
@@ -400,7 +410,7 @@ def generate_public_site():
         # Collect all markdown files with their dates and modification times
         all_md_files = []
         for fn in os.listdir(NEWS_POSTS_DIR):
-            if fn.endswith('.md'):
+            if fn.endswith('.md') and not fn.endswith('-en.md'):
                 file_path = os.path.join(NEWS_POSTS_DIR, fn)
                 
                 # Extract date from filename
@@ -431,7 +441,7 @@ def generate_public_site():
             # Ensure the date used for the URL is the one extracted from the filename
             url = f"{date_str}-{clean_filename(title)}.html"
             articles_meta.append({'title': title, 'date': date_str, 'url': url})
-            description_for_article = extract_description_from_md(processed_content)
+            description_for_article = extract_description_from_md(processed_content, lang="ko")
             generate_article_html(processed_content, title, date_str, os.path.join(PUBLIC_DIR, url), hashtags_html, description=description_for_article)
 
     # --- Pagination Logic ---
@@ -511,26 +521,49 @@ def generate_ai_content(api_key, news_title, news_summary):
     prompt = f'''뉴스 제목: {news_title}
 뉴스 요약: {news_summary}
 
-한국어 마크다운 뉴스 글 작성
-- 제목 생성 지침: 뉴스 제목을 지을 때 단순히 사실만 나열하지 말고, 사람들이 실제로 검색창에 입력할 법한 구체적인 질문, 추천, 비교, 해결 방법이 포함된 '롱테일 키워드' 형식을 사용하세요.
-  예시:
-  - [기존 방식]: 인텔, 새로운 GPU 출시
-  - [개선 방식]: 인텔 새 GPU 출시, 대학생 그래픽 작업용 노트북 추천 사양 및 성능 비교 가이드
-  - 작성 원칙: 제목은 항상 # 제목 형식을 유지하되, 독자가 궁금해할 만한 유익한 정보를 제목에 포함하여 클릭률(CTR)을 높이도록 작성해 주십시오.
+Please generate two versions of the news article based on the title and summary provided: one in Korean and one in English.
 
-- 본문 작성 원칙:
-  - 본문 내용은 가독성을 위해 불렛포인트(-)를 적극 활용하여 중요한 정보를 명확하게 전달해 주십시오.
-  - IT 전문가가 통찰력을 제공하는 듯한 정중하고 신뢰감 있는 말투(예: ~입니다, ~합니다)로 작성해 주십시오.
+Follow these instructions for BOTH languages:
+1.  **Title Generation**: Create a "long-tail keyword" style title that people would actually search for. Instead of just stating facts, include specific questions, recommendations, comparisons, or solutions. The title must start with `#`.
+    *   Example (Korean):
+        *   (Bad): 인텔, 새로운 GPU 출시
+        *   (Good): 인텔 새 GPU 출시, 대학생 그래픽 작업용 노트북 추천 사양 및 성능 비교 가이드
+    *   Example (English):
+        *   (Bad): Intel launches new GPU
+        *   (Good): Intel's New GPU: A Performance Comparison and Buying Guide for College Students
 
-- # 제목
-- 본문 내용 (불렛포인트 적극 활용)
+2.  **Body Content**:
+    *   Use bullet points (`-`) extensively for readability to clearly convey important information.
+    *   Write in a polite and trustworthy tone, as if an IT expert is providing insights (e.g., using ~입니다, ~합니다 for Korean).
 
+3.  **Deep Dive Section (`## 🔍 Deep Dive`)**:
+    *   In 3-5 sentences, provide an expert analysis of the news's impact and future prospects for the relevant market (e.g., Korean IT market for the Korean version, global market for the English version).
+
+4.  **Monetization Ideas**: Provide 3 monetization ideas related to the article's topic.
+
+5.  **Hashtags**: Provide 5 relevant hashtags in the format `##HASHTAGS##: #keyword1 #keyword2 #keyword3 #keyword4 #keyword5`. This section is mandatory.
+
+Strictly enclose the final output for each language within the following tags:
+-   For Korean: `[KO_START]` and `[KO_END]`
+-   For English: `[EN_START]` and `[EN_END]`
+
+Example structure of your final response:
+[KO_START]
+# 한국어 제목
+- 한국어 본문...
 ## 🔍 Deep Dive
-- 이 섹션에는 해당 뉴스가 한국 IT 시장이나 일반 독자에게 미칠 영향과 전망을 전문가 시각으로 3~5문장 작성해 주십시오.
-- 말투는 테크 전문 기자의 신뢰감 있는 말투(~입니다, ~합니다)를 사용해 주십시오.
-
-- 수익화 아이디어 3개
-- 해시태그: (해시태그 섹션을 작성할 때 반드시, 절대로 생략하지 말고 "##HASHTAGS##: #키워드1 #키워드2 #키워드3 #키워드4 #키워드5" 형식으로 뉴스 내용과 관련된 키워드 5개 출력. 출력 예시: ##기술 #혁신 #인공지능 #미래 #트렌드)
+- 한국 IT 시장에 미칠 영향...
+- 수익화 아이디어 3가지
+##HASHTAGS##: #기술 #혁신 #인공지능 #미래 #트렌드
+[KO_END]
+[EN_START]
+# English Title
+- English body content...
+## 🔍 Deep Dive
+- Impact on the global market...
+- 3 Monetization Ideas
+##HASHTAGS##: #tech #innovation #ai #future #trends
+[EN_END]
 '''
 
     try:
@@ -546,7 +579,7 @@ def generate_ai_content(api_key, news_title, news_summary):
 def _extract_hashtags_from_string(text_with_hashtags):
     # Improved regex to find #tags, ensuring it's not part of a markdown header like ###
     # and handles cases where there might be extra spaces or other characters
-    return re.findall(r'#([가-힣\w]+)\b', text_with_hashtags)
+    return re.findall(r'#([a-zA-Z0-9가-힣\w]+)\b', text_with_hashtags)
 
 def _extract_and_format_hashtags(original_content, log_prefix=""):
     hashtags_html = ""
@@ -575,15 +608,16 @@ def _extract_and_format_hashtags(original_content, log_prefix=""):
     if not found_hashtags:
         found_hashtags.extend(_extract_hashtags_from_string(original_content))
         if found_hashtags:
+            # Remove the found hashtags from the content to prevent them from showing up in the body
+            for tag in found_hashtags:
+                modified_content = re.sub(r'#'+re.escape(tag)+r'\b', '', modified_content)
             print(f"{log_prefix}✅ 해시태그 추출 성공 (전체 본문 폴백): {', '.join(found_hashtags)}")
-        # No '❌ 해시태그 추출 실패' print here because default generation is the next step
     
     # 3. Generate default hashtags if still no hashtags found
     if not found_hashtags and title:
         default_tags_raw = re.sub(r'[^\w\s]', '', title).split()
-        default_hashtags = [clean_filename(word) for word in default_tags_raw if len(word) > 1][:5]
-        if default_tags_raw: # Check if there are any words to form default hashtags
-            found_hashtags.extend(default_tags_raw) # Use default_tags_raw here, not default_hashtags again
+        found_hashtags = [clean_filename(word) for word in default_tags_raw if len(word) > 1][:5]
+        if found_hashtags:
             print(f"{log_prefix}ℹ️ 해시태그 없음: 제목에서 기본 해시태그 생성함: {', '.join(found_hashtags)}")
     
     # --- Final Formatting ---
@@ -596,24 +630,63 @@ def _extract_and_format_hashtags(original_content, log_prefix=""):
         print(f"{log_prefix}❌ 최종 해시태그 없음. 영역을 숨깁니다.")
         hashtags_html = ""
 
-    return modified_content, hashtags_html
+    return modified_content.strip(), hashtags_html
 
 def save_post_and_generate_html(content):
     os.makedirs(NEWS_POSTS_DIR, exist_ok=True)
     today = datetime.date.today().strftime("%Y-%m-%d")
-    title = extract_title_from_md(content)
-    cleaned = clean_filename(title)
 
-    # Use the new helper function for hashtag extraction and formatting
-    processed_content, hashtags_html = _extract_and_format_hashtags(content, log_prefix="[save_post_and_generate_html] ")
+    # Extract Korean and English content
+    ko_match = re.search(r'\[KO_START\](.*?)\[KO_END\]', content, re.DOTALL)
+    en_match = re.search(r'\[EN_START\](.*?)\[EN_END\]', content, re.DOTALL)
 
-    md_path = os.path.join(NEWS_POSTS_DIR, f"{today}-{cleaned}.md")
-    with open(md_path, "w", encoding="utf-8") as f: f.write(processed_content) # Use processed_content
+    ko_content = ko_match.group(1).strip() if ko_match else ""
+    en_content = en_match.group(1).strip() if en_match else ""
+
+    if not ko_content:
+        print("⚠️ 한국어 콘텐츠를 찾을 수 없습니다. 이 기사를 건너뜁니다.")
+        return None, None, None
+
+    # --- Process Korean Article ---
+    ko_title = extract_title_from_md(ko_content)
+    ko_cleaned = clean_filename(ko_title)
+    ko_processed_content, ko_hashtags_html = _extract_and_format_hashtags(ko_content, log_prefix="[save_post_ko] ")
     
-    html_filename = f"{today}-{cleaned}.html"
-    description_for_article = extract_description_from_md(processed_content)
-    generate_article_html(processed_content, title, today, os.path.join(PUBLIC_DIR, html_filename), hashtags_html, description=description_for_article)
-    return html_filename, title, today
+    ko_md_path = os.path.join(NEWS_POSTS_DIR, f"{today}-{ko_cleaned}.md")
+    with open(ko_md_path, "w", encoding="utf-8") as f:
+        f.write(ko_processed_content)
+    
+    ko_html_filename = f"{today}-{ko_cleaned}.html"
+    ko_description = extract_description_from_md(ko_processed_content, lang="ko")
+    generate_article_html(
+        ko_processed_content, ko_title, today, 
+        os.path.join(PUBLIC_DIR, ko_html_filename), 
+        ko_hashtags_html, description=ko_description, lang="ko"
+    )
+    print(f"✅ 한국어 기사 생성됨: {ko_html_filename}")
+
+    # --- Process English Article ---
+    if en_content:
+        en_title = extract_title_from_md(en_content)
+        en_cleaned = clean_filename(en_title)
+        en_processed_content, en_hashtags_html = _extract_and_format_hashtags(en_content, log_prefix="[save_post_en] ")
+
+        # Save English markdown file with '-en' suffix
+        en_md_path = os.path.join(NEWS_POSTS_DIR, f"{today}-{ko_cleaned}-en.md") # Use Korean cleaned title for consistency
+        with open(en_md_path, "w", encoding="utf-8") as f:
+            f.write(en_processed_content)
+            
+        en_html_filename = f"{today}-{ko_cleaned}-en.html" # Use Korean cleaned title for consistency
+        en_description = extract_description_from_md(en_processed_content, lang="en")
+        generate_article_html(
+            en_processed_content, en_title, today,
+            os.path.join(PUBLIC_DIR, en_html_filename),
+            en_hashtags_html, description=en_description, lang="en"
+        )
+        print(f"✅ 영어 기사 생성됨: {en_html_filename}")
+
+    # Return the primary (Korean) article info
+    return ko_html_filename, ko_title, today
 
 def main():
     parser = argparse.ArgumentParser(description="Generate static news site with optional AI content generation.")

@@ -49,6 +49,22 @@ window.applyTranslations = function(lang) {
 
 // 언어를 변경하는 함수 (전역으로 선언)
 window.setLanguage = function(lang) {
+    const currentPath = window.location.pathname;
+    const isArticlePage = /\/\d{4}-\d{2}-\d{2}-/.test(currentPath);
+
+    // --- New Redirection Logic ---
+    if (isArticlePage) {
+        if (lang === 'en' && !currentPath.endsWith('-en.html')) {
+            const newPath = currentPath.replace('.html', '-en.html');
+            window.location.href = newPath;
+            return; 
+        } else if (lang === 'ko' && currentPath.endsWith('-en.html')) {
+            const newPath = currentPath.replace('-en.html', '.html');
+            window.location.href = newPath;
+            return; 
+        }
+    }
+    
     currentLang = lang;
     localStorage.setItem('lang', lang);
     window.applyTranslations(lang); // Call the global applyTranslations
