@@ -1,38 +1,85 @@
-# Logs
-logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-app.log
-cron.log
-processed_articles.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+myenv/
+.venv/
 
 # Firebase
-.firebase
-firebase-debug.log
-database-debug.log
+.firebase/
+firebase.json
+database.rules.json
+storage.rules
 
 # IDX
-.idx
+.idx/
+.dev.nix
+
+# VSCode
+.vscode/
 
 # Build output
-dist
-build
+/public/*
+!/public/style.css
+!/public/common.js
+!/public/translations.js
+!/public/logo.svg
+!/public/favicon.svg
+!/public/ads.txt
+!/public/index.html
+!/public/index-en.html
+!/public/about.html
+!/public/contact.html
+!/public/inquiry.html
+!/public/privacy-policy.html
+!/public/write.html
+!/public/post.html
+!/public/edit.html
+!/public/ai-test.html
+!/public/saju-test.html
+!/public/animal_face_test.html
+!/public/posts/
 
-# Dependencies
-node_modules
-.venv/
-myenv/
-__pycache__/
-
-# Misc
+# Other
+*.log
+*.pot
+*.swp
 .DS_Store
+/functions/api/saju.js
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-http-server.log
-firebase-config.js
-/venv/
+secrets.json
+.secret
+secrets/
+.secrets
+key.json
+service-account.json
+serviceAccountKey.json
+google-services.json
+firebase-adminsdk.json
+firebase-service-account.json
+client_secret.json
+credentials.json
+.credentials
+/functions/api/config.js
+
+#tracking-sa
+/.firebase/
+/functions/api/
+.firebaserc
+/saju-test.js
+/saju-test.html
+
+#tracking-sa-final
+.venv
+.vscode
+__pycache__
+myenv
+.idx
+.firebase
+*.pyc
+venv/
