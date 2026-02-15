@@ -6,15 +6,14 @@ function addCORSHeaders(response) {
     return response;
 }
 
-// /functions/api/saju.js
 export async function onRequest(context) {
-    const { request, env } = context;
+    // 1. 에러 방지를 위해 변수 선언을 맨 위로 고정
+    const { request, env } = context; 
 
     if (request.method === 'OPTIONS') {
         return addCORSHeaders(new Response(null, { status: 204 }));
     }
 
-    // Early exit if API key is not configured
     if (!env.GEMINI_API_KEY) {
         console.error('CRITICAL: GEMINI_API_KEY environment variable not set.');
         return addCORSHeaders(new Response(JSON.stringify({ error: 'Server configuration error: API key is not set.' }), {
@@ -27,19 +26,20 @@ export async function onRequest(context) {
         return addCORSHeaders(new Response('Method Not Allowed', { status: 405 }));
     }
 
-    const { name, birthDate, birthTime, gender, language, currentDate } = await request.json(); // Destructure language and currentDate
+    try {
+        const { name, birthDate, birthTime, gender, language, currentDate } = await request.json();
 
-    if (!name || !birthDate || !birthTime || !gender || !currentDate) {
-        return addCORSHeaders(new Response(JSON.stringify({ error: '이름, 생년월일, 성별, 현재 날짜 정보를 모두 입력해주세요.' }), {
-            status: 400,
-            headers: { 'Content-Type': 'application/json' },
-        }));
-    }
+        if (!name || !birthDate || !birthTime || !gender || !currentDate) {
+            return addCORSHeaders(new Response(JSON.stringify({ error: '이름, 생년월일, 성별, 현재 날짜 정보를 모두 입력해주세요.' }), {
+                status: 400,
+                headers: { 'Content-Type': 'application/json' },
+            }));
+        }
 
-    const GEMINI_API_KEY = env.GEMINI_API_KEY; // Access API key from Cloudflare environment variables
-    const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent';
+        const GEMINI_API_KEY = env.GEMINI_API_KEY;
+        const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent';
 
-    let prompt = '';
+        let prompt = '';
         if (language === 'en') {
             prompt = `Today is ${currentDate.year} / ${currentDate.month} / ${currentDate.day}. You must interpret the fortune based on this date.
     
@@ -60,7 +60,7 @@ export async function onRequest(context) {
     Gender: ${gender === 'male' ? 'Male' : 'Female'}
     `;
         } else { // Default to Korean
-        prompt = `오늘은 ${currentDate.year}년 ${currentDate.month}월 ${currentDate.day}일입니다. 반드시 이 날짜를 기준으로 운세를 풀이하세요.
+            prompt = `오늘은 ${currentDate.year}년 ${currentDate.month}월 ${currentDate.day}일입니다. 반드시 이 날짜를 기준으로 운세를 풀이하세요.
 
 사용자의 이름, 생년월일시, 성별 정보가 주어지면, 오늘의 운세를 상담가처럼 친절하고 희망적인 어조로 자세히 설명하는 마크다운 글을 작성해 주세요. 다음 지침을 따르세요:
 
@@ -78,14 +78,13 @@ export async function onRequest(context) {
 태어난 시간: ${birthTime === 'unknown' ? '모름' : birthTime}
 성별: ${gender === 'male' ? '남성' : '여성'}
 `;
-    }
+        }
 
-    try {
         const geminiResponse = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'x-goog-api-client': 'gl-js/saju-api/1.0.0' // Added safety header
+                'x-goog-api-client': 'gl-js/saju-api/1.0.0'
             },
             body: JSON.stringify({
                 contents: [{
@@ -103,8 +102,7 @@ export async function onRequest(context) {
                 status: 200
             }));
         } else {
-            console.error('Gemini API Error:', geminiData);
-            const errorMessage = geminiData.error?.message || '사주 풀이를 가져오는 데 실패했습니다. 잠시 후 다시 시도해주세요.';
+            const errorMessage = geminiData.error?.message || '사주 풀이를 가져오는 데 실패했습니다.';
             return addCORSHeaders(new Response(JSON.stringify({ error: errorMessage }), {
                 headers: { 'Content-Type': 'application/json' },
                 status: geminiResponse.status || 500
@@ -112,8 +110,7 @@ export async function onRequest(context) {
         }
 
     } catch (error) {
-        console.error('Function execution error:', error);
-        return addCORSHeaders(new Response(JSON.stringify({ error: `서버 내부 오류가 발생했습니다: ${error.message}` }), {
+        return addCORSHeaders(new Response(JSON.stringify({ error: `서버 내부 오류: ${error.message}` }), {
             headers: { 'Content-Type': 'application/json' },
             status: 500
         }));
