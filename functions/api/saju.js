@@ -7,6 +7,7 @@ function addCORSHeaders(response) {
 }
 
 export async function onRequest(context) {
+    console.log('Vercel context object:', context); // Debugging line
     // 1. 에러 방지를 위해 변수 선언을 맨 위로 고정
     const { request, env } = context; 
 
