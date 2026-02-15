@@ -204,7 +204,7 @@ def process_html_file_for_common_elements(filepath):
     except Exception as e:
         print(f"⚠️ 에러: {filepath} 처리 중 {e}")
 
-def _generate_sitemap(articles_info):
+def _generate_sitemap(articles_info, total_pages_ko=1, total_pages_en=1):
     # articles_info will be a list of {'url': '...', 'lastmod': 'YYYY-MM-DD'}
     # Use current date as last modified date for the index page for simplicity
     current_date = datetime.date.today().strftime("%Y-%m-%d")
@@ -216,6 +216,30 @@ def _generate_sitemap(articles_info):
         <lastmod>{current_date}</lastmod>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
+    </url>
+    <url>
+        <loc>{BASE_URL}index-en.html</loc>
+        <lastmod>{current_date}</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>1.0</priority>
+    </url>
+"""
+    # Add Korean paginated pages
+    for i in range(2, total_pages_ko + 1):
+        sitemap_content += f"""    <url>
+        <loc>{BASE_URL}page-{i}.html</loc>
+        <lastmod>{current_date}</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>0.9</priority>
+    </url>
+"""
+    # Add English paginated pages
+    for i in range(2, total_pages_en + 1):
+        sitemap_content += f"""    <url>
+        <loc>{BASE_URL}page-en-{i}.html</loc>
+        <lastmod>{current_date}</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>0.9</priority>
     </url>
 """
 
@@ -242,6 +266,48 @@ def _generate_sitemap(articles_info):
     os.makedirs(os.path.dirname(SITEMAP_PATH), exist_ok=True)
     with open(SITEMAP_PATH, "w", encoding="utf-8") as f:
         f.write(sitemap_content)
+
+def generate_rss_feed(articles_info):
+    RSS_PATH = os.path.join(PUBLIC_DIR, "rss.xml")
+    current_date_rfc822 = datetime.datetime.now().strftime("%a, %d %b %Y %H:%M:%S %z")
+
+    rss_content = f"""<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+    <title>AI News - Tracking SA</title>
+    <link>{BASE_URL}</link>
+    <description>The latest AI news and in-depth analysis, updated daily.</description>
+    <language>ko</language>
+    <lastBuildDate>{current_date_rfc822}</lastBuildDate>
+    <atom:link href="{BASE_URL}rss.xml" rel="self" type="application/rss+xml" />
+"""
+    # Sort articles by date, most recent first
+    sorted_articles = sorted(articles_info, key=lambda x: x['date'], reverse=True)
+
+    for article in sorted_articles[:30]: # Limit to most recent 30
+        article_url = f"{BASE_URL}{article['url']}"
+        # For pubDate, we need a datetime object
+        pub_date = datetime.datetime.strptime(article['date'], "%Y-%m-%d")
+        pub_date_rfc822 = pub_date.strftime("%a, %d %b %Y 00:00:00 +0000")
+
+        # Basic description for now. Could be improved by reading md content.
+        description = f"Article about {article['title']}"
+
+        rss_content += f"""    <item>
+        <title><![CDATA[{article['title']}]]></title>
+        <link>{article_url}</link>
+        <description><![CDATA[{description}]]></description>
+        <pubDate>{pub_date_rfc822}</pubDate>
+        <guid isPermaLink="true">{article_url}</guid>
+    </item>
+"""
+
+    rss_content += """</channel>
+</rss>"""
+    with open(RSS_PATH, "w", encoding="utf-8") as f:
+        f.write(rss_content)
+    print("✅ RSS feed generated at rss.xml")
+
 
 def generate_article_html(md_content, title, date_str, output_path, hashtags_html="", description="", image_url="", lang="ko"):
     # Default values for description and image_url if not provided
@@ -427,7 +493,8 @@ def generate_public_site():
         # Generate empty index files if no posts directory
         generate_index_html([], 1, 1, lang='ko')
         generate_index_html([], 1, 1, lang='en')
-        _generate_sitemap([])
+        _generate_sitemap([], 1, 1)
+        generate_rss_feed([]) # Also generate an empty RSS feed
         return
 
     # --- Korean Articles ---
@@ -489,16 +556,18 @@ def generate_public_site():
     ARTICLES_PER_PAGE = 10
     
     # Korean Pagination
+    total_pages_ko = 1
     if not articles_meta_ko:
         generate_index_html([], 1, 1, lang='ko')
     else:
-        total_pages = math.ceil(len(articles_meta_ko) / ARTICLES_PER_PAGE)
-        for page_num in range(1, total_pages + 1):
+        total_pages_ko = math.ceil(len(articles_meta_ko) / ARTICLES_PER_PAGE)
+        for page_num in range(1, total_pages_ko + 1):
             start_index = (page_num - 1) * ARTICLES_PER_PAGE
             end_index = start_index + ARTICLES_PER_PAGE
-            generate_index_html(articles_meta_ko[start_index:end_index], page_num, total_pages, lang='ko')
+            generate_index_html(articles_meta_ko[start_index:end_index], page_num, total_pages_ko, lang='ko')
             
     # English Pagination
+    total_pages_en = 1
     if not articles_meta_en:
         generate_index_html([], 1, 1, lang='en')
     else:
@@ -508,8 +577,11 @@ def generate_public_site():
             end_index = start_index + ARTICLES_PER_PAGE
             generate_index_html(articles_meta_en[start_index:end_index], page_num, total_pages_en, lang='en')
 
-    # Combine all articles for the sitemap
-    _generate_sitemap(articles_meta_ko + articles_meta_en)
+    # Combine all articles for sitemap and RSS
+    all_articles_meta = articles_meta_ko + articles_meta_en
+    _generate_sitemap(all_articles_meta, total_pages_ko, total_pages_en)
+    generate_rss_feed(all_articles_meta)
+
 
 def extract_svg_logo_from_common_body_injections():
     # Regex to find the <svg> tag within COMMON_BODY_INJECTIONS
