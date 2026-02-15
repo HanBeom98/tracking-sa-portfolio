@@ -35,3 +35,4 @@ __pycache__/
 .env.production.local
 http-server.log
 firebase-config.js
+/venv/
