@@ -19,7 +19,6 @@ database-debug.log
 # Build output
 dist
 build
-public/
 
 # Dependencies
 node_modules
