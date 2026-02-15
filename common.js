@@ -49,11 +49,14 @@ window.applyTranslations = function(lang) {
 
 // 언어를 변경하는 함수 (전역으로 선언)
 window.setLanguage = function(lang) {
+    // 1. 선택한 언어를 즉시 브라우저에 저장 (매우 중요)
+    localStorage.setItem('lang', lang);
+    currentLang = lang;
     const currentPath = window.location.pathname;
     const isEnPath = currentPath.includes('index-en');
     const isMainPath = currentPath === '/' || currentPath.endsWith('index.html') || /^\/page-\d+\.html$/.test(currentPath);
 
-    // 1. 메인 페이지 이동 로직 (주소 이동을 최우선으로)
+    // 2. 메인 페이지 주소 이동 로직
     if (lang === 'en' && isMainPath && !isEnPath) {
         window.location.href = '/index-en';
         return;
@@ -63,7 +66,7 @@ window.setLanguage = function(lang) {
         return;
     }
 
-    // 2. 기사 페이지 이동 로직
+    // 3. 기사 페이지 주소 이동 로직
     const isArticlePage = /\/\d{4}-\d{2}-\d{2}-/.test(currentPath);
     if (isArticlePage) {
         const isEnArticle = currentPath.includes('-en');
@@ -77,9 +80,7 @@ window.setLanguage = function(lang) {
         }
     }
 
-    // 3. 페이지 이동이 필요 없는 경우에만 내부 텍스트 변경
-    currentLang = lang;
-    localStorage.setItem('lang', lang);
+    // 4. 주소 이동이 필요 없는 경우에만 현재 페이지 번역 적용
     window.applyTranslations(lang);
     document.querySelectorAll('.lang-button').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.lang === lang);
