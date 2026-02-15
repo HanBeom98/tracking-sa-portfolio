@@ -1,34 +1,35 @@
-// /api/saju.js (Vercel 루트의 브릿지 파일)
+// /api/saju.js - Vercel 전용 핸들러 (최종 수정본)
 import { onRequest } from '../functions/api/saju.js';
 
 export default async function handler(req, res) {
-    // Vercel의 요청 객체를 Cloudflare가 이해하는 context 구조로 포장합니다.
-    const context = {
-        request: req,
-        env: process.env // Vercel 대시보드에 설정한 환경변수를 주입합니다.
-    };
+    // 1. CORS 헤더 직접 설정 (무한 로딩 방지)
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    // 2. OPTIONS 요청 즉시 응답 (무한 로딩 해결 핵심)
+    if (req.method === 'OPTIONS') {
+        return res.status(204).end();
+    }
 
     try {
-        // 원본 함수를 호출하여 응답을 받습니다.
+        // 3. Cloudflare 형식의 context 구성
+        const context = {
+            request: {
+                method: req.method,
+                headers: req.headers,
+                json: async () => req.body // Vercel에서 파싱된 body를 그대로 반환
+            },
+            env: process.env
+        };
+
+        // 4. 원본 함수 실행
         const response = await onRequest(context);
-        
-        // 응답 본문을 읽어옵니다.
         const data = await response.json();
-        
-        // Vercel 형식으로 최종 응답을 보냅니다 (CORS 헤더 포함).
-        return new Response(JSON.stringify(data), {
-            status: response.status,
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'POST, OPTIONS',
-                'Access-Control-Allow-Headers': 'Content-Type'
-            }
-        });
+
+        return res.status(response.status || 200).json(data);
     } catch (error) {
-        return new Response(JSON.stringify({ error: `Bridge Error: ${error.message}` }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
-        });
+        console.error('Vercel Bridge API Error:', error);
+        return res.status(500).json({ error: error.message });
     }
 }
