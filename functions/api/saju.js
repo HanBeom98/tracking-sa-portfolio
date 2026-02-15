@@ -11,6 +11,8 @@ export async function onRequest(context) {
     const { request, env } = context;
 
     if (request.method === 'OPTIONS') {
+        return addCORSHeaders(new Response(null, { status: 204 }));
+    }
 
     // Early exit if API key is not configured
     if (!env.GEMINI_API_KEY) {
