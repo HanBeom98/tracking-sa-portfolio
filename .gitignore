@@ -1,60 +1,30 @@
-# Python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-env/
+# Python & Virtual Environments
+.venv/
 venv/
 myenv/
-.venv/
-
-# Firebase
-.firebase/
-firebase.json
-database.rules.json
-storage.rules
-
-# IDX
-.idx/
-.dev.nix
-
-# VSCode
-.vscode/
-
-# Other
-*.log
-*.pot
-*.swp
-.DS_Store
-.env
-secrets.json
-.secret
-secrets/
-.secrets
-key.json
-service-account.json
-serviceAccountKey.json
-google-services.json
-firebase-adminsdk.json
-firebase-service-account.json
-client_secret.json
-credentials.json
-.credentials
-/functions/api/config.js
-
-#tracking-sa
-/.firebase/
-.firebaserc
-/saju-test.js
-/saju-test.html
-
-#tracking-sa-final
-.venv
-.vscode
-__pycache__
-myenv
-.idx
-.firebase
+__pycache__/
 *.pyc
-venv/
+
+# Build Outputs (뉴스는 IDX/Cloudflare에는 남고, Git 목록에서만 사라집니다)
+public/*.html
+public/page-*/
+sitemap.xml
+rss.xml
+node_modules/
+firebase-functions/node_modules/
+functions/node_modules/
+.firebase/
+
+# Firebase & Cloudflare
+.firebase/
+.firebaserc
+firebase-debug.log
+
+# IDE & OS
+.vscode/
+.idx/
+
+# Secrets (보안상 제외)
+.env
+*.json
+!package.json

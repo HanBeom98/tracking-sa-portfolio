@@ -131,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             console.log('Current language for API request:', window.currentLang); // Debugging line
-            const response = await fetch('/api/saju', { // Call the Cloudflare Function endpoint
+            const response = await fetch('https://tracking-sa.vercel.app/api/saju', { // Call the Cloudflare Function endpoint
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
