@@ -2,4 +2,4 @@ feedparser
 python-dotenv
 requests
 markdown
-google-gena
+google-genai
