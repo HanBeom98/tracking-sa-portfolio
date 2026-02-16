@@ -2,6 +2,4 @@ feedparser
 python-dotenv
 requests
 markdown
-google-genaigit add requirements.txt
-git commit -m "Fix google-genai dependency error"
-git push origin main
+google-gena
