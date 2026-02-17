@@ -489,6 +489,7 @@ def generate_public_site():
     os.makedirs(PUBLIC_DIR, exist_ok=True)
     copy_static_assets()
     create_ads_txt()
+    create_robots_txt()
 
     if not os.path.exists(NEWS_POSTS_DIR):
         # Generate empty index files if no posts directory
@@ -637,7 +638,14 @@ def create_ads_txt():
     ads_txt_path = os.path.join(PUBLIC_DIR, "ads.txt")
     with open(ads_txt_path, "w", encoding="utf-8") as f:
         f.write(ads_txt_content)
-    print(f"✅ Created {ads_txt_path}")
+    print(f"✅ Created {{ads_txt_path}}")
+
+def create_robots_txt():
+    robots_content = f"User-agent: *\\nAllow: /\\nSitemap: {BASE_URL}sitemap.xml"
+    robots_path = os.path.join(PUBLIC_DIR, "robots.txt")
+    with open(robots_path, "w", encoding="utf-8") as f:
+        f.write(robots_content)
+    print(f"✅ Created {{robots_path}}")
 
 def get_processed_articles():
     if not os.path.exists(PROCESSED_ARTICLES_LOG): return set()
