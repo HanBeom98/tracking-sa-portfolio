@@ -33,7 +33,8 @@ STATIC_PAGES_FOR_SITEMAP = [
 
 
 # Use absolute paths for all assets
-COMMON_HEAD_SCRIPTS = f"""<!-- Google tag (gtag.js) -->
+COMMON_HEAD_SCRIPTS = f"""<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={ADSENSE_CLIENT_ID}" crossorigin="anonymous"></script>
+    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -42,7 +43,6 @@ COMMON_HEAD_SCRIPTS = f"""<!-- Google tag (gtag.js) -->
       gtag('config', 'G-TGD3WRNKPZ');
     </script>
     <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={ADSENSE_CLIENT_ID}" crossorigin="anonymous"></script>
     <script type="text/javascript">
     (function(c,l,a,r,i,t,y){{
         c[a]=c[a]||function(){{(c[a].q=c[a].q||[]).push(arguments)}};
@@ -66,7 +66,7 @@ COMMON_HEAD_SCRIPTS = f"""<!-- Google tag (gtag.js) -->
 
 COMMON_BODY_INJECTIONS = """
 <header>
-    <a href="/index.html" class="site-logo-link">
+    <a href="/" class="site-logo-link">
         <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="site-logo">
             <circle cx="50" cy="50" r="48" stroke="white" stroke-width="4" fill="transparent"/>
             <path d="M25 70L40 55L50 65L75 35" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
@@ -82,7 +82,7 @@ COMMON_BODY_INJECTIONS = """
     <div class="desktop-menu-container" id="slide-out-menu"> <!-- This container now serves as the slide-out for mobile -->
         <nav>
             <ul>
-                <li><a href="/index.html" data-i18n="news_home">홈</a></li>
+                <li><a href="/" data-i18n="news_home">홈</a></li>
                 <li class="dropdown">
                     <a href="#" class="dropbtn" data-i18n="menu_test">테스트</a>
                     <div class="dropdown-content">
