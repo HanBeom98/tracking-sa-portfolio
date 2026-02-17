@@ -12,23 +12,23 @@ import time
 import math
 
 PUBLIC_DIR = "public"
-NEWS_POSTS_DIR = "posts" 
-PROCESSED_ARTICLES_LOG = "processed_articles.log" 
+NEWS_POSTS_DIR = "posts"
+PROCESSED_ARTICLES_LOG = "processed_articles.log"
 ADSENSE_CLIENT_ID = "pub-7263630893992216"
 SITEMAP_PATH = os.path.join(PUBLIC_DIR, "sitemap.xml")
 BASE_URL = os.getenv("BASE_URL", "https://trackingsa.com/")
 
 STATIC_PAGES_FOR_SITEMAP = [
-    "about.html",
-    "contact.html",
-    "inquiry.html",
-    "privacy-policy.html",
-    "animal_face_test.html",
-    "ai-test.html",
-    "saju-test.html",
-    "edit.html",
-    "write.html",
-    "post.html"
+    "about",
+    "contact",
+    "inquiry",
+    "privacy-policy",
+    "animal_face_test",
+    "ai-test",
+    "fortune",
+    "edit",
+    "write",
+    "post"
 ]
 
 
@@ -86,15 +86,15 @@ COMMON_BODY_INJECTIONS = """
                 <li class="dropdown">
                     <a href="#" class="dropbtn" data-i18n="menu_test">테스트</a>
                     <div class="dropdown-content">
-                        <a href="/animal_face_test.html" data-i18n="animal_face_test">동물상 테스트</a>
-                        <a href="/ai-test.html" data-i18n="ai_tendency_test">AI 성향 테스트</a>
-                        <a href="/saju-test.html" data-i18n="saju_test">AI 사주 테스트</a>
+                        <a href="/animal_face_test" data-i18n="animal_face_test">동물상 테스트</a>
+                        <a href="/ai-test" data-i18n="ai_tendency_test">AI 성향 테스트</a>
+                        <a href="/fortune" data-i18n="saju_test">AI 운세 테스트</a>
                     </div>
                 </li>
-                <li><a href="/inquiry.html" data-i18n="partnership_inquiry">파트너십 문의</a></li>
-                <li><a href="/about.html" data-i18n="about_us">회사 소개</a></li>
-                <li><a href="/contact.html" data-i18n="contact">문의</a></li>
-                <li><a href="/privacy-policy.html" data-i18n="privacy_policy">개인정보처리방침</a></li>
+                <li><a href="/inquiry" data-i18n="partnership_inquiry">파트너십 문의</a></li>
+                <li><a href="/about" data-i18n="about_us">회사 소개</a></li>
+                <li><a href="/contact" data-i18n="contact">문의</a></li>
+                <li><a href="/privacy-policy" data-i18n="privacy_policy">개인정보처리방침</a></li>
             </ul>
         </nav>
         <div class="utility-controls">
@@ -109,9 +109,9 @@ COMMON_FOOTER = """
     <footer>
         <p data-i18n="footer_copyright"></p>
         <p>
-            <a href="/about.html" data-i18n="about_us">회사 소개</a> |
-            <a href="/contact.html" data-i18n="contact">문의</a> |
-            <a href="/privacy-policy.html" data-i18n="privacy_policy">개인정보처리방침</a> |
+            <a href="/about" data-i18n="about_us">회사 소개</a> |
+            <a href="/contact" data-i18n="contact">문의</a> |
+            <a href="/privacy-policy" data-i18n="privacy_policy">개인정보처리방침</a> |
             <a href="/sitemap.xml" data-i18n="sitemap">사이트맵</a> |
             <a href="/rss.xml">RSS Feed</a>
         </p>
@@ -464,7 +464,7 @@ def generate_index_html(articles_on_page, current_page, total_pages, lang='ko'):
         f"""
         <section class="hero-banner">
             <h2 data-i18n="hero_title"></h2>
-            <button class="action-button" onclick="window.location.href='/saju-test.html'" data-i18n="start_test_button"></button>
+            <button class="action-button" onclick="window.location.href='/fortune'" data-i18n="start_test_button"></button>
         </section>
         <section class="news-section-main">
             {news_section_content}
@@ -591,7 +591,17 @@ def extract_svg_logo_from_common_body_injections():
     return None
 
 def copy_static_assets():
-    assets = ["style.css", "common.js", "translations.js", "animal_face_test.html", "edit.html", "edit.js", "inquiry.html", "main.js", "post.html", "post.js", "write.html", "write.js", "about.html", "contact.html", "privacy-policy.html", "firebase-config.js", "logo.svg", "favicon.svg", "ai-test.html", "ai-test.js", "saju-test.html", "saju-test.js"] # Added saju-test.html and saju-test.js
+    assets = [
+        "style.css", "common.js", "translations.js", "firebase-config.js", 
+        "logo.svg", "favicon.svg", 
+        "ai-test.js", "fortune.js", "edit.js", "post.js", "write.js", "main.js"
+    ]
+    
+    # Directories to be copied
+    asset_dirs = [
+        "fortune", "about", "ai-test", "animal_face_test", "contact", 
+        "edit", "inquiry", "post", "privacy-policy", "write"
+    ]
 
     # Favicon check and creation
     favicon_path = "favicon.svg"
@@ -605,11 +615,21 @@ def copy_static_assets():
         else:
             print("⚠️ Could not extract SVG logo from COMMON_BODY_INJECTIONS to create favicon.svg.")
     
+    # Copy individual asset files
     for item in assets:
         if os.path.isfile(item):
             shutil.copy2(item, os.path.join(PUBLIC_DIR, item))
-            if item.endswith('.html'):
-                process_html_file_for_common_elements(os.path.join(PUBLIC_DIR, item))
+
+    # Copy asset directories
+    for dir_name in asset_dirs:
+        src_dir = dir_name
+        dest_dir = os.path.join(PUBLIC_DIR, dir_name)
+        if os.path.isdir(src_dir):
+            shutil.copytree(src_dir, dest_dir)
+            # After copying, process the index.html within the directory
+            index_html_path = os.path.join(dest_dir, 'index.html')
+            if os.path.exists(index_html_path):
+                process_html_file_for_common_elements(index_html_path)
 
 def create_ads_txt():
     ads_txt_content = f"google.com, {ADSENSE_CLIENT_ID}, DIRECT, f08c47fec0942fa0"

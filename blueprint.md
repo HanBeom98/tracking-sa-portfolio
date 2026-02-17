@@ -20,11 +20,12 @@ The `tracking-sa` project is a web application with several HTML pages, CSS styl
     -   **"당신과 닮은" Translation Issue Resolved:** The "당신과 닮은" phrase now correctly translates based on the selected language. The issue was resolved by ensuring the latest version of `translations.js` was loaded by the browser, likely resolving a caching issue.
 -   **"Back to List" Button:** Redesigned button on news detail pages.
 -   **SEO Enhancement:** Cleaned header, enhanced footer with sitemap/RSS links, and favicon generation logic.
+-   **Firebase Integration:** Added Firebase server configurations to `.idx/mcp.json` as required for the Firebase Studio environment.
 
 ## Current Task
 
-**Cleanup debugging logs from `main.js` and finalize changes.**
+**Update Firebase configuration and finalize changes.**
 
 ### Detailed Steps:
-1.  Remove debugging `console.log` statements from `main.js`.
-2.  Stage, commit, and push the final changes.
+1.  Ensure Firebase server configurations are correctly added to `.idx/mcp.json`. (Completed)
+2.  Review and confirm all implicit and explicit requests from the user have been addressed.

@@ -65,7 +65,7 @@ document.getElementById('write-form').addEventListener('submit', async (event) =
         await addPost(postData);
         
         alert('게시물이 성공적으로 등록되었습니다.');
-        window.location.href = 'board.html';
+        window.location.href = '/board';
 
     } catch (e) {
         console.error('게시물 등록 실패:', e);

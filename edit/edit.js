@@ -43,7 +43,7 @@ function renderForm(post) {
             <input type="password" id="password" placeholder="수정하려면 원본 비밀번호를 입력하세요" required>
         </div>
         <button type="submit" id="submit-button" class="go-test-button">수정 완료</button>
-        <a href="post.html?id=${postId}" class="go-test-button cancel">취소</a>
+        <a href="/post?id=${postId}" class="go-test-button cancel">취소</a>
     `;
 
     // 폼 제출 이벤트 리스너
@@ -73,7 +73,7 @@ function renderForm(post) {
         try {
             await updatePost(postId, { title, content });
             alert('게시물이 성공적으로 수정되었습니다.');
-            window.location.href = `post.html?id=${postId}`;
+            window.location.href = `/post?id=${postId}`;
         } catch (e) {
             console.error('게시물 수정 실패:', e);
             alert('게시물 수정에 실패했습니다. 잠시 후 다시 시도해주세요.');

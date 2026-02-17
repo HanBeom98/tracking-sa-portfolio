@@ -1,5 +1,5 @@
 // /api/saju.js - Vercel 전용 핸들러 (최종 수정본)
-import { onRequest } from '../functions/api/saju.js';
+import { onRequest } from '../functions/api/fortune.js';
 
 export default async function handler(req, res) {
     // 1. CORS 헤더 직접 설정 (무한 로딩 방지)

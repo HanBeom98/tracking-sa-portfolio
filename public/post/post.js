@@ -45,7 +45,7 @@ function renderPost(post) {
         <div class="post-actions">
             <button id="edit-button" class="go-test-button">수정</button>
             <button id="delete-button" class="go-test-button delete">삭제</button>
-            <a href="board.html" class="go-test-button">목록으로</a>
+            <a href="/board" class="go-test-button">목록으로</a>
         </div>
     `;
     
@@ -59,7 +59,7 @@ function renderPost(post) {
             if (confirm('관리자 권한으로 게시물을 정말 삭제하시겠습니까?')) {
                 await deletePost(postId);
                 alert('게시물이 삭제되었습니다.');
-                window.location.href = 'board.html';
+                window.location.href = '/board';
             }
             return;
         }
@@ -70,7 +70,7 @@ function renderPost(post) {
             if (confirm('게시물을 정말 삭제하시겠습니까?')) {
                 await deletePost(postId);
                 alert('게시물이 삭제되었습니다.');
-                window.location.href = 'board.html';
+                window.location.href = '/board';
             }
         } else {
             alert('비밀번호가 일치하지 않습니다.');
@@ -84,7 +84,7 @@ function renderPost(post) {
 
         const passwordHash = CryptoJS.SHA256(password).toString();
         if (passwordHash === post.passwordHash) {
-            window.location.href = `edit.html?id=${postId}`;
+            window.location.href = `/edit?id=${postId}`;
         } else {
             alert('비밀번호가 일치하지 않습니다.');
         }

@@ -49,38 +49,38 @@ window.applyTranslations = function(lang) {
 
 // 언어를 변경하는 함수 (전역으로 선언)
 window.setLanguage = function(lang) {
-    // 1. 선택한 언어를 즉시 브라우저에 저장 (매우 중요)
     localStorage.setItem('lang', lang);
     currentLang = lang;
-    const currentPath = window.location.pathname;
-    const isEnPath = currentPath.includes('index-en');
-    const isMainPath = currentPath === '/' || currentPath.endsWith('index.html') || /^\/page-\d+\.html$/.test(currentPath);
+    const currentPath = window.location.pathname.replace(/\/index\.html$/, '/');
 
-    // 2. 메인 페이지 주소 이동 로직
+    const isEnPath = currentPath.includes('-en');
+    const isMainPath = currentPath === '/' || /^\/page-\d+$/.test(currentPath) || currentPath.includes('index-en');
+
     if (lang === 'en' && isMainPath && !isEnPath) {
-        window.location.href = '/index-en';
+        let newPath = currentPath.replace(/\/page-(\d+)/, '/page-en-$1');
+        if (currentPath === '/') newPath = '/index-en';
+        window.location.href = newPath;
         return;
-    } 
-    if (lang === 'ko' && isEnPath) {
-        window.location.href = '/';
+    }
+    if (lang === 'ko' && isMainPath && isEnPath) {
+        let newPath = currentPath.replace(/\/page-en-(\d+)/, '/page-$1').replace('/index-en', '/');
+        window.location.href = newPath;
         return;
     }
 
-    // 3. 기사 페이지 주소 이동 로직
     const isArticlePage = /\/\d{4}-\d{2}-\d{2}-/.test(currentPath);
     if (isArticlePage) {
-        const isEnArticle = currentPath.includes('-en');
+        const isEnArticle = currentPath.endsWith('-en');
         if (lang === 'en' && !isEnArticle) {
-            window.location.href = currentPath.replace('.html', '') + '-en';
+            window.location.href = currentPath + '-en';
             return;
         }
         if (lang === 'ko' && isEnArticle) {
-            window.location.href = currentPath.replace('-en', '').replace('.html', '');
+            window.location.href = currentPath.slice(0, -3);
             return;
         }
     }
 
-    // 4. 주소 이동이 필요 없는 경우에만 현재 페이지 번역 적용
     window.applyTranslations(lang);
     document.querySelectorAll('.lang-button').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.lang === lang);

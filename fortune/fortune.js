@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Defensive check for sajuForm. If not present, this is not the saju page, so return.
     if (!sajuForm) {
-        console.log("Not saju-test.html, skipping saju-specific logic.");
+        console.log("Not /fortune, skipping saju-specific logic.");
         return;
     }
 
@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             console.log('Current language for API request:', window.currentLang); // Debugging line
-            const response = await fetch('https://tracking-sa.vercel.app/api/saju', { // Call the Cloudflare Function endpoint
+            const response = await fetch('https://tracking-sa.vercel.app/api/fortune', { // Call the Cloudflare Function endpoint
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
