@@ -167,10 +167,8 @@ def process_html_file_for_common_elements(filepath):
         content = re.sub(r'<footer>[\s\S]*?</footer>', '', content, flags=re.DOTALL)
 
         # Inject common elements
-        # COMMON_HEAD_SCRIPTS now contains all shared scripts including common.js, tensorflow, teachablemachine
         content = content.replace('</head>', f'{COMMON_HEAD_SCRIPTS}\n</head>')
         content = content.replace('<body>', f'<body>\n{COMMON_BODY_INJECTIONS}')
-        content = content.replace('</body>', f'{COMMON_FOOTER}\n</body>')
 
         # --- New: Replace hardcoded old URLs in meta tags ---
         content = re.sub(
@@ -193,11 +191,13 @@ def process_html_file_for_common_elements(filepath):
         )
         # --- End New ---
 
-        # Conditionally inject main.js only for animal_face_test.html
-        if "animal_face_test.html" in filepath:
-            main_script_injection = '\n    <script src="/main.js"></script>'
+        # Conditionally inject main.js only for animal_face_test
+        if "animal_face_test" in filepath:
+            main_script_injection = '\n    <script src="./main.js"></script>'
             # Insert main.js before the final </body> tag
             content = content.replace('</body>', f'{main_script_injection}\n</body>')
+
+        content = content.replace('</body>', f'{COMMON_FOOTER}\n</body>')
 
         with open(filepath, "w", encoding="utf-8") as f:
             f.write(content)
