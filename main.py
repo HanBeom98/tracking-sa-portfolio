@@ -505,11 +505,11 @@ def generate_public_site():
     # --- Korean Articles ---
     all_ko_md_files = []
     for fn in os.listdir(NEWS_POSTS_DIR):
-        if fn.endswith('.md') and not fn.endswith('-en.md'):
+        if fn.endswith('.md') and not fn.endswith('-en.md') and "{base_name}" not in fn:
             file_path = os.path.join(NEWS_POSTS_DIR, fn)
             date_match = re.match(r'(\d{4}-\d{2}-\d{2})', fn)
-            date_str = date_match.group(1) if date_match else "0000-00-00"
-            date_obj = datetime.datetime.strptime(date_str, '%Y-%m-%d').date() if date_match else datetime.date.min
+            date_str = date_match.group(1) if date_match else datetime.date.today().strftime("%Y-%m-%d")
+            date_obj = datetime.datetime.strptime(date_str, '%Y-%m-%d').date() if date_match else datetime.date.today().date()
             mod_time = os.path.getmtime(file_path)
             all_ko_md_files.append({'filename': fn, 'date_obj': date_obj, 'date_str': date_str, 'mod_time': mod_time})
 
@@ -532,11 +532,11 @@ def generate_public_site():
     # --- English Articles ---
     all_en_md_files = []
     for fn in os.listdir(NEWS_POSTS_DIR):
-        if fn.endswith('-en.md'):
+        if fn.endswith('-en.md') and "{base_name}" not in fn:
             file_path = os.path.join(NEWS_POSTS_DIR, fn)
             date_match = re.match(r'(\d{4}-\d{2}-\d{2})', fn)
-            date_str = date_match.group(1) if date_match else "0000-00-00"
-            date_obj = datetime.datetime.strptime(date_str, '%Y-%m-%d').date() if date_match else datetime.date.min
+            date_str = date_match.group(1) if date_match else datetime.date.today().strftime("%Y-%m-%d")
+            date_obj = datetime.datetime.strptime(date_str, '%Y-%m-%d').date() if date_match else datetime.date.today().date()
             mod_time = os.path.getmtime(file_path)
             all_en_md_files.append({'filename': fn, 'date_obj': date_obj, 'date_str': date_str, 'mod_time': mod_time})
 
