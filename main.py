@@ -10,6 +10,7 @@ import markdown
 import shutil
 import time
 import math
+from xml.sax.saxutils import escape
 
 PUBLIC_DIR = "public"
 NEWS_POSTS_DIR = "posts"
@@ -206,9 +207,9 @@ def process_html_file_for_common_elements(filepath):
         print(f"⚠️ 에러: {filepath} 처리 중 {e}")
 
 def _generate_sitemap(articles_info, total_pages_ko=1, total_pages_en=1):
-    # articles_info will be a list of {'url': '...', 'lastmod': 'YYYY-MM-DD'}
-    # Use current date as last modified date for the index page for simplicity
     current_date = datetime.date.today().strftime("%Y-%m-%d")
+
+    safe_base_url = escape(BASE_URL)
     
     sitemap_content = f"""<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -254,8 +255,9 @@ def _generate_sitemap(articles_info, total_pages_ko=1, total_pages_en=1):
 """
 
     for article in articles_info:
+        safe_article_url = escape(article['url'])
         sitemap_content += f"""    <url>
-        <loc>{BASE_URL}{article['url']}</loc>
+        <loc>{safe_base_url}{safe_article_url}</loc>
         <lastmod>{article['date']}</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
@@ -638,14 +640,14 @@ def create_ads_txt():
     ads_txt_path = os.path.join(PUBLIC_DIR, "ads.txt")
     with open(ads_txt_path, "w", encoding="utf-8") as f:
         f.write(ads_txt_content)
-    print(f"✅ Created {{ads_txt_path}}")
+    print(f"✅ Created {ads_txt_path}")
 
 def create_robots_txt():
     robots_content = f"User-agent: *\\nAllow: /\\nSitemap: {BASE_URL}sitemap.xml"
     robots_path = os.path.join(PUBLIC_DIR, "robots.txt")
     with open(robots_path, "w", encoding="utf-8") as f:
         f.write(robots_content)
-    print(f"✅ Created {{robots_path}}")
+    print(f"✅ Created {robots_path}")
 
 def get_processed_articles():
     if not os.path.exists(PROCESSED_ARTICLES_LOG): return set()
