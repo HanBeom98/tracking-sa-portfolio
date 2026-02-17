@@ -211,64 +211,65 @@ def _generate_sitemap(articles_info, total_pages_ko=1, total_pages_en=1):
 
     safe_base_url = escape(BASE_URL)
     
-    sitemap_content = f"""<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-    <url>
+    url_entries = []
+
+    # Add base index pages
+    url_entries.append(f"""    <url>
         <loc>{BASE_URL}index.html</loc>
         <lastmod>{current_date}</lastmod>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
-    </url>
-    <url>
+    </url>""")
+    url_entries.append(f"""    <url>
         <loc>{BASE_URL}index-en.html</loc>
         <lastmod>{current_date}</lastmod>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
-    </url>
-"""
+    </url>""")
+
     # Add Korean paginated pages
     for i in range(2, total_pages_ko + 1):
-        sitemap_content += f"""    <url>
+        url_entries.append(f"""    <url>
         <loc>{BASE_URL}page-{i}.html</loc>
         <lastmod>{current_date}</lastmod>
         <changefreq>daily</changefreq>
         <priority>0.9</priority>
-    </url>
-"""
+    </url>""")
+
     # Add English paginated pages
     for i in range(2, total_pages_en + 1):
-        sitemap_content += f"""    <url>
+        url_entries.append(f"""    <url>
         <loc>{BASE_URL}page-en-{i}.html</loc>
         <lastmod>{current_date}</lastmod>
         <changefreq>daily</changefreq>
         <priority>0.9</priority>
-    </url>
-"""
+    </url>""")
 
     for static_page in STATIC_PAGES_FOR_SITEMAP:
-        sitemap_content += f"""    <url>
+        url_entries.append(f"""    <url>
         <loc>{BASE_URL}{static_page}</loc>
         <lastmod>{current_date}</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
-    </url>
-"""
+    </url>""")
 
     for article in articles_info:
         safe_article_url = escape(article['url'])
-        sitemap_content += f"""    <url>
+        url_entries.append(f"""    <url>
         <loc>{safe_base_url}{safe_article_url}</loc>
         <lastmod>{article['date']}</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
-    </url>
-"""
+    </url>""")
 
-    sitemap_content += """</urlset>"""
+    sitemap_content = f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{"".join(url_entries)}
+</urlset>"""
 
     os.makedirs(os.path.dirname(SITEMAP_PATH), exist_ok=True)
     with open(SITEMAP_PATH, "w", encoding="utf-8") as f:
-        f.write(sitemap_content)
+        f.write(sitemap_content.strip())
 
 def generate_rss_feed(articles_info):
     RSS_PATH = os.path.join(PUBLIC_DIR, "rss.xml")
