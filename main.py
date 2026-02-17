@@ -43,6 +43,7 @@ COMMON_HEAD_SCRIPTS = f"""<script async src="https://pagead2.googlesyndication.c
       gtag('config', 'G-TGD3WRNKPZ');
     </script>
     <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
+    <meta name="naver-site-verification" content="b15b33af838280b54d31eb3c7e5c358d2836743f" />
     <script type="text/javascript">
     (function(c,l,a,r,i,t,y){{
         c[a]=c[a]||function(){{(c[a].q=c[a].q||[]).push(arguments)}};
