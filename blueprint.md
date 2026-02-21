@@ -22,10 +22,28 @@ The `tracking-sa` project is a web application with several HTML pages, CSS styl
 -   **SEO Enhancement:** Cleaned header, enhanced footer with sitemap/RSS links, and favicon generation logic.
 -   **Firebase Integration:** Added Firebase server configurations to `.idx/mcp.json` as required for the Firebase Studio environment.
 
-## Current Task
+## Current Task: Implement Multi-Agent AI System
 
-**Update Firebase configuration and finalize changes.**
+### System Overview
+A Node.js-based system for orchestrating multiple AI agents to collaboratively complete complex tasks. The system is designed with a clear separation of concerns, making it modular and extensible.
 
-### Detailed Steps:
-1.  Ensure Firebase server configurations are correctly added to `.idx/mcp.json`. (Completed)
-2.  Review and confirm all implicit and explicit requests from the user have been addressed.
+### Core Architecture
+-   **Orchestrator:** The central component (`orchestrator.js`) that manages the workflow. It initializes a `state` object and calls a sequence of agents (`Planner` -> `Developer` -> `Reviewer`), passing the state between them.
+-   **Agents:** Specialized functions in `agents.js` that perform specific tasks.
+-   **State Object:** A JavaScript object that acts as a shared memory or context for the agents. It holds the initial request, intermediate results (plan, code), and the final output.
+-   **Prompt Management:** Agent personas and instructions are stored in a separate `prompts.js` file. For agents requiring structured output, prompts include explicit instructions to return JSON.
+
+### Implemented Components (`multi-agent-system/`)
+-   **`index.js`:** The main entry point to trigger a test run of the system.
+-   **`orchestrator.js`:** Implements the main orchestration logic.
+-   **`agents.js`:** Implements the agent runners. After debugging, this was refactored to bypass the `@google/generative-ai` SDK and use direct `fetch` calls to the Gemini v1 REST API. This was the key to resolving persistent `404 Not Found` errors.
+-   **`prompts.js`:** Exports a configuration object for agent personas and instructions.
+
+### API & Model Configuration
+-   **Method:** Direct `fetch` calls to the Gemini REST API.
+-   **Endpoint Version:** `v1`
+-   **Model:** `gemini-2.0-flash` (as identified from the working `fortune` service).
+-   **Dependencies:** `dotenv` for API key management. The `@google/generative-ai` SDK was removed.
+
+### Current Status
+Completed and operational. The system successfully connects to the Gemini API and executes a full workflow, demonstrating that the orchestration, state management, and API integration are working correctly.
