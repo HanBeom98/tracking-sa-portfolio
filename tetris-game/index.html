@@ -1,24 +1,54 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <!-- SEO 및 마케팅 설정 -->
-    <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
-    <meta name="google-adsense-account" content="ca-pub-7263630893992216">
+    <!-- [1] 분석 및 마케팅 스크립트 -->
+    <!-- Google Analytics (GA4) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-TGD3WRNKPZ');
+    </script>
+
+    <!-- Microsoft Clarity -->
+    <script type="text/javascript">
+        (function(c,l,a,r,i,t,y){
+            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+        })(window, document, "clarity", "script", "vb9q33ggpa");
+    </script>
+
+    <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7263630893992216" crossorigin="anonymous"></script>
-    
+    <meta name="google-adsense-account" content="ca-pub-7263630893992216">
+
+    <!-- [2] 검색 엔진 최적화 (SEO) -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title data-i18n="tetris_game">테트리스 - Tracking SA</title>
     
     <meta name="description" content="Tracking SA에서 제공하는 고성능 테트리스 게임. 실시간 랭킹 시스템과 부드러운 모바일 조작을 경험해보세요.">
     <meta name="keywords" content="테트리스, Tetris, 게임, 온라인 게임, Tracking SA, 랭킹 게임">
-    
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    
-    <script src="./firebase-config.js"></script>
+    <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
+    <meta name="naver-site-verification" content="b15b33af838280b54d31eb3c7e5c358d2836743f" />
+
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="테트리스 - Tracking SA">
+    <meta property="og:description" content="실시간 랭킹에 도전하는 중독성 있는 테트리스 게임">
+    <meta property="og:image" content="/logo.svg">
+    <meta property="og:url" content="https://trackingsa.com/tetris-game/">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <!-- [3] 글로벌 리소스 및 스타일 -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/style.css">
 
     <style>
+        /* 테트리스 게임 전용 레이아웃 보정 */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
             --bg-dark: oklch(10% 0.02 250);
@@ -31,7 +61,17 @@
             color: var(--text-color);
         }
         tetris-game { display: block; width: 100%; height: 100%; }
+        
+        /* 상단 헤더가 있는 경우를 위한 보정 */
+        header { z-index: 10000 !important; }
     </style>
+
+    <!-- [4] 핵심 스크립트 연동 -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="/firebase-config.js"></script>
+    <script src="/translations.js"></script>
+    <script src="/common.js"></script>
 </head>
 <body>
     <tetris-game></tetris-game>
