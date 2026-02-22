@@ -170,20 +170,22 @@ def process_html_file_for_common_elements(filepath):
         with open(filepath, "r", encoding="utf-8") as f:
             content = f.read()
 
-        # 1. Clean up targeted common elements more aggressively to prevent duplication
+        # 1. Clean up only targeted common elements to preserve <main> content
+        # Use more specific patterns to avoid over-deletion
         content = re.sub(r'<header[\s\S]*?</header>', '', content, flags=re.DOTALL | re.IGNORECASE)
-        # Remove any existing tracking or common scripts to prevent variable conflicts
-        content = re.sub(r'\s*<script[^>]*src=".*?(googletagmanager|clarity|firebase|crypto-js|config|translations|common|tensorflow|teachablemachine).*?".*?></script>', '', content, flags=re.DOTALL | re.IGNORECASE)
-        # Remove old GTM inline scripts
+        # Avoid deleting scripts that might be part of the specific feature - only delete global common ones
+        content = re.sub(r'\s*<script[^>]*src=".*?(googletagmanager|clarity|firebase-app|firebase-firestore|crypto-js|firebase-config|translations|common).*?".*?></script>', '', content, flags=re.DOTALL | re.IGNORECASE)
+        # Remove old GTM inline scripts specifically
         content = re.sub(r'<script>\s*window\.dataLayer[\s\S]*?</script>', '', content, flags=re.DOTALL | re.IGNORECASE)
+        # Remove common style links
         content = re.sub(r'<link[^>]*href=".*?(style\.css|all\.min\.css)"[^>]*>', '', content, flags=re.DOTALL | re.IGNORECASE)
-        content = re.sub(r'<meta name="google-site-verification"[\s\S]*?>', '', content, flags=re.IGNORECASE)
-        content = re.sub(r'<meta name="naver-site-verification"[\s\S]*?>', '', content, flags=re.IGNORECASE)
+        # Remove verification metas
+        content = re.sub(r'<meta name="(google|naver)-site-verification"[\s\S]*?>', '', content, flags=re.IGNORECASE)
+        
         content = re.sub(r'<footer>[\s\S]*?</footer>', '', content, flags=re.DOTALL | re.IGNORECASE)
 
         # 2. Inject common head elements if </head> exists
         if '</head>' in content:
-            # First remove existing COMMON_HEAD_SCRIPTS if somehow present
             content = content.replace('</head>', f'{COMMON_HEAD_SCRIPTS}\n</head>')
         
         # 3. Inject header after <body>
@@ -197,16 +199,9 @@ def process_html_file_for_common_elements(filepath):
             content,
             flags=re.IGNORECASE
         )
-        # ... (other meta replacements)
 
-        # 5. Feature-specific script injections
-        if "animal_face_test" in filepath:
-            if './main.js' not in content:
-                content = content.replace('</body>', '\n    <script src="./main.js"></script>\n</body>')
-        
-        # 6. Inject Footer before </body>
+        # 5. Inject Footer before </body>
         if '</body>' in content:
-            # Ensure we don't duplicate the footer if it was already injected
             if 'data-i18n="footer_copyright"' not in content:
                 content = content.replace('</body>', f'{COMMON_FOOTER}\n</body>')
 
