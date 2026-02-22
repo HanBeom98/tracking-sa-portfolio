@@ -92,6 +92,7 @@ COMMON_BODY_INJECTIONS = """
                         <a href="/animal_face_test" data-i18n="animal_face_test">동물상 테스트</a>
                         <a href="/ai-test" data-i18n="ai_tendency_test">AI 성향 테스트</a>
                         <a href="/fortune" data-i18n="saju_test">AI 운세 테스트</a>
+                        <a href="/lucky-recommendation" data-i18n="lucky_recommendation">행운의 추천</a>
                     </div>
                 </li>
                 <li><a href="/inquiry" data-i18n="partnership_inquiry">파트너십 문의</a></li>
@@ -471,6 +472,19 @@ def generate_index_html(articles_on_page, current_page, total_pages, lang='ko'):
             <h2 data-i18n="hero_title"></h2>
             <button class="action-button" onclick="window.location.href='/fortune'" data-i18n="start_test_button"></button>
         </section>
+        
+        <!-- Lucky Recommendation Promo Card -->
+        <section class="lucky-promo-container" style="max-width: 1200px; margin: -30px auto 40px auto; padding: 0 20px; position: relative; z-index: 10;">
+            <div class="lucky-promo-card" style="background: white; border-radius: 20px; padding: 30px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid #eef2f7; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 15px 35px rgba(0,0,0,0.15)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(0,0,0,0.1)';">
+                <div class="lucky-promo-content" style="flex: 1;">
+                    <span style="background: oklch(90% 0.1 200); color: oklch(50% 0.15 200); padding: 5px 12px; border-radius: 50px; font-size: 0.85rem; font-weight: bold; margin-bottom: 10px; display: inline-block;" data-i18n="new_feature">NEW</span>
+                    <h3 style="font-size: 1.8rem; margin: 0 0 10px 0; color: #1e40af;" data-i18n="lucky_recommendation">행운의 추천</h3>
+                    <p style="color: #64748b; margin: 0; font-size: 1.1rem;" data-i18n="lucky_hero_subtitle">당신에게 필요한 컬러와 아이템을 추천해 드립니다.</p>
+                </div>
+                <button class="action-button" onclick="window.location.href='/lucky-recommendation'" style="background: linear-gradient(135deg, #0052cc 0%, #1e40af 100%); color: white; border: none; padding: 12px 25px; border-radius: 12px; cursor: pointer; font-weight: bold; transition: all 0.3s ease;" onmouseover="this.style.filter='brightness(1.1)';" onmouseout="this.style.filter='brightness(1)';" data-i18n="check_now">확인하기</button>
+            </div>
+        </section>
+
         <section class="news-section-main">
             {news_section_content}
         </section>

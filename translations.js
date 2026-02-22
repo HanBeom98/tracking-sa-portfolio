@@ -71,6 +71,7 @@ const translations = {
         'saju_test': 'AI 오늘의 운세',
         'menu_test': '테스트',
         'sitemap': '사이트맵',
+        'lucky_recommendation': '행운의 추천',
         // Saju page specific keys for main title and descriptions
         'saju_title': 'AI 실시간 오늘의 운세',
         'saju_desc1': '이름과 생년월일시 정보를 입력하여 AI가 분석한 오늘의 운세 풀이를 확인해보세요.',
@@ -184,6 +185,7 @@ const translations = {
         'saju_test_description': 'Based on traditional Korean Fortune Telling',
         'menu_test': 'Tests',
         'sitemap': 'Sitemap',
+        'lucky_recommendation': 'Lucky Recommendation',
         // Saju page specific keys for main title and descriptions
         'saju_title': 'AI Real-time Daily Fortune',
         'saju_desc1': 'Enter your name, birth date, and time to get your Daily Fortune analyzed by AI.',
