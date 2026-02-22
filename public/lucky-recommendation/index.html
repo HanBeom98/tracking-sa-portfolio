@@ -86,12 +86,39 @@
         </section>
 
         <section class="content-container">
+            <div class="saju-input-section" style="margin-bottom: 3rem;">
+                <div class="input-form-group">
+                    <label for="user-name" data-i18n="name_label">이름:</label>
+                    <input type="text" id="user-name" placeholder="이름을 입력하세요">
+                </div>
+
+                <div class="input-form-group">
+                    <label data-i18n="birthdate_label">생일:</label>
+                    <div class="birthdate-selectors">
+                        <select id="birth-month"></select>
+                        <span class="unit-span" data-i18n="month_unit"></span>
+                        <select id="birth-day"></select>
+                        <span class="unit-span" data-i18n="day_unit"></span>
+                    </div>
+                </div>
+
+                <div class="input-form-group">
+                    <label data-i18n="gender_select_label">성별:</label>
+                    <div class="gender-buttons">
+                        <input type="radio" id="gender-male" name="gender" value="male" checked>
+                        <label for="gender-male" data-i18n="gender_male_label">남성</label>
+                        <input type="radio" id="gender-female" name="gender" value="female">
+                        <label for="gender-female" data-i18n="gender_female_label">여성</label>
+                    </div>
+                </div>
+
+                <div class="action-area" style="margin-top: 20px;">
+                    <button class="go-test-button" id="refresh-button" data-i18n="refresh_lucky">행운 추천받기</button>
+                </div>
+            </div>
+
             <!-- Web Component Integration -->
             <lucky-recommendation role="region" aria-live="polite" id="lucky-display"></lucky-recommendation>
-            
-            <div class="action-area">
-                <button class="action-button" id="refresh-button" data-i18n="refresh_lucky">다시 확인하기</button>
-            </div>
         </section>
     </main>
 

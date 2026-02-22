@@ -1,7 +1,7 @@
 /**
  * LuckyRecommendation Web Component
- * ESM based component following GEMINI.md standards.
- * AI-Powered version using Gemini API.
+ * Secure version calling /api/lucky serverless function.
+ * Follows GEMINI.md standards.
  */
 class LuckyRecommendation extends HTMLElement {
     constructor() {
@@ -13,12 +13,51 @@ class LuckyRecommendation extends HTMLElement {
     }
 
     connectedCallback() {
-        this.generateLuckyData();
+        this.initSelectors();
+        // Do not call generateLuckyData automatically if we want user to input first.
+        // Or we can call it with empty/default values.
+        // For better UX, let's wait for user interaction or show a placeholder.
+    }
+
+    initSelectors() {
+        const monthSelect = document.getElementById('birth-month');
+        const daySelect = document.getElementById('birth-day');
+
+        if (monthSelect && daySelect) {
+            monthSelect.innerHTML = '';
+            for (let i = 1; i <= 12; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = `${i}${window.getTranslation(window.currentLang, 'month_unit')}`;
+                monthSelect.appendChild(option);
+            }
+
+            daySelect.innerHTML = '';
+            for (let i = 1; i <= 31; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = `${i}${window.getTranslation(window.currentLang, 'day_unit')}`;
+                daySelect.appendChild(option);
+            }
+        }
     }
 
     async generateLuckyData() {
+        const nameInput = document.getElementById('user-name');
+        const monthSelect = document.getElementById('birth-month');
+        const daySelect = document.getElementById('birth-day');
+        const genderMale = document.getElementById('gender-male');
+
+        const userInfo = {
+            name: nameInput ? nameInput.value.trim() : '',
+            birthMonth: monthSelect ? monthSelect.value : '',
+            birthDay: daySelect ? daySelect.value : '',
+            gender: genderMale && genderMale.checked ? 'male' : 'female'
+        };
+
         this._loading = true;
         this._error = null;
+        this._luckyData = null;
         this.render();
 
         try {
@@ -32,16 +71,16 @@ class LuckyRecommendation extends HTMLElement {
                         year: today.getFullYear(),
                         month: today.getMonth() + 1,
                         day: today.getDate()
-                    }
+                    },
+                    userInfo: userInfo
                 })
             });
 
             if (!response.ok) throw new Error('API request failed');
-            
             this._luckyData = await response.json();
         } catch (err) {
             console.error('Lucky API Error:', err);
-            this._error = '행운 정보를 가져오는데 실패했습니다. 다시 시도해 주세요.';
+            this._error = '행운 분석 중 오류가 발생했습니다. 다시 시도해 주세요.';
         } finally {
             this._loading = false;
             this.render();
@@ -53,11 +92,11 @@ class LuckyRecommendation extends HTMLElement {
             this.shadowRoot.innerHTML = `
                 <style>
                     :host { display: block; text-align: center; padding: 2rem; }
-                    .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 2s linear infinite; margin: 0 auto; }
+                    .loader { border: 4px solid #f3f3f3; border-top: 4px solid #1e40af; border-radius: 50%; width: 40px; height: 40px; animation: spin 2s linear infinite; margin: 0 auto; }
                     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
                 </style>
                 <div class="loader"></div>
-                <p>AI가 당신의 행운을 분석 중입니다...</p>
+                <p>AI가 당신의 정보를 바탕으로 행운을 분석 중입니다...</p>
             `;
             return;
         }
@@ -67,7 +106,16 @@ class LuckyRecommendation extends HTMLElement {
             return;
         }
 
-        if (!this._luckyData) return;
+        if (!this._luckyData) {
+            this.shadowRoot.innerHTML = `
+                <style>
+                    :host { display: block; text-align: center; padding: 2rem; color: #666; }
+                    .welcome-msg { font-size: 1.1rem; }
+                </style>
+                <div class="welcome-msg">정보를 입력하고 '행운 추천받기' 버튼을 눌러보세요!</div>
+            `;
+            return;
+        }
 
         const { oklch, colorName, colorDesc, itemName, itemIcon, itemAction } = this._luckyData;
 
@@ -83,9 +131,7 @@ class LuckyRecommendation extends HTMLElement {
                 background: white;
                 border-radius: 2rem;
                 padding: 2.5rem;
-                box-shadow: 
-                    0 10px 20px rgba(0,0,0,0.05),
-                    0 20px 40px rgba(0,0,0,0.1);
+                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
                 display: grid;
                 gap: 2rem;
                 position: relative;
@@ -103,74 +149,21 @@ class LuckyRecommendation extends HTMLElement {
                 background: ${oklch};
             }
 
-            .section {
-                display: flex;
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-
-            .label {
-                font-size: 0.9rem;
-                text-transform: uppercase;
-                letter-spacing: 0.1em;
-                color: #666;
-                font-weight: 600;
-            }
-
-            .value-row {
-                display: flex;
-                align-items: center;
-                gap: 1rem;
-            }
-
-            .color-preview {
-                width: 40px;
-                height: 40px;
-                border-radius: 50%;
-                background-color: ${oklch};
-                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-                border: 3px solid white;
-            }
-
-            .title {
-                font-size: 1.8rem;
-                font-weight: 700;
-                margin: 0;
-                color: #222;
-            }
-
-            .description {
-                font-size: 1rem;
-                line-height: 1.6;
-                color: #444;
-            }
-
-            .item-icon {
-                font-size: 3rem;
-                margin-bottom: 0.5rem;
-            }
-
-            .divider {
-                height: 1px;
-                background: #eee;
-                width: 100%;
-            }
-
-            @container (max-width: 400px) {
-                .card {
-                    padding: 1.5rem;
-                }
-                .title {
-                    font-size: 1.5rem;
-                }
-            }
+            .section { display: flex; flex-direction: column; gap: 0.5rem; }
+            .label { font-size: 0.9rem; color: #666; font-weight: 600; text-transform: uppercase; }
+            .value-row { display: flex; align-items: center; gap: 1rem; }
+            .color-preview { width: 35px; height: 35px; border-radius: 50%; background: ${oklch}; border: 2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+            .title { font-size: 1.6rem; font-weight: 700; margin: 0; color: #222; }
+            .description { font-size: 1rem; line-height: 1.6; color: #444; }
+            .item-icon { font-size: 3rem; }
+            .divider { height: 1px; background: #eee; width: 100%; }
         </style>
         
         <div class="card" role="article" aria-label="Today's Lucky Recommendation">
             <div class="section">
                 <span class="label">Lucky Color</span>
                 <div class="value-row">
-                    <div class="color-preview" aria-hidden="true"></div>
+                    <div class="color-preview"></div>
                     <h2 class="title">${colorName}</h2>
                 </div>
                 <p class="description">${colorDesc}</p>
@@ -180,7 +173,7 @@ class LuckyRecommendation extends HTMLElement {
 
             <div class="section">
                 <span class="label">Lucky Item</span>
-                <div class="item-icon" aria-hidden="true">${itemIcon}</div>
+                <div class="item-icon">${itemIcon}</div>
                 <div class="value-row">
                     <h2 class="title">${itemName}</h2>
                 </div>
