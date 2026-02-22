@@ -7,8 +7,14 @@ function addCORSHeaders(response) {
 }
 
 export async function onRequest(context) {
-    // fortune.js와 동일한 구조
     const { request, env } = context || {};
+
+    if (!request) {
+        return new Response(JSON.stringify({ error: 'Bad Request: No request object' }), { 
+            status: 400, 
+            headers: { 'Content-Type': 'application/json' } 
+        });
+    }
 
     if (request.method === 'OPTIONS') {
         return addCORSHeaders(new Response(null, { status: 204 }));
@@ -18,15 +24,18 @@ export async function onRequest(context) {
     const GEMINI_API_KEY = env?.GEMINI_API_KEY || process.env.GEMINI_API_KEY;
 
     if (!GEMINI_API_KEY) {
-        console.error('CRITICAL: GEMINI_API_KEY not found.');
         return addCORSHeaders(new Response(JSON.stringify({ error: 'Server configuration error: API key is not set.' }), {
             status: 500,
             headers: { 'Content-Type': 'application/json' },
         }));
     }
 
+    // 405 Method Not Allowed 에러도 JSON으로 반환
     if (request.method !== 'POST') {
-        return addCORSHeaders(new Response('Method Not Allowed', { status: 405 }));
+        return addCORSHeaders(new Response(JSON.stringify({ error: 'Method Not Allowed. Please use POST.' }), { 
+            status: 405,
+            headers: { 'Content-Type': 'application/json' }
+        }));
     }
 
     try {
@@ -54,9 +63,7 @@ export async function onRequest(context) {
 
         const geminiResponse = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 contents: [{ parts: [{ text: prompt }] }],
                 generationConfig: { 
@@ -73,8 +80,6 @@ export async function onRequest(context) {
         }
 
         let text = geminiData.candidates[0].content.parts[0].text;
-        
-        // JSON 파싱 (마크다운 방지)
         const jsonMatch = text.match(/\{[\s\S]*\}/);
         if (!jsonMatch) throw new Error('Invalid AI response format');
         

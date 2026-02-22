@@ -75,8 +75,16 @@ class LuckyRecommendation extends HTMLElement {
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                let errorMsg = `HTTP error! status: ${response.status}`;
+                try {
+                    const errorData = await response.json();
+                    errorMsg = errorData.error || errorMsg;
+                } catch (e) {
+                    // JSON이 아닌 경우 텍스트로 시도
+                    const errorText = await response.text();
+                    errorMsg = errorText || errorMsg;
+                }
+                throw new Error(errorMsg);
             }
             this._luckyData = await response.json();
         } catch (err) {

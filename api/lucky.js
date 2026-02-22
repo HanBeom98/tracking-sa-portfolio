@@ -1,35 +1,35 @@
-// /api/lucky.js - Vercel 전용 핸들러 (fortune.js와 완벽히 동일한 구조로 복구)
+// /api/lucky.js - Vercel Bridge Handler
 import { onRequest } from '../functions/api/lucky.js';
 
 export default async function handler(req, res) {
-    // 1. CORS 헤더 직접 설정
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-    // 2. OPTIONS 요청 즉시 응답
     if (req.method === 'OPTIONS') {
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
         return res.status(204).end();
     }
 
     try {
-        // 3. Cloudflare 형식의 context 구성 (Headers 객체 없이 req.headers 사용)
+        // Vercel에서 body는 이미 파싱되어 있을 수 있습니다.
+        const body = req.body;
+
         const context = {
             request: {
                 method: req.method,
                 headers: req.headers,
-                json: async () => req.body
+                json: async () => body
             },
             env: process.env
         };
 
-        // 4. 원본 함수 실행
         const response = await onRequest(context);
         const data = await response.json();
 
+        res.setHeader('Access-Control-Allow-Origin', '*');
         return res.status(response.status || 200).json(data);
     } catch (error) {
-        console.error('Vercel Bridge API Error (Lucky):', error);
+        console.error('Vercel Lucky Bridge Error:', error);
+        res.setHeader('Access-Control-Allow-Origin', '*');
         return res.status(500).json({ error: error.message });
     }
 }
