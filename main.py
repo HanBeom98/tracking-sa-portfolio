@@ -29,7 +29,8 @@ STATIC_PAGES_FOR_SITEMAP = [
     "fortune",
     "edit",
     "write",
-    "post"
+    "post",
+    "lucky-recommendation"
 ]
 
 
