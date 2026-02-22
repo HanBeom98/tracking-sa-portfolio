@@ -27,4 +27,7 @@ firebase-debug.log
 # Secrets (보안상 제외)
 .env
 *.json
-!package.json
+!package.jsonworkdocs/
+workdocs/
+workdocs/
+workdocs/
