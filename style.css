@@ -121,9 +121,18 @@ header {
 .desktop-menu-container {
     display: flex;
     flex-grow: 1;
-    justify-content: center;
     align-items: center;
     height: 100%;
+}
+
+@media (min-width: 769px) {
+    .desktop-menu-container nav {
+        margin-left: auto;
+    }
+
+    .desktop-menu-container .utility-controls {
+        margin-left: auto;
+    }
 }
 
 nav ul {
