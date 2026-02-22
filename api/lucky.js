@@ -2,7 +2,7 @@
 import { onRequest } from '../functions/api/lucky.js';
 
 export default async function handler(req, res) {
-    // 1. CORS 헤더 설정
+    // 1. CORS 헤더 직접 설정
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -13,7 +13,7 @@ export default async function handler(req, res) {
     }
 
     try {
-        // 3. context 구성 (fortune.js와 동일하게 Headers 생성자 제거)
+        // 3. Cloudflare 형식의 context 구성 (Headers 객체 없이 req.headers 사용)
         const context = {
             request: {
                 method: req.method,
@@ -29,7 +29,7 @@ export default async function handler(req, res) {
 
         return res.status(response.status || 200).json(data);
     } catch (error) {
-        console.error('Vercel Lucky Bridge Error:', error);
+        console.error('Vercel Bridge API Error (Lucky):', error);
         return res.status(500).json({ error: error.message });
     }
 }

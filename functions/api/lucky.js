@@ -7,22 +7,15 @@ function addCORSHeaders(response) {
 }
 
 export async function onRequest(context) {
-    // 1. 에러 방지를 위해 변수 선언을 맨 위로 고정 (fortune.js 스타일)
+    // 1. 에러 방지를 위해 변수 선언을 맨 위로 고정 (fortune.js와 동일)
     const { request, env } = context || {};
-
-    if (!request) {
-        return new Response('Bad Request', { status: 400 });
-    }
 
     if (request.method === 'OPTIONS') {
         return addCORSHeaders(new Response(null, { status: 204 }));
     }
 
-    // GEMINI_API_KEY 확인
-    const GEMINI_API_KEY = env?.GEMINI_API_KEY || (typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : null);
-
-    if (!GEMINI_API_KEY) {
-        console.error('CRITICAL: GEMINI_API_KEY not found in env or process.env');
+    if (!env.GEMINI_API_KEY) {
+        console.error('CRITICAL: GEMINI_API_KEY not found in env object.');
         return addCORSHeaders(new Response(JSON.stringify({ error: 'Server configuration error: API key is not set.' }), {
             status: 500,
             headers: { 'Content-Type': 'application/json' },
@@ -38,7 +31,9 @@ export async function onRequest(context) {
         const { language, currentDate, userInfo } = body;
         const { name, gender, birthMonth, birthDay } = userInfo || {};
 
-        const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+        // fortune.js와 동일한 키 획득 방식
+        const GEMINI_API_KEY = env?.GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+        const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent';
 
         const dateStr = currentDate ? `${currentDate.year}-${currentDate.month}-${currentDate.day}` : 'today';
         
@@ -56,9 +51,11 @@ export async function onRequest(context) {
             {"colorName":"색상명", "oklch":"oklch값", "colorDesc":"설명", "itemName":"아이템명", "itemIcon":"이모지", "itemAction":"행동팁"}`;
         }
 
-        const geminiResponse = await fetch(GEMINI_API_URL, {
+        const geminiResponse = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify({
                 contents: [{ parts: [{ text: prompt }] }],
                 generationConfig: { 
@@ -74,13 +71,7 @@ export async function onRequest(context) {
             throw new Error(geminiData.error?.message || 'Gemini API call failed');
         }
 
-        if (!geminiData.candidates || geminiData.candidates.length === 0) {
-            throw new Error('No response from AI');
-        }
-
         let text = geminiData.candidates[0].content.parts[0].text;
-        
-        // JSON 파싱 에러 방지 (fortune.js보다 엄격하게)
         const jsonMatch = text.match(/\{[\s\S]*\}/);
         if (!jsonMatch) throw new Error('Invalid AI response format');
         

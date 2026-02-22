@@ -14,9 +14,6 @@ class LuckyRecommendation extends HTMLElement {
 
     connectedCallback() {
         this.initSelectors();
-        // Do not call generateLuckyData automatically if we want user to input first.
-        // Or we can call it with empty/default values.
-        // For better UX, let's wait for user interaction or show a placeholder.
     }
 
     initSelectors() {
@@ -49,10 +46,10 @@ class LuckyRecommendation extends HTMLElement {
         const genderMale = document.getElementById('gender-male');
 
         const userInfo = {
-            name: nameInput ? nameInput.value.trim() : '',
-            birthMonth: monthSelect ? monthSelect.value : '',
-            birthDay: daySelect ? daySelect.value : '',
-            gender: genderMale && genderMale.checked ? 'male' : 'female'
+            name: nameInput ? nameInput.value.trim() || '익명' : '익명',
+            birthMonth: monthSelect ? monthSelect.value : '1',
+            birthDay: daySelect ? daySelect.value : '1',
+            gender: (genderMale && genderMale.checked) ? 'male' : 'female'
         };
 
         this._loading = true;
@@ -62,7 +59,8 @@ class LuckyRecommendation extends HTMLElement {
 
         try {
             const today = new Date();
-            const response = await fetch('/api/lucky', {
+            // fortune.js와 동일하게 Vercel Full URL 사용 (라우팅 에러 방지)
+            const response = await fetch('https://tracking-sa.vercel.app/api/lucky', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -76,11 +74,14 @@ class LuckyRecommendation extends HTMLElement {
                 })
             });
 
-            if (!response.ok) throw new Error('API request failed');
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+            }
             this._luckyData = await response.json();
         } catch (err) {
             console.error('Lucky API Error:', err);
-            this._error = '행운 분석 중 오류가 발생했습니다. 다시 시도해 주세요.';
+            this._error = `행운 분석 중 오류가 발생했습니다: ${err.message}`;
         } finally {
             this._loading = false;
             this.render();
