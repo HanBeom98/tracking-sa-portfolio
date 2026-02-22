@@ -103,7 +103,7 @@ class TetrisGame extends HTMLElement {
                     const gain = this.audioCtx.createGain();
                     osc.type = 'triangle';
                     osc.frequency.setValueAtTime(freqs[note], time);
-                    gain.gain.setValueAtTime(0.04, time);
+                    gain.gain.setValueAtTime(0.6, time);
                     gain.gain.exponentialRampToValueAtTime(0.0001, time + (4/duration) * beatUnit - 0.05);
                     osc.connect(gain);
                     gain.connect(this.audioCtx.destination);
@@ -137,7 +137,7 @@ class TetrisGame extends HTMLElement {
         if (btn) btn.innerText = this.isMuted ? '🔇' : '🔊';
     }
 
-    playNote(freq, duration, type = 'sine', volume = 0.05) {
+    playNote(freq, duration, type = 'sine', volume = 0.06) {
         if (!this.audioCtx || this.isMuted) return;
         const osc = this.audioCtx.createOscillator();
         const gain = this.audioCtx.createGain();
