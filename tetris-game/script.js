@@ -81,17 +81,30 @@ class TetrisGame extends HTMLElement {
 
     connectedCallback() {
         this.render();
+        // [추가] 외부 레이아웃(헤더) 높이 감지 및 CSS 변수 설정
+        this.updateLayoutStyles();
+        
         this.canvas = this.shadowRoot.querySelector('#game-canvas');
         this.ctx = this.canvas.getContext('2d');
         this.nextCanvas = this.shadowRoot.querySelector('#next-canvas');
         this.nextCtx = this.nextCanvas.getContext('2d');
         this.boardWrapper = this.shadowRoot.querySelector('.main-board');
 
-        const observer = new ResizeObserver(() => this.resizeCanvas());
+        const observer = new ResizeObserver(() => {
+            this.updateLayoutStyles();
+            this.resizeCanvas();
+        });
+        observer.observe(document.body);
         observer.observe(this.boardWrapper);
 
         this.addEventListeners();
         requestAnimationFrame(this.update.bind(this));
+    }
+
+    updateLayoutStyles() {
+        const header = document.querySelector('header');
+        const headerHeight = header ? header.offsetHeight : 0;
+        this.style.setProperty('--header-height', `${headerHeight}px`);
     }
 
     resizeCanvas() {
@@ -99,10 +112,17 @@ class TetrisGame extends HTMLElement {
         const padding = 0;
         const availableW = rect.width - padding;
         
-        // [수정] 기기 높이를 초과하지 않도록 계산 로직 강화
+        // [수정] 외부 레이아웃 높이를 고려한 정교한 계산
         const vh = window.innerHeight;
-        // 헤더(75px)와 조작부(약 140px)를 고려한 최대 가용 높이 계산
-        const availableH = Math.min(rect.height, vh - 220) - padding;
+        const header = document.querySelector('header');
+        const headerHeight = header ? header.offsetHeight : 0;
+        
+        // 하단 컨트롤러 높이 감지 (모바일 기준 약 130px)
+        const controls = this.shadowRoot.querySelector('.controls');
+        const controlsHeight = (controls && controls.offsetHeight > 0) ? controls.offsetHeight : 130;
+        
+        // 실제 게임 보드가 가질 수 있는 최대 높이 계산
+        const availableH = vh - headerHeight - controlsHeight - 40; // 40px 여유 버퍼
         
         let size = Math.floor(availableH / this.ROWS);
         if (size * this.COLS > availableW) size = Math.floor(availableW / this.COLS);
@@ -324,12 +344,15 @@ class TetrisGame extends HTMLElement {
     render() {
         this.shadowRoot.innerHTML = `
         <style>
-            :host { display: block; height: 100%; font-family: 'Orbitron', sans-serif; background: #050505; color: white; overflow: hidden; }
-            .game-layout { display: flex; flex-direction: column; height: 100%; padding: 10px; box-sizing: border-box; }
+            :host { display: block; position: relative; height: 100%; font-family: 'Orbitron', sans-serif; background: #050505; color: white; overflow: hidden; }
+            .game-layout { display: flex; flex-direction: column; height: 100%; padding: 10px; box-sizing: border-box; position: relative; }
             
-            /* [수정] 모바일(1023px 이하) 환경 최적화 */
+            /* [수정] 모바일(1023px 이하) 환경 최적화 - 헤더 높이 동적 반영 */
             @media (max-width: 1023px) {
-                .game-layout { padding-top: 75px; }
+                .game-layout { 
+                    padding-top: var(--header-height, 70px); 
+                    height: calc(100vh - var(--header-height, 70px));
+                }
                 .controls { height: 130px !important; padding: 10px !important; gap: 10px !important; }
                 .btn { font-size: 22px !important; }
             }
