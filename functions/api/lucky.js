@@ -52,16 +52,18 @@ export async function onRequest(context) {
             prompt = `Today is ${dateStr}. 
             User: Name: ${name}, Gender: ${gender}, Birthday: ${birthMonth}/${birthDay}.
             Based on this info, provide a "Lucky Color" and "Lucky Item".
-            Respond ONLY in JSON: 
-            {"colorName":"Localized Name", "oklch":"oklch(L C H)", "colorDesc":"Short description", "itemName":"Localized Item", "itemIcon":"Emoji", "itemAction":"Tip"}.
-            IMPORTANT: The 'oklch' value MUST be a valid CSS string like 'oklch(0.7 0.1 200)'. Do not include any other text.`;
+            Respond ONLY in JSON format.
+            EVERY field value (colorName, colorDesc, itemName, itemAction) MUST be written in English.
+            JSON structure: 
+            {"colorName":"English Color Name", "oklch":"oklch(L C H)", "colorDesc":"English description", "itemName":"English Item Name", "itemIcon":"Emoji", "itemAction":"English Tip"}.
+            IMPORTANT: The 'oklch' value MUST be a valid CSS string like 'oklch(0.7 0.1 200)'. No markdown.`;
         } else {
             prompt = `오늘은 ${dateStr}입니다.
             사용자: 이름: ${name}, 성별: ${gender === 'male' ? '남성' : '여성'}, 생일: ${birthMonth}월 ${birthDay}일.
             이 정보를 바탕으로 오늘을 위한 "행운의 컬러"와 "행운의 아이템"을 추천해 주세요.
             반드시 아래 JSON 형식으로만 응답하세요:
             {"colorName":"한글 컬러명", "oklch":"oklch(L C H)", "colorDesc":"설명", "itemName":"한글 아이템명", "itemIcon":"이모지", "itemAction":"행동팁"}
-            중요: 'oklch' 값은 반드시 브라우저 CSS에서 즉시 사용 가능한 'oklch(0.7 0.1 200)' 형식의 순수 문자열이어야 합니다. 한글 설명을 섞지 마세요.`;
+            중요: 'oklch' 값은 반드시 브라우저 CSS에서 즉시 사용 가능한 'oklch(0.7 0.1 200)' 형식의 순수 문자열이어야 합니다. 모든 필드는 반드시 한국어로 작성하세요.`;
         }
 
         const geminiResponse = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {

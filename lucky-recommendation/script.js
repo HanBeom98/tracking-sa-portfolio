@@ -60,12 +60,14 @@ class LuckyRecommendation extends HTMLElement {
 
         try {
             const today = new Date();
-            // fortune.js와 동일하게 Vercel Full URL 사용 (라우팅 에러 방지)
+            // 3. 다국어 초기화 및 상태 점검 (localStorage 기반)
+            const currentLang = localStorage.getItem('lang') || window.currentLang || 'ko';
+            
             const response = await fetch('https://tracking-sa.vercel.app/api/lucky', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    language: localStorage.getItem('lang') || 'ko',
+                    language: currentLang,
                     currentDate: {
                         year: today.getFullYear(),
                         month: today.getMonth() + 1,
@@ -92,14 +94,13 @@ class LuckyRecommendation extends HTMLElement {
             const btn = document.getElementById('refresh-button');
             if (btn) {
                 btn.setAttribute('data-i18n', 'refresh_lucky');
-                const lang = window.currentLang || localStorage.getItem('lang') || 'ko';
                 let translated = "";
                 if (typeof window.getTranslation === 'function') {
-                    translated = window.getTranslation(lang, 'refresh_lucky');
+                    translated = window.getTranslation(currentLang, 'refresh_lucky');
                 }
                 
                 // btn.textContent 대신 안전하게 업데이트
-                const finalLabel = translated || (lang === 'en' ? 'Check Again' : '다시 확인하기');
+                const finalLabel = translated || (currentLang === 'en' ? 'Check Again' : '다시 확인하기');
                 btn.innerHTML = `<span>${finalLabel}</span>`;
             }
 
@@ -113,6 +114,8 @@ class LuckyRecommendation extends HTMLElement {
     }
 
     render() {
+        const currentLang = localStorage.getItem('lang') || window.currentLang || 'ko';
+
         if (this._loading) {
             this.shadowRoot.innerHTML = `
                 <style>
@@ -122,7 +125,7 @@ class LuckyRecommendation extends HTMLElement {
                     p { color: oklch(0.4 0.05 250); margin-top: 1rem; font-weight: 500; }
                 </style>
                 <div class="loader"></div>
-                <p>AI가 당신의 정보를 바탕으로 행운을 분석 중입니다...</p>
+                <p>${currentLang === 'en' ? 'AI is analyzing your fortune...' : 'AI가 당신의 정보를 바탕으로 행운을 분석 중입니다...'}</p>
             `;
             return;
         }
@@ -150,7 +153,7 @@ class LuckyRecommendation extends HTMLElement {
                 </style>
                 <div class="welcome-card">
                     <span class="icon">✨</span>
-                    <div class="msg">정보를 입력하고 '행운 추천받기' 버튼을 눌러보세요!</div>
+                    <div class="msg">${currentLang === 'en' ? 'Enter your info and click the button!' : "정보를 입력하고 '행운 추천받기' 버튼을 눌러보세요!"}</div>
                 </div>
             `;
             return;
@@ -159,15 +162,11 @@ class LuckyRecommendation extends HTMLElement {
         const { oklch, colorName, colorDesc, itemName, itemIcon, itemAction } = this._luckyData;
         
         // 1. 색상 렌더링 방어 코드 (Component)
-        // 쉼표를 공백으로 치환하고 oklch() 함수 중복 방지
         let cleanColor = oklch.trim().replace(/,/g, ' ');
         if (cleanColor.includes('oklch(')) {
-            // 이미 oklch() 형태인 경우 추출 시도
             const match = cleanColor.match(/oklch\(([^)]+)\)/);
             if (match) cleanColor = match[1].trim();
         }
-        
-        // 최종 안전 색상 결정 (비어있으면 기본값 보정)
         const safeColor = cleanColor ? `oklch(${cleanColor})` : 'oklch(0.6 0.15 250)';
 
         this.shadowRoot.innerHTML = `
@@ -178,6 +177,7 @@ class LuckyRecommendation extends HTMLElement {
                 container-type: inline-size;
             }
 
+            /* 2. 유연한 레이아웃 설계 (Flexible widths for English) */
             .card {
                 background: white;
                 border-radius: 2rem;
@@ -185,7 +185,8 @@ class LuckyRecommendation extends HTMLElement {
                 box-shadow: 
                     0 10px 20px oklch(0 0 0 / 0.04),
                     0 30px 60px oklch(0 0 0 / 0.12);
-                display: grid;
+                display: flex;
+                flex-direction: column;
                 gap: 2.5rem;
                 position: relative;
                 overflow: hidden;
@@ -209,16 +210,17 @@ class LuckyRecommendation extends HTMLElement {
 
             .section { display: flex; flex-direction: column; gap: 0.75rem; }
             .label { font-size: 0.85rem; color: oklch(0.55 0.02 250); font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; }
-            .value-row { display: flex; align-items: center; gap: 1.25rem; }
+            .value-row { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
             .color-preview { 
                 width: 44px; 
                 height: 44px; 
+                flex-shrink: 0;
                 border-radius: 50%; 
                 background: ${safeColor} !important;
                 border: 4px solid white; 
                 box-shadow: 0 8px 16px oklch(0 0 0 / 0.15);
             }
-            .title { font-size: 2rem; font-weight: 900; margin: 0; color: oklch(0.25 0.02 250); letter-spacing: -0.02em; }
+            .title { font-size: 2rem; font-weight: 900; margin: 0; color: oklch(0.25 0.02 250); letter-spacing: -0.02em; flex: 1; min-width: 200px; }
             .description { font-size: 1.1rem; line-height: 1.7; color: oklch(0.45 0.02 250); margin: 0; }
             .item-icon { font-size: 4rem; filter: drop-shadow(0 10px 20px oklch(0 0 0 / 0.1)); }
             .divider { height: 1px; background: oklch(0.94 0.01 250); width: 100%; }
@@ -233,7 +235,7 @@ class LuckyRecommendation extends HTMLElement {
         
         <div class="card" role="article" aria-label="Today's Lucky Recommendation">
             <div class="section">
-                <span class="label">Lucky Color</span>
+                <span class="label">${currentLang === 'en' ? 'Lucky Color' : '행운의 컬러'}</span>
                 <div class="value-row">
                     <div class="color-preview"></div>
                     <h2 class="title">${colorName}</h2>
@@ -244,7 +246,7 @@ class LuckyRecommendation extends HTMLElement {
             <div class="divider"></div>
 
             <div class="section">
-                <span class="label">Lucky Item</span>
+                <span class="label">${currentLang === 'en' ? 'Lucky Item' : '행운의 아이템'}</span>
                 <div class="item-icon">${itemIcon}</div>
                 <div class="value-row">
                     <h2 class="title">${itemName}</h2>
