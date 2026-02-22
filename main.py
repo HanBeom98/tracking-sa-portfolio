@@ -30,7 +30,8 @@ STATIC_PAGES_FOR_SITEMAP = [
     "edit",
     "write",
     "post",
-    "lucky-recommendation"
+    "lucky-recommendation",
+    "tetris-game"
 ]
 
 
@@ -93,6 +94,12 @@ COMMON_BODY_INJECTIONS = """
                         <a href="/ai-test" data-i18n="ai_tendency_test">AI 성향 테스트</a>
                         <a href="/fortune" data-i18n="saju_test">AI 운세 테스트</a>
                         <a href="/lucky-recommendation" data-i18n="lucky_recommendation">행운의 추천</a>
+                    </div>
+                </li>
+                <li class="dropdown">
+                    <a href="#" class="dropbtn" data-i18n="menu_game">게임</a>
+                    <div class="dropdown-content">
+                        <a href="/tetris-game" data-i18n="tetris_game">테트리스</a>
                     </div>
                 </li>
                 <li><a href="/inquiry" data-i18n="partnership_inquiry">파트너십 문의</a></li>

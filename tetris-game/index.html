@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="사주 분석 및 운세 예측 서비스">
+    <meta name="keywords" content="사주, 운세, 예측, AI, 인공지능">
+    <meta name="author" content="Your Name">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
+    <title data-i18n="title">사주 분석 - AI 운세 예측</title>
+
+    <!-- [Revenue] AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-xxxxxxxxxxxxxxxx"
+    crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="canonical" href="https://yourdomain.com/index.html">
+    <meta property="og:title" content="AI 사주 분석 및 운세 예측">
+    <meta property="og:description" content="인공지능 기반의 정확한 사주 분석과 운세 예측을 경험하세요.">
+    <meta property="og:image" content="https://yourdomain.com/og-image.jpg">
+    <meta property="og:url" content="https://yourdomain.com/index.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <script src="./translations.js"></script>
+    <script src="./common.js"></script>
+    <script src="./tetris-game/script.js"></script>
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="#" data-i18n="menu.home">홈</a></li>
+                <li><a href="#" data-i18n="menu.about">소개</a></li>
+                <li><a href="#" data-i18n="menu.services">서비스</a></li>
+                <li><a href="#" data-i18n="menu.contact">문의</a></li>
+                <li>
+                    <select id="language-switcher">
+                        <option value="ko" data-i18n="languages.ko">한국어</option>
+                        <option value="en" data-i18n="languages.en">영어</option>
+                    </select>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="hero">
+            <h1 data-i18n="hero.title">AI 기반 사주 분석으로 미래를 예측하세요</h1>
+            <p data-i18n="hero.subtitle">정확하고 심층적인 분석을 제공합니다.</p>
+            <button data-i18n="hero.button">지금 시작하기</button>
+        </section>
+
+        <section id="tetris-section">
+            <tetris-game></tetris-game>
+        </section>
+
+        <section id="news">
+            <h2><span data-i18n="news.title">최신 소식</span></h2>
+            <div class="news-grid">
+                <article class="news-card hero-card">
+                    <img src="news1.jpg" alt="News 1">
+                    <h3><span data-i18n="news.card1.title">새로운 AI 분석 모델 출시</span></h3>
+                    <p><span data-i18n="news.card1.description">더욱 정확한 예측을 위한 AI 모델이 출시되었습니다.</span></p>
+                    <a href="#" data-i18n="news.readMore">자세히 보기</a>
+                </article>
+                <article class="news-card">
+                    <img src="news2.jpg" alt="News 2">
+                    <h3><span data-i18n="news.card2.title">사주 분석 방법론 업데이트</span></h3>
+                    <p><span data-i18n="news.card2.description">최신 통계 데이터를 반영한 분석 방법론이 업데이트되었습니다.</span></p>
+                    <a href="#" data-i18n="news.readMore">자세히 보기</a>
+                </article>
+                <article class="news-card">
+                    <img src="news3.jpg" alt="News 3">
+                    <h3><span data-i18n="news.card3.title">개인 정보 보호 정책 변경 안내</span></h3>
+                    <p><span data-i18n="news.card3.description">사용자 개인 정보 보호를 위한 정책이 변경되었습니다.</span></p>
+                    <a href="#" data-i18n="news.readMore">자세히 보기</a>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p data-i18n="footer.copyright">© 2024 Your Company. All rights reserved.</p>
+        <nav>
+            <ul>
+                <li><a href="#" data-i18n="footer.sitemap">사이트맵</a></li>
+                <li><a href="#" data-i18n="footer.rss">RSS</a></li>
+                <li><a href="#" data-i18n="footer.terms">이용약관</a></li>
+                <li><a href="#" data-i18n="footer.privacy">개인정보처리방침</a></li>
+            </ul>
+        </nav>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTranslations();
+
+            const languageSwitcher = document.getElementById('language-switcher');
+            languageSwitcher.addEventListener('change', function() {
+                setLanguage(this.value);
+            });
+        });
+    </script>
+</body>
+</html>
