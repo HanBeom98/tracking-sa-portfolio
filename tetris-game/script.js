@@ -109,20 +109,24 @@ class TetrisGame extends HTMLElement {
 
     resizeCanvas() {
         const rect = this.boardWrapper.getBoundingClientRect();
-        const padding = 0;
+        const isDesktop = window.innerWidth >= 1024;
+        // [수정] 짤림 방지를 위해 최소한의 패딩(4px) 부여
+        const padding = 4;
         const availableW = rect.width - padding;
         
-        // [수정] 외부 레이아웃 높이를 고려한 정교한 계산
         const vh = window.innerHeight;
         const header = document.querySelector('header');
         const headerHeight = header ? header.offsetHeight : 0;
         
-        // 하단 컨트롤러 높이 감지 (모바일 기준 약 130px)
-        const controls = this.shadowRoot.querySelector('.controls');
-        const controlsHeight = (controls && controls.offsetHeight > 0) ? controls.offsetHeight : 130;
-        
-        // 실제 게임 보드가 가질 수 있는 최대 높이 계산
-        const availableH = vh - headerHeight - controlsHeight - 40; // 40px 여유 버퍼
+        // [수정] 데스크탑은 하단 버튼이 없으므로 여백 계산 차별화
+        let availableH;
+        if (isDesktop) {
+            availableH = Math.min(rect.height, vh - headerHeight - 60) - padding;
+        } else {
+            const controls = this.shadowRoot.querySelector('.controls');
+            const controlsHeight = (controls && controls.offsetHeight > 0) ? controls.offsetHeight : 130;
+            availableH = Math.min(rect.height, vh - headerHeight - controlsHeight - 40) - padding;
+        }
         
         let size = Math.floor(availableH / this.ROWS);
         if (size * this.COLS > availableW) size = Math.floor(availableW / this.COLS);
@@ -373,11 +377,12 @@ class TetrisGame extends HTMLElement {
             @media (min-width: 1024px) {
                 .controls { display: none; }
                 .game-main { align-items: center; justify-content: center; }
+                /* [수정] 데스크탑 화면 너비 확장 및 짤림 방지 */
                 .main-board { 
                     flex: none; 
                     height: 85vh; 
                     width: calc(85vh * 0.5); 
-                    max-width: 350px;
+                    max-width: 450px;
                 }
             }
             .btn { background: oklch(25% 0.05 250); border: 1px solid #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 4px 0 #000; transition: 0.1s; cursor: pointer; }
