@@ -6,13 +6,13 @@ class TetrisGame extends HTMLElement {
         this.ROWS = 20;
         this.COLORS = [
             null,
-            'oklch(65% 0.25 250)', // I
-            'oklch(60% 0.2 60)',   // J
-            'oklch(60% 0.2 30)',   // L
-            'oklch(70% 0.2 140)',  // O
-            'oklch(65% 0.2 180)',  // S
-            'oklch(65% 0.2 320)',  // T
-            'oklch(60% 0.2 0)'     // Z
+            'oklch(65% 0.25 250)', // I (Cyan)
+            'oklch(60% 0.2 60)',   // J (Blue)
+            'oklch(60% 0.2 30)',   // L (Orange)
+            'oklch(70% 0.2 140)',  // O (Yellow)
+            'oklch(65% 0.2 180)',  // S (Green)
+            'oklch(65% 0.2 320)',  // T (Purple)
+            'oklch(60% 0.2 0)'     // Z (Red)
         ];
         this.SHAPES = [
             [],
@@ -64,6 +64,7 @@ class TetrisGame extends HTMLElement {
         this.nextCanvas = this.shadowRoot.querySelector('#next-canvas');
         this.nextCtx = this.nextCanvas.getContext('2d');
         this.boardWrapper = this.shadowRoot.querySelector('.main-board');
+        this.flashOverlay = this.shadowRoot.querySelector('.flash-overlay');
         
         this.db = window.db || null;
 
@@ -111,29 +112,90 @@ class TetrisGame extends HTMLElement {
         return { pos: { x: 3, y: 0 }, matrix: JSON.parse(JSON.stringify(this.SHAPES[id])), colorId: id };
     }
 
+    // [New] Ghost Piece 위치 계산
+    getGhostPos() {
+        const ghost = { pos: { ...this.piece.pos }, matrix: this.piece.matrix };
+        while (!this.collide(ghost)) {
+            ghost.pos.y++;
+        }
+        ghost.pos.y--;
+        return ghost.pos;
+    }
+
     draw() {
         if (!this.BLOCK_SIZE || !this.ctx) return;
-        this.ctx.fillStyle = '#000';
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // 1. 보드 배경 격자 (Subtle Grid)
+        this.ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+        this.ctx.lineWidth = 1;
+        for(let i=0; i<=this.COLS; i++) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(i*this.BLOCK_SIZE, 0);
+            this.ctx.lineTo(i*this.BLOCK_SIZE, this.canvas.height);
+            this.ctx.stroke();
+        }
+        for(let i=0; i<=this.ROWS; i++) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(0, i*this.BLOCK_SIZE);
+            this.ctx.lineTo(this.canvas.width, i*this.BLOCK_SIZE);
+            this.ctx.stroke();
+        }
+
+        // 2. 쌓인 블록들
         this.drawMatrix(this.board, { x: 0, y: 0 }, this.ctx, this.BLOCK_SIZE);
+        
+        // 3. 고스트 블록 (반투명)
+        const gPos = this.getGhostPos();
+        this.drawMatrix(this.piece.matrix, gPos, this.ctx, this.BLOCK_SIZE, true);
+
+        // 4. 현재 조작 블록
         this.drawMatrix(this.piece.matrix, this.piece.pos, this.ctx, this.BLOCK_SIZE);
 
-        this.nextCtx.fillStyle = '#111';
+        // 5. 다음 블록 미리보기
+        this.nextCtx.fillStyle = 'rgba(0,0,0,0.3)';
         this.nextCtx.fillRect(0, 0, this.nextCanvas.width, this.nextCanvas.height);
         const nx = (4 - this.nextPiece.matrix[0].length) / 2;
         const ny = (4 - this.nextPiece.matrix.length) / 2;
         this.drawMatrix(this.nextPiece.matrix, { x: nx, y: ny }, this.nextCtx, this.NEXT_BLOCK_SIZE);
     }
 
-    drawMatrix(matrix, offset, context, size) {
+    // [Upgrade] Bevel & Gradient 효과가 적용된 블록 렌더링
+    drawMatrix(matrix, offset, context, size, isGhost = false) {
         matrix.forEach((row, y) => {
             row.forEach((value, x) => {
                 if (value !== 0) {
-                    context.shadowBlur = size / 3;
-                    context.shadowColor = this.COLORS[value];
-                    context.fillStyle = this.COLORS[value];
-                    context.fillRect((x + offset.x) * size, (y + offset.y) * size, size - 1, size - 1);
+                    const bx = (x + offset.x) * size;
+                    const by = (y + offset.y) * size;
+                    const color = this.COLORS[value];
+
+                    if (isGhost) {
+                        context.strokeStyle = color.replace('oklch(', 'oklch(40% '); // 채도/명도 낮춤
+                        context.setLineDash([2, 2]);
+                        context.strokeRect(bx + 2, by + 2, size - 4, size - 4);
+                        context.setLineDash([]);
+                        return;
+                    }
+
+                    // 블록 본체 그라데이션
+                    const grad = context.createLinearGradient(bx, by, bx + size, by + size);
+                    grad.addColorStop(0, color);
+                    grad.addColorStop(1, color.replace('oklch(', 'oklch(40% '));
+                    context.fillStyle = grad;
+                    context.shadowBlur = size / 4;
+                    context.shadowColor = color;
+                    context.fillRect(bx, by, size - 1, size - 1);
                     context.shadowBlur = 0;
+
+                    // Bevel 효과 (하이라이트)
+                    context.fillStyle = 'rgba(255,255,255,0.3)';
+                    context.fillRect(bx, by, size - 1, 2); // 상단
+                    context.fillRect(bx, by, 2, size - 1); // 좌측
+
+                    // Bevel 효과 (그림자)
+                    context.fillStyle = 'rgba(0,0,0,0.2)';
+                    context.fillRect(bx, by + size - 3, size - 1, 2); // 하단
+                    context.fillRect(bx + size - 3, by, 2, size - 1); // 우측
                 }
             });
         });
@@ -199,8 +261,8 @@ class TetrisGame extends HTMLElement {
             snapshot.forEach(doc => {
                 const data = doc.data();
                 const item = document.createElement('div');
-                item.style = 'display:flex; justify-content:space-between; margin-bottom:4px; font-size:0.8rem; color:#aaa;';
-                item.innerHTML = `<span>${data.nickname}</span> <span>${data.score}</span>`;
+                item.style = 'display:flex; justify-content:space-between; margin-bottom:6px; font-size:0.85rem; color:#ccc; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:2px;';
+                item.innerHTML = `<span>${data.nickname}</span> <span style="color:oklch(70% 0.2 150)">${data.score}</span>`;
                 listEl.appendChild(item);
             });
         } catch (e) { console.error(e); }
@@ -223,8 +285,9 @@ class TetrisGame extends HTMLElement {
         } catch (e) { console.error(e); }
     }
 
-    collide() {
-        const [m, o] = [this.piece.matrix, this.piece.pos];
+    collide(customPiece) {
+        const p = customPiece || this.piece;
+        const [m, o] = [p.matrix, p.pos];
         for (let y = 0; y < m.length; ++y) {
             for (let x = 0; x < m[y].length; ++x) {
                 if (m[y][x] !== 0 && (this.board[y + o.y] && this.board[y + o.y][x + o.x]) !== 0) return true;
@@ -256,8 +319,14 @@ class TetrisGame extends HTMLElement {
             this.combo++;
             this.score += (linesCleared * 100) * this.combo;
             this.playNote(400 + (this.combo * 100), 0.2);
+            this.triggerFlash();
             this.showComboEffect();
         } else { this.combo = 0; }
+    }
+
+    triggerFlash() {
+        this.flashOverlay.classList.add('active');
+        setTimeout(() => this.flashOverlay.classList.remove('active'), 150);
     }
 
     showComboEffect() {
@@ -265,7 +334,7 @@ class TetrisGame extends HTMLElement {
         if (this.combo > 1) {
             comboEl.innerText = `COMBO X${this.combo}`;
             comboEl.classList.add('pop');
-            setTimeout(() => comboEl.classList.remove('pop'), 500);
+            setTimeout(() => comboEl.classList.remove('pop'), 600);
         }
     }
 
@@ -315,21 +384,17 @@ class TetrisGame extends HTMLElement {
             else if (e.keyCode === 38) this.playerRotate(1);
         });
 
-        // [핵심] 모바일 전용 연속 이동 로직 및 passive: false 적용
         const handleTouch = (id, action, isRepeat = true) => {
             const el = this.shadowRoot.querySelector(`#${id}`);
             if (!el) return;
-            
             el.addEventListener('touchstart', (e) => {
-                if (e.cancelable) e.preventDefault(); // 스크롤 간섭 방지
+                if (e.cancelable) e.preventDefault();
                 if (isRepeat) this.startRepeat(action); else action();
             }, { passive: false });
-
             el.addEventListener('touchend', (e) => {
                 if (e.cancelable) e.preventDefault();
                 this.stopRepeat();
             }, { passive: false });
-
             el.addEventListener('touchcancel', () => this.stopRepeat(), { passive: false });
         };
 
@@ -345,102 +410,93 @@ class TetrisGame extends HTMLElement {
     render() {
         this.shadowRoot.innerHTML = `
             <style>
-                :host { display: block; height: 100%; width: 100%; font-family: 'Orbitron', sans-serif; color: white; user-select: none; background: #050505; overflow: hidden; }
-                .game-layout { display: flex; flex-direction: column; height: 100%; width: 100%; padding: 10px; box-sizing: border-box; }
+                :host { 
+                    display: block; height: 100%; width: 100%; font-family: 'Orbitron', sans-serif; color: white; user-select: none; 
+                    background: radial-gradient(circle at center, oklch(20% 0.05 250), #000), 
+                                url('data:image/svg+xml,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.65" stitchTiles="stitch" /></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.05"/></svg>');
+                    overflow: hidden; 
+                }
+                .game-layout { display: flex; flex-direction: column; height: 100%; width: 100%; padding: 15px; box-sizing: border-box; }
                 
-                /* [Desktop Layout - 사용자 만족 포인트 원복] */
-                .game-main { flex: 1; display: flex; gap: 20px; align-items: center; justify-content: center; min-height: 0; }
-                .main-board { position: relative; height: 100%; display: flex; align-items: center; justify-content: center; }
-                #game-canvas { border: 4px solid #222; background: #000; border-radius: 8px; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
-                .side-panel { display: flex; flex-direction: column; gap: 15px; width: 130px; }
-                .panel-box { background: #111; padding: 12px; border-radius: 12px; border: 2px solid #222; text-align: center; }
-                .label { color: #666; font-size: 10px; margin-bottom: 5px; letter-spacing: 1px; }
-                .value { color: white; font-size: 20px; text-shadow: 0 0 10px oklch(60% 0.2 250); }
-                #next-canvas { background: #000; border-radius: 4px; margin: auto; }
+                .game-main { flex: 1; display: flex; gap: 30px; align-items: center; justify-content: center; min-height: 0; }
+                
+                /* [Glassmorphism Board] */
+                .main-board { 
+                    position: relative; height: 100%; display: flex; align-items: center; justify-content: center; 
+                    background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); 
+                    backdrop-filter: blur(5px); padding: 10px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+                }
+                #game-canvas { border: 2px solid rgba(255,255,255,0.1); background: #000; border-radius: 4px; }
+                
+                .side-panel { display: flex; flex-direction: column; gap: 20px; width: 140px; }
+                .panel-box { 
+                    background: rgba(20, 20, 30, 0.6); padding: 15px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); 
+                    text-align: center; backdrop-filter: blur(15px); box-shadow: inset 0 0 20px rgba(255,255,255,0.02);
+                }
+                .label { color: #888; font-size: 11px; margin-bottom: 8px; letter-spacing: 2px; font-weight: 300; }
+                .value { color: white; font-size: 24px; font-weight: bold; text-shadow: 0 0 15px oklch(60% 0.2 150); }
+                #next-canvas { background: transparent; border-radius: 4px; margin: auto; }
 
-                #combo-text { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); color: oklch(70% 0.3 150); font-size: 2rem; font-weight: bold; pointer-events: none; opacity: 0; transition: 0.3s; z-index: 5; }
-                #combo-text.pop { opacity: 1; transform: translate(-50%, -60%) scale(1.2); }
+                /* [Effects] */
+                .flash-overlay { position: absolute; inset: 0; background: white; opacity: 0; pointer-events: none; transition: 0.1s; border-radius: 12px; z-index: 2; }
+                .flash-overlay.active { opacity: 0.3; }
 
-                #game-over { position: absolute; inset: 0; background: rgba(0,0,0,0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10; border-radius: 8px; text-align: center; padding: 20px; }
+                #combo-text { 
+                    position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); color: oklch(75% 0.3 150); 
+                    font-size: 2.5rem; font-weight: 900; pointer-events: none; opacity: 0; z-index: 5; text-shadow: 0 0 20px currentColor; 
+                }
+                #combo-text.pop { opacity: 1; animation: popScale 0.6s cubic-bezier(0.17, 0.89, 0.32, 1.49); }
+                @keyframes popScale { 0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } 50% { transform: translate(-50%, -60%) scale(1.3); opacity: 1; } 100% { transform: translate(-50%, -70%) scale(1); opacity: 0; } }
+
+                #game-over { 
+                    position: absolute; inset: 0; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; 
+                    justify-content: center; z-index: 10; border-radius: 12px; text-align: center; padding: 25px; backdrop-filter: blur(10px);
+                }
                 #game-over.visible { display: flex; }
 
-                /* [기본 버튼 - PC에서는 숨김] */
-                .controls { height: 180px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 10px 20px 30px 20px; justify-items: center; align-items: center; background: #0a0a0a; border-top: 1px solid #222; flex-shrink: 0; }
-                @media (min-width: 1024px) { .controls { display: none; } }
-
-                /* [Modern Mobile UI - 오직 모바일 환경에서만 강력하게 적용] */
-                @media (max-width: 1023px) {
-                    .game-layout { padding: 5px; }
-                    .game-main { flex-direction: column; gap: 5px; }
-                    
-                    /* 사이드바를 상단 HUD로 가로 배치 */
-                    .side-panel { 
-                        flex-direction: row; 
-                        width: 100%; 
-                        max-width: 400px;
-                        margin: 0 auto;
-                        justify-content: space-between; 
-                        order: -1; /* 보드판 위로 이동 */
-                        gap: 8px;
-                        padding: 5px 10px;
-                    }
-                    .side-panel .panel-box { 
-                        flex: 1; 
-                        padding: 4px; 
-                        border-radius: 8px;
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                        justify-content: center;
-                        min-width: 0;
-                    }
-                    .side-panel .label { font-size: 7px; margin-bottom: 1px; }
-                    .side-panel .value { font-size: 14px; }
-                    #next-canvas { width: 30px !important; height: 30px !important; }
-
-                    /* 조이스틱을 중앙으로 조밀하게 배치 (D-PAD 스타일) */
-                    .controls { 
-                        height: 150px; 
-                        grid-template-columns: repeat(3, 70px); 
-                        grid-template-rows: repeat(2, 60px);
-                        gap: 12px; 
-                        justify-content: center; 
-                        padding: 15px;
-                        background: transparent;
-                        border: none;
-                    }
-                    .mobile-btn { 
-                        width: 60px; 
-                        height: 60px; 
-                        background: oklch(35% 0.1 250);
-                        border: 2px solid #444;
-                        border-radius: 50%;
-                        color: white;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        box-shadow: 0 4px 0 oklch(20% 0.1 250);
-                        font-size: 1.3rem;
-                    }
-                    .mobile-btn:active {
-                        transform: translateY(2px);
-                        box-shadow: 0 2px 0 oklch(20% 0.1 250);
-                    }
+                /* [Premium Controller] */
+                .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding: 20px; justify-items: center; align-items: center; }
+                .mobile-btn { 
+                    width: 75px; height: 75px; background: linear-gradient(145deg, oklch(35% 0.05 250), oklch(25% 0.05 250)); 
+                    border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; color: white; display: flex; align-items: center; 
+                    justify-content: center; font-size: 2rem; cursor: pointer; box-shadow: 5px 5px 15px rgba(0,0,0,0.4), -2px -2px 10px rgba(255,255,255,0.05); 
+                    transition: 0.1s;
                 }
+                .mobile-btn:active { 
+                    transform: scale(0.92) translateY(2px); background: oklch(50% 0.2 250); 
+                    box-shadow: 0 0 30px oklch(50% 0.2 250); border-color: white; 
+                }
+
+                @media (max-width: 1023px) {
+                    .game-layout { padding: 10px; }
+                    .game-main { flex-direction: column; gap: 10px; }
+                    .side-panel { 
+                        flex-direction: row; width: 100%; max-width: 450px; order: -1; gap: 8px; margin: 0 auto;
+                    }
+                    .side-panel .panel-box { flex: 1; padding: 8px; border-radius: 12px; }
+                    .side-panel .label { font-size: 8px; margin-bottom: 2px; }
+                    .side-panel .value { font-size: 18px; }
+                    #next-canvas { width: 32px !important; height: 32px !important; }
+                    .controls { height: 160px; grid-template-columns: repeat(3, 80px); grid-template-rows: repeat(2, 70px); gap: 15px; }
+                    .mobile-btn { width: 70px; height: 70px; border-radius: 50%; }
+                }
+
+                @media (min-width: 1024px) { .controls { display: none; } }
             </style>
             <div class="game-layout">
                 <div class="game-main">
                     <div class="main-board">
+                        <div class="flash-overlay"></div>
                         <canvas id="game-canvas"></canvas>
                         <div id="combo-text">COMBO!</div>
                         <div id="game-over">
-                            <h2 style="color:red; margin-bottom:5px;">GAME OVER</h2>
-                            <div style="font-size:2rem; margin-bottom:15px;" id="final-score-val">0</div>
-                            <div id="rank-list" style="width:100%; max-width:180px; margin-bottom:15px;"></div>
-                            <input type="text" id="nick-input" placeholder="NICKNAME" maxlength="10" style="padding:10px; background:#111; border:1px solid #444; color:white; width:140px; text-align:center; margin-bottom:10px; font-family:inherit;">
-                            <div style="display:flex; gap:10px;">
-                                <button id="submit-btn" style="padding:10px 20px; background:oklch(65% 0.2 150); border:none; border-radius:4px; font-weight:bold; cursor:pointer;">SAVE</button>
-                                <button id="restart-btn" style="padding:10px 20px; background:oklch(60% 0.2 250); color:white; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">RETRY</button>
+                            <h2 style="color:red; margin-bottom:10px; letter-spacing:4px;">GAME OVER</h2>
+                            <div style="font-size:3rem; margin-bottom:20px; font-weight:900;" id="final-score-val">0</div>
+                            <div id="rank-list" style="width:100%; max-width:220px; margin-bottom:20px; background:rgba(255,255,255,0.05); padding:15px; border-radius:12px;"></div>
+                            <input type="text" id="nick-input" placeholder="NICKNAME" maxlength="10" style="padding:12px; background:rgba(0,0,0,0.5); border:1px solid #444; color:white; width:160px; text-align:center; margin-bottom:15px; font-family:inherit; border-radius:8px;">
+                            <div style="display:flex; gap:15px;">
+                                <button id="submit-btn" style="padding:12px 28px; background:oklch(65% 0.2 150); border:none; border-radius:8px; font-weight:bold; cursor:pointer; color:black;">SAVE</button>
+                                <button id="restart-btn" style="padding:12px 28px; background:oklch(60% 0.2 250); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">RETRY</button>
                             </div>
                         </div>
                     </div>
