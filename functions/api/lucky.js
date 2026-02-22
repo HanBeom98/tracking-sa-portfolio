@@ -7,15 +7,18 @@ function addCORSHeaders(response) {
 }
 
 export async function onRequest(context) {
-    // 1. 에러 방지를 위해 변수 선언을 맨 위로 고정 (fortune.js와 동일)
+    // fortune.js와 동일한 구조
     const { request, env } = context || {};
 
     if (request.method === 'OPTIONS') {
         return addCORSHeaders(new Response(null, { status: 204 }));
     }
 
-    if (!env.GEMINI_API_KEY) {
-        console.error('CRITICAL: GEMINI_API_KEY not found in env object.');
+    // GEMINI_API_KEY 확인
+    const GEMINI_API_KEY = env?.GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+
+    if (!GEMINI_API_KEY) {
+        console.error('CRITICAL: GEMINI_API_KEY not found.');
         return addCORSHeaders(new Response(JSON.stringify({ error: 'Server configuration error: API key is not set.' }), {
             status: 500,
             headers: { 'Content-Type': 'application/json' },
@@ -31,8 +34,6 @@ export async function onRequest(context) {
         const { language, currentDate, userInfo } = body;
         const { name, gender, birthMonth, birthDay } = userInfo || {};
 
-        // fortune.js와 동일한 키 획득 방식
-        const GEMINI_API_KEY = env?.GEMINI_API_KEY || process.env.GEMINI_API_KEY;
         const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent';
 
         const dateStr = currentDate ? `${currentDate.year}-${currentDate.month}-${currentDate.day}` : 'today';
@@ -72,6 +73,8 @@ export async function onRequest(context) {
         }
 
         let text = geminiData.candidates[0].content.parts[0].text;
+        
+        // JSON 파싱 (마크다운 방지)
         const jsonMatch = text.match(/\{[\s\S]*\}/);
         if (!jsonMatch) throw new Error('Invalid AI response format');
         
