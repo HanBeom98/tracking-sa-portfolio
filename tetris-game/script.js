@@ -1,5 +1,4 @@
 // [1] Firebase 초기화 (전역 충돌 방지 및 안전한 초기화 로직)
-// 이미 전역에 firebaseConfig가 선언되어 있다면 기존 설정을 사용하고, 없다면 새로 할당합니다.
 if (typeof firebaseConfig === 'undefined') {
     window.firebaseConfig = {
         authDomain: "tracking-sa-295db.firebaseapp.com",
@@ -8,12 +7,10 @@ if (typeof firebaseConfig === 'undefined') {
     };
 }
 
-// 중복 초기화 에러(App already exists)를 방지하기 위해 apps.length를 체크합니다.
 if (firebase.apps.length === 0) {
     firebase.initializeApp(firebaseConfig);
 }
 
-// db 변수 중복 선언 방지 (이미 전역 선언된 경우 기존 인스턴스 사용)
 if (typeof db === 'undefined') {
     window.db = firebase.firestore();
 }
@@ -45,6 +42,9 @@ class TetrisGame extends HTMLElement {
             [[7, 7, 0], [0, 7, 7], [0, 0, 0]]
         ];
         this.audioCtx = null;
+        this.isMuted = false;
+        this.bgmNode = null;
+        this.bgmTimeout = null;
         this.resetInternalState();
     }
 
@@ -63,10 +63,80 @@ class TetrisGame extends HTMLElement {
     initAudio() {
         if (this.audioCtx) return;
         this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        this.startBGM();
+    }
+
+    startBGM() {
+        if (this.isMuted || this.bgmNode) return;
+        
+        const melody = [
+            ['E4', 4], ['B3', 8], ['C4', 8], ['D4', 4], ['C4', 8], ['B3', 8],
+            ['A3', 4], ['A3', 8], ['C4', 8], ['E4', 4], ['D4', 8], ['C4', 8],
+            ['B3', 4], ['B3', 8], ['C4', 8], ['D4', 4], ['E4', 4],
+            ['C4', 4], ['A3', 4], ['A3', 4], [null, 4],
+            ['D4', 4], ['F4', 8], ['A4', 4], ['G4', 8], ['F4', 8],
+            ['E4', 4], ['C4', 8], ['E4', 4], ['D4', 8], ['C4', 8],
+            ['B3', 4], ['B3', 8], ['C4', 8], ['D4', 4], ['E4', 4],
+            ['C4', 4], ['A3', 4], ['A3', 4], [null, 4]
+        ];
+
+        const freqs = {
+            'A3': 220.00, 'B3': 246.94, 'C4': 261.63, 'D4': 293.66, 
+            'E4': 329.63, 'F4': 349.23, 'G4': 392.00, 'A4': 440.00
+        };
+
+        let time = this.audioCtx.currentTime + 0.1;
+        const tempo = 150; 
+        const beatUnit = 60 / tempo;
+
+        const playMelody = () => {
+            if (this.isGameOver || this.isMuted) {
+                this.bgmNode = null;
+                return;
+            }
+            
+            melody.forEach(([note, duration]) => {
+                if (note) {
+                    const osc = this.audioCtx.createOscillator();
+                    const gain = this.audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freqs[note], time);
+                    gain.gain.setValueAtTime(0.01, time);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, time + (4/duration) * beatUnit - 0.05);
+                    osc.connect(gain);
+                    gain.connect(this.audioCtx.destination);
+                    osc.start(time);
+                    osc.stop(time + (4/duration) * beatUnit);
+                }
+                time += (4/duration) * beatUnit;
+            });
+            
+            this.bgmTimeout = setTimeout(playMelody, (time - this.audioCtx.currentTime) * 1000);
+        };
+
+        playMelody();
+        this.bgmNode = true;
+    }
+
+    toggleMute() {
+        this.isMuted = !this.isMuted;
+        if (this.isMuted) {
+            if (this.bgmTimeout) clearTimeout(this.bgmTimeout);
+            this.bgmNode = null;
+        } else {
+            this.initAudio();
+            if (this.audioCtx && !this.bgmNode) this.startBGM();
+        }
+        this.updateMuteUI();
+    }
+
+    updateMuteUI() {
+        const btn = this.shadowRoot.querySelector('#btn-mute');
+        if (btn) btn.innerText = this.isMuted ? '🔇' : '🔊';
     }
 
     playNote(freq, duration, type = 'sine', volume = 0.05) {
-        if (!this.audioCtx) return;
+        if (!this.audioCtx || this.isMuted) return;
         const osc = this.audioCtx.createOscillator();
         const gain = this.audioCtx.createGain();
         osc.type = type;
@@ -109,22 +179,19 @@ class TetrisGame extends HTMLElement {
     resizeCanvas() {
         const rect = this.boardWrapper.getBoundingClientRect();
         const isDesktop = window.innerWidth >= 1024;
-        const padding = 10; // 여백 확보
+        const padding = 10;
         const availableW = this.boardWrapper.clientWidth - padding;
         
         const vh = window.innerHeight;
-        const headerHeight = 70; // 홈 화면 기준 헤더 높이
+        const headerHeight = 70;
         
         let availableH;
         if (isDesktop) {
-            // 데스크톱: 상단 헤더만 고려
             availableH = Math.min(rect.height, vh - 100) - padding;
         } else {
-            // 모바일: window.innerHeight - 헤더(70) - 컨트롤러(150) - 하단 여백(40)
             availableH = vh - headerHeight - 150 - 40; 
         }
         
-        // 가로/세로 중 더 제한적인 쪽에 맞춤
         let size = Math.floor(availableH / this.ROWS);
         if (size * this.COLS > availableW) {
             size = Math.floor(availableW / this.COLS);
@@ -146,12 +213,12 @@ class TetrisGame extends HTMLElement {
         const deltaTime = time - this.lastTime;
         this.lastTime = time;
         this.dropCounter += deltaTime;
-        if (this.dropCounter > this.dropInterval) this.playerDrop();
+        if (this.dropCounter > this.dropInterval) this.playerDrop(false);
         this.draw();
         requestAnimationFrame(this.update.bind(this));
     }
 
-    playerDrop() {
+    playerDrop(isSoftDrop = true) {
         this.piece.pos.y++;
         if (this.collide()) {
             this.piece.pos.y--;
@@ -160,6 +227,8 @@ class TetrisGame extends HTMLElement {
             this.arenaSweep();
             this.updateUI();
             this.playNote(100, 0.1, 'square', 0.02);
+        } else if (isSoftDrop) {
+            this.playNote(150, 0.05, 'sine', 0.01);
         }
         this.dropCounter = 0;
     }
@@ -207,7 +276,7 @@ class TetrisGame extends HTMLElement {
         if (linesCleared > 0) {
             this.combo++;
             this.score += (linesCleared * 100) * this.combo;
-            this.playNote(400 + (this.combo * 100), 0.2, 'sine');
+            this.playNote(400 + (this.combo * 100), 0.3, 'sine', 0.1);
             this.showComboEffect();
         } else { this.combo = 0; }
     }
@@ -312,33 +381,30 @@ class TetrisGame extends HTMLElement {
 
     addEventListeners() {
         this.shadowRoot.querySelector('#submit-btn').onclick = () => this.submitScore();
+        this.shadowRoot.querySelector('#btn-mute').onclick = () => this.toggleMute();
+        
         const move = (dir) => { 
             this.initAudio(); 
             this.piece.pos.x += dir; 
             if (this.collide()) this.piece.pos.x -= dir; 
-            else this.playNote(200, 0.05);
+            else this.playNote(250, 0.05, 'sine', 0.03);
         };
         this.shadowRoot.querySelector('#btn-left').onclick = () => move(-1);
         this.shadowRoot.querySelector('#btn-right').onclick = () => move(1);
-        this.shadowRoot.querySelector('#btn-down').onclick = () => { this.initAudio(); this.playerDrop(); };
+        this.shadowRoot.querySelector('#btn-down').onclick = () => { this.initAudio(); this.playerDrop(true); };
         this.shadowRoot.querySelector('#btn-up').onclick = () => {
             this.initAudio();
             this.rotate(this.piece.matrix, 1);
             if (this.collide()) this.rotate(this.piece.matrix, -1);
-            else this.playNote(300, 0.05, 'triangle');
+            else this.playNote(350, 0.08, 'triangle', 0.04);
         };
         document.addEventListener('keydown', e => {
             if (this.isGameOver) return;
-            
-            // 방향키 및 스페이스바 입력 시 페이지 스크롤 방지
             const keysToPrevent = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '];
-            if (keysToPrevent.includes(e.key)) {
-                e.preventDefault();
-            }
-
+            if (keysToPrevent.includes(e.key)) e.preventDefault();
             if (e.key === 'ArrowLeft') move(-1);
             if (e.key === 'ArrowRight') move(1);
-            if (e.key === 'ArrowDown') { this.initAudio(); this.playerDrop(); }
+            if (e.key === 'ArrowDown') { this.initAudio(); this.playerDrop(true); }
             if (e.key === 'ArrowUp') this.shadowRoot.querySelector('#btn-up').click();
         });
     }
@@ -356,12 +422,8 @@ class TetrisGame extends HTMLElement {
             :host { display: block; position: relative; width: 100%; height: 100%; font-family: 'Orbitron', sans-serif; background: #000; color: white; overflow: hidden; }
             .game-layout { display: flex; flex-direction: column; height: 100%; padding: 10px; box-sizing: border-box; position: relative; z-index: 1; }
             
-            /* [수정] 모바일(768px 이하) 전용 레이아웃 최적화 */
             @media (max-width: 768px) {
-                .game-layout { 
-                    padding-top: 70px; /* 헤더 높이 대응 */
-                    height: 100vh;
-                }
+                .game-layout { padding-top: 70px; height: 100vh; }
                 .controls { height: 150px !important; padding: 10px !important; gap: 10px !important; }
                 .btn { font-size: 24px !important; }
             }
@@ -378,21 +440,17 @@ class TetrisGame extends HTMLElement {
             #game-over.visible { display: flex; }
             .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 15px; height: 160px; }
             
-            /* 데스크톱(1024px 이상) 레이아웃 보존 */
             @media (min-width: 1024px) {
                 .controls { display: none; }
                 .game-main { align-items: center; justify-content: center; }
-                .main-board { 
-                    flex: none; 
-                    height: 85vh; 
-                    width: calc(85vh * 0.5); 
-                    max-width: 450px;
-                }
+                .main-board { flex: none; height: 85vh; width: calc(85vh * 0.5); max-width: 450px; }
             }
             .btn { background: oklch(25% 0.05 250); border: 1px solid #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 4px 0 #000; transition: 0.1s; cursor: pointer; }
             .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #000; background: oklch(35% 0.05 250); }
+            #btn-mute { position: absolute; top: 10px; right: 10px; background: none; border: none; color: white; font-size: 20px; cursor: pointer; z-index: 10; }
         </style>
         <div class="game-layout">
+            <button id="btn-mute">🔊</button>
             <div class="game-main">
                 <div class="main-board">
                     <canvas id="game-canvas"></canvas>
