@@ -104,6 +104,8 @@ const translations = {
         'refresh_lucky': '다시 확인하기',
         'new_feature': 'NEW',
         'check_now': '확인하기',
+        'prev_button': '이전',
+        'next_button': '다음',
         // Saju page specific keys for main title and descriptions
         'saju_title': 'AI 실시간 오늘의 운세',
         'saju_desc1': '이름과 생년월일 정보를 입력하여 AI가 분석한 오늘의 운세 풀이를 확인해보세요.',

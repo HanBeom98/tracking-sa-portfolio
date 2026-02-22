@@ -445,17 +445,17 @@ def generate_index_html(articles_on_page, current_page, total_pages, lang='ko'):
             prev_page_url = "index-en.html" if current_page == 2 else f"page-en-{current_page - 1}.html"
         else:
             prev_page_url = "index.html" if current_page == 2 else f"page-{current_page - 1}.html"
-        pagination_html += f'<a href="/{prev_page_url}" class="pagination-button" data-i18n="prev_button"></a>'
+        pagination_html += f'<a href="/{prev_page_url}" class="pagination-button prev" data-i18n="prev_button"><span class="arrow">←</span></a>'
     
     if total_pages > 1:
-        pagination_html += f'<span class="page-number">{current_page} / {total_pages}</span>'
+        pagination_html += f'<span class="page-number-wrapper"><span class="current-page">{current_page}</span><span class="separator">/</span><span class="total-pages">{total_pages}</span></span>'
 
     if current_page < total_pages:
         if lang == 'en':
             next_page_url = f"page-en-{current_page + 1}.html"
         else:
             next_page_url = f"page-{current_page + 1}.html"
-        pagination_html += f'<a href="/{next_page_url}" class="pagination-button" data-i18n="next_button"></a>'
+        pagination_html += f'<a href="/{next_page_url}" class="pagination-button next" data-i18n="next_button"><span class="arrow">→</span></a>'
     pagination_html += '</div>'
 
     news_section_content = f"""
