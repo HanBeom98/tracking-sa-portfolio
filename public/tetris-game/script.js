@@ -65,10 +65,8 @@ class TetrisGame extends HTMLElement {
         this.nextCtx = this.nextCanvas.getContext('2d');
         this.boardWrapper = this.shadowRoot.querySelector('.main-board');
         
-        // Firestore 인스턴스 확인
         this.db = window.db || null;
 
-        // ResizeObserver로 실시간 자동 스케일링
         const observer = new ResizeObserver(() => this.resizeCanvas());
         observer.observe(this.shadowRoot.querySelector('.game-layout'));
         
@@ -80,7 +78,7 @@ class TetrisGame extends HTMLElement {
     resizeCanvas() {
         if (!this.boardWrapper) return;
         const rect = this.boardWrapper.getBoundingClientRect();
-        const padding = 10;
+        const padding = 20;
         const availableW = rect.width - padding;
         const availableH = rect.height - padding;
 
@@ -211,10 +209,7 @@ class TetrisGame extends HTMLElement {
     async submitScore() {
         const nickname = this.shadowRoot.querySelector('#nick-input').value.trim();
         this.db = window.db || null;
-        if (!nickname || !this.db) {
-            alert("DB 연결 중이거나 닉네임이 없습니다.");
-            return;
-        }
+        if (!nickname || !this.db) return;
         try {
             await this.db.collection('tetris_rankings').add({
                 nickname: nickname,
@@ -225,10 +220,7 @@ class TetrisGame extends HTMLElement {
             this.shadowRoot.querySelector('#submit-btn').disabled = true;
             this.shadowRoot.querySelector('#submit-btn').innerText = "OK";
             this.loadRankings();
-        } catch (e) { 
-            console.error(e);
-            alert("등록 실패: " + e.message);
-        }
+        } catch (e) { console.error(e); }
     }
 
     collide() {
@@ -348,11 +340,10 @@ class TetrisGame extends HTMLElement {
                 :host { display: block; height: 100%; width: 100%; font-family: 'Orbitron', sans-serif; color: white; user-select: none; background: #050505; overflow: hidden; }
                 .game-layout { display: flex; flex-direction: column; height: 100%; width: 100%; padding: 10px; box-sizing: border-box; }
                 
+                /* [Desktop Layout - 기반 복구] */
                 .game-main { flex: 1; display: flex; gap: 20px; align-items: center; justify-content: center; min-height: 0; }
-                
                 .main-board { position: relative; height: 100%; display: flex; align-items: center; justify-content: center; }
                 #game-canvas { border: 4px solid #222; background: #000; border-radius: 8px; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
-                
                 .side-panel { display: flex; flex-direction: column; gap: 15px; width: 130px; }
                 .panel-box { background: #111; padding: 12px; border-radius: 12px; border: 2px solid #222; text-align: center; }
                 .label { color: #666; font-size: 10px; margin-bottom: 5px; letter-spacing: 1px; }
@@ -369,17 +360,15 @@ class TetrisGame extends HTMLElement {
                 .mobile-btn { width: 65px; height: 65px; background: oklch(25% 0.05 250); border: 1px solid #333; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
                 .mobile-btn:active { background: oklch(40% 0.1 250); transform: scale(0.9); }
 
-                /* [Modern Mobile UI 개편] */
+                /* [Modern Mobile UI 개편 - 오직 1023px 이하에서만] */
                 @media (max-width: 1023px) {
                     .game-layout { padding: 5px; }
                     .game-main { flex-direction: column; gap: 5px; }
                     
-                    /* HUD를 보드 위로 이동 (유명 게임 스타일) */
+                    /* HUD를 보드 위로 가로로 배치 */
                     .side-panel { 
                         flex-direction: row; 
                         width: 100%; 
-                        max-width: 400px;
-                        margin: 0 auto;
                         justify-content: space-between; 
                         order: -1; 
                         gap: 8px;
@@ -393,13 +382,12 @@ class TetrisGame extends HTMLElement {
                         flex-direction: column;
                         align-items: center;
                         justify-content: center;
-                        min-width: 0;
                     }
                     .side-panel .label { font-size: 7px; margin-bottom: 1px; }
                     .side-panel .value { font-size: 14px; }
                     #next-canvas { width: 30px !important; height: 30px !important; }
 
-                    /* 조이스틱을 더 조밀하게 중앙으로 배치 */
+                    /* 조이스틱을 중앙으로 조밀하게 배치 */
                     .controls { 
                         height: 150px; 
                         grid-template-columns: repeat(3, 70px); 
@@ -423,11 +411,7 @@ class TetrisGame extends HTMLElement {
                     }
                 }
 
-                /* [Desktop Layout - untouched selectors] */
                 @media (min-width: 1024px) {
-                    .game-layout { flex-direction: row; align-items: center; justify-content: center; gap: 40px; padding: 20px; }
-                    .game-main { flex: none; }
-                    .side-panel { display: flex; flex-direction: column; gap: 20px; width: 130px; }
                     .controls { display: none; }
                 }
             </style>
@@ -447,11 +431,11 @@ class TetrisGame extends HTMLElement {
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="side-panel">
-                    <div class="panel-box"><div class="label">NEXT</div><canvas id="next-canvas"></canvas></div>
-                    <div class="panel-box"><div class="label">SCORE</div><div class="value score-val">0</div></div>
-                    <div class="panel-box"><div class="label">COMBO</div><div class="value combo-val">0</div></div>
+                    <div class="side-panel">
+                        <div class="panel-box"><div class="label">NEXT</div><canvas id="next-canvas"></canvas></div>
+                        <div class="panel-box"><div class="label">SCORE</div><div class="value score-val">0</div></div>
+                        <div class="panel-box"><div class="label">COMBO</div><div class="value combo-val">0</div></div>
+                    </div>
                 </div>
                 <div class="controls">
                     <div class="mobile-btn" style="grid-column: 2; grid-row: 1" id="btn-up">↑</div>
