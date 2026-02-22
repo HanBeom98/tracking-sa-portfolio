@@ -25,6 +25,7 @@ class TetrisGame extends HTMLElement {
             [[7, 7, 0], [0, 7, 7], [0, 0, 0]]
         ];
         this.audioCtx = null;
+        this.repeatTimer = null; // 연속 이동을 위한 타이머
         this.resetInternalState();
     }
 
@@ -64,7 +65,6 @@ class TetrisGame extends HTMLElement {
         this.nextCtx = this.nextCanvas.getContext('2d');
         this.boardContainer = this.shadowRoot.querySelector('.main-board');
         
-        // 자동 최적화 핵심: 컨테이너 크기 변화 감지
         const observer = new ResizeObserver(() => this.autoScale());
         observer.observe(this.boardContainer);
         
@@ -78,13 +78,12 @@ class TetrisGame extends HTMLElement {
         const availableW = rect.width - padding;
         const availableH = rect.height - padding;
 
-        // 10:20 비율 유지하며 최대 크기 계산
         let size = Math.floor(availableH / this.ROWS);
         if (size * this.COLS > availableW) {
             size = Math.floor(availableW / this.COLS);
         }
 
-        this.BLOCK_SIZE = Math.max(size, 5); // 절대 잘리지 않는 크기
+        this.BLOCK_SIZE = Math.max(size, 5);
         this.canvas.width = this.BLOCK_SIZE * this.COLS;
         this.canvas.height = this.BLOCK_SIZE * this.ROWS;
         
@@ -250,25 +249,46 @@ class TetrisGame extends HTMLElement {
         this.update();
     }
 
+    // 연속 조작 처리 핵심 로직
+    startRepeat(action) {
+        this.stopRepeat();
+        action(); // 첫 실행
+        this.repeatTimer = setInterval(action, 100); // 100ms 간격 반복
+    }
+
+    stopRepeat() {
+        if (this.repeatTimer) {
+            clearInterval(this.repeatTimer);
+            this.repeatTimer = null;
+        }
+    }
+
     addEventListeners() {
         document.addEventListener('keydown', e => {
             if (this.isGameOver) return;
-            if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) e.preventDefault();
+            if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(e.key)) e.preventDefault();
             if (e.keyCode === 37) this.playerMove(-1);
             else if (e.keyCode === 39) this.playerMove(1);
             else if (e.keyCode === 40) this.playerDrop();
             else if (e.keyCode === 38) this.playerRotate(1);
         });
-        const btns = { 'btn-left': -1, 'btn-right': 1, 'btn-down': 'drop', 'btn-up': 'rotate' };
-        Object.entries(btns).forEach(([id, act]) => {
+
+        const handleTouch = (id, action, isRepeat = true) => {
             const el = this.shadowRoot.querySelector(`#${id}`);
-            el.ontouchstart = (e) => {
+            el.addEventListener('touchstart', (e) => {
                 e.preventDefault();
-                if (act === -1 || act === 1) this.playerMove(act);
-                else if (act === 'drop') this.playerDrop();
-                else this.playerRotate(1);
-            };
-        });
+                if (isRepeat) this.startRepeat(action);
+                else action();
+            });
+            el.addEventListener('touchend', () => this.stopRepeat());
+            el.addEventListener('touchcancel', () => this.stopRepeat());
+        };
+
+        handleTouch('btn-left', () => this.playerMove(-1));
+        handleTouch('btn-right', () => this.playerMove(1));
+        handleTouch('btn-down', () => this.playerDrop());
+        handleTouch('btn-up', () => this.playerRotate(1), false); // 회전은 반복 안함
+
         this.shadowRoot.querySelector('#restart-btn').onclick = () => this.restart();
     }
 
@@ -276,25 +296,54 @@ class TetrisGame extends HTMLElement {
         this.shadowRoot.innerHTML = `
             <style>
                 :host { display: flex; flex-direction: column; height: 100%; width: 100%; box-sizing: border-box; font-family: 'Orbitron', sans-serif; color: white; user-select: none; }
-                .game-container { display: flex; flex-direction: column; height: 100%; width: 100%; gap: 10px; }
-                .top-panel { display: flex; justify-content: space-around; background: #111; padding: 5px; border-radius: 10px; border: 1px solid #222; }
-                .panel-box { text-align: center; }
-                .label { color: #666; font-size: 8px; letter-spacing: 1px; }
-                .value { color: white; font-size: 14px; }
-                .preview-box { width: 40px; height: 40px; }
+                .game-container { display: flex; flex-direction: column; height: 100%; width: 100%; gap: 5px; padding: 5px; }
                 
-                .main-board { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; min-height: 0; }
-                #game-canvas { border: 2px solid #333; background: #000; max-height: 100%; max-width: 100%; }
+                .top-panel { display: flex; justify-content: space-around; background: rgba(20,20,20,0.8); padding: 8px; border-radius: 12px; border: 1px solid #333; }
+                .panel-box { text-align: center; flex: 1; }
+                .label { color: #888; font-size: 10px; letter-spacing: 1px; margin-bottom: 2px; }
+                .value { color: #fff; font-size: 16px; font-weight: bold; }
+                .preview-box { width: 40px; height: 40px; margin: auto; }
                 
-                #combo-text { position: absolute; top: 20%; color: oklch(70% 0.3 150); font-size: 1.5rem; font-weight: bold; pointer-events: none; opacity: 0; }
-                #combo-text.pop { opacity: 1; transform: scale(1.2); }
+                .main-board { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; min-height: 0; padding: 5px; }
+                #game-canvas { border: 3px solid #444; background: #000; border-radius: 8px; max-height: 100%; max-width: 100%; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
                 
-                #game-over { position: absolute; inset: 0; background: rgba(0,0,0,0.85); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10; }
+                #combo-text { position: absolute; top: 20%; color: oklch(70% 0.3 150); font-size: 2rem; font-weight: bold; pointer-events: none; opacity: 0; z-index: 5; text-shadow: 0 0 15px currentColor; }
+                #combo-text.pop { opacity: 1; animation: pop 0.5s ease-out; }
+                @keyframes pop { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
+                
+                #game-over { position: absolute; inset: 0; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10; border-radius: 8px; }
                 #game-over.visible { display: flex; }
+                #restart-btn { padding: 12px 24px; background: oklch(60% 0.2 250); color: white; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; font-weight: bold; margin-top: 15px; }
                 
-                .controls-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 10px; justify-items: center; }
-                .mobile-btn { width: 50px; height: 50px; background: oklch(25% 0.05 250); border: 1px solid #333; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
-                .mobile-btn:active { background: oklch(40% 0.1 250); transform: scale(0.9); }
+                /* [에르고노믹 조이스틱] */
+                .controls-grid { 
+                    display: grid; 
+                    grid-template-columns: repeat(3, 1fr); 
+                    grid-template-rows: repeat(2, 60px);
+                    gap: 20px; /* 버튼 사이 간격 대폭 확대 */
+                    padding: 15px 20px 25px 20px; 
+                    justify-items: center;
+                    background: rgba(10,10,10,0.5);
+                    border-top: 1px solid #222;
+                }
+                .mobile-btn { 
+                    width: 65px; /* 버튼 크기 확대 */
+                    height: 65px; 
+                    background: oklch(35% 0.1 250 / 0.8); 
+                    border: 2px solid #444; 
+                    border-radius: 50%; 
+                    color: white; 
+                    display: flex; 
+                    align-items: center; 
+                    justify-content: center; 
+                    font-size: 1.8rem; 
+                    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+                    transition: transform 0.1s, background 0.1s;
+                }
+                .mobile-btn:active { 
+                    background: oklch(50% 0.2 250); 
+                    transform: scale(0.9) translateY(2px); 
+                }
                 
                 @media (min-width: 1024px) { .controls-grid { display: none; } }
             </style>
