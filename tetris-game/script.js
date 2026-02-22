@@ -45,6 +45,9 @@ class TetrisGame extends HTMLElement {
         this.isMuted = false;
         this.bgmNode = null;
         this.bgmTimeout = null;
+        
+        // 조작 간격을 제어하기 위한 타이머 변수
+        this.controlsTimers = {};
         this.resetInternalState();
     }
 
@@ -389,15 +392,61 @@ class TetrisGame extends HTMLElement {
             if (this.collide()) this.piece.pos.x -= dir; 
             else this.playNote(250, 0.05, 'sine', 0.03);
         };
-        this.shadowRoot.querySelector('#btn-left').onclick = () => move(-1);
-        this.shadowRoot.querySelector('#btn-right').onclick = () => move(1);
-        this.shadowRoot.querySelector('#btn-down').onclick = () => { this.initAudio(); this.playerDrop(true); };
+
+        const startContinuousAction = (action, interval = 100) => {
+            this.initAudio();
+            action();
+            const timerId = setInterval(action, interval);
+            return timerId;
+        };
+
+        const stopContinuousAction = (timerKey) => {
+            if (this.controlsTimers[timerKey]) {
+                clearInterval(this.controlsTimers[timerKey]);
+                delete this.controlsTimers[timerKey];
+            }
+        };
+
+        // 조작 버튼 이벤트 바인딩 (PC 클릭 + 모바일 롱프레스 대응)
+        const setupButton = (id, action, interval) => {
+            const btn = this.shadowRoot.querySelector(`#${id}`);
+            
+            // 마우스/터치 시작
+            const start = (e) => {
+                e.preventDefault();
+                if (this.controlsTimers[id]) return;
+                this.controlsTimers[id] = startContinuousAction(action, interval);
+            };
+
+            // 마우스/터치 종료
+            const end = (e) => {
+                e.preventDefault();
+                stopContinuousAction(id);
+            };
+
+            btn.onmousedown = start;
+            btn.onmouseup = end;
+            btn.onmouseleave = end;
+            btn.ontouchstart = start;
+            btn.ontouchend = end;
+            btn.ontouchcancel = end;
+        };
+
+        // 왼쪽 이동
+        setupButton('btn-left', () => move(-1), 120);
+        // 오른쪽 이동
+        setupButton('btn-right', () => move(1), 120);
+        // 소프트 드랍 (아래 이동) - 조금 더 빠르게 설정
+        setupButton('btn-down', () => this.playerDrop(true), 60);
+
+        // 회전 버튼 (회전은 꾹 눌러도 한 번만 실행되도록 기존 방식 유지하거나 긴 간격 설정)
         this.shadowRoot.querySelector('#btn-up').onclick = () => {
             this.initAudio();
             this.rotate(this.piece.matrix, 1);
             if (this.collide()) this.rotate(this.piece.matrix, -1);
             else this.playNote(350, 0.08, 'triangle', 0.04);
         };
+
         document.addEventListener('keydown', e => {
             if (this.isGameOver) return;
             const keysToPrevent = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '];
@@ -425,7 +474,7 @@ class TetrisGame extends HTMLElement {
             @media (max-width: 768px) {
                 .game-layout { padding-top: 70px; height: 100vh; }
                 .controls { height: 150px !important; padding: 10px !important; gap: 10px !important; }
-                .btn { font-size: 24px !important; }
+                .btn { font-size: 24px !important; user-select: none; -webkit-user-select: none; }
             }
 
             .game-main { flex: 1; display: flex; justify-content: center; gap: 5px; min-height: 0; }
@@ -445,7 +494,7 @@ class TetrisGame extends HTMLElement {
                 .game-main { align-items: center; justify-content: center; }
                 .main-board { flex: none; height: 85vh; width: calc(85vh * 0.5); max-width: 450px; }
             }
-            .btn { background: oklch(25% 0.05 250); border: 1px solid #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 4px 0 #000; transition: 0.1s; cursor: pointer; }
+            .btn { background: oklch(25% 0.05 250); border: 1px solid #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 4px 0 #000; transition: 0.1s; cursor: pointer; touch-action: manipulation; }
             .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #000; background: oklch(35% 0.05 250); }
             #btn-mute { position: absolute; top: 10px; right: 10px; background: none; border: none; color: white; font-size: 20px; cursor: pointer; z-index: 10; }
         </style>
