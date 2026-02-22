@@ -72,6 +72,12 @@ const translations = {
         'menu_test': '테스트',
         'sitemap': '사이트맵',
         'lucky_recommendation': '행운의 추천',
+        'lucky_recommendation_title': '오늘의 행운 추천 - Tracking SA',
+        'lucky_hero_title': '오늘 당신의 행운은 무엇일까요?',
+        'lucky_hero_subtitle': '당신에게 필요한 컬러와 아이템을 추천해 드립니다.',
+        'refresh_lucky': '다시 확인하기',
+        'new_feature': 'NEW',
+        'check_now': '확인하기',
         // Saju page specific keys for main title and descriptions
         'saju_title': 'AI 실시간 오늘의 운세',
         'saju_desc1': '이름과 생년월일시 정보를 입력하여 AI가 분석한 오늘의 운세 풀이를 확인해보세요.',
