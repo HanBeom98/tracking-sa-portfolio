@@ -3,61 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI EVOLUTION 2048</title>
+    <title data-i18n="ai_evolution_title">AI EVOLUTION 2048 - 인공지능 진화 퍼즐 게임 | Tracking SA</title>
+    <meta name="description" content="Data부터 AI Overlord까지! 인공지능의 진화 단계를 테마로 한 2048 퍼즐 게임을 즐겨보세요.">
+    <meta property="og:title" content="AI EVOLUTION 2048 - 인공지능 진화 퍼즐 게임 | Tracking SA">
+    <meta property="og:description" content="당신은 과연 AI Overlord에 도달할 수 있을까요? 인공지능 진화 2048 게임에 도전하세요!">
+    <meta property="og:image" content="/logo.svg">
+    <meta property="og:url" content="https://trackingsa.com/ai-evolution/">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="game-wrapper">
-        <header>
-            <div class="brand">
-                <h1>AI EVOLUTION</h1>
-                <div class="badge">2048</div>
-            </div>
-            <div class="score-container">
-                <div class="score-box">
-                    <div class="label">SCORE</div>
-                    <div id="current-score">0</div>
+    <main id="ai-evolution-game">
+        <div id="game-wrapper">
+            <div class="game-top-bar">
+                <div class="game-title-area">
+                    <h2 data-i18n="ai_evolution">AI EVOLUTION</h2>
+                    <span class="badge">2048</span>
                 </div>
-                <div class="score-box">
-                    <div class="label">BEST</div>
-                    <div id="best-score">0</div>
+                <div class="score-container">
+                    <div class="score-box">
+                        <div class="label" data-i18n="score">SCORE</div>
+                        <div id="current-score">0</div>
+                    </div>
+                    <div class="score-box">
+                        <div class="label" data-i18n="best">BEST</div>
+                        <div id="best-score">0</div>
+                    </div>
                 </div>
             </div>
-        </header>
 
-        <div class="main-controls">
-            <button id="new-game-btn" class="action-btn">New Game</button>
-            <button id="undo-btn" class="action-btn" disabled>Undo (1)</button>
-            <button id="share-btn" class="action-btn">Share</button>
+            <div class="main-controls">
+                <button id="new-game-btn" class="action-btn" data-i18n="new_game">New Game</button>
+                <button id="undo-btn" class="action-btn" disabled data-i18n="undo">Undo (1)</button>
+                <button id="share-btn" class="action-btn" data-i18n="share">Share</button>
+            </div>
+
+            <div id="status-message"></div>
+
+            <div id="game-board-container">
+                <div class="grid-layer">
+                    <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+                    <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+                    <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+                    <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+                </div>
+                <div id="tile-layer"></div>
+            </div>
+
+            <div id="game-over-modal" class="modal hidden">
+                <div class="modal-content">
+                    <h2 id="modal-title" data-i18n="evolution_result">Evolution Result</h2>
+                    <div class="result-info">
+                        <p><span data-i18n="final_stage">Final Stage</span>: <span id="final-stage-name">-</span></p>
+                        <p><span data-i18n="total_score">Total Score</span>: <span id="final-score">-</span></p>
+                    </div>
+                    <div class="modal-actions">
+                        <button id="restart-btn" class="action-btn" data-i18n="try_again">Try Again</button>
+                        <button id="modal-share-btn" class="action-btn" data-i18n="share_result">Share Result</button>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <div id="status-message"></div>
-
-        <div id="game-board-container">
-            <div class="grid-layer">
-                <!-- 16 cells -->
-                <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
-                <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
-                <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
-                <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
-            </div>
-            <div id="tile-layer"></div>
-        </div>
-
-        <div id="game-over-modal" class="modal hidden">
-            <div class="modal-content">
-                <h2 id="modal-title">Evolution Result</h2>
-                <div class="result-info">
-                    <p>Final Stage: <span id="final-stage-name">-</span></p>
-                    <p>Total Score: <span id="final-score">-</span></p>
-                </div>
-                <div class="modal-actions">
-                    <button id="restart-btn" class="action-btn">Try Again</button>
-                    <button id="modal-share-btn" class="action-btn">Share Result</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    </main>
     <script src="game.js"></script>
 </body>
 </html>
