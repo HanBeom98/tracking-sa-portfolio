@@ -26,7 +26,6 @@ class TetrisGame extends HTMLElement {
         ];
         this.audioCtx = null;
         this.repeatTimer = null;
-        this.db = null;
         this.resetInternalState();
     }
 
@@ -64,21 +63,24 @@ class TetrisGame extends HTMLElement {
         this.ctx = this.canvas.getContext('2d');
         this.nextCanvas = this.shadowRoot.querySelector('#next-canvas');
         this.nextCtx = this.nextCanvas.getContext('2d');
-        this.boardArea = this.shadowRoot.querySelector('.board-area');
+        this.boardWrapper = this.shadowRoot.querySelector('.main-board');
         
-        if (window.db) this.db = window.db;
+        // Firestore 인스턴스 확인
+        this.db = window.db || null;
 
-        const observer = new ResizeObserver(() => this.autoScale());
-        observer.observe(this.shadowRoot.querySelector('.main-container'));
+        // ResizeObserver로 실시간 자동 스케일링
+        const observer = new ResizeObserver(() => this.resizeCanvas());
+        observer.observe(this.shadowRoot.querySelector('.game-layout'));
         
         this.initGame();
         this.addEventListeners();
-        setTimeout(() => this.autoScale(), 50);
+        setTimeout(() => this.resizeCanvas(), 50);
     }
 
-    autoScale() {
-        const rect = this.boardArea.getBoundingClientRect();
-        const padding = 10;
+    resizeCanvas() {
+        if (!this.boardWrapper) return;
+        const rect = this.boardWrapper.getBoundingClientRect();
+        const padding = 20;
         const availableW = rect.width - padding;
         const availableH = rect.height - padding;
 
@@ -89,11 +91,11 @@ class TetrisGame extends HTMLElement {
             size = Math.floor(availableW / this.COLS);
         }
 
-        this.BLOCK_SIZE = Math.max(size, 5);
+        this.BLOCK_SIZE = Math.max(size, 10);
         this.canvas.width = this.BLOCK_SIZE * this.COLS;
         this.canvas.height = this.BLOCK_SIZE * this.ROWS;
         
-        this.NEXT_BLOCK_SIZE = Math.floor(this.BLOCK_SIZE * 0.6);
+        this.NEXT_BLOCK_SIZE = Math.floor(this.BLOCK_SIZE * 0.8);
         this.nextCanvas.width = this.NEXT_BLOCK_SIZE * 4;
         this.nextCanvas.height = this.NEXT_BLOCK_SIZE * 4;
         this.draw();
@@ -169,6 +171,14 @@ class TetrisGame extends HTMLElement {
         else this.playNote(300, 0.05, 'sine');
     }
 
+    rotate(matrix, dir) {
+        for (let y = 0; y < matrix.length; ++y) {
+            for (let x = 0; x < y; ++x) [matrix[x][y], matrix[y][x]] = [matrix[y][x], matrix[x][y]];
+        }
+        if (dir > 0) matrix.forEach(row => row.reverse());
+        else matrix.reverse();
+    }
+
     playerReset() {
         this.piece = this.nextPiece;
         this.nextPiece = this.generatePiece();
@@ -182,7 +192,7 @@ class TetrisGame extends HTMLElement {
     }
 
     async loadRankings() {
-        this.db = window.db || null;
+        this.db = window.db || null; // 갱신 시점에도 확인
         if (!this.db) return;
         try {
             const snapshot = await this.db.collection('tetris_rankings').orderBy('score', 'desc').limit(5).get();
@@ -201,7 +211,10 @@ class TetrisGame extends HTMLElement {
     async submitScore() {
         const nickname = this.shadowRoot.querySelector('#nick-input').value.trim();
         this.db = window.db || null;
-        if (!nickname || !this.db) return;
+        if (!nickname || !this.db) {
+            alert("DB 연결 중이거나 닉네임이 없습니다.");
+            return;
+        }
         try {
             await this.db.collection('tetris_rankings').add({
                 nickname: nickname,
@@ -210,8 +223,12 @@ class TetrisGame extends HTMLElement {
             });
             this.shadowRoot.querySelector('#nick-input').disabled = true;
             this.shadowRoot.querySelector('#submit-btn').disabled = true;
+            this.shadowRoot.querySelector('#submit-btn').innerText = "OK";
             this.loadRankings();
-        } catch (e) { console.error(e); }
+        } catch (e) { 
+            console.error(e);
+            alert("등록 실패: " + e.message);
+        }
     }
 
     collide() {
@@ -281,6 +298,7 @@ class TetrisGame extends HTMLElement {
         this.shadowRoot.querySelector('#nick-input').disabled = false;
         this.shadowRoot.querySelector('#nick-input').value = '';
         this.shadowRoot.querySelector('#submit-btn').disabled = false;
+        this.shadowRoot.querySelector('#submit-btn').innerText = "SAVE";
         this.updateScore();
         this.update();
     }
@@ -328,96 +346,67 @@ class TetrisGame extends HTMLElement {
         this.shadowRoot.innerHTML = `
             <style>
                 :host { display: block; height: 100%; width: 100%; font-family: 'Orbitron', sans-serif; color: white; user-select: none; background: #050505; overflow: hidden; }
-                .main-container { display: flex; flex-direction: column; height: 100%; width: 100%; }
+                .game-layout { display: flex; flex-direction: column; height: 100%; width: 100%; padding: 10px; box-sizing: border-box; }
                 
-                /* [Desktop Layout] */
-                @media (min-width: 1024px) {
-                    .main-container { flex-direction: row; align-items: center; justify-content: center; gap: 40px; padding: 20px; }
-                    .side-panel { display: flex; flex-direction: column; gap: 20px; width: 150px; }
-                    .mobile-hud, .controls { display: none; }
-                }
+                .game-main { flex: 1; display: flex; gap: 20px; align-items: center; justify-content: center; min-height: 0; }
+                
+                .main-board { position: relative; height: 100%; display: flex; align-items: center; justify-content: center; }
+                #game-canvas { border: 4px solid #222; background: #000; border-radius: 8px; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
+                
+                .side-panel { display: flex; flex-direction: column; gap: 15px; width: 130px; }
+                .panel-box { background: #111; padding: 12px; border-radius: 12px; border: 2px solid #222; text-align: center; }
+                .label { color: #666; font-size: 10px; margin-bottom: 5px; letter-spacing: 1px; }
+                .value { color: white; font-size: 20px; text-shadow: 0 0 10px oklch(60% 0.2 250); }
+                #next-canvas { background: #000; border-radius: 4px; margin: auto; }
 
-                /* [Mobile Layout] */
-                @media (max-width: 1023px) {
-                    .side-panel { display: none; }
-                    .mobile-hud { height: 50px; display: flex; justify-content: space-between; align-items: center; background: #111; padding: 0 15px; border-bottom: 1px solid #333; flex-shrink: 0; }
-                    .controls { height: 200px; display: flex; justify-content: center; align-items: center; background: #0a0a0a; border-top: 1px solid #222; flex-shrink: 0; }
-                }
+                #combo-text { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); color: oklch(70% 0.3 150); font-size: 2rem; font-weight: bold; pointer-events: none; opacity: 0; transition: 0.3s; z-index: 5; }
+                #combo-text.pop { opacity: 1; transform: translate(-50%, -60%) scale(1.2); }
 
-                .hud-item { display: flex; align-items: center; gap: 10px; }
-                .hud-label { font-size: 10px; color: #666; }
-                .hud-value { font-size: 16px; font-weight: bold; color: #fff; }
-                #next-canvas { width: 35px; height: 35px; background: #000; border-radius: 4px; }
-
-                .board-area { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; min-height: 0; background: #000; }
-                #game-canvas { border: 2px solid #444; background: #000; box-shadow: 0 0 30px rgba(0,0,0,0.8); border-radius: 4px; }
-
-                .panel-box { background: #111; padding: 15px; border-radius: 12px; border: 1px solid #333; text-align: center; }
-
-                #combo-text { position: absolute; top: 20%; color: oklch(70% 0.3 150); font-size: 2rem; font-weight: bold; pointer-events: none; opacity: 0; z-index: 5; text-shadow: 0 0 15px currentColor; }
-                #combo-text.pop { opacity: 1; animation: pop 0.5s ease-out; }
-                @keyframes pop { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
-
-                #game-over { position: absolute; inset: 0; background: rgba(0,0,0,0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10; padding: 20px; }
+                #game-over { position: absolute; inset: 0; background: rgba(0,0,0,0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10; border-radius: 8px; text-align: center; padding: 20px; }
                 #game-over.visible { display: flex; }
 
-                /* [D-PAD 스타일 컨트롤러] */
-                .d-pad { display: grid; grid-template-columns: repeat(3, 70px); grid-template-rows: repeat(2, 70px); gap: 10px; }
-                .mobile-btn { width: 70px; height: 70px; background: oklch(30% 0.05 250); border: 2px solid #444; border-radius: 12px; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; box-shadow: 0 4px 0 #000; }
-                .mobile-btn:active { background: oklch(45% 0.1 250); transform: translateY(4px); box-shadow: none; }
+                .controls { height: 180px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 10px 20px 30px 20px; justify-items: center; align-items: center; background: #0a0a0a; border-top: 1px solid #222; flex-shrink: 0; }
+                .mobile-btn { width: 65px; height: 65px; background: oklch(25% 0.05 250); border: 1px solid #333; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+                .mobile-btn:active { background: oklch(40% 0.1 250); transform: scale(0.9); }
+
+                @media (max-width: 600px) {
+                    .game-main { flex-direction: column; gap: 10px; }
+                    .side-panel { flex-direction: row; width: 100%; justify-content: space-around; }
+                    .side-panel .panel-box { flex: 1; padding: 8px; }
+                    .mobile-btn { width: 60px; height: 60px; }
+                }
+                @media (min-width: 1024px) { .controls { display: none; } }
             </style>
-            <div class="main-container">
-                <!-- Mobile HUD (Top) -->
-                <div class="mobile-hud">
-                    <div class="hud-item"><div class="hud-label">NEXT</div><canvas id="next-canvas"></canvas></div>
-                    <div class="hud-item"><div class="hud-label">SCORE</div><div class="hud-value score-val">0</div></div>
-                    <div class="hud-item"><div class="hud-label">COMBO</div><div class="hud-value combo-val">0</div></div>
-                </div>
-
-                <!-- Desktop Left -->
-                <div class="side-panel">
-                    <div class="panel-box"><div class="hud-label">SCORE</div><div class="hud-value score-val">0</div></div>
-                    <div class="panel-box"><div class="hud-label">COMBO</div><div class="hud-value combo-val">0</div></div>
-                </div>
-
-                <!-- Game Board -->
-                <div class="board-area">
-                    <canvas id="game-canvas"></canvas>
-                    <div id="combo-text">COMBO!</div>
-                    <div id="game-over">
-                        <h2 style="color:red; margin-bottom:10px;">GAME OVER</h2>
-                        <div style="font-size:2rem; margin-bottom:20px;"><span id="final-score-val">0</span></div>
-                        <div id="rank-list" style="width:180px; margin-bottom:20px;"></div>
-                        <input type="text" id="nick-input" placeholder="NICKNAME" maxlength="10" style="padding:10px; background:#111; border:1px solid #444; color:white; width:150px; text-align:center; margin-bottom:15px; font-family:inherit;">
-                        <div style="display:flex; gap:10px;">
-                            <button id="submit-btn" style="padding:12px 24px; background:oklch(65% 0.2 150); border:none; border-radius:8px; font-weight:bold; cursor:pointer;">SAVE</button>
-                            <button id="restart-btn" style="padding:12px 24px; background:oklch(60% 0.2 250); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">RETRY</button>
+            <div class="game-layout">
+                <div class="game-main">
+                    <div class="main-board">
+                        <canvas id="game-canvas"></canvas>
+                        <div id="combo-text">COMBO!</div>
+                        <div id="game-over">
+                            <h2 style="color:red; margin-bottom:5px;">GAME OVER</h2>
+                            <div style="font-size:2rem; margin-bottom:15px;" id="final-score-val">0</div>
+                            <div id="rank-list" style="width:100%; max-width:180px; margin-bottom:15px;"></div>
+                            <input type="text" id="nick-input" placeholder="NICKNAME" maxlength="10" style="padding:10px; background:#111; border:1px solid #444; color:white; width:140px; text-align:center; margin-bottom:10px; font-family:inherit;">
+                            <div style="display:flex; gap:10px;">
+                                <button id="submit-btn" style="padding:10px 20px; background:oklch(65% 0.2 150); border:none; border-radius:4px; font-weight:bold; cursor:pointer;">SAVE</button>
+                                <button id="restart-btn" style="padding:10px 20px; background:oklch(60% 0.2 250); color:white; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">RETRY</button>
+                            </div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Desktop Right -->
-                <div class="side-panel">
-                    <div class="panel-box"><div class="hud-label">NEXT</div><canvas id="next-canvas-desktop" style="width:60px; height:60px; background:#000; border-radius:8px;"></canvas></div>
-                </div>
-
-                <!-- Mobile Controls (Bottom) -->
-                <div class="controls">
-                    <div class="d-pad">
-                        <div class="mobile-btn" id="btn-left" style="grid-column: 1; grid-row: 2">←</div>
-                        <div class="mobile-btn" id="btn-up" style="grid-column: 2; grid-row: 1">↑</div>
-                        <div class="mobile-btn" id="btn-down" style="grid-column: 2; grid-row: 2">↓</div>
-                        <div class="mobile-btn" id="btn-right" style="grid-column: 3; grid-row: 2">→</div>
+                    <div class="side-panel">
+                        <div class="panel-box"><div class="label">NEXT</div><canvas id="next-canvas"></canvas></div>
+                        <div class="panel-box"><div class="label">SCORE</div><div class="value score-val">0</div></div>
+                        <div class="panel-box"><div class="label">COMBO</div><div class="value combo-val">0</div></div>
                     </div>
+                </div>
+                <div class="controls">
+                    <div class="mobile-btn" id="btn-up" style="grid-column: 2">↑</div>
+                    <div class="mobile-btn" id="btn-left" style="grid-column: 1; grid-row: 2">←</div>
+                    <div class="mobile-btn" id="btn-down" style="grid-column: 2; grid-row: 2">↓</div>
+                    <div class="mobile-btn" id="btn-right" style="grid-column: 3; grid-row: 2">→</div>
                 </div>
             </div>
         `;
-        // Desktop 전용 미리보기 캔버스를 위해 참조 업데이트
-        const desktopNext = this.shadowRoot.querySelector('#next-canvas-desktop');
-        if (desktopNext) {
-            this.nextCanvas = desktopNext;
-            this.nextCtx = desktopNext.getContext('2d');
-        }
     }
 }
 customElements.define('tetris-game', TetrisGame);
