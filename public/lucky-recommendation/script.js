@@ -88,18 +88,21 @@ class LuckyRecommendation extends HTMLElement {
             }
             this._luckyData = await response.json();
             
-            // 성공 시 버튼 문구 변경 및 다국어 속성 업데이트 (Persistence & Fallback)
+            // 2. 버튼 텍스트 복구 (Safe innerHTML & Fallback)
             const btn = document.getElementById('refresh-button');
             if (btn) {
                 btn.setAttribute('data-i18n', 'refresh_lucky');
                 const lang = window.currentLang || localStorage.getItem('lang') || 'ko';
-                const translated = window.getTranslation ? window.getTranslation(lang, 'refresh_lucky') : '';
+                let translated = "";
+                if (typeof window.getTranslation === 'function') {
+                    translated = window.getTranslation(lang, 'refresh_lucky');
+                }
                 
                 if (translated) {
-                    btn.textContent = translated;
+                    btn.innerHTML = `<span>${translated}</span>`;
                 } else {
                     // Fallback logic
-                    btn.textContent = lang === 'en' ? 'Check Again' : '다시 확인하기';
+                    btn.innerHTML = `<span>${lang === 'en' ? 'Check Again' : '다시 확인하기'}</span>`;
                 }
             }
 
@@ -127,7 +130,8 @@ class LuckyRecommendation extends HTMLElement {
             return;
         }
 
-        if (this._error) {
+        // 3. 에러 핸들링 숨기기 (데이터가 있으면 에러 무시)
+        if (this._error && !this._luckyData) {
             this.shadowRoot.innerHTML = `<p style="color: oklch(0.5 0.2 20); text-align: center; padding: 2rem; font-weight: 600;">${this._error}</p>`;
             return;
         }
@@ -137,11 +141,11 @@ class LuckyRecommendation extends HTMLElement {
                 <style>
                     :host { display: block; text-align: center; padding: 3rem 2rem; }
                     .welcome-card {
-                        background: oklch(98% 0.01 250);
-                        border: 2px dashed oklch(85% 0.05 250);
+                        background: oklch(0.98 0.01 250);
+                        border: 2px dashed oklch(0.85 0.05 250);
                         border-radius: 2rem;
                         padding: 2.5rem;
-                        color: oklch(40% 0.05 250);
+                        color: oklch(0.4 0.05 250);
                         transition: all 0.3s ease;
                     }
                     .icon { font-size: 3rem; margin-bottom: 1rem; display: block; filter: drop-shadow(0 4px 10px oklch(0 0 0 / 0.1)); }
@@ -157,8 +161,10 @@ class LuckyRecommendation extends HTMLElement {
 
         const { oklch, colorName, colorDesc, itemName, itemIcon, itemAction } = this._luckyData;
         
-        // 1. 방어적 배경색 로직 (괄호 유무 상관없이 대응)
-        const safeColor = oklch.includes('oklch') ? oklch : `oklch(${oklch})`;
+        // 1. 방어적 배경색 로직 (oklch, hex, named color 모두 대응)
+        const safeColor = oklch.includes('oklch') ? oklch : 
+                         (oklch.startsWith('#') || /^[a-zA-Z]+$/.test(oklch) ? oklch : 
+                         (oklch.length === 6 || oklch.length === 3 ? `#${oklch}` : `oklch(${oklch})`));
 
         this.shadowRoot.innerHTML = `
         <style>
@@ -168,7 +174,6 @@ class LuckyRecommendation extends HTMLElement {
                 container-type: inline-size;
             }
 
-            /* 3. 결과 카드 애니메이션 (Slide-up) */
             .card {
                 background: white;
                 border-radius: 2rem;
@@ -195,24 +200,24 @@ class LuckyRecommendation extends HTMLElement {
                 left: 0;
                 width: 100%;
                 height: 10px;
-                background: ${safeColor};
+                background-color: ${safeColor} !important;
             }
 
             .section { display: flex; flex-direction: column; gap: 0.75rem; }
-            .label { font-size: 0.85rem; color: oklch(55% 0.02 250); font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; }
+            .label { font-size: 0.85rem; color: oklch(0.55 0.02 250); font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; }
             .value-row { display: flex; align-items: center; gap: 1.25rem; }
             .color-preview { 
                 width: 40px; 
                 height: 40px; 
                 border-radius: 50%; 
-                background: ${safeColor}; 
+                background-color: ${safeColor} !important;
                 border: 4px solid white; 
                 box-shadow: 0 8px 16px oklch(0 0 0 / 0.15);
             }
-            .title { font-size: 2rem; font-weight: 900; margin: 0; color: oklch(25% 0.02 250); letter-spacing: -0.02em; }
-            .description { font-size: 1.1rem; line-height: 1.7; color: oklch(45% 0.02 250); margin: 0; }
+            .title { font-size: 2rem; font-weight: 900; margin: 0; color: oklch(0.25 0.02 250); letter-spacing: -0.02em; }
+            .description { font-size: 1.1rem; line-height: 1.7; color: oklch(0.45 0.02 250); margin: 0; }
             .item-icon { font-size: 4rem; filter: drop-shadow(0 10px 20px oklch(0 0 0 / 0.1)); }
-            .divider { height: 1px; background: oklch(94% 0.01 250); width: 100%; }
+            .divider { height: 1px; background: oklch(0.94 0.01 250); width: 100%; }
 
             @container (max-width: 500px) {
                 .card { padding: 2rem; gap: 2rem; }
