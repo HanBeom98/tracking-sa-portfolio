@@ -216,7 +216,7 @@ const translations = {
         'get_saju_reading': 'Check Today\'s Fortune',
         'ai_reading_fortune': 'AI is reading your fortune...',
         'saju_result_h2': 'Today\'s Daily Fortune',
-        'saju_input_missing': 'Please enter all your name, birth date, and gender information for your Daily Fortune.',
+        'saju_input_missing': 'Please enter all your name, birth date, and gender information.',
         'saju_api_error': 'Failed to get Daily Fortune. Please try again later.',
         'saju_network_error': 'A network error occurred. Please try again.',
         'retake_test': 'Retake Test',
