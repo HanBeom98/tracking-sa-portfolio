@@ -31,7 +31,8 @@ STATIC_PAGES_FOR_SITEMAP = [
     "write",
     "post",
     "lucky-recommendation",
-    "tetris-game"
+    "tetris-game",
+    "ai-evolution"
 ]
 
 
@@ -100,6 +101,7 @@ COMMON_BODY_INJECTIONS = """
                     <a href="#" class="dropbtn" data-i18n="menu_game">게임</a>
                     <div class="dropdown-content">
                         <a href="/tetris-game/" data-i18n="tetris_game">테트리스</a>
+                        <a href="/ai-evolution/" data-i18n="ai_evolution">AI 진화 2048</a>
                     </div>
                 </li>
             </ul>
@@ -619,7 +621,7 @@ def copy_static_assets():
     asset_dirs = [
         "fortune", "about", "ai-test", "animal_face_test", "contact", 
         "edit", "inquiry", "post", "privacy-policy", "write", "lucky-recommendation",
-        "tetris-game"
+        "tetris-game", "ai-evolution"
     ]
 
     # Favicon check and creation

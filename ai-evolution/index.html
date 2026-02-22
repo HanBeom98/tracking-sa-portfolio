@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI EVOLUTION 2048</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-wrapper">
+        <header>
+            <div class="brand">
+                <h1>AI EVOLUTION</h1>
+                <div class="badge">2048</div>
+            </div>
+            <div class="score-container">
+                <div class="score-box">
+                    <div class="label">SCORE</div>
+                    <div id="current-score">0</div>
+                </div>
+                <div class="score-box">
+                    <div class="label">BEST</div>
+                    <div id="best-score">0</div>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-controls">
+            <button id="new-game-btn" class="action-btn">New Game</button>
+            <button id="undo-btn" class="action-btn" disabled>Undo (1)</button>
+            <button id="share-btn" class="action-btn">Share</button>
+        </div>
+
+        <div id="status-message"></div>
+
+        <div id="game-board-container">
+            <div class="grid-layer">
+                <!-- 16 cells -->
+                <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+                <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+                <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+                <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+            </div>
+            <div id="tile-layer"></div>
+        </div>
+
+        <div id="game-over-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2 id="modal-title">Evolution Result</h2>
+                <div class="result-info">
+                    <p>Final Stage: <span id="final-stage-name">-</span></p>
+                    <p>Total Score: <span id="final-score">-</span></p>
+                </div>
+                <div class="modal-actions">
+                    <button id="restart-btn" class="action-btn">Try Again</button>
+                    <button id="modal-share-btn" class="action-btn">Share Result</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>

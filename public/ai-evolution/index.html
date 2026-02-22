@@ -2,8 +2,9 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="contact">문의하기 - Tracking SA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI EVOLUTION 2048</title>
+    
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=pub-7263630893992216" crossorigin="anonymous"></script>
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
@@ -81,17 +82,43 @@
     </div>
 </header>
 
-    <main>
-        <section class="page-content">
-            <h1 data-i18n="contact_us_title">Contact Us</h1>
-            <p data-i18n="contact_us_intro">If you have any questions, feedback, or inquiries, please feel free to reach out to us.</p>
-            <p>
-                <strong data-i18n="contact_us_email">Email:</strong> 
-                <a href="mailto:Carry9691@gmail.com">Carry9691@gmail.com</a>
-            </p>
-            <p data-i18n="contact_us_response_time">We aim to respond within 2-3 business days.</p>
-        </section>
-    </main>
+    <div id="game-wrapper">
+        
+
+        <div class="main-controls">
+            <button id="new-game-btn" class="action-btn">New Game</button>
+            <button id="undo-btn" class="action-btn" disabled>Undo (1)</button>
+            <button id="share-btn" class="action-btn">Share</button>
+        </div>
+
+        <div id="status-message"></div>
+
+        <div id="game-board-container">
+            <div class="grid-layer">
+                <!-- 16 cells -->
+                <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+                <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+                <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+                <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+            </div>
+            <div id="tile-layer"></div>
+        </div>
+
+        <div id="game-over-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2 id="modal-title">Evolution Result</h2>
+                <div class="result-info">
+                    <p>Final Stage: <span id="final-stage-name">-</span></p>
+                    <p>Total Score: <span id="final-score">-</span></p>
+                </div>
+                <div class="modal-actions">
+                    <button id="restart-btn" class="action-btn">Try Again</button>
+                    <button id="modal-share-btn" class="action-btn">Share Result</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="game.js"></script>
 
     <footer>
         <p data-i18n="footer_copyright"></p>
