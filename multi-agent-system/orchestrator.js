@@ -259,10 +259,19 @@ export async function orchestrator(initialRequest) {
             // 경로 감지 및 기존 코드 컨텍스트 확보 로직
             if (fs.existsSync(fullPath) && fs.lstatSync(fullPath).isDirectory()) {
                 console.log(`📂 [Path Detection] Existing folder found: /${suggestedFolder}. Reading context...`);
-                const existingHtmlPath = path.join(fullPath, 'index.html');
-                if (fs.existsSync(existingHtmlPath)) {
-                    state.existingContext = `\n\n[EXISTING_CODE_CONTEXT]:\n현재 /${suggestedFolder}/index.html 내용:\n\`\`\`html\n${fs.readFileSync(existingHtmlPath, 'utf8')}\n\`\`\`\n위 내용을 바탕으로 필요한 부분만 수정하거나 추가하라.`;
-                }
+                let context = `\n\n[EXISTING_CODE_CONTEXT] for /${suggestedFolder}:\n`;
+                
+                const filesToRead = ['index.html', 'script.js', 'style.css'];
+                filesToRead.forEach(file => {
+                    const filePath = path.join(fullPath, file);
+                    if (fs.existsSync(filePath)) {
+                        const ext = path.extname(file).slice(1);
+                        const lang = ext === 'js' ? 'javascript' : ext;
+                        context += `--- ${file} ---\n\`\`\`${lang}\n${fs.readFileSync(filePath, 'utf8')}\n\`\`\`\n`;
+                    }
+                });
+                
+                state.existingContext = context + `위 내용을 바탕으로 필요한 부분만 수정하거나 추가하라.`;
             } else {
                 console.log(`🆕 [Path Detection] New feature folder: /${suggestedFolder}`);
             }

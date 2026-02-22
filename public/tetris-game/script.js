@@ -109,8 +109,8 @@ class TetrisGame extends HTMLElement {
     resizeCanvas() {
         const rect = this.boardWrapper.getBoundingClientRect();
         const isDesktop = window.innerWidth >= 1024;
-        const padding = 4;
-        const availableW = rect.width - padding;
+        const padding = 10; // 여백 확보
+        const availableW = this.boardWrapper.clientWidth - padding;
         
         const vh = window.innerHeight;
         const headerHeight = 70; // 홈 화면 기준 헤더 높이
@@ -120,12 +120,15 @@ class TetrisGame extends HTMLElement {
             // 데스크톱: 상단 헤더만 고려
             availableH = Math.min(rect.height, vh - 100) - padding;
         } else {
-            // [수정] 모바일: window.innerHeight - 헤더(70) - 컨트롤러(150)
-            availableH = vh - headerHeight - 150 - 20; // 20px 안전 여백
+            // 모바일: window.innerHeight - 헤더(70) - 컨트롤러(150) - 하단 여백(40)
+            availableH = vh - headerHeight - 150 - 40; 
         }
         
+        // 가로/세로 중 더 제한적인 쪽에 맞춤
         let size = Math.floor(availableH / this.ROWS);
-        if (size * this.COLS > availableW) size = Math.floor(availableW / this.COLS);
+        if (size * this.COLS > availableW) {
+            size = Math.floor(availableW / this.COLS);
+        }
         
         this.BLOCK_SIZE = Math.max(size, 10);
         this.canvas.width = this.BLOCK_SIZE * this.COLS;

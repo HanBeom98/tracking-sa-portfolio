@@ -8,6 +8,7 @@
 body {
     font-family: sans-serif;
     color: var(--text-color);
+    overflow: hidden; /* Prevent scroll */
 }
 
 info-panel {
@@ -44,4 +45,15 @@ game-joystick > button {
     padding: 0.5em 1em;
     border-radius: 5px;
     margin: 0 0.5em;
+}
+
+/* Web Component Styling - Container Queries */
+tetris-game {
+    display: block;
+    container-type: size; /* Establish container context */
+}
+
+/* Responsive Canvas Size */
+tetris-game:has(> .game-layout) {
+    /* Adjust based on container size */
 }
