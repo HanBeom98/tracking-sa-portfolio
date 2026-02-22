@@ -1,5 +1,5 @@
 // multi-agent-system/index.js
-const orchestrator = require('./orchestrator');
+import { orchestrator } from './orchestrator.js';
 
 async function main() {
     const args = process.argv.slice(2);
@@ -9,4 +9,8 @@ async function main() {
     console.log(`\n🎯 미션 수령: ${userRequest}`);
     await orchestrator(userRequest);
 }
-main();
+
+main().catch(err => {
+    console.error("Fatal Error in Main:", err);
+    process.exit(1);
+});

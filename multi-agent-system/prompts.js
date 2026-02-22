@@ -27,4 +27,4 @@ const prompts = {
   }
 };
 
-module.exports = prompts;
+export default prompts;

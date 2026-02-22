@@ -1,8 +1,14 @@
 // multi-agent-system/agents.js
-const path = require('path');
+import path from 'path';
+import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+import prompts from './prompts.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // Construct an absolute path to the .env file in the project root
-require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
-const prompts = require('./prompts');
+dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 
 /**
  * Calls the Gemini REST API directly using fetch.
@@ -20,12 +26,10 @@ async function runAgent(agentName, inputPrompt, projectContext = '') {
     throw new Error("API key not configured.");
   }
   
-  // Using the exact model from the user's working `fortune` service.
   const modelName = 'gemini-2.0-flash';
   const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent`;
 
   const agentPrompts = prompts[agentName];
-  // Combine persona, instructions, and project context into the main prompt
   const fullPrompt = `
 ${agentPrompts.persona}
 
@@ -38,8 +42,6 @@ ${projectContext}
 ${inputPrompt}
 `.trim();
   
-  console.log(`Input: See full prompt in body.`);
-
   const isJsonAgent = agentName === 'planner' || agentName === 'reviewer';
 
   try {
@@ -85,9 +87,6 @@ ${inputPrompt}
   }
 }
 
-// Updated agent runners to pass the relevant input string and project context
-module.exports = {
-  runPlanner: (state, request, context) => runAgent('planner', request, context),
-  runDeveloper: (state, context) => runAgent('developer', JSON.stringify(state.plan, null, 2), context),
-  runReviewer: (state, context) => runAgent('reviewer', state.code, context),
-};
+export const runPlanner = (state, request, context) => runAgent('planner', request, context);
+export const runDeveloper = (state, context) => runAgent('developer', JSON.stringify(state.plan, null, 2), context);
+export const runReviewer = (code, context) => runAgent('reviewer', code, context);
