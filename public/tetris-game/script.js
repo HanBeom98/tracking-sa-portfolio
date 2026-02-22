@@ -78,7 +78,7 @@ class TetrisGame extends HTMLElement {
     resizeCanvas() {
         if (!this.boardWrapper) return;
         const rect = this.boardWrapper.getBoundingClientRect();
-        const padding = 20;
+        const padding = 10;
         const availableW = rect.width - padding;
         const availableH = rect.height - padding;
 
@@ -315,14 +315,22 @@ class TetrisGame extends HTMLElement {
             else if (e.keyCode === 38) this.playerRotate(1);
         });
 
+        // 모바일 터치 이벤트 최적화 (passive: false로 이벤트 가로채기 방지)
         const handleTouch = (id, action, isRepeat = true) => {
             const el = this.shadowRoot.querySelector(`#${id}`);
+            if (!el) return;
+            
             el.addEventListener('touchstart', (e) => {
-                e.preventDefault();
+                if (e.cancelable) e.preventDefault();
                 if (isRepeat) this.startRepeat(action); else action();
-            });
-            el.addEventListener('touchend', () => this.stopRepeat());
-            el.addEventListener('touchcancel', () => this.stopRepeat());
+            }, { passive: false });
+
+            el.addEventListener('touchend', (e) => {
+                if (e.cancelable) e.preventDefault();
+                this.stopRepeat();
+            }, { passive: false });
+
+            el.addEventListener('touchcancel', () => this.stopRepeat(), { passive: false });
         };
 
         handleTouch('btn-left', () => this.playerMove(-1));
@@ -365,10 +373,12 @@ class TetrisGame extends HTMLElement {
                     .game-layout { padding: 5px; }
                     .game-main { flex-direction: column; gap: 5px; }
                     
-                    /* HUD를 보드 위로 가로로 배치 */
+                    /* HUD를 보드 위로 가로로 배치 (유명 게임 스타일) */
                     .side-panel { 
                         flex-direction: row; 
                         width: 100%; 
+                        max-width: 400px;
+                        margin: 0 auto;
                         justify-content: space-between; 
                         order: -1; 
                         gap: 8px;
@@ -382,12 +392,13 @@ class TetrisGame extends HTMLElement {
                         flex-direction: column;
                         align-items: center;
                         justify-content: center;
+                        min-width: 0;
                     }
                     .side-panel .label { font-size: 7px; margin-bottom: 1px; }
                     .side-panel .value { font-size: 14px; }
                     #next-canvas { width: 30px !important; height: 30px !important; }
 
-                    /* 조이스틱을 중앙으로 조밀하게 배치 */
+                    /* 조이스틱을 더 조밀하게 중앙으로 배치 */
                     .controls { 
                         height: 150px; 
                         grid-template-columns: repeat(3, 70px); 
@@ -431,11 +442,11 @@ class TetrisGame extends HTMLElement {
                             </div>
                         </div>
                     </div>
-                    <div class="side-panel">
-                        <div class="panel-box"><div class="label">NEXT</div><canvas id="next-canvas"></canvas></div>
-                        <div class="panel-box"><div class="label">SCORE</div><div class="value score-val">0</div></div>
-                        <div class="panel-box"><div class="label">COMBO</div><div class="value combo-val">0</div></div>
-                    </div>
+                </div>
+                <div class="side-panel">
+                    <div class="panel-box"><div class="label">NEXT</div><canvas id="next-canvas"></canvas></div>
+                    <div class="panel-box"><div class="label">SCORE</div><div class="value score-val">0</div></div>
+                    <div class="panel-box"><div class="label">COMBO</div><div class="value combo-val">0</div></div>
                 </div>
                 <div class="controls">
                     <div class="mobile-btn" style="grid-column: 2; grid-row: 1" id="btn-up">↑</div>
