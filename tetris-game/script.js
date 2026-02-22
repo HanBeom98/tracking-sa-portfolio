@@ -46,7 +46,6 @@ class TetrisGame extends HTMLElement {
         this.bgmNode = null;
         this.bgmTimeout = null;
         
-        // 조작 간격을 제어하기 위한 타이머 변수
         this.controlsTimers = {};
         this.resetInternalState();
     }
@@ -180,9 +179,12 @@ class TetrisGame extends HTMLElement {
     }
 
     resizeCanvas() {
+        // 실제 컨테이너의 크기를 가져옴
         const rect = this.boardWrapper.getBoundingClientRect();
         const isDesktop = window.innerWidth >= 1024;
-        const padding = 10;
+        
+        // 테두리 두께(4px)와 여유 공간(10px)을 제외한 가용 너비 계산
+        const padding = 14; 
         const availableW = this.boardWrapper.clientWidth - padding;
         
         const vh = window.innerHeight;
@@ -195,14 +197,22 @@ class TetrisGame extends HTMLElement {
             availableH = vh - headerHeight - 150 - 40; 
         }
         
+        // 블록 크기 결정
         let size = Math.floor(availableH / this.ROWS);
         if (size * this.COLS > availableW) {
             size = Math.floor(availableW / this.COLS);
         }
         
         this.BLOCK_SIZE = Math.max(size, 10);
+        
+        // 캔버스 크기를 블록 크기에 정확히 맞춤
         this.canvas.width = this.BLOCK_SIZE * this.COLS;
         this.canvas.height = this.BLOCK_SIZE * this.ROWS;
+        
+        // 캔버스 스타일을 통해 중앙 정렬 및 여백 확보 보장
+        this.canvas.style.width = `${this.canvas.width}px`;
+        this.canvas.style.height = `${this.canvas.height}px`;
+        
         this.draw();
     }
 
@@ -407,23 +417,17 @@ class TetrisGame extends HTMLElement {
             }
         };
 
-        // 조작 버튼 이벤트 바인딩 (PC 클릭 + 모바일 롱프레스 대응)
         const setupButton = (id, action, interval) => {
             const btn = this.shadowRoot.querySelector(`#${id}`);
-            
-            // 마우스/터치 시작
             const start = (e) => {
                 e.preventDefault();
                 if (this.controlsTimers[id]) return;
                 this.controlsTimers[id] = startContinuousAction(action, interval);
             };
-
-            // 마우스/터치 종료
             const end = (e) => {
                 e.preventDefault();
                 stopContinuousAction(id);
             };
-
             btn.onmousedown = start;
             btn.onmouseup = end;
             btn.onmouseleave = end;
@@ -432,14 +436,10 @@ class TetrisGame extends HTMLElement {
             btn.ontouchcancel = end;
         };
 
-        // 왼쪽 이동
         setupButton('btn-left', () => move(-1), 120);
-        // 오른쪽 이동
         setupButton('btn-right', () => move(1), 120);
-        // 소프트 드랍 (아래 이동) - 조금 더 빠르게 설정
         setupButton('btn-down', () => this.playerDrop(true), 60);
 
-        // 회전 버튼 (회전은 꾹 눌러도 한 번만 실행되도록 기존 방식 유지하거나 긴 간격 설정)
         this.shadowRoot.querySelector('#btn-up').onclick = () => {
             this.initAudio();
             this.rotate(this.piece.matrix, 1);
@@ -478,7 +478,24 @@ class TetrisGame extends HTMLElement {
             }
 
             .game-main { flex: 1; display: flex; justify-content: center; gap: 5px; min-height: 0; }
-            .main-board { position: relative; flex: 1; background: #000; border: 2px solid #222; border-radius: 12px; display: flex; justify-content: center; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+            .main-board { 
+                position: relative; 
+                flex: 1; 
+                background: #000; 
+                border: 4px solid #222; 
+                border-radius: 12px; 
+                display: flex; 
+                justify-content: center; 
+                align-items: center;
+                overflow: hidden; 
+                box-shadow: 0 0 20px rgba(0,0,0,0.5); 
+                box-sizing: border-box;
+            }
+            #game-canvas {
+                display: block;
+                max-width: 100%;
+                max-height: 100%;
+            }
             .side-panel { width: 80px; display: flex; flex-direction: column; gap: 10px; }
             .panel-box { background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); padding: 8px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); text-align: center; }
             .label { font-size: 8px; color: #666; letter-spacing: 1px; margin-bottom: 5px; }
