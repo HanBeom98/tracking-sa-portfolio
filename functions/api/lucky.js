@@ -2,33 +2,45 @@ function addCORSHeaders(response) {
     response.headers.set('Access-Control-Allow-Origin', '*'); 
     response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
     response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+    response.headers.set('Access-Control-Max-Age', '86400');
     return response;
 }
 
 export async function onRequest(context) {
-    const { request, env } = context;
+    // 1. 에러 방지를 위해 변수 선언을 맨 위로 고정 (fortune.js 스타일)
+    const { request, env } = context || {};
+
+    if (!request) {
+        return new Response('Bad Request', { status: 400 });
+    }
 
     if (request.method === 'OPTIONS') {
         return addCORSHeaders(new Response(null, { status: 204 }));
     }
 
-    // Vercel 환경 변수(process.env)와 Cloudflare env 모두 대응
+    // GEMINI_API_KEY 확인
     const GEMINI_API_KEY = env?.GEMINI_API_KEY || (typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : null);
 
     if (!GEMINI_API_KEY) {
+        console.error('CRITICAL: GEMINI_API_KEY not found in env or process.env');
         return addCORSHeaders(new Response(JSON.stringify({ error: 'Server configuration error: API key is not set.' }), {
             status: 500,
             headers: { 'Content-Type': 'application/json' },
         }));
     }
 
+    if (request.method !== 'POST') {
+        return addCORSHeaders(new Response('Method Not Allowed', { status: 405 }));
+    }
+
     try {
-        const { language, currentDate, userInfo } = await request.json();
+        const body = await request.json();
+        const { language, currentDate, userInfo } = body;
         const { name, gender, birthMonth, birthDay } = userInfo || {};
 
         const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
-        const dateStr = `${currentDate.year}-${currentDate.month}-${currentDate.day}`;
+        const dateStr = currentDate ? `${currentDate.year}-${currentDate.month}-${currentDate.day}` : 'today';
         
         let prompt = '';
         if (language === 'en') {
@@ -56,15 +68,19 @@ export async function onRequest(context) {
             })
         });
 
+        const geminiData = await geminiResponse.json();
+
         if (!geminiResponse.ok) {
-            const errorData = await geminiResponse.json();
-            throw new Error(errorData.error?.message || 'Gemini API call failed');
+            throw new Error(geminiData.error?.message || 'Gemini API call failed');
         }
 
-        const data = await geminiResponse.json();
-        let text = data.candidates[0].content.parts[0].text;
+        if (!geminiData.candidates || geminiData.candidates.length === 0) {
+            throw new Error('No response from AI');
+        }
+
+        let text = geminiData.candidates[0].content.parts[0].text;
         
-        // JSON 추출 (마크다운 코드 블록 등 제거)
+        // JSON 파싱 에러 방지 (fortune.js보다 엄격하게)
         const jsonMatch = text.match(/\{[\s\S]*\}/);
         if (!jsonMatch) throw new Error('Invalid AI response format');
         
