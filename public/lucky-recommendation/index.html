@@ -96,22 +96,37 @@
         </section>
         <section class="content-container">
             <div class="saju-input-section">
+                <!-- 이름 입력 그룹 -->
                 <div class="input-form-group">
                     <label for="user-name" data-i18n="name_label">이름:</label>
                     <input type="text" id="user-name" placeholder="이름을 입력하세요">
                 </div>
-                <div class="birthdate-selectors">
-                    <select id="birth-month"></select>
-                    <select id="birth-day"></select>
+
+                <!-- 생일 그룹 -->
+                <div class="input-form-group">
+                    <label data-i18n="birthdate_label">생일:</label>
+                    <div class="birthdate-selectors">
+                        <select id="birth-month"></select>
+                        <span class="unit-span" data-i18n="month_unit"></span>
+                        <select id="birth-day"></select>
+                        <span class="unit-span" data-i18n="day_unit"></span>
+                    </div>
                 </div>
-                <div class="gender-buttons">
-                    <input type="radio" id="gender-male" name="gender" value="male" checked>
-                    <label for="gender-male" data-i18n="gender_male_label">남성</label>
-                    <input type="radio" id="gender-female" name="gender" value="female">
-                    <label for="gender-female" data-i18n="gender_female_label">여성</label>
+
+                <!-- 성별 선택 그룹 -->
+                <div class="input-form-group">
+                    <label data-i18n="gender_select_label">성별:</label>
+                    <div class="gender-buttons">
+                        <input type="radio" id="gender-male" name="gender" value="male" checked>
+                        <label for="gender-male" data-i18n="gender_male_label">남성</label>
+                        <input type="radio" id="gender-female" name="gender" value="female">
+                        <label for="gender-female" data-i18n="gender_female_label">여성</label>
+                    </div>
                 </div>
+
                 <button class="go-test-button" id="refresh-button" data-i18n="check_now">추천받기</button>
             </div>
+            
             <lucky-recommendation role="region" aria-live="polite" id="lucky-display"></lucky-recommendation>
         </section>
     </main>
