@@ -2,7 +2,6 @@
 <html lang="ko">
 <head>
     <!-- [1] 분석 및 마케팅 스크립트 -->
-    <!-- Google Analytics (GA4) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -11,7 +10,6 @@
       gtag('config', 'G-TGD3WRNKPZ');
     </script>
 
-    <!-- Microsoft Clarity -->
     <script type="text/javascript">
         (function(c,l,a,r,i,t,y){
             c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
@@ -20,7 +18,6 @@
         })(window, document, "clarity", "script", "vb9q33ggpa");
     </script>
 
-    <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7263630893992216" crossorigin="anonymous"></script>
     <meta name="google-adsense-account" content="ca-pub-7263630893992216">
 
@@ -34,7 +31,7 @@
     <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
     <meta name="naver-site-verification" content="b15b33af838280b54d31eb3c7e5c358d2836743f" />
 
-    <!-- Open Graph / Social Media -->
+    <!-- Open Graph / Social Media - 주소 최적화 -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="AI 성향 테스트 - 나와 닮은 인공지능 모델 찾기 | Tracking SA">
     <meta property="og:description" content="나의 성향과 가장 잘 맞는 AI 모델은 무엇일까요? 재미있는 테스트로 확인해보세요!">
@@ -77,9 +74,10 @@
         </section>
     </main>
 
+    <!-- [4] 핵심 스크립트 연동 (경로 수정 완료) -->
     <script src="/firebase-config.js"></script>
     <script src="/translations.js"></script>
     <script src="/common.js"></script>
-    <script src="/ai-test.js"></script>
+    <script src="./ai-test.js"></script> <!-- 같은 폴더 내의 js 참조 -->
 </body>
 </html>
