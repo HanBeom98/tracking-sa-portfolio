@@ -26,7 +26,7 @@ class TetrisGame extends HTMLElement {
         ];
         this.audioCtx = null;
         this.repeatTimer = null;
-        this.db = null; // Firestore 참조
+        this.db = null;
         this.resetInternalState();
     }
 
@@ -64,29 +64,26 @@ class TetrisGame extends HTMLElement {
         this.ctx = this.canvas.getContext('2d');
         this.nextCanvas = this.shadowRoot.querySelector('#next-canvas');
         this.nextCtx = this.nextCanvas.getContext('2d');
-        this.boardContainer = this.shadowRoot.querySelector('.main-board');
+        this.boardWrapper = this.shadowRoot.querySelector('.board-wrapper');
         
-        // Firestore 초기화 (firebase-config.js가 전역에 로드되어 있어야 함)
-        if (window.db) {
-            this.db = window.db;
-        }
+        if (window.db) this.db = window.db;
 
         const observer = new ResizeObserver(() => this.autoScale());
-        observer.observe(this.boardContainer);
+        observer.observe(this.boardWrapper);
         
         this.initGame();
         this.addEventListeners();
     }
 
     autoScale() {
-        const rect = this.boardContainer.getBoundingClientRect();
-        const padding = 10;
-        const availableW = rect.width - padding;
-        const availableH = rect.height - padding;
+        const rect = this.boardWrapper.getBoundingClientRect();
+        const availableW = rect.width;
+        const availableH = rect.height;
 
         let size = Math.floor(availableH / this.ROWS);
-        const maxWidthSize = Math.floor(Math.min(availableW, 350) / this.COLS);
-        if (size > maxWidthSize) size = maxWidthSize;
+        if (size * this.COLS > availableW) {
+            size = Math.floor(availableW / this.COLS);
+        }
 
         this.BLOCK_SIZE = Math.max(size, 5);
         this.canvas.width = this.BLOCK_SIZE * this.COLS;
@@ -196,11 +193,7 @@ class TetrisGame extends HTMLElement {
     async loadRankings() {
         if (!this.db) return;
         try {
-            const snapshot = await this.db.collection('tetris_rankings')
-                .orderBy('score', 'desc')
-                .limit(5)
-                .get();
-            
+            const snapshot = await this.db.collection('tetris_rankings').orderBy('score', 'desc').limit(5).get();
             const listEl = this.shadowRoot.querySelector('#rank-list');
             listEl.innerHTML = '';
             snapshot.forEach(doc => {
@@ -210,18 +203,12 @@ class TetrisGame extends HTMLElement {
                 item.innerHTML = `<span>${data.nickname}</span> <span>${data.score}</span>`;
                 listEl.appendChild(item);
             });
-        } catch (e) {
-            console.error("Error loading rankings:", e);
-        }
+        } catch (e) { console.error(e); }
     }
 
     async submitScore() {
         const nickname = this.shadowRoot.querySelector('#nick-input').value.trim();
-        if (!nickname || !this.db) {
-            alert("닉네임을 입력해주세요!");
-            return;
-        }
-
+        if (!nickname || !this.db) return;
         try {
             await this.db.collection('tetris_rankings').add({
                 nickname: nickname,
@@ -230,12 +217,8 @@ class TetrisGame extends HTMLElement {
             });
             this.shadowRoot.querySelector('#nick-input').disabled = true;
             this.shadowRoot.querySelector('#submit-btn').disabled = true;
-            this.shadowRoot.querySelector('#submit-btn').innerText = "DONE";
             this.loadRankings();
-        } catch (e) {
-            console.error("Error saving score:", e);
-            alert("점수 등록에 실패했습니다.");
-        }
+        } catch (e) { console.error(e); }
     }
 
     collide() {
@@ -305,7 +288,6 @@ class TetrisGame extends HTMLElement {
         this.shadowRoot.querySelector('#nick-input').disabled = false;
         this.shadowRoot.querySelector('#nick-input').value = '';
         this.shadowRoot.querySelector('#submit-btn').disabled = false;
-        this.shadowRoot.querySelector('#submit-btn').innerText = "REGISTER";
         this.updateScore();
         this.update();
     }
@@ -317,10 +299,7 @@ class TetrisGame extends HTMLElement {
     }
 
     stopRepeat() {
-        if (this.repeatTimer) {
-            clearInterval(this.repeatTimer);
-            this.repeatTimer = null;
-        }
+        if (this.repeatTimer) { clearInterval(this.repeatTimer); this.repeatTimer = null; }
     }
 
     addEventListeners() {
@@ -337,8 +316,7 @@ class TetrisGame extends HTMLElement {
             const el = this.shadowRoot.querySelector(`#${id}`);
             el.addEventListener('touchstart', (e) => {
                 e.preventDefault();
-                if (isRepeat) this.startRepeat(action);
-                else action();
+                if (isRepeat) this.startRepeat(action); else action();
             });
             el.addEventListener('touchend', () => this.stopRepeat());
             el.addEventListener('touchcancel', () => this.stopRepeat());
@@ -356,114 +334,65 @@ class TetrisGame extends HTMLElement {
     render() {
         this.shadowRoot.innerHTML = `
             <style>
-                :host { display: flex; flex-direction: column; height: 100%; width: 100%; box-sizing: border-box; font-family: 'Orbitron', sans-serif; color: white; user-select: none; }
-                .game-container { display: flex; flex-direction: column; height: 100%; width: 100%; gap: 5px; padding: 5px; }
+                :host { display: flex; flex-direction: column; height: 100%; width: 100%; font-family: 'Orbitron', sans-serif; color: white; user-select: none; background: #000; overflow: hidden; }
+                .game-wrapper { flex: 1; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 0; padding: 10px; }
                 
-                .top-panel { display: flex; justify-content: space-around; background: rgba(20,20,20,0.8); padding: 8px; border-radius: 12px; border: 1px solid #333; }
-                .panel-box { text-align: center; flex: 1; }
-                .label { color: #888; font-size: 10px; letter-spacing: 1px; margin-bottom: 2px; }
-                .value { color: #fff; font-size: 16px; font-weight: bold; }
-                .preview-box { width: 40px; height: 40px; margin: auto; }
+                #game-canvas { border: 2px solid #333; background: #000; box-shadow: 0 0 20px rgba(0,0,0,0.5); border-radius: 4px; }
                 
-                .main-board { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; min-height: 0; padding: 5px; }
-                #game-canvas { border: 3px solid #444; background: #000; border-radius: 8px; max-height: 100%; max-width: 100%; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
-                
-                #combo-text { position: absolute; top: 20%; color: oklch(70% 0.3 150); font-size: 2rem; font-weight: bold; pointer-events: none; opacity: 0; z-index: 5; text-shadow: 0 0 15px currentColor; }
+                /* [HUD Overlay 스타일] */
+                .hud { position: absolute; top: 20px; left: 20px; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+                .next-hud { position: absolute; top: 20px; right: 20px; text-align: center; pointer-events: none; }
+                .hud-box { background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 8px; border: 1px solid #444; backdrop-filter: blur(4px); }
+                .hud-label { font-size: 8px; color: #888; }
+                .hud-value { font-size: 14px; font-weight: bold; }
+                #next-canvas { width: 40px; height: 40px; background: #111; border-radius: 4px; }
+
+                #combo-text { position: absolute; top: 30%; color: oklch(70% 0.3 150); font-size: 2rem; font-weight: bold; pointer-events: none; opacity: 0; z-index: 5; }
                 #combo-text.pop { opacity: 1; animation: pop 0.5s ease-out; }
                 @keyframes pop { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
-                
-                /* [Game Over & Ranking UI] */
-                #game-over { 
-                    position: absolute; inset: 0; 
-                    background: rgba(0,0,0,0.95); 
-                    display: none; flex-direction: column; 
-                    align-items: center; justify-content: center; 
-                    z-index: 10; border-radius: 8px; 
-                    padding: 20px;
-                    text-align: center;
-                }
+
+                #game-over { position: absolute; inset: 0; background: rgba(0,0,0,0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10; padding: 20px; text-align: center; }
                 #game-over.visible { display: flex; }
-                #game-over h2 { color: oklch(60% 0.2 20); font-size: 1.5rem; margin: 0 0 10px 0; }
-                .score-display { font-size: 2rem; color: #fff; margin-bottom: 20px; }
-                
-                .ranking-section { width: 100%; max-width: 200px; margin-bottom: 20px; border-top: 1px solid #333; padding-top: 15px; }
-                .ranking-title { font-size: 0.8rem; color: #888; margin-bottom: 10px; }
-                .rank-item { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 5px; color: #ccc; }
-                
-                .registration { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 200px; }
-                #nick-input { 
-                    padding: 8px; background: #111; border: 1px solid #444; 
-                    color: white; border-radius: 4px; text-align: center; 
-                    font-family: inherit; font-size: 0.9rem;
-                }
-                .btn-group { display: flex; gap: 10px; width: 100%; }
-                .action-btn { flex: 1; padding: 10px; border: none; border-radius: 4px; cursor: pointer; font-family: inherit; font-weight: bold; font-size: 0.8rem; }
-                #submit-btn { background: oklch(65% 0.2 150); color: black; }
-                #restart-btn { background: oklch(60% 0.2 250); color: white; }
-                .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+                .rank-item { display: flex; justify-content: space-between; width: 100%; max-width: 180px; font-size: 0.8rem; margin-bottom: 4px; color: #aaa; }
+                #nick-input { padding: 8px; background: #111; border: 1px solid #444; color: white; width: 150px; text-align: center; margin-bottom: 10px; }
+                .action-btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
 
-                /* [에르고노믹 조이스틱] */
-                .controls-grid { 
-                    display: grid; 
-                    grid-template-columns: repeat(3, 1fr); 
-                    grid-template-rows: repeat(2, 60px);
-                    gap: 20px;
-                    padding: 15px 20px 25px 20px; 
-                    justify-items: center;
-                    background: rgba(10,10,10,0.5);
-                    border-top: 1px solid #222;
-                }
-                .mobile-btn { 
-                    width: 60px; height: 60px; 
-                    background: oklch(35% 0.1 250 / 0.8); 
-                    border: 2px solid #444; 
-                    border-radius: 50%; 
-                    color: white; 
-                    display: flex; 
-                    align-items: center; 
-                    justify-content: center; 
-                    font-size: 1.8rem; 
-                    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-                }
+                /* [에르고노믹 조이스틱 - 하단 완전 확보] */
+                .controls { height: 180px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 10px 20px 30px 20px; justify-items: center; align-items: center; background: #0a0a0a; border-top: 1px solid #222; }
+                .mobile-btn { width: 60px; height: 60px; background: oklch(35% 0.1 250); border: 2px solid #444; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
                 .mobile-btn:active { background: oklch(50% 0.2 250); transform: scale(0.9); }
-                
-                @media (min-width: 1024px) { .controls-grid { display: none; } }
-            </style>
-            <div class="game-container">
-                <div class="top-panel">
-                    <div class="panel-box"><div class="label">NEXT</div><canvas id="next-canvas" class="preview-box"></canvas></div>
-                    <div class="panel-box"><div class="label">SCORE</div><div class="value" id="score-val">0</div></div>
-                    <div class="panel-box"><div class="label">COMBO</div><div class="value" id="combo-val">0</div></div>
-                </div>
-                <div class="main-board">
-                    <canvas id="game-canvas"></canvas>
-                    <div id="combo-text">COMBO!</div>
-                    <div id="game-over">
-                        <h2>GAME OVER</h2>
-                        <div class="score-display" id="final-score">0</div>
-                        
-                        <div class="ranking-section">
-                            <div class="ranking-title">TOP 5 RANKING</div>
-                            <div id="rank-list">
-                                <!-- Rankings injected here -->
-                            </div>
-                        </div>
 
-                        <div class="registration">
-                            <input type="text" id="nick-input" placeholder="NICKNAME" maxlength="10">
-                            <div class="btn-group">
-                                <button id="submit-btn" class="action-btn">REGISTER</button>
-                                <button id="restart-btn" class="action-btn">RETRY</button>
-                            </div>
-                        </div>
+                @media (min-width: 1024px) { .controls { display: none; } }
+            </style>
+            <div class="hud">
+                <div class="hud-box"><div class="hud-label">SCORE</div><div class="hud-value" id="score-val">0</div></div>
+                <div class="hud-box"><div class="hud-label">COMBO</div><div class="hud-value" id="combo-val">0</div></div>
+            </div>
+            <div class="next-hud">
+                <div class="hud-box"><div class="hud-label">NEXT</div><canvas id="next-canvas"></canvas></div>
+            </div>
+            <div class="game-wrapper">
+                <canvas id="game-canvas"></canvas>
+                <div id="combo-text">COMBO!</div>
+                <div id="game-over">
+                    <h2>GAME OVER</h2>
+                    <div style="font-size: 2rem; margin-bottom: 15px;" id="final-score">0</div>
+                    <div style="width: 100%; max-width: 200px; margin-bottom: 15px;">
+                        <div style="color: #666; font-size: 0.7rem; margin-bottom: 5px;">TOP 5</div>
+                        <div id="rank-list"></div>
+                    </div>
+                    <input type="text" id="nick-input" placeholder="NICKNAME" maxlength="10">
+                    <div style="display: flex; gap: 10px;">
+                        <button id="submit-btn" class="action-btn" style="background: oklch(65% 0.2 150);">SAVE</button>
+                        <button id="restart-btn" class="action-btn" style="background: oklch(60% 0.2 250); color: white;">RETRY</button>
                     </div>
                 </div>
-                <div class="controls-grid">
-                    <div class="mobile-btn" style="grid-column: 2" id="btn-up">↑</div>
-                    <div class="mobile-btn" style="grid-column: 1; grid-row: 2" id="btn-left">←</div>
-                    <div class="mobile-btn" style="grid-column: 2; grid-row: 2" id="btn-down">↓</div>
-                    <div class="mobile-btn" style="grid-column: 3; grid-row: 2" id="btn-right">→</div>
-                </div>
+            </div>
+            <div class="controls">
+                <div class="mobile-btn" style="grid-column: 2" id="btn-up">↑</div>
+                <div class="mobile-btn" style="grid-column: 1; grid-row: 2" id="btn-left">←</div>
+                <div class="mobile-btn" style="grid-column: 2; grid-row: 2" id="btn-down">↓</div>
+                <div class="mobile-btn" style="grid-column: 3; grid-row: 2" id="btn-right">→</div>
             </div>
         `;
     }
