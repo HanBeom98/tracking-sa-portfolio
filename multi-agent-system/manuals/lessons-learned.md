@@ -1,14 +1,17 @@
 # Lessons Learned (Knowledge Base)
 
 ## [2026-02-22] Template Contamination Prevention
-- **Issue**: Developer 에이전트가 새로운 컴포넌트를 생성할 때 기존 'Animal Face Test' 코드를 템플릿으로 오용하여 불필요한 코드를 섞는 현상 발생.
-- **Root Cause**: 에이전트가 '안전한' 기존 코드를 참고하려다 발생한 과잉 참조.
-- **Solution**: 
-  - 신규 폴더 생성 시(`folder: [name]`), 기존 파일의 문맥을 가져오지 말고 **Zero-base**에서 시작하라.
-  - "standalone", "independent" 키워드가 포함된 요청 시 기존 프로젝트의 전역 설정(translations.js 등) 외의 비즈니스 로직은 절대 포함하지 마라.
+- **Issue**: Developer 에이전트가 새로운 컴포넌트를 생성할 때 기존 'Animal Face Test' 코드를 템플릿으로 오용함.
+- **Solution**: 신규 폴더 생성 시 Zero-base에서 시작하고, 독립성(standalone)을 유지하라.
 
 ## [2026-02-22] Mandatory SEO & AdSense Metadata
-- **Issue**: 신규 HTML 생성 시 검색 엔진 최적화 태그와 광고 수익화 준비 코드가 누락됨.
-- **Solution**: 
-  - 모든 `index.html`은 `project-conventions.md`에 정의된 표준 헤더 구조를 따라야 함.
-  - `google-site-verification` 태그와 애드센스 주석 블록은 선택이 아닌 필수 사항임.
+- **Issue**: 신규 HTML 생성 시 검색 엔진 최적화 태그와 광고 코드가 누락됨.
+- **Solution**: `project-conventions.md`의 표준 헤더 구조를 반드시 준수하라.
+
+## [2026-02-22] Full System Integration Checklist (CRITICAL)
+- **Issue**: 기능을 만들어도 메뉴에 연결되지 않거나 빌드에서 누락됨.
+- **Mandatory Action**: 새 기능을 추가할 때는 반드시 다음 3곳을 동시 수정하라:
+  1. **`main.py`**: `STATIC_PAGES_FOR_SITEMAP` 및 `asset_dirs`에 폴더명 추가.
+  2. **`main.py`**: `COMMON_BODY_INJECTIONS`의 헤더 메뉴에 링크 추가 (경로 끝에 `/` 필수).
+  3. **`translations.js`**: 메뉴 이름 및 관련 문구의 번역(ko/en) 추가.
+- **Path Rule**: 모든 내부 링크는 리다이렉트 방지를 위해 끝에 슬래시를 포함하라 (예: `/feature/`).
