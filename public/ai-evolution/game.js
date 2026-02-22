@@ -195,7 +195,12 @@ class AIEvolution2048 {
                     tile.className = `tile tile-${val} tile-new`;
                     tile.style.top = `${r * 25}%`;
                     tile.style.left = `${c * 25}%`;
-                    tile.innerText = this.getTileName(val);
+                    
+                    const inner = document.createElement('span');
+                    inner.className = 'tile-inner';
+                    inner.innerText = this.getTileName(val);
+                    tile.appendChild(inner);
+                    
                     this.tileLayer.appendChild(tile);
                 }
             });
