@@ -26,7 +26,7 @@ export async function onRequest(context) {
     }
 
     try {
-        const { name, birthDate, birthTime, gender, language, currentDate } = await request.json();
+        const { name, birthDate, gender, language, currentDate } = await request.json();
 
         if (!name || !birthDate || !gender || !currentDate) {
             return addCORSHeaders(new Response(JSON.stringify({ error: '이름, 생년월일, 성별, 현재 날짜 정보를 모두 입력해주세요.' }), {
@@ -35,7 +35,7 @@ export async function onRequest(context) {
             }));
         }
 
-        const GEMINI_API_KEY = env?.GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+        const GEMINI_API_KEY = env.GEMINI_API_KEY;
         const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent';
 
         let prompt = '';
