@@ -1,45 +1,9 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <!-- [1] 분석 및 마케팅 스크립트 -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-TGD3WRNKPZ');
-    </script>
-
-    <script type="text/javascript">
-        (function(c,l,a,r,i,t,y){
-            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-        })(window, document, "clarity", "script", "vb9q33ggpa");
-    </script>
-
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7263630893992216" crossorigin="anonymous"></script>
-    <meta name="google-adsense-account" content="ca-pub-7263630893992216">
-
-    <!-- [2] 검색 엔진 최적화 (SEO) -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="ai_tendency_test_title">AI 성향 테스트 - 나와 닮은 인공지능 모델 찾기 | Tracking SA</title>
-    
-    <meta name="description" content="ChatGPT, Claude, Gemini 중 당신과 가장 닮은 모델은 무엇일까요?">
-    <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
-    <meta name="naver-site-verification" content="b15b33af838280b54d31eb3c7e5c358d2836743f" />
-
-    <!-- Open Graph / Social Media -->
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="AI 성향 테스트 - 나와 닮은 인공지능 모델 찾기 | Tracking SA">
-    <meta property="og:url" content="https://trackingsa.com/ai-test/">
-    <meta name="twitter:card" content="summary_large_image">
-
-    <!-- [3] 리소스 연동 (상대 경로 복구) -->
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="../style.css">
+    <title data-i18n="ai_tendency_test_title">AI 성향 테스트 - Tracking SA</title>
 </head>
 <body>
     <main class="ai-test-page">
@@ -48,13 +12,11 @@
             <p data-i18n="ai_test_p1">간단한 질문에 답하고, 당신의 AI 성향을 알아보세요!</p>
             <button id="start-test-button" class="action-button" data-i18n="start_test">테스트 시작하기</button>
         </section>
-
         <section id="quiz-section" class="quiz-section" style="display: none;">
             <h2 id="question-text"></h2>
             <div id="answers-container" class="answers-container"></div>
             <button id="next-button" class="action-button" data-i18n="next_button">다음</button>
         </section>
-
         <section id="result-section" class="result-section" style="display: none;">
             <h2 data-i18n="ai_test_result_h2">당신과 가장 닮은 AI 모델은...</h2>
             <div class="ai-result">
@@ -68,10 +30,6 @@
             </div>
         </section>
     </main>
-
-    <script src="../firebase-config.js"></script>
-    <script src="../translations.js"></script>
-    <script src="../common.js"></script>
     <script src="./ai-test.js"></script>
 </body>
 </html>
