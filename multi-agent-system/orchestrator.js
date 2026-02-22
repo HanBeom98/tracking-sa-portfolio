@@ -59,8 +59,14 @@ function selectManuals(request) {
         { keywords: ['project', 'rule', 'folder', 'convention'], file: 'project-conventions.md' }
     ];
 
-    // Always include index
-    injectedManuals += `--- Chapter: index.md ---\n${fs.readFileSync(path.join(manualsDir, 'index.md'), 'utf8')}\n`;
+    // Always include index & lessons learned (Knowledge Base)
+    const alwaysInclude = ['index.md', 'lessons-learned.md'];
+    alwaysInclude.forEach(file => {
+        const filePath = path.join(manualsDir, file);
+        if (fs.existsSync(filePath)) {
+            injectedManuals += `--- Chapter: ${file} ---\n${fs.readFileSync(filePath, 'utf8')}\n`;
+        }
+    });
 
     mappings.forEach(m => {
         if (m.keywords.some(k => request.toLowerCase().includes(k))) {
