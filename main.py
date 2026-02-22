@@ -189,8 +189,7 @@ def process_html_file_for_common_elements(filepath):
             content = content.replace('</head>', f'{COMMON_HEAD_SCRIPTS}\n</head>')
         
         # 3. Inject header after <body>
-        if '<body>' in content:
-            content = content.replace('<body>', f'<body>\n{COMMON_BODY_INJECTIONS}')
+        content = re.sub(r'(<body[^>]*>)', r'\1\n' + COMMON_BODY_INJECTIONS, content, flags=re.IGNORECASE)
 
         # 4. Handle meta URL replacements
         content = re.sub(
