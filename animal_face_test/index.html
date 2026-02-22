@@ -2,7 +2,6 @@
 <html lang="ko">
 <head>
     <!-- [1] 분석 및 마케팅 스크립트 -->
-    <!-- Google Analytics (GA4) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -11,7 +10,6 @@
       gtag('config', 'G-TGD3WRNKPZ');
     </script>
 
-    <!-- Microsoft Clarity -->
     <script type="text/javascript">
         (function(c,l,a,r,i,t,y){
             c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
@@ -20,13 +18,12 @@
         })(window, document, "clarity", "script", "vb9q33ggpa");
     </script>
 
-    <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7263630893992216" crossorigin="anonymous"></script>
     <meta name="google-adsense-account" content="ca-pub-7263630893992216">
 
     <!-- [2] 검색 엔진 최적화 (SEO) -->
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title data-i18n="animal_face_test_title">동물상 테스트 - 나의 닮은 동물 찾기 | Tracking SA</title>
     
     <meta name="description" content="AI 기술로 분석하는 나의 닮은 동물 찾기! 사진 한 장으로 당신의 매력적인 동물상을 확인하고 친구들과 결과를 공유해보세요. 🔒 사진은 저장되지 않습니다.">
@@ -46,7 +43,7 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="/style.css">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="./style.css"> <!-- 로컬 스타일 우선 -->
 </head>
 <body>
     <main>
@@ -55,7 +52,6 @@
             <p data-i18n="animal_face_test_p1">당신은 어떤 동물을 닮았는지 알아보세요!</p>
             <p data-i18n="animal_face_test_p2">이미지를 업로드하여 당신의 동물상을 확인해보세요!</p>
 
-            <!-- Gender Selection Placeholder -->
             <div id="gender-selection" class="gender-selection-wrapper">
                 <label data-i18n="select_gender">성별 선택:</label>
                 <div class="gender-buttons">
@@ -64,7 +60,6 @@
                 </div>
             </div>
 
-            <!-- Image Upload Section -->
             <div class="image-upload-section">
                 <div class="upload-wrapper">
                     <div id="drop-zone" class="drop-zone">
@@ -79,19 +74,16 @@
                 </div>
             </div>
             
-            <!-- Loading Indicator -->
             <div id="loading-indicator" class="loading-indicator" style="display:none;">
                 <div class="spinner"></div>
                 <p data-i18n="analyzing_image">이미지 분석 중...</p>
                 <p class="privacy-note">🔒 사진은 저장되지 않습니다.</p>
             </div>
 
-            <!-- Result Display Section -->
             <div id="result-section" class="result-section" style="display:none;">
                 <div id="result-emoji" class="result-large-emoji"></div>
                 <div id="prediction-result" class="prediction-result"></div>
                 <div id="confidence-score" class="confidence-score"></div>
-                <!-- Share Buttons Placeholder -->
                 <div id="share-buttons" class="share-buttons">
                     <button class="share-button" data-platform="twitter">Twitter</button>
                     <button class="share-button" data-platform="facebook">Facebook</button>
@@ -102,6 +94,7 @@
         </section>
     </main>
 
+    <!-- [4] 핵심 스크립트 연동 (순서 중요) -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
     <script src="/firebase-config.js"></script>
