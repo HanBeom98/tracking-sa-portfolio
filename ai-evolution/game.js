@@ -6,11 +6,7 @@ class AIEvolution2048 {
         this.undoBuffer = null;
         this.maxTileReached = 2;
         this.isGameOver = false;
-        this.tileMap = {
-            2: "Data", 4: "Algorithm", 8: "Model", 16: "Neural Net",
-            32: "Deep Learning", 64: "Transformer", 128: "LLM", 256: "AGI",
-            512: "Super AI", 1024: "Singularity", 2048: "AI Overlord"
-        };
+        this.isMoving = false;
         this.init();
     }
 
@@ -27,9 +23,15 @@ class AIEvolution2048 {
         this.newGame();
     }
 
+    getTileName(val) {
+        const key = `tile_${val}`;
+        return (window.translations && window.translations[window.currentLang] && window.translations[window.currentLang][key]) 
+            || val;
+    }
+
     setupEvents() {
         document.addEventListener('keydown', (e) => {
-            if (this.isGameOver) return;
+            if (this.isGameOver || this.isMoving) return;
             const map = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' };
             if (map[e.key]) {
                 e.preventDefault();
@@ -44,7 +46,7 @@ class AIEvolution2048 {
         }, { passive: false });
 
         document.addEventListener('touchend', (e) => {
-            if (this.isGameOver || !tsX || !tsY) return;
+            if (this.isGameOver || this.isMoving || !tsX || !tsY) return;
             const dx = e.changedTouches[0].clientX - tsX;
             const dy = e.changedTouches[0].clientY - tsY;
             if (Math.abs(dx) > 30 || Math.abs(dy) > 30) {
@@ -67,7 +69,7 @@ class AIEvolution2048 {
         this.undoBuffer = null;
         this.maxTileReached = 2;
         this.isGameOver = false;
-        this.updateScore(0);
+        this.updateScoreDisplay();
         this.undoBtn.disabled = true;
         this.statusMsg.innerText = "";
         this.addRandomTile();
@@ -87,54 +89,81 @@ class AIEvolution2048 {
     }
 
     move(dir) {
+        if (this.isMoving) return;
+        this.isMoving = true;
+
         const prevGrid = JSON.stringify(this.grid);
-        const prevScore = this.score;
-        
         const rotate = (g) => g[0].map((_, i) => g.map(row => row[i]).reverse());
-        let temp = JSON.parse(prevGrid);
+        
+        let tempGrid = JSON.parse(prevGrid);
+        let moveScore = 0;
+        let moveMaxTile = this.maxTileReached;
 
         const slide = (row) => {
             let filtered = row.filter(v => v !== 0);
-            for (let i = 0; i < filtered.length - 1; i++) {
-                if (filtered[i] === filtered[i + 1]) {
-                    filtered[i] *= 2;
-                    this.score += filtered[i];
-                    filtered.splice(i + 1, 1);
-                    if (filtered[i] > this.maxTileReached) this.notifyEvolution(filtered[i]);
+            let newRow = [];
+            for (let i = 0; i < filtered.length; i++) {
+                if (i < filtered.length - 1 && filtered[i] === filtered[i + 1]) {
+                    const newVal = filtered[i] * 2;
+                    newRow.push(newVal);
+                    moveScore += newVal;
+                    if (newVal > moveMaxTile) moveMaxTile = newVal;
+                    i++;
+                } else {
+                    newRow.push(filtered[i]);
                 }
             }
-            while (filtered.length < 4) filtered.push(0);
-            return filtered;
+            while (newRow.length < 4) newRow.push(0);
+            return newRow;
         };
 
-        if (dir === 'up') { temp = rotate(rotate(rotate(temp))).map(slide); temp = rotate(temp); }
-        else if (dir === 'down') { temp = rotate(temp).map(slide); temp = rotate(rotate(rotate(temp))); }
-        else if (dir === 'right') { temp = temp.map(r => slide(r.reverse()).reverse()); }
-        else { temp = temp.map(slide); }
-
-        if (JSON.stringify(temp) !== prevGrid) {
-            this.undoBuffer = { grid: JSON.parse(prevGrid), score: prevScore };
-            this.undoBtn.disabled = false;
-            this.grid = temp;
-            this.addRandomTile();
-            this.updateScore(this.score);
-            this.render();
-            if (this.checkGameOver()) this.endGame();
+        if (dir === 'up') {
+            tempGrid = rotate(rotate(rotate(tempGrid))).map(slide);
+            tempGrid = rotate(tempGrid);
+        } else if (dir === 'down') {
+            tempGrid = rotate(tempGrid).map(slide);
+            tempGrid = rotate(rotate(rotate(tempGrid)));
+        } else if (dir === 'right') {
+            tempGrid = tempGrid.map(r => slide(r.reverse()).reverse());
+        } else {
+            tempGrid = tempGrid.map(slide);
         }
+
+        if (JSON.stringify(tempGrid) !== prevGrid) {
+            this.undoBuffer = { grid: JSON.parse(prevGrid), score: this.score, maxTile: this.maxTileReached };
+            this.undoBtn.disabled = false;
+            
+            this.grid = tempGrid;
+            this.score += moveScore;
+            
+            if (moveMaxTile > this.maxTileReached) {
+                this.notifyEvolution(moveMaxTile);
+            }
+
+            this.addRandomTile();
+            this.updateScoreDisplay();
+            this.render();
+            
+            if (this.checkGameOver()) {
+                setTimeout(() => this.endGame(), 500);
+            }
+        }
+
+        setTimeout(() => { this.isMoving = false; }, 100);
     }
 
     undo() {
         if (!this.undoBuffer) return;
         this.grid = this.undoBuffer.grid;
         this.score = this.undoBuffer.score;
+        this.maxTileReached = this.undoBuffer.maxTile;
         this.undoBuffer = null;
         this.undoBtn.disabled = true;
-        this.updateScore(this.score);
+        this.updateScoreDisplay();
         this.render();
     }
 
-    updateScore(s) {
-        this.score = s;
+    updateScoreDisplay() {
         this.scoreElem.innerText = this.score;
         if (this.score > this.bestScore) {
             this.bestScore = this.score;
@@ -145,8 +174,16 @@ class AIEvolution2048 {
 
     notifyEvolution(val) {
         this.maxTileReached = val;
-        this.statusMsg.innerText = `Evolution Reached: ${this.tileMap[val]}!`;
-        setTimeout(() => { if (this.statusMsg.innerText.includes(this.tileMap[val])) this.statusMsg.innerText = ""; }, 2000);
+        const name = this.getTileName(val);
+        this.statusMsg.innerText = `Evolution Reached: ${name}!`;
+        this.statusMsg.classList.remove('fade-out');
+        
+        setTimeout(() => {
+            this.statusMsg.classList.add('fade-out');
+            setTimeout(() => {
+                if (this.statusMsg.classList.contains('fade-out')) this.statusMsg.innerText = "";
+            }, 500);
+        }, 2000);
     }
 
     render() {
@@ -158,7 +195,7 @@ class AIEvolution2048 {
                     tile.className = `tile tile-${val} tile-new`;
                     tile.style.top = `${r * 25}%`;
                     tile.style.left = `${c * 25}%`;
-                    tile.innerText = this.tileMap[val] || val;
+                    tile.innerText = this.getTileName(val);
                     this.tileLayer.appendChild(tile);
                 }
             });
@@ -179,14 +216,15 @@ class AIEvolution2048 {
 
     endGame() {
         this.isGameOver = true;
-        document.getElementById('final-stage-name').innerText = this.tileMap[this.maxTileReached];
+        document.getElementById('final-stage-name').innerText = this.getTileName(this.maxTileReached);
         document.getElementById('final-score').innerText = this.score;
         this.modal.classList.remove('hidden');
     }
 
     share() {
+        const stageName = this.getTileName(this.maxTileReached);
         const text = `[AI EVOLUTION 2048]
-Stage: ${this.tileMap[this.maxTileReached]}
+Stage: ${stageName}
 Score: ${this.score}
 Play: trackingsa.com/ai-evolution`;
         if (navigator.share) {
@@ -197,4 +235,9 @@ Play: trackingsa.com/ai-evolution`;
     }
 }
 
-window.onload = () => new AIEvolution2048();
+window.addEventListener('load', () => {
+    // Small delay to ensure translations are loaded if they are injected
+    setTimeout(() => {
+        window.gameInstance = new AIEvolution2048();
+    }, 100);
+});
