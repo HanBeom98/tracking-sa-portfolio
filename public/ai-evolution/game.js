@@ -7,6 +7,13 @@ class AIEvolution2048 {
         this.maxTileReached = 2;
         this.isGameOver = false;
         this.isMoving = false;
+        
+        // Audio
+        this.audioCtx = null;
+        this.isMuted = false;
+        this.bgmNodes = [];
+        this.bgmTimeout = null;
+        
         this.init();
     }
 
@@ -18,9 +25,127 @@ class AIEvolution2048 {
         this.statusMsg = document.getElementById('status-message');
         this.modal = document.getElementById('game-over-modal');
         
+        // Add Mute Button
+        const controls = document.querySelector('.main-controls');
+        const muteBtn = document.createElement('button');
+        muteBtn.id = 'mute-btn';
+        muteBtn.className = 'action-btn';
+        muteBtn.innerText = '🔊';
+        muteBtn.onclick = () => this.toggleMute();
+        controls.appendChild(muteBtn);
+
         this.bestElem.innerText = this.bestScore;
         this.setupEvents();
         this.newGame();
+    }
+
+    initAudio() {
+        if (this.audioCtx) return;
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        this.audioCtx = new AudioContext();
+        this.startBGM();
+    }
+
+    toggleMute() {
+        this.isMuted = !this.isMuted;
+        document.getElementById('mute-btn').innerText = this.isMuted ? '🔇' : '🔊';
+        
+        if (this.isMuted) {
+            this.stopBGM();
+        } else {
+            this.initAudio();
+            if (this.audioCtx && this.audioCtx.state === 'suspended') this.audioCtx.resume();
+            this.startBGM();
+        }
+    }
+
+    playMergeSound(value) {
+        if (!this.audioCtx || this.isMuted) return;
+        if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+
+        const t = this.audioCtx.currentTime;
+        const osc = this.audioCtx.createOscillator();
+        const gain = this.audioCtx.createGain();
+        
+        // Base frequency based on tile value (Pentatonic scale-ish)
+        // 2->C4, 4->D4, 8->E4, 16->G4, 32->A4...
+        const notes = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25, 783.99, 880.00, 1046.50];
+        const index = Math.log2(value) - 1; 
+        const freq = notes[index % notes.length] * (1 + Math.floor(index / notes.length));
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, t);
+        osc.frequency.exponentialRampToValueAtTime(freq * 2, t + 0.1); // Pitch sweep for "pop" effect
+
+        gain.gain.setValueAtTime(0.3, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+
+        osc.connect(gain);
+        gain.connect(this.audioCtx.destination);
+        osc.start(t);
+        osc.stop(t + 0.3);
+
+        // Add a "shimmer" layer for higher tiles
+        if (value >= 64) {
+            const osc2 = this.audioCtx.createOscillator();
+            const gain2 = this.audioCtx.createGain();
+            osc2.type = 'triangle';
+            osc2.frequency.setValueAtTime(freq * 1.5, t);
+            gain2.gain.setValueAtTime(0.1, t);
+            gain2.gain.exponentialRampToValueAtTime(0.01, t + 0.4);
+            osc2.connect(gain2);
+            gain2.connect(this.audioCtx.destination);
+            osc2.start(t);
+            osc2.stop(t + 0.4);
+        }
+    }
+
+    startBGM() {
+        if (this.isMuted || !this.audioCtx || this.bgmNodes.length > 0) return;
+
+        // Ambient Arpeggio Loop (C Major 7 / A Minor 7 feel)
+        const sequence = [
+            { f: 261.63, d: 0.2 }, { f: 329.63, d: 0.2 }, { f: 392.00, d: 0.2 }, { f: 493.88, d: 0.2 }, // Cmaj7
+            { f: 220.00, d: 0.2 }, { f: 261.63, d: 0.2 }, { f: 329.63, d: 0.2 }, { f: 392.00, d: 0.2 }  // Am7
+        ];
+        
+        let noteIndex = 0;
+        const playNextNote = () => {
+            if (this.isMuted) return;
+            const t = this.audioCtx.currentTime;
+            const note = sequence[noteIndex];
+            
+            const osc = this.audioCtx.createOscillator();
+            const gain = this.audioCtx.createGain();
+            
+            osc.type = 'sine';
+            osc.frequency.value = note.f;
+            
+            gain.gain.setValueAtTime(0.03, t); // Very quiet ambient
+            gain.gain.linearRampToValueAtTime(0.01, t + note.d * 2); // Long decay
+            
+            osc.connect(gain);
+            gain.connect(this.audioCtx.destination);
+            
+            osc.start(t);
+            osc.stop(t + note.d * 2.5);
+            
+            this.bgmNodes.push(osc);
+            // Cleanup old nodes occasionally
+            if (this.bgmNodes.length > 20) this.bgmNodes.shift();
+
+            noteIndex = (noteIndex + 1) % sequence.length;
+            this.bgmTimeout = setTimeout(playNextNote, note.d * 1000);
+        };
+        playNextNote();
+    }
+
+    stopBGM() {
+        if (this.bgmTimeout) clearTimeout(this.bgmTimeout);
+        this.bgmNodes.forEach(node => {
+            try { node.stop(); } catch(e) {}
+        });
+        this.bgmNodes = [];
     }
 
     getTileName(val) {
@@ -43,6 +168,10 @@ class AIEvolution2048 {
         document.addEventListener('touchstart', (e) => {
             tsX = e.touches[0].clientX;
             tsY = e.touches[0].clientY;
+        }, { passive: false });
+
+        document.addEventListener('touchmove', (e) => {
+            e.preventDefault();
         }, { passive: false });
 
         document.addEventListener('touchend', (e) => {
@@ -90,6 +219,7 @@ class AIEvolution2048 {
 
     move(dir) {
         if (this.isMoving) return;
+        this.initAudio(); // Initialize audio context on first interaction
         this.isMoving = true;
 
         const prevGrid = JSON.stringify(this.grid);
@@ -98,6 +228,7 @@ class AIEvolution2048 {
         let tempGrid = JSON.parse(prevGrid);
         let moveScore = 0;
         let moveMaxTile = this.maxTileReached;
+        let merged = false;
 
         const slide = (row) => {
             let filtered = row.filter(v => v !== 0);
@@ -108,6 +239,8 @@ class AIEvolution2048 {
                     newRow.push(newVal);
                     moveScore += newVal;
                     if (newVal > moveMaxTile) moveMaxTile = newVal;
+                    this.playMergeSound(newVal); // Play SFX
+                    merged = true;
                     i++;
                 } else {
                     newRow.push(filtered[i]);

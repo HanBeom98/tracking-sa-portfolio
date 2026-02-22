@@ -28,6 +28,11 @@
             background-color: var(--bg-dark);
             color: var(--text-primary);
             font-family: 'Inter', -apple-system, system-ui, sans-serif;
+            overflow: hidden;
+            touch-action: none;
+            position: fixed;
+            inset: 0;
+            z-index: 10;
         }
 
         #game-wrapper {
@@ -85,7 +90,7 @@
         }
 
         .score-box div:last-child {
-            font-size: 1.1rem;
+            font-size: 1.4rem;
             font-weight: 800;
         }
 
@@ -177,11 +182,11 @@
         }
 
         .tile-inner {
-            font-weight: 800;
-            font-size: 0.8rem;
+            font-weight: 900;
+            font-size: 1.1rem;
             text-align: center;
             word-break: break-word;
-            line-height: 1.1;
+            line-height: 1;
         }
 
         /* Tile Evolution Colors */
