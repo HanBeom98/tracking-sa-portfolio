@@ -104,7 +104,7 @@ class TetrisGame extends HTMLElement {
                     const gain = this.audioCtx.createGain();
                     osc.type = 'triangle';
                     osc.frequency.setValueAtTime(freqs[note], time);
-                    gain.gain.setValueAtTime(0.025, time);
+                    gain.gain.setValueAtTime(0.04, time);
                     gain.gain.exponentialRampToValueAtTime(0.0001, time + (4/duration) * beatUnit - 0.05);
                     osc.connect(gain);
                     gain.connect(this.audioCtx.destination);
