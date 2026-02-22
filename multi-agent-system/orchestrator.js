@@ -101,9 +101,9 @@ function saveFiles(code, featureDirName) {
         }
     });
 
-    // 3종 세트 필수 체크 (하나라도 누락되면 에러)
-    if (!extractions.html || !extractions.css || !extractions.js) {
-        throw new Error("❌ Critical: HTML, CSS, and JS code blocks must ALL be present in the AI response.");
+    // 최소 하나 이상의 코드 블록이 있는지 확인 (전체 누락 시에만 에러)
+    if (!extractions.html && !extractions.css && !extractions.js) {
+        throw new Error("❌ Critical: No valid HTML, CSS, or JS code blocks found in the AI response.");
     }
 
     const saved = [];
