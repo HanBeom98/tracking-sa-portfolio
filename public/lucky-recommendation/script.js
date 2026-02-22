@@ -88,14 +88,18 @@ class LuckyRecommendation extends HTMLElement {
             }
             this._luckyData = await response.json();
             
-            // 성공 시 버튼 문구 변경 및 다국어 속성 업데이트
+            // 성공 시 버튼 문구 변경 및 다국어 속성 업데이트 (Persistence & Fallback)
             const btn = document.getElementById('refresh-button');
             if (btn) {
                 btn.setAttribute('data-i18n', 'refresh_lucky');
-                if (window.getTranslation && typeof window.getTranslation === 'function') {
-                    btn.textContent = window.getTranslation(window.currentLang, 'refresh_lucky');
+                const lang = window.currentLang || localStorage.getItem('lang') || 'ko';
+                const translated = window.getTranslation ? window.getTranslation(lang, 'refresh_lucky') : '';
+                
+                if (translated) {
+                    btn.textContent = translated;
                 } else {
-                    btn.textContent = window.currentLang === 'en' ? 'Check Again' : '다시 확인하기';
+                    // Fallback logic
+                    btn.textContent = lang === 'en' ? 'Check Again' : '다시 확인하기';
                 }
             }
 
@@ -153,8 +157,8 @@ class LuckyRecommendation extends HTMLElement {
 
         const { oklch, colorName, colorDesc, itemName, itemIcon, itemAction } = this._luckyData;
         
-        // 방어적 배경색 로직
-        const safeColor = oklch.startsWith('oklch') ? oklch : `oklch(${oklch})`;
+        // 1. 방어적 배경색 로직 (괄호 유무 상관없이 대응)
+        const safeColor = oklch.includes('oklch') ? oklch : `oklch(${oklch})`;
 
         this.shadowRoot.innerHTML = `
         <style>
@@ -164,6 +168,7 @@ class LuckyRecommendation extends HTMLElement {
                 container-type: inline-size;
             }
 
+            /* 3. 결과 카드 애니메이션 (Slide-up) */
             .card {
                 background: white;
                 border-radius: 2rem;
