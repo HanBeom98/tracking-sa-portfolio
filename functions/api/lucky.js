@@ -61,17 +61,19 @@ export async function onRequest(context) {
             {"colorName":"색상명", "oklch":"oklch값", "colorDesc":"설명", "itemName":"아이템명", "itemIcon":"이모지", "itemAction":"행동팁"}`;
         }
 
-        const geminiResponse = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: { 
-                    response_mime_type: "application/json",
-                    temperature: 0.7
-                }
-            })
-        });
+                const geminiResponse = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt + "\n\nIMPORTANT: Respond ONLY with a raw JSON object. Do not include markdown formatting, backticks, or any other text. Must be valid JSON." }] }],
+                        generationConfig: { 
+                            responseMimeType: "application/json",
+                            temperature: 0.7
+                        }
+                    })
+                });
 
         const geminiData = await geminiResponse.json();
         if (!geminiResponse.ok) throw new Error(geminiData.error?.message || 'Gemini API Error');
