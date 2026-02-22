@@ -6,13 +6,13 @@ class TetrisGame extends HTMLElement {
         this.ROWS = 20;
         this.COLORS = [
             null,
-            'oklch(60% 0.15 250)', // I
-            'oklch(60% 0.15 60)',  // J
-            'oklch(60% 0.15 30)',  // L
-            'oklch(60% 0.15 140)', // O
-            'oklch(60% 0.15 180)', // S
-            'oklch(60% 0.15 320)', // T
-            'oklch(60% 0.15 0)'    // Z
+            'oklch(65% 0.25 250)', // I
+            'oklch(60% 0.2 60)',   // J
+            'oklch(60% 0.2 30)',   // L
+            'oklch(70% 0.2 140)',  // O
+            'oklch(65% 0.2 180)',  // S
+            'oklch(65% 0.2 320)',  // T
+            'oklch(60% 0.2 0)'     // Z
         ];
         this.SHAPES = [
             [],
@@ -44,7 +44,7 @@ class TetrisGame extends HTMLElement {
         this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
 
-    playNote(freq, duration, type = 'square', volume = 0.1) {
+    playNote(freq, duration, type = 'square', volume = 0.05) {
         if (!this.audioCtx) return;
         const osc = this.audioCtx.createOscillator();
         const gain = this.audioCtx.createGain();
@@ -68,6 +68,7 @@ class TetrisGame extends HTMLElement {
         
         if (window.db) this.db = window.db;
 
+        // ResizeObserver로 실시간 자동 스케일링
         const observer = new ResizeObserver(() => this.autoScale());
         observer.observe(this.boardWrapper);
         
@@ -77,8 +78,9 @@ class TetrisGame extends HTMLElement {
 
     autoScale() {
         const rect = this.boardWrapper.getBoundingClientRect();
-        const availableW = rect.width;
-        const availableH = rect.height;
+        const padding = 10;
+        const availableW = rect.width - padding;
+        const availableH = rect.height - padding;
 
         let size = Math.floor(availableH / this.ROWS);
         if (size * this.COLS > availableW) {
@@ -125,7 +127,7 @@ class TetrisGame extends HTMLElement {
         matrix.forEach((row, y) => {
             row.forEach((value, x) => {
                 if (value !== 0) {
-                    context.shadowBlur = size / 4;
+                    context.shadowBlur = size / 3;
                     context.shadowColor = this.COLORS[value];
                     context.fillStyle = this.COLORS[value];
                     context.fillRect((x + offset.x) * size, (y + offset.y) * size, size - 1, size - 1);
@@ -179,15 +181,10 @@ class TetrisGame extends HTMLElement {
         if (this.collide()) {
             this.isGameOver = true;
             this.playNote(100, 0.8, 'sawtooth');
-            this.showGameOverUI();
+            this.shadowRoot.querySelector('#game-over').classList.add('visible');
+            this.shadowRoot.querySelector('#final-score-val').innerText = this.score;
+            this.loadRankings();
         }
-    }
-
-    showGameOverUI() {
-        const ui = this.shadowRoot.querySelector('#game-over');
-        this.shadowRoot.querySelector('#final-score').innerText = this.score;
-        ui.classList.add('visible');
-        this.loadRankings();
     }
 
     async loadRankings() {
@@ -199,7 +196,7 @@ class TetrisGame extends HTMLElement {
             snapshot.forEach(doc => {
                 const data = doc.data();
                 const item = document.createElement('div');
-                item.className = 'rank-item';
+                item.style = 'display:flex; justify-content:space-between; margin-bottom:4px; font-size:0.8rem; color:#aaa;';
                 item.innerHTML = `<span>${data.nickname}</span> <span>${data.score}</span>`;
                 listEl.appendChild(item);
             });
@@ -295,7 +292,7 @@ class TetrisGame extends HTMLElement {
     startRepeat(action) {
         this.stopRepeat();
         action();
-        this.repeatTimer = setInterval(action, 100);
+        this.repeatTimer = setInterval(action, 80);
     }
 
     stopRepeat() {
@@ -335,64 +332,59 @@ class TetrisGame extends HTMLElement {
         this.shadowRoot.innerHTML = `
             <style>
                 :host { display: flex; flex-direction: column; height: 100%; width: 100%; font-family: 'Orbitron', sans-serif; color: white; user-select: none; background: #000; overflow: hidden; }
-                .game-wrapper { flex: 1; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 0; padding: 10px; }
+                .game-container { display: flex; flex-direction: column; height: 100%; width: 100%; }
                 
-                #game-canvas { border: 2px solid #333; background: #000; box-shadow: 0 0 20px rgba(0,0,0,0.5); border-radius: 4px; }
-                
-                /* [HUD Overlay 스타일] */
-                .hud { position: absolute; top: 20px; left: 20px; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
-                .next-hud { position: absolute; top: 20px; right: 20px; text-align: center; pointer-events: none; }
-                .hud-box { background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 8px; border: 1px solid #444; backdrop-filter: blur(4px); }
-                .hud-label { font-size: 8px; color: #888; }
+                /* [1. 상단 HUD] */
+                .top-hud { display: flex; justify-content: space-between; align-items: center; background: #111; padding: 10px 20px; border-bottom: 1px solid #333; z-index: 5; }
+                .hud-item { display: flex; flex-direction: column; align-items: center; }
+                .hud-label { font-size: 8px; color: #666; margin-bottom: 2px; }
                 .hud-value { font-size: 14px; font-weight: bold; }
-                #next-canvas { width: 40px; height: 40px; background: #111; border-radius: 4px; }
+                #next-canvas { width: 35px; height: 35px; background: #000; border-radius: 4px; }
 
-                #combo-text { position: absolute; top: 30%; color: oklch(70% 0.3 150); font-size: 2rem; font-weight: bold; pointer-events: none; opacity: 0; z-index: 5; }
+                /* [2. 중앙 보드] */
+                .board-wrapper { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; min-height: 0; padding: 10px; background: #000; }
+                #game-canvas { border: 2px solid #444; background: #000; box-shadow: 0 0 30px rgba(0,0,0,0.8); border-radius: 4px; max-height: 100%; max-width: 100%; }
+                
+                #combo-text { position: absolute; top: 20%; color: oklch(70% 0.3 150); font-size: 2rem; font-weight: bold; pointer-events: none; opacity: 0; z-index: 5; text-shadow: 0 0 15px currentColor; }
                 #combo-text.pop { opacity: 1; animation: pop 0.5s ease-out; }
                 @keyframes pop { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
 
-                #game-over { position: absolute; inset: 0; background: rgba(0,0,0,0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10; padding: 20px; text-align: center; }
+                #game-over { position: absolute; inset: 0; background: rgba(0,0,0,0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10; text-align: center; }
                 #game-over.visible { display: flex; }
-                .rank-item { display: flex; justify-content: space-between; width: 100%; max-width: 180px; font-size: 0.8rem; margin-bottom: 4px; color: #aaa; }
-                #nick-input { padding: 8px; background: #111; border: 1px solid #444; color: white; width: 150px; text-align: center; margin-bottom: 10px; }
-                .action-btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
 
-                /* [에르고노믹 조이스틱 - 하단 완전 확보] */
+                /* [3. 하단 컨트롤] */
                 .controls { height: 180px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 10px 20px 30px 20px; justify-items: center; align-items: center; background: #0a0a0a; border-top: 1px solid #222; }
-                .mobile-btn { width: 60px; height: 60px; background: oklch(35% 0.1 250); border: 2px solid #444; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+                .mobile-btn { width: 60px; height: 60px; background: oklch(35% 0.1 250); border: 2px solid #444; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
                 .mobile-btn:active { background: oklch(50% 0.2 250); transform: scale(0.9); }
 
                 @media (min-width: 1024px) { .controls { display: none; } }
             </style>
-            <div class="hud">
-                <div class="hud-box"><div class="hud-label">SCORE</div><div class="hud-value" id="score-val">0</div></div>
-                <div class="hud-box"><div class="hud-label">COMBO</div><div class="hud-value" id="combo-val">0</div></div>
-            </div>
-            <div class="next-hud">
-                <div class="hud-box"><div class="hud-label">NEXT</div><canvas id="next-canvas"></canvas></div>
-            </div>
-            <div class="game-wrapper">
-                <canvas id="game-canvas"></canvas>
-                <div id="combo-text">COMBO!</div>
-                <div id="game-over">
-                    <h2>GAME OVER</h2>
-                    <div style="font-size: 2rem; margin-bottom: 15px;" id="final-score">0</div>
-                    <div style="width: 100%; max-width: 200px; margin-bottom: 15px;">
-                        <div style="color: #666; font-size: 0.7rem; margin-bottom: 5px;">TOP 5</div>
-                        <div id="rank-list"></div>
-                    </div>
-                    <input type="text" id="nick-input" placeholder="NICKNAME" maxlength="10">
-                    <div style="display: flex; gap: 10px;">
-                        <button id="submit-btn" class="action-btn" style="background: oklch(65% 0.2 150);">SAVE</button>
-                        <button id="restart-btn" class="action-btn" style="background: oklch(60% 0.2 250); color: white;">RETRY</button>
+            <div class="game-container">
+                <div class="top-hud">
+                    <div class="hud-item"><div class="hud-label">NEXT</div><canvas id="next-canvas"></canvas></div>
+                    <div class="hud-item"><div class="hud-label">SCORE</div><div class="hud-value" id="score-val">0</div></div>
+                    <div class="hud-item"><div class="hud-label">COMBO</div><div class="hud-value" id="combo-val">0</div></div>
+                </div>
+                <div class="board-wrapper">
+                    <canvas id="game-canvas"></canvas>
+                    <div id="combo-text">COMBO!</div>
+                    <div id="game-over">
+                        <h2 style="color:red; margin-bottom:10px;">GAME OVER</h2>
+                        <div id="final-score" style="font-size:2rem; margin-bottom:20px;"><span id="final-score-val">0</span></div>
+                        <div id="rank-list" style="width:180px; margin-bottom:20px;"></div>
+                        <input type="text" id="nick-input" placeholder="NICKNAME" maxlength="10" style="padding:10px; background:#111; border:1px solid #444; color:white; width:150px; text-align:center; margin-bottom:10px; font-family:inherit;">
+                        <div style="display:flex; gap:10px;">
+                            <button id="submit-btn" style="padding:10px 20px; background:oklch(65% 0.2 150); border:none; border-radius:4px; font-weight:bold; cursor:pointer;">SAVE</button>
+                            <button id="restart-btn" style="padding:10px 20px; background:oklch(60% 0.2 250); color:white; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">RETRY</button>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="controls">
-                <div class="mobile-btn" style="grid-column: 2" id="btn-up">↑</div>
-                <div class="mobile-btn" style="grid-column: 1; grid-row: 2" id="btn-left">←</div>
-                <div class="mobile-btn" style="grid-column: 2; grid-row: 2" id="btn-down">↓</div>
-                <div class="mobile-btn" style="grid-column: 3; grid-row: 2" id="btn-right">→</div>
+                <div class="controls">
+                    <div class="mobile-btn" style="grid-column: 2" id="btn-up">↑</div>
+                    <div class="mobile-btn" style="grid-column: 1; grid-row: 2" id="btn-left">←</div>
+                    <div class="mobile-btn" style="grid-column: 2; grid-row: 2" id="btn-down">↓</div>
+                    <div class="mobile-btn" style="grid-column: 3; grid-row: 2" id="btn-right">→</div>
+                </div>
             </div>
         `;
     }
