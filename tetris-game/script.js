@@ -25,7 +25,8 @@ class TetrisGame extends HTMLElement {
             [[7, 7, 0], [0, 7, 7], [0, 0, 0]]
         ];
         this.audioCtx = null;
-        this.repeatTimer = null; // 연속 이동을 위한 타이머
+        this.repeatTimer = null;
+        this.db = null; // Firestore 참조
         this.resetInternalState();
     }
 
@@ -65,6 +66,11 @@ class TetrisGame extends HTMLElement {
         this.nextCtx = this.nextCanvas.getContext('2d');
         this.boardContainer = this.shadowRoot.querySelector('.main-board');
         
+        // Firestore 초기화 (firebase-config.js가 전역에 로드되어 있어야 함)
+        if (window.db) {
+            this.db = window.db;
+        }
+
         const observer = new ResizeObserver(() => this.autoScale());
         observer.observe(this.boardContainer);
         
@@ -79,9 +85,8 @@ class TetrisGame extends HTMLElement {
         const availableH = rect.height - padding;
 
         let size = Math.floor(availableH / this.ROWS);
-        if (size * this.COLS > availableW) {
-            size = Math.floor(availableW / this.COLS);
-        }
+        const maxWidthSize = Math.floor(Math.min(availableW, 350) / this.COLS);
+        if (size > maxWidthSize) size = maxWidthSize;
 
         this.BLOCK_SIZE = Math.max(size, 5);
         this.canvas.width = this.BLOCK_SIZE * this.COLS;
@@ -177,7 +182,59 @@ class TetrisGame extends HTMLElement {
         if (this.collide()) {
             this.isGameOver = true;
             this.playNote(100, 0.8, 'sawtooth');
-            this.shadowRoot.querySelector('#game-over').classList.add('visible');
+            this.showGameOverUI();
+        }
+    }
+
+    showGameOverUI() {
+        const ui = this.shadowRoot.querySelector('#game-over');
+        this.shadowRoot.querySelector('#final-score').innerText = this.score;
+        ui.classList.add('visible');
+        this.loadRankings();
+    }
+
+    async loadRankings() {
+        if (!this.db) return;
+        try {
+            const snapshot = await this.db.collection('tetris_rankings')
+                .orderBy('score', 'desc')
+                .limit(5)
+                .get();
+            
+            const listEl = this.shadowRoot.querySelector('#rank-list');
+            listEl.innerHTML = '';
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const item = document.createElement('div');
+                item.className = 'rank-item';
+                item.innerHTML = `<span>${data.nickname}</span> <span>${data.score}</span>`;
+                listEl.appendChild(item);
+            });
+        } catch (e) {
+            console.error("Error loading rankings:", e);
+        }
+    }
+
+    async submitScore() {
+        const nickname = this.shadowRoot.querySelector('#nick-input').value.trim();
+        if (!nickname || !this.db) {
+            alert("닉네임을 입력해주세요!");
+            return;
+        }
+
+        try {
+            await this.db.collection('tetris_rankings').add({
+                nickname: nickname,
+                score: this.score,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            this.shadowRoot.querySelector('#nick-input').disabled = true;
+            this.shadowRoot.querySelector('#submit-btn').disabled = true;
+            this.shadowRoot.querySelector('#submit-btn').innerText = "DONE";
+            this.loadRankings();
+        } catch (e) {
+            console.error("Error saving score:", e);
+            alert("점수 등록에 실패했습니다.");
         }
     }
 
@@ -245,15 +302,18 @@ class TetrisGame extends HTMLElement {
     restart() {
         this.resetInternalState();
         this.shadowRoot.querySelector('#game-over').classList.remove('visible');
+        this.shadowRoot.querySelector('#nick-input').disabled = false;
+        this.shadowRoot.querySelector('#nick-input').value = '';
+        this.shadowRoot.querySelector('#submit-btn').disabled = false;
+        this.shadowRoot.querySelector('#submit-btn').innerText = "REGISTER";
         this.updateScore();
         this.update();
     }
 
-    // 연속 조작 처리 핵심 로직
     startRepeat(action) {
         this.stopRepeat();
-        action(); // 첫 실행
-        this.repeatTimer = setInterval(action, 100); // 100ms 간격 반복
+        action();
+        this.repeatTimer = setInterval(action, 100);
     }
 
     stopRepeat() {
@@ -287,9 +347,10 @@ class TetrisGame extends HTMLElement {
         handleTouch('btn-left', () => this.playerMove(-1));
         handleTouch('btn-right', () => this.playerMove(1));
         handleTouch('btn-down', () => this.playerDrop());
-        handleTouch('btn-up', () => this.playerRotate(1), false); // 회전은 반복 안함
+        handleTouch('btn-up', () => this.playerRotate(1), false);
 
         this.shadowRoot.querySelector('#restart-btn').onclick = () => this.restart();
+        this.shadowRoot.querySelector('#submit-btn').onclick = () => this.submitScore();
     }
 
     render() {
@@ -311,24 +372,49 @@ class TetrisGame extends HTMLElement {
                 #combo-text.pop { opacity: 1; animation: pop 0.5s ease-out; }
                 @keyframes pop { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
                 
-                #game-over { position: absolute; inset: 0; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10; border-radius: 8px; }
+                /* [Game Over & Ranking UI] */
+                #game-over { 
+                    position: absolute; inset: 0; 
+                    background: rgba(0,0,0,0.95); 
+                    display: none; flex-direction: column; 
+                    align-items: center; justify-content: center; 
+                    z-index: 10; border-radius: 8px; 
+                    padding: 20px;
+                    text-align: center;
+                }
                 #game-over.visible { display: flex; }
-                #restart-btn { padding: 12px 24px; background: oklch(60% 0.2 250); color: white; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; font-weight: bold; margin-top: 15px; }
+                #game-over h2 { color: oklch(60% 0.2 20); font-size: 1.5rem; margin: 0 0 10px 0; }
+                .score-display { font-size: 2rem; color: #fff; margin-bottom: 20px; }
                 
+                .ranking-section { width: 100%; max-width: 200px; margin-bottom: 20px; border-top: 1px solid #333; padding-top: 15px; }
+                .ranking-title { font-size: 0.8rem; color: #888; margin-bottom: 10px; }
+                .rank-item { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 5px; color: #ccc; }
+                
+                .registration { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 200px; }
+                #nick-input { 
+                    padding: 8px; background: #111; border: 1px solid #444; 
+                    color: white; border-radius: 4px; text-align: center; 
+                    font-family: inherit; font-size: 0.9rem;
+                }
+                .btn-group { display: flex; gap: 10px; width: 100%; }
+                .action-btn { flex: 1; padding: 10px; border: none; border-radius: 4px; cursor: pointer; font-family: inherit; font-weight: bold; font-size: 0.8rem; }
+                #submit-btn { background: oklch(65% 0.2 150); color: black; }
+                #restart-btn { background: oklch(60% 0.2 250); color: white; }
+                .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
                 /* [에르고노믹 조이스틱] */
                 .controls-grid { 
                     display: grid; 
                     grid-template-columns: repeat(3, 1fr); 
                     grid-template-rows: repeat(2, 60px);
-                    gap: 20px; /* 버튼 사이 간격 대폭 확대 */
+                    gap: 20px;
                     padding: 15px 20px 25px 20px; 
                     justify-items: center;
                     background: rgba(10,10,10,0.5);
                     border-top: 1px solid #222;
                 }
                 .mobile-btn { 
-                    width: 65px; /* 버튼 크기 확대 */
-                    height: 65px; 
+                    width: 60px; height: 60px; 
                     background: oklch(35% 0.1 250 / 0.8); 
                     border: 2px solid #444; 
                     border-radius: 50%; 
@@ -338,12 +424,8 @@ class TetrisGame extends HTMLElement {
                     justify-content: center; 
                     font-size: 1.8rem; 
                     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-                    transition: transform 0.1s, background 0.1s;
                 }
-                .mobile-btn:active { 
-                    background: oklch(50% 0.2 250); 
-                    transform: scale(0.9) translateY(2px); 
-                }
+                .mobile-btn:active { background: oklch(50% 0.2 250); transform: scale(0.9); }
                 
                 @media (min-width: 1024px) { .controls-grid { display: none; } }
             </style>
@@ -356,7 +438,25 @@ class TetrisGame extends HTMLElement {
                 <div class="main-board">
                     <canvas id="game-canvas"></canvas>
                     <div id="combo-text">COMBO!</div>
-                    <div id="game-over"><h2>GAME OVER</h2><button id="restart-btn">RESTART</button></div>
+                    <div id="game-over">
+                        <h2>GAME OVER</h2>
+                        <div class="score-display" id="final-score">0</div>
+                        
+                        <div class="ranking-section">
+                            <div class="ranking-title">TOP 5 RANKING</div>
+                            <div id="rank-list">
+                                <!-- Rankings injected here -->
+                            </div>
+                        </div>
+
+                        <div class="registration">
+                            <input type="text" id="nick-input" placeholder="NICKNAME" maxlength="10">
+                            <div class="btn-group">
+                                <button id="submit-btn" class="action-btn">REGISTER</button>
+                                <button id="restart-btn" class="action-btn">RETRY</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="controls-grid">
                     <div class="mobile-btn" style="grid-column: 2" id="btn-up">↑</div>
