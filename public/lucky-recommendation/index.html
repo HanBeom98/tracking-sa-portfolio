@@ -12,6 +12,15 @@
         })(window, document, "clarity", "script", "vb9q33ggpa");
     </script>
     <script type="module" src="./script.js"></script>
+    <script>
+        // 간단한 새로고침 로직
+        document.getElementById('refresh-button').addEventListener('click', () => {
+            const el = document.querySelector('lucky-recommendation');
+            if (el && typeof el.generateLuckyData === 'function') {
+                el.generateLuckyData();
+            }
+        });
+    </script>
 
     <footer>
         <p data-i18n="footer_copyright"></p>

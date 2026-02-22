@@ -23,23 +23,25 @@
 
     <!-- [2] 검색 엔진 최적화 (SEO) -->
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title data-i18n="animal_face_test_title">동물상 테스트 - 나의 닮은 동물 찾기 | Tracking SA</title>
     
-    <meta name="description" content="AI 기술로 분석하는 나의 닮은 동물 찾기!">
+    <meta name="description" content="AI 기술로 분석하는 나의 닮은 동물 찾기! 사진 한 장으로 당신의 매력적인 동물상을 확인하고 친구들과 결과를 공유해보세요. 🔒 사진은 저장되지 않습니다.">
     <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
     <meta name="naver-site-verification" content="b15b33af838280b54d31eb3c7e5c358d2836743f" />
 
     <!-- Open Graph / Social Media -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="동물상 테스트 - 나의 닮은 동물 찾기 | Tracking SA">
+    <meta property="og:description" content="AI가 분석하는 나의 매력적인 동물상은? 지금 바로 사진으로 확인해보세요!">
+    <meta property="og:image" content="/logo.svg">
     <meta property="og:url" content="https://trackingsa.com/animal_face_test/">
     <meta name="twitter:card" content="summary_large_image">
 
-    <!-- [3] 리소스 연동 (상대 경로 복구) -->
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <!-- [3] 글로벌 리소스 및 스타일 -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="/style.css">
     <link rel="stylesheet" href="./style.css">
 </head>
 <body>
@@ -47,6 +49,9 @@
         <section class="animal-face-test">
             <h1 data-i18n="animal_face_test_h1">당신은 어떤 동물을 닮았나요?</h1>
             <p data-i18n="animal_face_test_p1">당신은 어떤 동물을 닮았는지 알아보세요!</p>
+            <p data-i18n="animal_face_test_p2">이미지를 업로드하여 당신의 동물상을 확인해보세요!</p>
+
+            <!-- 성별 선택 양식 복구 -->
             <div id="gender-selection" class="gender-selection-wrapper">
                 <label data-i18n="select_gender">성별 선택:</label>
                 <div class="gender-buttons">
@@ -54,9 +59,12 @@
                     <button id="gender-female" class="gender-button" data-gender="female" data-i18n="gender_female">여성</button>
                 </div>
             </div>
+
+            <!-- 업로드 및 레이아웃 양식 복구 -->
             <div class="image-upload-section">
                 <div class="upload-wrapper">
                     <div id="drop-zone" class="drop-zone">
+                        <p data-i18n="drag_drop_image">여기에 이미지를 드래그하거나 클릭하여 업로드</p>
                         <input type="file" id="image-upload" accept="image/*" style="display: none;">
                         <label for="image-upload" class="custom-file-upload" data-i18n="select_image">이미지 선택</label>
                     </div>
@@ -66,13 +74,22 @@
                     </div>
                 </div>
             </div>
+            
             <div id="loading-indicator" class="loading-indicator" style="display:none;">
                 <div class="spinner"></div>
-                <p data-i18n="analyzing_image">분석 중...</p>
+                <p data-i18n="analyzing_image">이미지 분석 중...</p>
+                <p class="privacy-note">🔒 사진은 저장되지 않습니다.</p>
             </div>
+
             <div id="result-section" class="result-section" style="display:none;">
                 <div id="result-emoji" class="result-large-emoji"></div>
                 <div id="prediction-result" class="prediction-result"></div>
+                <div id="confidence-score" class="confidence-score"></div>
+                <div id="share-buttons" class="share-buttons">
+                    <button class="share-button" data-platform="twitter">Twitter</button>
+                    <button class="share-button" data-platform="facebook">Facebook</button>
+                    <button class="share-button" data-platform="download" data-i18n="download_result">결과 다운로드</button>
+                </div>
                 <button type="button" id="retake-button" class="go-test-button" data-i18n="retake_test">다시 테스트</button>
             </div>
         </section>
