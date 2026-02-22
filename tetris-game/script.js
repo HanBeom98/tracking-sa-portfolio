@@ -1,14 +1,22 @@
-// [1] Firebase 초기화 (프로젝트 고정 설정)
-const firebaseConfig = {
-    authDomain: "tracking-sa-295db.firebaseapp.com",
-    projectId: "tracking-sa-295db",
-    storageBucket: "tracking-sa-295db.firebasestorage.app",
-};
+// [1] Firebase 초기화 (전역 충돌 방지 및 안전한 초기화 로직)
+// 이미 전역에 firebaseConfig가 선언되어 있다면 기존 설정을 사용하고, 없다면 새로 할당합니다.
+if (typeof firebaseConfig === 'undefined') {
+    window.firebaseConfig = {
+        authDomain: "tracking-sa-295db.firebaseapp.com",
+        projectId: "tracking-sa-295db",
+        storageBucket: "tracking-sa-295db.firebasestorage.app",
+    };
+}
 
-if (!firebase.apps.length) {
+// 중복 초기화 에러(App already exists)를 방지하기 위해 apps.length를 체크합니다.
+if (firebase.apps.length === 0) {
     firebase.initializeApp(firebaseConfig);
 }
-const db = firebase.firestore();
+
+// db 변수 중복 선언 방지 (이미 전역 선언된 경우 기존 인스턴스 사용)
+if (typeof db === 'undefined') {
+    window.db = firebase.firestore();
+}
 
 class TetrisGame extends HTMLElement {
     constructor() {
