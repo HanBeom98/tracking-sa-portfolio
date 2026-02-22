@@ -326,6 +326,13 @@ class TetrisGame extends HTMLElement {
         };
         document.addEventListener('keydown', e => {
             if (this.isGameOver) return;
+            
+            // 방향키 및 스페이스바 입력 시 페이지 스크롤 방지
+            const keysToPrevent = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '];
+            if (keysToPrevent.includes(e.key)) {
+                e.preventDefault();
+            }
+
             if (e.key === 'ArrowLeft') move(-1);
             if (e.key === 'ArrowRight') move(1);
             if (e.key === 'ArrowDown') { this.initAudio(); this.playerDrop(); }
