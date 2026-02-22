@@ -60,6 +60,7 @@ class LuckyRecommendation extends HTMLElement {
 
         try {
             const today = new Date();
+            // fortune.js와 동일하게 Vercel Full URL 사용 (라우팅 에러 방지)
             const response = await fetch('https://tracking-sa.vercel.app/api/lucky', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -87,13 +88,20 @@ class LuckyRecommendation extends HTMLElement {
             }
             this._luckyData = await response.json();
             
-            // 성공 시 버튼 문구 변경 (index.html과 동기화)
+            // 성공 시 버튼 문구 변경 및 다국어 속성 업데이트
             const btn = document.getElementById('refresh-button');
-            if (btn) btn.textContent = window.getTranslation(window.currentLang, 'refresh_lucky');
+            if (btn) {
+                btn.setAttribute('data-i18n', 'refresh_lucky');
+                if (window.getTranslation && typeof window.getTranslation === 'function') {
+                    btn.textContent = window.getTranslation(window.currentLang, 'refresh_lucky');
+                } else {
+                    btn.textContent = window.currentLang === 'en' ? 'Check Again' : '다시 확인하기';
+                }
+            }
 
         } catch (err) {
             console.error('Lucky API Error:', err);
-            this._error = `오류 발생: ${err.message}`;
+            this._error = `행운 분석 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.`;
         } finally {
             this._loading = false;
             this.render();
@@ -110,13 +118,13 @@ class LuckyRecommendation extends HTMLElement {
                     p { color: oklch(0.4 0.05 250); margin-top: 1rem; font-weight: 500; }
                 </style>
                 <div class="loader"></div>
-                <p>AI가 당신의 행운을 분석 중입니다...</p>
+                <p>AI가 당신의 정보를 바탕으로 행운을 분석 중입니다...</p>
             `;
             return;
         }
 
         if (this._error) {
-            this.shadowRoot.innerHTML = `<p style="color: oklch(0.5 0.2 20); text-align: center; padding: 2rem;">${this._error}</p>`;
+            this.shadowRoot.innerHTML = `<p style="color: oklch(0.5 0.2 20); text-align: center; padding: 2rem; font-weight: 600;">${this._error}</p>`;
             return;
         }
 
@@ -125,23 +133,28 @@ class LuckyRecommendation extends HTMLElement {
                 <style>
                     :host { display: block; text-align: center; padding: 3rem 2rem; }
                     .welcome-card {
-                        background: oklch(0.98 0.01 250);
-                        border: 1px dashed oklch(0.8 0.05 250);
-                        border-radius: 1.5rem;
-                        padding: 2rem;
-                        color: oklch(0.4 0.05 250);
+                        background: oklch(98% 0.01 250);
+                        border: 2px dashed oklch(85% 0.05 250);
+                        border-radius: 2rem;
+                        padding: 2.5rem;
+                        color: oklch(40% 0.05 250);
+                        transition: all 0.3s ease;
                     }
-                    .icon { font-size: 2.5rem; margin-bottom: 1rem; display: block; }
+                    .icon { font-size: 3rem; margin-bottom: 1rem; display: block; filter: drop-shadow(0 4px 10px oklch(0 0 0 / 0.1)); }
+                    .msg { font-size: 1.1rem; font-weight: 500; line-height: 1.5; }
                 </style>
                 <div class="welcome-card">
                     <span class="icon">✨</span>
-                    <div class="welcome-msg">정보를 입력하고 '행운 추천받기' 버튼을 눌러보세요!</div>
+                    <div class="msg">정보를 입력하고 '행운 추천받기' 버튼을 눌러보세요!</div>
                 </div>
             `;
             return;
         }
 
         const { oklch, colorName, colorDesc, itemName, itemIcon, itemAction } = this._luckyData;
+        
+        // 방어적 배경색 로직
+        const safeColor = oklch.startsWith('oklch') ? oklch : `oklch(${oklch})`;
 
         this.shadowRoot.innerHTML = `
         <style>
@@ -154,13 +167,20 @@ class LuckyRecommendation extends HTMLElement {
             .card {
                 background: white;
                 border-radius: 2rem;
-                padding: 2.5rem;
-                box-shadow: 0 20px 40px oklch(0 0 0 / 0.08);
+                padding: 3rem;
+                box-shadow: 
+                    0 10px 20px oklch(0 0 0 / 0.04),
+                    0 30px 60px oklch(0 0 0 / 0.12);
                 display: grid;
-                gap: 2rem;
+                gap: 2.5rem;
                 position: relative;
                 overflow: hidden;
-                transition: transform 0.3s ease;
+                animation: slideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+            }
+
+            @keyframes slideUp {
+                from { opacity: 0; transform: translateY(30px); }
+                to { opacity: 1; transform: translateY(0); }
             }
 
             .card::before {
@@ -169,23 +189,31 @@ class LuckyRecommendation extends HTMLElement {
                 top: 0;
                 left: 0;
                 width: 100%;
-                height: 8px;
-                background: ${oklch};
+                height: 10px;
+                background: ${safeColor};
             }
 
-            .section { display: flex; flex-direction: column; gap: 0.5rem; }
-            .label { font-size: 0.85rem; color: oklch(0.5 0.02 250); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
-            .value-row { display: flex; align-items: center; gap: 1rem; }
-            .color-preview { width: 32px; height: 32px; border-radius: 50%; background: ${oklch}; border: 3px solid white; box-shadow: 0 4px 8px oklch(0 0 0 / 0.15); }
-            .title { font-size: 1.75rem; font-weight: 800; margin: 0; color: oklch(0.2 0.02 250); }
-            .description { font-size: 1rem; line-height: 1.6; color: oklch(0.4 0.02 250); margin: 0; }
-            .item-icon { font-size: 3.5rem; margin-bottom: 0.5rem; }
-            .divider { height: 1px; background: oklch(0.95 0.01 250); width: 100%; }
+            .section { display: flex; flex-direction: column; gap: 0.75rem; }
+            .label { font-size: 0.85rem; color: oklch(55% 0.02 250); font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; }
+            .value-row { display: flex; align-items: center; gap: 1.25rem; }
+            .color-preview { 
+                width: 40px; 
+                height: 40px; 
+                border-radius: 50%; 
+                background: ${safeColor}; 
+                border: 4px solid white; 
+                box-shadow: 0 8px 16px oklch(0 0 0 / 0.15);
+            }
+            .title { font-size: 2rem; font-weight: 900; margin: 0; color: oklch(25% 0.02 250); letter-spacing: -0.02em; }
+            .description { font-size: 1.1rem; line-height: 1.7; color: oklch(45% 0.02 250); margin: 0; }
+            .item-icon { font-size: 4rem; filter: drop-shadow(0 10px 20px oklch(0 0 0 / 0.1)); }
+            .divider { height: 1px; background: oklch(94% 0.01 250); width: 100%; }
 
-            @container (max-width: 450px) {
-                .card { padding: 1.5rem; gap: 1.5rem; }
-                .title { font-size: 1.4rem; }
-                .item-icon { font-size: 2.8rem; }
+            @container (max-width: 500px) {
+                .card { padding: 2rem; gap: 2rem; }
+                .title { font-size: 1.6rem; }
+                .item-icon { font-size: 3rem; }
+                .description { font-size: 1rem; }
             }
         </style>
         
