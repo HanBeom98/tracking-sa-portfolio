@@ -75,19 +75,37 @@ class TetrisGame extends HTMLElement {
         this.ctx = this.canvas.getContext('2d');
         this.nextCanvas = this.shadowRoot.querySelector('#next-canvas');
         this.nextCtx = this.nextCanvas.getContext('2d');
+        
+        this.resizeCanvas();
         this.initGame();
         this.addEventListeners();
-        this.resizeCanvas();
-        window.addEventListener('resize', () => this.resizeCanvas());
+        window.addEventListener('resize', () => {
+            this.resizeCanvas();
+            this.draw();
+        });
     }
 
     resizeCanvas() {
-        const padding = 40;
-        const availableWidth = Math.min(window.innerWidth - padding, 400);
-        this.BLOCK_SIZE = Math.floor(availableWidth / this.COLS);
+        // 너비와 높이를 모두 고려한 지능형 사이징
+        const marginW = 40;
+        const marginH = window.innerWidth < 600 ? 350 : 250; // 모바일일 때 여백 더 확보
+        
+        const availableW = window.innerWidth - marginW;
+        const availableH = window.innerHeight - marginH;
+
+        // 1. 너비 기준 크기 계산
+        let size = Math.floor(Math.min(availableW, 400) / this.COLS);
+        
+        // 2. 높이가 부족하면 높이에 맞춤
+        if (size * this.ROWS > availableH) {
+            size = Math.floor(availableH / this.ROWS);
+        }
+
+        this.BLOCK_SIZE = Math.max(size, 15); // 최소 크기 보장
         this.canvas.width = this.BLOCK_SIZE * this.COLS;
         this.canvas.height = this.BLOCK_SIZE * this.ROWS;
-        this.NEXT_BLOCK_SIZE = Math.floor(this.BLOCK_SIZE * 0.8);
+        
+        this.NEXT_BLOCK_SIZE = Math.floor(this.BLOCK_SIZE * 0.7);
         this.nextCanvas.width = this.NEXT_BLOCK_SIZE * 4;
         this.nextCanvas.height = this.NEXT_BLOCK_SIZE * 4;
     }
@@ -121,7 +139,7 @@ class TetrisGame extends HTMLElement {
         matrix.forEach((row, y) => {
             row.forEach((value, x) => {
                 if (value !== 0) {
-                    context.shadowBlur = 10;
+                    context.shadowBlur = size / 3;
                     context.shadowColor = this.COLORS[value];
                     context.fillStyle = this.COLORS[value];
                     context.fillRect((x + offset.x) * size, (y + offset.y) * size, size - 1, size - 1);
@@ -260,6 +278,12 @@ class TetrisGame extends HTMLElement {
     addEventListeners() {
         document.addEventListener('keydown', e => {
             if (this.isGameOver) return;
+            
+            // 방향키 입력 시 브라우저 스크롤 방지
+            if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+                e.preventDefault();
+            }
+
             if (e.keyCode === 37) this.playerMove(-1);
             else if (e.keyCode === 39) this.playerMove(1);
             else if (e.keyCode === 40) this.playerDrop();
@@ -275,25 +299,25 @@ class TetrisGame extends HTMLElement {
     render() {
         this.shadowRoot.innerHTML = `
             <style>
-                :host { display: flex; flex-direction: column; align-items: center; background: #050505; padding: 20px; border-radius: 24px; box-shadow: 0 0 50px oklch(50% 0.2 250 / 0.2); user-select: none; touch-action: manipulation; font-family: 'Orbitron', sans-serif; color: white; }
-                .game-layout { display: flex; gap: 20px; align-items: flex-start; }
+                :host { display: flex; flex-direction: column; align-items: center; background: #050505; padding: 15px; border-radius: 20px; box-shadow: 0 0 50px oklch(50% 0.2 250 / 0.2); user-select: none; touch-action: manipulation; font-family: 'Orbitron', sans-serif; color: white; }
+                .game-layout { display: flex; gap: 15px; align-items: flex-start; }
                 .main-board { position: relative; }
-                #game-canvas { border: 4px solid #222; background: #000; border-radius: 8px; }
-                .side-panel { display: flex; flex-direction: column; gap: 15px; width: 120px; }
-                .panel-box { background: #111; padding: 12px; border-radius: 12px; border: 2px solid #222; text-align: center; }
-                .label { color: #666; font-size: 10px; margin-bottom: 5px; letter-spacing: 1px; }
-                .value { color: white; font-size: 20px; text-shadow: 0 0 10px oklch(60% 0.2 250); }
+                #game-canvas { border: 3px solid #222; background: #000; border-radius: 8px; }
+                .side-panel { display: flex; flex-direction: column; gap: 10px; width: 100px; }
+                .panel-box { background: #111; padding: 10px; border-radius: 10px; border: 2px solid #222; text-align: center; }
+                .label { color: #666; font-size: 9px; margin-bottom: 3px; letter-spacing: 1px; }
+                .value { color: white; font-size: 16px; text-shadow: 0 0 10px oklch(60% 0.2 250); }
                 #next-canvas { background: #000; border-radius: 4px; }
-                #combo-text { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); color: oklch(70% 0.3 150); font-size: 2rem; font-weight: bold; pointer-events: none; opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+                #combo-text { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); color: oklch(70% 0.3 150); font-size: 1.5rem; font-weight: bold; pointer-events: none; opacity: 0; transition: all 0.3s; }
                 #combo-text.pop { opacity: 1; transform: translate(-50%, -60%) scale(1.2); }
                 #game-over { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; opacity: 0; pointer-events: none; transition: opacity 0.5s; z-index: 10; }
                 #game-over.visible { opacity: 1; pointer-events: auto; }
-                #game-over h2 { color: oklch(60% 0.2 20); font-size: 2rem; text-shadow: 0 0 20px oklch(60% 0.2 20); margin-bottom: 20px; }
-                #restart-btn { padding: 12px 24px; background: oklch(60% 0.2 250); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-                .controls-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 20px; }
-                .mobile-btn { width: 55px; height: 55px; background: oklch(25% 0.05 250); color: white; border: 1px solid #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; cursor: pointer; }
+                #game-over h2 { color: oklch(60% 0.2 20); font-size: 1.5rem; text-shadow: 0 0 20px oklch(60% 0.2 20); margin-bottom: 15px; }
+                #restart-btn { padding: 10px 20px; background: oklch(60% 0.2 250); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+                .controls-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+                .mobile-btn { width: 50px; height: 55px; background: oklch(25% 0.05 250); color: white; border: 1px solid #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; }
                 .mobile-btn:active { background: oklch(40% 0.1 250); transform: scale(0.9); }
-                @media (max-width: 600px) { .game-layout { flex-direction: column; align-items: center; } .side-panel { flex-direction: row; width: 100%; } }
+                @media (max-width: 600px) { .game-layout { flex-direction: column; align-items: center; } .side-panel { flex-direction: row; width: 100%; justify-content: center; } }
                 @media (min-width: 1024px) { .controls-grid { display: none; } }
             </style>
             <div class="game-layout">

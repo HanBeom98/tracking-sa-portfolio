@@ -2,22 +2,49 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title data-i18n="tetris_game">테트리스 게임 - Tracking SA</title>
     <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
     
-    <!-- 빌드 시 삭제 방지를 위해 스타일을 인라인으로 보호 -->
     <style>
         :root {
             --primary-neon: oklch(65% 0.25 250);
-            --bg-dark: oklch(15% 0.02 250);
+            --bg-dark: oklch(10% 0.02 250);
             --text-light: oklch(95% 0.01 250);
         }
-        body { background-color: var(--bg-dark); color: var(--text-light); margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
-        main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; }
-        #hero { text-align: center; margin-bottom: 2rem; }
-        #hero h1 { font-size: 2.5rem; background: linear-gradient(to right, var(--primary-neon), oklch(75% 0.2 180)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        tetris-game { display: block; box-shadow: 0 0 40px oklch(0% 0 0 / 0.5); border-radius: 24px; overflow: hidden; }
+        /* 스크롤 방지를 위해 body 고정 */
+        body { 
+            background-color: var(--bg-dark); 
+            color: var(--text-light); 
+            margin: 0; 
+            overflow: hidden; /* 전체 페이지 스크롤 차단 */
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh;
+        }
+        main { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 10px; /* 여백 최소화 */
+        }
+        #hero { text-align: center; margin-bottom: 10px; }
+        #hero h1 { 
+            font-size: 1.5rem; /* 제목 크기 축소 */
+            margin: 0;
+            background: linear-gradient(to right, var(--primary-neon), oklch(75% 0.2 180)); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        tetris-game { 
+            display: block; 
+            box-shadow: 0 0 40px oklch(0% 0 0 / 0.5); 
+            border-radius: 20px; 
+        }
+        /* 푸터 크기 줄임 */
+        footer { padding: 5px !important; font-size: 0.8rem; }
     </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=pub-7263630893992216" crossorigin="anonymous"></script>
     <!-- Google tag (gtag.js) -->
@@ -99,7 +126,6 @@
     </div>
 </header>
 
-    <!-- Header/Footer는 main.py에 의해 주입됨 -->
     <main>
         <section id="hero">
             <h1 data-i18n="tetris_game">테트리스 게임</h1>
@@ -108,8 +134,6 @@
             <tetris-game></tetris-game>
         </section>
     </main>
-    
-    <!-- 필수 스크립트 (상대 경로로 유지하여 빌드 후에도 작동 보장) -->
     <script src="./script.js"></script>
 
     <footer>
