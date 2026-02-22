@@ -14,6 +14,7 @@ class LuckyRecommendation extends HTMLElement {
 
     connectedCallback() {
         this.initSelectors();
+        this.render(); // Ensure initial render
     }
 
     initSelectors() {
@@ -59,7 +60,6 @@ class LuckyRecommendation extends HTMLElement {
 
         try {
             const today = new Date();
-            // fortune.js와 동일하게 Vercel Full URL 사용 (라우팅 에러 방지)
             const response = await fetch('https://tracking-sa.vercel.app/api/lucky', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -80,16 +80,20 @@ class LuckyRecommendation extends HTMLElement {
                     const errorData = await response.json();
                     errorMsg = errorData.error || errorMsg;
                 } catch (e) {
-                    // JSON이 아닌 경우 텍스트로 시도
                     const errorText = await response.text();
                     errorMsg = errorText || errorMsg;
                 }
                 throw new Error(errorMsg);
             }
             this._luckyData = await response.json();
+            
+            // 성공 시 버튼 문구 변경 (index.html과 동기화)
+            const btn = document.getElementById('refresh-button');
+            if (btn) btn.textContent = window.getTranslation(window.currentLang, 'refresh_lucky');
+
         } catch (err) {
             console.error('Lucky API Error:', err);
-            this._error = `행운 분석 중 오류가 발생했습니다: ${err.message}`;
+            this._error = `오류 발생: ${err.message}`;
         } finally {
             this._loading = false;
             this.render();
@@ -101,27 +105,38 @@ class LuckyRecommendation extends HTMLElement {
             this.shadowRoot.innerHTML = `
                 <style>
                     :host { display: block; text-align: center; padding: 2rem; }
-                    .loader { border: 4px solid #f3f3f3; border-top: 4px solid #1e40af; border-radius: 50%; width: 40px; height: 40px; animation: spin 2s linear infinite; margin: 0 auto; }
+                    .loader { border: 4px solid #f3f3f3; border-top: 4px solid oklch(0.45 0.15 250); border-radius: 50%; width: 40px; height: 40px; animation: spin 2s linear infinite; margin: 0 auto; }
                     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+                    p { color: oklch(0.4 0.05 250); margin-top: 1rem; font-weight: 500; }
                 </style>
                 <div class="loader"></div>
-                <p>AI가 당신의 정보를 바탕으로 행운을 분석 중입니다...</p>
+                <p>AI가 당신의 행운을 분석 중입니다...</p>
             `;
             return;
         }
 
         if (this._error) {
-            this.shadowRoot.innerHTML = `<p style="color: red; text-align: center;">${this._error}</p>`;
+            this.shadowRoot.innerHTML = `<p style="color: oklch(0.5 0.2 20); text-align: center; padding: 2rem;">${this._error}</p>`;
             return;
         }
 
         if (!this._luckyData) {
             this.shadowRoot.innerHTML = `
                 <style>
-                    :host { display: block; text-align: center; padding: 2rem; color: #666; }
-                    .welcome-msg { font-size: 1.1rem; }
+                    :host { display: block; text-align: center; padding: 3rem 2rem; }
+                    .welcome-card {
+                        background: oklch(0.98 0.01 250);
+                        border: 1px dashed oklch(0.8 0.05 250);
+                        border-radius: 1.5rem;
+                        padding: 2rem;
+                        color: oklch(0.4 0.05 250);
+                    }
+                    .icon { font-size: 2.5rem; margin-bottom: 1rem; display: block; }
                 </style>
-                <div class="welcome-msg">정보를 입력하고 '행운 추천받기' 버튼을 눌러보세요!</div>
+                <div class="welcome-card">
+                    <span class="icon">✨</span>
+                    <div class="welcome-msg">정보를 입력하고 '행운 추천받기' 버튼을 눌러보세요!</div>
+                </div>
             `;
             return;
         }
@@ -140,7 +155,7 @@ class LuckyRecommendation extends HTMLElement {
                 background: white;
                 border-radius: 2rem;
                 padding: 2.5rem;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+                box-shadow: 0 20px 40px oklch(0 0 0 / 0.08);
                 display: grid;
                 gap: 2rem;
                 position: relative;
@@ -159,13 +174,19 @@ class LuckyRecommendation extends HTMLElement {
             }
 
             .section { display: flex; flex-direction: column; gap: 0.5rem; }
-            .label { font-size: 0.9rem; color: #666; font-weight: 600; text-transform: uppercase; }
+            .label { font-size: 0.85rem; color: oklch(0.5 0.02 250); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
             .value-row { display: flex; align-items: center; gap: 1rem; }
-            .color-preview { width: 35px; height: 35px; border-radius: 50%; background: ${oklch}; border: 2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-            .title { font-size: 1.6rem; font-weight: 700; margin: 0; color: #222; }
-            .description { font-size: 1rem; line-height: 1.6; color: #444; }
-            .item-icon { font-size: 3rem; }
-            .divider { height: 1px; background: #eee; width: 100%; }
+            .color-preview { width: 32px; height: 32px; border-radius: 50%; background: ${oklch}; border: 3px solid white; box-shadow: 0 4px 8px oklch(0 0 0 / 0.15); }
+            .title { font-size: 1.75rem; font-weight: 800; margin: 0; color: oklch(0.2 0.02 250); }
+            .description { font-size: 1rem; line-height: 1.6; color: oklch(0.4 0.02 250); margin: 0; }
+            .item-icon { font-size: 3.5rem; margin-bottom: 0.5rem; }
+            .divider { height: 1px; background: oklch(0.95 0.01 250); width: 100%; }
+
+            @container (max-width: 450px) {
+                .card { padding: 1.5rem; gap: 1.5rem; }
+                .title { font-size: 1.4rem; }
+                .item-icon { font-size: 2.8rem; }
+            }
         </style>
         
         <div class="card" role="article" aria-label="Today's Lucky Recommendation">
