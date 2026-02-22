@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title data-i18n="tetris_game">테트리스 - Tracking SA</title>
     <style>
-        /* 모든 마진/패딩 제거 및 전체 화면 강제 고정 */
+        /* [UI 수복 핵심: 최상위 높이 강제 고정] */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body, html {
             width: 100%;
             height: 100%;
-            height: 100dvh; 
+            height: 100dvh; /* 주소창 제외 실제 가용 높이 */
             overflow: hidden;
             background-color: #000;
         }

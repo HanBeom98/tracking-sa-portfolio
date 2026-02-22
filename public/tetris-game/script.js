@@ -64,42 +64,39 @@ class TetrisGame extends HTMLElement {
         this.ctx = this.canvas.getContext('2d');
         this.nextCanvas = this.shadowRoot.querySelector('#next-canvas');
         this.nextCtx = this.nextCanvas.getContext('2d');
-        this.boardWrapper = this.shadowRoot.querySelector('.board-wrapper');
+        this.boardArea = this.shadowRoot.querySelector('.board-area');
         
         if (window.db) this.db = window.db;
 
-        // ResizeObserver로 실시간 자동 스케일링 (높이 유실 방지)
-        const observer = new ResizeObserver(() => {
-            if (this.boardWrapper.clientHeight > 0) {
-                this.autoScale();
-            }
-        });
-        observer.observe(this.boardWrapper);
+        // ResizeObserver로 실시간 가용 공간 감지 및 보드 크기 최적화
+        const observer = new ResizeObserver(() => this.autoScale());
+        observer.observe(this.shadowRoot.querySelector('.main-container'));
         
         this.initGame();
         this.addEventListeners();
-        // 초기 강제 호출
-        setTimeout(() => this.autoScale(), 100);
+        setTimeout(() => this.autoScale(), 50);
     }
 
     autoScale() {
-        const rect = this.boardWrapper.getBoundingClientRect();
+        // 실제 보드가 그려질 영역의 크기 측정
+        const rect = this.boardArea.getBoundingClientRect();
         const padding = 20;
         const availableW = rect.width - padding;
         const availableH = rect.height - padding;
 
         if (availableH <= 0 || availableW <= 0) return;
 
+        // 10:20 비율을 유지하는 최대 블록 크기 계산
         let size = Math.floor(availableH / this.ROWS);
         if (size * this.COLS > availableW) {
             size = Math.floor(availableW / this.COLS);
         }
 
-        this.BLOCK_SIZE = Math.max(size, 10);
+        this.BLOCK_SIZE = Math.max(size, 5);
         this.canvas.width = this.BLOCK_SIZE * this.COLS;
         this.canvas.height = this.BLOCK_SIZE * this.ROWS;
         
-        this.NEXT_BLOCK_SIZE = Math.floor(this.BLOCK_SIZE * 0.6);
+        this.NEXT_BLOCK_SIZE = Math.floor(this.BLOCK_SIZE * 0.7);
         this.nextCanvas.width = this.NEXT_BLOCK_SIZE * 4;
         this.nextCanvas.height = this.NEXT_BLOCK_SIZE * 4;
         this.draw();
@@ -273,8 +270,8 @@ class TetrisGame extends HTMLElement {
     }
 
     updateScore() {
-        this.shadowRoot.querySelector('#score-val').innerText = this.score;
-        this.shadowRoot.querySelector('#combo-val').innerText = this.combo;
+        this.shadowRoot.querySelectorAll('.score-val').forEach(el => el.innerText = this.score);
+        this.shadowRoot.querySelectorAll('.combo-val').forEach(el => el.innerText = this.combo);
     }
 
     update(time = 0) {
@@ -340,17 +337,33 @@ class TetrisGame extends HTMLElement {
         this.shadowRoot.innerHTML = `
             <style>
                 :host { display: block; height: 100%; width: 100%; font-family: 'Orbitron', sans-serif; color: white; user-select: none; background: #000; overflow: hidden; }
-                .game-container { display: flex; flex-direction: column; height: 100%; width: 100%; overflow: hidden; }
+                .main-container { display: flex; flex-direction: column; height: 100%; width: 100%; }
                 
-                .top-hud { height: 60px; display: flex; justify-content: space-between; align-items: center; background: #111; padding: 0 20px; border-bottom: 1px solid #333; flex-shrink: 0; }
+                /* [Desktop Layout - Landscape] */
+                @media (min-width: 1024px) {
+                    .main-container { flex-direction: row; align-items: center; justify-content: center; gap: 40px; padding: 20px; }
+                    .side-panel { display: flex; flex-direction: column; gap: 20px; width: 150px; }
+                    .top-hud { display: none; }
+                    .controls { display: none; }
+                }
+
+                /* [Mobile Layout - Portrait] */
+                @media (max-width: 1023px) {
+                    .side-panel { display: none; }
+                    .top-hud { height: 60px; display: flex; justify-content: space-around; align-items: center; background: #111; padding: 0 20px; border-bottom: 1px solid #333; flex-shrink: 0; }
+                    .controls { height: 180px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 10px 20px 30px 20px; justify-items: center; align-items: center; background: #0a0a0a; border-top: 1px solid #222; flex-shrink: 0; }
+                }
+
                 .hud-item { display: flex; flex-direction: column; align-items: center; }
                 .hud-label { font-size: 8px; color: #666; }
                 .hud-value { font-size: 14px; font-weight: bold; color: #fff; }
-                #next-canvas { width: 30px; height: 30px; background: #000; border-radius: 4px; }
-
-                .board-wrapper { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; min-height: 0; background: #050505; }
-                #game-canvas { border: 2px solid #444; background: #000; box-shadow: 0 0 30px rgba(0,0,0,0.8); border-radius: 4px; display: block; }
                 
+                .board-area { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; min-height: 0; background: #000; }
+                #game-canvas { border: 2px solid #444; background: #000; box-shadow: 0 0 30px rgba(0,0,0,0.8); border-radius: 4px; }
+                #next-canvas { width: 40px; height: 40px; background: #000; border-radius: 4px; }
+
+                .panel-box { background: #111; padding: 15px; border-radius: 12px; border: 1px solid #333; text-align: center; }
+
                 #combo-text { position: absolute; top: 20%; color: oklch(70% 0.3 150); font-size: 2rem; font-weight: bold; pointer-events: none; opacity: 0; z-index: 5; }
                 #combo-text.pop { opacity: 1; animation: pop 0.5s ease-out; }
                 @keyframes pop { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
@@ -358,32 +371,45 @@ class TetrisGame extends HTMLElement {
                 #game-over { position: absolute; inset: 0; background: rgba(0,0,0,0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10; padding: 20px; text-align: center; }
                 #game-over.visible { display: flex; }
 
-                .controls { height: 180px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 10px 20px 30px 20px; justify-items: center; align-items: center; background: #0a0a0a; border-top: 1px solid #222; flex-shrink: 0; }
-                .mobile-btn { width: 60px; height: 60px; background: oklch(35% 0.1 250); border: 2px solid #444; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+                .mobile-btn { width: 60px; height: 60px; background: oklch(35% 0.1 250); border: 2px solid #444; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
                 .mobile-btn:active { background: oklch(50% 0.2 250); transform: scale(0.9); }
-
-                @media (min-width: 1024px) { .controls { display: none; } }
             </style>
-            <div class="game-container">
+            <div class="main-container">
+                <!-- Mobile Top HUD -->
                 <div class="top-hud">
                     <div class="hud-item"><div class="hud-label">NEXT</div><canvas id="next-canvas"></canvas></div>
-                    <div class="hud-item"><div class="hud-label">SCORE</div><div class="hud-value" id="score-val">0</div></div>
-                    <div class="hud-item"><div class="hud-label">COMBO</div><div class="hud-value" id="combo-val">0</div></div>
+                    <div class="hud-item"><div class="hud-label">SCORE</div><div class="hud-value score-val">0</div></div>
+                    <div class="hud-item"><div class="hud-label">COMBO</div><div class="hud-value combo-val">0</div></div>
                 </div>
-                <div class="board-wrapper">
+
+                <!-- Desktop Left Panel -->
+                <div class="side-panel">
+                    <div class="panel-box"><div class="hud-label">SCORE</div><div class="hud-value score-val">0</div></div>
+                    <div class="panel-box"><div class="hud-label">COMBO</div><div class="hud-value combo-val">0</div></div>
+                </div>
+
+                <!-- Game Board -->
+                <div class="board-area">
                     <canvas id="game-canvas"></canvas>
                     <div id="combo-text">COMBO!</div>
                     <div id="game-over">
                         <h2 style="color:red; margin-bottom:10px;">GAME OVER</h2>
                         <div style="font-size:2rem; margin-bottom:20px;"><span id="final-score-val">0</span></div>
                         <div id="rank-list" style="width:180px; margin-bottom:20px;"></div>
-                        <input type="text" id="nick-input" placeholder="NICKNAME" maxlength="10" style="padding:10px; background:#111; border:1px solid #444; color:white; width:150px; text-align:center; margin-bottom:10px; font-family:inherit;">
-                        <div style="display:flex; gap:10px;">
+                        <input type="text" id="nick-input" placeholder="NICKNAME" maxlength="10">
+                        <div style="display:flex; gap:10px; margin-top:10px;">
                             <button id="submit-btn" style="padding:10px 20px; background:oklch(65% 0.2 150); border:none; border-radius:4px; font-weight:bold; cursor:pointer;">SAVE</button>
                             <button id="restart-btn" style="padding:10px 20px; background:oklch(60% 0.2 250); color:white; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">RETRY</button>
                         </div>
                     </div>
                 </div>
+
+                <!-- Desktop Right Panel -->
+                <div class="side-panel">
+                    <div class="panel-box"><div class="hud-label">NEXT</div><canvas id="next-canvas-desktop"></canvas></div>
+                </div>
+
+                <!-- Mobile Bottom Controls -->
                 <div class="controls">
                     <div class="mobile-btn" id="btn-up" style="grid-column: 2">↑</div>
                     <div class="mobile-btn" id="btn-left" style="grid-column: 1; grid-row: 2">←</div>
@@ -392,6 +418,12 @@ class TetrisGame extends HTMLElement {
                 </div>
             </div>
         `;
+        // Desktop 전용 미리보기 캔버스를 위해 참조 업데이트
+        const desktopNext = this.shadowRoot.querySelector('#next-canvas-desktop');
+        if (desktopNext) {
+            this.nextCanvas = desktopNext;
+            this.nextCtx = desktopNext.getContext('2d');
+        }
     }
 }
 customElements.define('tetris-game', TetrisGame);
