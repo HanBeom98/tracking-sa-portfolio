@@ -8,9 +8,10 @@ const prompts = require('./prompts');
  * Calls the Gemini REST API directly using fetch.
  * @param {string} agentName - The name of the agent (e.g., 'planner', 'developer').
  * @param {string} inputPrompt - The specific input prompt for this agent turn.
+ * @param {string} projectContext - The project structure context.
  * @returns {Promise<any>} - The output from the AI.
  */
-async function runAgent(agentName, inputPrompt) {
+async function runAgent(agentName, inputPrompt, projectContext = '') {
   console.log(`\n----- Running ${agentName.toUpperCase()} Agent -----`);
   
   const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
@@ -24,8 +25,18 @@ async function runAgent(agentName, inputPrompt) {
   const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent`;
 
   const agentPrompts = prompts[agentName];
-  // Combine persona and instructions into the main prompt
-  const fullPrompt = `${agentPrompts.persona}\n\n${agentPrompts.instructions}\n\nInput:\n${inputPrompt}`;
+  // Combine persona, instructions, and project context into the main prompt
+  const fullPrompt = `
+${agentPrompts.persona}
+
+${agentPrompts.instructions}
+
+### Project Context (Current Root Directory Structure):
+${projectContext}
+
+### Input:
+${inputPrompt}
+`.trim();
   
   console.log(`Input: See full prompt in body.`);
 
@@ -74,9 +85,9 @@ async function runAgent(agentName, inputPrompt) {
   }
 }
 
-// Updated agent runners to pass only the relevant input string
+// Updated agent runners to pass the relevant input string and project context
 module.exports = {
-  runPlanner: (state, request) => runAgent('planner', request),
-  runDeveloper: (state) => runAgent('developer', JSON.stringify(state.plan, null, 2)),
-  runReviewer: (state) => runAgent('reviewer', state.code),
+  runPlanner: (state, request, context) => runAgent('planner', request, context),
+  runDeveloper: (state, context) => runAgent('developer', JSON.stringify(state.plan, null, 2), context),
+  runReviewer: (state, context) => runAgent('reviewer', state.code, context),
 };
