@@ -196,6 +196,12 @@ const translations = {
         'tetris_game': 'Tetris',
         'sitemap': 'Sitemap',
         'lucky_recommendation': 'Lucky Recommendation',
+        'lucky_recommendation_title': 'Daily Lucky Recommendation - Tracking SA',
+        'lucky_hero_title': 'What is your luck for today?',
+        'lucky_hero_subtitle': 'We recommend the perfect colors and items for you.',
+        'refresh_lucky': 'Check Again',
+        'new_feature': 'NEW',
+        'check_now': 'Check Now',
         // Saju page specific keys for main title and descriptions
         'saju_title': 'AI Real-time Daily Fortune',
         'saju_desc1': 'Enter your name, birth date, and time to get your Daily Fortune analyzed by AI.',
