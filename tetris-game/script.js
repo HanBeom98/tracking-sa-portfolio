@@ -4,7 +4,6 @@ class TetrisGame extends HTMLElement {
         this.attachShadow({ mode: 'open' });
         this.COLS = 10;
         this.ROWS = 20;
-        this.BLOCK_SIZE = 20;
         this.COLORS = [
             null,
             'oklch(60% 0.15 250)', // I
@@ -57,42 +56,42 @@ class TetrisGame extends HTMLElement {
         osc.stop(this.audioCtx.currentTime + duration);
     }
 
-    soundMove() { this.playNote(150, 0.05, 'sine'); }
-    soundRotate() { this.playNote(300, 0.05, 'sine'); }
-    soundClear() { this.playNote(400 + (this.combo * 100), 0.2); }
-    soundGameOver() { this.playNote(100, 0.8, 'sawtooth'); }
-
     connectedCallback() {
         this.render();
         this.canvas = this.shadowRoot.querySelector('#game-canvas');
         this.ctx = this.canvas.getContext('2d');
         this.nextCanvas = this.shadowRoot.querySelector('#next-canvas');
         this.nextCtx = this.nextCanvas.getContext('2d');
+        this.boardContainer = this.shadowRoot.querySelector('.main-board');
         
-        this.resizeCanvas();
+        // 자동 최적화 핵심: 컨테이너 크기 변화 감지
+        const observer = new ResizeObserver(() => this.autoScale());
+        observer.observe(this.boardContainer);
+        
         this.initGame();
         this.addEventListeners();
-        window.addEventListener('resize', () => { this.resizeCanvas(); this.draw(); });
     }
 
-    resizeCanvas() {
-        const isSmallScreen = window.innerWidth < 600;
-        // 모바일일 때 헤더/푸터/버튼 공간을 더 보수적으로 잡음 (최소 300px 확보)
-        const reservedH = isSmallScreen ? 320 : 220; 
-        const availableW = window.innerWidth - 40;
-        const availableH = window.innerHeight - reservedH;
+    autoScale() {
+        const rect = this.boardContainer.getBoundingClientRect();
+        const padding = 10;
+        const availableW = rect.width - padding;
+        const availableH = rect.height - padding;
 
+        // 10:20 비율 유지하며 최대 크기 계산
         let size = Math.floor(availableH / this.ROWS);
-        const maxWidthSize = Math.floor(Math.min(availableW, 350) / this.COLS);
-        if (size > maxWidthSize) size = maxWidthSize;
+        if (size * this.COLS > availableW) {
+            size = Math.floor(availableW / this.COLS);
+        }
 
-        this.BLOCK_SIZE = Math.max(size, 12);
+        this.BLOCK_SIZE = Math.max(size, 5); // 절대 잘리지 않는 크기
         this.canvas.width = this.BLOCK_SIZE * this.COLS;
         this.canvas.height = this.BLOCK_SIZE * this.ROWS;
         
         this.NEXT_BLOCK_SIZE = Math.floor(this.BLOCK_SIZE * 0.6);
         this.nextCanvas.width = this.NEXT_BLOCK_SIZE * 4;
         this.nextCanvas.height = this.NEXT_BLOCK_SIZE * 4;
+        this.draw();
     }
 
     initGame() {
@@ -108,6 +107,7 @@ class TetrisGame extends HTMLElement {
     }
 
     draw() {
+        if (!this.BLOCK_SIZE) return;
         this.ctx.fillStyle = '#000';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.drawMatrix(this.board, { x: 0, y: 0 }, this.ctx, this.BLOCK_SIZE);
@@ -153,25 +153,15 @@ class TetrisGame extends HTMLElement {
         this.initAudio();
         this.piece.pos.x += dir;
         if (this.collide()) this.piece.pos.x -= dir;
-        else this.soundMove();
+        else this.playNote(150, 0.05, 'sine');
     }
 
     playerRotate(dir) {
         if (this.isGameOver) return;
         this.initAudio();
-        const pos = this.piece.pos.x;
-        let offset = 1;
         this.rotate(this.piece.matrix, dir);
-        while (this.collide()) {
-            this.piece.pos.x += offset;
-            offset = -(offset + (offset > 0 ? 1 : -1));
-            if (offset > this.piece.matrix[0].length) {
-                this.rotate(this.piece.matrix, -dir);
-                this.piece.pos.x = pos;
-                return;
-            }
-        }
-        this.soundRotate();
+        if (this.collide()) this.rotate(this.piece.matrix, -dir);
+        else this.playNote(300, 0.05, 'sine');
     }
 
     rotate(matrix, dir) {
@@ -187,7 +177,7 @@ class TetrisGame extends HTMLElement {
         this.nextPiece = this.generatePiece();
         if (this.collide()) {
             this.isGameOver = true;
-            this.soundGameOver();
+            this.playNote(100, 0.8, 'sawtooth');
             this.shadowRoot.querySelector('#game-over').classList.add('visible');
         }
     }
@@ -224,7 +214,7 @@ class TetrisGame extends HTMLElement {
         if (linesCleared > 0) {
             this.combo++;
             this.score += (linesCleared * 100) * this.combo;
-            this.soundClear();
+            this.playNote(400 + (this.combo * 100), 0.2);
             this.showComboEffect();
         } else { this.combo = 0; }
     }
@@ -269,57 +259,62 @@ class TetrisGame extends HTMLElement {
             else if (e.keyCode === 40) this.playerDrop();
             else if (e.keyCode === 38) this.playerRotate(1);
         });
-        this.shadowRoot.querySelector('#btn-left').onclick = (e) => { e.preventDefault(); this.playerMove(-1); };
-        this.shadowRoot.querySelector('#btn-right').onclick = (e) => { e.preventDefault(); this.playerMove(1); };
-        this.shadowRoot.querySelector('#btn-down').onclick = (e) => { e.preventDefault(); this.playerDrop(); };
-        this.shadowRoot.querySelector('#btn-up').onclick = (e) => { e.preventDefault(); this.playerRotate(1); };
+        const btns = { 'btn-left': -1, 'btn-right': 1, 'btn-down': 'drop', 'btn-up': 'rotate' };
+        Object.entries(btns).forEach(([id, act]) => {
+            const el = this.shadowRoot.querySelector(`#${id}`);
+            el.ontouchstart = (e) => {
+                e.preventDefault();
+                if (act === -1 || act === 1) this.playerMove(act);
+                else if (act === 'drop') this.playerDrop();
+                else this.playerRotate(1);
+            };
+        });
         this.shadowRoot.querySelector('#restart-btn').onclick = () => this.restart();
     }
 
     render() {
         this.shadowRoot.innerHTML = `
             <style>
-                :host { display: flex; flex-direction: column; align-items: center; background: #050505; padding: 10px; border-radius: 20px; user-select: none; touch-action: none; font-family: 'Orbitron', sans-serif; color: white; width: fit-content; margin: auto; }
-                .game-layout { display: flex; gap: 10px; align-items: flex-start; }
-                .main-board { position: relative; }
-                #game-canvas { border: 2px solid #333; background: #000; border-radius: 4px; }
-                .side-panel { display: flex; flex-direction: column; gap: 8px; width: 70px; }
-                .panel-box { background: #111; padding: 5px; border-radius: 8px; border: 1px solid #222; text-align: center; }
-                .label { color: #666; font-size: 7px; margin-bottom: 2px; letter-spacing: 1px; }
-                .value { color: white; font-size: 12px; text-shadow: 0 0 10px oklch(60% 0.2 250); }
-                #next-canvas { background: #000; border-radius: 2px; width: 100%; }
-                #combo-text { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); color: oklch(70% 0.3 150); font-size: 1.2rem; font-weight: bold; pointer-events: none; opacity: 0; z-index: 5; }
-                #combo-text.pop { opacity: 1; transform: translate(-50%, -60%) scale(1.2); }
-                #game-over { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 4px; opacity: 0; pointer-events: none; transition: opacity 0.5s; z-index: 10; }
-                #game-over.visible { opacity: 1; pointer-events: auto; }
-                #restart-btn { padding: 8px 16px; background: oklch(60% 0.2 250); color: white; border: none; border-radius: 4px; cursor: pointer; }
-                .controls-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
-                .mobile-btn { width: 40px; height: 40px; background: oklch(25% 0.05 250); color: white; border: 1px solid #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer; }
+                :host { display: flex; flex-direction: column; height: 100%; width: 100%; box-sizing: border-box; font-family: 'Orbitron', sans-serif; color: white; user-select: none; }
+                .game-container { display: flex; flex-direction: column; height: 100%; width: 100%; gap: 10px; }
+                .top-panel { display: flex; justify-content: space-around; background: #111; padding: 5px; border-radius: 10px; border: 1px solid #222; }
+                .panel-box { text-align: center; }
+                .label { color: #666; font-size: 8px; letter-spacing: 1px; }
+                .value { color: white; font-size: 14px; }
+                .preview-box { width: 40px; height: 40px; }
+                
+                .main-board { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; min-height: 0; }
+                #game-canvas { border: 2px solid #333; background: #000; max-height: 100%; max-width: 100%; }
+                
+                #combo-text { position: absolute; top: 20%; color: oklch(70% 0.3 150); font-size: 1.5rem; font-weight: bold; pointer-events: none; opacity: 0; }
+                #combo-text.pop { opacity: 1; transform: scale(1.2); }
+                
+                #game-over { position: absolute; inset: 0; background: rgba(0,0,0,0.85); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10; }
+                #game-over.visible { display: flex; }
+                
+                .controls-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 10px; justify-items: center; }
+                .mobile-btn { width: 50px; height: 50px; background: oklch(25% 0.05 250); border: 1px solid #333; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
                 .mobile-btn:active { background: oklch(40% 0.1 250); transform: scale(0.9); }
-                @media (max-width: 600px) {
-                    .game-layout { flex-direction: column; align-items: center; }
-                    .side-panel { flex-direction: row; width: 100%; justify-content: space-around; margin-bottom: 5px; }
-                    .side-panel .panel-box { flex: 1; }
-                }
+                
                 @media (min-width: 1024px) { .controls-grid { display: none; } }
             </style>
-            <div class="game-layout">
-                <div class="side-panel">
-                    <div class="panel-box"><div class="label">NEXT</div><canvas id="next-canvas"></canvas></div>
+            <div class="game-container">
+                <div class="top-panel">
+                    <div class="panel-box"><div class="label">NEXT</div><canvas id="next-canvas" class="preview-box"></canvas></div>
                     <div class="panel-box"><div class="label">SCORE</div><div class="value" id="score-val">0</div></div>
                     <div class="panel-box"><div class="label">COMBO</div><div class="value" id="combo-val">0</div></div>
                 </div>
                 <div class="main-board">
                     <canvas id="game-canvas"></canvas>
                     <div id="combo-text">COMBO!</div>
-                    <div id="game-over"><h2>OVER</h2><button id="restart-btn">RESTART</button></div>
+                    <div id="game-over"><h2>GAME OVER</h2><button id="restart-btn">RESTART</button></div>
                 </div>
-            </div>
-            <div class="controls-grid">
-                <div class="mobile-btn" style="grid-column: 2" id="btn-up">↑</div>
-                <div class="mobile-btn" style="grid-column: 1; grid-row: 2" id="btn-left">←</div>
-                <div class="mobile-btn" style="grid-column: 2; grid-row: 2" id="btn-down">↓</div>
-                <div class="mobile-btn" style="grid-column: 3; grid-row: 2" id="btn-right">→</div>
+                <div class="controls-grid">
+                    <div class="mobile-btn" style="grid-column: 2" id="btn-up">↑</div>
+                    <div class="mobile-btn" style="grid-column: 1; grid-row: 2" id="btn-left">←</div>
+                    <div class="mobile-btn" style="grid-column: 2; grid-row: 2" id="btn-down">↓</div>
+                    <div class="mobile-btn" style="grid-column: 3; grid-row: 2" id="btn-right">→</div>
+                </div>
             </div>
         `;
     }
