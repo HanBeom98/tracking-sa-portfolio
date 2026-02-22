@@ -88,7 +88,7 @@ class LuckyRecommendation extends HTMLElement {
             }
             this._luckyData = await response.json();
             
-            // 2. 버튼 텍스트 복구 (Safe innerHTML & Fallback)
+            // 2. 버튼 다국어 로직 수정 (Fallback 강화)
             const btn = document.getElementById('refresh-button');
             if (btn) {
                 btn.setAttribute('data-i18n', 'refresh_lucky');
@@ -98,12 +98,9 @@ class LuckyRecommendation extends HTMLElement {
                     translated = window.getTranslation(lang, 'refresh_lucky');
                 }
                 
-                if (translated) {
-                    btn.innerHTML = `<span>${translated}</span>`;
-                } else {
-                    // Fallback logic
-                    btn.innerHTML = `<span>${lang === 'en' ? 'Check Again' : '다시 확인하기'}</span>`;
-                }
+                // btn.textContent 대신 안전하게 업데이트
+                const finalLabel = translated || (lang === 'en' ? 'Check Again' : '다시 확인하기');
+                btn.innerHTML = `<span>${finalLabel}</span>`;
             }
 
         } catch (err) {
@@ -130,7 +127,7 @@ class LuckyRecommendation extends HTMLElement {
             return;
         }
 
-        // 3. 에러 핸들링 숨기기 (데이터가 있으면 에러 무시)
+        // 3. 에러 핸들링 숨기기 (성공 데이터가 있으면 에러 메시지 미노출)
         if (this._error && !this._luckyData) {
             this.shadowRoot.innerHTML = `<p style="color: oklch(0.5 0.2 20); text-align: center; padding: 2rem; font-weight: 600;">${this._error}</p>`;
             return;
@@ -161,10 +158,17 @@ class LuckyRecommendation extends HTMLElement {
 
         const { oklch, colorName, colorDesc, itemName, itemIcon, itemAction } = this._luckyData;
         
-        // 1. 방어적 배경색 로직 (oklch, hex, named color 모두 대응)
-        const safeColor = oklch.includes('oklch') ? oklch : 
-                         (oklch.startsWith('#') || /^[a-zA-Z]+$/.test(oklch) ? oklch : 
-                         (oklch.length === 6 || oklch.length === 3 ? `#${oklch}` : `oklch(${oklch})`));
+        // 1. 색상 렌더링 방어 코드 (Component)
+        // 쉼표를 공백으로 치환하고 oklch() 함수 중복 방지
+        let cleanColor = oklch.trim().replace(/,/g, ' ');
+        if (cleanColor.includes('oklch(')) {
+            // 이미 oklch() 형태인 경우 추출 시도
+            const match = cleanColor.match(/oklch\(([^)]+)\)/);
+            if (match) cleanColor = match[1].trim();
+        }
+        
+        // 최종 안전 색상 결정 (비어있으면 기본값 보정)
+        const safeColor = cleanColor ? `oklch(${cleanColor})` : 'oklch(0.6 0.15 250)';
 
         this.shadowRoot.innerHTML = `
         <style>
@@ -200,17 +204,17 @@ class LuckyRecommendation extends HTMLElement {
                 left: 0;
                 width: 100%;
                 height: 10px;
-                background-color: ${safeColor} !important;
+                background: ${safeColor} !important;
             }
 
             .section { display: flex; flex-direction: column; gap: 0.75rem; }
             .label { font-size: 0.85rem; color: oklch(0.55 0.02 250); font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; }
             .value-row { display: flex; align-items: center; gap: 1.25rem; }
             .color-preview { 
-                width: 40px; 
-                height: 40px; 
+                width: 44px; 
+                height: 44px; 
                 border-radius: 50%; 
-                background-color: ${safeColor} !important;
+                background: ${safeColor} !important;
                 border: 4px solid white; 
                 box-shadow: 0 8px 16px oklch(0 0 0 / 0.15);
             }
