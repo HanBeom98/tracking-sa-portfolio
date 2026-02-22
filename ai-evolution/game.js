@@ -197,7 +197,11 @@ class AIEvolution2048 {
     }
 
     async loadRankings() {
-        if (typeof db === 'undefined') return;
+        if (typeof db === 'undefined' || !db) {
+            console.warn("Firestore (db) not initialized.");
+            this.rankList.innerHTML = '<div style="text-align:center; color:#ff4444;">Ranking unavailable</div>';
+            return;
+        }
         try {
             this.rankList.innerHTML = '<div style="text-align:center;">Loading...</div>';
             const snapshot = await db.collection('ai_evolution_rankings').orderBy('score', 'desc').limit(5).get();
@@ -213,9 +217,19 @@ class AIEvolution2048 {
 
     async submitScore() {
         const nick = this.nickInput.value.trim();
-        if (!nick || this.score === 0 || typeof db === 'undefined') return;
+        if (!nick) {
+            alert("Please enter a nickname.");
+            return;
+        }
+        if (this.score === 0) return;
+
+        if (typeof db === 'undefined' || !db) {
+            alert("Database connection failed. Please try again later.");
+            return;
+        }
         
         this.submitBtn.disabled = true;
+        this.submitBtn.innerText = "...";
         try {
             await db.collection('ai_evolution_rankings').add({
                 nickname: nick,
@@ -224,11 +238,13 @@ class AIEvolution2048 {
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
             this.nickInput.value = "";
+            this.submitBtn.innerText = "DONE";
             this.loadRankings();
         } catch (e) {
             console.error("Score Submit Error:", e);
-            alert("Failed to save score.");
+            alert("Failed to save score: " + e.message);
             this.submitBtn.disabled = false;
+            this.submitBtn.innerText = "SAVE";
         }
     }
 
