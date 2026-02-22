@@ -68,26 +68,34 @@ class TetrisGame extends HTMLElement {
         
         if (window.db) this.db = window.db;
 
-        // ResizeObserver로 실시간 자동 스케일링
-        const observer = new ResizeObserver(() => this.autoScale());
+        // ResizeObserver로 실시간 자동 스케일링 (높이 유실 방지)
+        const observer = new ResizeObserver(() => {
+            if (this.boardWrapper.clientHeight > 0) {
+                this.autoScale();
+            }
+        });
         observer.observe(this.boardWrapper);
         
         this.initGame();
         this.addEventListeners();
+        // 초기 강제 호출
+        setTimeout(() => this.autoScale(), 100);
     }
 
     autoScale() {
         const rect = this.boardWrapper.getBoundingClientRect();
-        const padding = 10;
+        const padding = 20;
         const availableW = rect.width - padding;
         const availableH = rect.height - padding;
+
+        if (availableH <= 0 || availableW <= 0) return;
 
         let size = Math.floor(availableH / this.ROWS);
         if (size * this.COLS > availableW) {
             size = Math.floor(availableW / this.COLS);
         }
 
-        this.BLOCK_SIZE = Math.max(size, 5);
+        this.BLOCK_SIZE = Math.max(size, 10);
         this.canvas.width = this.BLOCK_SIZE * this.COLS;
         this.canvas.height = this.BLOCK_SIZE * this.ROWS;
         
@@ -110,7 +118,7 @@ class TetrisGame extends HTMLElement {
     }
 
     draw() {
-        if (!this.BLOCK_SIZE) return;
+        if (!this.BLOCK_SIZE || !this.ctx) return;
         this.ctx.fillStyle = '#000';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.drawMatrix(this.board, { x: 0, y: 0 }, this.ctx, this.BLOCK_SIZE);
@@ -331,29 +339,26 @@ class TetrisGame extends HTMLElement {
     render() {
         this.shadowRoot.innerHTML = `
             <style>
-                :host { display: flex; flex-direction: column; height: 100%; width: 100%; font-family: 'Orbitron', sans-serif; color: white; user-select: none; background: #000; overflow: hidden; }
-                .game-container { display: flex; flex-direction: column; height: 100%; width: 100%; }
+                :host { display: block; height: 100%; width: 100%; font-family: 'Orbitron', sans-serif; color: white; user-select: none; background: #000; overflow: hidden; }
+                .game-container { display: flex; flex-direction: column; height: 100%; width: 100%; overflow: hidden; }
                 
-                /* [1. 상단 HUD] */
-                .top-hud { display: flex; justify-content: space-between; align-items: center; background: #111; padding: 10px 20px; border-bottom: 1px solid #333; z-index: 5; }
+                .top-hud { height: 60px; display: flex; justify-content: space-between; align-items: center; background: #111; padding: 0 20px; border-bottom: 1px solid #333; flex-shrink: 0; }
                 .hud-item { display: flex; flex-direction: column; align-items: center; }
-                .hud-label { font-size: 8px; color: #666; margin-bottom: 2px; }
-                .hud-value { font-size: 14px; font-weight: bold; }
-                #next-canvas { width: 35px; height: 35px; background: #000; border-radius: 4px; }
+                .hud-label { font-size: 8px; color: #666; }
+                .hud-value { font-size: 14px; font-weight: bold; color: #fff; }
+                #next-canvas { width: 30px; height: 30px; background: #000; border-radius: 4px; }
 
-                /* [2. 중앙 보드] */
-                .board-wrapper { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; min-height: 0; padding: 10px; background: #000; }
-                #game-canvas { border: 2px solid #444; background: #000; box-shadow: 0 0 30px rgba(0,0,0,0.8); border-radius: 4px; max-height: 100%; max-width: 100%; }
+                .board-wrapper { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; min-height: 0; background: #050505; }
+                #game-canvas { border: 2px solid #444; background: #000; box-shadow: 0 0 30px rgba(0,0,0,0.8); border-radius: 4px; display: block; }
                 
-                #combo-text { position: absolute; top: 20%; color: oklch(70% 0.3 150); font-size: 2rem; font-weight: bold; pointer-events: none; opacity: 0; z-index: 5; text-shadow: 0 0 15px currentColor; }
+                #combo-text { position: absolute; top: 20%; color: oklch(70% 0.3 150); font-size: 2rem; font-weight: bold; pointer-events: none; opacity: 0; z-index: 5; }
                 #combo-text.pop { opacity: 1; animation: pop 0.5s ease-out; }
                 @keyframes pop { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
 
-                #game-over { position: absolute; inset: 0; background: rgba(0,0,0,0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10; text-align: center; }
+                #game-over { position: absolute; inset: 0; background: rgba(0,0,0,0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10; padding: 20px; text-align: center; }
                 #game-over.visible { display: flex; }
 
-                /* [3. 하단 컨트롤] */
-                .controls { height: 180px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 10px 20px 30px 20px; justify-items: center; align-items: center; background: #0a0a0a; border-top: 1px solid #222; }
+                .controls { height: 180px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 10px 20px 30px 20px; justify-items: center; align-items: center; background: #0a0a0a; border-top: 1px solid #222; flex-shrink: 0; }
                 .mobile-btn { width: 60px; height: 60px; background: oklch(35% 0.1 250); border: 2px solid #444; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
                 .mobile-btn:active { background: oklch(50% 0.2 250); transform: scale(0.9); }
 
@@ -370,7 +375,7 @@ class TetrisGame extends HTMLElement {
                     <div id="combo-text">COMBO!</div>
                     <div id="game-over">
                         <h2 style="color:red; margin-bottom:10px;">GAME OVER</h2>
-                        <div id="final-score" style="font-size:2rem; margin-bottom:20px;"><span id="final-score-val">0</span></div>
+                        <div style="font-size:2rem; margin-bottom:20px;"><span id="final-score-val">0</span></div>
                         <div id="rank-list" style="width:180px; margin-bottom:20px;"></div>
                         <input type="text" id="nick-input" placeholder="NICKNAME" maxlength="10" style="padding:10px; background:#111; border:1px solid #444; color:white; width:150px; text-align:center; margin-bottom:10px; font-family:inherit;">
                         <div style="display:flex; gap:10px;">
@@ -380,10 +385,10 @@ class TetrisGame extends HTMLElement {
                     </div>
                 </div>
                 <div class="controls">
-                    <div class="mobile-btn" style="grid-column: 2" id="btn-up">↑</div>
-                    <div class="mobile-btn" style="grid-column: 1; grid-row: 2" id="btn-left">←</div>
-                    <div class="mobile-btn" style="grid-column: 2; grid-row: 2" id="btn-down">↓</div>
-                    <div class="mobile-btn" style="grid-column: 3; grid-row: 2" id="btn-right">→</div>
+                    <div class="mobile-btn" id="btn-up" style="grid-column: 2">↑</div>
+                    <div class="mobile-btn" id="btn-left" style="grid-column: 1; grid-row: 2">←</div>
+                    <div class="mobile-btn" id="btn-down" style="grid-column: 2; grid-row: 2">↓</div>
+                    <div class="mobile-btn" id="btn-right" style="grid-column: 3; grid-row: 2">→</div>
                 </div>
             </div>
         `;
