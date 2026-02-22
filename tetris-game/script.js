@@ -327,9 +327,17 @@ class TetrisGame extends HTMLElement {
             #game-over { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
             #game-over.visible { display: flex; }
             .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 20px; height: 180px; }
-            /* 데스크탑(1024px 이상)에서는 조작 버튼 숨김 */
+            /* 데스크탑(1024px 이상) 최적화 */
             @media (min-width: 1024px) {
                 .controls { display: none; }
+                .game-main { align-items: center; justify-content: center; }
+                /* 게임판이 너무 길어지지 않게 높이 제한 및 비율 유지 */
+                .main-board { 
+                    flex: none; 
+                    height: 85vh; 
+                    width: calc(85vh * 0.5); 
+                    max-width: 350px;
+                }
             }
             .btn { background: oklch(25% 0.05 250); border: 1px solid #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 4px 0 #000; transition: 0.1s; cursor: pointer; }
             .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #000; background: oklch(35% 0.05 250); }
