@@ -26,7 +26,6 @@ class TetrisGame extends HTMLElement {
         ];
         this.audioCtx = null;
         this.repeatTimer = null;
-        this.db = null;
         this.resetInternalState();
     }
 
@@ -64,8 +63,10 @@ class TetrisGame extends HTMLElement {
         this.ctx = this.canvas.getContext('2d');
         this.nextCanvas = this.shadowRoot.querySelector('#next-canvas');
         this.nextCtx = this.nextCanvas.getContext('2d');
+        this.boardWrapper = this.shadowRoot.querySelector('.main-board');
         
-        if (window.db) this.db = window.db;
+        // Firestore 인스턴스 확인
+        this.db = window.db || null;
 
         // ResizeObserver로 실시간 자동 스케일링
         const observer = new ResizeObserver(() => this.resizeCanvas());
@@ -73,14 +74,12 @@ class TetrisGame extends HTMLElement {
         
         this.initGame();
         this.addEventListeners();
-        this.resizeCanvas();
+        setTimeout(() => this.resizeCanvas(), 50);
     }
 
     resizeCanvas() {
-        const wrapper = this.shadowRoot.querySelector('.main-board');
-        if (!wrapper) return;
-        
-        const rect = wrapper.getBoundingClientRect();
+        if (!this.boardWrapper) return;
+        const rect = this.boardWrapper.getBoundingClientRect();
         const padding = 20;
         const availableW = rect.width - padding;
         const availableH = rect.height - padding;
@@ -193,6 +192,7 @@ class TetrisGame extends HTMLElement {
     }
 
     async loadRankings() {
+        this.db = window.db || null; // 갱신 시점에도 확인
         if (!this.db) return;
         try {
             const snapshot = await this.db.collection('tetris_rankings').orderBy('score', 'desc').limit(5).get();
@@ -210,7 +210,11 @@ class TetrisGame extends HTMLElement {
 
     async submitScore() {
         const nickname = this.shadowRoot.querySelector('#nick-input').value.trim();
-        if (!nickname || !this.db) return;
+        this.db = window.db || null;
+        if (!nickname || !this.db) {
+            alert("DB 연결 중이거나 닉네임이 없습니다.");
+            return;
+        }
         try {
             await this.db.collection('tetris_rankings').add({
                 nickname: nickname,
@@ -219,8 +223,12 @@ class TetrisGame extends HTMLElement {
             });
             this.shadowRoot.querySelector('#nick-input').disabled = true;
             this.shadowRoot.querySelector('#submit-btn').disabled = true;
+            this.shadowRoot.querySelector('#submit-btn').innerText = "OK";
             this.loadRankings();
-        } catch (e) { console.error(e); }
+        } catch (e) { 
+            console.error(e);
+            alert("등록 실패: " + e.message);
+        }
     }
 
     collide() {
@@ -270,8 +278,8 @@ class TetrisGame extends HTMLElement {
     }
 
     updateScore() {
-        this.shadowRoot.querySelector('#score-val').innerText = this.score;
-        this.shadowRoot.querySelector('#combo-val').innerText = this.combo;
+        this.shadowRoot.querySelectorAll('.score-val').forEach(el => el.innerText = this.score);
+        this.shadowRoot.querySelectorAll('.combo-val').forEach(el => el.innerText = this.combo);
     }
 
     update(time = 0) {
@@ -290,6 +298,7 @@ class TetrisGame extends HTMLElement {
         this.shadowRoot.querySelector('#nick-input').disabled = false;
         this.shadowRoot.querySelector('#nick-input').value = '';
         this.shadowRoot.querySelector('#submit-btn').disabled = false;
+        this.shadowRoot.querySelector('#submit-btn').innerText = "SAVE";
         this.updateScore();
         this.update();
     }
@@ -344,7 +353,7 @@ class TetrisGame extends HTMLElement {
                 .main-board { position: relative; height: 100%; display: flex; align-items: center; justify-content: center; }
                 #game-canvas { border: 4px solid #222; background: #000; border-radius: 8px; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
                 
-                .side-panel { display: flex; flex-direction: column; gap: 15px; width: 120px; }
+                .side-panel { display: flex; flex-direction: column; gap: 15px; width: 130px; }
                 .panel-box { background: #111; padding: 12px; border-radius: 12px; border: 2px solid #222; text-align: center; }
                 .label { color: #666; font-size: 10px; margin-bottom: 5px; letter-spacing: 1px; }
                 .value { color: white; font-size: 20px; text-shadow: 0 0 10px oklch(60% 0.2 250); }
@@ -353,10 +362,10 @@ class TetrisGame extends HTMLElement {
                 #combo-text { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); color: oklch(70% 0.3 150); font-size: 2rem; font-weight: bold; pointer-events: none; opacity: 0; transition: 0.3s; z-index: 5; }
                 #combo-text.pop { opacity: 1; transform: translate(-50%, -60%) scale(1.2); }
 
-                #game-over { position: absolute; inset: 0; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10; border-radius: 8px; text-align: center; padding: 20px; }
+                #game-over { position: absolute; inset: 0; background: rgba(0,0,0,0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10; border-radius: 8px; text-align: center; padding: 20px; }
                 #game-over.visible { display: flex; }
 
-                .controls-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 10px; padding: 10px; flex-shrink: 0; justify-items: center; }
+                .controls { height: 180px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 10px 20px 30px 20px; justify-items: center; align-items: center; background: #0a0a0a; border-top: 1px solid #222; flex-shrink: 0; }
                 .mobile-btn { width: 65px; height: 65px; background: oklch(25% 0.05 250); border: 1px solid #333; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
                 .mobile-btn:active { background: oklch(40% 0.1 250); transform: scale(0.9); }
 
@@ -364,9 +373,9 @@ class TetrisGame extends HTMLElement {
                     .game-main { flex-direction: column; gap: 10px; }
                     .side-panel { flex-direction: row; width: 100%; justify-content: space-around; }
                     .side-panel .panel-box { flex: 1; padding: 8px; }
-                    .mobile-btn { width: 55px; height: 55px; }
+                    .mobile-btn { width: 60px; height: 60px; }
                 }
-                @media (min-width: 1024px) { .controls-grid { display: none; } }
+                @media (min-width: 1024px) { .controls { display: none; } }
             </style>
             <div class="game-layout">
                 <div class="game-main">
@@ -386,15 +395,15 @@ class TetrisGame extends HTMLElement {
                     </div>
                     <div class="side-panel">
                         <div class="panel-box"><div class="label">NEXT</div><canvas id="next-canvas"></canvas></div>
-                        <div class="panel-box"><div class="label">SCORE</div><div class="value" id="score-val">0</div></div>
-                        <div class="panel-box"><div class="label">COMBO</div><div class="value" id="combo-val">0</div></div>
+                        <div class="panel-box"><div class="label">SCORE</div><div class="value score-val">0</div></div>
+                        <div class="panel-box"><div class="label">COMBO</div><div class="value combo-val">0</div></div>
                     </div>
                 </div>
-                <div class="controls-grid">
-                    <div class="mobile-btn" style="grid-column: 2" id="btn-up">↑</div>
-                    <div class="mobile-btn" style="grid-column: 1; grid-row: 2" id="btn-left">←</div>
-                    <div class="mobile-btn" style="grid-column: 2; grid-row: 2" id="btn-down">↓</div>
-                    <div class="mobile-btn" style="grid-column: 3; grid-row: 2" id="btn-right">→</div>
+                <div class="controls">
+                    <div class="mobile-btn" id="btn-up" style="grid-column: 2">↑</div>
+                    <div class="mobile-btn" id="btn-left" style="grid-column: 1; grid-row: 2">←</div>
+                    <div class="mobile-btn" id="btn-down" style="grid-column: 2; grid-row: 2">↓</div>
+                    <div class="mobile-btn" id="btn-right" style="grid-column: 3; grid-row: 2">→</div>
                 </div>
             </div>
         `;

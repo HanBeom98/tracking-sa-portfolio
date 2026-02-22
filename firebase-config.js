@@ -17,5 +17,5 @@ if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
 
-// Firestore 인스턴스
-const db = firebase.firestore();
+// Firestore 인스턴스 (글로벌 접근 보장)
+window.db = firebase.firestore();
