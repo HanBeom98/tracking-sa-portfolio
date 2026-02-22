@@ -170,15 +170,20 @@ def process_html_file_for_common_elements(filepath):
         with open(filepath, "r", encoding="utf-8") as f:
             content = f.read()
 
-        # 1. Clean up only targeted common elements to preserve <main> content
+        # 1. Clean up targeted common elements more aggressively to prevent duplication
         content = re.sub(r'<header[\s\S]*?</header>', '', content, flags=re.DOTALL | re.IGNORECASE)
-        # Avoid deleting scripts that might be part of the specific feature
-        content = re.sub(r'\s*<script[^>]*src=".*?(firebase|crypto-js|config|translations|common|clarity|googletagmanager).*?".*?></script>', '', content, flags=re.DOTALL | re.IGNORECASE)
-        content = re.sub(r'<link[^>]*href=".*?style\.css"[^>]*>', '', content, flags=re.DOTALL | re.IGNORECASE)
+        # Remove any existing tracking or common scripts to prevent variable conflicts
+        content = re.sub(r'\s*<script[^>]*src=".*?(googletagmanager|clarity|firebase|crypto-js|config|translations|common|tensorflow|teachablemachine).*?".*?></script>', '', content, flags=re.DOTALL | re.IGNORECASE)
+        # Remove old GTM inline scripts
+        content = re.sub(r'<script>\s*window\.dataLayer[\s\S]*?</script>', '', content, flags=re.DOTALL | re.IGNORECASE)
+        content = re.sub(r'<link[^>]*href=".*?(style\.css|all\.min\.css)"[^>]*>', '', content, flags=re.DOTALL | re.IGNORECASE)
+        content = re.sub(r'<meta name="google-site-verification"[\s\S]*?>', '', content, flags=re.IGNORECASE)
+        content = re.sub(r'<meta name="naver-site-verification"[\s\S]*?>', '', content, flags=re.IGNORECASE)
         content = re.sub(r'<footer>[\s\S]*?</footer>', '', content, flags=re.DOTALL | re.IGNORECASE)
 
         # 2. Inject common head elements if </head> exists
         if '</head>' in content:
+            # First remove existing COMMON_HEAD_SCRIPTS if somehow present
             content = content.replace('</head>', f'{COMMON_HEAD_SCRIPTS}\n</head>')
         
         # 3. Inject header after <body>

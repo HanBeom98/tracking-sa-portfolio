@@ -26,23 +26,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title data-i18n="ai_tendency_test_title">AI 성향 테스트 - 나와 닮은 인공지능 모델 찾기 | Tracking SA</title>
     
-    <meta name="description" content="간단한 질문을 통해 당신의 AI 성향을 분석합니다. ChatGPT, Claude, Gemini 중 당신과 가장 닮은 인공지능 모델은 무엇일까요? 지금 바로 테스트해보세요.">
-    <meta name="keywords" content="AI 성향 테스트, 인공지능 테스트, 인공지능 모델, ChatGPT, Claude, Gemini, MBTI 테스트, Tracking SA">
+    <meta name="description" content="ChatGPT, Claude, Gemini 중 당신과 가장 닮은 모델은 무엇일까요?">
     <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
     <meta name="naver-site-verification" content="b15b33af838280b54d31eb3c7e5c358d2836743f" />
 
-    <!-- Open Graph / Social Media - 주소 최적화 -->
+    <!-- Open Graph / Social Media -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="AI 성향 테스트 - 나와 닮은 인공지능 모델 찾기 | Tracking SA">
-    <meta property="og:description" content="나의 성향과 가장 잘 맞는 AI 모델은 무엇일까요? 재미있는 테스트로 확인해보세요!">
-    <meta property="og:image" content="/logo.svg">
     <meta property="og:url" content="https://trackingsa.com/ai-test/">
     <meta name="twitter:card" content="summary_large_image">
 
-    <!-- [3] 글로벌 리소스 및 스타일 -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <!-- [3] 리소스 연동 (상대 경로 복구) -->
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="../style.css">
 </head>
 <body>
     <main class="ai-test-page">
@@ -54,9 +51,7 @@
 
         <section id="quiz-section" class="quiz-section" style="display: none;">
             <h2 id="question-text"></h2>
-            <div id="answers-container" class="answers-container">
-                <!-- Answers will be dynamically loaded here -->
-            </div>
+            <div id="answers-container" class="answers-container"></div>
             <button id="next-button" class="action-button" data-i18n="next_button">다음</button>
         </section>
 
@@ -74,10 +69,9 @@
         </section>
     </main>
 
-    <!-- [4] 핵심 스크립트 연동 (경로 수정 완료) -->
-    <script src="/firebase-config.js"></script>
-    <script src="/translations.js"></script>
-    <script src="/common.js"></script>
-    <script src="./ai-test.js"></script> <!-- 같은 폴더 내의 js 참조 -->
+    <script src="../firebase-config.js"></script>
+    <script src="../translations.js"></script>
+    <script src="../common.js"></script>
+    <script src="./ai-test.js"></script>
 </body>
 </html>
