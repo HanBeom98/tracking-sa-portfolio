@@ -229,7 +229,8 @@ function updateWorkDocs(featureName, state, qcReport, approved) {
 export async function orchestrator(initialRequest) {
     console.log(`\n🚀 [Work OS] Stabilized Orchestrator Starting...`);
     const rootDir = path.resolve(__dirname, '..');
-    const blueprint = fs.existsSync(path.join(rootDir, 'blueprint.md')) ? fs.readFileSync(path.join(rootDir, 'blueprint.md'), 'utf8') : "No blueprint found.";
+    const blueprintPath = path.join(rootDir, 'blueprint.md');
+    const blueprint = fs.existsSync(blueprintPath) ? fs.readFileSync(blueprintPath, 'utf8') : "No blueprint found.";
     const manuals = selectManuals(initialRequest);
     
     const state = {
@@ -237,7 +238,8 @@ export async function orchestrator(initialRequest) {
         plan: null,
         code: null,
         review: { approved: false, comments: "" },
-        folderName: 'ai-gen-feature'
+        folderName: 'ai-gen-feature',
+        existingContext: ""
     };
 
     try {
@@ -248,9 +250,13 @@ export async function orchestrator(initialRequest) {
             const suggestedFolder = folderStep.split(':')[1].trim();
             const fullPath = path.join(rootDir, suggestedFolder);
             
-            // 경로 감지 로직: 기존 폴더 여부 확인
+            // 경로 감지 및 기존 코드 컨텍스트 확보 로직
             if (fs.existsSync(fullPath) && fs.lstatSync(fullPath).isDirectory()) {
-                console.log(`📂 [Path Detection] Existing folder found: /${suggestedFolder}. Overwriting existing files.`);
+                console.log(`📂 [Path Detection] Existing folder found: /${suggestedFolder}. Reading context...`);
+                const existingHtmlPath = path.join(fullPath, 'index.html');
+                if (fs.existsSync(existingHtmlPath)) {
+                    state.existingContext = `\n\n[EXISTING_CODE_CONTEXT]:\n현재 /${suggestedFolder}/index.html 내용:\n\`\`\`html\n${fs.readFileSync(existingHtmlPath, 'utf8')}\n\`\`\`\n위 내용을 바탕으로 필요한 부분만 수정하거나 추가하라.`;
+                }
             } else {
                 console.log(`🆕 [Path Detection] New feature folder: /${suggestedFolder}`);
             }
@@ -265,7 +271,7 @@ export async function orchestrator(initialRequest) {
 
             // Developer 출력 강제 규칙 주입
             const forceRules = `\n\n반드시 \`\`\`html, \`\`\`css, \`\`\`js (또는 \`\`\`javascript) 세 개의 코드블록을 모두 출력하라.\n변경이 없는 파일도 이전 내용을 그대로 재출력하라.\n3개 중 하나라도 누락되면 실패로 간주된다.`;
-            const developerInput = `[PLAN]: ${JSON.stringify(state.plan)}\n[FEEDBACK]: ${state.review.comments || 'None'}${forceRules}`;
+            const developerInput = `[PLAN]: ${JSON.stringify(state.plan)}\n[FEEDBACK]: ${state.review.comments || 'None'}${state.existingContext}${forceRules}`;
             
             state.code = await runDeveloper(state, blueprint + manuals + "\n" + developerInput);
             
@@ -287,6 +293,12 @@ export async function orchestrator(initialRequest) {
 
         if (state.review.approved) {
             console.log(`\n✅ [MISSION COMPLETE] /${state.folderName} deployment successful.`);
+            
+            // 3. Update blueprint.md with activity log
+            const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+            const logEntry = `\n- [${timestamp}] Feature updated: ${state.folderName} (Request: ${state.initialRequest.substring(0, 50)}...)`;
+            fs.appendFileSync(blueprintPath, logEntry);
+            console.log(`📝 [Blueprint] Activity logged.`);
         } else {
             console.error(`\n❌ [FAIL] Quality standards not met after 3 attempts.`);
         }
