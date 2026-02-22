@@ -24,6 +24,9 @@ class AIEvolution2048 {
         this.undoBtn = document.getElementById('undo-btn');
         this.statusMsg = document.getElementById('status-message');
         this.modal = document.getElementById('game-over-modal');
+        this.rankList = document.getElementById('rank-list');
+        this.nickInput = document.getElementById('nick-input');
+        this.submitBtn = document.getElementById('submit-btn');
         
         // Add Mute Button
         const controls = document.querySelector('.main-controls');
@@ -190,6 +193,43 @@ class AIEvolution2048 {
         document.getElementById('undo-btn').onclick = () => this.undo();
         document.getElementById('share-btn').onclick = () => this.share();
         document.getElementById('modal-share-btn').onclick = () => this.share();
+        this.submitBtn.onclick = () => this.submitScore();
+    }
+
+    async loadRankings() {
+        if (typeof db === 'undefined') return;
+        try {
+            this.rankList.innerHTML = '<div style="text-align:center;">Loading...</div>';
+            const snapshot = await db.collection('ai_evolution_rankings').orderBy('score', 'desc').limit(5).get();
+            this.rankList.innerHTML = snapshot.docs.map(doc => {
+                const d = doc.data();
+                return `<div class="rank-item"><span>${d.nickname}</span><span>${d.score}</span></div>`;
+            }).join('') || '<div style="text-align:center;">No records yet</div>';
+        } catch (e) {
+            console.error("Ranking Load Error:", e);
+            this.rankList.innerHTML = '<div style="text-align:center;">Error loading</div>';
+        }
+    }
+
+    async submitScore() {
+        const nick = this.nickInput.value.trim();
+        if (!nick || this.score === 0 || typeof db === 'undefined') return;
+        
+        this.submitBtn.disabled = true;
+        try {
+            await db.collection('ai_evolution_rankings').add({
+                nickname: nick,
+                score: this.score,
+                maxTile: this.maxTileReached,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            this.nickInput.value = "";
+            this.loadRankings();
+        } catch (e) {
+            console.error("Score Submit Error:", e);
+            alert("Failed to save score.");
+            this.submitBtn.disabled = false;
+        }
     }
 
     newGame() {
@@ -200,6 +240,7 @@ class AIEvolution2048 {
         this.isGameOver = false;
         this.updateScoreDisplay();
         this.undoBtn.disabled = true;
+        this.submitBtn.disabled = false;
         this.statusMsg.innerText = "";
         this.addRandomTile();
         this.addRandomTile();
@@ -357,6 +398,7 @@ class AIEvolution2048 {
         document.getElementById('final-stage-name').innerText = this.getTileName(this.maxTileReached);
         document.getElementById('final-score').innerText = this.score;
         this.modal.classList.remove('hidden');
+        this.loadRankings();
     }
 
     share() {
