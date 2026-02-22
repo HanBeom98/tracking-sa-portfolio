@@ -627,7 +627,8 @@ def copy_static_assets():
     # Directories to be copied
     asset_dirs = [
         "fortune", "about", "ai-test", "animal_face_test", "contact", 
-        "edit", "inquiry", "post", "privacy-policy", "write", "lucky-recommendation"
+        "edit", "inquiry", "post", "privacy-policy", "write", "lucky-recommendation",
+        "tetris-game"
     ]
 
     # Favicon check and creation
