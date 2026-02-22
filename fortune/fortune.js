@@ -1,17 +1,12 @@
 // saju-test.js
-// import { currentLang, applyTranslations, getTranslation } from './common.js'; // Import necessary functions - these are now global
-
 // Function to update dynamic content with translations
 const updateSajuContent = () => {
     const birthYearSelect = document.getElementById('birth-year');
     const birthMonthSelect = document.getElementById('birth-month');
     const birthDaySelect = document.getElementById('birth-day');
-    const birthHourSelect = document.getElementById('birth-hour');
 
     // Defensive check for saju elements before proceeding
-    if (!birthYearSelect || !birthMonthSelect || !birthDaySelect || !birthHourSelect) {
-        // This page is likely not the saju test page, or elements are not yet available.
-        // Or handle specific error if it's supposed to be the saju page.
+    if (!birthYearSelect || !birthMonthSelect || !birthDaySelect) {
         return; 
     }
 
@@ -21,7 +16,7 @@ const updateSajuContent = () => {
         for (let i = currentYear; i >= 1900; i--) {
             const option = document.createElement('option');
             option.value = i;
-            option.textContent = `${i}${window.getTranslation(lang, 'year_unit')}`; // Combine number and translated unit
+            option.textContent = `${i}${window.getTranslation(lang, 'year_unit')}`;
             birthYearSelect.appendChild(option);
         }
 
@@ -29,7 +24,7 @@ const updateSajuContent = () => {
         for (let i = 1; i <= 12; i++) {
             const option = document.createElement('option');
             option.value = i;
-            option.textContent = `${i}${window.getTranslation(lang, 'month_unit')}`; // Combine number and translated unit
+            option.textContent = `${i}${window.getTranslation(lang, 'month_unit')}`;
             birthMonthSelect.appendChild(option);
         }
 
@@ -37,29 +32,13 @@ const updateSajuContent = () => {
         for (let i = 1; i <= 31; i++) {
             const option = document.createElement('option');
             option.value = i;
-            option.textContent = `${i}${window.getTranslation(lang, 'day_unit')}`; // Combine number and translated unit
+            option.textContent = `${i}${window.getTranslation(lang, 'day_unit')}`;
             birthDaySelect.appendChild(option);
         }
-
-        birthHourSelect.innerHTML = '';
-        // Add "unknown" option for birth hour
-        const unknownOption = document.createElement('option');
-        unknownOption.value = 'unknown';
-        unknownOption.textContent = window.getTranslation(lang, 'unknown_option'); // Translated "Unknown"
-        birthHourSelect.appendChild(unknownOption);
-
-        // Populate hours (0-23)
-        for (let i = 0; i <= 23; i++) {
-            const option = document.createElement('option');
-            option.value = i;
-            option.textContent = `${String(i).padStart(2, '0')}${window.getTranslation(lang, 'hour_unit')}`; // Combine number and translated unit
-            birthHourSelect.appendChild(option);
-        }
-        birthHourSelect.value = 'unknown'; // Set "Unknown" as default
     };
 
     populateSelectors(window.currentLang);
-    window.applyTranslations(window.currentLang); // Apply translations to static elements
+    window.applyTranslations(window.currentLang);
 };
 
 
@@ -79,12 +58,13 @@ const formatFortuneContent = (markdownText) => {
 
 document.addEventListener('DOMContentLoaded', () => {
     const userNameInput = document.getElementById('user-name');
-    userNameInput.placeholder = window.getTranslation(window.currentLang, 'name_placeholder'); // Apply placeholder translation
-    const sajuForm = document.querySelector('.saju-input-section'); // More general selector for saju page
+    if (userNameInput) {
+        userNameInput.placeholder = window.getTranslation(window.currentLang, 'name_placeholder');
+    }
     
-    // Defensive check for sajuForm. If not present, this is not the saju page, so return.
+    const sajuForm = document.querySelector('.saju-input-section');
+    
     if (!sajuForm) {
-        console.log("Not /fortune, skipping saju-specific logic.");
         return;
     }
 
@@ -94,12 +74,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const sajuReadingText = document.getElementById('saju-reading-text');
     const retakeButton = document.getElementById('retake-button');
 
-    updateSajuContent(); // Initial content update on page load
+    updateSajuContent();
 
-    // Listen for custom event dispatched when language changes in common.js
     window.addEventListener('languageChanged', (event) => {
-        updateSajuContent(); // Re-render dynamic content with new language
-        userNameInput.placeholder = window.getTranslation(window.currentLang, 'name_placeholder'); // Update placeholder translation on language change
+        updateSajuContent();
+        if (userNameInput) {
+            userNameInput.placeholder = window.getTranslation(window.currentLang, 'name_placeholder');
+        }
     });
 
     getSajuButton.addEventListener('click', async () => {
@@ -107,12 +88,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const birthYear = document.getElementById('birth-year').value;
         const birthMonth = document.getElementById('birth-month').value;
         const birthDay = document.getElementById('birth-day').value;
-        const birthHour = document.getElementById('birth-hour').value;
         const genderMaleRadio = document.getElementById('gender-male');
         const gender = genderMaleRadio.checked ? 'male' : 'female';
+        // 태어난 시간은 'unknown'으로 고정
+        const birthHour = 'unknown';
 
         if (!name || !birthYear || !birthMonth || !birthDay) {
-            console.log("Input validation failed: Not all required fields are filled.");
             alert(window.getTranslation(window.currentLang, 'saju_input_missing'));
             return;
         }
@@ -120,19 +101,17 @@ document.addEventListener('DOMContentLoaded', () => {
         loadingIndicator.style.display = 'flex';
         resultContainer.style.display = 'none';
         sajuReadingText.textContent = '';
-        if (getSajuButton) { // Defensive check
-            getSajuButton.disabled = true; // Disable button to prevent duplicate clicks
+        if (getSajuButton) {
+            getSajuButton.disabled = true;
         }
 
-        // Get current date
         const today = new Date();
         const currentYear = today.getFullYear();
-        const currentMonth = today.getMonth() + 1; // Month is 0-indexed
+        const currentMonth = today.getMonth() + 1;
         const currentDay = today.getDate();
 
         try {
-            console.log('Current language for API request:', window.currentLang); // Debugging line
-            const response = await fetch('https://tracking-sa.vercel.app/api/fortune', { // Call the Cloudflare Function endpoint
+            const response = await fetch('https://tracking-sa.vercel.app/api/fortune', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -146,8 +125,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     },
                     birthTime: birthHour,
                     gender,
-                    language: localStorage.getItem('lang') || 'ko', // Send language parameter
-                    currentDate: { // Send current date
+                    language: localStorage.getItem('lang') || 'ko',
+                    currentDate: {
                         year: currentYear,
                         month: currentMonth,
                         day: currentDay
@@ -159,8 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (response.ok) {
                 const sajuReading = data.sajuReading;
-            sajuReadingText.innerHTML = formatFortuneContent(sajuReading);
-
+                sajuReadingText.innerHTML = formatFortuneContent(sajuReading);
             } else {
                 sajuReadingText.textContent = window.getTranslation(window.currentLang, 'saju_api_error') + (data.error || response.statusText);
             }
@@ -169,26 +147,23 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Frontend Saju API call error:', error);
             sajuReadingText.textContent = window.getTranslation(window.currentLang, 'saju_network_error');
         } finally {
-            if (loadingIndicator) loadingIndicator.style.display = 'none'; // Defensive check
-            if (resultContainer) resultContainer.style.display = 'block'; // Defensive check
-            if (getSajuButton) getSajuButton.disabled = false; // Re-enable button
+            if (loadingIndicator) loadingIndicator.style.display = 'none';
+            if (resultContainer) resultContainer.style.display = 'block';
+            if (getSajuButton) getSajuButton.disabled = false;
         }
     });
 
     retakeButton.addEventListener('click', () => {
-        if (resultContainer) resultContainer.style.display = 'none'; // Defensive check
-        if (userNameInput) userNameInput.value = ''; // Defensive check
-        // Defensive checks for select elements before accessing value
+        if (resultContainer) resultContainer.style.display = 'none';
+        if (userNameInput) userNameInput.value = '';
         const by = document.getElementById('birth-year');
         const bm = document.getElementById('birth-month');
         const bd = document.getElementById('birth-day');
-        const bh = document.getElementById('birth-hour');
         const gm = document.getElementById('gender-male');
 
         if (by) by.value = new Date().getFullYear();
         if (bm) bm.value = 1;
         if (bd) bd.value = 1;
-        if (bh) bh.value = 'unknown';
         if (gm) gm.checked = true;
     });
 });

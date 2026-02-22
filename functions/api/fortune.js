@@ -7,7 +7,6 @@ function addCORSHeaders(response) {
 }
 
 export async function onRequest(context) {
-    // 1. 에러 방지를 위해 변수 선언을 맨 위로 고정
     const { request, env } = context || {};
 
     if (request.method === 'OPTIONS') {
@@ -29,7 +28,7 @@ export async function onRequest(context) {
     try {
         const { name, birthDate, birthTime, gender, language, currentDate } = await request.json();
 
-        if (!name || !birthDate || !birthTime || !gender || !currentDate) {
+        if (!name || !birthDate || !gender || !currentDate) {
             return addCORSHeaders(new Response(JSON.stringify({ error: '이름, 생년월일, 성별, 현재 날짜 정보를 모두 입력해주세요.' }), {
                 status: 400,
                 headers: { 'Content-Type': 'application/json' },
@@ -52,17 +51,17 @@ export async function onRequest(context) {
       - ### ✨ Lucky Item
     - Each section's content should be explained specifically and clearly.
     - Write everything in a polite and warm tone, like a friendly consultant. Avoid excessive use of emojis.
+    - Analyze the fortune based on the Name, Date of Birth, and Gender provided. (Time of birth is not available).
     
     User Information:
     Name: ${name}
     Date of Birth: ${birthDate.year} / ${birthDate.month} / ${birthDate.day}
-    Time of Birth: ${birthTime === 'unknown' ? 'Unknown' : birthTime + ':00'}
     Gender: ${gender === 'male' ? 'Male' : 'Female'}
     `;
         } else { // Default to Korean
             prompt = `오늘은 ${currentDate.year}년 ${currentDate.month}월 ${currentDate.day}일입니다. 반드시 이 날짜를 기준으로 운세를 풀이하세요.
 
-사용자의 이름, 생년월일시, 성별 정보가 주어지면, 오늘의 운세를 상담가처럼 친절하고 희망적인 어조로 자세히 설명하는 마크다운 글을 작성해 주세요. 다음 지침을 따르세요:
+사용자의 이름, 생년월일, 성별 정보가 주어지면, 오늘의 운세를 상담가처럼 친절하고 희망적인 어조로 자세히 설명하는 마크다운 글을 작성해 주세요. 다음 지침을 따르세요:
 
 - 글의 시작은 항상 ### 🌟 오늘의 운세 (${currentDate.month}월 ${currentDate.day}일) 한 줄 요약 과 같은 형식으로 시작하여 전체 운세의 핵심 내용을 1줄 요약해 주십시오.
 - 본문 내용은 다음의 마크다운 소제목을 반드시 사용하여 구성해 주십시오:
@@ -71,11 +70,11 @@ export async function onRequest(context) {
   - ### ✨ 행운의 아이템
 - 각 섹션의 내용은 구체적이고 명확하게 설명해 주십시오.
 - 모든 내용은 존댓말을 사용하여 친근하고 따뜻한 상담가 톤으로 작성해 주십시오. 과도한 이모지 사용은 자제해 주세요.
+- 태어난 시간 정보는 주어지지 않으므로, 이름과 생년월일, 성별만을 바탕으로 분석해 주십시오.
 
 사용자 정보:
 이름: ${name}
 생년월일: ${birthDate.year}년 ${birthDate.month}월 ${birthDate.day}일
-태어난 시간: ${birthTime === 'unknown' ? '모름' : birthTime}
 성별: ${gender === 'male' ? '남성' : '여성'}
 `;
         }
@@ -84,7 +83,7 @@ export async function onRequest(context) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'x-goog-api-client': 'gl-js/saju-api/1.0.0'
+                'x-goog-api-client': 'gl-js/fortune-api/1.0.0'
             },
             body: JSON.stringify({
                 contents: [{
@@ -96,13 +95,13 @@ export async function onRequest(context) {
         const geminiData = await geminiResponse.json();
 
         if (geminiResponse.ok && geminiData.candidates && geminiData.candidates.length > 0) {
-            const sajuReading = geminiData.candidates[0].content.parts[0].text;
-            return addCORSHeaders(new Response(JSON.stringify({ sajuReading }), {
+            const fortuneReading = geminiData.candidates[0].content.parts[0].text;
+            return addCORSHeaders(new Response(JSON.stringify({ sajuReading: fortuneReading }), {
                 headers: { 'Content-Type': 'application/json' },
                 status: 200
             }));
         } else {
-            const errorMessage = geminiData.error?.message || '사주 풀이를 가져오는 데 실패했습니다.';
+            const errorMessage = geminiData.error?.message || '운세 풀이를 가져오는 데 실패했습니다.';
             return addCORSHeaders(new Response(JSON.stringify({ error: errorMessage }), {
                 headers: { 'Content-Type': 'application/json' },
                 status: geminiResponse.status || 500
