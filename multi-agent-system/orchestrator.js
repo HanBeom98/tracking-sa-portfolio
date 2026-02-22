@@ -244,7 +244,18 @@ export async function orchestrator(initialRequest) {
         // 1. Planner
         state.plan = await runPlanner(state, initialRequest, blueprint);
         const folderStep = state.plan.find(s => s.toLowerCase().startsWith('folder:'));
-        if (folderStep) state.folderName = folderStep.split(':')[1].trim();
+        if (folderStep) {
+            const suggestedFolder = folderStep.split(':')[1].trim();
+            const fullPath = path.join(rootDir, suggestedFolder);
+            
+            // 경로 감지 로직: 기존 폴더 여부 확인
+            if (fs.existsSync(fullPath) && fs.lstatSync(fullPath).isDirectory()) {
+                console.log(`📂 [Path Detection] Existing folder found: /${suggestedFolder}. Overwriting existing files.`);
+            } else {
+                console.log(`🆕 [Path Detection] New feature folder: /${suggestedFolder}`);
+            }
+            state.folderName = suggestedFolder;
+        }
 
         // 2. Main Loop (Max 3 attempts)
         let attempts = 0;
