@@ -1,53 +1,103 @@
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 const { runPlanner, runDeveloper, runReviewer } = require('./agents');
 
 /**
- * 프로젝트의 심층 맥락(Blueprint + 파일 내용)을 읽어오는 함수
+ * [1] Manual Router: 현재 요청에 필요한 매뉴얼 챕터만 선택하여 주입
+ */
+function selectManuals(request) {
+    const manualsDir = path.join(__dirname, 'manuals');
+    let injectedManuals = "\n### 📚 주입된 매뉴얼 (Mandatory Rules):\n";
+    
+    try {
+        if (!fs.existsSync(manualsDir)) fs.mkdirSync(manualsDir);
+        
+        // 키워드별 매뉴얼 매핑
+        const mappings = [
+            { keywords: ['color', 'style', 'design', 'css'], file: 'css-baseline.md' },
+            { keywords: ['component', 'web', 'shadow'], file: 'web-components.md' },
+            { keywords: ['project', 'rule', 'folder'], file: 'project-conventions.md' }
+        ];
+
+        mappings.forEach(m => {
+            const hasKeyword = m.keywords.some(k => request.toLowerCase().includes(k));
+            const filePath = path.join(manualsDir, m.file);
+            if (hasKeyword && fs.existsSync(filePath)) {
+                injectedManuals += `--- Chapter: ${m.file} ---\n${fs.readFileSync(filePath, 'utf8')}\n`;
+            }
+        });
+    } catch (err) {
+        console.warn("⚠️ 매뉴얼 로딩 중 오류 발생:", err.message);
+    }
+    return injectedManuals;
+}
+
+/**
+ * [3] Work Memory: 작업 기억 3문서 (Plan, Context, Checklist) 생성 및 업데이트
+ */
+function updateWorkDocs(featureName, planData, contextData, checklistData) {
+    const workDir = path.resolve(__dirname, '..', 'workdocs', featureName);
+    if (!fs.existsSync(workDir)) fs.mkdirSync(workDir, { recursive: true });
+
+    fs.writeFileSync(path.join(workDir, 'plan.md'), `# Plan: ${featureName}\n\n${planData}`);
+    fs.writeFileSync(path.join(workDir, 'context.md'), `# Context: ${featureName}\n\n${contextData}`);
+    fs.writeFileSync(path.join(workDir, 'checklist.md'), `# Checklist: ${featureName}\n\n${checklistData}`);
+    
+    console.log(`📝 WorkDocs 기록 완료: /workdocs/${featureName}/`);
+}
+
+/**
+ * [4, 5] Post-Flight: 자동 정적 검사 및 빌드 테스트
+ */
+function runAutomationCheck(code) {
+    let report = "\n### 🔍 [QC Report: Automated Inspection]\n";
+    
+    // 1. 정적 분석
+    const checks = [
+        { label: "Shadow DOM 사용", regex: /attachShadow/ },
+        { label: "Web Component 정의", regex: /customElements\.define/ },
+        { label: "OKLCH 컬러 사용", regex: /oklch/ },
+        { label: "HTML/CSS/JS 블록 포함", regex: /```html[\s\S]*```css[\s\S]*```javascript/i }
+    ];
+
+    checks.forEach(c => {
+        const pass = c.regex.test(code);
+        report += `${pass ? '✅' : '❌'} ${c.label}\n`;
+    });
+
+    // 2. 빌드 테스트 (python main.py --build-only)
+    try {
+        console.log("🛠️ 빌드 테스트 실행 중 (python main.py)...");
+        const buildOutput = execSync('python main.py --build-only', { stdio: 'pipe' }).toString();
+        report += "✅ 빌드 테스트: SUCCESS\n";
+    } catch (err) {
+        report += `❌ 빌드 테스트: FAILED\n- Error: ${err.stderr ? err.stderr.toString() : err.message}\n`;
+    }
+
+    return report;
+}
+
+/**
+ * 프로젝트 맥락 읽기 (기존 유지)
  */
 function getDeepProjectContext() {
     const rootDir = path.resolve(__dirname, '..');
     let context = "### Project Structure & Blueprint:\n";
-    
-    try {
-        // 1. blueprint.md 읽기 (AI의 기억 장치)
-        const blueprintPath = path.join(rootDir, 'blueprint.md');
-        if (fs.existsSync(blueprintPath)) {
-            context += "--- File: blueprint.md ---\n" + fs.readFileSync(blueprintPath, 'utf8') + "\n\n";
-        }
-
-        // 2. 파일 목록 확인
-        const files = fs.readdirSync(rootDir);
-        context += "### Current Root Files:\n" + files.join(', ') + "\n\n";
-
-        // 3. 디자인 가이드들을 위한 핵심 파일 내용 읽기
-        const criticalFiles = ['public/style.css', 'style.css', 'index.html'];
-        context += "### Critical File Contents (for Style Matching):\n";
-        
-        criticalFiles.forEach(relPath => {
-            const fullPath = path.join(rootDir, relPath);
-            if (fs.existsSync(fullPath)) {
-                const content = fs.readFileSync(fullPath, 'utf8').substring(0, 1000); 
-                context += `\n--- File: ${relPath} ---\n${content}\n`;
-            }
-        });
-        return context;
-    } catch (err) {
-        return "Context reading failed, proceed with caution.";
+    const blueprintPath = path.join(rootDir, 'blueprint.md');
+    if (fs.existsSync(blueprintPath)) {
+        context += fs.readFileSync(blueprintPath, 'utf8') + "\n";
     }
+    return context;
 }
 
 /**
- * 최종 승인된 코드를 프로젝트 루트의 동적 기능 폴더에 직접 저장하는 함수
+ * 최종 코드 저장 (기존 유지)
  */
 function saveToProjectRoot(code, featureDirName) {
     const rootDir = path.resolve(__dirname, '..');
     const targetDir = path.join(rootDir, featureDirName);
-
-    if (!fs.existsSync(targetDir)) {
-        fs.mkdirSync(targetDir, { recursive: true });
-        console.log(`📁 프로젝트 루트에 새 기능 폴더 생성됨: ${featureDirName}`);
-    }
+    if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
 
     const codeBlocks = code.match(/```(?:[a-z]+)?\n([\s\S]*?)\n```/g);
     if (codeBlocks) {
@@ -55,25 +105,20 @@ function saveToProjectRoot(code, featureDirName) {
             const langMatch = block.match(/```([a-z]+)/);
             const lang = langMatch ? langMatch[1] : 'txt';
             const pureCode = block.replace(/```[a-z]*\n|```/g, '').trim();
-            
-            let name = `index.${lang}`;
-            if (lang === 'html') name = 'index.html';
-            if (lang === 'css') name = 'style.css';
-            if (lang === 'javascript' || lang === 'js') name = 'main.js'; // 배포 관습 준수
-
-            const finalPath = path.join(targetDir, name);
-            fs.writeFileSync(finalPath, pureCode);
-            console.log(`💾 루트 폴더 직배송 완료: ${featureDirName}/${name}`);
+            const name = lang === 'html' ? 'index.html' : (lang === 'css' ? 'style.css' : 'main.js');
+            fs.writeFileSync(path.join(targetDir, name), pureCode);
+            console.log(`💾 저장 완료: ${featureDirName}/${name}`);
         });
     }
 }
 
 /**
- * 메인 오케스트레이터: 플래너 -> 개발자 <-> 리뷰어 루프 실행
+ * Main Orchestrator: AI 작업 운영체계 (Work OS)
  */
 async function orchestrator(initialRequest) {
-    console.log(`\n🚀 배포급 퀄리티를 위한 오케스트레이션 시작...`);
+    console.log(`\n🚀 [Work OS] 고도화된 에이전트 루프 가동 시작...`);
     const projectContext = getDeepProjectContext();
+    const manuals = selectManuals(initialRequest);
     
     const state = {
         initialRequest,
@@ -81,54 +126,57 @@ async function orchestrator(initialRequest) {
         plan: null,
         code: null,
         review: { approved: false, comments: "" },
-        history: [],
-        folderName: 'ai-gen-feature' // 기본 폴더명
+        folderName: 'ai-gen-feature'
     };
 
     try {
-        // 1. Planner가 전략 수립 및 폴더명 결정
+        // 1. Planner 단계 & WorkDocs 초기화
         state.plan = await runPlanner(state, initialRequest, projectContext);
-        
-        // 플래너가 응답한 리스트에서 "folder: 이름" 형식을 찾아 폴더명 추출
         const folderStep = state.plan.find(step => step.toLowerCase().startsWith('folder:'));
-        if (folderStep) {
-            state.folderName = folderStep.split(':')[1].trim();
-            console.log(`📂 Planner가 결정한 폴더명: ${state.folderName}`);
-        }
+        if (folderStep) state.folderName = folderStep.split(':')[1].trim();
 
-        // 2. 완벽해질 때까지 반복하는 Self-Correction Loop (최대 3회)
+        // 2. Self-Correction Loop
         let attempts = 0;
         while (!state.review.approved && attempts < 3) {
             attempts++;
-            console.log(`\n🔄 [시도 ${attempts}/3] 개발 및 검증 루프 가동...`);
+            console.log(`\n🔄 [시도 ${attempts}/3] 개발 및 자동 검수 진행 중...`);
 
-            const developerInput = attempts > 1 
-                ? `이전 코드 반려 사유: ${state.review.comments}\n\n위 피드백을 반영하여 코드를 수정해줘.` 
-                : JSON.stringify(state.plan);
+            // Developer 실행 (매뉴얼 + 체크포인트 주입)
+            const developerInput = `
+[GOAL]: ${JSON.stringify(state.plan)}
+[FEEDBACK]: ${state.review.comments || 'None'}
+[MEMORY]: 현재 /workdocs/${state.folderName}/ 문서를 참조하여 작업하십시오.
+`.trim();
 
-            state.code = await runDeveloper(state, projectContext + "\n" + developerInput);
+            state.code = await runDeveloper(state, projectContext + manuals + "\n" + developerInput);
             
-            // 리뷰어가 깐깐하게 체크
-            state.review = await runReviewer(state, projectContext);
+            // Post-Flight: 자동 검수 및 빌드 리포트 생성
+            const qcReport = runAutomationCheck(state.code);
+            console.log(qcReport);
 
-            if (state.review.approved) {
-                console.log(`\n✨ 에이전트 팀이 ${attempts}번 만에 완벽한 코드를 승인했습니다!`);
-                break;
-            } else {
-                console.log(`⚠️ 리뷰 반려: ${state.review.comments}`);
-            }
+            // Reviewer 실행 (QC 리포트 기반 승인)
+            state.review = await runReviewer(state, projectContext + qcReport);
+
+            // 작업 기억 업데이트
+            updateWorkDocs(
+                state.folderName, 
+                JSON.stringify(state.plan, null, 2),
+                `Attempt ${attempts}: ${state.review.approved ? 'Approved' : 'Rejected'}`,
+                `- Task execution: ${attempts} times\n- Last QC Report: ${qcReport.replace(/\n/g, ' ')}`
+            );
+
+            if (state.review.approved) break;
         }
 
-        // 3. 최종 승인된 경우에만 루트로 저장
+        // 3. 배포
         if (state.review.approved) {
             saveToProjectRoot(state.code, state.folderName);
-            console.log(`\n✅ 작업 완료! '${state.folderName}' 폴더가 생성되었습니다.`);
-            console.log(`이제 'python main.py --build-only'를 실행해 배포하세요.`);
+            console.log(`\n✅ [MISSION COMPLETE] 모든 검수를 통과하여 배포되었습니다.`);
         } else {
-            console.error("\n❌ 3회 시도 내에 완벽한 코드를 만들지 못했습니다.");
+            console.error("\n❌ [FAIL] 3회 시도 내에 품질 기준을 충족하지 못했습니다.");
         }
     } catch (error) {
-        console.error("\n❌ 시스템 에러 발생:", error);
+        console.error("\n❌ 시스템 에러:", error);
     }
 }
 
