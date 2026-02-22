@@ -50,7 +50,12 @@ export async function onRequest(context) {
         });
 
         const data = await geminiResponse.json();
-        const luckyData = JSON.parse(data.candidates[0].content.parts[0].text);
+        let text = data.candidates[0].content.parts[0].text;
+        
+        // JSON 파싱 에러 방지: 마크다운 코드 블록 제거
+        text = text.replace(/```json\n?|```/g, '').trim();
+        
+        const luckyData = JSON.parse(text);
 
         return addCORSHeaders(new Response(JSON.stringify(luckyData), {
             headers: { 'Content-Type': 'application/json' },
