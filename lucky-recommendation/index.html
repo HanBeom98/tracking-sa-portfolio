@@ -18,13 +18,10 @@
         </section>
         <section class="content-container">
             <div class="saju-input-section">
-                <!-- 이름 입력 그룹 -->
                 <div class="input-form-group">
                     <label for="user-name" data-i18n="name_label">이름:</label>
                     <input type="text" id="user-name" placeholder="이름을 입력하세요">
                 </div>
-
-                <!-- 생일 그룹 -->
                 <div class="input-form-group">
                     <label data-i18n="birthdate_label">생일:</label>
                     <div class="birthdate-selectors">
@@ -34,8 +31,6 @@
                         <span class="unit-span" data-i18n="day_unit"></span>
                     </div>
                 </div>
-
-                <!-- 성별 선택 그룹 -->
                 <div class="input-form-group">
                     <label data-i18n="gender_select_label">성별:</label>
                     <div class="gender-buttons">
@@ -45,13 +40,25 @@
                         <label for="gender-female" data-i18n="gender_female_label">여성</label>
                     </div>
                 </div>
-
-                <button class="go-test-button" id="refresh-button" data-i18n="check_now">추천받기</button>
+                <!-- 버튼 ID와 텍스트 키값 확인 -->
+                <button class="go-test-button" id="refresh-button" data-i18n="check_now">행운의 아이템 확인하기</button>
             </div>
             
             <lucky-recommendation role="region" aria-live="polite" id="lucky-display"></lucky-recommendation>
         </section>
     </main>
     <script type="module" src="./script.js"></script>
+    <script>
+        // AI 분석 실행 로직 (필수)
+        document.addEventListener('DOMContentLoaded', () => {
+            const refreshBtn = document.getElementById('refresh-button');
+            refreshBtn.addEventListener('click', () => {
+                const luckyComp = document.querySelector('lucky-recommendation');
+                if (luckyComp && typeof luckyComp.generateLuckyData === 'function') {
+                    luckyComp.generateLuckyData();
+                }
+            });
+        });
+    </script>
 </body>
 </html>
