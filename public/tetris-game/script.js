@@ -65,10 +65,8 @@ class TetrisGame extends HTMLElement {
         this.nextCtx = this.nextCanvas.getContext('2d');
         this.boardWrapper = this.shadowRoot.querySelector('.main-board');
         
-        // Firestore 인스턴스 확인
         this.db = window.db || null;
 
-        // ResizeObserver로 실시간 자동 스케일링
         const observer = new ResizeObserver(() => this.resizeCanvas());
         observer.observe(this.shadowRoot.querySelector('.game-layout'));
         
@@ -192,7 +190,7 @@ class TetrisGame extends HTMLElement {
     }
 
     async loadRankings() {
-        this.db = window.db || null; // 갱신 시점에도 확인
+        this.db = window.db || null;
         if (!this.db) return;
         try {
             const snapshot = await this.db.collection('tetris_rankings').orderBy('score', 'desc').limit(5).get();
@@ -211,10 +209,7 @@ class TetrisGame extends HTMLElement {
     async submitScore() {
         const nickname = this.shadowRoot.querySelector('#nick-input').value.trim();
         this.db = window.db || null;
-        if (!nickname || !this.db) {
-            alert("DB 연결 중이거나 닉네임이 없습니다.");
-            return;
-        }
+        if (!nickname || !this.db) return;
         try {
             await this.db.collection('tetris_rankings').add({
                 nickname: nickname,
@@ -225,10 +220,7 @@ class TetrisGame extends HTMLElement {
             this.shadowRoot.querySelector('#submit-btn').disabled = true;
             this.shadowRoot.querySelector('#submit-btn').innerText = "OK";
             this.loadRankings();
-        } catch (e) { 
-            console.error(e);
-            alert("등록 실패: " + e.message);
-        }
+        } catch (e) { console.error(e); }
     }
 
     collide() {
@@ -323,14 +315,22 @@ class TetrisGame extends HTMLElement {
             else if (e.keyCode === 38) this.playerRotate(1);
         });
 
+        // [핵심] 모바일 전용 연속 이동 로직 및 passive: false 적용
         const handleTouch = (id, action, isRepeat = true) => {
             const el = this.shadowRoot.querySelector(`#${id}`);
+            if (!el) return;
+            
             el.addEventListener('touchstart', (e) => {
-                e.preventDefault();
+                if (e.cancelable) e.preventDefault(); // 스크롤 간섭 방지
                 if (isRepeat) this.startRepeat(action); else action();
-            });
-            el.addEventListener('touchend', () => this.stopRepeat());
-            el.addEventListener('touchcancel', () => this.stopRepeat());
+            }, { passive: false });
+
+            el.addEventListener('touchend', (e) => {
+                if (e.cancelable) e.preventDefault();
+                this.stopRepeat();
+            }, { passive: false });
+
+            el.addEventListener('touchcancel', () => this.stopRepeat(), { passive: false });
         };
 
         handleTouch('btn-left', () => this.playerMove(-1));
@@ -348,11 +348,10 @@ class TetrisGame extends HTMLElement {
                 :host { display: block; height: 100%; width: 100%; font-family: 'Orbitron', sans-serif; color: white; user-select: none; background: #050505; overflow: hidden; }
                 .game-layout { display: flex; flex-direction: column; height: 100%; width: 100%; padding: 10px; box-sizing: border-box; }
                 
+                /* [Desktop Layout - 사용자 만족 포인트 원복] */
                 .game-main { flex: 1; display: flex; gap: 20px; align-items: center; justify-content: center; min-height: 0; }
-                
                 .main-board { position: relative; height: 100%; display: flex; align-items: center; justify-content: center; }
                 #game-canvas { border: 4px solid #222; background: #000; border-radius: 8px; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
-                
                 .side-panel { display: flex; flex-direction: column; gap: 15px; width: 130px; }
                 .panel-box { background: #111; padding: 12px; border-radius: 12px; border: 2px solid #222; text-align: center; }
                 .label { color: #666; font-size: 10px; margin-bottom: 5px; letter-spacing: 1px; }
@@ -365,17 +364,69 @@ class TetrisGame extends HTMLElement {
                 #game-over { position: absolute; inset: 0; background: rgba(0,0,0,0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10; border-radius: 8px; text-align: center; padding: 20px; }
                 #game-over.visible { display: flex; }
 
+                /* [기본 버튼 - PC에서는 숨김] */
                 .controls { height: 180px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 10px 20px 30px 20px; justify-items: center; align-items: center; background: #0a0a0a; border-top: 1px solid #222; flex-shrink: 0; }
-                .mobile-btn { width: 65px; height: 65px; background: oklch(25% 0.05 250); border: 1px solid #333; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-                .mobile-btn:active { background: oklch(40% 0.1 250); transform: scale(0.9); }
-
-                @media (max-width: 600px) {
-                    .game-main { flex-direction: column; gap: 10px; }
-                    .side-panel { flex-direction: row; width: 100%; justify-content: space-around; }
-                    .side-panel .panel-box { flex: 1; padding: 8px; }
-                    .mobile-btn { width: 60px; height: 60px; }
-                }
                 @media (min-width: 1024px) { .controls { display: none; } }
+
+                /* [Modern Mobile UI - 오직 모바일 환경에서만 강력하게 적용] */
+                @media (max-width: 1023px) {
+                    .game-layout { padding: 5px; }
+                    .game-main { flex-direction: column; gap: 5px; }
+                    
+                    /* 사이드바를 상단 HUD로 가로 배치 */
+                    .side-panel { 
+                        flex-direction: row; 
+                        width: 100%; 
+                        max-width: 400px;
+                        margin: 0 auto;
+                        justify-content: space-between; 
+                        order: -1; /* 보드판 위로 이동 */
+                        gap: 8px;
+                        padding: 5px 10px;
+                    }
+                    .side-panel .panel-box { 
+                        flex: 1; 
+                        padding: 4px; 
+                        border-radius: 8px;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        min-width: 0;
+                    }
+                    .side-panel .label { font-size: 7px; margin-bottom: 1px; }
+                    .side-panel .value { font-size: 14px; }
+                    #next-canvas { width: 30px !important; height: 30px !important; }
+
+                    /* 조이스틱을 중앙으로 조밀하게 배치 (D-PAD 스타일) */
+                    .controls { 
+                        height: 150px; 
+                        grid-template-columns: repeat(3, 70px); 
+                        grid-template-rows: repeat(2, 60px);
+                        gap: 12px; 
+                        justify-content: center; 
+                        padding: 15px;
+                        background: transparent;
+                        border: none;
+                    }
+                    .mobile-btn { 
+                        width: 60px; 
+                        height: 60px; 
+                        background: oklch(35% 0.1 250);
+                        border: 2px solid #444;
+                        border-radius: 50%;
+                        color: white;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        box-shadow: 0 4px 0 oklch(20% 0.1 250);
+                        font-size: 1.3rem;
+                    }
+                    .mobile-btn:active {
+                        transform: translateY(2px);
+                        box-shadow: 0 2px 0 oklch(20% 0.1 250);
+                    }
+                }
             </style>
             <div class="game-layout">
                 <div class="game-main">
@@ -400,10 +451,10 @@ class TetrisGame extends HTMLElement {
                     </div>
                 </div>
                 <div class="controls">
-                    <div class="mobile-btn" id="btn-up" style="grid-column: 2">↑</div>
-                    <div class="mobile-btn" id="btn-left" style="grid-column: 1; grid-row: 2">←</div>
-                    <div class="mobile-btn" id="btn-down" style="grid-column: 2; grid-row: 2">↓</div>
-                    <div class="mobile-btn" id="btn-right" style="grid-column: 3; grid-row: 2">→</div>
+                    <div class="mobile-btn" style="grid-column: 2; grid-row: 1" id="btn-up">↑</div>
+                    <div class="mobile-btn" style="grid-column: 1; grid-row: 2" id="btn-left">←</div>
+                    <div class="mobile-btn" style="grid-column: 2; grid-row: 2" id="btn-down">↓</div>
+                    <div class="mobile-btn" style="grid-column: 3; grid-row: 2" id="btn-right">→</div>
                 </div>
             </div>
         `;
