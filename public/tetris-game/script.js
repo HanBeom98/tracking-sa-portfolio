@@ -25,7 +25,6 @@ class TetrisGame extends HTMLElement {
             [[0, 6, 0], [6, 6, 6], [0, 0, 0]],
             [[7, 7, 0], [0, 7, 7], [0, 0, 0]]
         ];
-        
         this.audioCtx = null;
         this.resetInternalState();
     }
@@ -39,7 +38,6 @@ class TetrisGame extends HTMLElement {
         this.piece = this.generatePiece();
     }
 
-    // --- Audio System ---
     initAudio() {
         if (this.audioCtx) return;
         this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -65,25 +63,22 @@ class TetrisGame extends HTMLElement {
         const baseFreq = 400 + (this.combo * 100);
         this.playNote(baseFreq, 0.2);
         this.playNote(baseFreq * 1.25, 0.25);
-        if (lines >= 4) this.playNote(baseFreq * 1.5, 0.4);
     }
     soundGameOver() {
         this.playNote(200, 0.5, 'sawtooth');
-        this.playNote(150, 0.5, 'sawtooth');
         this.playNote(100, 0.8, 'sawtooth');
     }
 
-    // --- Game Logic ---
     connectedCallback() {
         this.render();
         this.canvas = this.shadowRoot.querySelector('#game-canvas');
         this.ctx = this.canvas.getContext('2d');
         this.nextCanvas = this.shadowRoot.querySelector('#next-canvas');
         this.nextCtx = this.nextCanvas.getContext('2d');
-        
         this.initGame();
         this.addEventListeners();
         this.resizeCanvas();
+        window.addEventListener('resize', () => this.resizeCanvas());
     }
 
     resizeCanvas() {
@@ -106,11 +101,7 @@ class TetrisGame extends HTMLElement {
 
     generatePiece() {
         const id = Math.floor(Math.random() * (this.SHAPES.length - 1)) + 1;
-        return {
-            pos: { x: 3, y: 0 },
-            matrix: JSON.parse(JSON.stringify(this.SHAPES[id])),
-            colorId: id
-        };
+        return { pos: { x: 3, y: 0 }, matrix: JSON.parse(JSON.stringify(this.SHAPES[id])), colorId: id };
     }
 
     draw() {
@@ -158,11 +149,8 @@ class TetrisGame extends HTMLElement {
         if (this.isGameOver) return;
         this.initAudio();
         this.piece.pos.x += dir;
-        if (this.collide()) {
-            this.piece.pos.x -= dir;
-        } else {
-            this.soundMove();
-        }
+        if (this.collide()) this.piece.pos.x -= dir;
+        else this.soundMove();
     }
 
     playerRotate(dir) {
@@ -185,9 +173,7 @@ class TetrisGame extends HTMLElement {
 
     rotate(matrix, dir) {
         for (let y = 0; y < matrix.length; ++y) {
-            for (let x = 0; x < y; ++x) {
-                [matrix[x][y], matrix[y][x]] = [matrix[y][x], matrix[x][y]];
-            }
+            for (let x = 0; x < y; ++x) [matrix[x][y], matrix[y][x]] = [matrix[y][x], matrix[x][y]];
         }
         if (dir > 0) matrix.forEach(row => row.reverse());
         else matrix.reverse();
@@ -207,9 +193,7 @@ class TetrisGame extends HTMLElement {
         const [m, o] = [this.piece.matrix, this.piece.pos];
         for (let y = 0; y < m.length; ++y) {
             for (let x = 0; x < m[y].length; ++x) {
-                if (m[y][x] !== 0 && (this.board[y + o.y] && this.board[y + o.y][x + o.x]) !== 0) {
-                    return true;
-                }
+                if (m[y][x] !== 0 && (this.board[y + o.y] && this.board[y + o.y][x + o.x]) !== 0) return true;
             }
         }
         return false;
@@ -234,15 +218,12 @@ class TetrisGame extends HTMLElement {
             ++y;
             linesCleared++;
         }
-
         if (linesCleared > 0) {
             this.combo++;
             this.score += (linesCleared * 100) * this.combo;
             this.soundClear(linesCleared);
             this.showComboEffect();
-        } else {
-            this.combo = 0;
-        }
+        } else { this.combo = 0; }
     }
 
     showComboEffect() {
@@ -284,35 +265,17 @@ class TetrisGame extends HTMLElement {
             else if (e.keyCode === 40) this.playerDrop();
             else if (e.keyCode === 38) this.playerRotate(1);
         });
-
-        const btnLeft = this.shadowRoot.querySelector('#btn-left');
-        const btnRight = this.shadowRoot.querySelector('#btn-right');
-        const btnDown = this.shadowRoot.querySelector('#btn-down');
-        const btnUp = this.shadowRoot.querySelector('#btn-up');
-        const btnRestart = this.shadowRoot.querySelector('#restart-btn');
-
-        btnLeft.onclick = () => this.playerMove(-1);
-        btnRight.onclick = () => this.playerMove(1);
-        btnDown.onclick = () => this.playerDrop();
-        btnUp.onclick = () => this.playerRotate(1);
-        btnRestart.onclick = () => this.restart();
+        this.shadowRoot.querySelector('#btn-left').onclick = () => this.playerMove(-1);
+        this.shadowRoot.querySelector('#btn-right').onclick = () => this.playerMove(1);
+        this.shadowRoot.querySelector('#btn-down').onclick = () => this.playerDrop();
+        this.shadowRoot.querySelector('#btn-up').onclick = () => this.playerRotate(1);
+        this.shadowRoot.querySelector('#restart-btn').onclick = () => this.restart();
     }
 
     render() {
         this.shadowRoot.innerHTML = `
             <style>
-                :host {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    background: #050505;
-                    padding: 20px;
-                    border-radius: 24px;
-                    box-shadow: 0 0 50px oklch(50% 0.2 250 / 0.2);
-                    user-select: none;
-                    touch-action: manipulation;
-                    font-family: 'Orbitron', sans-serif;
-                }
+                :host { display: flex; flex-direction: column; align-items: center; background: #050505; padding: 20px; border-radius: 24px; box-shadow: 0 0 50px oklch(50% 0.2 250 / 0.2); user-select: none; touch-action: manipulation; font-family: 'Orbitron', sans-serif; color: white; }
                 .game-layout { display: flex; gap: 20px; align-items: flex-start; }
                 .main-board { position: relative; }
                 #game-canvas { border: 4px solid #222; background: #000; border-radius: 8px; }
@@ -321,58 +284,30 @@ class TetrisGame extends HTMLElement {
                 .label { color: #666; font-size: 10px; margin-bottom: 5px; letter-spacing: 1px; }
                 .value { color: white; font-size: 20px; text-shadow: 0 0 10px oklch(60% 0.2 250); }
                 #next-canvas { background: #000; border-radius: 4px; }
-                
-                #combo-text {
-                    position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
-                    color: oklch(70% 0.3 150); font-size: 2rem; font-weight: bold;
-                    pointer-events: none; opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-                }
+                #combo-text { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); color: oklch(70% 0.3 150); font-size: 2rem; font-weight: bold; pointer-events: none; opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
                 #combo-text.pop { opacity: 1; transform: translate(-50%, -60%) scale(1.2); }
-
-                #game-over {
-                    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-                    background: rgba(0,0,0,0.85); display: flex; flex-direction: column;
-                    align-items: center; justify-content: center; border-radius: 8px;
-                    opacity: 0; pointer-events: none; transition: opacity 0.5s; z-index: 10;
-                }
+                #game-over { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; opacity: 0; pointer-events: none; transition: opacity 0.5s; z-index: 10; }
                 #game-over.visible { opacity: 1; pointer-events: auto; }
                 #game-over h2 { color: oklch(60% 0.2 20); font-size: 2rem; text-shadow: 0 0 20px oklch(60% 0.2 20); margin-bottom: 20px; }
                 #restart-btn { padding: 12px 24px; background: oklch(60% 0.2 250); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-
                 .controls-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 20px; }
                 .mobile-btn { width: 55px; height: 55px; background: oklch(25% 0.05 250); color: white; border: 1px solid #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; cursor: pointer; }
                 .mobile-btn:active { background: oklch(40% 0.1 250); transform: scale(0.9); }
-
                 @media (max-width: 600px) { .game-layout { flex-direction: column; align-items: center; } .side-panel { flex-direction: row; width: 100%; } }
                 @media (min-width: 1024px) { .controls-grid { display: none; } }
             </style>
-            
             <div class="game-layout">
                 <div class="main-board">
                     <canvas id="game-canvas"></canvas>
                     <div id="combo-text">COMBO!</div>
-                    <div id="game-over">
-                        <h2>GAME OVER</h2>
-                        <button id="restart-btn">RESTART</button>
-                    </div>
+                    <div id="game-over"><h2>GAME OVER</h2><button id="restart-btn">RESTART</button></div>
                 </div>
-
                 <div class="side-panel">
-                    <div class="panel-box">
-                        <div class="label">NEXT</div>
-                        <canvas id="next-canvas"></canvas>
-                    </div>
-                    <div class="panel-box">
-                        <div class="label">SCORE</div>
-                        <div class="value" id="score-val">0</div>
-                    </div>
-                    <div class="panel-box">
-                        <div class="label">COMBO</div>
-                        <div class="value" id="combo-val">0</div>
-                    </div>
+                    <div class="panel-box"><div class="label">NEXT</div><canvas id="next-canvas"></canvas></div>
+                    <div class="panel-box"><div class="label">SCORE</div><div class="value" id="score-val">0</div></div>
+                    <div class="panel-box"><div class="label">COMBO</div><div class="value" id="combo-val">0</div></div>
                 </div>
             </div>
-            
             <div class="controls-grid">
                 <div class="mobile-btn" style="grid-column: 2" id="btn-up">↑</div>
                 <div class="mobile-btn" style="grid-column: 1; grid-row: 2" id="btn-left">←</div>
