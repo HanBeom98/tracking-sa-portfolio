@@ -96,9 +96,11 @@ class TetrisGame extends HTMLElement {
 
     resizeCanvas() {
         const rect = this.boardWrapper.getBoundingClientRect();
-        const padding = 10;
+        // [수정] 모바일 가로 너비 100% 활용을 위해 패딩 0 설정
+        const padding = 0;
         const availableW = rect.width - padding;
         const availableH = rect.height - padding;
+        
         let size = Math.floor(availableH / this.ROWS);
         if (size * this.COLS > availableW) size = Math.floor(availableW / this.COLS);
         
@@ -259,6 +261,11 @@ class TetrisGame extends HTMLElement {
                     context.shadowColor = color;
                     context.fillRect((x + offset.x) * this.BLOCK_SIZE, (y + offset.y) * this.BLOCK_SIZE, this.BLOCK_SIZE - 1, this.BLOCK_SIZE - 1);
                     context.shadowBlur = 0;
+                    
+                    // [수정] 블록 간 구분을 위해 얇은 흰색 테두리 추가
+                    context.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                    context.lineWidth = 1;
+                    context.strokeRect((x + offset.x) * this.BLOCK_SIZE, (y + offset.y) * this.BLOCK_SIZE, this.BLOCK_SIZE - 1, this.BLOCK_SIZE - 1);
                 }
             });
         });
@@ -316,22 +323,25 @@ class TetrisGame extends HTMLElement {
         <style>
             :host { display: block; height: 100%; font-family: 'Orbitron', sans-serif; background: #050505; color: white; overflow: hidden; }
             .game-layout { display: flex; flex-direction: column; height: 100%; padding: 10px; box-sizing: border-box; }
-            .game-main { flex: 1; display: flex; justify-content: center; gap: 15px; min-height: 0; }
-            .main-board { position: relative; flex: 1; max-width: 320px; background: #000; border: 2px solid #222; border-radius: 12px; display: flex; justify-content: center; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
-            .side-panel { width: 100px; display: flex; flex-direction: column; gap: 10px; }
-            .panel-box { background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); padding: 12px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); text-align: center; }
-            .label { font-size: 9px; color: #666; letter-spacing: 1px; margin-bottom: 5px; }
-            .value { font-size: 18px; font-weight: bold; color: oklch(75% 0.15 250); }
+            /* [수정] 요소 간 간격을 2px로 최소화 */
+            .game-main { flex: 1; display: flex; justify-content: center; gap: 2px; min-height: 0; }
+            /* [수정] max-width 제한 해제 및 보드 영역 극대화 */
+            .main-board { position: relative; flex: 1; background: #000; border: 2px solid #222; border-radius: 12px; display: flex; justify-content: center; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+            .side-panel { width: 80px; display: flex; flex-direction: column; gap: 10px; }
+            .panel-box { background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); padding: 8px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); text-align: center; }
+            .label { font-size: 8px; color: #666; letter-spacing: 1px; margin-bottom: 5px; }
+            .value { font-size: 16px; font-weight: bold; color: oklch(75% 0.15 250); }
             #combo-text { position: absolute; top: 30%; left: 50%; transform: translateX(-50%); color: oklch(70% 0.3 150); font-size: 1.5rem; font-weight: bold; opacity: 0; pointer-events: none; transition: 0.3s; }
             #combo-text.pop { opacity: 1; transform: translate(-50%, -20px); }
             #game-over { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
             #game-over.visible { display: flex; }
-            .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 20px; height: 180px; }
+            /* [수정] 조작 버튼 높이 조절로 보드 영역 추가 확보 */
+            .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 15px; height: 160px; }
+            
             /* 데스크탑(1024px 이상) 최적화 */
             @media (min-width: 1024px) {
                 .controls { display: none; }
                 .game-main { align-items: center; justify-content: center; }
-                /* 게임판이 너무 길어지지 않게 높이 제한 및 비율 유지 */
                 .main-board { 
                     flex: none; 
                     height: 85vh; 
