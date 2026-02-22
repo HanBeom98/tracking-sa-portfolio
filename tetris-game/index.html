@@ -4,22 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title data-i18n="tetris_game">테트리스 - Tracking SA</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <style>
-        /* [UI 수복 핵심: 최상위 높이 강제 고정] */
+        /* 글로벌 레이아웃 설정 */
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-dark: oklch(10% 0.02 250);
+            --text-color: oklch(90% 0.05 20);
+        }
         body, html {
-            width: 100%;
-            height: 100%;
-            height: 100dvh; /* 주소창 제외 실제 가용 높이 */
-            overflow: hidden;
-            background-color: #000;
+            width: 100%; height: 100%; height: 100dvh;
+            overflow: hidden; background-color: #000;
+            font-family: 'Orbitron', sans-serif;
+            color: var(--text-color);
         }
-        /* 테트리스 컴포넌트가 화면 전체를 채우도록 설정 */
-        tetris-game {
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
+        tetris-game { display: block; width: 100%; height: 100%; }
     </style>
 </head>
 <body>
