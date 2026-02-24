@@ -5,6 +5,11 @@ on:
     - cron: '6 22 * * *'
     - cron: '12 12 * * *'
   workflow_dispatch:
+    inputs:
+      generate_news:
+        description: '새 뉴스를 생성하시겠습니까?'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -49,9 +54,15 @@ jobs:
           BASE_URL: "https://trackingsa.com/"
         run: |
           set -euo pipefail
-          # 1. Generate news using Multi-Agent Team and store in Firestore
-          python main.py
-          # 2. Final build from Firestore data
+          # 1. Generate news only if scheduled or manually requested
+          if [ "${{ github.event_name }}" == "schedule" ] || [ "${{ github.event.inputs.generate_news }}" == "true" ]; then
+            echo "🚀 Generating new articles..."
+            python main.py
+          else
+            echo "ℹ️ Skipping news generation, running build-only mode."
+          fi
+          
+          # 2. Final build from Firestore data (ALWAYS RUNS)
           python main.py --build-only
 
       - name: Deploy to Cloudflare Pages
