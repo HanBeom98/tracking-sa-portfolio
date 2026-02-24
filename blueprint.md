@@ -64,6 +64,7 @@ Evolving Tracking-sa into a premium, framework-less web platform using a special
 - [x] Move build stamp generation into build pipeline (CF Pages compatible).
 - [x] Normalize animal-face route and add redirect from legacy path.
 - [x] Remove animal-face local CSS and inline body overrides to align nav.
+- [x] Restore Teachable Machine scripts for animal-face functionality.
 - [x] Restore scheduled news generation in GitHub Actions (schedule only).
 
 ## ⚠️ Lessons Learned
