@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
             const html = docs.map(doc => {
                 const data = doc.data();
-                const url = data.urlKey ? `/${data.urlKey}.html` : `/${data.date}-${data.slug}.html`;
+                const url = data.urlKey ? `/news/${data.urlKey}.html` : `/news/${data.date}-${data.slug}.html`;
                 return `
                     <a href="${url}" class="search-result-item">
                         <div class="result-title">${data.titleKo}</div>
