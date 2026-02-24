@@ -337,12 +337,16 @@ def get_firestore_client():
             if sj.startswith("'") and sj.endswith("'"): sj = sj[1:-1]
             
             # 2. 작은따옴표를 큰따옴표로 교정 (JSON 표준 준수)
+            # 주의: private_key 내부의 실제 작은따옴표가 있을 수 있으므로 신중해야 함
+            # 여기서는 전체적인 구조를 위해 유지하되, 가급적 원본 JSON이 올바르기를 권장
             sj = sj.replace("\'", "\"")
             
-            # 3. 줄바꿈 문자 정규화
-            sj = sj.replace('\\n', '\n')
-            
             cred_dict = json.loads(sj)
+            
+            # 3. private_key 내의 줄바꿈 문자 교정 (JSON 파싱 후에 수행)
+            if "private_key" in cred_dict:
+                cred_dict["private_key"] = cred_dict["private_key"].replace("\\n", "\n")
+                
             firebase_admin.initialize_app(credentials.Certificate(cred_dict))
             db = firestore.client()
         except Exception as e:
