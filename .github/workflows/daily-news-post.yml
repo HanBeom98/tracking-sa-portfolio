@@ -60,7 +60,11 @@ jobs:
           BASE_URL: "https://trackingsa.com/"
         run: |
           set -euo pipefail
-          python main.py --build-only
+          if [[ "${{ github.event_name }}" == "schedule" || ( "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.generate_news }}" == "true" ) ]]; then
+            python main.py
+          else
+            python main.py --build-only
+          fi
 
       - name: Commit Log changes
         if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.generate_news == 'true')
