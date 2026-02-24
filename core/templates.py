@@ -1,4 +1,5 @@
 import os
+import datetime
 from core.config import ADSENSE_CLIENT_ID
 
 def load_template(filename):
@@ -10,6 +11,9 @@ def load_template(filename):
 
 def get_common_head():
     template = load_template("head.html")
+    # Force cache busting for style.css with a build timestamp
+    version = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    template = template.replace('href="/style.css"', f'href="/style.css?v={version}"')
     return template.replace("{{ADSENSE_CLIENT_ID}}", ADSENSE_CLIENT_ID)
 
 def get_common_header():
