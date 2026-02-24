@@ -12,37 +12,8 @@ from core.utils import extract_title_from_md, clean_filename, extract_descriptio
 from core.db import get_firestore_client
 from firebase_admin import firestore
 
-def process_html_file_for_common_elements(filepath):
-    try:
-        with open(filepath, "r", encoding="utf-8") as f:
-            content = f.read()
-
-        # 1. CSS Inline Injection (Stability Fix)
-        css_inline = ""
-        if os.path.exists("style.css"):
-            with open("style.css", "r", encoding="utf-8") as css_f:
-                css_inline = f"<style>\n{css_f.read()}\n</style>"
-
-        # 2. Inject to HEAD
-        if '</head>' in content:
-            head_html = get_common_head()
-            content = content.replace('</head>', f'{head_html}\n{css_inline}\n</head>')
-        
-        # 3. Inject to BODY (Robust RegEx)
-        header_html = get_common_header()
-        header_scripts = '\n<script src="/translations.js"></script>\n<script src="/common.js"></script>\n'
-        content = re.sub(r'(<body[^>]*>)', r'\1' + header_scripts + header_html, content, count=1, flags=re.IGNORECASE)
-        
-        # 4. Inject FOOTER
-        if '</body>' in content:
-            content = content.replace('</body>', f'{get_common_footer()}\n</body>')
-
-        with open(filepath, "w", encoding="utf-8") as f:
-            f.write(content)
-    except Exception as e:
-        print(f"🚨 [BUILD ERROR]: {filepath} -> {e}")
-
 def _extract_and_format_hashtags(content):
+    if not content: return "", ""
     tags = re.findall(r'#([a-zA-Z0-9가-힣]+)', content)
     unique_tags = list(dict.fromkeys(tags))[:5]
     if not unique_tags: return content.strip(), ""
@@ -50,10 +21,38 @@ def _extract_and_format_hashtags(content):
     for t in unique_tags: content = content.replace(f'#{t}', '')
     return content.strip(), html
 
+def process_html_file_for_common_elements(filepath):
+    try:
+        with open(filepath, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        # CSS Inline
+        css_inline = ""
+        if os.path.exists("style.css"):
+            with open("style.css", "r", encoding="utf-8") as css_f:
+                css_inline = f"<style>\n{css_f.read()}\n</style>"
+
+        # HEAD
+        if '</head>' in content:
+            head_html = get_common_head()
+            content = content.replace('</head>', f'{head_html}\n{css_inline}\n</head>')
+        
+        # HEADER
+        header_html = get_common_header()
+        header_scripts = '\n<script src="/translations.js"></script>\n<script src="/common.js"></script>\n'
+        content = re.sub(r'(<body[^>]*>)', r'\1' + header_scripts + header_html, content, count=1, flags=re.IGNORECASE)
+        
+        # FOOTER
+        if '</body>' in content:
+            content = content.replace('</body>', f'{get_common_footer()}\n</body>')
+
+        with open(filepath, "w", encoding="utf-8") as f: f.write(content)
+    except Exception as e:
+        print(f"🚨 [BUILD ERROR]: {filepath} -> {e}")
+
 def generate_article_html(md_content, title, date_str, output_path, hashtags_html="", description="", lang="ko"):
     if not description:
         description = extract_description_from_md(md_content, lang=lang) or f"{title} news."
-    
     back_text = "목록으로 돌아가기" if lang == "ko" else "Back to List"
     
     html_template = f"""<!DOCTYPE html>
@@ -61,10 +60,6 @@ def generate_article_html(md_content, title, date_str, output_path, hashtags_htm
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{title} - Tracking SA</title>
-    <meta name="description" content="{description}">
-    <meta property="og:title" content="{title}"><meta property="og:description" content="{description}">
-    <meta property="og:type" content="article"><meta property="og:url" content="{BASE_URL}{os.path.basename(output_path)}">
-    <meta property="og:image" content="{BASE_URL}logo.svg">
 </head>
 <body>
     <main class="article-detail-main">
@@ -113,12 +108,17 @@ def generate_index_html(articles_on_page, current_page, total_pages, lang='ko'):
                 </div>
             </a>"""
     
-    pagination_html = f"""
-        <div class="pagination">
-            <div class="page-number-wrapper">
-                <span class="current-page">{current_page}</span> / <span>{total_pages}</span>
-            </div>
-        </div>"""
+    pagination_html = ""
+    if total_pages > 1:
+        pagination_html = '<div class="pagination">'
+        if current_page > 1:
+            prev_url = f"index{'-en' if lang=='en' else ''}.html" if current_page == 2 else f"page{'-en' if lang=='en' else ''}-{current_page-1}.html"
+            pagination_html += f'<a href="/news/{prev_url}" class="pagination-button prev">← PREV</a>'
+        pagination_html += f'<div class="page-number-wrapper"><span class="current-page">{current_page}</span> / {total_pages}</div>'
+        if current_page < total_pages:
+            next_url = f"page{'-en' if lang=='en' else ''}-{current_page+1}.html"
+            pagination_html += f'<a href="/news/{next_url}" class="pagination-button next">NEXT →</a>'
+        pagination_html += '</div>'
 
     final_content = f"""<section class="news-section-main">
         {hero_card_html}
@@ -154,9 +154,9 @@ def generate_public_site():
     copy_static_assets()
     db = get_firestore_client()
     if db:
+        docs = list(db.collection('posts').order_by('createdAt', direction=firestore.Query.DESCENDING).stream())
         for lang in ['ko', 'en']:
             articles = []
-            docs = list(db.collection('posts').order_by('createdAt', direction=firestore.Query.DESCENDING).limit(100).stream())
             for doc in docs:
                 p = doc.to_dict()
                 title = p.get('titleKo' if lang=='ko' else 'titleEn') or p.get('titleKo', '제목 없음')
@@ -166,5 +166,9 @@ def generate_public_site():
                 body, tags = _extract_and_format_hashtags(content)
                 generate_article_html(body, title, date, os.path.join(PUBLIC_DIR, f"{ukey}.html"), hashtags_html=tags, lang=lang)
                 articles.append({'title': title, 'url': f"{ukey}.html", 'date': date})
-            generate_index_html(articles, 1, 1, lang=lang)
+            
+            total_pages = math.ceil(len(articles) / ARTICLES_PER_PAGE) if articles else 1
+            for p_num in range(1, total_pages + 1):
+                start = (p_num - 1) * ARTICLES_PER_PAGE
+                generate_index_html(articles[start:start+ARTICLES_PER_PAGE], p_num, total_pages, lang=lang)
     process_html_file_for_common_elements(os.path.join(PUBLIC_DIR, "index.html"))
