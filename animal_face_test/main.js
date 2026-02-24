@@ -1,13 +1,13 @@
 /**
- * AnimalFaceTest Web Component
- * Encapsulated AI Analysis for Tracking SA.
+ * AnimalFaceTest Web Component - Ultra Premium Version
+ * Fully functional with Gender Selection, Image Upload, Result Analysis, and Sharing.
  */
 class AnimalFaceTest extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({ mode: 'open' });
         this._model = null;
-        this._selectedGender = null;
+        this._selectedGender = 'male';
         this._currentImage = null;
         this._modelUrl = "https://teachablemachine.withgoogle.com/models/e52yfi_eK/";
         this._animalData = {
@@ -31,75 +31,162 @@ class AnimalFaceTest extends HTMLElement {
         const isEn = lang === 'en';
 
         const t = {
-            h1: isEn ? "Which animal do you resemble?" : "당신은 어떤 동물을 닮았나요?",
-            p1: isEn ? "Find out your animal face type with AI!" : "당신은 어떤 동물을 닮았는지 알아보세요!",
-            gender: isEn ? "Select Gender" : "성별 선택",
+            h1: isEn ? "AI Animal Face Test" : "AI 동물상 테스트",
+            p1: isEn ? "Which animal do you resemble the most?" : "당신은 어떤 동물을 가장 닮았나요?",
+            gender: isEn ? "Select Your Gender" : "성별을 선택해 주세요",
             male: isEn ? "Male" : "남성",
             female: isEn ? "Female" : "여성",
-            upload: isEn ? "Click or drag image to upload" : "여기에 이미지를 드래그하거나 클릭하여 업로드",
-            btn: isEn ? "Check Result" : "결과 확인",
-            analyzing: isEn ? "AI is analyzing..." : "AI 분석 중...",
-            privacy: isEn ? "🔒 Photos are not saved." : "🔒 사진은 저장되지 않습니다.",
-            retake: isEn ? "Try Again" : "다시 테스트"
+            uploadHint: isEn ? "Drag & Drop or Click to Upload" : "여기에 사진을 드래그하거나 클릭하세요",
+            uploadBtn: isEn ? "Select Image" : "이미지 선택하기",
+            analyzeBtn: isEn ? "Check My Animal Face" : "나의 동물상 확인하기",
+            analyzing: isEn ? "AI is analyzing your face..." : "AI가 당신의 얼굴을 분석 중입니다...",
+            privacy: isEn ? "🔒 Photos are not stored on our server." : "🔒 사진은 서버에 저장되지 않으니 안심하세요.",
+            resultTitle: isEn ? "Analysis Result" : "AI 분석 결과",
+            shareTitle: isEn ? "Share your result" : "결과 공유하기",
+            download: isEn ? "Download" : "결과 저장",
+            retake: isEn ? "Retake Test" : "다시 테스트하기"
         };
 
         this.shadowRoot.innerHTML = `
         <style>
-            :host { display: block; width: 100%; max-width: 800px; margin: 0 auto; text-align: center; font-family: system-ui, sans-serif; }
-            .card { background: white; border-radius: 30px; padding: 50px 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); }
-            h1 { font-size: 2.5rem; font-weight: 900; background: linear-gradient(135deg, #0052cc, #1e40af); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
-            p.desc { color: #64748b; margin-bottom: 30px; font-size: 1.1rem; }
+            :host { display: block; width: 100%; max-width: 800px; margin: 0 auto; text-align: center; font-family: 'Inter', system-ui, sans-serif; }
             
-            .gender-group { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; }
-            .gender-btn { padding: 12px 30px; border-radius: 50px; border: 2px solid #f1f5f9; background: #f1f5f9; cursor: pointer; font-weight: 700; transition: 0.3s; color: #64748b; }
-            .gender-btn.active.male { background: #0052cc; color: white; border-color: #0052cc; }
-            .gender-btn.active.female { background: #e11d48; color: white; border-color: #e11d48; }
+            .card { 
+                background: white; border-radius: 40px; padding: 60px 40px; 
+                box-shadow: 0 30px 100px rgba(0, 82, 204, 0.1); 
+                border: 1px solid rgba(0, 0, 0, 0.02);
+                animation: slideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+            }
 
-            .upload-box { border: 2px dashed #0052cc; border-radius: 20px; padding: 40px; background: #f8faff; cursor: pointer; transition: 0.3s; margin-bottom: 30px; }
-            .upload-box:hover { background: #eff6ff; }
+            @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+
+            h1 { font-size: 3rem; font-weight: 950; margin-bottom: 10px; background: linear-gradient(135deg, #0052cc, #1e40af); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.05em; }
+            .subtitle { color: #64748b; font-size: 1.2rem; margin-bottom: 40px; font-weight: 500; }
+
+            /* Premium Gender Toggle */
+            .section-label { font-weight: 800; font-size: 0.9rem; color: #1e293b; text-transform: uppercase; margin-bottom: 15px; display: block; letter-spacing: 0.1em; }
+            .gender-group { display: flex; justify-content: center; gap: 15px; margin-bottom: 40px; }
+            .gender-btn { 
+                flex: 1; max-width: 150px; padding: 16px; border-radius: 20px; border: 2px solid #f1f5f9; 
+                background: #f8fafc; cursor: pointer; font-weight: 800; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+                color: #64748b; display: flex; align-items: center; justify-content: center; gap: 10px;
+            }
+            .gender-btn:hover { border-color: #0052cc; color: #0052cc; transform: translateY(-2px); }
+            .gender-btn.active.male { background: #0052cc; color: white; border-color: #0052cc; box-shadow: 0 10px 25px rgba(0, 82, 204, 0.3); }
+            .gender-btn.active.female { background: #e11d48; color: white; border-color: #e11d48; box-shadow: 0 10px 25px rgba(225, 29, 72, 0.3); }
+
+            /* Advanced Upload Box */
+            .upload-container { margin-bottom: 40px; }
+            .upload-box { 
+                border: 3px dashed #e2e8f0; border-radius: 30px; padding: 60px 30px; 
+                background: #f8fafc; cursor: pointer; transition: 0.4s; 
+                display: flex; flex-direction: column; align-items: center; gap: 20px;
+            }
+            .upload-box:hover { background: #f1f5f9; border-color: #0052cc; }
+            .upload-box.dragover { background: #eff6ff; border-color: #0052cc; transform: scale(1.02); }
+            .upload-icon { font-size: 3rem; }
+            .upload-box p { color: #64748b; font-weight: 700; margin: 0; }
             
-            #preview { max-width: 100%; border-radius: 15px; display: none; margin: 0 auto 20px auto; }
-            
-            .submit-btn { background: linear-gradient(135deg, #0052cc, #1e40af); color: white; border: none; padding: 18px 45px; border-radius: 15px; font-weight: 800; font-size: 1.2rem; cursor: pointer; box-shadow: 0 10px 25px rgba(0, 82, 204, 0.2); display: none; margin: 0 auto; }
-            
-            #loading { display: none; flex-direction: column; align-items: center; gap: 15px; padding: 40px; }
-            .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #0052cc; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+            .custom-btn { 
+                background: #0052cc; color: white; padding: 14px 28px; border-radius: 12px; 
+                font-weight: 800; font-size: 1rem; border: none; cursor: pointer; transition: 0.3s;
+            }
+
+            #preview-container { display: none; flex-direction: column; align-items: center; gap: 20px; }
+            #preview { max-width: 100%; max-height: 400px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+
+            .main-btn { 
+                background: linear-gradient(135deg, #0052cc 0%, #1e40af 100%); 
+                color: white; border: none; padding: 22px 50px; border-radius: 20px; 
+                font-weight: 900; font-size: 1.3rem; cursor: pointer; 
+                box-shadow: 0 15px 35px rgba(0, 82, 204, 0.3); transition: 0.4s;
+            }
+            .main-btn:hover { transform: translateY(-5px); filter: brightness(1.1); box-shadow: 0 20px 45px rgba(0, 82, 204, 0.4); }
+
+            /* Loading State */
+            #loading { display: none; flex-direction: column; align-items: center; gap: 20px; padding: 60px 0; }
+            .spinner { 
+                border: 6px solid #f1f5f9; border-top: 6px solid #0052cc; border-radius: 50%; 
+                width: 60px; height: 60px; animation: spin 1s linear infinite; 
+            }
             @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-            #result { display: none; padding: 40px; background: #f8fafc; border-radius: 25px; margin-top: 30px; animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-            @keyframes pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-            .emoji { font-size: 5rem; margin-bottom: 10px; }
-            .res-text { font-size: 2rem; font-weight: 900; color: #0052cc; }
+            /* Result Presentation */
+            #result { 
+                display: none; padding: 60px 40px; background: #f8fafc; border-radius: 35px; 
+                margin-top: 40px; border: 1px solid #eef2f7;
+                animation: pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            }
+            @keyframes pop { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+            .res-emoji { font-size: 8rem; margin-bottom: 20px; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.1)); }
+            .res-name { font-size: 3rem; font-weight: 950; color: #0052cc; margin-bottom: 10px; }
+            .res-score { font-size: 1.4rem; font-weight: 700; color: #64748b; margin-bottom: 40px; }
+
+            /* Share Buttons */
+            .share-group { display: flex; justify-content: center; gap: 12px; margin-bottom: 30px; }
+            .share-btn { 
+                padding: 14px 24px; border-radius: 14px; border: none; cursor: pointer; 
+                font-weight: 800; transition: 0.3s; display: flex; align-items: center; gap: 8px; color: white;
+            }
+            .twitter { background: #1da1f2; }
+            .facebook { background: #1877f2; }
+            .download { background: #0052cc; }
+            .share-btn:hover { transform: translateY(-3px); filter: brightness(1.1); }
+
+            .reset-btn { 
+                background: none; border: 2px solid #e2e8f0; color: #64748b; 
+                padding: 14px 30px; border-radius: 15px; cursor: pointer; font-weight: 700; margin-top: 20px;
+            }
+            .reset-btn:hover { background: #f1f5f9; color: #1e293b; }
         </style>
 
         <div class="card">
             <h1>${t.h1}</h1>
-            <p class="desc">${t.p1}</p>
+            <p class="subtitle">${t.p1}</p>
 
-            <div class="gender-group">
-                <button class="gender-btn" data-gender="male">♂ ${t.male}</button>
-                <button class="gender-btn" data-gender="female">♀ ${t.female}</button>
+            <div id="setup-view">
+                <span class="section-label">${t.gender}</span>
+                <div class="gender-group">
+                    <button class="gender-btn male active" data-gender="male">♂ ${t.male}</button>
+                    <button class="gender-btn female" data-gender="female">♀ ${t.female}</button>
+                </div>
+
+                <div class="upload-container">
+                    <div class="upload-box" id="drop-zone">
+                        <span class="upload-icon">📸</span>
+                        <p>${t.uploadHint}</p>
+                        <button class="custom-btn">${t.uploadBtn}</button>
+                        <input type="file" id="file-input" accept="image/*" style="display:none">
+                    </div>
+                </div>
+
+                <div id="preview-container">
+                    <img id="preview">
+                    <button class="main-btn" id="predict-btn">${t.btn}</button>
+                </div>
+
+                <p style="margin-top:30px; font-size:0.9rem; color:#94a3b8;">${t.privacy}</p>
             </div>
-
-            <div class="upload-box" id="drop-zone">
-                <p>${t.upload}</p>
-                <input type="file" id="file-input" accept="image/*" style="display:none">
-            </div>
-
-            <img id="preview">
-            <button class="submit-btn" id="predict-btn">${t.btn}</button>
 
             <div id="loading">
                 <div class="spinner"></div>
-                <p>${t.analyzing}</p>
-                <small style="color:#94a3b8">${t.privacy}</small>
+                <p style="font-weight:700; color:#0052cc;">${t.analyzing}</p>
             </div>
 
             <div id="result">
-                <div class="emoji" id="res-emoji"></div>
-                <div class="res-text" id="res-name"></div>
-                <div id="res-score" style="margin: 10px 0 30px 0; font-weight: 600; color: #64748b;"></div>
-                <button class="gender-btn" id="reset-btn">${t.retake}</button>
+                <span class="section-label">${t.resultTitle}</span>
+                <div class="res-emoji" id="res-emoji"></div>
+                <div class="res-name" id="res-name"></div>
+                <div class="res-score" id="res-score"></div>
+                
+                <span class="section-label">${t.shareTitle}</span>
+                <div class="share-group">
+                    <button class="share-btn twitter" id="share-tw">Twitter</button>
+                    <button class="share-btn facebook" id="share-fb">Facebook</button>
+                    <button class="share-btn download" id="btn-save">${t.download}</button>
+                </div>
+
+                <button class="reset-btn" id="reset-btn">${t.retake}</button>
             </div>
         </div>
         `;
@@ -112,19 +199,36 @@ class AnimalFaceTest extends HTMLElement {
         const predictBtn = root.getElementById('predict-btn');
         const resetBtn = root.getElementById('reset-btn');
 
+        // File Selection Logic
         dropZone.onclick = () => fileInput.click();
         fileInput.onchange = (e) => this.handleFile(e.target.files[0]);
         
-        predictBtn.onclick = () => this.predict();
-        resetBtn.onclick = () => this.reset();
+        // Drag & Drop
+        dropZone.ondragover = (e) => { e.preventDefault(); dropZone.classList.add('dragover'); };
+        dropZone.ondragleave = () => dropZone.classList.remove('dragover');
+        dropZone.ondrop = (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            this.handleFile(e.dataTransfer.files[0]);
+        };
 
-        root.querySelectorAll('.gender-btn[data-gender]').forEach(btn => {
+        // Gender Selection
+        root.querySelectorAll('.gender-btn').forEach(btn => {
             btn.onclick = () => {
                 root.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 this._selectedGender = btn.dataset.gender;
             };
         });
+
+        // Action Buttons
+        predictBtn.onclick = () => this.predict();
+        resetBtn.onclick = () => this.reset();
+
+        // Share Buttons
+        root.getElementById('share-tw').onclick = () => this.share('twitter');
+        root.getElementById('share-fb').onclick = () => this.share('facebook');
+        root.getElementById('btn-save').onclick = () => this.downloadResult();
     }
 
     handleFile(file) {
@@ -134,37 +238,64 @@ class AnimalFaceTest extends HTMLElement {
         reader.onload = (e) => {
             const preview = this.shadowRoot.getElementById('preview');
             preview.src = e.target.result;
-            preview.style.display = 'block';
-            this.shadowRoot.getElementById('drop-zone').style.display = 'none';
-            this.shadowRoot.getElementById('predict-btn').style.display = 'block';
+            this.shadowRoot.getElementById('drop-zone').parentElement.style.display = 'none';
+            this.shadowRoot.getElementById('preview-container').style.display = 'flex';
         };
         reader.readAsDataURL(file);
     }
 
     async loadModel() {
         if (window.tmImage) {
-            this._model = await window.tmImage.load(this._modelUrl + "model.json", this._modelUrl + "metadata.json");
+            try {
+                this._model = await window.tmImage.load(this._modelUrl + "model.json", this._modelUrl + "metadata.json");
+            } catch(e) { console.error("Model load error", e); }
         }
     }
 
     async predict() {
         if (!this._model) return;
         const root = this.shadowRoot;
-        root.getElementById('predict-btn').style.display = 'none';
+        root.getElementById('preview-container').style.display = 'none';
         root.getElementById('loading').style.display = 'flex';
 
-        const prediction = await this._model.predict(root.getElementById('preview'));
-        prediction.sort((a, b) => b.probability - a.probability);
+        try {
+            const prediction = await this._model.predict(root.getElementById('preview'));
+            prediction.sort((a, b) => b.probability - a.probability);
 
-        const top = prediction[0];
-        const confidence = (top.probability * 100).toFixed(2);
-        const data = this._animalData[top.className.trim()] || { emoji: '❓', kor: top.className };
+            const top = prediction[0];
+            const confidence = (top.probability * 100).toFixed(2);
+            const data = this._animalData[top.className.trim()] || { emoji: '❓', kor: top.className };
 
-        root.getElementById('loading').style.display = 'none';
-        root.getElementById('result').style.display = 'block';
-        root.getElementById('res-emoji').innerText = data.emoji;
-        root.getElementById('res-name').innerText = data.kor;
-        root.getElementById('res-score').innerText = `매칭률: ${confidence}%`;
+            this._lastResult = { name: data.kor, emoji: data.emoji, score: confidence };
+
+            root.getElementById('loading').style.display = 'none';
+            root.getElementById('result').style.display = 'block';
+            root.getElementById('res-emoji').innerText = data.emoji;
+            root.getElementById('res-name').innerText = data.kor;
+            root.getElementById('res-score').innerText = `매칭률: ${confidence}%`;
+        } catch(e) {
+            alert("분석 중 오류가 발생했습니다.");
+            this.reset();
+        }
+    }
+
+    share(platform) {
+        const res = this._lastResult;
+        const text = `저는 ${res.name} 입니다! (${res.score}% 확률) #동물상테스트 #TrackingSA`;
+        const url = window.location.href;
+        if (platform === 'twitter') {
+            window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`);
+        } else {
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}`);
+        }
+    }
+
+    downloadResult() {
+        const preview = this.shadowRoot.getElementById('preview');
+        const link = document.createElement('a');
+        link.href = preview.src;
+        link.download = `animal_face_${this._lastResult.name}.png`;
+        link.click();
     }
 
     reset() {
