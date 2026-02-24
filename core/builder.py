@@ -17,14 +17,22 @@ def process_html_file_for_common_elements(filepath):
         with open(filepath, "r", encoding="utf-8") as f:
             content = f.read()
 
-        # 1. CLEANUP: 낡은 태그들만 최소한으로 제거
-        content = content.replace('</head>', f'{get_common_head()}\n</head>')
+        # CSS 내용을 읽어서 직접 주입 (경로 문제 원천 차단)
+        css_content = ""
+        if os.path.exists("style.css"):
+            with open("style.css", "r", encoding="utf-8") as css_f:
+                css_content = f"<style>\n{css_f.read()}\n</style>"
+
+        # 1. HEAD 주입
+        head_html = get_common_head()
+        content = content.replace('</head>', f'{head_html}\n{css_content}\n</head>')
         
+        # 2. HEADER 주입
         header_html = get_common_header()
-        # 정규표현식 대신 단순 치환 사용
         if '<body>' in content:
             content = content.replace('<body>', f'<body>\n{header_html}')
         
+        # 3. FOOTER 주입
         if '</body>' in content:
             content = content.replace('</body>', f'{get_common_footer()}\n</body>')
 
