@@ -44,15 +44,16 @@ jobs:
           # 2. Final build from Firestore data
           python main.py --build-only
 
-      - name: Deploy to Firebase Hosting
-        uses: FirebaseExtended/action-hosting-deploy@v0
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
         with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}'
-          channelId: live
-          projectId: tracking-sa-77928
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: 'tracking-sa' # Cloudflare에 등록된 프로젝트 이름
+          directory: 'public'
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Commit Log changes
+      - name: Commit Log changes (Keep only the history)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -60,8 +61,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Only commit the log file to keep the repository clean.
-          # Articles are now in Firebase and HIDDEN from Git main branch.
+          # 뉴스 파일은 올리지 않고, 어떤 뉴스를 처리했는지 기록하는 로그만 유지합니다.
           git add processed_articles.log
 
           if git diff --cached --quiet; then
