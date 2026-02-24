@@ -25,25 +25,39 @@ function selectManuals(request) {
  */
 function saveFiles(code, defaultFolder) {
     const rootDir = path.resolve(__dirname, '..');
-    const blocks = code.match(/```(?:html|css|js|javascript)[\s\S]*?```/g) || [];
+    const blocks = code.match(/```(?:html|css|js|javascript|python|py)[\s\S]*?```/g) || [];
     
     blocks.forEach(block => {
         const lines = block.split('\n');
         // 파일명 힌트 찾기 (예: /* news/style.css */ 또는 <!-- news/index.html -->)
-        const hintMatch = block.match(/(?:\/\*|<!--)\s*([a-zA-Z0-9._\-\/]+)\s*(?:\*\/|-->)/);
+        const hintMatch = block.match(/(?:\/\*|<!--|\/\/|#)\s*([a-zA-Z0-9._\-\/]+)\s*(?:\*\/|-->|)/);
         let fileName = hintMatch ? hintMatch[1].trim() : '';
         
         // 블록 타입별 기본 파일명 결정
         if (!fileName) {
             if (block.includes('```html')) fileName = 'index.html';
             else if (block.includes('```css')) fileName = 'style.css';
+            else if (block.includes('```python') || block.includes('```py')) fileName = 'script.py';
             else fileName = 'script.js';
         }
 
         const cleanCode = lines.slice(1, -1).join('\n').trim();
-        const targetPath = path.join(rootDir, fileName.includes('/') ? fileName : path.join(defaultFolder, fileName));
         
-        fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+        // [FIX] 절대 경로가 아닌 경우 defaultFolder를 붙여서 안전한 상대 경로 생성
+        const relativePath = fileName.includes('/') ? fileName : path.join(defaultFolder, fileName);
+        const targetPath = path.join(rootDir, relativePath);
+        
+        // [FIX] 파일 자체가 폴더로 인식되는 것을 방지: 부모 디렉토리만 생성
+        const parentDir = path.dirname(targetPath);
+        if (!fs.existsSync(parentDir)) {
+            fs.mkdirSync(parentDir, { recursive: true });
+        }
+        
+        // [FIX] 만약 해당 경로에 이미 폴더가 있다면 (에러 상황), 파일 쓰기 전 삭제 시도
+        if (fs.existsSync(targetPath) && fs.lstatSync(targetPath).isDirectory()) {
+            fs.rmSync(targetPath, { recursive: true, force: true });
+        }
+
         fs.writeFileSync(targetPath, cleanCode);
         console.log(`💾 Saved: ${targetPath}`);
     });

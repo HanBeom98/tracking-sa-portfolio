@@ -228,7 +228,7 @@ def copy_static_assets():
                             process_html_file_for_common_elements(os.path.join(root, file))
 
 def generate_public_site():
-    if os.path.exists(PUBLIC_DIR): shutil.rmtree(PUBLIC_DIR)
+    # Don't delete everything, just ensure the directory exists
     os.makedirs(PUBLIC_DIR, exist_ok=True)
     copy_static_assets()
     
