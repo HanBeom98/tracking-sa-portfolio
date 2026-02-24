@@ -60,3 +60,122 @@ body.home-page header nav,
 body.home-page header .site-logo-link {
     display: none !important;
 }
+
+/* --- Premium News Hub Styles --- */
+.news-section-main {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.hero-card {
+    position: relative;
+    background: oklch(25% 0.05 260);
+    border-radius: 24px;
+    padding: 60px 40px;
+    margin-bottom: 50px;
+    overflow: hidden;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: 400px;
+    transition: transform 0.4s ease;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+.hero-card:hover { transform: translateY(-5px); }
+
+.hero-badge {
+    position: absolute;
+    top: 30px;
+    left: 40px;
+    background: oklch(55% 0.18 260);
+    padding: 6px 16px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.hero-card-title {
+    font-size: 2.5rem;
+    line-height: 1.2;
+    margin: 20px 0;
+    font-weight: 800;
+}
+
+.hero-card-title a { color: white; text-decoration: none; }
+
+.hero-card-date { opacity: 0.7; font-size: 0.95rem; }
+
+.section-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.news-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 30px;
+}
+
+.news-card-premium {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    transition: all 0.3s ease;
+    border: 1px solid oklch(95% 0.01 260);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.news-card-premium:hover {
+    transform: translateY(-8px);
+    border-color: oklch(55% 0.18 260);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+
+.premium-icon-box {
+    width: 45px;
+    height: 45px;
+    background: oklch(96% 0.02 260);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: oklch(55% 0.18 260);
+}
+
+.news-title-text {
+    font-size: 1.2rem;
+    line-height: 1.5;
+    font-weight: 700;
+    margin: 0;
+}
+
+.news-date-box { font-size: 0.85rem; color: oklch(60% 0.02 260); }
+
+.pagination { margin-top: 60px; display: flex; justify-content: center; align-items: center; gap: 20px; }
+
+.pagination-button {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border: 1px solid oklch(90% 0.02 260);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: inherit;
+}
+
+.pagination-button:hover { background: oklch(25% 0.05 260); color: white; }
