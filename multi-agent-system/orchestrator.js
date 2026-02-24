@@ -111,8 +111,11 @@ export async function executeWorkflow(userRequest, projectContext) {
             // 3. Review
             state.review = await runReviewer(state.finalCode, iterationContext);
             
-            // If the UI is getting better (or it's the first time), save it as the best reference
-            if (state.iteration === 1 || (state.review.preserve && state.review.preserve.toLowerCase().includes('design'))) {
+            // Robust check for preserve string
+            const hasPreserve = state.review.preserve && typeof state.review.preserve === 'string';
+
+            // If the UI is getting better, save it as the best reference
+            if (state.iteration === 1 || (hasPreserve && state.review.preserve.toLowerCase().includes('design'))) {
                 state.bestUiSoFar = state.uiCode;
             }
 
@@ -120,8 +123,8 @@ export async function executeWorkflow(userRequest, projectContext) {
                 console.log(`✅ Approved on iteration ${state.iteration}!`);
                 break;
             } else {
-                console.log(`❌ Rejected. Comments: ${state.review.comments}`);
-                if (state.review.preserve) console.log(`⭐ Preserving: ${state.review.preserve}`);
+                console.log(`❌ Rejected. Comments: ${state.review.comments || 'No comments'}`);
+                if (hasPreserve) console.log(`⭐ Preserving: ${state.review.preserve}`);
             }
         }
 
