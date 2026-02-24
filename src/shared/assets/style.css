@@ -58,6 +58,22 @@ nav a, .dropbtn {
 }
 nav a:hover { color: var(--p-blue); }
 
+/* --- Footer --- */
+footer {
+    margin-top: 80px;
+    padding: 40px 20px;
+    text-align: center;
+    background: white;
+    border-top: 1px solid oklch(95% 0.01 260);
+    color: var(--text-sub);
+}
+footer a {
+    color: var(--text-sub);
+    text-decoration: none;
+    font-weight: 700;
+}
+footer a:hover { color: var(--p-blue); }
+
 /* --- CENTERED CONTENT LAYOUT --- */
 main {
     width: 100%;

@@ -106,6 +106,8 @@ const translations = {
         'tile_512': 'Super AI',
         'tile_1024': 'Singularity',
         'tile_2048': 'AI Overlord',
+        'ai_tendency_test_h1': 'AI Tendency Test',
+        'ai_tendency_test_p1': 'Find your AI style with a few quick questions.',
         'sitemap': '사이트맵',
         'lucky_recommendation': '행운의 추천',
         'lucky_recommendation_title': '오늘의 행운 추천 - Tracking SA',

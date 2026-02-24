@@ -103,12 +103,12 @@ class AiTestPremium extends HTMLElement {
         this.shadowRoot.innerHTML = `
         <style>
             :host { 
-                display: block; width: 100%; max-width: 650px; margin: 0 auto; 
+                display: block; width: 100%; max-width: 700px; margin: 0 auto; 
                 font-family: 'Pretendard Variable', 'Pretendard', system-ui, sans-serif; 
                 -webkit-font-smoothing: antialiased; color: oklch(20% 0 0);
             }
             .card {
-                background: white; border-radius: 40px; padding: 60px 50px;
+                background: white; border-radius: 32px; padding: 40px 36px;
                 box-shadow: 0 30px 100px oklch(20% 0.1 260 / 8%); 
                 border: 1px solid oklch(95% 0.02 260);
                 text-align: center; position: relative; overflow: hidden;
@@ -120,22 +120,22 @@ class AiTestPremium extends HTMLElement {
             }
             
             h1 { 
-                font-size: 2.5rem; font-weight: 950; 
+                font-size: 2.1rem; font-weight: 900; 
                 background: linear-gradient(135deg, oklch(45% 0.2 260), oklch(30% 0.15 260)); 
                 -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
                 margin-bottom: 10px; letter-spacing: -0.04em; 
             }
-            .subtitle { color: oklch(60% 0.05 260); font-weight: 600; margin-bottom: 40px; font-size: 1.1rem; }
+            .subtitle { color: oklch(60% 0.05 260); font-weight: 600; margin-bottom: 32px; font-size: 1rem; }
 
-            .progress-container { width: 100%; height: 10px; background: oklch(96% 0.01 260); border-radius: 20px; margin-bottom: 50px; overflow: hidden; }
+            .progress-container { width: 100%; height: 10px; background: oklch(96% 0.01 260); border-radius: 20px; margin-bottom: 36px; overflow: hidden; }
             .progress-fill { height: 100%; background: oklch(50% 0.2 260); transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
 
-            .q-text { font-size: 1.4rem; font-weight: 800; color: oklch(25% 0.02 260); margin-bottom: 40px; line-height: 1.6; word-break: keep-all; }
+            .q-text { font-size: 1.2rem; font-weight: 800; color: oklch(25% 0.02 260); margin-bottom: 28px; line-height: 1.6; word-break: keep-all; }
             
-            .options { display: grid; gap: 15px; }
+            .options { display: grid; gap: 12px; }
             .opt-btn {
-                padding: 22px 30px; border-radius: 20px; border: 2px solid oklch(93% 0.02 260);
-                background: oklch(99% 0.01 260); cursor: pointer; font-size: 1.1rem; font-weight: 700;
+                padding: 18px 22px; border-radius: 16px; border: 2px solid oklch(93% 0.02 260);
+                background: oklch(99% 0.01 260); cursor: pointer; font-size: 1rem; font-weight: 700;
                 transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); color: oklch(45% 0.05 260);
                 position: relative; overflow: hidden;
             }
@@ -155,8 +155,8 @@ class AiTestPremium extends HTMLElement {
                 background: oklch(95% 0.05 260); color: oklch(50% 0.2 260); 
                 font-weight: 900; font-size: 0.9rem; margin-bottom: 20px; text-transform: uppercase;
             }
-            .res-icon { font-size: 7rem; margin: 30px 0; filter: drop-shadow(0 20px 40px rgba(0,0,0,0.1)); display: block; }
-            .res-name { font-size: 3.5rem; font-weight: 950; margin-bottom: 15px; letter-spacing: -0.05em; }
+            .res-icon { font-size: 5.5rem; margin: 24px 0; filter: drop-shadow(0 20px 40px rgba(0,0,0,0.1)); display: block; }
+            .res-name { font-size: 2.6rem; font-weight: 900; margin-bottom: 12px; letter-spacing: -0.04em; }
             .res-desc { 
                 font-size: 1.25rem; line-height: 1.8; color: oklch(45% 0.05 260); 
                 margin-bottom: 50px; word-break: keep-all; max-width: 80%; margin-left: auto; margin-right: auto;
