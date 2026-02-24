@@ -130,7 +130,7 @@ def generate_index_html(articles_on_page, current_page, total_pages, lang='ko'):
         grid_articles = articles_on_page[1:]
         hero_card_html = f"""
             <article class="hero-card">
-                <div class="hero-badge">LATEST NEWS</div>
+                <div class="hero-badge" data-i18n="latest_news">LATEST NEWS</div>
                 <h2 class="hero-card-title"><a href="/{hero['url']}">{hero['title']}</a></h2>
                 <div class="hero-card-meta">
                     <span class="hero-card-date"><i class="far fa-calendar-alt"></i> {hero['date']}</span>
@@ -150,7 +150,7 @@ def generate_index_html(articles_on_page, current_page, total_pages, lang='ko'):
                     <h2 class="news-title-text">{article['title']}</h2>
                     <div class="news-card-footer">
                         <span class="news-date-box">{article['date']}</span>
-                        <span class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></span>
+                        <span class="read-more-btn" data-i18n="check_now">Read More <i class="fas fa-arrow-right"></i></span>
                     </div>
                 </div>
             </a>"""
