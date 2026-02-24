@@ -61,9 +61,10 @@ export async function executeWorkflow(userRequest, projectContext) {
         uiCode: '',
         logicCode: '',
         finalCode: '',
-        review: { approved: false, comments: '' },
+        review: { approved: false, comments: '', preserve: '' },
         iteration: 0,
-        maxIterations: 3
+        maxIterations: 3,
+        bestUiSoFar: ''
     };
 
     try {
@@ -71,7 +72,6 @@ export async function executeWorkflow(userRequest, projectContext) {
         state.plan = await runPlanner(state, userRequest, enrichedContext);
         console.log('✅ Plan Created:', state.plan);
 
-        // Extract folder name robustly (handles both strings like "folder: name" and objects like { folder: "name" })
         let folderName = 'new-feature';
         for (const step of state.plan) {
             if (typeof step === 'string' && step.toLowerCase().includes('folder:')) {
@@ -83,43 +83,51 @@ export async function executeWorkflow(userRequest, projectContext) {
             }
         }
 
-        // 2. Specialized Coding & Self-Healing Loop (Tiki-Taka)
+        // 2. Specialized Coding & Self-Healing Loop
         while (state.iteration < state.maxIterations) {
             state.iteration++;
             console.log(`\n🔄 --- Workflow Iteration ${state.iteration}/${state.maxIterations} ---`);
 
+            let iterationContext = enrichedContext;
             if (state.review.comments) {
-                console.log(`📝 Applying Reviewer Feedback: ${state.review.comments.substring(0, 100)}...`);
-                // Feed back the rejection reasons to the team
-                enrichedContext += `\n\n### ⚠️ PREVIOUS ATTEMPT FAILED!\nReviewer Feedback: ${state.review.comments}\nPlease FIX these issues in this iteration.`;
+                iterationContext += `\n\n### ⚠️ ATTENTION: PREVIOUS ATTEMPT REJECTED!`;
+                iterationContext += `\n**Critical Issues to Fix**: ${state.review.comments}`;
+                
+                if (state.review.preserve) {
+                    iterationContext += `\n**SUCCESSFUL PARTS TO PRESERVE (DO NOT CHANGE)**: ${state.review.preserve}`;
+                    iterationContext += `\n**Reference for Preservation**: \n${state.bestUiSoFar}`;
+                }
             }
 
             // 2a. UI Architect
-            state.uiCode = await runUIArchitect(state, enrichedContext);
+            state.uiCode = await runUIArchitect(state, iterationContext);
             
             // 2b. Logic Engineer
-            state.logicCode = await runLogicEngineer(state, enrichedContext);
+            state.logicCode = await runLogicEngineer(state, iterationContext);
 
             // 2c. Integrator
-            state.finalCode = await runIntegrator(state, enrichedContext);
+            state.finalCode = await runIntegrator(state, iterationContext);
 
             // 3. Review
-            state.review = await runReviewer(state.finalCode, enrichedContext);
+            state.review = await runReviewer(state.finalCode, iterationContext);
             
+            // If the UI is getting better (or it's the first time), save it as the best reference
+            if (state.iteration === 1 || (state.review.preserve && state.review.preserve.toLowerCase().includes('design'))) {
+                state.bestUiSoFar = state.uiCode;
+            }
+
             if (state.review.approved) {
                 console.log(`✅ Approved on iteration ${state.iteration}!`);
                 break;
             } else {
-                console.log(`❌ Rejected on iteration ${state.iteration}. Comments: ${state.review.comments}`);
-                if (state.iteration === state.maxIterations) {
-                    console.log('⚠️ Max iterations reached. Proceeding with best effort.');
-                }
+                console.log(`❌ Rejected. Comments: ${state.review.comments}`);
+                if (state.review.preserve) console.log(`⭐ Preserving: ${state.review.preserve}`);
             }
         }
 
         // 4. Final Storage
         saveFiles(state.finalCode, folderName);
-        console.log(`💾 Final files saved to folder: ${folderName}`);
+        console.log(`💾 Files saved to folder: ${folderName}`);
 
         return state;
     } catch (error) {
