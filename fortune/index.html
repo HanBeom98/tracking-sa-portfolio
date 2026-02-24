@@ -1,38 +1,15 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title data-i18n="fortunePremiumTitle">Fortune Premium</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="translations.js"></script>
-  <script>
-    function applyTranslations() {
-      const elements = document.querySelectorAll('[data-i18n]');
-      elements.forEach(element => {
-        const key = element.getAttribute('data-i18n');
-        element.textContent = translations[key] || key; // Use key as fallback
-      });
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      applyTranslations();
-    });
-  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="saju_test_title">AI 오늘의 운세 - Tracking SA</title>
 </head>
 <body>
-  <header>
-    <!-- Header content -->
-  </header>
-  <main>
-    <fortune-premium>
-      <h2 data-i18n="premiumFortune">오늘의 프리미엄 운세</h2>
-      <p data-i18n="checkSpecialFortune">나만을 위한 특별한 운세를 확인하세요.</p>
-    </fortune-premium>
-  </main>
-  <footer>
-    <!-- Footer content -->
-  </footer>
-  <script src="fortune_premium/script.js"></script>
+    <main style="padding: 40px 20px; min-height: 60vh;">
+        <h1 data-i18n="saju_title" style="text-align: center; color: var(--primary); font-weight: 900; margin-bottom: 40px;">AI 오늘의 운세</h1>
+        <fortune-premium></fortune-premium>
+    </main>
+    <script src="./fortune.js" type="module"></script>
 </body>
 </html>
