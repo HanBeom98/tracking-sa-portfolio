@@ -92,7 +92,6 @@ COMMON_BODY_INJECTIONS = """
     <div class="desktop-menu-container" id="slide-out-menu"> <!-- This container now serves as the slide-out for mobile -->
         <nav>
             <ul>
-                <li><a href="/" data-i18n="news_home">홈</a></li>
                 <li class="dropdown">
                     <a href="#" class="dropbtn" data-i18n="menu_test">테스트</a>
                     <div class="dropdown-content">
