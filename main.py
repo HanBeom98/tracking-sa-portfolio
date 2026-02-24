@@ -726,11 +726,26 @@ def copy_static_assets():
         src_dir = dir_name
         dest_dir = os.path.join(PUBLIC_DIR, dir_name)
         if os.path.isdir(src_dir):
-            shutil.copytree(src_dir, dest_dir, dirs_exist_ok=True)
+            # Special handling for 'news' directory to avoid overwriting generated index files
+            if dir_name == "news":
+                os.makedirs(dest_dir, exist_ok=True)
+                for item in os.listdir(src_dir):
+                    if item in ["index.html", "index-en.html"]: continue # Skip templates
+                    s = os.path.join(src_dir, item)
+                    d = os.path.join(dest_dir, item)
+                    if os.path.isdir(s):
+                        shutil.copytree(s, d, dirs_exist_ok=True)
+                    else:
+                        shutil.copy2(s, d)
+            else:
+                shutil.copytree(src_dir, dest_dir, dirs_exist_ok=True)
+            
             # After copying, process the index.html within the directory
-            index_html_path = os.path.join(dest_dir, 'index.html')
-            if os.path.exists(index_html_path):
-                process_html_file_for_common_elements(index_html_path)
+            # (except for 'news' which we handle via generate_index_html)
+            if dir_name != "news":
+                index_html_path = os.path.join(dest_dir, 'index.html')
+                if os.path.exists(index_html_path):
+                    process_html_file_for_common_elements(index_html_path)
 
 def create_ads_txt():
     ads_txt_content = f"google.com, {ADSENSE_CLIENT_ID}, DIRECT, f08c47fec0942fa0"
