@@ -28,6 +28,10 @@ Evolving Tracking-sa into a premium, framework-less web platform using a special
 ### 3. Global UI/UX Optimization
 - **Typography**: Applied global font smoothing and Pretendard font stack.
 - **Navigation**: Restored global header/footer styles through the automated builder.
+- **Spacing**: Added global main padding to prevent header/content crowding.
+- **Language Switcher**: Stabilized button layout to avoid position shifts.
+- **AI Tendency Test**: Fixed English i18n keys and reduced UI scale to match fortune page.
+- **Animal Face Test**: Removed placeholder header/footer and invalid navigation script.
 
 ## 🧭 Architecture Reality Check (2026-02-24)
 - **DDD folder names exist, but DDD layers do not**: `src/domains` currently maps to pages/features, not `domain/application/infrastructure` layers.
@@ -67,6 +71,10 @@ Evolving Tracking-sa into a premium, framework-less web platform using a special
 - [x] Restore Teachable Machine scripts for animal-face functionality.
 - [x] Add English translations for AI tendency test intro.
 - [x] Reduce AI tendency test UI scale to match fortune.
+- [x] Add global main padding (top/bottom) for consistent page spacing.
+- [x] Fix AI tendency test English keys and result/reset labels.
+- [x] Stabilize language switcher width to prevent button shift.
+- [x] Clean animal-face page: remove placeholder header/footer and invalid nav script.
 - [x] Style footer for consistent layout.
 - [x] Expose translations on window for AI test component.
 - [x] Restore scheduled news generation in GitHub Actions (schedule only).
