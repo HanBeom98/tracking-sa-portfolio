@@ -15,9 +15,12 @@ def process_html_file_for_common_elements(filepath):
         with open(filepath, "r", encoding="utf-8") as f:
             content = f.read()
 
-        # Clean old injections
+        # Clean old injections to prevent duplicates
         content = re.sub(r'<header[\s\S]*?</header>', '', content, flags=re.DOTALL)
         content = re.sub(r'<footer>[\s\S]*?</footer>', '', content, flags=re.DOTALL)
+        content = re.sub(r'<script src="/translations.js"></script>', '', content)
+        content = re.sub(r'<script src="/common.js"></script>', '', content)
+        content = re.sub(r'<style>[\s\S]*?/\* --- Tracking SA PREMIUM DESIGN SYSTEM[\s\S]*?</style>', '', content)
 
         css_inline = ""
         if os.path.exists("style.css"):
@@ -28,8 +31,8 @@ def process_html_file_for_common_elements(filepath):
             content = content.replace('</head>', f'{get_common_head()}\n{css_inline}\n</head>')
         
         header_html = get_common_header()
-        header_scripts = '\n<script src="/translations.js"></script>\n<script src="/common.js"></script>\n'
-        content = re.sub(r'(<body[^>]*>)', r'\1' + header_scripts + header_html, content, count=1, flags=re.IGNORECASE)
+        # Header scripts are already included in get_common_head() via head.html
+        content = re.sub(r'(<body[^>]*>)', r'\1' + header_html, content, count=1, flags=re.IGNORECASE)
         
         if '</body>' in content:
             content = content.replace('</body>', f'{get_common_footer()}\n</body>')
@@ -43,35 +46,39 @@ def generate_news_pages():
     """
     뉴스 도메인 전용 빌드 로직 (Firestore 연동)
     """
-    db = get_firestore_client()
-    if not db: return
-    
-    docs = list(db.collection('posts').order_by('createdAt', direction=firestore.Query.DESCENDING).limit(100).stream())
     articles = []
-    
-    # 기사 개별 페이지 생성
-    for doc in docs:
-        p = doc.to_dict()
-        title = p.get('titleKo', '제목 없음')
-        ukey = p.get('urlKey', 'news')
-        content = p.get('contentKo', '')
-        date = p.get('date', '2026-02-24')
-        
-        out_path = os.path.join(PUBLIC_DIR, f"{ukey}.html")
-        html = f"""<!DOCTYPE html>
+    try:
+        db = get_firestore_client()
+        if db:
+            docs = list(db.collection('posts').order_by('createdAt', direction=firestore.Query.DESCENDING).limit(100).stream())
+            # 기사 개별 페이지 생성
+            for doc in docs:
+                p = doc.to_dict()
+                title = p.get('titleKo', '제목 없음')
+                ukey = p.get('urlKey', 'news')
+                content = p.get('contentKo', '')
+                date = p.get('date', '2026-02-24')
+                
+                out_path = os.path.join(PUBLIC_DIR, f"{ukey}.html")
+                html = f"""<!DOCTYPE html>
 <html><head><meta charset="UTF-8"><title>{title}</title></head>
 <body><main class="news-section-main"><h1>{title}</h1><div>{markdown.markdown(content)}</div></main></body></html>"""
-        
-        with open(out_path, "w", encoding="utf-8") as f: f.write(html)
-        process_html_file_for_common_elements(out_path)
-        articles.append({'title': title, 'url': f"{ukey}.html", 'date': date})
+                
+                with open(out_path, "w", encoding="utf-8") as f: f.write(html)
+                process_html_file_for_common_elements(out_path)
+                articles.append({'title': title, 'url': f"{ukey}.html", 'date': date})
+    except Exception as e:
+        print(f"⚠️ [NEWS BUILD WARNING] Skipping individual articles due to DB error: {e}")
 
-    # 뉴스 인덱스 페이지 생성 (src/domains/news/index.html 기반)
+    # 뉴스 인덱스 페이지 생성 (데이터 유무와 상관없이 보장)
     idx_tmpl = "src/domains/news/index.html"
     if os.path.exists(idx_tmpl):
         with open(idx_tmpl, "r", encoding="utf-8") as f: base_html = f.read()
-        grid_items = "".join([f'<a href="/{a["url"]}" class="news-card-premium"><h2>{a["title"]}</h2></a>' for a in articles])
-        final_html = base_html.replace("<!-- NEWS_INJECTION_POINT -->", f'<div class="news-grid">{grid_items}</div>')
+        if articles:
+            grid_items = "".join([f'<a href="/{a["url"]}" class="news-card-premium"><h2>{a["title"]}</h2></a>' for a in articles])
+            final_html = base_html.replace("<!-- NEWS_INJECTION_POINT -->", f'<div class="news-grid">{grid_items}</div>')
+        else:
+            final_html = base_html.replace("<!-- NEWS_INJECTION_POINT -->", '<div class="news-empty">아직 등록된 기사가 없습니다.</div>')
         
         dest_idx = os.path.join(PUBLIC_DIR, "news", "index.html")
         os.makedirs(os.path.dirname(dest_idx), exist_ok=True)
