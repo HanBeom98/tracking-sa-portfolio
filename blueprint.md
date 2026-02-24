@@ -60,6 +60,7 @@ Evolving Tracking-sa into a premium, framework-less web platform using a special
 - [x] Remove inline style.css injection to prevent layout flicker.
 - [x] Wrap fortune/lucky content in container for consistent centering.
 - [x] Center container blocks globally to prevent left-shift.
+- [x] Move Pretendard font load to head to reduce layout shifts.
 
 ## ⚠️ Lessons Learned
 - **Path Resolution**: Always use absolute paths (`/`) for shared assets in deeply nested domain folders.
