@@ -147,6 +147,8 @@ def generate_index_html(articles_on_page, current_page, total_pages, lang='ko'):
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(updated_html)
+    
+    # [FIX] 뉴스 인덱스 페이지에도 공통 레이아웃 주입 프로세스 실행
     process_html_file_for_common_elements(output_path)
 
 def generate_sitemap(articles):
