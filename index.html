@@ -1,22 +1,150 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="news_home">뉴스 홈</title>
+    <title>Tracking SA - Search</title>
     <!-- CSS and other head elements will be injected by main.py -->
+    <script src="/search.js" defer></script>
+    <style>
+        .search-main-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 70vh;
+            padding: 20px;
+        }
+        .main-logo-area {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .main-logo-area svg {
+            width: 120px;
+            height: 120px;
+        }
+        .search-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+        }
+        .search-bar-wrapper {
+            display: flex;
+            align-items: center;
+            background: white;
+            border: 1px solid #dfe1e5;
+            border-radius: 30px;
+            padding: 5px 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .search-bar-wrapper:hover, .search-bar-wrapper:focus-within {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-color: transparent;
+        }
+        .search-bar-wrapper input {
+            border: none;
+            outline: none;
+            height: 45px;
+            flex: 1;
+            font-size: 1.1rem;
+            padding: 0 10px;
+        }
+        .search-icon {
+            color: #9aa0a6;
+            font-size: 1.2rem;
+        }
+        #searchResults {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 1000;
+            margin-top: 5px;
+            display: none;
+            overflow: hidden;
+            border: 1px solid #eee;
+        }
+        #searchResults.active {
+            display: block;
+        }
+        .search-result-item {
+            display: block;
+            padding: 15px 20px;
+            text-decoration: none;
+            color: #3c4043;
+            border-bottom: 1px solid #f1f3f4;
+            transition: background 0.2s;
+        }
+        .search-result-item:hover {
+            background: #f8f9fa;
+        }
+        .result-title {
+            font-weight: bold;
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+        .result-date {
+            font-size: 0.8rem;
+            color: #70757a;
+        }
+        .search-no-results {
+            padding: 20px;
+            text-align: center;
+            color: #70757a;
+        }
+        .category-nav {
+            margin-top: 40px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .cat-btn {
+            background: oklch(95% 0.02 240);
+            border: 1px solid #eee;
+            padding: 10px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            color: #3c4043;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .cat-btn:hover {
+            background: oklch(90% 0.05 240);
+            transform: translateY(-2px);
+        }
+    </style>
 </head>
 <body>
-    <div style="max-width: 1200px; margin: 20px auto; background-color: white; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); padding: 10px 20px; box-sizing: border-box;">
-        <script type="module" src="https://widgets.tradingview-widget.com/w/kr/tv-ticker-tape.js"></script>
-        <tv-ticker-tape symbols='FOREXCOM:SPXUSD,FOREXCOM:NSXUSD,FOREXCOM:DJI,FX:EURUSD,BITSTAMP:BTCUSD,BITSTAMP:ETHUSD,CMCMARKETS:GOLD'></tv-ticker-tape>
-    </div>
+    <main class="search-main-container">
+        <div class="main-logo-area">
+            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="48" stroke="#0052cc" stroke-width="4" fill="transparent"/>
+                <path d="M25 70L40 55L50 65L75 35" stroke="#0052cc" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="70" cy="35" r="12" stroke="#0052cc" stroke-width="6" fill="#0052cc"/>
+            </svg>
+            <h1 style="color: #0052cc; font-size: 2.5rem; margin-top: 10px;">Tracking SA</h1>
+        </div>
 
-    <main>
-        <!-- News content will be injected here by the Python script -->
+        <div class="search-container">
+            <div class="search-bar-wrapper">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="searchInput" placeholder="뉴스를 검색해보세요" autocomplete="off">
+            </div>
+            <div id="searchResults"></div>
+        </div>
+
+        <div class="category-nav">
+            <a href="/news/" class="cat-btn"><i class="fas fa-newspaper"></i> AI 뉴스</a>
+            <a href="/ai-test/" class="cat-btn"><i class="fas fa-brain"></i> AI 성향 테스트</a>
+            <a href="/fortune/" class="cat-btn"><i class="fas fa-crystal-ball"></i> AI 운세</a>
+            <a href="/tetris-game/" class="cat-btn"><i class="fas fa-gamepad"></i> 게임</a>
+        </div>
     </main>
-
+    <!-- Footer elements will be injected by main.py -->
 </body>
 </html>

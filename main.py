@@ -24,6 +24,7 @@ SITEMAP_PATH = os.path.join(PUBLIC_DIR, "sitemap.xml")
 BASE_URL = os.getenv("BASE_URL", "https://trackingsa.com/")
 
 STATIC_PAGES_FOR_SITEMAP = [
+    "news",
     "about",
     "contact",
     "inquiry",
@@ -33,7 +34,7 @@ STATIC_PAGES_FOR_SITEMAP = [
     "fortune",
     "edit",
     "write",
-    "post",
+    "post", "news",
     "lucky-recommendation",
     "tetris-game",
     "ai-evolution"
@@ -222,6 +223,9 @@ def _generate_sitemap(articles_info, total_pages_ko=1, total_pages_en=1):
     # Add base index pages
     url_entries.append(f"""    <url>
         <loc>{BASE_URL}index.html</loc>
+    </url>
+    <url>
+        <loc>{BASE_URL}news/index.html</loc>
         <lastmod>{current_date}</lastmod>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
@@ -393,7 +397,7 @@ def generate_article_html(md_content, title, date_str, output_path, hashtags_htm
 
 
 def generate_index_html(articles_on_page, current_page, total_pages, lang='ko'):
-    with open("index.html", "r", encoding="utf-8") as f:
+    with open("news/index.html", "r", encoding="utf-8") as f:
         base_html = f.read()
 
     # Meta tags based on language
@@ -462,9 +466,9 @@ def generate_index_html(articles_on_page, current_page, total_pages, lang='ko'):
     pagination_html = '<div class="pagination">'
     if current_page > 1:
         if lang == 'en':
-            prev_page_url = "index-en.html" if current_page == 2 else f"page-en-{current_page - 1}.html"
+            prev_page_url = "news/index-en.html" if current_page == 2 else f"page-en-{current_page - 1}.html"
         else:
-            prev_page_url = "index.html" if current_page == 2 else f"page-{current_page - 1}.html"
+            prev_page_url = "news/index.html" if current_page == 2 else f"page-{current_page - 1}.html"
         pagination_html += f'<a href="/{prev_page_url}" class="pagination-button prev" data-i18n="prev_button"><span class="arrow">←</span></a>'
     
     if total_pages > 1:
@@ -472,9 +476,9 @@ def generate_index_html(articles_on_page, current_page, total_pages, lang='ko'):
 
     if current_page < total_pages:
         if lang == 'en':
-            next_page_url = f"page-en-{current_page + 1}.html"
+            next_page_url = f"news/page-en-{current_page + 1}.html"
         else:
-            next_page_url = f"page-{current_page + 1}.html"
+            next_page_url = f"news/page-{current_page + 1}.html"
         pagination_html += f'<a href="/{next_page_url}" class="pagination-button next" data-i18n="next_button"><span class="arrow">→</span></a>'
     pagination_html += '</div>'
 
@@ -512,9 +516,9 @@ def generate_index_html(articles_on_page, current_page, total_pages, lang='ko'):
     )
     
     if lang == 'en':
-        output_filename = "index-en.html" if current_page == 1 else f"page-en-{current_page}.html"
+        output_filename = "news/index-en.html" if current_page == 1 else f"news/page-en-{current_page}.html"
     else:
-        output_filename = "index.html" if current_page == 1 else f"page-{current_page}.html"
+        output_filename = "news/index.html" if current_page == 1 else f"news/page-{current_page}.html"
         
     output_path = os.path.join(PUBLIC_DIR, output_filename)
     
@@ -667,13 +671,14 @@ def copy_static_assets():
     assets = [
         "style.css", "common.js", "translations.js", "firebase-config.js", 
         "logo.svg", "favicon.svg", 
-        "ai-test.js", "fortune.js", "edit.js", "post.js", "write.js", "main.js"
+        "ai-test.js", "fortune.js", "edit.js", "post.js", "write.js", "main.js", "search.js"
     ]
     
     # Directories to be copied
     asset_dirs = [
-        "fortune", "about", "ai-test", "animal_face_test", "contact", 
-        "edit", "inquiry", "post", "privacy-policy", "write", "lucky-recommendation",
+        "fortune", "news",
+    "about", "ai-test", "animal_face_test", "contact", 
+        "edit", "inquiry", "post", "news", "privacy-policy", "write", "lucky-recommendation",
         "tetris-game", "ai-evolution"
     ]
 
@@ -699,7 +704,7 @@ def copy_static_assets():
         src_dir = dir_name
         dest_dir = os.path.join(PUBLIC_DIR, dir_name)
         if os.path.isdir(src_dir):
-            shutil.copytree(src_dir, dest_dir)
+            shutil.copytree(src_dir, dest_dir, dirs_exist_ok=True)
             # After copying, process the index.html within the directory
             index_html_path = os.path.join(dest_dir, 'index.html')
             if os.path.exists(index_html_path):

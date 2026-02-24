@@ -22,6 +22,18 @@ The `tracking-sa` project is a web application with several HTML pages, CSS styl
 -   **SEO Enhancement:** Cleaned header, enhanced footer with sitemap/RSS links, and favicon generation logic.
 -   **Firebase Integration:** Added Firebase server configurations to `.idx/mcp.json` as required for the Firebase Studio environment.
 
+## Cloud Database & Build Architecture (Single Source of Truth)
+-   **SSOT (Single Source of Truth):** All news articles are now managed via **Firebase Firestore** (`posts` collection). Local `.md` files are no longer stored in Git.
+-   **Firestore Document Structure:** Documents use `urlKey` (format: `YYYY-MM-DD-slug`) as their ID. Fields include `date`, `slug`, `urlKey`, `titleKo`, `contentKo`, `titleEn`, `contentEn`, and `createdAt`.
+-   **Build Workflow:**
+    -   **Firestore-First:** The `main.py` script prioritizes Firestore for building static HTML files.
+    -   **Fallback:** Local `posts/*.md` files are only used if Firestore connection fails (e.g., missing credentials).
+    -   **GitHub Actions:** Automates news generation and storage into Firestore. Only `processed_articles.log` is committed back to Git to keep the repository clean.
+-   **Home Redesign:**
+    -   `index.html` is now a minimalist Google-style search engine hub.
+    -   `search.js` implements real-time Firestore prefix searching for article titles.
+    -   Original news list moved to `/news/index.html`.
+
 ## Current Task: Implement Multi-Agent AI System
 
 ### System Overview
@@ -58,3 +70,4 @@ Completed and operational. The system successfully connects to the Gemini API an
 사이트: trackingsa.com
 게임명: AI EVOLUTION 2...)
 - [2026-02-22 20:17:37] Feature updated: project-summary (Request:  너 뭘 만들었는지 설명해...)
+- [2026-02-24 03:19:20] Feature updated: google-search-home (Request: [DESIGN PRESERVATION MISSION] 1. 리모델링 대상: 루트 index...)
