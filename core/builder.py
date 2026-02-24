@@ -40,7 +40,10 @@ def process_html_file_for_common_elements(filepath):
         if '</head>' in content:
             content = content.replace('</head>', f'{get_common_head()}{extra_head}\n</head>')
         
-        content = re.sub(r'(<body[^>]*>)', r'\1\n' + get_common_header(), content, flags=re.IGNORECASE)
+        # Specific class for home page body to allow UI customizations
+        is_root_index = filepath.endswith('index.html') and os.path.dirname(filepath) == PUBLIC_DIR
+        body_class_attr = ' class="home-page"' if is_root_index else ''
+        content = re.sub(r'(<body[^>]*>)', r'<body' + body_class_attr + '>\n' + get_common_header(), content, flags=re.IGNORECASE)
 
         if '</body>' in content and 'data-i18n="footer_copyright"' not in content:
             content = content.replace('</body>', f'{get_common_footer()}\n</body>')

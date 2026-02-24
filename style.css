@@ -641,3 +641,20 @@ nav a:hover, .dropdown:hover .dropbtn { background: var(--primary-soft); color: 
 }
 
 @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* --- Home Page Specific Header Adjustments --- */
+body.home-page header nav {
+    display: none; /* Hide main navigation on home page only */
+}
+
+body.home-page header {
+    background: transparent;
+    border-bottom: none;
+    box-shadow: none;
+    justify-content: flex-end; /* Push utility to the right */
+    padding-top: 20px;
+}
+
+body.home-page .site-logo-link {
+    display: none; /* Logo is already in the main center area */
+}
