@@ -12,16 +12,20 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 70vh;
+            min-height: 75vh;
             padding: 20px;
         }
         .main-logo-area {
-            margin-bottom: 30px;
+            margin-bottom: 35px;
             text-align: center;
+            transition: transform 0.3s ease;
+        }
+        .main-logo-area:hover {
+            transform: scale(1.02);
         }
         .main-logo-area svg {
-            width: 120px;
-            height: 120px;
+            width: 130px;
+            height: 130px;
         }
         .search-container {
             position: relative;
@@ -34,25 +38,25 @@
             background: white;
             border: 1px solid #dfe1e5;
             border-radius: 30px;
-            padding: 5px 20px;
-            transition: all 0.3s ease;
+            padding: 5px 25px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
         .search-bar-wrapper:hover, .search-bar-wrapper:focus-within {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             border-color: transparent;
         }
         .search-bar-wrapper input {
             border: none;
             outline: none;
-            height: 45px;
+            height: 50px;
             flex: 1;
-            font-size: 1.1rem;
-            padding: 0 10px;
+            font-size: 1.15rem;
+            padding: 0 15px;
         }
         .search-icon {
             color: #9aa0a6;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
         }
         #searchResults {
             position: absolute;
@@ -60,20 +64,25 @@
             left: 0;
             right: 0;
             background: white;
-            border-radius: 0 0 20px 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-radius: 0 0 24px 24px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
             z-index: 1000;
-            margin-top: 5px;
+            margin-top: 8px;
             display: none;
             overflow: hidden;
             border: 1px solid #eee;
+            animation: slideDown 0.2s ease-out;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         #searchResults.active {
             display: block;
         }
         .search-result-item {
             display: block;
-            padding: 15px 20px;
+            padding: 18px 25px;
             text-decoration: none;
             color: #3c4043;
             border-bottom: 1px solid #f1f3f4;
@@ -83,39 +92,74 @@
             background: #f8f9fa;
         }
         .result-title {
-            font-weight: bold;
-            font-size: 1rem;
+            font-weight: 600;
+            font-size: 1.05rem;
             margin-bottom: 4px;
         }
         .result-date {
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             color: #70757a;
         }
-        .search-no-results {
-            padding: 20px;
-            text-align: center;
-            color: #70757a;
+        
+        /* Category Grid Navigation */
+        .service-grid {
+            margin-top: 50px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            width: 100%;
+            max-width: 800px;
         }
-        .category-nav {
-            margin-top: 40px;
+        @media (max-width: 600px) {
+            .service-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+        }
+        .service-item {
             display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .cat-btn {
-            background: oklch(95% 0.02 240);
-            border: 1px solid #eee;
-            padding: 10px 20px;
-            border-radius: 20px;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 10px;
             text-decoration: none;
             color: #3c4043;
-            font-weight: 500;
-            transition: all 0.2s;
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            text-align: center;
         }
-        .cat-btn:hover {
-            background: oklch(90% 0.05 240);
-            transform: translateY(-2px);
+        .service-item:hover {
+            background: white;
+            box-shadow: 0 10px 25px rgba(0, 82, 204, 0.08);
+            transform: translateY(-5px);
+            border-color: #0052cc;
+        }
+        .service-icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: oklch(95% 0.03 240);
+            border-radius: 14px;
+            color: #0052cc;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        .service-item:hover .service-icon {
+            background: #0052cc;
+            color: white;
+        }
+        .service-label {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .service-desc {
+            font-size: 0.75rem;
+            color: #70757a;
+            margin-top: 4px;
         }
     </style>
 </head>
@@ -127,22 +171,58 @@
                 <path d="M25 70L40 55L50 65L75 35" stroke="#0052cc" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
                 <circle cx="70" cy="35" r="12" stroke="#0052cc" stroke-width="6" fill="#0052cc"/>
             </svg>
-            <h1 style="color: #0052cc; font-size: 2.5rem; margin-top: 10px;">Tracking SA</h1>
+            <h1 style="color: #0052cc; font-size: 2.8rem; margin-top: 15px; font-weight: 800; letter-spacing: -1px;">Tracking SA</h1>
         </div>
 
         <div class="search-container">
             <div class="search-bar-wrapper">
                 <i class="fas fa-search search-icon"></i>
-                <input type="text" id="searchInput" placeholder="뉴스를 검색해보세요" autocomplete="off">
+                <input type="text" id="searchInput" placeholder="무엇을 도와드릴까요?" autocomplete="off">
             </div>
             <div id="searchResults"></div>
         </div>
 
-        <div class="category-nav">
-            <a href="/news/" class="cat-btn"><i class="fas fa-newspaper"></i> AI 뉴스</a>
-            <a href="/ai-test/" class="cat-btn"><i class="fas fa-brain"></i> AI 성향 테스트</a>
-            <a href="/fortune/" class="cat-btn"><i class="fas fa-crystal-ball"></i> AI 운세</a>
-            <a href="/tetris-game/" class="cat-btn"><i class="fas fa-gamepad"></i> 게임</a>
+        <div class="service-grid">
+            <a href="/news/" class="service-item">
+                <div class="service-icon"><i class="fas fa-newspaper"></i></div>
+                <span class="service-label" data-i18n="news_home">AI 뉴스</span>
+                <span class="service-desc">최신 트렌드 분석</span>
+            </a>
+            <a href="/animal_face_test/" class="service-item">
+                <div class="service-icon"><i class="fas fa-paw"></i></div>
+                <span class="service-label" data-i18n="animal_face_test">동물상 테스트</span>
+                <span class="service-desc">나는 어떤 동물?</span>
+            </a>
+            <a href="/ai-test/" class="service-item">
+                <div class="service-icon"><i class="fas fa-brain"></i></div>
+                <span class="service-label" data-i18n="ai_tendency_test">성향 테스트</span>
+                <span class="service-desc">AI가 분석하는 성격</span>
+            </a>
+            <a href="/fortune/" class="service-item">
+                <div class="service-icon"><i class="fas fa-crystal-ball"></i></div>
+                <span class="service-label" data-i18n="saju_test">AI 운세</span>
+                <span class="service-desc">오늘의 행운 확인</span>
+            </a>
+            <a href="/lucky-recommendation/" class="service-item">
+                <div class="service-icon"><i class="fas fa-magic"></i></div>
+                <span class="service-label" data-i18n="lucky_recommendation">행운의 추천</span>
+                <span class="service-desc">맞춤 컬러 & 아이템</span>
+            </a>
+            <a href="/tetris-game/" class="service-item">
+                <div class="service-icon"><i class="fas fa-gamepad"></i></div>
+                <span class="service-label" data-i18n="tetris_game">테트리스</span>
+                <span class="service-desc">클래식 퍼즐 게임</span>
+            </a>
+            <a href="/ai-evolution/" class="service-item">
+                <div class="service-icon"><i class="fas fa-dna"></i></div>
+                <span class="service-label" data-i18n="ai_evolution">AI 진화 게임</span>
+                <span class="service-desc">2048 스타일 퍼즐</span>
+            </a>
+            <a href="/about" class="service-item">
+                <div class="service-icon"><i class="fas fa-info-circle"></i></div>
+                <span class="service-label" data-i18n="about_us">서비스 소개</span>
+                <span class="service-desc">Tracking SA 소개</span>
+            </a>
         </div>
     </main>
     <!-- Footer elements will be injected by main.py -->
