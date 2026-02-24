@@ -1,97 +1,163 @@
-/* ai-test/style.css - Premium AI Personality Test */
+/* ai-test/style.css - True Premium Blue Edition */
 
 .ai-test-page {
-    text-align: center;
-    padding: 60px 20px;
     max-width: 900px;
     margin: 40px auto;
-    background: var(--surface);
-    border-radius: var(--radius-lg);
-    box-shadow: 0 20px 50px oklch(0% 0 0 / 0.05);
-    border: 1px solid oklch(0% 0 0 / 0.03);
+    background: white;
+    border-radius: 30px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px oklch(0% 0 0 / 0.1);
     animation: fadeIn 0.8s var(--transition);
 }
 
-.ai-test-page h1 {
-    font-size: clamp(1.8rem, 5vw, 3rem);
-    font-weight: 900;
-    color: var(--text-strong);
-    margin-bottom: 1.5rem;
-    letter-spacing: -0.04em;
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-.ai-test-page p {
-    font-size: 1.15rem;
-    color: var(--text-muted);
-    line-height: 1.7;
-    margin-bottom: 2.5rem;
-}
-
-.action-button {
-    background: linear-gradient(135deg, var(--primary) 0%, oklch(45% 0.15 260) 100%);
+/* Hero Section with Deep Blue Gradient */
+.test-intro {
+    background: linear-gradient(135deg, #0052cc 0%, #1e40af 100%);
+    padding: 80px 40px;
     color: white;
+    text-align: center;
+}
+
+.test-intro h1 {
+    font-size: clamp(2.2rem, 5vw, 3.5rem);
+    font-weight: 900;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.05em;
+    text-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.test-intro p {
+    font-size: 1.3rem;
+    opacity: 0.9;
+    max-width: 600px;
+    margin: 0 auto 2.5rem auto;
+    line-height: 1.6;
+}
+
+/* Premium Action Button */
+.action-button {
+    background: white;
+    color: #0052cc;
     border: none;
-    padding: 16px 32px;
-    border-radius: 14px;
+    padding: 18px 40px;
+    border-radius: 50px;
+    font-size: 1.2rem;
+    font-weight: 800;
     cursor: pointer;
-    font-size: 1.1rem;
-    font-weight: 700;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1);
-    box-shadow: 0 10px 25px var(--primary-soft);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
 }
 
 .action-button:hover {
-    transform: translateY(-3px);
-    filter: brightness(1.1);
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+    background: #f8faff;
 }
 
-/* Quiz Section */
+/* Quiz Section Content */
+.quiz-section, .result-section {
+    padding: 60px 40px;
+    text-align: center;
+}
+
+.quiz-section h2 {
+    font-size: 1.8rem;
+    color: var(--text-strong);
+    margin-bottom: 40px;
+    font-weight: 800;
+}
+
+/* Answer Buttons - High Quality */
 .answers-container {
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    margin: 30px 0;
+    gap: 18px;
+    max-width: 600px;
+    margin: 0 auto 40px auto;
 }
 
 .answer-button {
-    background: oklch(98% 0.01 250);
-    border: 2px solid oklch(0% 0 0 / 0.05);
-    padding: 20px;
-    border-radius: 16px;
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    padding: 22px 30px;
+    border-radius: 20px;
     cursor: pointer;
     text-align: left;
-    font-size: 1.1rem;
+    font-size: 1.15rem;
     font-weight: 600;
-    color: var(--text-base);
-    transition: all 0.2s ease;
+    color: #334155;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
 }
 
 .answer-button:hover {
+    border-color: #0052cc;
     background: white;
-    border-color: var(--primary);
-    transform: translateX(5px);
-    box-shadow: 0 5px 15px oklch(0% 0 0 / 0.05);
+    transform: translateX(10px);
+    box-shadow: 0 10px 20px rgba(0, 82, 204, 0.05);
+    color: #0052cc;
 }
 
 .answer-button.selected {
-    background: var(--primary);
+    background: #0052cc;
     color: white;
-    border-color: var(--primary);
+    border-color: #0052cc;
+    box-shadow: 0 10px 25px rgba(0, 82, 204, 0.3);
 }
 
-/* Result Section */
+/* Result Section - Dynamic & Colorful */
 .ai-result {
-    padding: 40px;
+    margin: 40px 0;
+    padding: 50px;
     background: oklch(98% 0.01 250);
-    border-radius: 24px;
-    margin: 30px 0;
+    border-radius: 30px;
+    border: 1px solid #e2e8f0;
 }
 
-.result-emoji { font-size: 5rem; margin-bottom: 1rem; }
-.result-name { font-size: 2.2rem; font-weight: 900; color: var(--primary); margin-bottom: 1rem; }
-.result-description { font-size: 1.1rem; line-height: 1.8; color: var(--text-base); }
+.result-emoji { 
+    font-size: 6rem; 
+    margin-bottom: 20px;
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.1));
+}
 
-/* Dark Mode */
-body.dark-mode .ai-test-page { background: var(--surface); }
-body.dark-mode .answer-button { background: oklch(20% 0.02 250); border-color: rgba(255,255,255,0.1); color: white; }
-body.dark-mode .ai-result { background: oklch(15% 0.02 250); }
+.result-name { 
+    font-size: 2.8rem; 
+    font-weight: 950; 
+    color: #0052cc; 
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.03em;
+}
+
+.result-description { 
+    font-size: 1.25rem; 
+    line-height: 1.8; 
+    color: #475569; 
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+/* Result Action Buttons (Secondary) */
+.result-actions {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.result-actions .action-button {
+    background: #0052cc;
+    color: white;
+}
+
+/* Dark Mode Support */
+body.dark-mode .ai-test-page { background: #1e293b; color: white; }
+body.dark-mode .quiz-section h2 { color: white; }
+body.dark-mode .answer-button { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+body.dark-mode .answer-button:hover { border-color: #38bdf8; color: #38bdf8; }
+body.dark-mode .ai-result { background: #0f172a; border-color: #334155; }

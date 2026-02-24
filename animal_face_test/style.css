@@ -1,360 +1,141 @@
-/* Styling for Animal Face Test Page (animal_face_test.html) */
+/* animal_face_test/style.css - Pretty Blue Edition */
+
 .animal-face-test {
     text-align: center;
-    padding: 40px 20px;
-    max-width: 900px;
-    margin: 20px auto;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.07);
-    position: relative;
-    z-index: 1;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth transition */
+    padding: 60px 20px;
+    max-width: 1000px;
+    margin: 40px auto;
+    background: white;
+    border-radius: 30px;
+    box-shadow: 0 20px 60px oklch(0% 0 0 / 0.08);
+    animation: fadeIn 0.8s var(--transition);
 }
 
 .animal-face-test h1 {
-    font-size: 2.8em;
-    color: #333;
-    margin-bottom: 15px;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 900;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, #0052cc 0%, #1e40af 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.04em;
 }
 
 .animal-face-test p {
-    font-size: 1.1em;
-    color: #555;
-    margin-bottom: 25px;
+    font-size: 1.2rem;
+    color: #64748b;
+    margin-bottom: 3rem;
 }
 
+/* Luxury Gender Selection */
 .gender-selection-wrapper {
-    margin-bottom: 30px;
-    position: relative;
-    z-index: 10;
+    margin-bottom: 40px;
 }
 
 .gender-selection-wrapper label {
-    font-weight: bold;
-    color: #333;
-    margin-right: 15px;
-    font-size: 1.1em;
-}
-
-.gender-buttons .gender-button {
-    background-color: #0052cc;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 25px;
-    cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth transition */
-    margin: 0 5px;
-}
-
-#gender-female {
-    background-color: #dc3545;
-}
-#gender-female:hover {
-    background-color: #c82333;
-}
-
-#gender-female.active {
-    background-color: #0052cc;
-}
-
-.gender-buttons .gender-button:hover {
-    background-color: #1e40af;
-    transform: translateY(-2px);
-}
-
-.gender-buttons .gender-button.active {
-    background-color: #0052cc;
-    box-shadow: 0 4px 8px rgba(0, 82, 204, 0.3), inset 0 0 8px rgba(0, 0, 0, 0.5);
-}
-
-.gender-buttons .gender-button.active:hover {
-    background-color: #1e40af;
-}
-
-.image-upload-section {
-    position: relative;
-    z-index: 5;
-}
-
-.upload-wrapper {
-    max-width: 500px;
-    margin: 0 auto 30px auto;
-    padding: 15px;
-    border: 1px solid #e0e0e0;
-    border-radius: 10px;
-    background-color: #f9f9f9;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth transition */
-}
-
-.drop-zone {
-    border: 2px dashed #0052cc;
-    border-radius: 10px;
-    padding: 30px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth transition */
-    margin-bottom: 20px;
-    background-color: #f8faff;
-    color: #0052cc;
-}
-
-.drop-zone.drag-over {
-    background-color: #e6f0ff;
-    border-color: #1e40af;
-}
-
-.drop-zone p {
-    margin-top: 0;
+    font-size: 1rem;
+    font-weight: 800;
+    color: #334155;
     margin-bottom: 15px;
-    font-size: 1.1em;
-    color: #0052cc;
+    display: block;
 }
 
-.image-upload-section .custom-file-upload {
-    background-color: #0052cc;
-    color: white;
-    padding: 12px 25px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth transition */
-    display: inline-block;
-}
-
-.image-upload-section .custom-file-upload:hover {
-    background-color: #1e40af;
-}
-
-#image-preview-container {
-    margin-top: 20px;
-    padding: 15px;
-    border: 1px solid #eee;
-    border-radius: 8px;
-    background-color: #f9f9f9;
-    text-align: center;
-    margin-left: auto;
-    margin-right: auto;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth transition */
-}
-
-#image-preview {
-    max-width: 100%;
-    height: auto;
-    border-radius: 15px;
-    margin-bottom: 15px;
-    display: none;
-}
-
-#predict-button {
-    background-color: #0052cc;
-    color: white;
-    border: none;
-    padding: 12px 30px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1.1em;
-    font-weight: bold;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth transition */
-    display: none;
-}
-
-#predict-button:hover {
-    background-color: #1e40af;
-    transform: translateY(-2px);
-}
-
-/* Loading Indicator */
-.loading-indicator {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.8);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth transition */
-}
-
-.loading-indicator .spinner {
-    border: 8px solid rgba(0, 123, 255, 0.1);
-    border-top: 8px solid #0052cc;
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    animation: spin 1s linear infinite;
-    margin-bottom: 15px;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.loading-indicator p {
-    font-size: 1.2em;
-    color: #0052cc;
-    font-weight: bold;
-}
-
-.result-section h2 {
-    color: #0052cc;
-    font-size: 2.2em;
-    margin-bottom: 20px;
-    text-align: center;
-}
-
-.prediction-result {
-    font-size: 2.5em;
-    font-weight: bold;
-    color: #0052cc;
-    margin-bottom: 10px;
-    text-align: center;
-}
-
-.confidence-score {
-    font-size: 1.5em;
-    color: #6c757d;
-    margin-bottom: 30px;
-    text-align: center;
-}
-
-/* Share Buttons */
-.share-buttons {
+.gender-buttons {
     display: flex;
     justify-content: center;
     gap: 15px;
-    margin-bottom: 25px;
 }
 
-.share-buttons .share-button {
-    background-color: #6c757d;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth transition */
-}
-
-.share-buttons .share-button[data-platform="twitter"] { background-color: #1da1f2; }
-.share-buttons .share-button[data-platform="facebook"] { background-color: #3b5998; }
-.share-buttons .share-button[data-platform="download"] { background-color: #0052cc; }
-
-.share-buttons .share-button:hover {
-    transform: translateY(-2px);
-}
-
-.share-buttons .share-button[data-platform="twitter"]:hover { background-color: #1a8cd8; }
-.share-buttons .share-button[data-platform="facebook"]:hover { background-color: #2d4373; }
-.share-buttons .share-button[data-platform="download"]:hover { background-color: #1e40af; }
-
-#retake-button {
-    background-color: #6c757d;
-    color: white;
-    border: none;
-    padding: 12px 30px;
-    border-radius: 5px;
+.gender-button {
+    background: #f1f5f9;
+    color: #475569;
+    border: 2px solid transparent;
+    padding: 14px 35px;
+    border-radius: 50px;
     cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth transition */
-    margin-top: 15px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-#retake-button:hover {
-    background-color: #5a6268;
+.gender-button:hover {
+    background: white;
+    border-color: #0052cc;
+    color: #0052cc;
     transform: translateY(-2px);
 }
 
-/* Privacy Note for Animal Face Test */
-.privacy-note {
-    font-size: 0.85em;
-    color: #6c757d;
-    margin-top: 10px;
+.gender-button.active {
+    background: #0052cc;
+    color: white;
+    box-shadow: 0 10px 20px rgba(0, 82, 204, 0.25);
 }
 
-/* New style for hashtags */
-.hashtags {
-    font-size: 0.8rem;
-    color: #6c757d;
-    margin-top: 20px;
-    padding-top: 10px;
-    border-top: 1px solid #eee;
-    text-align: right;
+/* Pretty Upload Box */
+.upload-wrapper {
+    max-width: 600px;
+    margin: 0 auto 40px auto;
+    padding: 20px;
+    background: oklch(98% 0.01 250);
+    border-radius: 24px;
+    border: 2px dashed #0052cc;
+    transition: all 0.3s ease;
 }
 
-/* Dark Mode Styles */
-body.dark-mode .animal-face-test {
-    background-color: #1a202c;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+.drop-zone {
+    padding: 50px 30px;
+    cursor: pointer;
 }
-body.dark-mode .animal-face-test h1 {
-    color: #eeeeee;
+
+.drop-zone p {
+    color: #0052cc;
+    font-weight: 700;
+    margin-bottom: 20px;
 }
-body.dark-mode .animal-face-test p {
-    color: #cccccc;
+
+.custom-file-upload {
+    background: linear-gradient(135deg, #0052cc 0%, #1e40af 100%);
+    color: white;
+    padding: 15px 35px;
+    border-radius: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    display: inline-block;
+    box-shadow: 0 10px 25px rgba(0, 82, 204, 0.2);
 }
-body.dark-mode .gender-buttons .gender-button {
-    background-color: #3b82f6;
+
+/* Result Section - Dynamic */
+.result-section {
+    margin-top: 50px;
+    padding: 50px;
+    background: linear-gradient(135deg, #f8faff 0%, #eef2ff 100%);
+    border-radius: 30px;
+    animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-body.dark-mode .gender-buttons .gender-button:hover {
-    background-color: #60a5fa;
+
+@keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+.result-large-emoji { font-size: 7rem; margin-bottom: 20px; }
+.prediction-result { font-size: 2.5rem; font-weight: 950; color: #0052cc; margin-bottom: 10px; }
+.confidence-score { font-size: 1.3rem; color: #64748b; font-weight: 600; }
+
+/* Action Buttons (Go Test style) */
+.go-test-button {
+    background: linear-gradient(135deg, #0052cc 0%, #1e40af 100%);
+    color: white;
+    border: none;
+    padding: 18px 45px;
+    border-radius: 16px;
+    font-weight: 800;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(0, 82, 204, 0.3);
+    transition: all 0.3s ease;
 }
-body.dark-mode .gender-buttons .gender-button.active {
-    background-color: #60a5fa;
-}
-body.dark-mode .gender-buttons .gender-button.active:hover {
-    background-color: #3b82f6;
-}
-body.dark-mode .drop-zone {
-    border: 2px dashed #60a5fa; /* Blue for dark mode */
-    background-color: #1a202c; /* Darker background for dark mode */
-    color: #60a5fa;
-}
-body.dark-mode .drop-zone.drag-over {
-    background-color: #2d3748;
-    border-color: #3b82f6;
-}
-body.dark-mode .drop-zone p {
-    color: #60a5fa;
-}
-body.dark-mode .image-upload-section .custom-file-upload {
-    background-color: #60a5fa;
-}
-body.dark-mode .image-upload-section .custom-file-upload:hover {
-    background-color: #3b82f6;
-}
-body.dark-mode .loading-indicator p {
-    color: #60a5fa;
-}
-body.dark-mode .loading-indicator .spinner {
-    border-top-color: #60a5fa;
-}
-body.dark-mode .result-section {
-    background-color: #1a202c;
-    border-color: #444;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-}
-body.dark-mode .result-section h2 {
-    color: #60a5fa;
-}
-body.dark-mode .prediction-result {
-    color: #60a5fa;
-}
-body.dark-mode .confidence-score {
-    color: #aaaaaa;
-}
-body.dark-mode .privacy-note {
-    color: #aaaaaa;
-}
-body.dark-mode .hashtags {
-    color: #aaaaaa;
-    border-top-color: #444;
-}
-body.dark-mode .gender-buttons input[type="radio"] + label:hover {
-    background-color: #2d3748;
-}
+
+.go-test-button:hover { transform: translateY(-4px); box-shadow: 0 15px 40px rgba(0, 82, 204, 0.4); }
+
+/* Dark Mode Overrides */
+body.dark-mode .animal-face-test { background: #1e293b; }
+body.dark-mode .upload-wrapper { background: #0f172a; border-color: #38bdf8; }
+body.dark-mode .result-section { background: #0f172a; border: 1px solid #334155; }
