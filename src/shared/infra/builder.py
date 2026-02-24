@@ -10,6 +10,107 @@ from src.shared.infra.templates import get_common_head, get_common_header, get_c
 from src.shared.infra.db import get_firestore_client
 from firebase_admin import firestore
 
+def _extract_date_from_slug(slug):
+    m = re.match(r'^(\d{4}-\d{2}-\d{2})', slug)
+    return m.group(1) if m else ""
+
+def _strip_leading_title(content_html, title):
+    if not content_html:
+        return content_html
+    while True:
+        match = re.match(r'\s*(?:<div[^>]*>\s*)*<h1[^>]*>([\s\S]*?)</h1>\s*(?:</div>\s*)*', content_html, flags=re.IGNORECASE)
+        if not match:
+            return content_html
+        h1_text = re.sub(r'<[^>]+>', '', match.group(1)).strip()
+        if h1_text == title:
+            content_html = content_html[match.end():].lstrip()
+            continue
+        return content_html
+
+def _wrap_article_html(title, content_html, date_text):
+    date_block = f'<span class="news-article-date">{date_text}</span>' if date_text else ''
+    content_html = _strip_leading_title(content_html, title)
+    return f"""<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{title}</title>
+</head>
+<body>
+  <main class="news-article-main">
+    <article class="news-article-card">
+      <div class="news-article-meta">{date_block}</div>
+      <h1 class="news-article-title">{title}</h1>
+      <div class="news-article-content">
+        {content_html}
+      </div>
+    </article>
+  </main>
+</body>
+</html>"""
+
+def _upgrade_cached_news_index():
+    news_index_path = os.path.join(PUBLIC_DIR, "news", "index.html")
+    if not os.path.exists(news_index_path):
+        return
+    with open(news_index_path, "r", encoding="utf-8") as f:
+        html = f.read()
+    if "news-date" in html:
+        return
+
+    def _inject_date(match):
+        href = match.group(1)
+        title = match.group(2)
+        slug = href.lstrip("/")
+        date_text = _extract_date_from_slug(slug)
+        date_block = f'<div class="news-card-meta"><span class="news-date">{date_text}</span></div>' if date_text else ''
+        return f'<a href="{href}" class="news-card-premium">{date_block}<h2>{title}</h2></a>'
+
+    html = re.sub(r'<a href="([^"]+)" class="news-card-premium"><h2>([^<]+)</h2></a>', _inject_date, html)
+    with open(news_index_path, "w", encoding="utf-8") as f:
+        f.write(html)
+
+def _upgrade_cached_article_pages():
+    if not os.path.exists(PUBLIC_DIR):
+        return
+    for name in os.listdir(PUBLIC_DIR):
+        if not name.endswith(".html") or name == "index.html":
+            continue
+        path = os.path.join(PUBLIC_DIR, name)
+        if not os.path.isfile(path):
+            continue
+        with open(path, "r", encoding="utf-8") as f:
+            html = f.read()
+        if "news-article-main" in html:
+            title_match = re.search(r'class="news-article-title"[^>]*>([\s\S]*?)</h1>', html, flags=re.IGNORECASE)
+            title = re.sub(r'<[^>]+>', '', title_match.group(1)).strip() if title_match else ""
+            if title:
+                escaped_title = re.escape(title)
+                pattern = r'(<div class="news-article-content">\s*)(?:<div[^>]*>\s*)*<h1[^>]*>\s*' + escaped_title + r'\s*</h1>\s*(?:</div>\s*)*'
+                updated = html
+                while re.search(pattern, updated, flags=re.IGNORECASE):
+                    updated = re.sub(pattern, r'\1', updated, count=1, flags=re.IGNORECASE)
+                if updated != html:
+                    with open(path, "w", encoding="utf-8") as wf:
+                        wf.write(updated)
+                    process_html_file_for_common_elements(path)
+            continue
+        title_match = re.search(r'<title>(.*?)</title>', html, flags=re.IGNORECASE | re.DOTALL)
+        h1_match = re.search(r'<h1[^>]*>(.*?)</h1>', html, flags=re.IGNORECASE | re.DOTALL)
+        title = (h1_match.group(1).strip() if h1_match else (title_match.group(1).strip() if title_match else "뉴스"))
+
+        main_match = re.search(r'<main[^>]*>([\s\S]*?)</main>', html, flags=re.IGNORECASE)
+        body_match = re.search(r'<body[^>]*>([\s\S]*?)</body>', html, flags=re.IGNORECASE)
+        content_html = main_match.group(1).strip() if main_match else (body_match.group(1).strip() if body_match else "")
+        content_html = _strip_leading_title(content_html, title)
+
+        date_text = _extract_date_from_slug(name)
+        new_html = _wrap_article_html(title, content_html, date_text)
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(new_html)
+        process_html_file_for_common_elements(path)
+
 def process_html_file_for_common_elements(filepath):
     try:
         with open(filepath, "r", encoding="utf-8") as f:
@@ -66,9 +167,7 @@ def generate_news_pages():
             date = p.get('date', '2026-02-24')
             
             out_path = os.path.join(PUBLIC_DIR, f"{ukey}.html")
-            html = f"""<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><title>{title}</title></head>
-<body><main class="news-section-main"><h1>{title}</h1><div>{markdown.markdown(content)}</div></main></body></html>"""
+            html = _wrap_article_html(title, markdown.markdown(content), date)
             
             with open(out_path, "w", encoding="utf-8") as f: f.write(html)
             process_html_file_for_common_elements(out_path)
@@ -81,7 +180,13 @@ def generate_news_pages():
     if os.path.exists(idx_tmpl):
         with open(idx_tmpl, "r", encoding="utf-8") as f: base_html = f.read()
         if articles:
-            grid_items = "".join([f'<a href="/{a["url"]}" class="news-card-premium"><h2>{a["title"]}</h2></a>' for a in articles])
+            grid_items = "".join([
+                f'<a href="/{a["url"]}" class="news-card-premium">'
+                f'<div class="news-card-meta"><span class="news-date">{a["date"]}</span></div>'
+                f'<h2>{a["title"]}</h2>'
+                f'</a>'
+                for a in articles
+            ])
             final_html = base_html.replace("<!-- NEWS_INJECTION_POINT -->", f'<div class="news-grid">{grid_items}</div>')
         else:
             final_html = base_html.replace("<!-- NEWS_INJECTION_POINT -->", '<div class="news-empty">아직 등록된 기사가 없습니다.</div>')
@@ -172,6 +277,8 @@ def generate_public_site():
     if not db_ok:
         print("⚠️ [NEWS BUILD] Restoring cached news from previous public/ build.")
         _restore_news_snapshot(news_snapshot)
+        _upgrade_cached_news_index()
+        _upgrade_cached_article_pages()
     
     # 루트 index.html 엘리먼트 처리
     process_html_file_for_common_elements(os.path.join(PUBLIC_DIR, "index.html"))
