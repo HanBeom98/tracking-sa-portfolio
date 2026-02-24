@@ -22,19 +22,22 @@ def process_html_file_for_common_elements(filepath):
         local_css_path = os.path.join(dirname, "style.css")
         extra_head = ""
         if os.path.exists(local_css_path):
-            # We use a relative link so it works in subdirectories
+            # If we are in a subdirectory (e.g. /fortune/), style.css refers to the local one
             extra_head = '\n    <link rel="stylesheet" href="style.css">'
 
+        # 1. Strip ALL existing headers, footers, and scripts to prevent duplication
         content = re.sub(r'<header[\s\S]*?</header>', '', content, flags=re.DOTALL | re.IGNORECASE)
-        # Modified regex to preserve essential external AI libraries (tensorflow, teachablemachine)
         content = re.sub(r'\s*<script[^>]*src=".*?(googletagmanager|clarity|firebase-app|firebase-firestore|crypto-js|firebase-config|translations|common).*?".*?></script>', '', content, flags=re.DOTALL | re.IGNORECASE)
         content = re.sub(r'<script>\s*window\.dataLayer[\s\S]*?</script>', '', content, flags=re.DOTALL | re.IGNORECASE)
+        
+        # 2. STRIP ALL existing local stylesheet links to prevent priority conflicts
         content = re.sub(r'<link[^>]*href=".*?(style\.css|all\.min\.css)"[^>]*>', '', content, flags=re.DOTALL | re.IGNORECASE)
+        
         content = re.sub(r'<meta name="(google|naver)-site-verification"[\s\S]*?>', '', content, flags=re.IGNORECASE)
         content = re.sub(r'<footer>[\s\S]*?</footer>', '', content, flags=re.DOTALL | re.IGNORECASE)
 
+        # 3. Inject common head (which includes root /style.css) + local service CSS
         if '</head>' in content:
-            # Inject common head + local service CSS
             content = content.replace('</head>', f'{get_common_head()}{extra_head}\n</head>')
         
         content = re.sub(r'(<body[^>]*>)', r'\1\n' + get_common_header(), content, flags=re.IGNORECASE)
