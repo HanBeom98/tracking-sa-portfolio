@@ -227,25 +227,35 @@ async function initLayout() {
     // Mobile menu toggle logic
     const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
     const slideOutMenu = document.getElementById('slide-out-menu');
-    // bodyElement is guaranteed to exist
+    
+    // Create and append overlay element if it doesn't exist
+    let overlay = document.querySelector('.overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.classList.add('overlay');
+        document.body.appendChild(overlay);
+    }
 
-    // Create and append overlay element
-    const overlay = document.createElement('div');
-    overlay.classList.add('overlay');
-    document.body.appendChild(overlay); // body is guaranteed to exist
-
-    if (mobileMenuToggle && slideOutMenu) { // Defensive check for these elements
+    if (mobileMenuToggle && slideOutMenu) {
         mobileMenuToggle.addEventListener('click', () => {
-            if (body) { // Defensive check for body
-                body.classList.toggle('mobile-menu-open');
+            // ONLY execute on mobile (less than 992px)
+            if (window.innerWidth <= 992) {
+                document.body.classList.toggle('mobile-menu-open');
             }
         });
 
         overlay.addEventListener('click', () => {
-            if (body) { // Defensive check for body
-                body.classList.remove('mobile-menu-open');
+            document.body.classList.remove('mobile-menu-open');
+        });
+
+        // Ensure menu is reset when resizing to desktop
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 992) {
+                document.body.classList.remove('mobile-menu-open');
+                slideOutMenu.style.transform = ''; // Clear any JS-applied styles
             }
         });
+    }
 
         // Handle clicks inside the slide-out menu
         slideOutMenu.addEventListener('click', (event) => {
