@@ -21,6 +21,40 @@ body {
     min-height: 100vh;
 }
 
+/* --- Dark Mode (Global) --- */
+body.dark-mode {
+    --bg-main: oklch(18% 0.02 260);
+    --text-main: oklch(95% 0.02 260);
+    --text-sub: oklch(75% 0.02 260);
+    background-color: var(--bg-main);
+    color: var(--text-main);
+}
+
+body.dark-mode header {
+    background: #0f172a !important;
+    border-bottom: 2px solid var(--p-blue) !important;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.35) !important;
+}
+
+body.dark-mode nav a,
+body.dark-mode .dropbtn {
+    color: var(--text-main);
+}
+
+body.dark-mode nav a:hover {
+    color: var(--p-blue);
+}
+
+body.dark-mode footer {
+    background: #0f172a;
+    border-top: 1px solid oklch(30% 0.02 260);
+    color: var(--text-sub);
+}
+
+body.dark-mode footer a {
+    color: var(--text-sub);
+}
+
 /* --- THE HEADER (ABSOLUTE VISIBILITY) --- */
 header {
     position: fixed !important;
