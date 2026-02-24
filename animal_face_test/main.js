@@ -156,7 +156,7 @@ async function predict() {
     }
 
     if (!currentImageFile) {
-        alert(translations[currentLang]['select_image_first']);
+        alert(window.getTranslation(window.currentLang, 'select_image_first'));
         return;
     }
 
@@ -179,16 +179,16 @@ async function predict() {
     // Update resultEmoji, predictionResult, and confidenceScore
     if (animalInfo) {
         resultEmoji.innerHTML = ''; // Removed as emoji is now part of predictionResult
-        predictionResult.innerText = window.getTranslation(currentLang, 'your_animal_face_is') + " " + animalInfo.emoji;
+        predictionResult.innerText = window.getTranslation(window.currentLang, 'your_animal_face_is') + " " + animalInfo.emoji;
         setupShareButtons(animalInfo.kor, confidence); // Use Korean name for sharing
     } else {
         // Fallback if rawName is not found in animalData
         resultEmoji.innerHTML = ''; // Removed as emoji is now part of predictionResult
-        predictionResult.innerText = window.getTranslation(currentLang, 'your_animal_face_is') + " " + '❓';
+        predictionResult.innerText = window.getTranslation(window.currentLang, 'your_animal_face_is') + " " + '❓';
         setupShareButtons(rawName, confidence); // Use rawName for sharing
     }
     
-    confidenceScore.innerText = window.getTranslation(currentLang, 'ai_matching_rate').replace('{confidence}', confidence);
+    confidenceScore.innerText = window.getTranslation(window.currentLang, 'ai_matching_rate').replace('{confidence}', confidence);
 
     hideLoadingIndicator();
     showResultSection();
