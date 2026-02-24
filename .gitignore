@@ -10,12 +10,12 @@ posts/
 processed_articles.log.tmp
 
 # Build Outputs (Static site generation)
-# public/ 내의 핵심 파일들은 이제 Git에 포함하여 배포에 반영합니다.
-!public/*.html
-!public/news/*.html
-!public/search.js
-!public/sitemap.xml
-!public/rss.xml
+# public/ 폴더 전체를 Git 추적에서 제외하여 저장소를 깨끗하게 유지합니다.
+# 배포는 GitHub Actions에서 Firebase Hosting으로 직접 수행합니다.
+public/
+*.html
+rss.xml
+sitemap.xml
 
 # Node.js
 node_modules/
@@ -40,7 +40,3 @@ firebase-debug.log
 
 # Project specific
 workdocs/
-
-# AI Temporary Workspaces (Ignored to prevent confusion)
-ai-tmp-*/
-google-search-home/

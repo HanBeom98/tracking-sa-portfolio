@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -32,7 +32,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run Script
+      - name: Run Build Script
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
@@ -44,7 +44,15 @@ jobs:
           # 2. Final build from Firestore data
           python main.py --build-only
 
-      - name: Commit and Push changes
+      - name: Deploy to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}'
+          channelId: live
+          projectId: tracking-sa-77928
+
+      - name: Commit Log changes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -53,7 +61,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           # Only commit the log file to keep the repository clean.
-          # Articles are now stored in Firestore and generated into public/ (which should be ignored or handled by hosting).
+          # Articles are now in Firebase and HIDDEN from Git main branch.
           git add processed_articles.log
 
           if git diff --cached --quiet; then
