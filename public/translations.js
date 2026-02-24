@@ -1,6 +1,8 @@
 const translations = {
     'ko': {
         'news_home': '뉴스',
+        'news_home_title': 'Tracking SA 뉴스',
+        'news_home_desc': 'AI, 스타트업, 테크 산업의 핵심 이슈를 매일 정리합니다. 신뢰할 수 있는 요약과 분석을 확인하세요.',
         'latest_news_hero_title': '주요 뉴스',
         'all_news_grid_title': '최신 기사',
         'home': '홈',
@@ -161,6 +163,8 @@ const translations = {
     },
     'en': {
         'news_home': 'News',
+        'news_home_title': 'Tracking SA News',
+        'news_home_desc': 'Daily highlights across AI, startups, and tech. Read concise, reliable summaries and analysis.',
         'latest_news_hero_title': 'Featured News',
         'all_news_grid_title': 'Latest Articles',
         'home': 'Home',

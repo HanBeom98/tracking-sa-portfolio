@@ -12,7 +12,61 @@ from firebase_admin import firestore
 
 def _extract_date_from_slug(slug):
     m = re.match(r'^(\d{4}-\d{2}-\d{2})', slug)
-    return m.group(1) if m else ""
+    if m:
+        return m.group(1)
+    m = re.search(r'news-(\d{10})-', slug)
+    if m:
+        try:
+            ts = int(m.group(1))
+            return datetime.datetime.utcfromtimestamp(ts).strftime("%Y-%m-%d")
+        except Exception:
+            return ""
+    return ""
+
+def _strip_html(text):
+    if not text:
+        return ""
+    text = re.sub(r'<[^>]+>', ' ', text)
+    text = re.sub(r'\s+', ' ', text).strip()
+    return text
+
+def _make_excerpt(markdown_text, limit=160):
+    if not markdown_text:
+        return ""
+    html = markdown.markdown(markdown_text)
+    text = _strip_html(html)
+    if len(text) <= limit:
+        return text
+    return text[:limit].rstrip() + "…"
+
+def _extract_excerpt_from_article(slug, limit=160):
+    path = os.path.join(PUBLIC_DIR, slug)
+    if not os.path.exists(path):
+        return ""
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            html = f.read()
+        content_match = re.search(r'class="news-article-content"[^>]*>([\s\S]*?)</div>', html, flags=re.IGNORECASE)
+        html_block = content_match.group(1) if content_match else html
+        p_match = re.search(r'<p[^>]*>([\s\S]*?)</p>', html_block, flags=re.IGNORECASE)
+        raw = p_match.group(1) if p_match else html_block
+        text = _strip_html(raw)
+        if not text:
+            return ""
+        return text[:limit].rstrip() + ("…" if len(text) > limit else "")
+    except Exception:
+        return ""
+
+def _build_news_card(href, title, date_text="", excerpt=""):
+    date_block = f'<div class="news-card-meta"><span class="news-date">{date_text}</span></div>' if date_text else ''
+    excerpt_block = f'<p class="news-excerpt">{excerpt}</p>' if excerpt else ''
+    return (
+        f'<a href="{href}" class="news-card-premium">'
+        f'{date_block}'
+        f'<h2 class="news-title-text">{title}</h2>'
+        f'{excerpt_block}'
+        f'</a>'
+    )
 
 def _strip_leading_title(content_html, title):
     if not content_html:
@@ -56,7 +110,31 @@ def _upgrade_cached_news_index():
         return
     with open(news_index_path, "r", encoding="utf-8") as f:
         html = f.read()
-    if "news-date" in html:
+    cards = re.findall(
+        r'<a href="([^"]+)" class="news-card-premium">[\s\S]*?<h2[^>]*>([^<]+)</h2>[\s\S]*?</a>',
+        html,
+        flags=re.IGNORECASE
+    )
+    if not cards:
+        return
+
+    idx_tmpl = "src/domains/news/index.html"
+    if os.path.exists(idx_tmpl):
+        with open(idx_tmpl, "r", encoding="utf-8") as f:
+            base_html = f.read()
+        grid_items = "".join([
+            _build_news_card(
+                href,
+                title,
+                _extract_date_from_slug(href.lstrip("/")),
+                _extract_excerpt_from_article(href.lstrip("/"))
+            )
+            for href, title in cards
+        ])
+        final_html = base_html.replace("<!-- NEWS_INJECTION_POINT -->", f'<div class="news-grid">{grid_items}</div>')
+        with open(news_index_path, "w", encoding="utf-8") as f:
+            f.write(final_html)
+        process_html_file_for_common_elements(news_index_path)
         return
 
     def _inject_date(match):
@@ -64,10 +142,14 @@ def _upgrade_cached_news_index():
         title = match.group(2)
         slug = href.lstrip("/")
         date_text = _extract_date_from_slug(slug)
-        date_block = f'<div class="news-card-meta"><span class="news-date">{date_text}</span></div>' if date_text else ''
-        return f'<a href="{href}" class="news-card-premium">{date_block}<h2>{title}</h2></a>'
+        excerpt = _extract_excerpt_from_article(slug)
+        return _build_news_card(href, title, date_text, excerpt)
 
-    html = re.sub(r'<a href="([^"]+)" class="news-card-premium"><h2>([^<]+)</h2></a>', _inject_date, html)
+    html = re.sub(
+        r'<a href="([^"]+)" class="news-card-premium">(?:<div class="news-card-meta">[\s\S]*?</div>)?<h2[^>]*>([^<]+)</h2>(?:<p[^>]*>[\s\S]*?</p>)?</a>',
+        _inject_date,
+        html
+    )
     with open(news_index_path, "w", encoding="utf-8") as f:
         f.write(html)
 
@@ -165,13 +247,14 @@ def generate_news_pages():
             ukey = p.get('urlKey', 'news')
             content = p.get('contentKo', '')
             date = p.get('date', '2026-02-24')
+            excerpt = _make_excerpt(content)
             
             out_path = os.path.join(PUBLIC_DIR, f"{ukey}.html")
             html = _wrap_article_html(title, markdown.markdown(content), date)
             
             with open(out_path, "w", encoding="utf-8") as f: f.write(html)
             process_html_file_for_common_elements(out_path)
-            articles.append({'title': title, 'url': f"{ukey}.html", 'date': date})
+            articles.append({'title': title, 'url': f"{ukey}.html", 'date': date, 'excerpt': excerpt})
     except Exception as e:
         print(f"⚠️ [NEWS BUILD WARNING] Skipping individual articles due to DB error: {e}")
 
@@ -181,10 +264,7 @@ def generate_news_pages():
         with open(idx_tmpl, "r", encoding="utf-8") as f: base_html = f.read()
         if articles:
             grid_items = "".join([
-                f'<a href="/{a["url"]}" class="news-card-premium">'
-                f'<div class="news-card-meta"><span class="news-date">{a["date"]}</span></div>'
-                f'<h2>{a["title"]}</h2>'
-                f'</a>'
+                _build_news_card(f'/{a["url"]}', a["title"], a.get("date", ""), a.get("excerpt", ""))
                 for a in articles
             ])
             final_html = base_html.replace("<!-- NEWS_INJECTION_POINT -->", f'<div class="news-grid">{grid_items}</div>')
