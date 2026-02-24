@@ -337,11 +337,10 @@ def get_firestore_client():
             if sj.startswith("'") and sj.endswith("'"): sj = sj[1:-1]
             
             # 2. 작은따옴표를 큰따옴표로 교정 (JSON 표준 준수)
-            sj = sj.replace("\'", """)
+            sj = sj.replace("\'", "\"")
             
             # 3. 줄바꿈 문자 정규화
-            sj = sj.replace('
-', '\n')
+            sj = sj.replace('\\n', '\n')
             
             cred_dict = json.loads(sj)
             firebase_admin.initialize_app(credentials.Certificate(cred_dict))
