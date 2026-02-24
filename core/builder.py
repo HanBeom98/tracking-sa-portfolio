@@ -17,6 +17,14 @@ def process_html_file_for_common_elements(filepath):
         with open(filepath, "r", encoding="utf-8") as f:
             content = f.read()
 
+        dirname = os.path.dirname(filepath)
+        # Check if a local style.css exists in the same directory within PUBLIC_DIR
+        local_css_path = os.path.join(dirname, "style.css")
+        extra_head = ""
+        if os.path.exists(local_css_path):
+            # We use a relative link so it works in subdirectories
+            extra_head = '\n    <link rel="stylesheet" href="style.css">'
+
         content = re.sub(r'<header[\s\S]*?</header>', '', content, flags=re.DOTALL | re.IGNORECASE)
         content = re.sub(r'\s*<script[^>]*src=".*?(googletagmanager|clarity|firebase-app|firebase-firestore|crypto-js|firebase-config|translations|common).*?".*?></script>', '', content, flags=re.DOTALL | re.IGNORECASE)
         content = re.sub(r'<script>\s*window\.dataLayer[\s\S]*?</script>', '', content, flags=re.DOTALL | re.IGNORECASE)
@@ -25,7 +33,8 @@ def process_html_file_for_common_elements(filepath):
         content = re.sub(r'<footer>[\s\S]*?</footer>', '', content, flags=re.DOTALL | re.IGNORECASE)
 
         if '</head>' in content:
-            content = content.replace('</head>', f'{get_common_head()}\n</head>')
+            # Inject common head + local service CSS
+            content = content.replace('</head>', f'{get_common_head()}{extra_head}\n</head>')
         
         content = re.sub(r'(<body[^>]*>)', r'\1\n' + get_common_header(), content, flags=re.IGNORECASE)
 
