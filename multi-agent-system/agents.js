@@ -125,5 +125,6 @@ ${inputPrompt}
 }
 
 export const runPlanner = (state, request, context) => runAgent('planner', request, context);
+export const runCreative = (state, context) => runAgent('creative', JSON.stringify(state.plan, null, 2), context);
 export const runDeveloper = (state, context) => runAgent('developer', JSON.stringify(state.plan, null, 2), context);
 export const runReviewer = (code, context) => runAgent('reviewer', code, context);

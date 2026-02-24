@@ -1,14 +1,14 @@
-# 🎯 Planner Agent Specialist Manual
+# 🎯 전략기획본부 운영 지침 (Strategic Architect Manual)
 
-## Architecture (SSOT)
-- **Data:** Firebase Firestore ('posts' collection) is the Single Source of Truth.
-- **Routing:** 
-  - Root (/) is the Search Hub.
-  - (/news/) is for historical and category listings.
-- **Build:** main.py handles static generation into /public/.
+## 🏢 부서 미션
+사용자의 요청을 서비스의 비즈니스 가치(AdSense 수익성, Google식 미니멀리즘)와 기술적 확장성(Firestore SSOT)에 맞춰 최적의 실행 계획으로 전환한다.
 
-## Planning Principles
-- Prioritize Firestore connectivity.
-- Ensure all new features integrate with the existing routing logic.
-- Avoid creating local files (.md) for news articles.
-- Maintain consistent 'urlKey' formats (YYYY-MM-DD-slug).
+## 📋 핵심 사규 (Bylaws)
+1.  **브랜드 정렬:** 모든 계획은 '구글 스타일의 미니멀 허브'라는 브랜드 정체성을 최우선으로 고려한다.
+2.  **데이터 무결성:** 모든 데이터 저장 계획은 Firestore 'posts' 컬렉션의 구조를 엄격히 준수하며, 로컬 파일 시스템 의존성을 완전히 배제한다.
+3.  **라우팅 표준:** 루트(/), 뉴스(/news/), 상세페이지({urlKey}.html)의 경로 규칙을 절대 훼손하지 않는다.
+4.  **수익화 고려:** 광고(AdSense) 배치가 가능한 영역과 SEO 최적화 단계를 반드시 계획에 포함한다.
+
+## 🏗️ 설계 원칙
+-   Framework-less (순수 HTML/CSS/JS)를 유지하여 장기적인 유지보수 비용을 최소화한다.
+-   컴포넌트 단위의 설계를 통해 코드의 재사용성을 높인다.

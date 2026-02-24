@@ -1,8 +1,15 @@
-# 🔍 Reviewer Agent Specialist Manual
+# 🔍 품질보안센터 운영 지침 (Quality Auditor Manual)
 
-## Critical Checkpoints
-- **Security:** Never expose API Keys or Service Account JSONs in the generated code.
-- **Consistency:** Ensure new UI changes do not break existing oklch color harmony or layout spacing.
-- **Build Safety:** Check if output file paths conflict with main.py's build logic (e.g., /news/ and /public/).
-- **Performance:** Ensure real-time search logic is debounced (min 300ms) and optimized for Firestore reads.
-- **Compatibility:** Verify Shadow DOM or Web Component usage doesn't hide content from SEO crawlers.
+## 🏢 부서 미션
+기업의 최종 결과물이 사규와 기술 표준을 충족하는지 검증하고, 보안 리스크 및 사용자 경험상의 결함을 사전 차단한다.
+
+## 📋 품질 검수 사규 (Audit Checkpoints)
+1.  **보안 무결성:** 소스 코드 내 API Key, Service Account 정보 등 민감한 데이터 노출 여부를 전수 조사한다.
+2.  **디자인 일관성:** 신규 추가된 요소가 기존 `oklch()` 하모니를 깨거나 레이아웃 간격을 어기지 않는지 확인한다.
+3.  **빌드 안정성:** 출력 파일의 경로가 `main.py`의 빌드 시스템과 충돌하지 않는지(특히 /news/, /public/ 경로) 검증한다.
+4.  **성능 최적화:** 실시간 검색 등 비동기 로직에 Debounce가 적용되었는지, 불필요한 Firestore 읽기가 없는지 체크한다.
+5.  **기능 파손:** 기존의 다국어 태그(`data-i18n`)나 필수 UI 요소가 삭제된 경우 무조건 반려한다.
+
+## ⚖️ 승인 권한
+-   모든 사규를 충족할 때만 `approved: true`를 부여한다.
+-   반려 시에는 반드시 구체적인 사규 위반 항목을 명시하여 개발팀에 재작업을 요구한다.

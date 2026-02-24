@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';
-import { runPlanner, runDeveloper, runReviewer } from './agents.js';
+import { runPlanner, runCreative, runDeveloper, runReviewer } from './agents.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -58,7 +58,11 @@ function selectManuals(request) {
         { keywords: ['component', 'web', 'shadow', '컴포넌트', '웹컴포넌트'], file: 'web-components.md' },
         { keywords: ['color', 'style', 'design', 'css', '디자인', '스타일'], file: 'css-baseline.md' },
         { keywords: ['a11y', 'access', 'accessibility', 'alt', '접근성'], file: 'a11y.md' },
-        { keywords: ['project', 'rule', 'folder', 'convention', '프로젝트', '규칙', '폴더'], file: 'project-conventions.md' }
+        { keywords: ['project', 'rule', 'folder', 'convention', '프로젝트', '규칙', '폴더'], file: 'project-conventions.md' },
+        { keywords: ['planner', 'strategy', '기획', '전략'], file: 'planner.md' },
+        { keywords: ['developer', 'engineer', '개발', '엔지니어'], file: 'developer.md' },
+        { keywords: ['reviewer', 'audit', '검수', '감사'], file: 'reviewer.md' },
+        { keywords: ['creative', 'ux', 'design', 'director', '크리에이티브', '디자인'], file: 'creative.md' }
     ];
 
     // Always include index & lessons learned (Knowledge Base)
@@ -283,6 +287,7 @@ export async function orchestrator(initialRequest) {
         initialRequest,
         plan: null,
         code: null,
+        creativeSpec: null,
         review: { approved: false, comments: "" },
         folderName: 'ai-gen-feature',
         existingContext: ""
@@ -322,11 +327,16 @@ export async function orchestrator(initialRequest) {
         let attempts = 0;
         while (!state.review.approved && attempts < 3) {
             attempts++;
-            console.log(`\n🔄 [Attempt ${attempts}/3] Developer & Review cycle...`);
+            console.log(`\n🔄 [Attempt ${attempts}/3] Corporate Workflow cycle...`);
+
+            // 2-1. Creative Strategy (NEW)
+            console.log('🎨 [Corporate Flow] Creative Director designing UX & SEO...');
+            const creativeContext = `[PLAN]: ${JSON.stringify(state.plan)}\n[CONTEXT]: ${state.existingContext}`;
+            state.creativeSpec = await runCreative(state, blueprint + manuals + creativeContext);
 
             // Developer 출력 강제 규칙 주입
             const forceRules = `\n\n반드시 \`\`\`html, \`\`\`css, \`\`\`js (또는 \`\`\`javascript) 세 개의 코드블록을 모두 출력하라.\n변경이 없는 파일도 이전 내용을 그대로 재출력하라.\n3개 중 하나라도 누락되면 실패로 간주된다.`;
-            const developerInput = `[PLAN]: ${JSON.stringify(state.plan)}\n[FEEDBACK]: ${state.review.comments || 'None'}${state.existingContext}${forceRules}`;
+            const developerInput = `[DESIGN_SPEC]: ${state.creativeSpec}\n[PLAN]: ${JSON.stringify(state.plan)}\n[FEEDBACK]: ${state.review.comments || 'None'}${state.existingContext}${forceRules}`;
             
             state.code = await runDeveloper(state, blueprint + manuals + "\n" + developerInput);
             
@@ -338,7 +348,7 @@ export async function orchestrator(initialRequest) {
             console.log(`🔍 ${qcReport.summary}`);
 
             // Reviewer
-            state.review = await runReviewer(state.code, blueprint + qcReport.summary);
+            state.review = await runReviewer(state.code, blueprint + manuals + qcReport.summary);
             
             // Work Memory update
             updateWorkDocs(state.folderName, state, qcReport, state.review.approved);
