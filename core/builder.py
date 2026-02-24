@@ -34,16 +34,20 @@ def process_html_file_for_common_elements(filepath):
         # 2. INJECT COMMON HEAD (Includes root /style.css)
         if '</head>' in content:
             # We add critical scripts to the head to ensure they are ready for the body
-            script_block = '\n    <script src="/translations.js"></script>\n    <script src="/common.js"></script>'
-            content = content.replace('</head>', f'{get_common_head()}{script_block}{extra_head}\n</head>')
+            # REMOVED DUPLICATE INJECTION HERE
+            content = content.replace('</head>', f'{get_common_head()}\n</head>')
         
         # 3. INJECT HEADER & BODY CLASS
         is_root_index = filepath.endswith('index.html') and os.path.dirname(filepath) == PUBLIC_DIR
         body_class_attr = ' class="home-page"' if is_root_index else ''
         
         # Ensure we find the body tag and put the header right after it
+        header_html = get_common_header()
+        # Add scripts required for the header to work, ONLY ONCE
+        header_scripts = '\n<script src="/translations.js"></script>\n<script src="/common.js"></script>\n'
+        
         if re.search(r'<body[^>]*>', content, re.IGNORECASE):
-            content = re.sub(r'(<body[^>]*>)', r'<body' + body_class_attr + '>\n' + get_common_header(), content, count=1, flags=re.IGNORECASE)
+            content = re.sub(r'(<body[^>]*>)', r'<body' + body_class_attr + '>\n' + header_scripts + header_html, content, count=1, flags=re.IGNORECASE)
         else:
             # Fallback if body tag is missing
             content = '<body>\n' + get_common_header() + content + '\n</body>'
