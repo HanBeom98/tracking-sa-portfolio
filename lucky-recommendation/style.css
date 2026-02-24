@@ -1,105 +1,118 @@
-/* lucky-recommendation/style.css */
+/* lucky-recommendation/style.css - Balanced & Modern */
 
 .recommendation-page {
-    text-align: center;
-    padding: 40px 20px;
-    max-width: 1200px;
+    max-width: 1000px;
     margin: 0 auto;
-    animation: fadeIn 0.8s ease-out;
+    padding: 20px;
+    animation: fadeIn 0.8s var(--transition);
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
+    from { opacity: 0; transform: translateY(15px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* Slimmer & Integrated Hero Banner */
 .hero-banner {
-    background: linear-gradient(135deg, oklch(45% 0.15 250) 0%, oklch(35% 0.12 260) 100%);
+    background: linear-gradient(135deg, var(--primary) 0%, oklch(45% 0.15 260) 100%);
     color: white;
-    padding: 4rem 2rem;
-    border-radius: 1.5rem;
+    padding: 3rem 2rem; /* Reduced from 4rem */
+    border-radius: 24px;
     text-align: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-    margin-bottom: 3rem;
+    box-shadow: 0 10px 30px oklch(0% 0 0 / 0.1);
+    margin-bottom: 2rem; /* Reduced from 3rem */
 }
 
 .hero-banner h1 {
-    font-size: clamp(2rem, 5vw, 3.5rem);
-    margin-bottom: 1rem;
-    font-weight: 800;
+    font-size: clamp(1.8rem, 4vw, 2.8rem); /* Slightly smaller than before */
+    margin-bottom: 0.75rem;
+    font-weight: 900;
+    letter-spacing: -0.04em;
 }
 
-/* Saju-style Input Section */
+.hero-banner p {
+    font-size: 1.1rem;
+    opacity: 0.95;
+    font-weight: 500;
+}
+
+/* Balanced Input Section */
 .saju-input-section {
     background: white;
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    border: 1px solid oklch(0% 0 0 / 0.05);
     border-radius: 24px;
     padding: 40px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    box-shadow: 0 15px 40px oklch(0% 0 0 / 0.05);
     display: flex;
     flex-direction: column;
-    gap: 25px;
-    max-width: 550px;
-    margin: 0 auto 4rem auto;
+    gap: 20px;
+    max-width: 650px; /* Increased from 550px for better balance with banner */
+    margin: 0 auto 3rem auto;
 }
 
 .input-form-group {
     display: flex;
-    align-items: center;
-    gap: 15px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
 }
 
 .input-form-group label {
-    width: 90px;
-    font-weight: bold;
-    text-align: left;
+    font-size: 0.9rem;
+    font-weight: 800;
     color: var(--text-strong);
-}
-
-.birthdate-selectors {
-    display: flex;
-    align-items: center;
-    flex: 1;
-    gap: 5px;
+    padding-left: 4px;
 }
 
 .saju-input-section input[type='text'],
 .saju-input-section select {
-    flex: 1;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 12px 15px;
-    background: #f8fafc;
-    font-size: 1em;
+    width: 100%;
+    border: 2px solid oklch(0% 0 0 / 0.06);
+    border-radius: 14px;
+    padding: 14px 18px;
+    background: oklch(98% 0.01 250);
+    font-size: 1.05rem;
+    color: var(--text-strong);
     outline: none;
     transition: all 0.3s ease;
 }
 
 .saju-input-section input:focus, .saju-input-section select:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px var(--primary-soft);
+    background: white;
+    box-shadow: 0 0 0 4px var(--primary-soft);
+}
+
+.birthdate-selectors {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 10px;
 }
 
 .gender-buttons {
     display: flex;
+    width: 100%;
     gap: 10px;
-    flex: 1;
 }
 
 .gender-buttons label {
     flex: 1;
-    padding: 12px;
-    background: #f1f5f9;
-    border-radius: 10px;
+    padding: 14px;
+    background: oklch(96% 0.01 250);
+    border: 2px solid transparent;
+    border-radius: 12px;
     cursor: pointer;
-    transition: 0.2s;
+    transition: all 0.2s ease;
     text-align: center;
-    font-weight: 600;
+    font-weight: 700;
+    color: var(--text-base);
 }
 
 .gender-buttons input[type='radio']:checked + label {
     background: var(--primary);
     color: white;
+    box-shadow: 0 5px 15px var(--primary-soft);
 }
 
 .gender-buttons input[type='radio'] {
@@ -107,28 +120,28 @@
 }
 
 .go-test-button {
+    margin-top: 10px;
     background: linear-gradient(135deg, var(--primary) 0%, oklch(45% 0.15 260) 100%);
     color: white;
     border: none;
     padding: 18px;
-    border-radius: 14px;
+    border-radius: 16px;
     cursor: pointer;
-    font-size: 1.1rem;
-    font-weight: 700;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px var(--primary-soft);
+    font-size: 1.15rem;
+    font-weight: 800;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+    box-shadow: 0 10px 25px var(--primary-soft);
 }
 
 .go-test-button:hover {
-    transform: translateY(-2px);
-    filter: brightness(1.1);
-    box-shadow: 0 8px 25px var(--primary-soft);
+    transform: translateY(-3px);
+    filter: brightness(1.05);
 }
 
-/* Web Component Display */
+/* Web Component Display Area */
 lucky-recommendation {
     width: 100%;
-    max-width: 700px;
+    max-width: 750px;
     margin: 0 auto;
     display: block;
 }
@@ -136,7 +149,7 @@ lucky-recommendation {
 /* Dark Mode */
 body.dark-mode .saju-input-section {
     background: var(--surface);
-    border-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.05);
 }
 
 body.dark-mode .saju-input-section input,
