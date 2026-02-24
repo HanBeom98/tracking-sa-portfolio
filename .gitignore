@@ -10,13 +10,12 @@ posts/
 processed_articles.log.tmp
 
 # Build Outputs (Static site generation)
-public/*.html
-public/page-*.html
-public/page-en-*.html
-public/sitemap.xml
-public/rss.xml
-sitemap.xml
-rss.xml
+# public/ 내의 핵심 파일들은 이제 Git에 포함하여 배포에 반영합니다.
+!public/*.html
+!public/news/*.html
+!public/search.js
+!public/sitemap.xml
+!public/rss.xml
 
 # Node.js
 node_modules/

@@ -669,7 +669,7 @@ def extract_svg_logo_from_common_body_injections():
 
 def copy_static_assets():
     assets = [
-        "style.css", "common.js", "translations.js", "firebase-config.js", 
+        "index.html", "style.css", "common.js", "translations.js", "firebase-config.js", 
         "logo.svg", "favicon.svg", 
         "ai-test.js", "fortune.js", "edit.js", "post.js", "write.js", "main.js", "search.js"
     ]
