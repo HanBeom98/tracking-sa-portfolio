@@ -51,12 +51,14 @@ function selectManuals(request) {
     bootstrapManuals();
     const manualsDir = path.join(__dirname, 'manuals');
     let injectedManuals = "\n### 📚 주입된 매뉴얼 (Mandatory Rules):\n";
+    const requestLower = request.toLowerCase();
+    const selectedFiles = new Set();
     
     const mappings = [
-        { keywords: ['component', 'web', 'shadow'], file: 'web-components.md' },
-        { keywords: ['color', 'style', 'design', 'css'], file: 'css-baseline.md' },
-        { keywords: ['a11y', 'access', 'accessibility', 'alt'], file: 'a11y.md' },
-        { keywords: ['project', 'rule', 'folder', 'convention'], file: 'project-conventions.md' }
+        { keywords: ['component', 'web', 'shadow', '컴포넌트', '웹컴포넌트'], file: 'web-components.md' },
+        { keywords: ['color', 'style', 'design', 'css', '디자인', '스타일'], file: 'css-baseline.md' },
+        { keywords: ['a11y', 'access', 'accessibility', 'alt', '접근성'], file: 'a11y.md' },
+        { keywords: ['project', 'rule', 'folder', 'convention', '프로젝트', '규칙', '폴더'], file: 'project-conventions.md' }
     ];
 
     // Always include index & lessons learned (Knowledge Base)
@@ -65,18 +67,56 @@ function selectManuals(request) {
         const filePath = path.join(manualsDir, file);
         if (fs.existsSync(filePath)) {
             injectedManuals += `--- Chapter: ${file} ---\n${fs.readFileSync(filePath, 'utf8')}\n`;
+            selectedFiles.add(file);
         }
     });
 
     mappings.forEach(m => {
-        if (m.keywords.some(k => request.toLowerCase().includes(k))) {
+        if (m.keywords.some(k => requestLower.includes(k)) && !selectedFiles.has(m.file)) {
             const filePath = path.join(manualsDir, m.file);
             if (fs.existsSync(filePath)) {
                 injectedManuals += `--- Chapter: ${m.file} ---\n${fs.readFileSync(filePath, 'utf8')}\n`;
+                selectedFiles.add(m.file);
             }
         }
     });
     return injectedManuals;
+}
+
+function normalizePlan(rawPlan) {
+    if (!Array.isArray(rawPlan)) {
+        throw new Error('Planner output must be an array.');
+    }
+
+    const normalized = rawPlan
+        .map(step => String(step || '').trim())
+        .filter(Boolean);
+
+    if (normalized.length === 0) {
+        throw new Error('Planner produced an empty plan.');
+    }
+
+    if (!normalized.some(step => step.toLowerCase().startsWith('folder:'))) {
+        normalized.unshift('folder: ai-gen-feature');
+    }
+
+    return normalized;
+}
+
+function normalizeFolderName(folderName) {
+    const safe = folderName
+        .toLowerCase()
+        .replace(/[^a-z0-9-_/]/g, '-')
+        .replace(/\.{2,}/g, '.')
+        .replace(/\/+/g, '/')
+        .replace(/^\//, '')
+        .trim();
+
+    if (!safe || safe.includes('..')) {
+        return 'ai-gen-feature';
+    }
+
+    return safe;
 }
 
 /**
@@ -250,10 +290,10 @@ export async function orchestrator(initialRequest) {
 
     try {
         // 1. Planner
-        state.plan = await runPlanner(state, initialRequest, blueprint);
+        state.plan = normalizePlan(await runPlanner(state, initialRequest, blueprint));
         const folderStep = state.plan.find(s => s.toLowerCase().startsWith('folder:'));
         if (folderStep) {
-            const suggestedFolder = folderStep.split(':')[1].trim();
+            const suggestedFolder = normalizeFolderName(folderStep.split(':')[1].trim());
             const fullPath = path.join(rootDir, suggestedFolder);
             
             // 경로 감지 및 기존 코드 컨텍스트 확보 로직
