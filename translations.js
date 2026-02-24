@@ -106,6 +106,8 @@ const translations = {
         'check_now': '확인하기',
         'prev_button': '이전',
         'next_button': '다음',
+        'latest_news': '오늘의 주요 뉴스',
+        'all_articles': '전체 기사 목록',
         // Saju page specific keys for main title and descriptions
         'saju_title': 'AI 실시간 오늘의 운세',
         'saju_desc1': '이름과 생년월일 정보를 입력하여 AI가 분석한 오늘의 운세 풀이를 확인해보세요.',
@@ -249,6 +251,8 @@ const translations = {
         'refresh_lucky': 'Check Again',
         'new_feature': 'NEW',
         'check_now': 'Check Now',
+        'latest_news': 'Featured News',
+        'all_articles': 'All AI Articles',
         // Saju page specific keys for main title and descriptions
         'saju_title': 'AI Real-time Daily Fortune',
         'saju_desc1': 'Enter your name and birth date to get your Daily Fortune analyzed by AI.',
