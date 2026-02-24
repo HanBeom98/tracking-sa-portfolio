@@ -31,22 +31,27 @@ def process_html_file_for_common_elements(filepath):
         with open(filepath, "r", encoding="utf-8") as f:
             content = f.read()
 
+        # Clean old injections
         content = re.sub(r'<header[\s\S]*?</header>', '', content, flags=re.DOTALL)
         content = re.sub(r'<footer>[\s\S]*?</footer>', '', content, flags=re.DOTALL)
         content = re.sub(r'\s*<script[^>]*src=".*?(translations|common).*?".*?></script>', '', content, flags=re.DOTALL)
 
+        # 1. CSS 인라인 주입 (절대 안 깨지게)
         css_inline = ""
         if os.path.exists("style.css"):
             with open("style.css", "r", encoding="utf-8") as css_f:
                 css_inline = f"<style>\n{css_f.read()}\n</style>"
 
+        # 2. HEAD 주입
         if '</head>' in content:
             content = content.replace('</head>', f'{get_common_head()}\n{css_inline}\n</head>')
         
+        # 3. HEADER & SCRIPTS 주입 (Robust RegEx)
         header_html = get_common_header()
-        header_scripts = '\n<script src="/translations.js"></script>\n<script src="/common.js"></script>\n'
+        header_scripts = '\n<script src="/translations.js"></script>\n<script src="/common.js"></script>\n<script src="/web-components/premium-news-card.js" type="module"></script>\n'
         content = re.sub(r'(<body[^>]*>)', r'\1' + header_scripts + header_html, content, count=1, flags=re.IGNORECASE)
         
+        # 4. FOOTER 주입
         if '</body>' in content:
             content = content.replace('</body>', f'{get_common_footer()}\n</body>')
 
@@ -61,7 +66,8 @@ def generate_article_html(md_content, title, date_str, output_path, hashtags_htm
     html_template = f"""<!DOCTYPE html>
 <html lang="{lang}"><head><meta charset="UTF-8"><title>{title} - Tracking SA</title></head>
 <body><main class="news-section-main"><article class="news-article-container">
-<h1>{title}</h1><p>{date_str}</p><div>{markdown.markdown(md_content)}{hashtags_html}</div>
+<h1 class="article-title-display">{title}</h1><p class="article-meta">Published on: {date_str}</p>
+<div class="article-content">{markdown.markdown(md_content)}{hashtags_html}</div>
 </article></main></body></html>"""
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f: f.write(html_template)
@@ -71,9 +77,18 @@ def generate_index_html(articles, lang='ko'):
     template_path = "news/index.html"
     if not os.path.exists(template_path): return
     with open(template_path, "r", encoding="utf-8") as f: base_html = f.read()
-    grid_items = "".join([f'<a href="/{a["url"]}" class="news-card-premium"><h2 class="news-title-text">{a["title"]}</h2><div class="news-card-footer"><span>{a["date"]}</span></div></a>' for a in articles])
-    final_content = f'<section class="news-section-main"><div class="news-grid">{grid_items}</div></section>'
+    
+    # Use Web Components for Premium Look
+    grid_items = "".join([f"""
+        <premium-news-card
+            title="{a['title']}"
+            date="{a['date']}"
+            link="/{a['url']}"
+        ></premium-news-card>""" for a in articles])
+    
+    final_content = f'<section class="news-section-main"><h1 class="section-title" data-i18n="all_articles">All AI News</h1><div class="news-grid">{grid_items}</div></section>'
     updated_html = base_html.replace("<!-- NEWS_INJECTION_POINT -->", final_content)
+    
     out_name = f"index{'-en' if lang=='en' else ''}.html"
     output_path = os.path.join(PUBLIC_DIR, "news", out_name)
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
@@ -85,15 +100,19 @@ def copy_static_assets():
     for item in assets:
         if os.path.exists(item): shutil.copy2(item, os.path.join(PUBLIC_DIR, item))
     
-    exclude = [".git", ".github", "core", "templates", "public", "node_modules", "multi-agent-system", "__pycache__"]
+    exclude_dirs = [".git", ".github", "core", "templates", "public", "node_modules", "multi-agent-system", "web-components", "__pycache__"]
     for d in os.listdir("."):
-        if os.path.isdir(d) and d not in exclude and not d.startswith("."):
+        if os.path.isdir(d) and d not in exclude_dirs and not d.startswith("."):
             dest = os.path.join(PUBLIC_DIR, d)
             if os.path.exists(dest): shutil.rmtree(dest)
             shutil.copytree(d, dest)
             for root, _, files in os.walk(dest):
                 for file in files:
                     if file.endswith(".html"): process_html_file_for_common_elements(os.path.join(root, file))
+    
+    # Web Components copy
+    if os.path.exists("web-components"):
+        shutil.copytree("web-components", os.path.join(PUBLIC_DIR, "web-components"), dirs_exist_ok=True)
 
 def generate_public_site():
     if os.path.exists(PUBLIC_DIR): shutil.rmtree(PUBLIC_DIR)
@@ -114,3 +133,4 @@ def generate_public_site():
                 articles.append({'title': title, 'url': f"{ukey}.html", 'date': date})
             generate_index_html(articles, lang=lang)
     process_html_file_for_common_elements(os.path.join(PUBLIC_DIR, "index.html"))
+    print("✅ Build logic fully restored and synchronized.")
