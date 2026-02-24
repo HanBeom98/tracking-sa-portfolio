@@ -1,11 +1,12 @@
-/* --- Tracking SA COMPLETE RECOVERY CSS (ULTIMATE VERSION) --- */
+/* --- Tracking SA ROOT ULTIMATE FIX (Layout & Nav) --- */
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 
 :root {
-    --premium-blue: oklch(55% 0.18 260);
-    --text-dark: oklch(25% 0.05 260);
-    --bg-light: oklch(98% 0.01 250);
+    --premium-blue: #0052cc;
+    --text-dark: #1e293b;
+    --bg-light: #f8fafc;
     --header-height: 75px;
+    --container-width: 1200px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -15,11 +16,13 @@ body {
     background-color: var(--bg-light);
     color: var(--text-dark);
     line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
     padding-top: var(--header-height);
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* 바디 전체 중앙 정렬 보조 */
 }
 
-/* --- THE HEADER (GOD LAYER) --- */
+/* --- THE HEADER (CENTERED & VISIBLE) --- */
 header {
     display: flex !important;
     height: var(--header-height) !important;
@@ -29,82 +32,92 @@ header {
     width: 100% !important;
     z-index: 999999;
     align-items: center;
-    justify-content: space-between;
-    padding: 0 5%;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    justify-content: center; /* 헤더 내용물 중앙 정렬 */
+    padding: 0 20px;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.1);
     border-bottom: 3px solid var(--premium-blue);
 }
 
-.site-logo-link { display: flex !important; align-items: center; text-decoration: none; }
-.site-logo { width: 45px; height: 45px; }
-
-.desktop-menu-container { 
-    display: flex !important; 
-    align-items: center; 
-    flex: 1;
+.header-inner {
+    width: 100%;
+    max-width: var(--container-width);
+    display: flex;
+    align-items: center;
     justify-content: space-between;
-    margin-left: 40px;
 }
 
-nav { display: block !important; }
-nav ul { display: flex !important; list-style: none !important; gap: 15px; }
+.site-logo-link { display: flex !important; align-items: center; text-decoration: none; }
+.site-logo { width: 40px; height: 40px; }
 
+.desktop-menu-container { display: flex !important; align-items: center; gap: 30px; }
+nav ul { display: flex !important; list-style: none !important; gap: 10px; }
 nav a, .dropbtn {
     text-decoration: none !important;
     color: var(--text-dark) !important;
     font-weight: 800 !important;
     padding: 10px 15px;
-    font-size: 1.05rem;
-    transition: 0.2s;
+    font-size: 1rem;
+    cursor: pointer;
 }
 nav a:hover { color: var(--premium-blue) !important; }
 
 /* Utility Controls */
-.utility-controls { display: flex !important; align-items: center; gap: 15px; }
+.utility-controls { display: flex !important; align-items: center; gap: 12px; }
 #color-change { 
-    background: #f1f5f9; border: 2px solid #e2e8f0; font-size: 1.3rem; cursor: pointer; 
-    padding: 8px 12px; border-radius: 12px;
+    background: #f1f5f9; border: 1px solid #ddd; font-size: 1.2rem; cursor: pointer; 
+    padding: 5px 10px; border-radius: 10px;
 }
 
 .lang-button {
-    border: 2px solid #e2e8f0; background: white; padding: 8px 16px;
-    border-radius: 10px; font-weight: 800; color: #64748b; cursor: pointer; font-size: 0.85rem;
+    border: 1px solid #ddd; background: white; padding: 6px 12px;
+    border-radius: 8px; font-weight: 800; color: #64748b; cursor: pointer;
 }
 .lang-button.active { background: var(--premium-blue) !important; color: white !important; }
 
-/* Hamburger (Mobile Only) */
-.hamburger-menu {
-    display: none; background: none; border: none; cursor: pointer; padding: 10px;
+/* Dropdown */
+.dropdown { position: relative; }
+.dropdown-content {
+    display: none; position: absolute; top: 100%; left: 0;
+    background: white; min-width: 200px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    border-radius: 12px; padding: 10px 0; border: 1px solid #eee;
 }
-.hamburger-menu span {
-    display: block; width: 25px; height: 3px; background: var(--text-dark); margin: 5px 0;
+.dropdown:hover .dropdown-content { display: block; }
+.dropdown-content a { padding: 12px 20px; display: block; color: var(--text-dark) !important; text-decoration: none; }
+.dropdown-content a:hover { background: #f8fafc; color: var(--premium-blue) !important; }
+
+/* --- CONTENT CENTERING (THE CORE FIX) --- */
+main {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* 자식 요소들을 중앙으로 */
 }
 
-@media (max-width: 992px) {
-    .desktop-menu-container { display: none !important; }
-    .hamburger-menu { display: block !important; }
+.container, .news-section-main {
+    width: 100%;
+    max-width: var(--container-width);
+    margin: 0 auto !important; /* 무조건 중앙 정렬 */
+    padding: 40px 20px;
+    background: white; /* 본문 영역 강조 */
+    min-height: 80vh;
 }
 
-/* --- News Premium Layout --- */
-.news-section-main { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+/* --- News Layout --- */
 .hero-card {
-    background: var(--text-dark); color: white; border-radius: 32px; 
-    padding: 80px 50px; margin-bottom: 50px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    background: var(--text-dark); color: white; border-radius: 24px; 
+    padding: 60px; margin-bottom: 40px; width: 100%;
 }
-.hero-card-title a { color: white; text-decoration: none; font-size: 2.8rem; font-weight: 900; }
-.hero-badge { background: var(--premium-blue); padding: 6px 16px; border-radius: 50px; font-size: 0.8rem; font-weight: 800; margin-bottom: 20px; display: inline-block; }
-
-.news-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 40px; }
+.hero-card-title a { color: white; text-decoration: none; font-size: 2.5rem; font-weight: 900; }
+.news-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; width: 100%; }
 .news-card-premium {
-    background: white; padding: 40px; border-radius: 24px; border: 1px solid oklch(95% 0.01 260);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05); transition: all 0.3s;
+    background: white; padding: 30px; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); 
+    text-decoration: none; color: inherit; border: 1px solid #eee;
 }
-.news-card-premium:hover { transform: translateY(-10px); border-color: var(--premium-blue); }
-.news-title-text { font-size: 1.3rem; font-weight: 800; margin-bottom: 20px; color: var(--text-dark); }
 
-.pagination { margin-top: 60px; display: flex; justify-content: center; gap: 20px; font-weight: 800; }
+.pagination { margin-top: 60px; display: flex; justify-content: center; gap: 20px; font-weight: 800; width: 100%; }
 
-/* Home Page Exceptions */
+/* Homepage Exceptions */
 body.home-page header { background: transparent !important; box-shadow: none !important; border: none !important; }
+body.home-page .header-inner { justify-content: flex-end; }
 body.home-page nav, body.home-page .site-logo-link { display: none !important; }
-body.home-page .utility-controls { margin-left: auto; }
