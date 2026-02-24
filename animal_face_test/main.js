@@ -1,257 +1,177 @@
-const URL = "https://teachablemachine.withgoogle.com/models/e52yfi_eK/"; // Updated Teachable Machine model URL
-
-// Mapping of animal names to emojis with Korean names. Keys match AI model's class names.
-const animalData = {
-    '강아지': { emoji: '🐶', kor: '강아지상' },
-    '고양이': { emoji: '🐱', kor: '고양이상' },
-    '다람쥐': { emoji: '🐿️', kor: '다람쥐상' },
-    '곰': { emoji: '🐻', kor: '곰상' },
-    '토끼': { emoji: '🐰', kor: '토끼상' },
-    '여우': { emoji: '🦊', kor: '여우상' }
-};
-
-let model, maxPredictions;
-let selectedGender = null; // To store selected gender
-let imagePreview = document.getElementById("image-preview");
-let currentImageFile = null;
-
-// DOM Elements
-const dropZone = document.getElementById('drop-zone');
-const imageUploadInput = document.getElementById('image-upload');
-const predictButton = document.getElementById('predict-button');
-const loadingIndicator = document.getElementById('loading-indicator');
-const resultSection = document.getElementById('result-section');
-const resultEmoji = document.getElementById('result-emoji'); 
-const predictionResult = document.getElementById('prediction-result');
-const confidenceScore = document.getElementById('confidence-score');
-const retakeButton = document.getElementById('retake-button');
-const genderSelection = document.getElementById('gender-selection');
-const genderMaleButton = document.getElementById('gender-male');
-const genderFemaleButton = document.getElementById('gender-female');
-const shareButtonsContainer = document.getElementById('share-buttons');
-const imagePreviewContainer = document.getElementById('image-preview-container');
-
-
-async function init() {
-    showLoadingIndicator("모델 로딩 중..."); 
-    
-    predictButton.disabled = true;
-    dropZone.style.pointerEvents = 'none'; 
-    genderMaleButton.disabled = true;
-    genderFemaleButton.disabled = true;
-
-    const timestamp = new Date().getTime();
-    const modelURL = URL + "model.json?v=" + timestamp;
-    const metadataURL = URL + "metadata.json?v=" + timestamp;
-
-    try {
-        model = await window.tmImage.load(modelURL, metadataURL);
-        maxPredictions = model.getTotalClasses();
-
-        predictButton.disabled = false;
-        dropZone.style.pointerEvents = 'auto'; 
-        genderMaleButton.disabled = false;
-        genderFemaleButton.disabled = false;
-
-        hideLoadingIndicator();
-        hideResultSection();
-        dropZone.style.display = 'block'; 
-        imagePreviewContainer.style.display = 'none'; 
-
-    } catch (error) {
-        console.error("Error loading the model:", error);
-        alert("AI 모델 로딩에 실패했습니다. 페이지를 새로고침 해주세요.");
-        hideLoadingIndicator();
-    }
-
-    dropZone.addEventListener('dragover', handleDragOver);
-    dropZone.addEventListener('dragleave', handleDragLeave);
-    dropZone.addEventListener('drop', handleFileDrop);
-    imageUploadInput.addEventListener('change', handleFileSelect);
-    predictButton.addEventListener('click', predict);
-    retakeButton.addEventListener('click', resetUI);
-
-    genderMaleButton.addEventListener('click', () => selectGender('male'));
-    genderFemaleButton.addEventListener('click', () => selectGender('female'));
-
-    if (imagePreview.src && imagePreview.src !== window.location.href) {
-        document.querySelector('.image-upload-section').style.display = 'block';
-    }
-}
-
-function selectGender(gender) {
-    selectedGender = gender;
-    genderMaleButton.classList.remove('active');
-    genderFemaleButton.classList.remove('active');
-    if (gender === 'male') {
-        genderMaleButton.classList.add('active');
-    } else {
-        genderFemaleButton.classList.add('active');
-    }
-}
-
-function handleDragOver(event) {
-    event.preventDefault();
-    dropZone.classList.add('drag-over');
-}
-
-function handleDragLeave(event) {
-    event.preventDefault();
-    dropZone.classList.remove('drag-over');
-}
-
-function handleFileDrop(event) {
-    event.preventDefault();
-    dropZone.classList.remove('drag-over');
-    const files = event.dataTransfer.files;
-    if (files.length > 0) {
-        processFile(files[0]);
-    }
-}
-
-function handleFileSelect(event) {
-    const files = event.target.files;
-    if (files.length > 0) {
-        processFile(files[0]);
-    }
-}
-
-function processFile(file) {
-    if (!file.type.startsWith('image/')) {
-        const msg = (window.getTranslation && window.getTranslation(window.currentLang, 'only_image_files_alert')) || "이미지 파일만 업로드할 수 있습니다.";
-        alert(msg);
-        return;
-    }
-    currentImageFile = file;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        imagePreview.src = e.target.result;
-        imagePreview.style.display = 'block';
-        predictButton.style.display = 'block'; 
-        hideResultSection();
-        dropZone.style.display = 'none';
-        imagePreviewContainer.style.display = 'block';
-        imagePreview.style.display = 'block'; 
-        predictButton.style.display = 'block'; 
-    };
-    reader.readAsDataURL(file);
-}
-
-async function predict() {
-    if (!model) {
-        alert("AI 모델이 아직 로딩 중입니다. 잠시만 기다려 주세요.");
-        return;
-    }
-
-    if (!currentImageFile) {
-        const msg = (window.getTranslation && window.getTranslation(window.currentLang, 'select_image_first')) || "이미지를 먼저 선택해주세요.";
-        alert(msg);
-        return;
-    }
-
-    showLoadingIndicator();
-    hideResultSection();
-    
-    const image = imagePreview; 
-    const prediction = await model.predict(image);
-
-    prediction.sort((a, b) => b.probability - a.probability);
-
-    const topPrediction = prediction[0];
-    const rawName = topPrediction.className.trim(); 
-    const confidence = (topPrediction.probability * 100).toFixed(2);
-
-    const animalInfo = animalData[rawName];
-
-    if (animalInfo) {
-        resultEmoji.innerHTML = ''; 
-        predictionResult.innerText = window.getTranslation(window.currentLang, 'your_animal_face_is') + " " + animalInfo.emoji;
-        setupShareButtons(animalInfo.kor, confidence); 
-    } else {
-        resultEmoji.innerHTML = ''; 
-        predictionResult.innerText = window.getTranslation(window.currentLang, 'your_animal_face_is') + " " + '❓';
-        setupShareButtons(rawName, confidence); 
-    }
-    
-    const rateMsg = (window.getTranslation && window.getTranslation(window.currentLang, 'ai_matching_rate')) || "AI 분석 결과 {confidence}%의 매칭률을 보입니다.";
-    confidenceScore.innerText = rateMsg.replace('{confidence}', confidence);
-
-    hideLoadingIndicator();
-    showResultSection();
-    document.querySelector('.image-upload-section').style.display = 'none'; 
-}
-
-function showLoadingIndicator(message = "이미지 분석 중...") {
-    loadingIndicator.querySelector('p').innerText = message;
-    loadingIndicator.style.display = 'flex';
-}
-
-function hideLoadingIndicator() {
-    loadingIndicator.style.display = 'none';
-}
-
-function showResultSection() {
-    resultSection.style.display = 'block';
-}
-
-function hideResultSection() {
-    resultSection.style.display = 'none';
-}
-
-function resetUI() {
-    currentImageFile = null;
-    imagePreview.src = '';
-    imagePreview.style.display = 'none';
-    predictButton.style.display = 'none';
-    resultEmoji.innerHTML = ''; 
-    predictionResult.textContent = '';
-    confidenceScore.textContent = '';
-    selectedGender = null;
-    genderMaleButton.classList.remove('active');
-    genderFemaleButton.classList.remove('active');
-    hideResultSection();
-    hideLoadingIndicator();
-    dropZone.style.display = 'block';
-    imagePreviewContainer.style.display = 'none';
-    imageUploadInput.value = ''; 
-    document.querySelector('.image-upload-section').style.display = 'block'; 
-}
-
-function setupShareButtons(animalName, confidence) {
-    const shareText = `저는 ${animalName} 입니다! (${confidence}% 확률) #동물상테스트`;
-    const shareUrl = window.location.href; 
-
-    const twitterButton = shareButtonsContainer.querySelector('[data-platform="twitter"]');
-    if (twitterButton) {
-        twitterButton.onclick = () => {
-            window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`, '_blank');
+/**
+ * AnimalFaceTest Web Component
+ * Encapsulated AI Analysis for Tracking SA.
+ */
+class AnimalFaceTest extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        this._model = null;
+        this._selectedGender = null;
+        this._currentImage = null;
+        this._modelUrl = "https://teachablemachine.withgoogle.com/models/e52yfi_eK/";
+        this._animalData = {
+            '강아지': { emoji: '🐶', kor: '강아지상' },
+            '고양이': { emoji: '🐱', kor: '고양이상' },
+            '다람쥐': { emoji: '🐿️', kor: '다람쥐상' },
+            '곰': { emoji: '🐻', kor: '곰상' },
+            '토끼': { emoji: '🐰', kor: '토끼상' },
+            '여우': { emoji: '🦊', kor: '여우상' }
         };
     }
 
-    const facebookButton = shareButtonsContainer.querySelector('[data-platform="facebook"]');
-    if (facebookButton) {
-        facebookButton.onclick = () => {
-            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`, '_blank');
-        };
+    async connectedCallback() {
+        this.render();
+        this.setupEvents();
+        await this.loadModel();
     }
 
-    const downloadButton = shareButtonsContainer.querySelector('[data-platform="download"]');
-    if (downloadButton) {
-        downloadButton.onclick = () => {
-            if (imagePreview.src && imagePreview.src.startsWith('data:image')) {
-                const link = document.createElement('a');
-                link.href = imagePreview.src;
-                link.download = `animal_face_test_result_${animalName}.png`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            } else {
-                const msg = (window.getTranslation && window.getTranslation(window.currentLang, 'no_image_to_download_alert')) || "다운로드할 이미지가 없습니다.";
-                alert(msg);
-            }
+    render() {
+        const lang = localStorage.getItem('lang') || 'ko';
+        const isEn = lang === 'en';
+
+        const t = {
+            h1: isEn ? "Which animal do you resemble?" : "당신은 어떤 동물을 닮았나요?",
+            p1: isEn ? "Find out your animal face type with AI!" : "당신은 어떤 동물을 닮았는지 알아보세요!",
+            gender: isEn ? "Select Gender" : "성별 선택",
+            male: isEn ? "Male" : "남성",
+            female: isEn ? "Female" : "여성",
+            upload: isEn ? "Click or drag image to upload" : "여기에 이미지를 드래그하거나 클릭하여 업로드",
+            btn: isEn ? "Check Result" : "결과 확인",
+            analyzing: isEn ? "AI is analyzing..." : "AI 분석 중...",
+            privacy: isEn ? "🔒 Photos are not saved." : "🔒 사진은 저장되지 않습니다.",
+            retake: isEn ? "Try Again" : "다시 테스트"
         };
+
+        this.shadowRoot.innerHTML = `
+        <style>
+            :host { display: block; width: 100%; max-width: 800px; margin: 0 auto; text-align: center; font-family: system-ui, sans-serif; }
+            .card { background: white; border-radius: 30px; padding: 50px 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); }
+            h1 { font-size: 2.5rem; font-weight: 900; background: linear-gradient(135deg, #0052cc, #1e40af); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
+            p.desc { color: #64748b; margin-bottom: 30px; font-size: 1.1rem; }
+            
+            .gender-group { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; }
+            .gender-btn { padding: 12px 30px; border-radius: 50px; border: 2px solid #f1f5f9; background: #f1f5f9; cursor: pointer; font-weight: 700; transition: 0.3s; color: #64748b; }
+            .gender-btn.active.male { background: #0052cc; color: white; border-color: #0052cc; }
+            .gender-btn.active.female { background: #e11d48; color: white; border-color: #e11d48; }
+
+            .upload-box { border: 2px dashed #0052cc; border-radius: 20px; padding: 40px; background: #f8faff; cursor: pointer; transition: 0.3s; margin-bottom: 30px; }
+            .upload-box:hover { background: #eff6ff; }
+            
+            #preview { max-width: 100%; border-radius: 15px; display: none; margin: 0 auto 20px auto; }
+            
+            .submit-btn { background: linear-gradient(135deg, #0052cc, #1e40af); color: white; border: none; padding: 18px 45px; border-radius: 15px; font-weight: 800; font-size: 1.2rem; cursor: pointer; box-shadow: 0 10px 25px rgba(0, 82, 204, 0.2); display: none; margin: 0 auto; }
+            
+            #loading { display: none; flex-direction: column; align-items: center; gap: 15px; padding: 40px; }
+            .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #0052cc; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+            @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+            #result { display: none; padding: 40px; background: #f8fafc; border-radius: 25px; margin-top: 30px; animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+            @keyframes pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+            .emoji { font-size: 5rem; margin-bottom: 10px; }
+            .res-text { font-size: 2rem; font-weight: 900; color: #0052cc; }
+        </style>
+
+        <div class="card">
+            <h1>${t.h1}</h1>
+            <p class="desc">${t.p1}</p>
+
+            <div class="gender-group">
+                <button class="gender-btn" data-gender="male">♂ ${t.male}</button>
+                <button class="gender-btn" data-gender="female">♀ ${t.female}</button>
+            </div>
+
+            <div class="upload-box" id="drop-zone">
+                <p>${t.upload}</p>
+                <input type="file" id="file-input" accept="image/*" style="display:none">
+            </div>
+
+            <img id="preview">
+            <button class="submit-btn" id="predict-btn">${t.btn}</button>
+
+            <div id="loading">
+                <div class="spinner"></div>
+                <p>${t.analyzing}</p>
+                <small style="color:#94a3b8">${t.privacy}</small>
+            </div>
+
+            <div id="result">
+                <div class="emoji" id="res-emoji"></div>
+                <div class="res-text" id="res-name"></div>
+                <div id="res-score" style="margin: 10px 0 30px 0; font-weight: 600; color: #64748b;"></div>
+                <button class="gender-btn" id="reset-btn">${t.retake}</button>
+            </div>
+        </div>
+        `;
+    }
+
+    setupEvents() {
+        const root = this.shadowRoot;
+        const dropZone = root.getElementById('drop-zone');
+        const fileInput = root.getElementById('file-input');
+        const predictBtn = root.getElementById('predict-btn');
+        const resetBtn = root.getElementById('reset-btn');
+
+        dropZone.onclick = () => fileInput.click();
+        fileInput.onchange = (e) => this.handleFile(e.target.files[0]);
+        
+        predictBtn.onclick = () => this.predict();
+        resetBtn.onclick = () => this.reset();
+
+        root.querySelectorAll('.gender-btn[data-gender]').forEach(btn => {
+            btn.onclick = () => {
+                root.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this._selectedGender = btn.dataset.gender;
+            };
+        });
+    }
+
+    handleFile(file) {
+        if (!file || !file.type.startsWith('image/')) return;
+        this._currentImage = file;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const preview = this.shadowRoot.getElementById('preview');
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+            this.shadowRoot.getElementById('drop-zone').style.display = 'none';
+            this.shadowRoot.getElementById('predict-btn').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    async loadModel() {
+        if (window.tmImage) {
+            this._model = await window.tmImage.load(this._modelUrl + "model.json", this._modelUrl + "metadata.json");
+        }
+    }
+
+    async predict() {
+        if (!this._model) return;
+        const root = this.shadowRoot;
+        root.getElementById('predict-btn').style.display = 'none';
+        root.getElementById('loading').style.display = 'flex';
+
+        const prediction = await this._model.predict(root.getElementById('preview'));
+        prediction.sort((a, b) => b.probability - a.probability);
+
+        const top = prediction[0];
+        const confidence = (top.probability * 100).toFixed(2);
+        const data = this._animalData[top.className.trim()] || { emoji: '❓', kor: top.className };
+
+        root.getElementById('loading').style.display = 'none';
+        root.getElementById('result').style.display = 'block';
+        root.getElementById('res-emoji').innerText = data.emoji;
+        root.getElementById('res-name').innerText = data.kor;
+        root.getElementById('res-score').innerText = `매칭률: ${confidence}%`;
+    }
+
+    reset() {
+        this._currentImage = null;
+        this.render();
+        this.setupEvents();
     }
 }
 
-
-document.addEventListener("DOMContentLoaded", init);
+customElements.define('animal-face-test', AnimalFaceTest);
