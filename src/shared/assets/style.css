@@ -78,6 +78,14 @@ main > *:not(script):not(style) {
     margin: 0 auto; /* 안전장치 */
 }
 
+/* Fallback: pages rendering content directly under body (DDD 전환 이후 대비) */
+body > :not(header):not(footer):not(script):not(style):not(link):not(main):not(tetris-game) {
+    display: block;
+    width: 100%;
+    max-width: var(--max-w);
+    margin: 0 auto;
+}
+
 .container, .news-section-main, .ticker-container {
     width: 100% !important;
     max-width: var(--max-w) !important;
