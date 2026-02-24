@@ -62,6 +62,7 @@ Evolving Tracking-sa into a premium, framework-less web platform using a special
 - [x] Center container blocks globally to prevent left-shift.
 - [x] Move Pretendard font load to head to reduce layout shifts.
 - [x] Move build stamp generation into build pipeline (CF Pages compatible).
+- [x] Normalize animal-face route and add redirect from legacy path.
 
 ## ⚠️ Lessons Learned
 - **Path Resolution**: Always use absolute paths (`/`) for shared assets in deeply nested domain folders.

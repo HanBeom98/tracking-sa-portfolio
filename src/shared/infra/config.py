@@ -16,7 +16,7 @@ STATIC_PAGES_FOR_SITEMAP = [
     "contact",
     "inquiry",
     "privacy-policy",
-    "animal_face_test",
+    "animal-face",
     "ai-test",
     "fortune",
     "edit",
