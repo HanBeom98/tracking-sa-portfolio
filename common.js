@@ -56,10 +56,22 @@ document.addEventListener('DOMContentLoaded', () => {
     initTheme();
     initLanguageSwitcher();
     
-    // Final Visibility Check
+    // Final Visibility Check & Force Reveal (Overriding CSS !important)
     const header = document.querySelector('header');
     if (header) {
-        header.style.display = 'flex';
-        header.style.visibility = 'visible';
+        header.style.setProperty('display', 'flex', 'important');
+        header.style.setProperty('visibility', 'visible', 'important');
+        
+        const nav = header.querySelector('nav');
+        if (nav) nav.style.setProperty('display', 'block', 'important');
+        
+        const logo = header.querySelector('.site-logo-link');
+        if (logo) logo.style.setProperty('display', 'block', 'important');
+    }
+
+    const footer = document.querySelector('footer');
+    if (footer) {
+        footer.style.setProperty('display', 'block', 'important');
+        footer.style.setProperty('visibility', 'visible', 'important');
     }
 });
