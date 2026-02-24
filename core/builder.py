@@ -18,10 +18,15 @@ def process_html_file_for_common_elements(filepath):
             content = f.read()
 
         dirname = os.path.dirname(filepath)
-        local_css_path = os.path.join(dirname, "style.css")
+        # Check if we are in a sub-service directory (like /news/ or /fortune/)
+        # We need to check the relative path from PUBLIC_DIR
+        rel_dir = os.path.relpath(dirname, PUBLIC_DIR)
+        
         extra_head = ""
-        if os.path.exists(local_css_path):
-            extra_head = '\n    <link rel="stylesheet" href="style.css">'
+        if rel_dir != "." and not rel_dir.startswith(".."):
+            # If a style.css exists in the source service directory, it was copied to public/service/style.css
+            if os.path.exists(os.path.join(dirname, "style.css")):
+                extra_head = '\n    <link rel="stylesheet" href="style.css">'
 
         # 1. CLEANUP: Strip everything that might be duplicated
         content = re.sub(r'<header[\s\S]*?</header>', '', content, flags=re.DOTALL | re.IGNORECASE)
@@ -31,11 +36,11 @@ def process_html_file_for_common_elements(filepath):
         content = re.sub(r'<link[^>]*href=".*?(style\.css|all\.min\.css)"[^>]*>', '', content, flags=re.DOTALL | re.IGNORECASE)
         content = re.sub(r'<meta name="(google|naver)-site-verification"[\s\S]*?>', '', content, flags=re.IGNORECASE)
 
-        # 2. INJECT COMMON HEAD (Includes root /style.css)
+        # 2. INJECT COMMON HEAD + EXTRA HEAD
         if '</head>' in content:
-            # We add critical scripts to the head to ensure they are ready for the body
-            # REMOVED DUPLICATE INJECTION HERE
-            content = content.replace('</head>', f'{get_common_head()}\n</head>')
+            # Inject global head AND the service-specific extra_head
+            full_head = get_common_head() + extra_head
+            content = content.replace('</head>', f'{full_head}\n</head>')
         
         # 3. INJECT HEADER & BODY CLASS
         is_root_index = filepath.endswith('index.html') and os.path.dirname(filepath) == PUBLIC_DIR
