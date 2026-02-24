@@ -330,13 +330,24 @@ def get_firestore_client():
         if not service_account_json:
             return None
 
+        
         try:
-            # 줄바꿈 이스케이프 문제 해결
-            normalized_json = service_account_json.replace('\n', '\\n')
-            cred_dict = json.loads(normalized_json)
-            cred = credentials.Certificate(cred_dict)
-            firebase_admin.initialize_app(cred)
+            # 1. 앞뒤 공백 및 따옴표 제거
+            sj = service_account_json.strip()
+            if sj.startswith("'") and sj.endswith("'"): sj = sj[1:-1]
+            
+            # 2. 작은따옴표를 큰따옴표로 교정 (JSON 표준 준수)
+            sj = sj.replace("\'", """)
+            
+            # 3. 줄바꿈 문자 정규화
+            sj = sj.replace('
+', '\n')
+            
+            cred_dict = json.loads(sj)
+            firebase_admin.initialize_app(credentials.Certificate(cred_dict))
+            db = firestore.client()
         except Exception as e:
+
 
             print(f"⚠️ Firebase initialization error: {e}")
             return None
