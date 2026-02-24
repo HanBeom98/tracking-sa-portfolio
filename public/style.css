@@ -92,6 +92,47 @@ nav a, .dropbtn {
 }
 nav a:hover { color: var(--p-blue); }
 
+/* --- Language Switcher --- */
+#language-switcher {
+    display: inline-flex;
+    gap: 6px;
+}
+
+.lang-button {
+    min-width: 44px;
+    height: 32px;
+    padding: 0 8px;
+    border-radius: 999px;
+    border: 1px solid oklch(90% 0.01 260);
+    background: white;
+    color: var(--text-main);
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.lang-button.active {
+    background: var(--p-blue);
+    color: white;
+    border-color: var(--p-blue);
+}
+
+body.dark-mode .lang-button {
+    background: #0f172a;
+    border-color: oklch(35% 0.02 260);
+    color: var(--text-main);
+}
+
+body.dark-mode .lang-button.active {
+    background: var(--p-blue);
+    color: white;
+    border-color: var(--p-blue);
+}
+
 /* --- Footer --- */
 footer {
     margin-top: 80px;
