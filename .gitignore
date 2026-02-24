@@ -13,7 +13,6 @@ processed_articles.log.tmp
 public/ 폴더 전체를 Git 추적에서 제외하여 저장소를 깨끗하게 유지합니다.
 # 배포는 GitHub Actions에서 Firebase Hosting으로 직접 수행합니다.
 public/
-*.html
 rss.xml
 sitemap.xml
 

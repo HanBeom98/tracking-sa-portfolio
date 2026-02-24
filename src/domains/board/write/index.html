@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="write_post_title">글쓰기 - TrackingSA</title>
+    <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
+    <meta name="description" content="TrackingSA 자유게시판에 새로운 글을 작성하세요. 제목과 내용을 입력하고 비밀번호를 설정하여 게시물을 등록할 수 있습니다.">
+
+    <!-- Open Graph Tags -->
+    <meta property="og:title" content="글쓰기 - TrackingSA">
+    <meta property="og:description" content="TrackingSA 자유게시판에 새로운 글을 작성하세요. 제목과 내용을 입력하고 비밀번호를 설정하여 게시물을 등록할 수 있습니다.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://trackingsa.com/write.html">
+    <meta property="og:image" content="https://trackingsa.com/logo.svg">
+
+    <!-- Twitter Card Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="글쓰기 - TrackingSA">
+    <meta name="twitter:description" content="TrackingSA 자유게시판에 새로운 글을 작성하세요. 제목과 내용을 입력하고 비밀번호를 설정하여 게시물을 등록할 수 있습니다.">
+    <meta name="twitter:image" content="https://trackingsa.com/logo.svg">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-TGD3WRNKPZ');
+    </script>
+    <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "vb9q33ggpa");
+</script>
+</head>
+<body>
+
+
+    <main>
+        <section class="write-form-section section-card">
+            <h1 data-i18n="write_post_h1">자유게시판 글쓰기</h1>
+            <board-write-form></board-write-form>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 TrackingSA. 모든 권리 보유.</p>
+    </footer>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    
+    <!-- crypto-js for password hashing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    
+    <!-- Firebase-config -->
+    <script src="/firebase-config.js"></script>
+    
+    <script src="/translations.js"></script>
+    <script src="/common.js"></script>
+    <!-- 글쓰기 로직을 위한 별도의 스크립트 -->
+    <script type="module" src="../ui/board-write-form.js"></script>
+    <script type="module" src="main.js"></script>
+</body>
+</html>
