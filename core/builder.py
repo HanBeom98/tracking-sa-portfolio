@@ -168,9 +168,16 @@ def generate_rss_feed(articles):
 def copy_static_assets():
     assets = ["index.html", "style.css", "common.js", "translations.js", "firebase-config.js", "logo.svg", "favicon.svg", "search.js"]
     asset_dirs = ["fortune", "about", "ai-test", "animal_face_test", "contact", "edit", "inquiry", "post", "privacy-policy", "write", "lucky-recommendation", "tetris-game", "ai-evolution"]
+    
+    # Favicon Auto-generation if missing
+    if not os.path.exists("favicon.svg") and os.path.exists("logo.svg"):
+        shutil.copy2("logo.svg", "favicon.svg")
+        print("✅ Created favicon.svg from logo.svg")
+
     for item in assets:
         if os.path.exists(item): shutil.copy2(item, os.path.join(PUBLIC_DIR, item))
     for d in asset_dirs:
+
         if os.path.isdir(d):
             dest = os.path.join(PUBLIC_DIR, d)
             shutil.copytree(d, dest, dirs_exist_ok=True)
