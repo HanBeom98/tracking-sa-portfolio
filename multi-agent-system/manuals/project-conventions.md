@@ -1,11 +1,11 @@
 # Project Conventions (Mandatory Rules)
 
+## 0. Collaboration Protocol (CRITICAL)
+- **No Solo Action**: 마스터 오케스트레이터는 직접 코드를 생산하지 않는다. 모든 생산 활동은 반드시 멀티 에이전트 시스템(`Planner -> Developer -> Reviewer`)을 통해서만 이루어져야 한다.
+- **Verification Loop**: 모든 결과물은 반드시 `Reviewer`의 최종 검증을 마친 상태여야 하며, 마스터는 이를 배치하고 배포하는 역할만 수행한다.
+
 ## 1. HTML Standard Structure
-모든 신규 `index.html` 생성 시 다음 요소를 반드시 포함해야 합니다:
-- **SEO & Search Console**: `<meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />`
-- **AdSense Ready**: `<head>` 하단에 애드센스 주석 블록(`<!-- [Revenue] AdSense -->`)을 포함할 것.
-- **Language Support**: `translations.js` 및 `common.js`를 로드하고 `data-i18n` 속성을 활용할 것.
-- **Semantic Layout**: `<header>`, `<main>`, `<footer>` 구조를 유지할 것.
+... (중략) ...
 
 ## 2. Web Component Design
 - 모든 UI 요소는 `test-button`과 같이 독자적인 커스텀 엘리먼트(`Custom Elements`)로 개발하라.
