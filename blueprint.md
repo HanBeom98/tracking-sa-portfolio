@@ -1,37 +1,39 @@
 # Tracking SA Project Blueprint
 
 ## 🎯 Project Vision
-Evolving Tracking-sa into a premium, framework-less web platform using a specialized 5-agent AI orchestration system.
+Evolving Tracking-sa into a premium, framework-less web platform using a specialized 5-agent AI orchestration system and a strict DDD architecture.
 
 ## 🛠️ Tech Stack & Standards
-- **Architecture**: Web Components (Custom Elements) with Shadow DOM.
+- **Architecture**: Domain-Driven Design (DDD) with a clear separation of `src/domains` and `src/shared`.
+- **UI System**: Web Components (Custom Elements) with Shadow DOM.
 - **Styling**: Pure CSS with oklch colors, Container Queries, and -webkit-font-smoothing.
-- **Backend**: Vercel Serverless Functions (Node.js).
-- **Build System**: Custom Python builder (`main.py`) for SEO, AdSense, and i18n injection.
+- **Backend**: Vercel Serverless Functions & Firebase Functions.
+- **Build System**: Custom Python builder (`src/shared/infra/builder.py`) for automated asset injection and deployment.
 
 ## ✅ Completed Milestones (2026-02-24)
 
-### 1. Premium Module Overhaul
-- **Animal Face Test**: Fully converted to `<animal-face-test>` Web Component. Fixed UI flickering and restored sharing/download features.
-- **AI Fortune (Today's Fortune)**: Implemented premium report layout with Markdown parsing. Added 429 Rate Limit error handling.
-- **Lucky Recommendation**: Reconstructed into a premium component with dynamic color visualization and absolute API paths.
-- **News Hub**: Restored magazine-style hero cards and grid layout. Fixed Firestore data loading bugs (NoneType handling).
-- **AI Tendency Test**: Redesigned with Premium Blue aesthetic (oklch colors), integrated i18n support (`translations.js`), and migrated to DDD structure (`src/domains/ai-test`).
+### 1. DDD Core Restructuring
+- **Domain Migration**: All features (Animal Face, AI Test, Fortune, News, Board, Games, etc.) migrated to `src/domains/`.
+- **Shared Layer Optimization**: Global assets (JS/CSS/i18n) consolidated into `src/shared/assets/` and `src/shared/ui/`.
+- **Path Standardization**: Unified entry points to `main.js` and established root-relative paths (`/xxx.js`) for all domain modules.
+- **Redundancy Cleanup**: Eliminated legacy folders (`multi-agent-ai`, `core`, etc.) and consolidated multiple virtual environments into `.venv`.
 
-### 2. Global UI/UX Optimization
-- **Typography**: Applied global font smoothing and Pretendard font stack for crystal clear text rendering.
-- **Home Page**: Implemented "Minimalist Hub" mode. Navigation is hidden on the home page but utility buttons (Theme/Lang) are preserved.
-- **Navigation**: Restored global header/footer styles that were lost during modularization.
+### 2. Premium Module Overhaul
+- **Animal Face Test**: Fully converted to `<animal-face-test>` Web Component.
+- **AI Fortune**: Implemented premium report layout with Markdown parsing and 429 error handling.
+- **Lucky Recommendation**: Reconstructed into a premium component with dynamic color visualization.
+- **AI Tendency Test**: Redesigned with Premium Blue aesthetic (oklch colors) and integrated i18n support.
+- **News Hub**: Restored magazine-style hero cards and fixed Firestore loading bugs.
 
-### 3. Orchestrator Intelligence
-- **Resilience**: Fixed TypeError in Reviewer feedback parsing.
-- **File System**: Added support for nested path saving (`path/to/file.js`) within the agent loop.
-- **Compliance**: Updated prompts to strictly enforce Shadow DOM standards and Design-First principles.
+### 3. Global UI/UX Optimization
+- **Typography**: Applied global font smoothing and Pretendard font stack.
+- **Navigation**: Restored global header/footer styles through the automated builder.
 
 ## 🚀 Current Focus & Next Steps
 - [ ] Monitor Web Component performance and SEO crawling.
+- [ ] Implement a unified "Logs" system to prevent root clutter.
 
 ## ⚠️ Lessons Learned
-- **Cache Busting**: Always use version strings (`?v=...`) when updating JS modules to force browser refresh.
-- **Defensive Build**: Always check for `None` values when pulling data from Firestore to prevent entire site build failures.
+- **Path Resolution**: Always use absolute paths (`/`) for shared assets in deeply nested domain folders.
 - **Shadow DOM Style Isolation**: Global styles don't bleed in; font-smoothing must be re-declared inside components.
+- **Build Atomicity**: Nested domains (e.g., `games/tetris`) require `dirs_exist_ok=True` in Python's `copytree`.
