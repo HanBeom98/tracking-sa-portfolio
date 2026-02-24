@@ -98,7 +98,7 @@ body > :not(header):not(footer):not(script):not(style):not(link):not(main):not(t
     max-width: var(--max-w) !important;
     padding: 20px;
     position: relative;
-    /* margin: 0 auto 제거 (부모가 flex-align으로 처리) */
+    margin: 0 auto;
 }
 
 /* --- News Layout --- */

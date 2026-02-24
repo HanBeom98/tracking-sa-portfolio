@@ -58,6 +58,8 @@ Evolving Tracking-sa into a premium, framework-less web platform using a special
 - [x] Restore animal-face main component tag and module script.
 - [x] Add stricter main centering rule for non-game pages.
 - [x] Remove inline style.css injection to prevent layout flicker.
+- [x] Wrap fortune/lucky content in container for consistent centering.
+- [x] Center container blocks globally to prevent left-shift.
 
 ## ⚠️ Lessons Learned
 - **Path Resolution**: Always use absolute paths (`/`) for shared assets in deeply nested domain folders.
