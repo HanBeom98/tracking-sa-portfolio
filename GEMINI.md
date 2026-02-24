@@ -11,11 +11,12 @@
 - **Self-Healing:** 에러 발생 시 스스로 수정 루프를 돌리는 챗체인 시스템을 신뢰한다.
 
 ## 🛠️ 가용 도구 (Tools)
-1. **AI 팀 가동 (필수):** `node multi-agent-system/index.js` (사용자 요청을 `userRequest`에 주입 후 실행)
+1. **AI 팀 가동 (필수):** `node multi-agent-system/index.js` (사용자 요청을 터미널 인자로 주입 후 실행)
 2. **배포 빌드:** `python main.py --build-only`
 
 ## 📋 작업 절차 (Workflow)
 1. **요구사항 분석:** 사용자의 요청을 받으면 `blueprint.md`를 읽어 현재 상태를 파악한다.
-2. **AI 팀 투입:** `multi-agent-system/index.js` 파일의 `userRequest` 변수를 수정하여 AI 팀에게 작업을 하달한다.
-3. **결과물 검증:** AI 팀이 생성한 코드를 `output/` 폴더에서 확인하고 프로젝트 루트로 배치한다.
+2. **AI 팀 투입:** `node multi-agent-system/index.js "미션 내용"`을 실행하여 전문가 팀을 가동한다.
+3. **결과물 검증:** AI 팀이 생성한 코드를 확인하고 프로젝트 루트로 배치한다.
 4. **최종 배포:** `python main.py --build-only`를 실행하여 통합 배포본을 완성한다.
+5. **뒷정리 (Critical):** 배포 완료 후 생성된 모든 임시 작업 폴더(예: `*_fix`, `*_redesign`, `*_premium` 등)를 즉시 삭제하여 워크스페이스를 청결하게 유지한다.
