@@ -1,4 +1,14 @@
 /* --- Scoped News Hub Content Styles (NO HEADER STYLES HERE) --- */
+.ticker-container {
+    max-width: 1200px;
+    margin: 20px auto;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    padding: 10px 20px;
+    overflow: hidden;
+}
+
 .news-section-main {
     max-width: 1200px;
     margin: 40px auto;
@@ -111,3 +121,34 @@
 }
 
 .current-page { color: oklch(55% 0.18 260); font-size: 1.4rem; font-weight: 800; }
+
+/* --- Dark Mode Overrides --- */
+body.dark-mode .ticker-container {
+    background: oklch(18% 0.02 260);
+    border: 1px solid oklch(30% 0.02 260);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+body.dark-mode .news-card-premium {
+    background: oklch(18% 0.02 260);
+    border-color: oklch(30% 0.02 260);
+    color: oklch(92% 0.02 260);
+}
+
+body.dark-mode .news-card-premium:hover {
+    border-color: oklch(55% 0.18 260);
+}
+
+body.dark-mode .premium-icon-box {
+    background: oklch(24% 0.02 260);
+    color: oklch(80% 0.08 260);
+}
+
+body.dark-mode .news-title-text {
+    color: oklch(92% 0.02 260);
+}
+
+body.dark-mode .pagination-button {
+    border-color: oklch(30% 0.02 260);
+    color: oklch(85% 0.02 260);
+}
