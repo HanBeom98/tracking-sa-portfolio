@@ -109,15 +109,22 @@ def generate_public_site():
         shutil.copytree(shared_ui_dir, dest_ui)
     
     # 4. 도메인 빌드
-    domains = ["animal-face", "fortune", "games", "ai-test"]
+    domains = ["animal-face", "fortune", "games", "ai-test", "lucky-recommendation", "games/ai-evolution", "games/tetris"]
     for domain in domains:
         src = f"src/domains/{domain}"
         if os.path.exists(src):
             dest = os.path.join(PUBLIC_DIR, domain)
-            shutil.copytree(src, dest)
-            for root, _, files in os.walk(dest):
-                for file in files:
-                    if file.endswith(".html"): process_html_file_for_common_elements(os.path.join(root, file))
+            if os.path.isdir(src):
+                shutil.copytree(src, dest, dirs_exist_ok=True)
+            else:
+                os.makedirs(os.path.dirname(dest), exist_ok=True)
+                shutil.copy2(src, dest)
+            
+            # HTML 후처리 (재귀적으로 수행)
+            if os.path.isdir(dest):
+                for root, _, files in os.walk(dest):
+                    for file in files:
+                        if file.endswith(".html"): process_html_file_for_common_elements(os.path.join(root, file))
     
     # 뉴스 도메인 특수 빌드
     generate_news_pages()
