@@ -109,7 +109,11 @@ def generate_public_site():
         shutil.copytree(shared_ui_dir, dest_ui)
     
     # 4. 도메인 빌드
-    domains = ["animal-face", "fortune", "games", "ai-test", "lucky-recommendation", "games/ai-evolution", "games/tetris"]
+    domains = [
+        "animal-face", "fortune", "games", "ai-test", "lucky-recommendation", 
+        "games/ai-evolution", "games/tetris", "privacy-policy", "about", "contact",
+        "board", "board/write", "board/edit", "board/post"
+    ]
     for domain in domains:
         src = f"src/domains/{domain}"
         if os.path.exists(src):
