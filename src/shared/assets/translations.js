@@ -317,3 +317,8 @@ const translations = {
         'ai_matching_rate': 'AI analysis result shows {confidence}% matching rate.'
     }
 };
+
+// Expose translations on window for components that read window.translations.
+if (typeof window !== "undefined") {
+    window.translations = translations;
+}

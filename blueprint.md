@@ -68,6 +68,7 @@ Evolving Tracking-sa into a premium, framework-less web platform using a special
 - [x] Add English translations for AI tendency test intro.
 - [x] Reduce AI tendency test UI scale to match fortune.
 - [x] Style footer for consistent layout.
+- [x] Expose translations on window for AI test component.
 - [x] Restore scheduled news generation in GitHub Actions (schedule only).
 
 ## ⚠️ Lessons Learned
