@@ -124,7 +124,7 @@ def generate_index_html(articles_on_page, current_page, total_pages, lang='ko'):
     hero_card_html = ""
     grid_articles = articles_on_page
 
-    # Hero Card
+    # Hero Card (Premium Magazine Style)
     if current_page == 1 and articles_on_page:
         hero = articles_on_page[0]
         grid_articles = articles_on_page[1:]
@@ -132,7 +132,10 @@ def generate_index_html(articles_on_page, current_page, total_pages, lang='ko'):
             <article class="hero-card">
                 <div class="hero-badge">LATEST NEWS</div>
                 <h2 class="hero-card-title"><a href="/{hero['url']}">{hero['title']}</a></h2>
-                <p class="hero-card-date"><i class="far fa-calendar-alt"></i> {hero['date']}</p>
+                <div class="hero-card-meta">
+                    <span class="hero-card-date"><i class="far fa-calendar-alt"></i> {hero['date']}</span>
+                    <span class="hero-card-author">By Tracking SA Editor</span>
+                </div>
             </article>"""
 
     grid_news_items = ""
@@ -145,27 +148,32 @@ def generate_index_html(articles_on_page, current_page, total_pages, lang='ko'):
                 <div class="premium-icon-box"><i class="fas fa-bolt"></i></div>
                 <div class="news-card-content">
                     <h2 class="news-title-text">{article['title']}</h2>
-                    <div class="news-date-box">{article['date']}</div>
+                    <div class="news-card-footer">
+                        <span class="news-date-box">{article['date']}</span>
+                        <span class="read-more-btn">Read More <i class="fas fa-arrow-right"></i></span>
+                    </div>
                 </div>
             </a>"""
         grid_news_html = f'<div class="news-grid">{grid_news_items}</div>'
 
-    # Pagination
+    # Pagination (Premium UI)
     pagination_html = ""
     if total_pages > 1:
         pagination_html = '<div class="pagination">'
         if current_page > 1:
             prev_url = f"index{'-en' if lang=='en' else ''}.html" if current_page == 2 else f"page{'-en' if lang=='en' else ''}-{current_page-1}.html"
-            pagination_html += f'<a href="/news/{prev_url}" class="pagination-button prev">←</a>'
-        pagination_html += f'<span class="page-number-wrapper">{current_page} / {total_pages}</span>'
+            pagination_html += f'<a href="/news/{prev_url}" class="pagination-button prev"><i class="fas fa-chevron-left"></i></a>'
+        
+        pagination_html += f'<span class="page-number-wrapper">{current_page} <span class="page-divider">/</span> {total_pages}</span>'
+        
         if current_page < total_pages:
             next_url = f"page{'-en' if lang=='en' else ''}-{current_page+1}.html"
-            pagination_html += f'<a href="/news/{next_url}" class="pagination-button next">→</a>'
+            pagination_html += f'<a href="/news/{next_url}" class="pagination-button next"><i class="fas fa-chevron-right"></i></a>'
         pagination_html += '</div>'
 
     final_content = f"""<section class="news-section-main">
         {hero_card_html}
-        <h1 class="section-title" data-i18n="all_articles">All Articles</h1>
+        <h1 class="section-title" data-i18n="all_articles">All AI News</h1>
         {grid_news_html}
         {pagination_html}
     </section>"""
