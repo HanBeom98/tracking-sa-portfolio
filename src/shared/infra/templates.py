@@ -14,6 +14,8 @@ def get_common_head():
     # Force cache busting for style.css with a build timestamp
     version = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
     template = template.replace('href="/style.css"', f'href="/style.css?v={version}"')
+    template = template.replace('src="/translations.js"', f'src="/translations.js?v={version}"')
+    template = template.replace('src="/common.js"', f'src="/common.js?v={version}"')
     return template.replace("{{ADSENSE_CLIENT_ID}}", ADSENSE_CLIENT_ID)
 
 def get_common_header():

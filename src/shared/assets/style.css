@@ -80,7 +80,7 @@ header {
 
 .site-logo { width: 40px; height: 40px; fill: var(--p-blue); color: var(--p-blue); }
 
-.desktop-menu-container { display: flex; align-items: center; gap: 30px; }
+.desktop-menu-container { display: flex; align-items: center; gap: 30px; width: 100%; }
 nav ul { display: flex; list-style: none; gap: 15px; }
 nav a, .dropbtn {
     text-decoration: none;
@@ -91,6 +91,14 @@ nav a, .dropbtn {
     transition: 0.2s;
 }
 nav a:hover { color: var(--p-blue); }
+
+.utility-controls {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
 
 /* --- Language Switcher --- */
 #language-switcher {
