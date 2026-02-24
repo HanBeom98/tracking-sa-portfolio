@@ -7,14 +7,25 @@
     <!-- CSS and other head elements will be injected by main.py -->
     <script src="/search.js" defer></script>
     <style>
-        .home-controls {
+        .home-controls-wrap {
             position: fixed;
-            top: 16px;
-            right: 20px;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
             z-index: 10;
+            pointer-events: none;
+        }
+        .home-controls {
+            height: 70px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            pointer-events: auto;
         }
         .home-controls #color-change {
             border: 1px solid rgba(0,0,0,0.08);
@@ -288,9 +299,11 @@
     </style>
 </head>
 <body>
-    <div class="home-controls">
-        <button id="color-change" aria-label="Theme">🌙</button>
-        <div id="language-switcher"></div>
+    <div class="home-controls-wrap">
+        <div class="home-controls">
+            <button id="color-change" aria-label="Theme">🌙</button>
+            <div id="language-switcher"></div>
+        </div>
     </div>
     <main class="search-main-container">
         
