@@ -1,250 +1,56 @@
 /* 
    --------------------------------------------------------------------------
-   🎨 TRACKING SA PREMIUM DESIGN SYSTEM (Corporate Edition)
-   Modern Standards: oklch(), CSS Variables, Rich UI Components
+   🎨 TRACKING SA GLOBAL DESIGN SYSTEM (Core Foundations)
+   Role: Shared Variables, Layout, and Universal UI Elements
    --------------------------------------------------------------------------
 */
 
 :root {
-    /* Color Palette - okLCH for depth */
-    --p-base: 55% 0.18 250; 
-    --primary: oklch(var(--p-base));
-    --primary-soft: oklch(var(--p-base) / 0.12);
-    --primary-deep: oklch(40% 0.2 250);
-    
-    --bg-base: 98% 0.01 250;
-    --background: oklch(var(--bg-base));
+    --primary: oklch(55% 0.18 250);
+    --primary-soft: oklch(95% 0.03 250);
+    --bg-main: oklch(98% 0.01 250);
     --surface: oklch(100% 0 0);
-    --surface-glass: oklch(100% 0 0 / 0.75);
-    
-    --text-main: oklch(25% 0.02 250);
-    --text-muted: oklch(55% 0.02 250);
-    --text-on-primary: oklch(100% 0 0);
-    
-    /* Layout Tokens */
-    --header-height: 70px;
-    --border-radius-xl: 36px;
-    --border-radius-lg: 24px;
-    --border-radius-md: 14px;
-    --max-width: 1200px;
-    
-    /* Effects */
-    --shadow-sm: 0 4px 20px rgba(0,0,0,0.03);
-    --shadow-md: 0 15px 45px oklch(0% 0 0 / 0.08);
-    --shadow-lg: 0 30px 60px oklch(0% 0 0 / 0.12);
-    --glass-border: 1px solid oklch(0% 0 0 / 0.05);
-    
-    /* Animation */
-    --ease-out: cubic-bezier(0.33, 1, 0.68, 1);
-    --transition: 0.4s var(--ease-out);
+    --text-strong: oklch(20% 0.02 250);
+    --text-base: oklch(35% 0.02 250);
+    --text-muted: oklch(60% 0.02 250);
+    --radius-lg: 24px;
+    --radius-md: 12px;
+    --transition: 0.4s cubic-bezier(0.33, 1, 0.68, 1);
 }
 
 body.dark-mode {
-    --bg-base: 10% 0.02 250;
+    --bg-main: oklch(12% 0.02 250);
     --surface: oklch(18% 0.02 250);
-    --surface-glass: oklch(18% 0.02 250 / 0.8);
-    --text-main: oklch(92% 0.01 250);
-    --text-muted: oklch(70% 0.01 250);
-    --glass-border: 1px solid oklch(100% 0 0 / 0.08);
-    --shadow-md: 0 20px 50px oklch(0% 0 0 / 0.35);
+    --text-strong: oklch(92% 0.01 250);
 }
 
-/* 1. Base Styles */
-* { box-sizing: border-box; }
+/* Base Reset */
+* { box-sizing: border-box; margin: 0; padding: 0; }
 body {
-    font-family: 'Inter', 'Pretendard', system-ui, -apple-system, sans-serif;
-    background: var(--background);
-    color: var(--text-main);
-    line-height: 1.6;
-    margin: 0;
-    transition: background var(--transition), color var(--transition);
-    overflow-x: hidden;
+    font-family: 'Inter', 'Pretendard', system-ui, sans-serif;
+    background: var(--bg-main); color: var(--text-base);
+    line-height: 1.6; transition: background 0.3s, color 0.3s;
 }
 
-/* 2. Layout Elements */
+/* Global Header & Footer */
 header {
-    background: var(--surface-glass);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    height: var(--header-height);
-    padding: 0 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    border-bottom: var(--glass-border);
+    height: 70px; background: var(--surface); backdrop-filter: blur(15px);
+    position: sticky; top: 0; z-index: 10000;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 5%; border-bottom: 1px solid oklch(0% 0 0 / 0.05);
 }
 
-main {
-    max-width: var(--max-width);
-    margin: 3rem auto;
-    padding: 0 1.5rem;
-    min-height: 80vh;
-}
+footer { padding: 60px 20px; text-align: center; border-top: 1px solid oklch(0% 0 0 / 0.05); margin-top: 80px; }
 
-footer {
-    background: var(--surface);
-    padding: 5rem 2rem;
-    text-align: center;
-    border-top: var(--glass-border);
-    color: var(--text-muted);
-    font-size: 0.95rem;
-}
+/* Global Navigation Styles */
+.site-logo-link { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+nav ul { display: flex; list-style: none; gap: 15px; }
+nav a, .dropbtn { text-decoration: none; color: var(--text-strong); font-weight: 700; padding: 10px 15px; border-radius: var(--radius-md); }
+nav a:hover, .dropdown:hover .dropbtn { background: var(--primary-soft); color: var(--primary); }
 
-/* 3. Navigation & Dropdown */
-nav ul { list-style: none; display: flex; gap: 0.5rem; margin: 0; padding: 0; }
-nav li { position: relative; }
-nav a, .dropbtn {
-    color: var(--text-main);
-    text-decoration: none;
-    font-weight: 700;
-    padding: 0.6rem 1.2rem;
-    border-radius: var(--border-radius-md);
-    transition: all var(--transition);
-    cursor: pointer;
-}
-nav a:hover, .dropdown:hover .dropbtn {
-    background: var(--primary-soft);
-    color: var(--primary);
-}
-
-.dropdown-content {
-    display: none;
-    position: absolute;
-    top: calc(100% + 5px);
-    left: 0;
-    min-width: 220px;
-    background: var(--surface);
-    border-radius: var(--border-radius-md);
-    box-shadow: var(--shadow-md);
-    border: var(--glass-border);
-    padding: 0.6rem;
-    z-index: 1100;
-}
-.dropdown:hover .dropdown-content { display: block; animation: fadeIn 0.3s var(--ease-out); }
-
-/* 4. News Components (Premium Card) */
-.news-section-main { animation: fadeIn 0.8s var(--ease-out); }
-
-.section-title {
-    font-size: 2.5rem;
-    font-weight: 900;
-    margin: 4rem 0 2.5rem 0;
-    text-align: center;
-    color: var(--primary);
-    letter-spacing: -0.03em;
-}
-
-.news-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-    gap: 2.5rem;
-    width: 100%;
-}
-
-.news-card-premium {
-    background: var(--surface);
-    border-radius: var(--border-radius-lg);
-    padding: 2.5rem;
-    text-decoration: none;
-    color: var(--text-main) !important;
-    border: var(--glass-border);
-    box-shadow: var(--shadow-sm);
-    transition: all var(--transition);
-    display: flex;
-    flex-direction: column;
-    position: relative;
-}
-
-.news-card-premium::after {
-    content: '→';
-    position: absolute; bottom: 2.5rem; right: 2.5rem;
-    font-size: 1.5rem; color: var(--primary);
-    opacity: 0; transform: translateX(-10px);
-    transition: all var(--transition);
-}
-
-.news-card-premium:hover {
-    transform: translateY(-12px);
-    box-shadow: var(--shadow-lg);
-    border-color: var(--primary);
-}
-
-.news-card-premium:hover::after { opacity: 1; transform: translateX(0); }
-
-.premium-icon-box {
-    width: 52px; height: 52px;
-    background: var(--primary-soft);
-    color: var(--primary);
-    border-radius: 16px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.4rem; margin-bottom: 1.8rem;
-}
-
-.news-title-text {
-    font-size: 1.35rem; font-weight: 850; line-height: 1.4;
-    margin-bottom: 1.2rem; word-break: keep-all;
-}
-
-.news-date-box {
-    font-size: 0.9rem; color: var(--text-muted);
-    font-weight: 600; margin-top: auto;
-}
-
-/* 5. Hero Card (The Focus) */
-.hero-card {
-    background: linear-gradient(165deg, var(--surface) 0%, var(--bg-base) 100%);
-    border-radius: var(--border-radius-xl);
-    padding: 6rem 3rem; margin-bottom: 5rem;
-    border: 1px solid oklch(var(--p-base) / 0.1);
-    box-shadow: var(--shadow-lg);
-    text-align: center;
-    position: relative;
-}
-
-.hero-card::before {
-    content: 'FEATURED';
-    position: absolute; top: 2.5rem; left: 50%; transform: translateX(-50%);
-    background: var(--primary); color: white;
-    padding: 0.4rem 1.2rem; border-radius: 50px;
-    font-size: 0.75rem; font-weight: 900; letter-spacing: 0.1em;
-}
-
-.hero-card-title a {
-    color: var(--text-main); text-decoration: none;
-    font-size: 3rem; font-weight: 900; line-height: 1.2;
-}
-
-.hero-card-title a:hover { color: var(--primary); }
-
-/* 6. Utility Controls */
-.utility-controls { display: flex; gap: 1rem; align-items: center; }
-#color-change {
-    background: var(--primary-soft); border: none;
-    width: 42px; height: 42px; border-radius: 50%;
-    cursor: pointer; font-size: 1.2rem; transition: all var(--transition);
-}
-#color-change:hover { transform: rotate(15deg) scale(1.1); }
-
-/* 7. Service Specifics */
-.animal-face-test, .ai-test-page, .saju-input-section {
-    background: var(--surface); border-radius: var(--border-radius-lg);
-    padding: 4rem 2rem; box-shadow: var(--shadow-md);
-    max-width: 850px; margin: 4rem auto; text-align: center; border: var(--glass-border);
-}
-
-.gender-button, .answer-button, .go-test-button {
-    background: var(--surface); border: 2px solid var(--primary-soft);
-    padding: 1.2rem 2.5rem; border-radius: var(--border-radius-md);
-    font-weight: 800; cursor: pointer; transition: all var(--transition);
-}
-
-.gender-button.active, .answer-button.selected, .go-test-button {
-    background: var(--primary); color: var(--text-on-primary); border-color: var(--primary);
-    box-shadow: 0 10px 25px oklch(var(--p-base) / 0.3);
-}
+/* Common UI Elements (Used across home/news) */
+.news-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; width: 100%; }
+.service-card { background: var(--surface); border-radius: var(--radius-lg); padding: 30px; text-decoration: none; border: 1px solid oklch(0% 0 0 / 0.03); transition: var(--transition); }
+.service-card:hover { transform: translateY(-10px); box-shadow: 0 15px 40px oklch(0% 0 0 / 0.08); }
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes spin { to { transform: rotate(360deg); } }

@@ -1,0 +1,12 @@
+/* Animal Face Test Styles */
+.animal-face-test {
+    background: var(--surface); border-radius: var(--border-radius-lg);
+    padding: 4rem 2rem; box-shadow: var(--shadow-md);
+    max-width: 850px; margin: 3rem auto; text-align: center; border: var(--glass-border);
+}
+.gender-button {
+    background: var(--surface); border: 2px solid var(--primary-soft);
+    padding: 1.2rem 2.5rem; border-radius: var(--border-radius-md);
+    font-weight: 800; cursor: pointer; transition: all var(--transition);
+}
+.gender-button.active { background: var(--primary); color: var(--text-on-primary); }

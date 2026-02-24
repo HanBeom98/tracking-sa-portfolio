@@ -1,0 +1,17 @@
+/* News Page Styles */
+.news-section-main { animation: fadeIn 0.8s var(--ease-out); }
+.news-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 2.5rem; width: 100%;
+}
+.news-card-premium {
+    background: var(--surface); border-radius: var(--border-radius-lg);
+    padding: 2.5rem; text-decoration: none; color: var(--text-main) !important;
+    border: var(--glass-border); box-shadow: var(--shadow-sm);
+    transition: all var(--transition); display: flex; flex-direction: column;
+}
+.hero-card {
+    background: linear-gradient(165deg, var(--surface) 0%, var(--bg-base) 100%);
+    border-radius: var(--border-radius-xl); padding: 6rem 3rem; margin-bottom: 5rem;
+    box-shadow: var(--shadow-lg); text-align: center; position: relative;
+}
