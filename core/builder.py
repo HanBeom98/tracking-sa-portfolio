@@ -48,10 +48,10 @@ def process_html_file_for_common_elements(filepath):
         
         # Ensure we find the body tag and put the header right after it
         header_html = get_common_header()
-        # Add scripts required for the header to work, ONLY ONCE
-        header_scripts = '\n<script src="/translations.js"></script>\n<script src="/common.js"></script>\n'
         
         if re.search(r'<body[^>]*>', content, re.IGNORECASE):
+            # Only inject essential scripts once at the beginning of body
+            header_scripts = '\n<script src="/translations.js"></script>\n<script src="/common.js"></script>\n'
             content = re.sub(r'(<body[^>]*>)', r'<body' + body_class_attr + '>\n' + header_scripts + header_html, content, count=1, flags=re.IGNORECASE)
         else:
             # Fallback if body tag is missing
