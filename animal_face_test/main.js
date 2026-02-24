@@ -49,7 +49,7 @@ class AnimalFaceTest extends HTMLElement {
 
         this.shadowRoot.innerHTML = `
         <style>
-            :host { display: block; width: 100%; max-width: 800px; margin: 0 auto; text-align: center; font-family: 'Inter', system-ui, sans-serif; }
+            :host { display: block; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; width: 100%; max-width: 800px; margin: 0 auto; text-align: center; font-family: 'Inter', system-ui, sans-serif; }
             
             .card { 
                 background: white; border-radius: 40px; padding: 60px 40px; 

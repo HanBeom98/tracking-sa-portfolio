@@ -1,3 +1,24 @@
+
+/* --- Advanced Typography & Rendering Optimization --- */
+html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: 'cv11', 'ss01';
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    letter-spacing: -0.01em;
+}
+
+/* Fix for blurry pixels on small text */
+p, span, div, li {
+    transform: translateZ(0); /* Hardware acceleration for text rendering */
+}
 /* 
    --------------------------------------------------------------------------
    🎨 TRACKING SA GLOBAL DESIGN SYSTEM (Core Foundations)

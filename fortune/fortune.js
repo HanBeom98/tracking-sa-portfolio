@@ -31,7 +31,7 @@ class FortunePremium extends HTMLElement {
 
         this.shadowRoot.innerHTML = `
         <style>
-            :host { display: block; width: 100%; max-width: 700px; margin: 0 auto; font-family: 'Pretendard', system-ui, sans-serif; }
+            :host { display: block; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; width: 100%; max-width: 700px; margin: 0 auto; font-family: 'Pretendard', system-ui, sans-serif; }
             
             .card {
                 background: white; border-radius: 35px; padding: 50px;
