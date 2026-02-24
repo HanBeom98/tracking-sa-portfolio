@@ -1,5 +1,10 @@
 /* ai-test/style.css - True Premium Blue Edition */
 
+ai-test-premium {
+    display: block;
+    margin-top: 18px;
+}
+
 .ai-test-page {
     max-width: 900px;
     margin: 40px auto;
