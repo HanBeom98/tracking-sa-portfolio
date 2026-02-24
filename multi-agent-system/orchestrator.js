@@ -7,15 +7,9 @@ import { runPlanner, runUIArchitect, runLogicEngineer, runIntegrator, runReviewe
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-/**
- * [1] Manuals Bootstrapping: 필수 지침서 로드 및 관리
- */
 function selectManuals(request) {
     const manualsDir = path.join(__dirname, 'manuals');
     let injectedManuals = "\n### 📚 Mandatory Project Rules (MUST FOLLOW):\n";
-    const requestLower = request.toLowerCase();
-    
-    // Always include core conventions
     const essential = ['index.md', 'project-conventions.md', 'css-baseline.md', 'web-components.md'];
     essential.forEach(file => {
         const filePath = path.join(manualsDir, file);
@@ -23,13 +17,9 @@ function selectManuals(request) {
             injectedManuals += `--- Chapter: ${file} ---\n${fs.readFileSync(filePath, 'utf8')}\n`;
         }
     });
-
     return injectedManuals;
 }
 
-/**
- * [2] Code Block Parser & Storage: 분리된 전문가들의 결과물을 저장
- */
 function saveFiles(code, folderName) {
     const rootDir = path.resolve(__dirname, '..');
     const targetDir = path.join(rootDir, folderName);
@@ -61,12 +51,9 @@ function saveFiles(code, folderName) {
     return extractions;
 }
 
-/**
- * [3] Execute Workflow: Specialized Coding Team Pipeline
- */
 export async function executeWorkflow(userRequest, projectContext) {
     const manuals = selectManuals(userRequest);
-    const enrichedContext = `${projectContext}\n${manuals}`;
+    let enrichedContext = `${projectContext}\n${manuals}`;
 
     let state = {
         request: userRequest,
@@ -74,43 +61,60 @@ export async function executeWorkflow(userRequest, projectContext) {
         uiCode: '',
         logicCode: '',
         finalCode: '',
-        review: null
+        review: { approved: false, comments: '' },
+        iteration: 0,
+        maxIterations: 3
     };
 
     try {
-        // 1. Planning
+        // 1. Planning Stage
         state.plan = await runPlanner(state, userRequest, enrichedContext);
         console.log('✅ Plan Created:', state.plan);
 
-        // Extract folder name from plan (e.g., "folder: ai-test")
         const folderStep = state.plan.find(s => s.toLowerCase().startsWith('folder:'));
         const folderName = folderStep ? folderStep.split(':')[1].trim() : 'new-feature';
 
-        // 2. Specialized Coding
-        
-        // 2a. UI Architect (Design)
-        state.uiCode = await runUIArchitect(state, enrichedContext);
-        console.log('✅ UI/UX Architecture Completed.');
+        // 2. Specialized Coding & Self-Healing Loop (Tiki-Taka)
+        while (state.iteration < state.maxIterations) {
+            state.iteration++;
+            console.log(`\n🔄 --- Workflow Iteration ${state.iteration}/${state.maxIterations} ---`);
 
-        // 2b. Logic Engineer (Functionality)
-        state.logicCode = await runLogicEngineer(state, enrichedContext);
-        console.log('✅ Logic Engineering Completed.');
+            if (state.review.comments) {
+                console.log(`📝 Applying Reviewer Feedback: ${state.review.comments.substring(0, 100)}...`);
+                // Feed back the rejection reasons to the team
+                enrichedContext += `\n\n### ⚠️ PREVIOUS ATTEMPT FAILED!\nReviewer Feedback: ${state.review.comments}\nPlease FIX these issues in this iteration.`;
+            }
 
-        // 2c. System Integrator (Final Assembly)
-        state.finalCode = await runIntegrator(state, enrichedContext);
-        console.log('✅ System Integration Completed.');
+            // 2a. UI Architect
+            state.uiCode = await runUIArchitect(state, enrichedContext);
+            
+            // 2b. Logic Engineer
+            state.logicCode = await runLogicEngineer(state, enrichedContext);
 
-        // 3. Storage
+            // 2c. Integrator
+            state.finalCode = await runIntegrator(state, enrichedContext);
+
+            // 3. Review
+            state.review = await runReviewer(state.finalCode, enrichedContext);
+            
+            if (state.review.approved) {
+                console.log(`✅ Approved on iteration ${state.iteration}!`);
+                break;
+            } else {
+                console.log(`❌ Rejected on iteration ${state.iteration}. Comments: ${state.review.comments}`);
+                if (state.iteration === state.maxIterations) {
+                    console.log('⚠️ Max iterations reached. Proceeding with best effort.');
+                }
+            }
+        }
+
+        // 4. Final Storage
         saveFiles(state.finalCode, folderName);
-        console.log(`💾 Files saved to folder: ${folderName}`);
-
-        // 4. Review
-        state.review = await runReviewer(state.finalCode, enrichedContext);
-        console.log('✅ Review Completed:', state.review.approved ? 'APPROVED' : 'REJECTED');
+        console.log(`💾 Final files saved to folder: ${folderName}`);
 
         return state;
     } catch (error) {
-        console.error('❌ Workflow Error:', error);
+        console.error('❌ Workflow Critical Error:', error);
         throw error;
     }
 }

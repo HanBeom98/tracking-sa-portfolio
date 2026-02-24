@@ -14,15 +14,25 @@ async function main() {
     }
 
     const userRequest = args.join(' ');
-    const projectContext = "Root structure: animal_face_test, translations.js, common.js";
+    const projectContext = "Root structure: animal_face_test, fortune, news, translations.js, style.css";
 
     console.log(`\n🎯 [Mission Start]: ${userRequest}`);
     
     try {
-        await executeWorkflow(userRequest, projectContext);
-        console.log(`\n✨ [Success] 미션 수행 완료.`);
+        const finalState = await executeWorkflow(userRequest, projectContext);
+        
+        console.log('\n=============================================');
+        console.log('🏁 MISSION RESULT');
+        console.log('=============================================');
+        console.log(`STATUS: ${finalState.review.approved ? '✅ APPROVED' : '❌ REJECTED'}`);
+        console.log(`FEEDBACK: ${finalState.review.comments}`);
+        console.log('=============================================\n');
+
+        if (!finalState.review.approved) {
+            console.log('⚠️ Warning: The output code may have issues. Please check the feedback above.');
+        }
     } catch (err) {
-        console.error("\n❌ [Error] 미션 수행 중 오류 발생:", err);
+        console.error("\n❌ [Critical Error]:", err);
         process.exit(1);
     }
 }
