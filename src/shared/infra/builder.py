@@ -122,14 +122,31 @@ def _upgrade_cached_news_index():
     if os.path.exists(idx_tmpl):
         with open(idx_tmpl, "r", encoding="utf-8") as f:
             base_html = f.read()
+        def _date_key(date_text):
+            if not date_text:
+                return 0
+            try:
+                return int(datetime.datetime.strptime(date_text, "%Y-%m-%d").timestamp())
+            except Exception:
+                return 0
+
+        enriched = []
+        for href, title in cards:
+            slug = href.lstrip("/")
+            date_text = _extract_date_from_slug(slug)
+            excerpt = _extract_excerpt_from_article(slug)
+            enriched.append({
+                "href": href,
+                "title": title,
+                "date": date_text,
+                "excerpt": excerpt,
+                "sort_key": _date_key(date_text),
+            })
+        enriched.sort(key=lambda item: item["sort_key"], reverse=True)
+
         grid_items = "".join([
-            _build_news_card(
-                href,
-                title,
-                _extract_date_from_slug(href.lstrip("/")),
-                _extract_excerpt_from_article(href.lstrip("/"))
-            )
-            for href, title in cards
+            _build_news_card(item["href"], item["title"], item["date"], item["excerpt"])
+            for item in enriched
         ])
         final_html = base_html.replace("<!-- NEWS_INJECTION_POINT -->", f'<div class="news-grid">{grid_items}</div>')
         with open(news_index_path, "w", encoding="utf-8") as f:
