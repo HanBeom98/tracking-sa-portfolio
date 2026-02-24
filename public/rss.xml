@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+    <title>AI News - Tracking SA</title>
+    <link>https://trackingsa.com/</link>
+    <description>The latest AI news and in-depth analysis, updated daily.</description>
+    <language>ko</language>
+    <lastBuildDate>Tue, 24 Feb 2026 03:38:07 </lastBuildDate>
+    <atom:link href="https://trackingsa.com/rss.xml" rel="self" type="application/rss+xml" />
+</channel>
+</rss>
