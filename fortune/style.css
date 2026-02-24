@@ -1,83 +1,113 @@
-/* fortune/style.css - Premium Edition */
+/* fortune/style.css - The Ultimate Blue Premium Edition */
 
 .fortune-page-container {
     text-align: center;
-    padding: 60px 20px;
-    max-width: 1000px;
+    padding: 80px 20px;
+    max-width: 1100px;
     margin: 40px auto;
-    background: var(--surface);
-    border-radius: var(--radius-lg);
-    box-shadow: 0 20px 50px oklch(0% 0 0 / 0.05);
-    border: 1px solid oklch(0% 0 0 / 0.03);
-    animation: fadeIn 0.8s var(--transition);
+    background: linear-gradient(165deg, white 0%, oklch(98% 0.01 250) 100%);
+    border-radius: 40px;
+    box-shadow: 
+        0 10px 30px oklch(0% 0 0 / 0.03),
+        0 30px 70px oklch(0% 0 0 / 0.08);
+    border: 1px solid white;
+    animation: fadeIn 1s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .fortune-page-container h1 {
-    font-size: clamp(2rem, 5vw, 3.2rem);
-    font-weight: 900;
-    color: var(--text-strong);
+    font-size: clamp(2.5rem, 6vw, 3.8rem);
+    font-weight: 950;
     margin-bottom: 1rem;
-    letter-spacing: -0.05em;
-    background: linear-gradient(135deg, var(--primary) 0%, oklch(45% 0.15 260) 100%);
+    letter-spacing: -0.06em;
+    background: linear-gradient(135deg, oklch(55% 0.18 250) 0%, oklch(40% 0.15 260) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 4px 10px oklch(55% 0.18 250 / 0.2));
 }
 
 .fortune-page-container p {
-    font-size: 1.2rem;
-    color: var(--text-muted);
-    margin-bottom: 3rem;
+    font-size: 1.3rem;
+    color: oklch(45% 0.02 250);
+    margin-bottom: 4rem;
+    font-weight: 500;
 }
 
-/* Luxury Input Section */
+/* Luxury Saju Input Section */
 .saju-input-section {
-    background: oklch(98% 0.01 250);
+    background: white;
     border: 1px solid oklch(0% 0 0 / 0.05);
-    border-radius: 30px;
-    padding: 50px;
+    border-radius: 35px;
+    padding: 60px;
     display: flex;
     flex-direction: column;
-    gap: 30px;
-    max-width: 600px;
+    gap: 35px;
+    max-width: 650px;
     margin: 0 auto;
-    box-shadow: inset 0 2px 4px oklch(0% 0 0 / 0.02);
+    box-shadow: 
+        0 4px 10px oklch(0% 0 0 / 0.02),
+        0 20px 40px oklch(0% 0 0 / 0.04);
+    position: relative;
+    overflow: hidden;
+}
+
+.saju-input-section::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 6px;
+    background: linear-gradient(90deg, oklch(55% 0.18 250), oklch(85% 0.1 200));
 }
 
 .input-form-group {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
+    gap: 15px;
 }
 
 .input-form-group label {
-    font-size: 0.95rem;
-    font-weight: 800;
+    font-size: 1rem;
+    font-weight: 850;
     color: var(--text-strong);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    padding-left: 5px;
+    letter-spacing: 0.08em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-/* Modern Input & Select Styles */
+.input-form-group label::before {
+    content: '';
+    width: 12px; height: 12px;
+    background: var(--primary);
+    border-radius: 50%;
+    display: inline-block;
+}
+
+/* High-End Input & Select */
 .saju-input-section input[type='text'],
 .saju-input-section select {
     width: 100%;
-    border: 2px solid oklch(0% 0 0 / 0.08);
-    border-radius: 16px;
-    padding: 16px 20px;
-    background: white;
-    font-size: 1.1rem;
+    border: 2px solid oklch(90% 0.01 250);
+    border-radius: 18px;
+    padding: 18px 24px;
+    background: oklch(99% 0.01 250);
+    font-size: 1.15rem;
+    font-weight: 600;
     color: var(--text-strong);
     outline: none;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
 .saju-input-section input:focus, 
 .saju-input-section select:focus {
     border-color: var(--primary);
     background: white;
-    box-shadow: 0 0 0 4px var(--primary-soft);
+    box-shadow: 0 0 0 5px var(--primary-soft);
     transform: translateY(-2px);
 }
 
@@ -85,128 +115,101 @@
     display: flex;
     align-items: center;
     width: 100%;
-    gap: 10px;
+    gap: 12px;
 }
 
-.unit-span {
-    font-weight: 700;
-    color: var(--text-muted);
-    font-size: 0.9rem;
-}
-
-/* Gender Toggle Buttons */
+/* Premium Gender Buttons */
 .gender-buttons {
     display: flex;
     width: 100%;
-    gap: 12px;
+    gap: 15px;
 }
 
 .gender-buttons label {
     flex: 1;
-    padding: 16px;
-    background: white;
-    border: 2px solid oklch(0% 0 0 / 0.08);
-    border-radius: 16px;
+    padding: 18px;
+    background: oklch(97% 0.01 250);
+    border: 2px solid transparent;
+    border-radius: 18px;
     cursor: pointer;
     transition: all 0.3s ease;
     text-align: center;
-    font-weight: 700;
-    color: var(--text-base);
+    font-weight: 800;
+    color: var(--text-muted);
 }
 
 .gender-buttons input[type='radio']:checked + label {
     background: var(--primary);
     color: white;
-    border-color: var(--primary);
-    box-shadow: 0 8px 20px var(--primary-soft);
+    box-shadow: 0 10px 25px var(--primary-soft);
+    transform: scale(1.02);
 }
 
-.gender-buttons input[type='radio'] {
-    display: none;
-}
-
-/* Action Button */
+/* The Magic Button */
 .go-test-button {
-    margin-top: 10px;
-    background: linear-gradient(135deg, var(--primary) 0%, oklch(45% 0.15 260) 100%);
+    margin-top: 20px;
+    background: linear-gradient(135deg, oklch(55% 0.18 250) 0%, oklch(45% 0.15 260) 100%);
     color: white;
     border: none;
-    padding: 22px;
-    border-radius: 20px;
+    padding: 24px;
+    border-radius: 22px;
     cursor: pointer;
-    font-size: 1.2rem;
-    font-weight: 800;
+    font-size: 1.3rem;
+    font-weight: 900;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 10px 30px var(--primary-soft);
+    box-shadow: 0 15px 35px oklch(55% 0.18 250 / 0.3);
+    text-transform: uppercase;
 }
 
 .go-test-button:hover {
-    transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 15px 40px var(--primary-soft);
+    transform: translateY(-6px) scale(1.03);
+    box-shadow: 0 20px 50px oklch(55% 0.18 250 / 0.4);
     filter: brightness(1.1);
 }
 
-.go-test-button:active {
-    transform: translateY(0) scale(0.98);
-}
-
-/* Loading & Result Indicator */
-.loading-indicator { padding: 60px 20px; }
-.spinner {
-    border: 6px solid var(--primary-soft);
-    border-top: 6px solid var(--primary);
-    border-radius: 50%;
-    width: 70px;
-    height: 70px;
-    animation: spin 1s cubic-bezier(0.5, 0.1, 0.5, 0.9) infinite;
-    margin-bottom: 25px;
-}
-
+/* Result Section - Elegant & Deep */
 .result-section {
-    margin-top: 60px;
-    padding: 45px;
-    border-radius: 30px;
+    margin-top: 80px;
+    padding: 60px;
+    border-radius: 40px;
     background: white;
     border: 1px solid oklch(0% 0 0 / 0.05);
     text-align: left;
-    box-shadow: 0 30px 60px oklch(0% 0 0 / 0.08);
-    line-height: 1.8;
+    box-shadow: 0 40px 100px oklch(0% 0 0 / 0.1);
+    line-height: 2;
+    font-size: 1.2rem;
+    color: var(--text-base);
 }
 
 .result-section h2 {
-    font-size: 2rem;
+    font-size: 2.4rem;
+    font-weight: 950;
     color: var(--primary);
     text-align: center;
-    margin-bottom: 35px;
-    font-weight: 900;
+    margin-bottom: 45px;
+    letter-spacing: -0.04em;
 }
 
-/* Dark Mode Overrides */
+/* Dark Mode Overrides - Luxury Dark Blue */
 body.dark-mode .fortune-page-container {
-    background: var(--surface);
+    background: oklch(18% 0.02 250);
     border-color: rgba(255, 255, 255, 0.05);
 }
 
 body.dark-mode .saju-input-section {
-    background: oklch(20% 0.02 250);
+    background: oklch(15% 0.02 250);
 }
 
 body.dark-mode .saju-input-section input,
 body.dark-mode .saju-input-section select,
 body.dark-mode .gender-buttons label {
-    background: oklch(15% 0.02 250);
+    background: oklch(12% 0.02 250);
     border-color: rgba(255, 255, 255, 0.1);
     color: white;
 }
 
 body.dark-mode .result-section {
-    background: oklch(18% 0.02 250);
+    background: oklch(14% 0.02 250);
     color: oklch(90% 0.01 250);
-}
-
-/* Mobile Optimizations */
-@media (max-width: 600px) {
-    .saju-input-section { padding: 30px 20px; }
-    .birthdate-selectors { flex-wrap: wrap; justify-content: center; }
-    .birthdate-selectors select { flex: 1; min-width: 80px; }
+    border-color: rgba(255, 255, 255, 0.05);
 }
