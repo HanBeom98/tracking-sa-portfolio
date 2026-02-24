@@ -12,7 +12,7 @@ dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 
 /**
  * Calls the Gemini REST API directly using fetch.
- * @param {string} agentName - The name of the agent (e.g., 'planner', 'developer').
+ * @param {string} agentName - The name of the agent.
  * @param {string} inputPrompt - The specific input prompt for this agent turn.
  * @param {string} projectContext - The project structure context.
  * @returns {Promise<any>} - The output from the AI.
@@ -30,6 +30,8 @@ async function runAgent(agentName, inputPrompt, projectContext = '') {
   const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent`;
 
   const agentPrompts = prompts[agentName];
+  if (!agentPrompts) throw new Error(`Agent prompt for ${agentName} not found.`);
+
   const isJsonAgent = agentName === 'planner' || agentName === 'reviewer';
 
   const fullPrompt = `
@@ -47,14 +49,10 @@ ${inputPrompt}
 `.trim();
   
   const parseJsonFromText = (text) => {
-    // 1. Clean up markdown code blocks if present
     let cleaned = text.replace(/```json\n?/gi, '').replace(/```/g, '').trim();
-    
-    // 2. Try direct parse
     try {
       return JSON.parse(cleaned);
     } catch (e) {
-      // 3. Robust extraction using index search
       const firstBrace = cleaned.indexOf('{');
       const lastBrace = cleaned.lastIndexOf('}');
       const firstBracket = cleaned.indexOf('[');
@@ -71,12 +69,10 @@ ${inputPrompt}
         try {
           return JSON.parse(jsonCandidate);
         } catch (innerError) {
-          console.error("Failed to parse extracted JSON candidate:", jsonCandidate);
           throw new Error(`JSON parsing failed: ${innerError.message}`);
         }
       }
-      
-      throw new Error(`JSON payload not found in model response. Raw text start: ${text.substring(0, 100)}...`);
+      throw new Error(`JSON payload not found in model response.`);
     }
   };
 
@@ -85,68 +81,48 @@ ${inputPrompt}
       ?.map((p) => p.text || '')
       .join('\n')
       .trim();
-
-    if (!text) {
-      const blockReason = responseData?.promptFeedback?.blockReason || 'UNKNOWN';
-      throw new Error(`Empty model response. Block reason: ${blockReason}`);
-    }
-
+    if (!text) throw new Error(`Empty model response.`);
     return text;
   };
 
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 45000); // 45 seconds timeout
+    const timeout = setTimeout(() => controller.abort(), 60000); 
 
     const body = {
-      contents: [{
-        parts: [{ text: fullPrompt }]
-      }],
+      contents: [{ parts: [{ text: fullPrompt }] }],
       generationConfig: {
         temperature: isJsonAgent ? 0.1 : 0.7, 
-        topP: 1,
-        topK: 1,
-        maxOutputTokens: 4096,
+        topP: 1, topK: 1,
+        maxOutputTokens: 8192,
       }
     };
 
     const apiResponse = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       signal: controller.signal,
       body: JSON.stringify(body)
     });
     clearTimeout(timeout);
 
     const responseData = await apiResponse.json();
-
     if (apiResponse.ok && responseData.candidates && responseData.candidates.length > 0) {
       const responseText = extractResponseText(responseData);
-      
-      if (isJsonAgent) {
-        return parseJsonFromText(responseText);
-      } else {
-        console.log('Output (Raw Prose):', responseText.substring(0, 200) + '...');
-        return responseText;
-      }
+      if (isJsonAgent) return parseJsonFromText(responseText);
+      console.log('Output (Prose Preview):', responseText.substring(0, 100) + '...');
+      return responseText;
     } else {
-      const errorMessage = responseData.error?.message || 'API call failed with no error message.';
-      console.error('Gemini API Error:', responseData.error);
-      throw new Error(errorMessage);
+      throw new Error(responseData.error?.message || 'API call failed.');
     }
-
   } catch (error) {
-    if (error.name === 'AbortError') {
-      throw new Error(`Agent ${agentName} timed out.`);
-    }
-    console.error(`Error during ${agentName} agent execution:`, error);
+    if (error.name === 'AbortError') throw new Error(`Agent ${agentName} timed out.`);
     throw error;
   }
 }
 
 export const runPlanner = (state, request, context) => runAgent('planner', request, context);
-export const runCreative = (state, context) => runAgent('creative', JSON.stringify(state.plan, null, 2), context);
-export const runDeveloper = (state, context) => runAgent('developer', JSON.stringify(state.plan, null, 2), context);
+export const runUIArchitect = (state, context) => runAgent('ui_architect', `Plan: ${JSON.stringify(state.plan)}`, context);
+export const runLogicEngineer = (state, context) => runAgent('logic_engineer', `Plan: ${JSON.stringify(state.plan)}\nUI Concept: ${state.uiCode}`, context);
+export const runIntegrator = (state, context) => runAgent('integrator', `Plan: ${JSON.stringify(state.plan)}\nUI: ${state.uiCode}\nLogic: ${state.logicCode}`, context);
 export const runReviewer = (code, context) => runAgent('reviewer', code, context);
