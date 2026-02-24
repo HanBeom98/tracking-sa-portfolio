@@ -26,30 +26,27 @@ def process_html_file_for_common_elements(filepath):
         with open(filepath, "r", encoding="utf-8") as f:
             content = f.read()
 
-        # 1. CSS Inline Injection (Stability Fix)
-        css_inline = ""
-        if os.path.exists("style.css"):
-            with open("style.css", "r", encoding="utf-8") as css_f:
-                css_inline = f"<style>\n{css_f.read()}\n</style>"
+        # Clean old injections
+        content = re.sub(r'<header[\s\S]*?</header>', '', content, flags=re.DOTALL)
+        content = re.sub(r'<footer>[\s\S]*?</footer>', '', content, flags=re.DOTALL)
 
-        # 2. HEAD 주입
+        # Inject Head
         if '</head>' in content:
-            head_html = get_common_head()
-            content = content.replace('</head>', f'{head_html}\n{css_inline}\n</head>')
+            content = content.replace('</head>', f'{get_common_head()}\n</head>')
         
-        # 3. HEADER 주입 (강력한 정규표현식)
+        # Inject Header (Robust Match)
         header_html = get_common_header()
         header_scripts = '\n<script src="/translations.js"></script>\n<script src="/common.js"></script>\n'
         content = re.sub(r'(<body[^>]*>)', r'\1' + header_scripts + header_html, content, count=1, flags=re.IGNORECASE)
         
-        # 4. FOOTER 주입
+        # Inject Footer
         if '</body>' in content:
             content = content.replace('</body>', f'{get_common_footer()}\n</body>')
 
         with open(filepath, "w", encoding="utf-8") as f:
             f.write(content)
     except Exception as e:
-        print(f"🚨 [BUILD ERROR]: {filepath} -> {e}")
+        print(f"🚨 Build Error on {filepath}: {e}")
 
 def generate_article_html(md_content, title, date_str, output_path, hashtags_html="", description="", lang="ko"):
     if not description:
@@ -61,18 +58,17 @@ def generate_article_html(md_content, title, date_str, output_path, hashtags_htm
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{title} - Tracking SA</title>
+    <meta name="description" content="{description}">
 </head>
 <body>
-    <main>
-        <div class="container">
-            <a href="/news/" class="back-to-list"><i class="fas fa-arrow-left"></i> {back_text}</a>
-            <article class="news-article-container">
-                <h1 class="article-title-display">{title}</h1>
-                <p class="article-meta">Published on: {date_str}</p>
-                <div class="article-content">{markdown.markdown(md_content)}{hashtags_html}</div>
-            </article>
-        </div>
-    </main>
+    <main><div class="container">
+        <a href="/news/" class="back-to-list"><i class="fas fa-arrow-left"></i> {back_text}</a>
+        <article class="news-article-container">
+            <h1 class="article-title-display">{title}</h1>
+            <p class="article-meta">Published on: {date_str}</p>
+            <div class="article-content">{markdown.markdown(md_content)}{hashtags_html}</div>
+        </article>
+    </div></main>
 </body></html>"""
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f: f.write(html_template)
@@ -92,43 +88,28 @@ def generate_index_html(articles_on_page, current_page, total_pages, lang='ko'):
             <article class="hero-card">
                 <div class="hero-badge" data-i18n="latest_news">LATEST NEWS</div>
                 <h2 class="hero-card-title"><a href="/{hero['url']}">{hero['title']}</a></h2>
-                <div class="hero-card-meta">By Tracking SA Editor • {hero['date']}</div>
+                <div class="hero-card-meta">Editor • {hero['date']}</div>
             </article>"""
 
-    grid_news_items = ""
-    for a in grid_articles:
-        grid_news_items += f"""
-            <a href="/{a['url']}" class="news-card-premium">
-                <div class="premium-icon-box"><i class="fas fa-bolt"></i></div>
-                <div class="news-card-content">
-                    <h2 class="news-title-text">{a['title']}</h2>
-                    <div class="news-card-footer">
-                        <span>{a['date']}</span>
-                        <span class="read-more-btn" data-i18n="check_now">Read More</span>
-                    </div>
-                </div>
-            </a>"""
+    grid_items = "".join([f"""
+        <a href="/{a['url']}" class="news-card-premium">
+            <h2 class="news-title-text">{a['title']}</h2>
+            <div class="news-card-footer"><span>{a['date']}</span><span data-i18n="check_now">Read More</span></div>
+        </a>""" for a in grid_articles])
     
     pagination_html = ""
     if total_pages > 1:
-        pagination_html = '<div class="pagination">'
-        if current_page > 1:
-            prev_url = f"index{'-en' if lang=='en' else ''}.html" if current_page == 2 else f"page{'-en' if lang=='en' else ''}-{current_page-1}.html"
-            pagination_html += f'<a href="/news/{prev_url}" class="pagination-button prev">← PREV</a>'
-        pagination_html += f'<div class="page-number-wrapper"><span class="current-page">{current_page}</span> / {total_pages}</div>'
-        if current_page < total_pages:
-            next_url = f"page{'-en' if lang=='en' else ''}-{current_page+1}.html"
-            pagination_html += f'<a href="/news/{next_url}" class="pagination-button next">NEXT →</a>'
-        pagination_html += '</div>'
+        prev = f"index{'-en' if lang=='en' else ''}.html" if current_page == 2 else f"page{'-en' if lang=='en' else ''}-{current_page-1}.html"
+        next = f"page{'-en' if lang=='en' else ''}-{current_page+1}.html"
+        pagination_html = f"""<div class="pagination">
+            {f'<a href="/news/{prev}" class="pagination-button">←</a>' if current_page > 1 else ''}
+            <span class="current-page">{current_page}</span> / {total_pages}
+            {f'<a href="/news/{next}" class="pagination-button">→</a>' if current_page < total_pages else ''}
+        </div>"""
 
-    final_content = f"""<section class="news-section-main">
-        {hero_card_html}
-        <h1 class="section-title" data-i18n="all_articles">All AI News</h1>
-        <div class="news-grid">{grid_news_items}</div>
-        {pagination_html}
-    </section>"""
+    content = f'<section class="news-section-main">{hero_card_html}<div class="news-grid">{grid_items}</div>{pagination_html}</section>'
+    updated_html = base_html.replace("<!-- NEWS_INJECTION_POINT -->", content)
     
-    updated_html = base_html.replace("<!-- NEWS_INJECTION_POINT -->", final_content)
     out_name = f"index{'-en' if lang=='en' else ''}.html" if current_page == 1 else f"page{'-en' if lang=='en' else ''}-{current_page}.html"
     output_path = os.path.join(PUBLIC_DIR, "news", out_name)
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
@@ -140,7 +121,7 @@ def copy_static_assets():
     for item in assets:
         if os.path.exists(item): shutil.copy2(item, os.path.join(PUBLIC_DIR, item))
     
-    exclude_dirs = [".git", ".github", "core", "templates", "public", "node_modules", "multi-agent-system"]
+    exclude_dirs = [".git", ".github", "core", "templates", "public", "node_modules", "multi-agent-system", "__pycache__"]
     for d in os.listdir("."):
         if os.path.isdir(d) and d not in exclude_dirs and not d.startswith("."):
             dest = os.path.join(PUBLIC_DIR, d)

@@ -1,105 +1,146 @@
-/* --- Tracking SA ROOT COMPLETE RECOVERY --- */
+/*
+ * Tracking SA Premium Global Stylesheet (Total Reset v1.0)
+ * Architecture: Centered Baseline + Service-specific Containers
+ */
+
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 
 :root {
-    --premium-blue: #0052cc;
-    --text-dark: #1e293b;
-    --bg-light: #ffffff;
-    --header-height: 75px;
-    --container-width: 1200px;
+    --p-blue: oklch(55% 0.18 260);
+    --p-blue-soft: oklch(95% 0.02 260);
+    --text-main: oklch(25% 0.05 260);
+    --text-sub: oklch(50% 0.02 260);
+    --bg-main: oklch(98% 0.01 250);
+    --header-h: 70px;
+    --max-w: 1200px;
+    --radius: 20px;
+    --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
 }
 
+/* Reset & Base */
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
+html { scroll-behavior: smooth; }
 body {
-    font-family: 'Pretendard', sans-serif;
-    background-color: var(--bg-light);
-    color: var(--text-dark);
+    font-family: 'Pretendard', -apple-system, sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-main);
     line-height: 1.6;
-    padding-top: var(--header-height);
+    -webkit-font-smoothing: antialiased;
+    padding-top: var(--header-h); /* Prevent content hiding under fixed header */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* --- THE HEADER (Fixed & High Contrast) --- */
+header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: var(--header-h);
+    background: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+    padding: 0 20px;
+    border-bottom: 1px solid oklch(90% 0.02 260);
+}
+
+.header-inner {
+    width: 100%;
+    max-width: var(--max-w);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.site-logo { width: 40px; height: 40px; fill: var(--p-blue); }
+
+.desktop-menu-container { display: flex; align-items: center; gap: 30px; }
+nav ul { display: flex; list-style: none; gap: 10px; }
+nav a, .dropbtn {
+    text-decoration: none;
+    color: var(--text-main);
+    font-weight: 700;
+    padding: 8px 12px;
+    border-radius: 10px;
+    transition: all 0.2s;
+    font-size: 0.95rem;
+}
+nav a:hover { color: var(--p-blue); background: var(--p-blue-soft); }
+
+/* Utility Controls */
+.utility-controls { display: flex; align-items: center; gap: 12px; }
+#color-change { 
+    background: var(--p-blue-soft); border: none; font-size: 1.2rem; 
+    cursor: pointer; padding: 6px 10px; border-radius: 10px;
+}
+.lang-button {
+    border: 1px solid oklch(90% 0.02 260); background: white; 
+    padding: 6px 14px; border-radius: 50px; font-weight: 700; 
+    color: var(--text-sub); cursor: pointer; font-size: 0.85rem;
+}
+.lang-button.active { background: var(--p-blue); color: white; border-color: var(--p-blue); }
+
+/* Dropdown */
+.dropdown { position: relative; }
+.dropdown-content {
+    display: none; position: absolute; top: 100%; left: 0;
+    background: white; min-width: 200px; padding: 10px 0;
+    border-radius: 15px; box-shadow: var(--shadow); border: 1px solid oklch(95% 0.01 260);
+}
+.dropdown:hover .dropdown-content { display: block; }
+.dropdown-content a { display: block; padding: 12px 20px; text-decoration: none; color: var(--text-main); }
+.dropdown-content a:hover { background: var(--p-blue-soft); color: var(--p-blue); }
+
+/* --- CORE LAYOUT (CENTERING EVERYTHING) --- */
+main {
+    flex: 1;
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-/* --- THE HEADER (GOD LAYER) --- */
-header {
-    display: flex !important;
-    height: var(--header-height) !important;
-    background: #ffffff !important;
-    position: fixed !important;
-    top: 0; left: 0; right: 0;
-    width: 100% !important;
-    z-index: 999999;
-    align-items: center;
-    justify-content: center;
-    padding: 0 20px;
-    box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-    border-bottom: 3px solid var(--premium-blue);
-}
-
-.header-inner {
+.container, .news-section-main, .ticker-container {
     width: 100%;
-    max-width: var(--container-width);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    max-width: var(--max-w);
+    margin: 0 auto !important;
+    padding: 20px;
 }
 
-.site-logo-link { display: flex !important; align-items: center; text-decoration: none; }
-.site-logo { width: 40px; height: 40px; }
+/* TradingView Ticker Fix */
+.ticker-container { margin-top: 20px; min-height: 70px; }
 
-.desktop-menu-container { display: flex !important; align-items: center; gap: 30px; }
-nav ul { display: flex !important; list-style: none !important; gap: 20px; }
-nav a, .dropbtn {
-    text-decoration: none !important;
-    color: var(--text-dark) !important;
-    font-weight: 800 !important;
-    font-size: 1rem;
-    padding: 10px;
-}
-nav a:hover { color: var(--premium-blue) !important; }
-
-/* Utility Controls */
-.utility-controls { display: flex !important; align-items: center; gap: 15px; }
-#color-change { background: #f1f5f9; border: none; font-size: 1.2rem; cursor: pointer; padding: 5px 10px; border-radius: 10px; }
-
-.lang-button { border: 1px solid #ddd; background: white; padding: 6px 12px; border-radius: 8px; font-weight: 800; cursor: pointer; }
-.lang-button.active { background: var(--premium-blue); color: white; }
-
-/* --- CONTENT CENTERING --- */
-main {
-    width: 100%;
-    max-width: var(--container-width);
-    margin: 0 auto;
-    padding: 40px 20px;
-}
-
-.container { width: 100%; margin: 0 auto; }
-
-/* --- News Layout --- */
-.news-section-main { width: 100%; }
+/* --- News Premium Elements --- */
 .hero-card {
-    background: var(--text-dark); color: white; border-radius: 24px; 
-    padding: 60px; margin-bottom: 40px; width: 100%;
+    background: var(--text-main); color: white; border-radius: var(--radius);
+    padding: 60px 40px; margin-bottom: 40px; position: relative; overflow: hidden;
 }
-.hero-card-title a { color: white; text-decoration: none; font-size: 2.5rem; font-weight: 900; }
-.hero-badge { background: var(--premium-blue); padding: 6px 16px; border-radius: 50px; font-size: 0.8rem; font-weight: 800; margin-bottom: 20px; display: inline-block; }
+.hero-badge { background: var(--p-blue); padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 800; margin-bottom: 15px; display: inline-block; }
+.hero-card-title a { color: white; text-decoration: none; font-size: 2.5rem; font-weight: 800; line-height: 1.2; }
 
-.news-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; width: 100%; }
+.news-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; }
 .news-card-premium {
-    background: white; padding: 40px; border-radius: 24px; border: 1px solid #eee;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05); transition: all 0.3s; text-decoration: none; color: inherit;
+    background: white; border-radius: var(--radius); padding: 30px;
+    border: 1px solid oklch(95% 0.01 260); box-shadow: var(--shadow);
+    transition: transform 0.3s ease; text-decoration: none; color: inherit;
 }
-.news-card-premium:hover { transform: translateY(-10px); border-color: var(--premium-blue); }
-.news-title-text { font-size: 1.3rem; font-weight: 800; margin-bottom: 20px; color: var(--text-dark); }
+.news-card-premium:hover { transform: translateY(-8px); border-color: var(--p-blue); }
+.news-title-text { font-size: 1.2rem; font-weight: 700; margin-bottom: 15px; }
 
-.pagination { margin-top: 60px; display: flex; justify-content: center; gap: 20px; font-weight: 800; width: 100%; }
+.pagination { margin-top: 60px; display: flex; justify-content: center; align-items: center; gap: 20px; font-weight: 800; }
 
-/* Homepage Exceptions */
+/* Home Page Exceptions */
 body.home-page header { background: transparent !important; box-shadow: none !important; border: none !important; position: absolute; }
 body.home-page .header-inner { justify-content: flex-end; }
-body.home-page nav, body.home-page .site-logo-link { display: none !important; }
+body.home-page .site-logo-link, body.home-page nav { display: none !important; }
 
-/* Mobile Hamburger - DISABLE */
-.hamburger-menu { display: none !important; }
+/* Mobile Fallback */
+.hamburger-menu { display: none; }
+@media (max-width: 768px) {
+    .hero-card-title a { font-size: 1.8rem; }
+    .desktop-menu-container { display: none !important; }
+    /* Mobile menus will be handled in next iteration */
+}
