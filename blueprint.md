@@ -78,6 +78,7 @@ Evolving Tracking-sa into a premium, framework-less web platform using a special
 - [x] Style footer for consistent layout.
 - [x] Expose translations on window for AI test component.
 - [x] Restore scheduled news generation in GitHub Actions (schedule only).
+- [x] Allow Firebase credential discovery from `src/shared/infra/serviceAccountKey.json`.
 
 ## ⚠️ Lessons Learned
 - **Path Resolution**: Always use absolute paths (`/`) for shared assets in deeply nested domain folders.

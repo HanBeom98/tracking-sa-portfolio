@@ -14,14 +14,19 @@ def get_firestore_client():
         pass
 
     # 1. Try local JSON key file first (Developer's local environment)
-    key_path = os.path.join("core", "serviceAccountKey.json")
-    if os.path.exists(key_path):
-        try:
-            cred = credentials.Certificate(key_path)
-            firebase_admin.initialize_app(cred)
-            return firestore.client()
-        except Exception as e:
-            print(f"⚠️ Firebase initialization error from file: {e}")
+    key_candidates = [
+        os.path.join("core", "serviceAccountKey.json"),
+        os.path.join("src", "shared", "infra", "serviceAccountKey.json"),
+        "serviceAccountKey.json",
+    ]
+    for key_path in key_candidates:
+        if os.path.exists(key_path):
+            try:
+                cred = credentials.Certificate(key_path)
+                firebase_admin.initialize_app(cred)
+                return firestore.client()
+            except Exception as e:
+                print(f"⚠️ Firebase initialization error from file ({key_path}): {e}")
 
     # 2. Fallback to Environment Variable (GitHub Actions / Production)
     service_account_json = os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON")
