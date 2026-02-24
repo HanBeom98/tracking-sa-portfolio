@@ -1,12 +1,33 @@
-/* Fortune Page Styles */
+/* Fortune Page Premium Styles */
 .saju-input-section {
-    background: var(--surface); border-radius: var(--border-radius-lg);
-    padding: 4rem 2rem; box-shadow: var(--shadow-md);
-    max-width: 850px; margin: 3rem auto; text-align: center; border: var(--glass-border);
+    background: var(--surface); border-radius: var(--radius-lg);
+    padding: 4rem 2rem; box-shadow: var(--shadow);
+    max-width: 800px; margin: 3rem auto; text-align: center;
 }
-.go-test-button {
-    background: var(--primary); color: var(--text-on-primary); border-color: var(--primary);
-    padding: 1.2rem 2.5rem; border-radius: var(--border-radius-md);
-    font-weight: 800; cursor: pointer; transition: all var(--transition);
+
+.input-form-group {
+    display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.5rem;
+    text-align: left;
 }
-/* ... 기타 사주 전용 스타일 */
+
+.input-form-group label { width: 100px; font-weight: 700; color: var(--text-strong); }
+
+input[type="text"], select {
+    flex: 1; padding: 0.8rem 1.2rem; border-radius: 12px;
+    border: 1px solid oklch(0% 0 0 / 0.1); background: var(--surface);
+    color: var(--text-strong); font-size: 1rem; outline: none; transition: 0.2s;
+}
+
+input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-soft); }
+
+.gender-buttons { display: flex; gap: 1rem; flex: 1; }
+.gender-buttons label { 
+    flex: 1; text-align: center; padding: 0.8rem; background: var(--bg-main);
+    border-radius: 10px; cursor: pointer; border: 1px solid transparent; transition: 0.2s;
+}
+input[type="radio"]:checked + label { background: var(--primary); color: white; font-weight: bold; }
+
+#saju-reading-text {
+    background: var(--bg-main); padding: 2rem; border-radius: var(--radius-md);
+    margin-top: 2rem; text-align: left; line-height: 1.8; font-size: 1.1rem;
+}
