@@ -101,7 +101,7 @@ def _wrap_article_html(title, content_html, date_text):
       </div>
     </article>
   </main>
-  <script src="/news-client.js" defer></script>
+  <script src="/news/news-client.js" defer></script>
 </body>
 </html>"""
 
@@ -448,6 +448,7 @@ def generate_public_site():
     _, db_ok = generate_news_pages()
     # 뉴스 도메인 CSS 복사 (KO/EN)
     news_style_src = os.path.join("src", "domains", "news", "style.css")
+    news_client_src = os.path.join("src", "domains", "news", "application", "news-client.js")
     if os.path.exists(news_style_src):
         news_style_dest = os.path.join(PUBLIC_DIR, "news", "style.css")
         os.makedirs(os.path.dirname(news_style_dest), exist_ok=True)
@@ -456,6 +457,10 @@ def generate_public_site():
         news_style_dest_en = os.path.join(PUBLIC_DIR, "en", "news", "style.css")
         os.makedirs(os.path.dirname(news_style_dest_en), exist_ok=True)
         shutil.copy2(news_style_src, news_style_dest_en)
+    if os.path.exists(news_client_src):
+        news_client_dest = os.path.join(PUBLIC_DIR, "news", "news-client.js")
+        os.makedirs(os.path.dirname(news_client_dest), exist_ok=True)
+        shutil.copy2(news_client_src, news_client_dest)
     if not db_ok:
         print("⚠️ [NEWS BUILD] Restoring cached news from previous public/ build.")
         _restore_news_snapshot(news_snapshot)
