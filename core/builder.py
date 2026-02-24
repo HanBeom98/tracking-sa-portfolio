@@ -56,6 +56,10 @@ def process_html_file_for_common_elements(filepath):
         if '</body>' in content and 'data-i18n="footer_copyright"' not in content:
             content = content.replace('</body>', f'{get_common_footer()}\n</body>')
 
+        # 5. FORCE REFRESH: Add build timestamp comment
+        build_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        content += f"\n<!-- Build Time: {build_time} -->"
+
         with open(filepath, "w", encoding="utf-8") as f:
             f.write(content)
     except Exception as e:
