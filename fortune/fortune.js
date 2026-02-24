@@ -199,6 +199,11 @@ class FortunePremium extends HTMLElement {
                     currentDate: { year: new Date().getFullYear(), month: new Date().getMonth() + 1, day: new Date().getDate() }
                 })
             });
+
+            if (response.status === 429) {
+                throw new Error('TOO_MANY_REQUESTS');
+            }
+
             const data = await response.json();
             if (!response.ok) throw new Error();
 
@@ -206,7 +211,12 @@ class FortunePremium extends HTMLElement {
             resultArea.innerHTML = this.parseMarkdownToHtml(data.sajuReading);
             resultArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         } catch (err) {
-            resultArea.innerHTML = `<p style="color:#ef4444; text-align:center; font-weight:700;">분석 실패. 잠시 후 다시 시도해 주세요.</p>`;
+            console.error('Fortune API Error:', err);
+            let msg = "분석 실패. 잠시 후 다시 시도해 주세요.";
+            if (err.message === 'TOO_MANY_REQUESTS') {
+                msg = "🚀 AI 요청량이 일시적으로 초과되었습니다. 약 1분 후 다시 시도해 주세요!";
+            }
+            resultArea.innerHTML = `<p style="color:#ef4444; text-align:center; font-weight:700; padding: 20px; background: #fff1f2; border-radius: 15px; border: 1px solid #fecaca;">${msg}</p>`;
         }
     }
 }
