@@ -259,6 +259,12 @@ body > :not(header):not(footer):not(script):not(style):not(link):not(main):not(t
     margin: 0 auto;
 }
 
+.container.centered {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 /* --- News Layout --- */
 .hero-card {
     background: var(--text-main); color: white; border-radius: 24px;
