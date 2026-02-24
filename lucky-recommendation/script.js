@@ -1,265 +1,202 @@
 /**
- * LuckyRecommendation Web Component
- * Secure version calling /api/lucky serverless function.
- * Follows GEMINI.md standards.
+ * LuckyRecommendation Web Component - Ultimate Premium Version
+ * Fully functional with API integration, dynamic color visualization, and strict encapsulation.
  */
 class LuckyRecommendation extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({ mode: 'open' });
-        this._luckyData = null;
+        this._selectedGender = 'male';
         this._loading = false;
-        this._error = null;
+        this._result = null;
     }
 
     connectedCallback() {
-        this.initSelectors();
-        this.render(); // Ensure initial render
+        this.render();
+        this.setupEvents();
     }
 
-    initSelectors() {
-        const monthSelect = document.getElementById('birth-month');
-        const daySelect = document.getElementById('birth-day');
+    render() {
+        const lang = localStorage.getItem('lang') || 'ko';
+        const isEn = lang === 'en';
 
-        if (monthSelect && daySelect) {
-            monthSelect.innerHTML = '';
-            const monthUnit = (window.getTranslation && window.getTranslation(window.currentLang, 'month_unit')) || '월';
-            for (let i = 1; i <= 12; i++) {
-                const option = document.createElement('option');
-                option.value = i;
-                option.textContent = `${i}${monthUnit}`;
-                monthSelect.appendChild(option);
+        const t = {
+            name: isEn ? "Your Name" : "이름",
+            birth: isEn ? "Birth Month/Day" : "생일(월/일)",
+            gender: isEn ? "Gender" : "성별",
+            male: isEn ? "Male" : "남성",
+            female: isEn ? "Female" : "여성",
+            check: isEn ? "Get My Lucky Items" : "행운의 추천 받기",
+            analyzing: isEn ? "AI is analyzing your fate..." : "AI가 당신의 행운을 분석 중입니다...",
+            luckyColor: isEn ? "Today's Lucky Color" : "오늘의 행운 컬러",
+            luckyItem: isEn ? "Today's Lucky Item" : "오늘의 행운 아이템",
+            placeholder: isEn ? "Enter name" : "이름을 입력하세요"
+        };
+
+        this.shadowRoot.innerHTML = `
+        <style>
+            :host { display: block; width: 100%; max-width: 600px; margin: 0 auto; font-family: 'Inter', system-ui, sans-serif; }
+            
+            .card {
+                background: white; border-radius: 30px; padding: 40px;
+                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05); border: 1px solid rgba(0, 0, 0, 0.02);
+                display: flex; flex-direction: column; gap: 20px; text-align: left;
+                animation: slideIn 0.8s ease-out;
             }
 
-            daySelect.innerHTML = '';
-            const dayUnit = (window.getTranslation && window.getTranslation(window.currentLang, 'day_unit')) || '일';
-            for (let i = 1; i <= 31; i++) {
-                const option = document.createElement('option');
-                option.value = i;
-                option.textContent = `${i}${dayUnit}`;
-                daySelect.appendChild(option);
+            @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+            .field { display: flex; flex-direction: column; gap: 10px; }
+            .label { font-weight: 800; font-size: 0.85rem; color: #1e293b; text-transform: uppercase; letter-spacing: 0.05em; }
+
+            input, select {
+                padding: 14px 18px; border-radius: 14px; border: 2px solid #f1f5f9;
+                font-size: 1rem; background: #f8fafc; outline: none; transition: 0.3s;
             }
+            input:focus, select:focus { border-color: #0052cc; background: white; box-shadow: 0 0 0 4px rgba(0, 82, 204, 0.1); }
+
+            .gender-group { display: flex; gap: 10px; }
+            .gender-btn {
+                flex: 1; padding: 14px; border-radius: 14px; border: 2px solid #f1f5f9;
+                background: #f1f5f9; cursor: pointer; font-weight: 700; transition: 0.3s;
+                display: flex; align-items: center; justify-content: center; gap: 8px; color: #64748b;
+            }
+            .gender-btn.active.male { background: #0052cc; color: white; border-color: #0052cc; box-shadow: 0 5px 15px rgba(0, 82, 204, 0.2); }
+            .gender-btn.active.female { background: #e11d48; color: white; border-color: #e11d48; box-shadow: 0 5px 15px rgba(225, 29, 72, 0.2); }
+
+            .submit-btn {
+                margin-top: 10px; padding: 20px; border-radius: 16px; border: none;
+                background: linear-gradient(135deg, #0052cc 0%, #1e40af 100%);
+                color: white; font-weight: 900; font-size: 1.15rem; cursor: pointer;
+                transition: 0.3s; box-shadow: 0 10px 25px rgba(0, 82, 204, 0.2);
+            }
+            .submit-btn:hover { transform: translateY(-4px); filter: brightness(1.1); box-shadow: 0 15px 35px rgba(0, 82, 204, 0.3); }
+
+            /* Result Section */
+            #result-area { margin-top: 30px; }
+            .loading { text-align: center; padding: 20px; }
+            .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #0052cc; border-radius: 50%; width: 35px; height: 35px; animation: spin 1s linear infinite; margin: 0 auto 15px auto; }
+            @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+            .result-card {
+                padding: 35px; background: #f8fafc; border-radius: 24px; border: 1px solid #e2e8f0;
+                display: flex; flex-direction: column; gap: 25px; animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            }
+            @keyframes pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+            .res-item { display: flex; align-items: center; gap: 20px; }
+            .color-box { width: 60px; height: 60px; border-radius: 50%; border: 4px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+            .item-icon { font-size: 3rem; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1)); }
+            .res-text h3 { margin: 0; font-size: 0.85rem; color: #64748b; text-transform: uppercase; }
+            .res-text p { margin: 5px 0 0 0; font-size: 1.5rem; font-weight: 900; color: #1e293b; }
+        </style>
+
+        <div class="card">
+            <div class="field">
+                <span class="label">${t.name}</span>
+                <input type="text" id="user-name" placeholder="${t.placeholder}">
+            </div>
+
+            <div class="field">
+                <span class="label">${t.birth}</span>
+                <div style="display: flex; gap: 8px;">
+                    <select id="birth-month" style="flex:1"></select>
+                    <select id="birth-day" style="flex:1"></select>
+                </div>
+            </div>
+
+            <div class="field">
+                <span class="label">${t.gender}</span>
+                <div class="gender-group">
+                    <button class="gender-btn male active" data-gender="male">♂ ${t.male}</button>
+                    <button class="gender-btn female" data-gender="female">♀ ${t.female}</button>
+                </div>
+            </div>
+
+            <button class="submit-btn" id="predict-btn">${t.check}</button>
+
+            <div id="result-area"></div>
+        </div>
+        `;
+        this.populateSelectors();
+    }
+
+    populateSelectors() {
+        const monthSel = this.shadowRoot.getElementById('birth-month');
+        const daySel = this.shadowRoot.getElementById('birth-day');
+        for (let i = 1; i <= 12; i++) {
+            const opt = document.createElement('option'); opt.value = i; opt.innerText = i + "월";
+            monthSel.appendChild(opt);
+        }
+        for (let i = 1; i <= 31; i++) {
+            const opt = document.createElement('option'); opt.value = i; opt.innerText = i + "일";
+            daySel.appendChild(opt);
         }
     }
 
-    async generateLuckyData() {
-        const nameInput = document.getElementById('user-name');
-        const monthSelect = document.getElementById('birth-month');
-        const daySelect = document.getElementById('birth-day');
-        const genderMale = document.getElementById('gender-male');
+    setupEvents() {
+        const root = this.shadowRoot;
+        const genderBtns = root.querySelectorAll('.gender-btn');
+        genderBtns.forEach(btn => {
+            btn.onclick = () => {
+                genderBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this._selectedGender = btn.dataset.gender;
+            };
+        });
 
-        const userInfo = {
-            name: nameInput ? nameInput.value.trim() || '익명' : '익명',
-            birthMonth: monthSelect ? monthSelect.value : '1',
-            birthDay: daySelect ? daySelect.value : '1',
-            gender: (genderMale && genderMale.checked) ? 'male' : 'female'
-        };
+        root.getElementById('predict-btn').onclick = () => this.handlePredict();
+    }
 
-        this._loading = true;
-        this._error = null;
-        this._luckyData = null;
-        this.render();
+    async handlePredict() {
+        const name = this.shadowRoot.getElementById('user-name').value.trim() || '익명';
+        const month = this.shadowRoot.getElementById('birth-month').value;
+        const day = this.shadowRoot.getElementById('birth-day').value;
+        const lang = localStorage.getItem('lang') || 'ko';
+
+        const resultArea = this.shadowRoot.getElementById('result-area');
+        resultArea.innerHTML = `<div class="loading"><div class="spinner"></div><p>행운을 찾는 중...</p></div>`;
 
         try {
-            const today = new Date();
-            // 3. 다국어 초기화 및 상태 점검 (localStorage 기반)
-            const currentLang = localStorage.getItem('lang') || window.currentLang || 'ko';
-            
             const response = await fetch('https://tracking-sa.vercel.app/api/lucky', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    language: currentLang,
-                    currentDate: {
-                        year: today.getFullYear(),
-                        month: today.getMonth() + 1,
-                        day: today.getDate()
-                    },
-                    userInfo: userInfo
+                    language: lang,
+                    userInfo: { name, birthMonth: month, birthDay: day, gender: this._selectedGender },
+                    currentDate: { year: new Date().getFullYear(), month: new Date().getMonth() + 1, day: new Date().getDate() }
                 })
             });
 
-            if (!response.ok) {
-                let errorMsg = `HTTP error! status: ${response.status}`;
-                try {
-                    const errorData = await response.json();
-                    errorMsg = errorData.error || errorMsg;
-                } catch (e) {
-                    const errorText = await response.text();
-                    errorMsg = errorText || errorMsg;
-                }
-                throw new Error(errorMsg);
-            }
-            this._luckyData = await response.json();
+            if (!response.ok) throw new Error("API Failed");
+            const data = await response.json();
             
-            // 2. 버튼 다국어 로직 수정 (Fallback 강화)
-            const btn = document.getElementById('refresh-button');
-            if (btn) {
-                btn.setAttribute('data-i18n', 'refresh_lucky');
-                let translated = "";
-                if (typeof window.getTranslation === 'function') {
-                    translated = window.getTranslation(currentLang, 'refresh_lucky');
-                }
-                
-                // btn.textContent 대신 안전하게 업데이트
-                const finalLabel = translated || (currentLang === 'en' ? 'Check Again' : '다시 확인하기');
-                btn.innerHTML = `<span>${finalLabel}</span>`;
-            }
-
+            // Render Result Card
+            resultArea.innerHTML = `
+                <div class="result-card">
+                    <div class="res-item">
+                        <div class="color-box" style="background: ${data.oklch}"></div>
+                        <div class="res-text">
+                            <h3>Lucky Color</h3>
+                            <p>${data.colorName}</p>
+                        </div>
+                    </div>
+                    <div style="height:1px; background:#e2e8f0;"></div>
+                    <div class="res-item">
+                        <div class="item-icon">${data.itemIcon}</div>
+                        <div class="res-text">
+                            <h3>Lucky Item</h3>
+                            <p>${data.itemName}</p>
+                        </div>
+                    </div>
+                    <p style="font-size: 1rem; color: #64748b; line-height: 1.6; margin: 0;">${data.itemAction}</p>
+                </div>
+            `;
+            resultArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         } catch (err) {
-            console.error('Lucky API Error:', err);
-            this._error = `행운 분석 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.`;
-        } finally {
-            this._loading = false;
-            this.render();
+            resultArea.innerHTML = `<p style="color: #ef4444; text-align:center;">행운 분석에 실패했습니다.</p>`;
         }
-    }
-
-    render() {
-        const currentLang = localStorage.getItem('lang') || window.currentLang || 'ko';
-
-        if (this._loading) {
-            this.shadowRoot.innerHTML = `
-                <style>
-                    :host { display: block; text-align: center; padding: 2rem; }
-                    .loader { border: 4px solid #f3f3f3; border-top: 4px solid oklch(0.45 0.15 250); border-radius: 50%; width: 40px; height: 40px; animation: spin 2s linear infinite; margin: 0 auto; }
-                    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-                    p { color: oklch(0.4 0.05 250); margin-top: 1rem; font-weight: 500; }
-                </style>
-                <div class="loader"></div>
-                <p>${currentLang === 'en' ? 'AI is analyzing your fortune...' : 'AI가 당신의 정보를 바탕으로 행운을 분석 중입니다...'}</p>
-            `;
-            return;
-        }
-
-        // 3. 에러 핸들링 숨기기 (성공 데이터가 있으면 에러 메시지 미노출)
-        if (this._error && !this._luckyData) {
-            this.shadowRoot.innerHTML = `<p style="color: oklch(0.5 0.2 20); text-align: center; padding: 2rem; font-weight: 600;">${this._error}</p>`;
-            return;
-        }
-
-        if (!this._luckyData) {
-            this.shadowRoot.innerHTML = `
-                <style>
-                    :host { display: block; text-align: center; padding: 3rem 2rem; }
-                    .welcome-card {
-                        background: oklch(0.98 0.01 250);
-                        border: 2px dashed oklch(0.85 0.05 250);
-                        border-radius: 2rem;
-                        padding: 2.5rem;
-                        color: oklch(0.4 0.05 250);
-                        transition: all 0.3s ease;
-                    }
-                    .icon { font-size: 3rem; margin-bottom: 1rem; display: block; filter: drop-shadow(0 4px 10px oklch(0 0 0 / 0.1)); }
-                    .msg { font-size: 1.1rem; font-weight: 500; line-height: 1.5; }
-                </style>
-                <div class="welcome-card">
-                    <span class="icon">✨</span>
-                    <div class="msg">${currentLang === 'en' ? 'Enter your info and click the button!' : "정보를 입력하고 '행운 추천받기' 버튼을 눌러보세요!"}</div>
-                </div>
-            `;
-            return;
-        }
-
-        const { oklch, colorName, colorDesc, itemName, itemIcon, itemAction } = this._luckyData;
-        
-        // 1. 색상 렌더링 방어 코드 (Component)
-        let cleanColor = oklch.trim().replace(/,/g, ' ');
-        if (cleanColor.includes('oklch(')) {
-            const match = cleanColor.match(/oklch\(([^)]+)\)/);
-            if (match) cleanColor = match[1].trim();
-        }
-        const safeColor = cleanColor ? `oklch(${cleanColor})` : 'oklch(0.6 0.15 250)';
-
-        this.shadowRoot.innerHTML = `
-        <style>
-            :host {
-                display: block;
-                font-family: 'Segoe UI', system-ui, sans-serif;
-                container-type: inline-size;
-            }
-
-            /* 2. 유연한 레이아웃 설계 (Flexible widths for English) */
-            .card {
-                background: white;
-                border-radius: 2rem;
-                padding: 3rem;
-                box-shadow: 
-                    0 10px 20px oklch(0 0 0 / 0.04),
-                    0 30px 60px oklch(0 0 0 / 0.12);
-                display: flex;
-                flex-direction: column;
-                gap: 2.5rem;
-                position: relative;
-                overflow: hidden;
-                animation: slideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
-            }
-
-            @keyframes slideUp {
-                from { opacity: 0; transform: translateY(30px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
-
-            .card::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 10px;
-                background: ${safeColor} !important;
-            }
-
-            .section { display: flex; flex-direction: column; gap: 0.75rem; }
-            .label { font-size: 0.85rem; color: oklch(0.55 0.02 250); font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; }
-            .value-row { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
-            .color-preview { 
-                width: 44px; 
-                height: 44px; 
-                flex-shrink: 0;
-                border-radius: 50%; 
-                background: ${safeColor} !important;
-                border: 4px solid white; 
-                box-shadow: 0 8px 16px oklch(0 0 0 / 0.15);
-            }
-            .title { font-size: 2rem; font-weight: 900; margin: 0; color: oklch(0.25 0.02 250); letter-spacing: -0.02em; flex: 1; min-width: 200px; }
-            .description { font-size: 1.1rem; line-height: 1.7; color: oklch(0.45 0.02 250); margin: 0; }
-            .item-icon { font-size: 4rem; filter: drop-shadow(0 10px 20px oklch(0 0 0 / 0.1)); }
-            .divider { height: 1px; background: oklch(0.94 0.01 250); width: 100%; }
-
-            @container (max-width: 500px) {
-                .card { padding: 2rem; gap: 2rem; }
-                .title { font-size: 1.6rem; }
-                .item-icon { font-size: 3rem; }
-                .description { font-size: 1rem; }
-            }
-        </style>
-        
-        <div class="card" role="article" aria-label="Today's Lucky Recommendation">
-            <div class="section">
-                <span class="label">${currentLang === 'en' ? 'Lucky Color' : '행운의 컬러'}</span>
-                <div class="value-row">
-                    <div class="color-preview"></div>
-                    <h2 class="title">${colorName}</h2>
-                </div>
-                <p class="description">${colorDesc}</p>
-            </div>
-
-            <div class="divider"></div>
-
-            <div class="section">
-                <span class="label">${currentLang === 'en' ? 'Lucky Item' : '행운의 아이템'}</span>
-                <div class="item-icon">${itemIcon}</div>
-                <div class="value-row">
-                    <h2 class="title">${itemName}</h2>
-                </div>
-                <p class="description">${itemAction}</p>
-            </div>
-        </div>
-        `;
     }
 }
 
-if (!customElements.get('lucky-recommendation')) {
-    customElements.define('lucky-recommendation', LuckyRecommendation);
-}
+customElements.define('lucky-recommendation', LuckyRecommendation);
