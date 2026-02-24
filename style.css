@@ -1,6 +1,6 @@
 /* --- Global Premium Header System --- */
 header {
-    display: flex !important; /* Ensure it exists */
+    display: flex !important;
     height: 70px;
     background: white;
     position: sticky;
@@ -13,12 +13,13 @@ header {
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
 }
 
-header nav { display: block !important; }
-header .site-logo-link { display: flex !important; }
+/* Logo */
+.site-logo-link { display: flex; align-items: center; text-decoration: none; }
+.site-logo-link img { height: 35px; width: auto; }
 
-/* Desktop Menu Styling */
+/* Navigation */
 .desktop-menu-container { display: flex; align-items: center; gap: 30px; }
-nav ul { display: flex; list-style: none; gap: 15px; margin: 0; padding: 0; }
+nav ul { display: flex; list-style: none; gap: 10px; margin: 0; padding: 0; }
 nav a, .dropbtn {
     text-decoration: none;
     color: #1e293b;
@@ -26,28 +27,24 @@ nav a, .dropbtn {
     padding: 10px 15px;
     border-radius: 12px;
     transition: 0.3s;
+    font-size: 0.95rem;
 }
 nav a:hover { background: #eff6ff; color: #0052cc; }
 
-/* Dropdown */
-.dropdown { position: relative; }
-.dropdown-content {
-    display: none; position: absolute; top: 100%; left: 0;
-    background: white; min-width: 200px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    border-radius: 15px; padding: 10px 0; z-index: 10000;
+/* Utility Controls (Theme/Lang) */
+.utility-controls { display: flex; align-items: center; gap: 12px; }
+#color-change { 
+    background: none; border: none; font-size: 1.2rem; cursor: pointer; 
+    padding: 8px; border-radius: 50%; transition: background 0.2s;
 }
-.dropdown:hover .dropdown-content { display: block; }
-.dropdown-content a { padding: 12px 20px; display: block; color: #475569; }
-.dropdown-content a:hover { background: #f8fafc; color: #0052cc; }
+#color-change:hover { background: #f1f5f9; }
 
-/* Utility & Language */
-.utility-controls { display: flex; align-items: center; gap: 15px; }
-#color-change { background: none; border: none; font-size: 1.3rem; cursor: pointer; }
 .lang-button {
-    border: 1px solid #e2e8f0; background: white; padding: 6px 14px;
+    border: 1px solid #e2e8f0; background: white; padding: 6px 12px;
     border-radius: 50px; font-weight: 700; color: #64748b; cursor: pointer;
+    font-size: 0.85rem; transition: all 0.2s;
 }
+.lang-button:hover { border-color: #0052cc; color: #0052cc; }
 .lang-button.active { background: #0052cc; color: white; border-color: #0052cc; }
 
 /* --- Home Page Exceptions --- */
@@ -55,8 +52,12 @@ body.home-page header {
     background: transparent !important;
     box-shadow: none !important;
     border: none !important;
+    position: absolute;
 }
 body.home-page header nav, 
 body.home-page header .site-logo-link {
     display: none !important;
+}
+body.home-page header .utility-controls {
+    margin-left: auto;
 }
