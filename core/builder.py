@@ -37,33 +37,48 @@ def process_html_file_for_common_elements(filepath):
     except Exception as e:
         print(f"⚠️ 에러: {filepath} 처리 중 {e}")
 
-def _extract_and_format_hashtags(content, log_prefix=""):
+def _extract_and_format_hashtags(content):
     tags = re.findall(r'#([a-zA-Z0-9가-힣]+)', content)
     unique_tags = list(dict.fromkeys(tags))[:5]
-    if not unique_tags: return content, ""
+    if not unique_tags: return content.strip(), ""
     
     html = f'<div class="hashtag-container">' + "".join([f'<span class="hashtag">#{t}</span>' for t in unique_tags]) + '</div>'
     for t in unique_tags:
         content = content.replace(f'#{t}', '')
     return content.strip(), html
 
-def generate_article_html(md_content, title, date_str, output_path, hashtags_html="", description="", image_url="", lang="ko"):
+def generate_article_html(md_content, title, date_str, output_path, hashtags_html="", description="", lang="ko"):
     if not description:
         description = extract_description_from_md(md_content, lang=lang) or f"{title}에 대한 최신 뉴스입니다."
+    
+    image_url = DEFAULT_OG_IMAGE_URL
+    back_text = "목록으로 돌아가기" if lang == "ko" else "Back to List"
+    date_label = "게시일" if lang == "ko" else "Published on"
 
+    # Full SEO Meta Tags
     html_template = f"""
 <!DOCTYPE html>
 <html lang="{lang}">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{title} - News</title><meta name="description" content="{description}">
+    <title>{title} - Tracking SA</title>
+    <meta name="description" content="{description}">
+    <meta property="og:title" content="{title}">
+    <meta property="og:description" content="{description}">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="{BASE_URL}{os.path.basename(output_path)}">
+    <meta property="og:image" content="{image_url}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{title}">
+    <meta name="twitter:description" content="{description}">
+    <meta name="twitter:image" content="{image_url}">
 </head>
 <body>
     <main class="article-detail-main">
-        <a href="/news/" class="back-to-list"><i class="fas fa-arrow-left"></i> {'목록으로' if lang=='ko' else 'Back'}</a>
+        <a href="/news/" class="back-to-list"><i class="fas fa-arrow-left"></i> {back_text}</a>
         <article class="news-article-container">
             <div class="article-title-display">{title}</div>
-            <p class="article-meta">{date_str}</p>
+            <p class="article-meta">{date_label}: {date_str}</p>
             <div class="article-content">{markdown.markdown(md_content)}{hashtags_html}</div>
         </article>
     </main>
@@ -79,9 +94,22 @@ def generate_index_html(articles_on_page, current_page, total_pages, lang='ko'):
     with open(template_path, "r", encoding="utf-8") as f:
         base_html = f.read()
 
-    # News Grid Generation
+    hero_card_html = ""
+    grid_articles = articles_on_page
+
+    # Hero Card for first page
+    if current_page == 1 and articles_on_page:
+        hero = articles_on_page[0]
+        grid_articles = articles_on_page[1:]
+        hero_card_html = f"""
+            <h1 class="section-title">Latest News</h1>
+            <article class="hero-card">
+                <h2 class="hero-card-title"><a href="/{hero['url']}">{hero['title']}</a></h2>
+                <p class="hero-card-date">{hero['date']}</p>
+            </article>"""
+
     grid_news_items = ""
-    for article in articles_on_page:
+    for article in grid_articles:
         grid_news_items += f"""
         <a href="/{article['url']}" class="news-card-premium">
             <div class="premium-icon-box"><i class="fas fa-newspaper"></i></div>
@@ -105,7 +133,12 @@ def generate_index_html(articles_on_page, current_page, total_pages, lang='ko'):
         pagination_html += f'<a href="/news/{next_url}" class="pagination-button next">→</a>'
     pagination_html += '</div>'
 
-    final_content = f'<section class="news-section-main"><h1 class="section-title">Latest AI News</h1>{grid_news_html}{pagination_html}</section>'
+    final_content = f"""<section class="news-section-main">
+        {hero_card_html}
+        <h1 class="section-title">All Articles</h1>
+        {grid_news_html}
+        {pagination_html}
+    </section>"""
     
     updated_html = base_html.replace("<!-- NEWS_INJECTION_POINT -->", final_content)
     
@@ -115,6 +148,41 @@ def generate_index_html(articles_on_page, current_page, total_pages, lang='ko'):
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(updated_html)
     process_html_file_for_common_elements(output_path)
+
+def generate_sitemap(articles):
+    current_date = datetime.date.today().strftime("%Y-%m-%d")
+    url_entries = [f"""    <url><loc>{BASE_URL}{a['url']}</loc><lastmod>{current_date}</lastmod></url>""" for a in articles]
+    for static in STATIC_PAGES_FOR_SITEMAP:
+        url_entries.append(f"""    <url><loc>{BASE_URL}{static}</loc></url>""")
+    
+    sitemap = f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{"\n".join(url_entries)}
+</urlset>"""
+    with open(SITEMAP_PATH, "w", encoding="utf-8") as f:
+        f.write(sitemap.strip())
+
+def generate_rss_feed(articles):
+    RSS_PATH = os.path.join(PUBLIC_DIR, "rss.xml")
+    items = ""
+    for a in articles[:20]:
+        items += f"""    <item>
+        <title>{escape(a['title'])}</title>
+        <link>{BASE_URL}{a['url']}</link>
+        <pubDate>{a['date']}</pubDate>
+    </item>\n"""
+    
+    rss = f"""<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Tracking SA News</title><link>{BASE_URL}</link><description>Latest AI News</description>{items}</channel></rss>"""
+    with open(RSS_PATH, "w", encoding="utf-8") as f:
+        f.write(rss)
+
+def create_aux_files():
+    # ads.txt
+    with open(os.path.join(PUBLIC_DIR, "ads.txt"), "w") as f:
+        f.write(f"google.com, {ADSENSE_CLIENT_ID}, DIRECT, f08c47fec0942fa0")
+    # robots.txt
+    with open(os.path.join(PUBLIC_DIR, "robots.txt"), "w") as f:
+        f.write(f"User-agent: *\nAllow: /\nSitemap: {BASE_URL}sitemap.xml")
 
 def copy_static_assets():
     assets = ["index.html", "style.css", "common.js", "translations.js", "firebase-config.js", "logo.svg", "favicon.svg", "search.js"]
@@ -133,33 +201,40 @@ def generate_public_site():
     if os.path.exists(PUBLIC_DIR): shutil.rmtree(PUBLIC_DIR)
     os.makedirs(PUBLIC_DIR, exist_ok=True)
     copy_static_assets()
+    create_aux_files()
     
     db = get_firestore_client()
     articles_ko, articles_en = [], []
     
     if db:
-        docs = list(db.collection('posts').order_by('createdAt', direction=firestore.Query.DESCENDING).stream())
-        for doc in docs:
-            p = doc.to_dict()
-            date = p.get('date', '2026-02-24')
-            ukey = p.get('urlKey', f"{date}-news")
-            
-            # Generate KO Detail
-            ko_body, ko_tags = _extract_and_format_hashtags(p.get('contentKo', ''))
-            generate_article_html(ko_body, p.get('titleKo', ''), date, os.path.join(PUBLIC_DIR, f"{ukey}.html"), ko_tags, lang="ko")
-            articles_ko.append({'title': p.get('titleKo'), 'date': date, 'url': f"{ukey}.html"})
-            
-            # Generate EN Detail
-            if p.get('contentEn'):
-                en_body, en_tags = _extract_and_format_hashtags(p.get('contentEn', ''))
-                generate_article_html(en_body, p.get('titleEn', ''), date, os.path.join(PUBLIC_DIR, f"{ukey}-en.html"), en_tags, lang="en")
-                articles_en.append({'title': p.get('titleEn'), 'date': date, 'url': f"{ukey}-en.html"})
+        try:
+            docs = list(db.collection('posts').order_by('createdAt', direction=firestore.Query.DESCENDING).stream())
+            for doc in docs:
+                p = doc.to_dict()
+                date = p.get('date', '2026-02-24')
+                ukey = p.get('urlKey', f"{date}-news")
+                
+                ko_body, ko_tags = _extract_and_format_hashtags(p.get('contentKo', ''))
+                generate_article_html(ko_body, p.get('titleKo', ''), date, os.path.join(PUBLIC_DIR, f"{ukey}.html"), ko_tags, lang="ko")
+                articles_ko.append({'title': p.get('titleKo'), 'date': date, 'url': f"{ukey}.html"})
+                
+                if p.get('contentEn'):
+                    en_body, en_tags = _extract_and_format_hashtags(p.get('contentEn', ''))
+                    generate_article_html(en_body, p.get('titleEn', ''), date, os.path.join(PUBLIC_DIR, f"{ukey}-en.html"), en_tags, lang="en")
+                    articles_en.append({'title': p.get('titleEn'), 'date': date, 'url': f"{ukey}-en.html"})
+        except Exception as e:
+            print(f"⚠️ Firestore Load Error: {e}")
 
-    # Generate Paginated Index Pages
+    # Paginated Index Pages
     for lang, arts in [('ko', articles_ko), ('en', articles_en)]:
         total_pages = math.ceil(len(arts) / ARTICLES_PER_PAGE) if arts else 1
         for p_num in range(1, total_pages + 1):
             start = (p_num - 1) * ARTICLES_PER_PAGE
             generate_index_html(arts[start:start+ARTICLES_PER_PAGE], p_num, total_pages, lang=lang)
 
-    print(f"✅ Generated {len(articles_ko)} articles and index pages.")
+    # SEO Tools
+    all_articles = articles_ko + articles_en
+    generate_sitemap(all_articles)
+    generate_rss_feed(articles_ko)
+
+    print(f"✅ Generated {len(articles_ko)} articles, sitemap, rss, and ads.txt.")
