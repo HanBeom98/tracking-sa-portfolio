@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>코히어(Cohere)의 오픈형 다국어 모델, Tiny Aya 출시: 70개 이상 언어 지원, 어떤 장점과 활용법이 있을까?</title>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=pub-7263630893992216" crossorigin="anonymous"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-TGD3WRNKPZ');
+</script>
+<meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
+<meta name="naver-site-verification" content="b15b33af838280b54d31eb3c7e5c358d2836743f" />
+<script type="text/javascript">
+(function(c,l,a,r,i,t,y){
+    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+})(window, document, "clarity", "script", "vb9q33ggpa");
+</script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="/style.css?v=20260224230836">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<script src="/firebase-config.js"></script>
+<script src="/translations.js?v=20260224230836"></script>
+<script src="/common.js?v=20260224230836"></script>
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=pub-7263630893992216" crossorigin="anonymous"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-TGD3WRNKPZ');
+</script>
+<meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
+<meta name="naver-site-verification" content="b15b33af838280b54d31eb3c7e5c358d2836743f" />
+<script type="text/javascript">
+(function(c,l,a,r,i,t,y){
+    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+})(window, document, "clarity", "script", "vb9q33ggpa");
+</script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="/style.css?v=20260224231018">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<script src="/firebase-config.js"></script>
+<script src="/translations.js?v=20260224231018"></script>
+<script src="/common.js?v=20260224231018"></script>
+
+</head>
+<body><header>
+    <div class="header-inner">
+        <a href="/" class="site-logo-link">
+            <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="site-logo">
+                <circle cx="50" cy="50" r="48" stroke="currentColor" stroke-width="4" fill="transparent"/>
+                <path d="M25 70L40 55L50 65L75 35" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="70" cy="35" r="12" stroke="currentColor" stroke-width="6" fill="currentColor"/>
+                <rect x="78" y="43" width="15" height="6" rx="3" transform="rotate(45 78 43)" fill="currentColor"/>
+            </svg>
+        </a>
+        <div class="desktop-menu-container">
+            <nav>
+                <ul>
+                    <li class="dropdown">
+                        <a href="#" class="dropbtn" data-i18n="menu_test">테스트</a>
+                        <div class="dropdown-content">
+                            <a href="/animal-face/" data-i18n="animal_face_test">동물상 테스트</a>
+                            <a href="/ai-test/" data-i18n="ai_tendency_test">AI 성향 테스트</a>
+                            <a href="/fortune/" data-i18n="saju_test">AI 운세 테스트</a>
+                            <a href="/lucky-recommendation/" data-i18n="lucky_recommendation">행운의 추천</a>
+                        </div>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropbtn" data-i18n="menu_game">게임</a>
+                        <div class="dropdown-content">
+                            <a href="/tetris-game/" data-i18n="tetris_game">테트리스</a>
+                            <a href="/ai-evolution/" data-i18n="ai_evolution">AI 진화 2048</a>
+                        </div>
+                    </li>
+                    <li><a href="/news/" data-i18n="news_home">뉴스</a></li>
+                </ul>
+            </nav>
+            <div class="utility-controls">
+                <button id="color-change">🌙</button>
+                <div id="language-switcher"></div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+  <main class="news-article-main">
+    <article class="news-article-card">
+      <div class="news-article-meta"><span class="news-article-date">2026-02-17</span></div>
+      <h1 class="news-article-title">코히어(Cohere)의 오픈형 다국어 모델, Tiny Aya 출시: 70개 이상 언어 지원, 어떤 장점과 활용법이 있을까?</h1>
+      <div class="news-article-content"><ul>
+<li>코히어(Cohere)가 70개 이상의 언어를 지원하는 오픈형 다국어 모델, Tiny Aya 제품군을 출시했습니다.</li>
+<li>Tiny Aya 모델은 다음과 같은 특징을 가집니다.<ul>
+<li>다양한 언어 지원: 한국어 포함 70개 이상의 언어를 지원하여 전 세계 사용자들이 활용 가능합니다.</li>
+<li>오픈형 모델: 누구나 자유롭게 사용, 수정, 배포할 수 있어 접근성이 높습니다.</li>
+<li>Tiny 모델: 비교적 작은 크기로, 리소스 제약적인 환경에서도 효율적으로 사용 가능합니다.</li>
+</ul>
+</li>
+<li>Tiny Aya 모델의 활용 예시는 다음과 같습니다.<ul>
+<li>다국어 챗봇 구축: 다양한 언어를 사용하는 고객 응대 챗봇을 쉽게 구축할 수 있습니다.</li>
+<li>번역 서비스 개선: 번역 성능 향상에 기여하고, 새로운 언어 쌍에 대한 번역 서비스를 개발할 수 있습니다.</li>
+<li>교육 자료 현지화: 다양한 언어로 교육 자료를 번역하여 전 세계 학습자에게 제공할 수 있습니다.</li>
+</ul>
+</li>
+</ul>
+<h2>🔍 Deep Dive</h2>
+<ul>
+<li>
+<p>코히어의 Tiny Aya 모델 출시는 국내 IT 시장에 다양한 영향을 미칠 것으로 예상됩니다. 특히, 중소기업이나 스타트업들이 다국어 서비스를 구축하는데 드는 비용을 절감하고, 더 많은 사용자를 확보하는 데 도움이 될 수 있습니다. 또한, 한국어 데이터셋을 활용하여 모델을 개선하고 한국어 성능을 향상시키는 연구도 활발해질 것으로 기대됩니다. 이는 한국어 자연어 처리 기술 발전에도 기여할 수 있습니다. 앞으로 코히어의 행보와 국내 기업들의 협력이 기대됩니다.</p>
+</li>
+<li>
+<p>수익화 아이디어 3가지</p>
+<ol>
+<li>Tiny Aya 모델을 기반으로 한 다국어 챗봇 솔루션 개발 및 판매</li>
+<li>한국어 특화 데이터셋 구축 및 Tiny Aya 모델 한국어 성능 개선 컨설팅</li>
+<li>Tiny Aya 모델을 활용한 교육 프로그램 개발 및 판매 (예: 다국어 학습 플랫폼)</li>
+</ol>
+</li>
+</ul></div>
+      </div>
+    </article>
+  </main>
+
+
+<footer>
+    <p data-i18n="footer_copyright"></p>
+    <p>
+        <a href="/about" data-i18n="about_us">회사 소개</a> |
+        <a href="/contact" data-i18n="contact">문의</a> |
+        <a href="/inquiry" data-i18n="partnership_inquiry">파트너십 문의</a> |
+        <a href="/privacy-policy" data-i18n="privacy_policy">개인정보처리방침</a> |
+        <a href="/sitemap.xml" data-i18n="sitemap">사이트맵</a> |
+        <a href="/rss.xml">RSS Feed</a>
+    </p>
+</footer>
+
+</body>
+</html>

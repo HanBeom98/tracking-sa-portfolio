@@ -152,6 +152,22 @@ def _upgrade_cached_news_index():
         with open(news_index_path, "w", encoding="utf-8") as f:
             f.write(final_html)
         process_html_file_for_common_elements(news_index_path)
+
+        grid_items_en = "".join([
+            _build_news_card(
+                f'/en/{item["href"].lstrip("/")}',
+                item["title"],
+                item["date"],
+                item["excerpt"]
+            )
+            for item in enriched
+        ])
+        final_html_en = base_html.replace("<!-- NEWS_INJECTION_POINT -->", f'<div class="news-grid">{grid_items_en}</div>')
+        dest_idx_en = os.path.join(PUBLIC_DIR, "en", "news", "index.html")
+        os.makedirs(os.path.dirname(dest_idx_en), exist_ok=True)
+        with open(dest_idx_en, "w", encoding="utf-8") as f:
+            f.write(final_html_en)
+        process_html_file_for_common_elements(dest_idx_en)
         return
 
     def _inject_date(match):
@@ -173,42 +189,48 @@ def _upgrade_cached_news_index():
 def _upgrade_cached_article_pages():
     if not os.path.exists(PUBLIC_DIR):
         return
-    for name in os.listdir(PUBLIC_DIR):
-        if not name.endswith(".html") or name == "index.html":
-            continue
-        path = os.path.join(PUBLIC_DIR, name)
-        if not os.path.isfile(path):
-            continue
-        with open(path, "r", encoding="utf-8") as f:
-            html = f.read()
-        if "news-article-main" in html:
-            title_match = re.search(r'class="news-article-title"[^>]*>([\s\S]*?)</h1>', html, flags=re.IGNORECASE)
-            title = re.sub(r'<[^>]+>', '', title_match.group(1)).strip() if title_match else ""
-            if title:
-                escaped_title = re.escape(title)
-                pattern = r'(<div class="news-article-content">\s*)(?:<div[^>]*>\s*)*<h1[^>]*>\s*' + escaped_title + r'\s*</h1>\s*(?:</div>\s*)*'
-                updated = html
-                while re.search(pattern, updated, flags=re.IGNORECASE):
-                    updated = re.sub(pattern, r'\1', updated, count=1, flags=re.IGNORECASE)
-                if updated != html:
-                    with open(path, "w", encoding="utf-8") as wf:
-                        wf.write(updated)
-                    process_html_file_for_common_elements(path)
-            continue
-        title_match = re.search(r'<title>(.*?)</title>', html, flags=re.IGNORECASE | re.DOTALL)
-        h1_match = re.search(r'<h1[^>]*>(.*?)</h1>', html, flags=re.IGNORECASE | re.DOTALL)
-        title = (h1_match.group(1).strip() if h1_match else (title_match.group(1).strip() if title_match else "뉴스"))
+    def _upgrade_in_dir(root_dir):
+        for name in os.listdir(root_dir):
+            if not name.endswith(".html") or name == "index.html":
+                continue
+            path = os.path.join(root_dir, name)
+            if not os.path.isfile(path):
+                continue
+            with open(path, "r", encoding="utf-8") as f:
+                html = f.read()
+            if "news-article-main" in html:
+                title_match = re.search(r'class="news-article-title"[^>]*>([\s\S]*?)</h1>', html, flags=re.IGNORECASE)
+                title = re.sub(r'<[^>]+>', '', title_match.group(1)).strip() if title_match else ""
+                if title:
+                    escaped_title = re.escape(title)
+                    pattern = r'(<div class="news-article-content">\s*)(?:<div[^>]*>\s*)*<h1[^>]*>\s*' + escaped_title + r'\s*</h1>\s*(?:</div>\s*)*'
+                    updated = html
+                    while re.search(pattern, updated, flags=re.IGNORECASE):
+                        updated = re.sub(pattern, r'\1', updated, count=1, flags=re.IGNORECASE)
+                    if updated != html:
+                        with open(path, "w", encoding="utf-8") as wf:
+                            wf.write(updated)
+                        process_html_file_for_common_elements(path)
+                continue
+            title_match = re.search(r'<title>(.*?)</title>', html, flags=re.IGNORECASE | re.DOTALL)
+            h1_match = re.search(r'<h1[^>]*>(.*?)</h1>', html, flags=re.IGNORECASE | re.DOTALL)
+            title = (h1_match.group(1).strip() if h1_match else (title_match.group(1).strip() if title_match else "뉴스"))
 
-        main_match = re.search(r'<main[^>]*>([\s\S]*?)</main>', html, flags=re.IGNORECASE)
-        body_match = re.search(r'<body[^>]*>([\s\S]*?)</body>', html, flags=re.IGNORECASE)
-        content_html = main_match.group(1).strip() if main_match else (body_match.group(1).strip() if body_match else "")
-        content_html = _strip_leading_title(content_html, title)
+            main_match = re.search(r'<main[^>]*>([\s\S]*?)</main>', html, flags=re.IGNORECASE)
+            body_match = re.search(r'<body[^>]*>([\s\S]*?)</body>', html, flags=re.IGNORECASE)
+            content_html = main_match.group(1).strip() if main_match else (body_match.group(1).strip() if body_match else "")
+            content_html = _strip_leading_title(content_html, title)
 
-        date_text = _extract_date_from_slug(name)
-        new_html = _wrap_article_html(title, content_html, date_text)
-        with open(path, "w", encoding="utf-8") as f:
-            f.write(new_html)
-        process_html_file_for_common_elements(path)
+            date_text = _extract_date_from_slug(name)
+            new_html = _wrap_article_html(title, content_html, date_text)
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(new_html)
+            process_html_file_for_common_elements(path)
+
+    _upgrade_in_dir(PUBLIC_DIR)
+    en_dir = os.path.join(PUBLIC_DIR, "en")
+    if os.path.isdir(en_dir):
+        _upgrade_in_dir(en_dir)
 
 def process_html_file_for_common_elements(filepath):
     try:
@@ -250,6 +272,7 @@ def generate_news_pages():
     뉴스 도메인 전용 빌드 로직 (Firestore 연동)
     """
     articles = []
+    articles_en = []
     db_ok = False
     try:
         db = get_firestore_client()
@@ -261,17 +284,26 @@ def generate_news_pages():
         for doc in docs:
             p = doc.to_dict()
             title = p.get('titleKo', '제목 없음')
+            title_en = p.get('titleEn', '') or title
             ukey = p.get('urlKey', 'news')
             content = p.get('contentKo', '')
+            content_en = p.get('contentEn', '') or content
             date = p.get('date', '2026-02-24')
             excerpt = _make_excerpt(content)
+            excerpt_en = _make_excerpt(content_en)
             
             out_path = os.path.join(PUBLIC_DIR, f"{ukey}.html")
             html = _wrap_article_html(title, markdown.markdown(content), date)
             
             with open(out_path, "w", encoding="utf-8") as f: f.write(html)
             process_html_file_for_common_elements(out_path)
+            en_out_path = os.path.join(PUBLIC_DIR, "en", f"{ukey}.html")
+            os.makedirs(os.path.dirname(en_out_path), exist_ok=True)
+            en_html = _wrap_article_html(title_en, markdown.markdown(content_en), date)
+            with open(en_out_path, "w", encoding="utf-8") as f: f.write(en_html)
+            process_html_file_for_common_elements(en_out_path)
             articles.append({'title': title, 'url': f"{ukey}.html", 'date': date, 'excerpt': excerpt})
+            articles_en.append({'title': title_en, 'url': f"{ukey}.html", 'date': date, 'excerpt': excerpt_en})
     except Exception as e:
         print(f"⚠️ [NEWS BUILD WARNING] Skipping individual articles due to DB error: {e}")
 
@@ -285,31 +317,55 @@ def generate_news_pages():
                 for a in articles
             ])
             final_html = base_html.replace("<!-- NEWS_INJECTION_POINT -->", f'<div class="news-grid">{grid_items}</div>')
+            if articles_en:
+                grid_items_en = "".join([
+                    _build_news_card(f'/en/{a["url"]}', a["title"], a.get("date", ""), a.get("excerpt", ""))
+                    for a in articles_en
+                ])
+                final_html_en = base_html.replace("<!-- NEWS_INJECTION_POINT -->", f'<div class="news-grid">{grid_items_en}</div>')
         else:
             final_html = base_html.replace("<!-- NEWS_INJECTION_POINT -->", '<div class="news-empty">아직 등록된 기사가 없습니다.</div>')
+            final_html_en = final_html
         
         dest_idx = os.path.join(PUBLIC_DIR, "news", "index.html")
         os.makedirs(os.path.dirname(dest_idx), exist_ok=True)
         with open(dest_idx, "w", encoding="utf-8") as f: f.write(final_html)
         process_html_file_for_common_elements(dest_idx)
+        dest_idx_en = os.path.join(PUBLIC_DIR, "en", "news", "index.html")
+        os.makedirs(os.path.dirname(dest_idx_en), exist_ok=True)
+        with open(dest_idx_en, "w", encoding="utf-8") as f: f.write(final_html_en)
+        process_html_file_for_common_elements(dest_idx_en)
     return articles, db_ok
 
 def _snapshot_existing_news():
     if not os.path.exists(PUBLIC_DIR):
         return None
-    snapshot = {"news_index": None, "articles": {}}
+    snapshot = {"news_index": None, "articles": {}, "news_index_en": None, "articles_en": {}}
     news_index_path = os.path.join(PUBLIC_DIR, "news", "index.html")
     if os.path.exists(news_index_path):
         with open(news_index_path, "r", encoding="utf-8") as f:
             snapshot["news_index"] = f.read()
+    news_index_en_path = os.path.join(PUBLIC_DIR, "en", "news", "index.html")
+    if os.path.exists(news_index_en_path):
+        with open(news_index_en_path, "r", encoding="utf-8") as f:
+            snapshot["news_index_en"] = f.read()
     for name in os.listdir(PUBLIC_DIR):
         if name.endswith(".html") and name != "index.html":
             path = os.path.join(PUBLIC_DIR, name)
             if os.path.isfile(path):
                 with open(path, "r", encoding="utf-8") as f:
                     snapshot["articles"][name] = f.read()
+    en_dir = os.path.join(PUBLIC_DIR, "en")
+    if os.path.isdir(en_dir):
+        for name in os.listdir(en_dir):
+            if name.endswith(".html"):
+                path = os.path.join(en_dir, name)
+                if os.path.isfile(path):
+                    with open(path, "r", encoding="utf-8") as f:
+                        snapshot["articles_en"][name] = f.read()
     if snapshot["news_index"] is None and not snapshot["articles"]:
-        return None
+        if snapshot["news_index_en"] is None and not snapshot["articles_en"]:
+            return None
     return snapshot
 
 def _restore_news_snapshot(snapshot):
@@ -320,10 +376,28 @@ def _restore_news_snapshot(snapshot):
         os.makedirs(os.path.dirname(dest_idx), exist_ok=True)
         with open(dest_idx, "w", encoding="utf-8") as f:
             f.write(snapshot["news_index"])
+    if snapshot.get("news_index_en"):
+        dest_idx_en = os.path.join(PUBLIC_DIR, "en", "news", "index.html")
+        os.makedirs(os.path.dirname(dest_idx_en), exist_ok=True)
+        with open(dest_idx_en, "w", encoding="utf-8") as f:
+            f.write(snapshot["news_index_en"])
     for name, content in snapshot.get("articles", {}).items():
         out_path = os.path.join(PUBLIC_DIR, name)
         with open(out_path, "w", encoding="utf-8") as f:
             f.write(content)
+    for name, content in snapshot.get("articles_en", {}).items():
+        out_path = os.path.join(PUBLIC_DIR, "en", name)
+        os.makedirs(os.path.dirname(out_path), exist_ok=True)
+        with open(out_path, "w", encoding="utf-8") as f:
+            f.write(content)
+    if not snapshot.get("articles_en") and snapshot.get("articles"):
+        for name, content in snapshot.get("articles", {}).items():
+            out_path = os.path.join(PUBLIC_DIR, "en", name)
+            if os.path.exists(out_path):
+                continue
+            os.makedirs(os.path.dirname(out_path), exist_ok=True)
+            with open(out_path, "w", encoding="utf-8") as f:
+                f.write(content)
 
 def generate_public_site():
     news_snapshot = _snapshot_existing_news()

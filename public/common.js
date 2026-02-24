@@ -31,7 +31,35 @@ window.applyTranslations = function(lang) {
 
 window.setLanguage = function(lang) {
     localStorage.setItem('lang', lang);
-    location.reload(); 
+    const path = window.location.pathname || "/";
+
+    const isNewsIndex = path === "/news" || path === "/news/" || path === "/news/index.html";
+    const isNewsArticle = /^\/\d{4}-\d{2}-\d{2}-.+\.html$/.test(path) || /^\/news-\d{10}-\d+\.html$/.test(path);
+    const isEnglishPath = path.startsWith("/en/");
+
+    if (lang === "en") {
+        if (isEnglishPath) {
+            location.reload();
+            return;
+        }
+        if (isNewsIndex) {
+            location.href = "/en/news/";
+            return;
+        }
+        if (isNewsArticle) {
+            location.href = "/en" + path;
+            return;
+        }
+    }
+
+    if (lang === "ko") {
+        if (isEnglishPath) {
+            location.href = path.replace(/^\/en\//, "/");
+            return;
+        }
+    }
+
+    location.reload();
 };
 
 function initTheme() {
@@ -66,10 +94,17 @@ function initLanguageSwitcher() {
     }
 }
 
+function updateNewsLinksForLang() {
+    const links = document.querySelectorAll('a[href="/news/"], a[href="/news"]');
+    const target = currentLang === 'en' ? '/en/news/' : '/news/';
+    links.forEach(link => link.setAttribute('href', target));
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     window.applyTranslations(currentLang);
     initTheme();
     initLanguageSwitcher();
+    updateNewsLinksForLang();
     
     // Final Visibility Check & Force Reveal (Overriding CSS !important)
     const header = document.querySelector('header');
