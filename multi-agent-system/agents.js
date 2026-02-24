@@ -44,34 +44,65 @@ ${inputPrompt}
   
   const isJsonAgent = agentName === 'planner' || agentName === 'reviewer';
 
+  const parseJsonFromText = (text) => {
+    const cleaned = text.replace(/```json\n?/gi, '').replace(/```/g, '').trim();
+    try {
+      return JSON.parse(cleaned);
+    } catch {
+      const arrayMatch = cleaned.match(/\[[\s\S]*\]/);
+      if (arrayMatch) return JSON.parse(arrayMatch[0]);
+      const objectMatch = cleaned.match(/\{[\s\S]*\}/);
+      if (objectMatch) return JSON.parse(objectMatch[0]);
+      throw new Error('JSON payload not found in model response.');
+    }
+  };
+
+  const extractResponseText = (responseData) => {
+    const text = responseData?.candidates?.[0]?.content?.parts
+      ?.map((p) => p.text || '')
+      .join('\n')
+      .trim();
+
+    if (!text) {
+      const blockReason = responseData?.promptFeedback?.blockReason || 'UNKNOWN';
+      throw new Error(`Empty model response. Block reason: ${blockReason}`);
+    }
+
+    return text;
+  };
+
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
+
     const apiResponse = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
+      signal: controller.signal,
       body: JSON.stringify({
         contents: [{
           parts: [{ text: fullPrompt }]
         }],
         generationConfig: {
-          temperature: 0.7,
+          temperature: isJsonAgent ? 0.2 : 0.7,
           topP: 1,
           topK: 1,
           maxOutputTokens: 2048,
         }
       })
     });
+    clearTimeout(timeout);
 
     const responseData = await apiResponse.json();
 
     if (apiResponse.ok && responseData.candidates && responseData.candidates.length > 0) {
-      const responseText = responseData.candidates[0].content.parts[0].text;
+      const responseText = extractResponseText(responseData);
       console.log('Output (Raw):', responseText);
       
       if (isJsonAgent) {
-        const cleanedText = responseText.replace(/```json\n/g, '').replace(/```/g, '');
-        return JSON.parse(cleanedText);
+        return parseJsonFromText(responseText);
       } else {
         return responseText;
       }
