@@ -50,7 +50,13 @@ ${inputPrompt}
       return JSON.parse(cleaned);
     } catch {
       const arrayMatch = cleaned.match(/\[[\s\S]*\]/);
-      if (arrayMatch) return JSON.parse(arrayMatch[0]);
+      if (arrayMatch) {
+        try {
+          return JSON.parse(arrayMatch[0]);
+        } catch {
+          // Continue to object fallback when bracketed prose (e.g. [a11y]) is present.
+        }
+      }
       const objectMatch = cleaned.match(/\{[\s\S]*\}/);
       if (objectMatch) return JSON.parse(objectMatch[0]);
       throw new Error('JSON payload not found in model response.');
