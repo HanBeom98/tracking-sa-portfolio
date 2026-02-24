@@ -78,7 +78,7 @@ const translations = {
         'delete': '삭제',
         'back_to_list': '목록으로',
         'footer_copyright': '&copy; 2026 TrackingSA. 모든 권리 보유.',
-        'saju_test': 'AI 오늘의 운세',
+        'saju_test': 'AI 운세 테스트',
         'menu_test': '테스트',
         'menu_game': '게임',
         'tetris_game': '테트리스',
