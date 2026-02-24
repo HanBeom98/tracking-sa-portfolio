@@ -18,33 +18,37 @@ def process_html_file_for_common_elements(filepath):
             content = f.read()
 
         dirname = os.path.dirname(filepath)
-        # Check if a local style.css exists in the same directory within PUBLIC_DIR
         local_css_path = os.path.join(dirname, "style.css")
         extra_head = ""
         if os.path.exists(local_css_path):
-            # If we are in a subdirectory (e.g. /fortune/), style.css refers to the local one
             extra_head = '\n    <link rel="stylesheet" href="style.css">'
 
-        # 1. Strip ALL existing headers, footers, and scripts to prevent duplication
+        # 1. CLEANUP: Strip everything that might be duplicated
         content = re.sub(r'<header[\s\S]*?</header>', '', content, flags=re.DOTALL | re.IGNORECASE)
-        content = re.sub(r'\s*<script[^>]*src=".*?(googletagmanager|clarity|firebase-app|firebase-firestore|crypto-js|firebase-config|translations|common).*?".*?></script>', '', content, flags=re.DOTALL | re.IGNORECASE)
-        content = re.sub(r'<script>\s*window\.dataLayer[\s\S]*?</script>', '', content, flags=re.DOTALL | re.IGNORECASE)
-        
-        # 2. STRIP ALL existing local stylesheet links to prevent priority conflicts
-        content = re.sub(r'<link[^>]*href=".*?(style\.css|all\.min\.css)"[^>]*>', '', content, flags=re.DOTALL | re.IGNORECASE)
-        
-        content = re.sub(r'<meta name="(google|naver)-site-verification"[\s\S]*?>', '', content, flags=re.IGNORECASE)
         content = re.sub(r'<footer>[\s\S]*?</footer>', '', content, flags=re.DOTALL | re.IGNORECASE)
+        content = re.sub(r'\s*<script[^>]*src=".*?(translations|common|firebase-config|googletagmanager|clarity).*?".*?></script>', '', content, flags=re.DOTALL | re.IGNORECASE)
+        content = re.sub(r'<script>\s*window\.dataLayer[\s\S]*?</script>', '', content, flags=re.DOTALL | re.IGNORECASE)
+        content = re.sub(r'<link[^>]*href=".*?(style\.css|all\.min\.css)"[^>]*>', '', content, flags=re.DOTALL | re.IGNORECASE)
+        content = re.sub(r'<meta name="(google|naver)-site-verification"[\s\S]*?>', '', content, flags=re.IGNORECASE)
 
-        # 3. Inject common head (which includes root /style.css) + local service CSS
+        # 2. INJECT COMMON HEAD (Includes root /style.css)
         if '</head>' in content:
-            content = content.replace('</head>', f'{get_common_head()}{extra_head}\n</head>')
+            # We add critical scripts to the head to ensure they are ready for the body
+            script_block = '\n    <script src="/translations.js"></script>\n    <script src="/common.js"></script>'
+            content = content.replace('</head>', f'{get_common_head()}{script_block}{extra_head}\n</head>')
         
-        # Specific class for home page body to allow UI customizations
+        # 3. INJECT HEADER & BODY CLASS
         is_root_index = filepath.endswith('index.html') and os.path.dirname(filepath) == PUBLIC_DIR
         body_class_attr = ' class="home-page"' if is_root_index else ''
-        content = re.sub(r'(<body[^>]*>)', r'<body' + body_class_attr + '>\n' + get_common_header(), content, flags=re.IGNORECASE)
+        
+        # Ensure we find the body tag and put the header right after it
+        if re.search(r'<body[^>]*>', content, re.IGNORECASE):
+            content = re.sub(r'(<body[^>]*>)', r'<body' + body_class_attr + '>\n' + get_common_header(), content, count=1, flags=re.IGNORECASE)
+        else:
+            # Fallback if body tag is missing
+            content = '<body>\n' + get_common_header() + content + '\n</body>'
 
+        # 4. INJECT FOOTER
         if '</body>' in content and 'data-i18n="footer_copyright"' not in content:
             content = content.replace('</body>', f'{get_common_footer()}\n</body>')
 
