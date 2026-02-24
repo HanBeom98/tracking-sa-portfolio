@@ -121,22 +121,24 @@ def generate_index_html(articles_on_page, current_page, total_pages, lang='ko'):
         hero = articles_on_page[0]
         grid_articles = articles_on_page[1:]
         hero_card_html = f"""
-            <h1 class="section-title" data-i18n="latest_news">Latest News</h1>
             <article class="hero-card">
+                <div class="hero-badge">LATEST NEWS</div>
                 <h2 class="hero-card-title"><a href="/{hero['url']}">{hero['title']}</a></h2>
-                <p class="hero-card-date">{hero['date']}</p>
+                <p class="hero-card-date"><i class="far fa-calendar-alt"></i> {hero['date']}</p>
             </article>"""
 
     grid_news_items = ""
     if not grid_articles:
-        grid_news_html = "<p style='text-align:center; padding: 50px;'>No articles found.</p>"
+        grid_news_html = "<div class='no-articles'><p data-i18n='no_articles'>기사를 찾을 수 없습니다.</p></div>"
     else:
         for article in grid_articles:
             grid_news_items += f"""
             <a href="/{article['url']}" class="news-card-premium">
-                <div class="premium-icon-box"><i class="fas fa-newspaper"></i></div>
-                <h2 class="news-title-text">{article['title']}</h2>
-                <div class="news-date-box">{article['date']}</div>
+                <div class="premium-icon-box"><i class="fas fa-bolt"></i></div>
+                <div class="news-card-content">
+                    <h2 class="news-title-text">{article['title']}</h2>
+                    <div class="news-date-box">{article['date']}</div>
+                </div>
             </a>"""
         grid_news_html = f'<div class="news-grid">{grid_news_items}</div>'
 
