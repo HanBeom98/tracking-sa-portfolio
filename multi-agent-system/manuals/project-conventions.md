@@ -18,4 +18,5 @@
 
 ## 4. File Management
 - 모든 정적 에셋(이미지, 폰트)은 상대 경로를 사용하라.
-- `folder: [name]` 명령어로 지정된 폴더 안에 `index.html`, `style.css`, `script.js`를 모두 생성하라.
+- **Service Modularization**: 기본적으로 `folder: [name]` 폴더 안에 `index.html`, `style.css`, `script.js`를 각각 분리하여 생성하라.
+- **Game Module Exception (CRITICAL)**: `tetris-game` 및 `ai-evolution (2048)`과 같은 게임 모듈은 배포 및 관리 편의성을 위해 **단일 `index.html` 파일 안에서 HTML/CSS/JS를 모두 관장**한다. 절대 임의로 파일을 분리하지 말 것.
