@@ -23,8 +23,10 @@ def process_html_file_for_common_elements(filepath):
         content = re.sub(r'<style>[\s\S]*?/\* --- Tracking SA PREMIUM DESIGN SYSTEM[\s\S]*?</style>', '', content)
 
         css_inline = ""
-        if os.path.exists("style.css"):
-            with open("style.css", "r", encoding="utf-8") as css_f:
+        # DDD: Get style.css from shared assets
+        shared_css_path = "src/shared/assets/style.css"
+        if os.path.exists(shared_css_path):
+            with open(shared_css_path, "r", encoding="utf-8") as css_f:
                 css_inline = f"<style>\n{css_f.read()}\n</style>"
 
         if '</head>' in content:
@@ -89,12 +91,24 @@ def generate_public_site():
     if os.path.exists(PUBLIC_DIR): shutil.rmtree(PUBLIC_DIR)
     os.makedirs(PUBLIC_DIR, exist_ok=True)
     
-    # 정적 자산 복사
-    root_assets = ["index.html", "style.css", "common.js", "translations.js", "firebase-config.js", "logo.svg", "favicon.svg"]
+    # 1. 루트 정적 자산 복사
+    root_assets = ["index.html", "logo.svg", "favicon.svg", "ads.txt", "_redirects"]
     for asset in root_assets:
         if os.path.exists(asset): shutil.copy2(asset, os.path.join(PUBLIC_DIR, asset))
     
-    # 도메인 빌드
+    # 2. Shared Assets 복사 (src/shared/assets -> public/)
+    shared_assets_dir = "src/shared/assets"
+    if os.path.exists(shared_assets_dir):
+        for item in os.listdir(shared_assets_dir):
+            shutil.copy2(os.path.join(shared_assets_dir, item), os.path.join(PUBLIC_DIR, item))
+
+    # 3. Shared UI Components 복사 (src/shared/ui -> public/ui/)
+    shared_ui_dir = "src/shared/ui"
+    if os.path.exists(shared_ui_dir):
+        dest_ui = os.path.join(PUBLIC_DIR, "ui")
+        shutil.copytree(shared_ui_dir, dest_ui)
+    
+    # 4. 도메인 빌드
     domains = ["animal-face", "fortune", "games", "ai-test"]
     for domain in domains:
         src = f"src/domains/{domain}"
@@ -108,6 +122,6 @@ def generate_public_site():
     # 뉴스 도메인 특수 빌드
     generate_news_pages()
     
-    # 루트 index.html
+    # 루트 index.html 엘리먼트 처리
     process_html_file_for_common_elements(os.path.join(PUBLIC_DIR, "index.html"))
-    print("✨ Total DDD Build Success.")
+    print("✨ Total DDD Build Success with Shared Assets.")
