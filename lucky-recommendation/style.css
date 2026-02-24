@@ -1,10 +1,10 @@
 /* lucky-recommendation/style.css */
-/* GEMINI.md 가이드라인에 따른 최신 CSS 표준 활용 */
 
 .recommendation-page {
+    text-align: center;
+    padding: 40px 20px;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem 1rem;
     animation: fadeIn 0.8s ease-out;
 }
 
@@ -13,40 +13,6 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
-.content-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3rem;
-    margin-top: 2rem;
-}
-
-/* Web Component Styles */
-lucky-recommendation {
-    width: 100%;
-    max-width: 600px;
-    display: block;
-    margin: 0 auto;
-}
-
-.action-area {
-    margin-top: 1rem;
-    text-align: center;
-}
-
-/* Responsive Container Query Simulation for Host if needed */
-/* :has() Selector usage for interactive feedback */
-.action-area:has(button:active) {
-    transform: scale(0.98);
-}
-
-/* logical properties */
-.recommendation-page {
-    padding-inline: 1rem;
-    margin-block: 2rem;
-}
-
-/* Hero override for this page */
 .hero-banner {
     background: linear-gradient(135deg, oklch(45% 0.15 250) 0%, oklch(35% 0.12 260) 100%);
     color: white;
@@ -63,7 +29,124 @@ lucky-recommendation {
     font-weight: 800;
 }
 
-.hero-banner p {
-    font-size: 1.2rem;
-    opacity: 0.9;
+/* Saju-style Input Section */
+.saju-input-section {
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    max-width: 550px;
+    margin: 0 auto 4rem auto;
+}
+
+.input-form-group {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.input-form-group label {
+    width: 90px;
+    font-weight: bold;
+    text-align: left;
+    color: var(--text-strong);
+}
+
+.birthdate-selectors {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    gap: 5px;
+}
+
+.saju-input-section input[type='text'],
+.saju-input-section select {
+    flex: 1;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px 15px;
+    background: #f8fafc;
+    font-size: 1em;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.saju-input-section input:focus, .saju-input-section select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+.gender-buttons {
+    display: flex;
+    gap: 10px;
+    flex: 1;
+}
+
+.gender-buttons label {
+    flex: 1;
+    padding: 12px;
+    background: #f1f5f9;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+    text-align: center;
+    font-weight: 600;
+}
+
+.gender-buttons input[type='radio']:checked + label {
+    background: var(--primary);
+    color: white;
+}
+
+.gender-buttons input[type='radio'] {
+    display: none;
+}
+
+.go-test-button {
+    background: linear-gradient(135deg, var(--primary) 0%, oklch(45% 0.15 260) 100%);
+    color: white;
+    border: none;
+    padding: 18px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px var(--primary-soft);
+}
+
+.go-test-button:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+    box-shadow: 0 8px 25px var(--primary-soft);
+}
+
+/* Web Component Display */
+lucky-recommendation {
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto;
+    display: block;
+}
+
+/* Dark Mode */
+body.dark-mode .saju-input-section {
+    background: var(--surface);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .saju-input-section input,
+body.dark-mode .saju-input-section select {
+    background: rgba(0, 0, 0, 0.2);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .gender-buttons label {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-muted);
 }

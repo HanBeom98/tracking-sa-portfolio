@@ -9,6 +9,7 @@
     <meta property="og:description" content="당신에게 필요한 오늘 최고의 컬러와 아이템은 무엇일까요?">
     <meta property="og:image" content="/logo.svg">
     <meta property="og:url" content="https://trackingsa.com/lucky-recommendation/">
+    <link rel="stylesheet" href="./style.css">
 </head>
 <body>
     <main class="recommendation-page">
@@ -16,19 +17,20 @@
             <h1 data-i18n="lucky_hero_title">오늘 당신의 행운은 무엇일까요?</h1>
             <p data-i18n="lucky_hero_subtitle">당신에게 필요한 컬러와 아이템을 추천해 드립니다.</p>
         </section>
+        
         <section class="content-container">
             <div class="saju-input-section">
                 <div class="input-form-group">
                     <label for="user-name" data-i18n="name_label">이름:</label>
-                    <input type="text" id="user-name" placeholder="이름을 입력하세요">
+                    <input type="text" id="user-name" placeholder="이름을 입력하세요" data-i18n-placeholder="name_placeholder">
                 </div>
                 <div class="input-form-group">
                     <label data-i18n="birthdate_label">생일:</label>
                     <div class="birthdate-selectors">
                         <select id="birth-month"></select>
-                        <span class="unit-span" data-i18n="month_unit"></span>
+                        <span class="unit-span" data-i18n="month_unit">월</span>
                         <select id="birth-day"></select>
-                        <span class="unit-span" data-i18n="day_unit"></span>
+                        <span class="unit-span" data-i18n="day_unit">일</span>
                     </div>
                 </div>
                 <div class="input-form-group">
@@ -40,16 +42,16 @@
                         <label for="gender-female" data-i18n="gender_female_label">여성</label>
                     </div>
                 </div>
-                <!-- 버튼 ID와 텍스트 키값 확인 -->
-                <button class="go-test-button" id="refresh-button" data-i18n="check_now">행운의 아이템 확인하기</button>
+                <button class="go-test-button" id="refresh-button" data-i18n="check_now">행운 확인하기</button>
             </div>
             
+            <!-- Result Display -->
             <lucky-recommendation role="region" aria-live="polite" id="lucky-display"></lucky-recommendation>
         </section>
     </main>
+    
     <script type="module" src="./script.js"></script>
     <script>
-        // AI 분석 실행 로직 (필수)
         document.addEventListener('DOMContentLoaded', () => {
             const refreshBtn = document.getElementById('refresh-button');
             refreshBtn.addEventListener('click', () => {

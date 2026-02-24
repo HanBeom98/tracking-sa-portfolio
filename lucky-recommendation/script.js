@@ -23,18 +23,20 @@ class LuckyRecommendation extends HTMLElement {
 
         if (monthSelect && daySelect) {
             monthSelect.innerHTML = '';
+            const monthUnit = (window.getTranslation && window.getTranslation(window.currentLang, 'month_unit')) || '월';
             for (let i = 1; i <= 12; i++) {
                 const option = document.createElement('option');
                 option.value = i;
-                option.textContent = `${i}${window.getTranslation(window.currentLang, 'month_unit')}`;
+                option.textContent = `${i}${monthUnit}`;
                 monthSelect.appendChild(option);
             }
 
             daySelect.innerHTML = '';
+            const dayUnit = (window.getTranslation && window.getTranslation(window.currentLang, 'day_unit')) || '일';
             for (let i = 1; i <= 31; i++) {
                 const option = document.createElement('option');
                 option.value = i;
-                option.textContent = `${i}${window.getTranslation(window.currentLang, 'day_unit')}`;
+                option.textContent = `${i}${dayUnit}`;
                 daySelect.appendChild(option);
             }
         }
