@@ -30,10 +30,14 @@ async function runAgent(agentName, inputPrompt, projectContext = '') {
   const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent`;
 
   const agentPrompts = prompts[agentName];
+  const isJsonAgent = agentName === 'planner' || agentName === 'reviewer';
+
   const fullPrompt = `
 ${agentPrompts.persona}
 
 ${agentPrompts.instructions}
+
+${isJsonAgent ? 'IMPORTANT: YOU MUST RETURN ONLY A VALID JSON OBJECT OR ARRAY. NO PROSE, NO EXPLANATION.' : ''}
 
 ### Project Context (Current Root Directory Structure):
 ${projectContext}
@@ -42,24 +46,37 @@ ${projectContext}
 ${inputPrompt}
 `.trim();
   
-  const isJsonAgent = agentName === 'planner' || agentName === 'reviewer';
-
   const parseJsonFromText = (text) => {
-    const cleaned = text.replace(/```json\n?/gi, '').replace(/```/g, '').trim();
+    // 1. Clean up markdown code blocks if present
+    let cleaned = text.replace(/```json\n?/gi, '').replace(/```/g, '').trim();
+    
+    // 2. Try direct parse
     try {
       return JSON.parse(cleaned);
-    } catch {
-      const arrayMatch = cleaned.match(/\[[\s\S]*\]/);
-      if (arrayMatch) {
+    } catch (e) {
+      // 3. Robust extraction using index search
+      const firstBrace = cleaned.indexOf('{');
+      const lastBrace = cleaned.lastIndexOf('}');
+      const firstBracket = cleaned.indexOf('[');
+      const lastBracket = cleaned.lastIndexOf(']');
+
+      let jsonCandidate = "";
+      if (firstBrace !== -1 && (firstBracket === -1 || firstBrace < firstBracket)) {
+        jsonCandidate = cleaned.substring(firstBrace, lastBrace + 1);
+      } else if (firstBracket !== -1) {
+        jsonCandidate = cleaned.substring(firstBracket, lastBracket + 1);
+      }
+
+      if (jsonCandidate) {
         try {
-          return JSON.parse(arrayMatch[0]);
-        } catch {
-          // Continue to object fallback when bracketed prose (e.g. [a11y]) is present.
+          return JSON.parse(jsonCandidate);
+        } catch (innerError) {
+          console.error("Failed to parse extracted JSON candidate:", jsonCandidate);
+          throw new Error(`JSON parsing failed: ${innerError.message}`);
         }
       }
-      const objectMatch = cleaned.match(/\{[\s\S]*\}/);
-      if (objectMatch) return JSON.parse(objectMatch[0]);
-      throw new Error('JSON payload not found in model response.');
+      
+      throw new Error(`JSON payload not found in model response. Raw text start: ${text.substring(0, 100)}...`);
     }
   };
 
@@ -79,7 +96,25 @@ ${inputPrompt}
 
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 30000);
+    const timeout = setTimeout(() => controller.abort(), 45000); // 45 seconds timeout
+
+    // Define response schema if possible, or just force JSON mode via generationConfig
+    const body = {
+      contents: [{
+        parts: [{ text: fullPrompt }]
+      }],
+      generationConfig: {
+        temperature: isJsonAgent ? 0.1 : 0.7, // Lower temperature for more stable JSON
+        topP: 1,
+        topK: 1,
+        maxOutputTokens: 4096,
+      }
+    };
+
+    // Use response_mime_type for structured output if it's a JSON agent
+    if (isJsonAgent) {
+      body.generationConfig.response_mime_type = "application/json";
+    }
 
     const apiResponse = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
@@ -87,17 +122,7 @@ ${inputPrompt}
         'Content-Type': 'application/json',
       },
       signal: controller.signal,
-      body: JSON.stringify({
-        contents: [{
-          parts: [{ text: fullPrompt }]
-        }],
-        generationConfig: {
-          temperature: isJsonAgent ? 0.2 : 0.7,
-          topP: 1,
-          topK: 1,
-          maxOutputTokens: 2048,
-        }
-      })
+      body: JSON.stringify(body)
     });
     clearTimeout(timeout);
 
@@ -105,22 +130,25 @@ ${inputPrompt}
 
     if (apiResponse.ok && responseData.candidates && responseData.candidates.length > 0) {
       const responseText = extractResponseText(responseData);
-      console.log('Output (Raw):', responseText);
       
       if (isJsonAgent) {
         return parseJsonFromText(responseText);
       } else {
+        console.log('Output (Raw Prose):', responseText.substring(0, 200) + '...');
         return responseText;
       }
     } else {
       const errorMessage = responseData.error?.message || 'API call failed with no error message.';
-      console.error('Gemini API Error:', errorMessage);
+      console.error('Gemini API Error:', responseData.error);
       throw new Error(errorMessage);
     }
 
   } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new Error(`Agent ${agentName} timed out.`);
+    }
     console.error(`Error during ${agentName} agent execution:`, error);
-    throw new Error(`Agent ${agentName} failed.`);
+    throw error;
   }
 }
 

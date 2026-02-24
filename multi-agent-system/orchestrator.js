@@ -278,7 +278,7 @@ function updateWorkDocs(featureName, state, qcReport, approved) {
  * [Main] Orchestrator: AI 작업 운영체계 (Work OS)
  */
 export async function orchestrator(initialRequest) {
-    console.log(`\n🚀 [Work OS] Stabilized Orchestrator Starting...`);
+    console.log(`\n🚀 [Work OS] Orchestrator Starting (Enhanced Mode)...`);
     const rootDir = path.resolve(__dirname, '..');
     const blueprintPath = path.join(rootDir, 'blueprint.md');
     const blueprint = fs.existsSync(blueprintPath) ? fs.readFileSync(blueprintPath, 'utf8') : "No blueprint found.";
@@ -295,16 +295,15 @@ export async function orchestrator(initialRequest) {
     };
 
     try {
-        // 1. Planner
+        // 1. Planner (Reduced temperature JSON)
         state.plan = normalizePlan(await runPlanner(state, initialRequest, blueprint));
         const folderStep = state.plan.find(s => s.toLowerCase().startsWith('folder:'));
         if (folderStep) {
             const suggestedFolder = normalizeFolderName(folderStep.split(':')[1].trim());
             const fullPath = path.join(rootDir, suggestedFolder);
             
-            // 경로 감지 및 기존 코드 컨텍스트 확보 로직
             if (fs.existsSync(fullPath) && fs.lstatSync(fullPath).isDirectory()) {
-                console.log(`📂 [Path Detection] Existing folder found: /${suggestedFolder}. Reading context...`);
+                console.log(`📂 [Context] Reading existing files from /${suggestedFolder}...`);
                 let context = `\n\n[EXISTING_CODE_CONTEXT] for /${suggestedFolder}:\n`;
                 
                 const filesToRead = ['index.html', 'script.js', 'style.css'];
@@ -316,10 +315,7 @@ export async function orchestrator(initialRequest) {
                         context += `--- ${file} ---\n\`\`\`${lang}\n${fs.readFileSync(filePath, 'utf8')}\n\`\`\`\n`;
                     }
                 });
-                
-                state.existingContext = context + `위 내용을 바탕으로 필요한 부분만 수정하거나 추가하라.`;
-            } else {
-                console.log(`🆕 [Path Detection] New feature folder: /${suggestedFolder}`);
+                state.existingContext = context;
             }
             state.folderName = suggestedFolder;
         }
@@ -328,28 +324,53 @@ export async function orchestrator(initialRequest) {
         let attempts = 0;
         while (!state.review.approved && attempts < 3) {
             attempts++;
-            console.log(`\n🔄 [Attempt ${attempts}/3] Corporate Workflow cycle...`);
+            console.log(`\n🔄 [Loop ${attempts}/3] Corporate Workflow cycle...`);
 
-            // 2-1. Creative Strategy (NEW)
-            console.log('🎨 [Corporate Flow] Creative Director designing UX & SEO...');
+            // 2-1. Creative Spec
             const creativeContext = `[PLAN]: ${JSON.stringify(state.plan)}\n[CONTEXT]: ${state.existingContext}`;
             state.creativeSpec = await runCreative(state, blueprint + manuals + creativeContext);
 
-            // Developer 출력 강제 규칙 주입
-            const forceRules = `\n\n반드시 \`\`\`html, \`\`\`css, \`\`\`js (또는 \`\`\`javascript) 세 개의 코드블록을 모두 출력하라.\n변경이 없는 파일도 이전 내용을 그대로 재출력하라.\n3개 중 하나라도 누락되면 실패로 간주된다.`;
-            const developerInput = `[DESIGN_SPEC]: ${state.creativeSpec}\n[PLAN]: ${JSON.stringify(state.plan)}\n[FEEDBACK]: ${state.review.comments || 'None'}${state.existingContext}${forceRules}`;
-            
-            state.code = await runDeveloper(state, blueprint + manuals + "\n" + developerInput);
-            
-            // Always save results from Developer
-            const extractions = saveFiles(state.code, state.folderName);
-            
-            // Post-Flight & QC
-            const qcReport = postFlightCheck(extractions);
-            console.log(`🔍 ${qcReport.summary}`);
+            // 2-2. Developer (Flexibility: output only changed files)
+            const devPrompt = `
+[DESIGN_SPEC]: ${state.creativeSpec}
+[PLAN]: ${JSON.stringify(state.plan)}
+[FEEDBACK]: ${state.review.comments || 'First attempt. Focus on quality.'}
+${state.existingContext}
 
-            // Reviewer
-            state.review = await runReviewer(state.code, blueprint + manuals + qcReport.summary);
+[RULE]: You MUST output code blocks using markdown (e.g. \`\`\`html). 
+[RULE]: Only output the files that need changes or are new. 
+[RULE]: For the root index.html, if you change it, output the full file content.
+`.trim();
+            
+            state.code = await runDeveloper(state, blueprint + manuals + "\n" + devPrompt);
+            
+            // Try saving (ignore if no blocks found this time, maybe previous attempt was better)
+            let extractions;
+            try {
+                extractions = saveFiles(state.code, state.folderName);
+            } catch (e) {
+                console.warn(`⚠️ No code blocks extracted in this turn. Using prose or skipping save.`);
+                extractions = { html: "", css: "", js: "" };
+            }
+            
+            // 2-3. Quality Control & Build Check
+            const qcReport = postFlightCheck(extractions);
+            console.log(`🔍 QC: ${qcReport.summary}`);
+
+            // 2-4. Reviewer (Constructive Feedback)
+            const reviewerPrompt = `
+[PROPOSED_CODE]:
+${state.code}
+
+[QC_REPORT]:
+${qcReport.summary}
+${JSON.stringify(qcReport.json.build, null, 2)}
+
+[INSTRUCTION]: If the code has minor issues, do NOT just reject. Provide the specific fix or approved version. 
+[INSTRUCTION]: If approved is false, "comments" MUST be a detailed technical guide for the Developer to follow.
+`.trim();
+
+            state.review = await runReviewer(reviewerPrompt, blueprint + manuals);
             
             // Work Memory update
             updateWorkDocs(state.folderName, state, qcReport, state.review.approved);
@@ -358,18 +379,16 @@ export async function orchestrator(initialRequest) {
         }
 
         if (state.review.approved) {
-            console.log(`\n✅ [MISSION COMPLETE] /${state.folderName} deployment successful.`);
+            console.log(`\n✨ [MISSION SUCCESS] /${state.folderName} is ready.`);
             
-            // 3. Update blueprint.md with activity log
             const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
-            const logEntry = `\n- [${timestamp}] Feature updated: ${state.folderName} (Request: ${state.initialRequest.substring(0, 50)}...)`;
+            const logEntry = `\n- [${timestamp}] Feature updated: ${state.folderName} (Success via Multi-Agent)`;
             fs.appendFileSync(blueprintPath, logEntry);
-            console.log(`📝 [Blueprint] Activity logged.`);
         } else {
-            console.error(`\n❌ [FAIL] Quality standards not met after 3 attempts.`);
+            console.error(`\n❌ [MISSION ABORTED] Quality standards not met.`);
         }
 
     } catch (error) {
-        console.error(`\n❌ [SYSTEM ERROR]`, error);
+        console.error(`\n❌ [ORCHESTRATOR FATAL]`, error);
     }
 }
