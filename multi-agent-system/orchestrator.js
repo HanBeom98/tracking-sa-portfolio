@@ -9,7 +9,7 @@ const __dirname = path.dirname(__filename);
 
 function selectManuals(request) {
     const manualsDir = path.join(__dirname, 'manuals');
-    let injectedManuals = "\n### 📚 Mandatory Project Rules (MUST FOLLOW):\n";
+    let injectedManuals = "\n### 📚 Mandatory Project Rules:\n";
     const essential = ['index.md', 'project-conventions.md', 'css-baseline.md', 'web-components.md'];
     essential.forEach(file => {
         const filePath = path.join(manualsDir, file);
@@ -20,35 +20,45 @@ function selectManuals(request) {
     return injectedManuals;
 }
 
-function saveFiles(code, folderName) {
+/**
+ * [Robust Parser] AI가 뱉은 코드 블록에서 파일명과 경로를 지능적으로 추출하여 저장
+ */
+function saveFiles(code, defaultFolder) {
     const rootDir = path.resolve(__dirname, '..');
-    const targetDir = path.join(rootDir, folderName);
-    if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
-
-    const extractions = { html: null, css: null, js: null };
-    const markers = [
-        { tag: '```html', type: 'html' },
-        { tag: '```css', type: 'css' },
-        { tag: '```javascript', type: 'js' },
-        { tag: '```js', type: 'js' }
-    ];
-
-    markers.forEach(m => {
-        const startIdx = code.indexOf(m.tag);
-        if (startIdx !== -1) {
-            const contentStart = startIdx + m.tag.length;
-            const endIdx = code.indexOf('```', contentStart);
-            if (endIdx !== -1) {
-                extractions[m.type] = code.substring(contentStart, endIdx).trim();
-            }
-        }
-    });
-
-    if (extractions.html) fs.writeFileSync(path.join(targetDir, 'index.html'), extractions.html);
-    if (extractions.css) fs.writeFileSync(path.join(targetDir, 'style.css'), extractions.css);
-    if (extractions.js) fs.writeFileSync(path.join(targetDir, 'script.js'), extractions.js);
+    const blocks = code.match(/```(?:html|css|js|javascript)[\s\S]*?```/g) || [];
     
-    return extractions;
+    blocks.forEach(block => {
+        const lines = block.split('\n');
+        // 파일명 힌트 찾기 (예: /* news/style.css */ 또는 <!-- news/index.html -->)
+        const hintMatch = block.match(/(?:\/\*|<!--)\s*([a-zA-Z0-9._\-\/]+)\s*(?:\*\/|-->)/);
+        let fileName = hintMatch ? hintMatch[1].trim() : '';
+        
+        // 블록 타입별 기본 파일명 결정
+        if (!fileName) {
+            if (block.includes('```html')) fileName = 'index.html';
+            else if (block.includes('```css')) fileName = 'style.css';
+            else fileName = 'script.js';
+        }
+
+        const cleanCode = lines.slice(1, -1).join('\n').trim();
+        const targetPath = path.join(rootDir, fileName.includes('/') ? fileName : path.join(defaultFolder, fileName));
+        
+        fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+        fs.writeFileSync(targetPath, cleanCode);
+        console.log(`💾 Saved: ${targetPath}`);
+    });
+}
+
+/**
+ * [Robust Review] 리뷰어의 응답이 불규칙해도 피드백을 정확히 추출
+ */
+function normalizeReview(review) {
+    if (typeof review !== 'object') return { approved: false, comments: 'Invalid review format' };
+    return {
+        approved: !!(review.approved || review.isApproved),
+        comments: review.comments || review.feedback || review.reason || 'No specific comments provided.',
+        preserve: review.preserve || review.good_parts || ''
+    };
 }
 
 export async function executeWorkflow(userRequest, projectContext) {
@@ -68,54 +78,36 @@ export async function executeWorkflow(userRequest, projectContext) {
     };
 
     try {
-        // 1. Planning Stage
         state.plan = await runPlanner(state, userRequest, enrichedContext);
-        console.log('✅ Plan Created:', state.plan);
-
         let folderName = 'new-feature';
         for (const step of state.plan) {
             if (typeof step === 'string' && step.toLowerCase().includes('folder:')) {
-                folderName = step.split(':')[1].trim();
-                break;
+                folderName = step.split(':')[1].trim(); break;
             } else if (typeof step === 'object' && step.folder) {
-                folderName = step.folder;
-                break;
+                folderName = step.folder; break;
             }
         }
 
-        // 2. Specialized Coding & Self-Healing Loop
         while (state.iteration < state.maxIterations) {
             state.iteration++;
             console.log(`\n🔄 --- Workflow Iteration ${state.iteration}/${state.maxIterations} ---`);
 
             let iterationContext = enrichedContext;
-            if (state.review.comments) {
-                iterationContext += `\n\n### ⚠️ ATTENTION: PREVIOUS ATTEMPT REJECTED!`;
-                iterationContext += `\n**Critical Issues to Fix**: ${state.review.comments}`;
-                
+            if (state.review.comments && state.review.comments !== 'No specific comments provided.') {
+                iterationContext += `\n\n### ⚠️ PREVIOUS ATTEMPT REJECTED!\n**Issues to Fix**: ${state.review.comments}`;
                 if (state.review.preserve) {
-                    iterationContext += `\n**SUCCESSFUL PARTS TO PRESERVE (DO NOT CHANGE)**: ${state.review.preserve}`;
-                    iterationContext += `\n**Reference for Preservation**: \n${state.bestUiSoFar}`;
+                    iterationContext += `\n**SUCCESSFUL PARTS (KEEP THESE)**: ${state.review.preserve}\n**Reference**: \n${state.bestUiSoFar}`;
                 }
             }
 
-            // 2a. UI Architect
             state.uiCode = await runUIArchitect(state, iterationContext);
-            
-            // 2b. Logic Engineer
             state.logicCode = await runLogicEngineer(state, iterationContext);
-
-            // 2c. Integrator
             state.finalCode = await runIntegrator(state, iterationContext);
 
-            // 3. Review
-            state.review = await runReviewer(state.finalCode, iterationContext);
+            const rawReview = await runReviewer(state.finalCode, iterationContext);
+            state.review = normalizeReview(rawReview);
             
-            // Robust check for preserve string
-            const hasPreserve = state.review.preserve && typeof state.review.preserve === 'string';
-
-            // If the UI is getting better, save it as the best reference
-            if (state.iteration === 1 || (hasPreserve && state.review.preserve.toLowerCase().includes('design'))) {
+            if (state.iteration === 1 || (state.review.preserve && state.review.preserve.toLowerCase().includes('design'))) {
                 state.bestUiSoFar = state.uiCode;
             }
 
@@ -123,15 +115,11 @@ export async function executeWorkflow(userRequest, projectContext) {
                 console.log(`✅ Approved on iteration ${state.iteration}!`);
                 break;
             } else {
-                console.log(`❌ Rejected. Comments: ${state.review.comments || 'No comments'}`);
-                if (hasPreserve) console.log(`⭐ Preserving: ${state.review.preserve}`);
+                console.log(`❌ Rejected: ${state.review.comments}`);
             }
         }
 
-        // 4. Final Storage
         saveFiles(state.finalCode, folderName);
-        console.log(`💾 Files saved to folder: ${folderName}`);
-
         return state;
     } catch (error) {
         console.error('❌ Workflow Critical Error:', error);
