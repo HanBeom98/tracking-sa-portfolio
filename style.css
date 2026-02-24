@@ -1,10 +1,10 @@
-/* --- Tracking SA ROOT ULTIMATE FIX (Layout & Nav) --- */
+/* --- Tracking SA ROOT COMPLETE RECOVERY --- */
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 
 :root {
     --premium-blue: #0052cc;
     --text-dark: #1e293b;
-    --bg-light: #f8fafc;
+    --bg-light: #ffffff;
     --header-height: 75px;
     --container-width: 1200px;
 }
@@ -19,10 +19,10 @@ body {
     padding-top: var(--header-height);
     display: flex;
     flex-direction: column;
-    align-items: center; /* 바디 전체 중앙 정렬 보조 */
+    align-items: center;
 }
 
-/* --- THE HEADER (CENTERED & VISIBLE) --- */
+/* --- THE HEADER (GOD LAYER) --- */
 header {
     display: flex !important;
     height: var(--header-height) !important;
@@ -32,7 +32,7 @@ header {
     width: 100% !important;
     z-index: 999999;
     align-items: center;
-    justify-content: center; /* 헤더 내용물 중앙 정렬 */
+    justify-content: center;
     padding: 0 20px;
     box-shadow: 0 2px 15px rgba(0,0,0,0.1);
     border-bottom: 3px solid var(--premium-blue);
@@ -50,74 +50,56 @@ header {
 .site-logo { width: 40px; height: 40px; }
 
 .desktop-menu-container { display: flex !important; align-items: center; gap: 30px; }
-nav ul { display: flex !important; list-style: none !important; gap: 10px; }
+nav ul { display: flex !important; list-style: none !important; gap: 20px; }
 nav a, .dropbtn {
     text-decoration: none !important;
     color: var(--text-dark) !important;
     font-weight: 800 !important;
-    padding: 10px 15px;
     font-size: 1rem;
-    cursor: pointer;
+    padding: 10px;
 }
 nav a:hover { color: var(--premium-blue) !important; }
 
 /* Utility Controls */
-.utility-controls { display: flex !important; align-items: center; gap: 12px; }
-#color-change { 
-    background: #f1f5f9; border: 1px solid #ddd; font-size: 1.2rem; cursor: pointer; 
-    padding: 5px 10px; border-radius: 10px;
-}
+.utility-controls { display: flex !important; align-items: center; gap: 15px; }
+#color-change { background: #f1f5f9; border: none; font-size: 1.2rem; cursor: pointer; padding: 5px 10px; border-radius: 10px; }
 
-.lang-button {
-    border: 1px solid #ddd; background: white; padding: 6px 12px;
-    border-radius: 8px; font-weight: 800; color: #64748b; cursor: pointer;
-}
-.lang-button.active { background: var(--premium-blue) !important; color: white !important; }
+.lang-button { border: 1px solid #ddd; background: white; padding: 6px 12px; border-radius: 8px; font-weight: 800; cursor: pointer; }
+.lang-button.active { background: var(--premium-blue); color: white; }
 
-/* Dropdown */
-.dropdown { position: relative; }
-.dropdown-content {
-    display: none; position: absolute; top: 100%; left: 0;
-    background: white; min-width: 200px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
-    border-radius: 12px; padding: 10px 0; border: 1px solid #eee;
-}
-.dropdown:hover .dropdown-content { display: block; }
-.dropdown-content a { padding: 12px 20px; display: block; color: var(--text-dark) !important; text-decoration: none; }
-.dropdown-content a:hover { background: #f8fafc; color: var(--premium-blue) !important; }
-
-/* --- CONTENT CENTERING (THE CORE FIX) --- */
+/* --- CONTENT CENTERING --- */
 main {
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* 자식 요소들을 중앙으로 */
+    max-width: var(--container-width);
+    margin: 0 auto;
+    padding: 40px 20px;
 }
 
-.container, .news-section-main {
-    width: 100%;
-    max-width: var(--container-width);
-    margin: 0 auto !important; /* 무조건 중앙 정렬 */
-    padding: 40px 20px;
-    background: white; /* 본문 영역 강조 */
-    min-height: 80vh;
-}
+.container { width: 100%; margin: 0 auto; }
 
 /* --- News Layout --- */
+.news-section-main { width: 100%; }
 .hero-card {
     background: var(--text-dark); color: white; border-radius: 24px; 
     padding: 60px; margin-bottom: 40px; width: 100%;
 }
 .hero-card-title a { color: white; text-decoration: none; font-size: 2.5rem; font-weight: 900; }
+.hero-badge { background: var(--premium-blue); padding: 6px 16px; border-radius: 50px; font-size: 0.8rem; font-weight: 800; margin-bottom: 20px; display: inline-block; }
+
 .news-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; width: 100%; }
 .news-card-premium {
-    background: white; padding: 30px; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); 
-    text-decoration: none; color: inherit; border: 1px solid #eee;
+    background: white; padding: 40px; border-radius: 24px; border: 1px solid #eee;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05); transition: all 0.3s; text-decoration: none; color: inherit;
 }
+.news-card-premium:hover { transform: translateY(-10px); border-color: var(--premium-blue); }
+.news-title-text { font-size: 1.3rem; font-weight: 800; margin-bottom: 20px; color: var(--text-dark); }
 
 .pagination { margin-top: 60px; display: flex; justify-content: center; gap: 20px; font-weight: 800; width: 100%; }
 
 /* Homepage Exceptions */
-body.home-page header { background: transparent !important; box-shadow: none !important; border: none !important; }
+body.home-page header { background: transparent !important; box-shadow: none !important; border: none !important; position: absolute; }
 body.home-page .header-inner { justify-content: flex-end; }
 body.home-page nav, body.home-page .site-logo-link { display: none !important; }
+
+/* Mobile Hamburger - DISABLE */
+.hamburger-menu { display: none !important; }
