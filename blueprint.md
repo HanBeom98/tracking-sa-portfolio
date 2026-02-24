@@ -52,8 +52,9 @@ Evolving Tracking-sa into a premium, framework-less web platform using a special
 ## 🔭 Current Focus
 - [ ] Finalize DDD target layer template.
 - [ ] Build a pilot refactor plan for the `board` domain.
- - [x] Apply global centering fallback for body-level content (exclude game pages).
- - [x] Rebuild public output after layout fix.
+- [x] Apply global centering fallback for body-level content (exclude game pages).
+- [x] Rebuild public output after layout fix.
+- [x] Ensure homepage excludes global navigation header.
 
 ## ⚠️ Lessons Learned
 - **Path Resolution**: Always use absolute paths (`/`) for shared assets in deeply nested domain folders.

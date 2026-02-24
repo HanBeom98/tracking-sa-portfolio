@@ -34,7 +34,10 @@ def process_html_file_for_common_elements(filepath):
         
         header_html = get_common_header()
         # Header scripts are already included in get_common_head() via head.html
-        content = re.sub(r'(<body[^>]*>)', r'\1' + header_html, content, count=1, flags=re.IGNORECASE)
+        # Skip header on the root homepage
+        is_root_homepage = os.path.abspath(filepath) == os.path.abspath(os.path.join(PUBLIC_DIR, "index.html"))
+        if not is_root_homepage:
+            content = re.sub(r'(<body[^>]*>)', r'\1' + header_html, content, count=1, flags=re.IGNORECASE)
         
         if '</body>' in content:
             content = content.replace('</body>', f'{get_common_footer()}\n</body>')
