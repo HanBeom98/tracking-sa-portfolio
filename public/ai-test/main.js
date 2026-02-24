@@ -89,10 +89,29 @@ class AiTestPremium extends HTMLElement {
 
     connectedCallback() {
         this.render();
+        if (!window.translations) {
+            this._translationPoll = setInterval(() => {
+                if (window.translations) {
+                    clearInterval(this._translationPoll);
+                    this._translationPoll = null;
+                    this.render();
+                }
+            }, 100);
+        }
+    }
+
+    disconnectedCallback() {
+        if (this._translationPoll) {
+            clearInterval(this._translationPoll);
+            this._translationPoll = null;
+        }
     }
 
     getTranslation(key) {
         const lang = localStorage.getItem('lang') || 'ko';
+        if (window.getTranslation) {
+            return window.getTranslation(key, key);
+        }
         return (window.translations && window.translations[lang] && window.translations[lang][key]) || key;
     }
 
