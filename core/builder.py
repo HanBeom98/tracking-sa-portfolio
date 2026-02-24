@@ -219,19 +219,24 @@ def generate_public_site():
                 date = p.get('date', '2026-02-24')
                 ukey = p.get('urlKey', f"{date}-news")
                 
+                title_ko = p.get('titleKo') or "제목 없음"
+                content_ko = p.get('contentKo') or ""
+                title_en = p.get('titleEn') or title_ko
+                content_en = p.get('contentEn') or content_ko
+
                 # KO
-                ko_body, ko_tags = _extract_and_format_hashtags(p.get('contentKo', ''))
-                generate_article_html(ko_body, p.get('titleKo', ''), date, os.path.join(PUBLIC_DIR, f"{ukey}.html"), ko_tags, lang="ko")
-                articles_ko.append({'title': p.get('titleKo'), 'date': date, 'url': f"{ukey}.html"})
+                ko_body, ko_tags = _extract_and_format_hashtags(content_ko)
+                generate_article_html(ko_body, title_ko, date, os.path.join(PUBLIC_DIR, f"{ukey}.html"), ko_tags, lang="ko")
+                articles_ko.append({'title': title_ko, 'date': date, 'url': f"{ukey}.html"})
                 
-                # EN (Fallback to KO if missing)
-                en_title = p.get('titleEn') or p.get('titleKo')
-                en_content = p.get('contentEn') or p.get('contentKo')
-                en_body, en_tags = _extract_and_format_hashtags(en_content)
-                generate_article_html(en_body, en_title, date, os.path.join(PUBLIC_DIR, f"{ukey}-en.html"), en_tags, lang="en")
-                articles_en.append({'title': en_title, 'date': date, 'url': f"{ukey}-en.html"})
+                # EN
+                en_body, en_tags = _extract_and_format_hashtags(content_en)
+                generate_article_html(en_body, title_en, date, os.path.join(PUBLIC_DIR, f"{ukey}-en.html"), en_tags, lang="en")
+                articles_en.append({'title': title_en, 'date': date, 'url': f"{ukey}-en.html"})
         except Exception as e:
             print(f"⚠️ Firestore Load Error: {e}")
+            import traceback
+            traceback.print_exc()
 
     # Index Pages
     for lang, arts in [('ko', articles_ko), ('en', articles_en)]:
