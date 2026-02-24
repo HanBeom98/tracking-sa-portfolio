@@ -22,15 +22,8 @@ def process_html_file_for_common_elements(filepath):
         content = re.sub(r'<script src="/common.js"></script>', '', content)
         content = re.sub(r'<style>[\s\S]*?/\* --- Tracking SA PREMIUM DESIGN SYSTEM[\s\S]*?</style>', '', content)
 
-        css_inline = ""
-        # DDD: Get style.css from shared assets
-        shared_css_path = "src/shared/assets/style.css"
-        if os.path.exists(shared_css_path):
-            with open(shared_css_path, "r", encoding="utf-8") as css_f:
-                css_inline = f"<style>\n{css_f.read()}\n</style>"
-
         if '</head>' in content:
-            content = content.replace('</head>', f'{get_common_head()}\n{css_inline}\n</head>')
+            content = content.replace('</head>', f'{get_common_head()}\n</head>')
         
         header_html = get_common_header()
         # Header scripts are already included in get_common_head() via head.html
