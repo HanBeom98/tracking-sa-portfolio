@@ -55,6 +55,8 @@ Evolving Tracking-sa into a premium, framework-less web platform using a special
 - [x] Apply global centering fallback for body-level content (exclude game pages).
 - [x] Rebuild public output after layout fix.
 - [x] Ensure homepage excludes global navigation header.
+- [x] Restore animal-face main component tag and module script.
+- [x] Add stricter main centering rule for non-game pages.
 
 ## ⚠️ Lessons Learned
 - **Path Resolution**: Always use absolute paths (`/`) for shared assets in deeply nested domain folders.

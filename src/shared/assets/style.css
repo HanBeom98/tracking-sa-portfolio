@@ -70,6 +70,13 @@ main {
     min-height: 80vh;
 }
 
+/* Force centered page width for non-game pages */
+main:not(#ai-evolution-game):not(.search-main-container) {
+    max-width: var(--max-w);
+    margin-left: auto;
+    margin-right: auto;
+}
+
 /* 모든 main의 직계 자식에 대해 자동 중앙 정렬 보장 (강력한 안정화 장치) */
 main > *:not(script):not(style) {
     display: block;
