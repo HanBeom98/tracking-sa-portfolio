@@ -7,6 +7,29 @@
     <!-- CSS and other head elements will be injected by main.py -->
     <script src="/search.js" defer></script>
     <style>
+        .home-controls {
+            position: fixed;
+            top: 16px;
+            right: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 10;
+        }
+        .home-controls #color-change {
+            border: 1px solid rgba(0,0,0,0.08);
+            background: white;
+            border-radius: 999px;
+            width: 36px;
+            height: 32px;
+            cursor: pointer;
+        }
+        body.dark-mode .home-controls #color-change {
+            background: #0f172a;
+            color: white;
+            border-color: rgba(255,255,255,0.15);
+        }
+
         .search-main-container {
             display: flex;
             flex-direction: column;
@@ -265,6 +288,10 @@
     </style>
 </head>
 <body>
+    <div class="home-controls">
+        <button id="color-change" aria-label="Theme">🌙</button>
+        <div id="language-switcher"></div>
+    </div>
     <main class="search-main-container">
         
         <!-- Hero & Search -->

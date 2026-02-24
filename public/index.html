@@ -7,6 +7,29 @@
     <!-- CSS and other head elements will be injected by main.py -->
     <script src="/search.js" defer></script>
     <style>
+        .home-controls {
+            position: fixed;
+            top: 16px;
+            right: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 10;
+        }
+        .home-controls #color-change {
+            border: 1px solid rgba(0,0,0,0.08);
+            background: white;
+            border-radius: 999px;
+            width: 36px;
+            height: 32px;
+            cursor: pointer;
+        }
+        body.dark-mode .home-controls #color-change {
+            background: #0f172a;
+            color: white;
+            border-color: rgba(255,255,255,0.15);
+        }
+
         .search-main-container {
             display: flex;
             flex-direction: column;
@@ -288,14 +311,18 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<link rel="stylesheet" href="/style.css?v=20260224220454">
+<link rel="stylesheet" href="/style.css?v=20260224220615">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script src="/firebase-config.js"></script>
-<script src="/translations.js?v=20260224220454"></script>
-<script src="/common.js?v=20260224220454"></script>
+<script src="/translations.js?v=20260224220615"></script>
+<script src="/common.js?v=20260224220615"></script>
 
 </head>
 <body>
+    <div class="home-controls">
+        <button id="color-change" aria-label="Theme">🌙</button>
+        <div id="language-switcher"></div>
+    </div>
     <main class="search-main-container">
         
         <!-- Hero & Search -->
