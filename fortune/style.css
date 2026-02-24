@@ -1,146 +1,212 @@
-/* Fortune Page Container Styles */
+/* fortune/style.css - Premium Edition */
+
 .fortune-page-container {
     text-align: center;
-    padding: 40px 20px;
-    max-width: 900px;
-    margin: 20px auto;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.07);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 60px 20px;
+    max-width: 1000px;
+    margin: 40px auto;
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 50px oklch(0% 0 0 / 0.05);
+    border: 1px solid oklch(0% 0 0 / 0.03);
+    animation: fadeIn 0.8s var(--transition);
 }
 
 .fortune-page-container h1 {
-    font-size: 2.8em;
-    color: var(--primary);
-    margin-bottom: 15px;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 900;
+    color: var(--text-strong);
+    margin-bottom: 1rem;
+    letter-spacing: -0.05em;
+    background: linear-gradient(135deg, var(--primary) 0%, oklch(45% 0.15 260) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .fortune-page-container p {
-    font-size: 1.1em;
-    color: var(--text-base);
-    margin-bottom: 25px;
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    margin-bottom: 3rem;
 }
 
-/* Saju Test Page Specific Styles (Global/PC) */
+/* Luxury Input Section */
 .saju-input-section {
-    background: rgba(255, 255, 255, 0.75);
-    backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 20px;
-    padding: 40px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    background: oklch(98% 0.01 250);
+    border: 1px solid oklch(0% 0 0 / 0.05);
+    border-radius: 30px;
+    padding: 50px;
     display: flex;
     flex-direction: column;
-    gap: 25px;
-    margin-top: 30px;
-    max-width: 550px;
-    margin-left: auto;
-    margin-right: auto;
+    gap: 30px;
+    max-width: 600px;
+    margin: 0 auto;
+    box-shadow: inset 0 2px 4px oklch(0% 0 0 / 0.02);
 }
 
 .input-form-group {
     display: flex;
-    align-items: center;
-    gap: 15px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
 }
 
 .input-form-group label {
-    width: 90px;
-    font-weight: bold;
-    text-align: left;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--text-strong);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding-left: 5px;
+}
+
+/* Modern Input & Select Styles */
+.saju-input-section input[type='text'],
+.saju-input-section select {
+    width: 100%;
+    border: 2px solid oklch(0% 0 0 / 0.08);
+    border-radius: 16px;
+    padding: 16px 20px;
+    background: white;
+    font-size: 1.1rem;
+    color: var(--text-strong);
+    outline: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.saju-input-section input:focus, 
+.saju-input-section select:focus {
+    border-color: var(--primary);
+    background: white;
+    box-shadow: 0 0 0 4px var(--primary-soft);
+    transform: translateY(-2px);
 }
 
 .birthdate-selectors {
     display: flex;
     align-items: center;
-    flex: 1;
-    gap: 5px;
+    width: 100%;
+    gap: 10px;
 }
 
-.saju-input-section input[type='text'],
-.saju-input-section select {
-    flex: 1;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    padding: 12px 15px;
-    background: rgba(255, 255, 255, 0.9);
-    font-size: 1em;
-    outline: none;
+.unit-span {
+    font-weight: 700;
+    color: var(--text-muted);
+    font-size: 0.9rem;
 }
 
+/* Gender Toggle Buttons */
 .gender-buttons {
     display: flex;
-    gap: 10px;
-    flex: 1;
+    width: 100%;
+    gap: 12px;
 }
 
 .gender-buttons label {
     flex: 1;
-    padding: 10px;
-    background: #f1f5f9;
-    border-radius: 8px;
+    padding: 16px;
+    background: white;
+    border: 2px solid oklch(0% 0 0 / 0.08);
+    border-radius: 16px;
     cursor: pointer;
-    transition: 0.2s;
+    transition: all 0.3s ease;
     text-align: center;
+    font-weight: 700;
+    color: var(--text-base);
 }
 
 .gender-buttons input[type='radio']:checked + label {
     background: var(--primary);
     color: white;
+    border-color: var(--primary);
+    box-shadow: 0 8px 20px var(--primary-soft);
 }
 
 .gender-buttons input[type='radio'] {
     display: none;
 }
 
-/* Loading & Result Sections */
-.loading-indicator {
-    padding: 40px;
+/* Action Button */
+.go-test-button {
+    margin-top: 10px;
+    background: linear-gradient(135deg, var(--primary) 0%, oklch(45% 0.15 260) 100%);
+    color: white;
+    border: none;
+    padding: 22px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    font-weight: 800;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 10px 30px var(--primary-soft);
 }
 
+.go-test-button:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 15px 40px var(--primary-soft);
+    filter: brightness(1.1);
+}
+
+.go-test-button:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* Loading & Result Indicator */
+.loading-indicator { padding: 60px 20px; }
 .spinner {
-    border: 8px solid rgba(0, 82, 204, 0.1);
-    border-top: 8px solid var(--primary);
+    border: 6px solid var(--primary-soft);
+    border-top: 6px solid var(--primary);
     border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 15px auto;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    width: 70px;
+    height: 70px;
+    animation: spin 1s cubic-bezier(0.5, 0.1, 0.5, 0.9) infinite;
+    margin-bottom: 25px;
 }
 
 .result-section {
-    margin-top: 40px;
-    padding: 30px;
-    border-radius: 20px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    margin-top: 60px;
+    padding: 45px;
+    border-radius: 30px;
+    background: white;
+    border: 1px solid oklch(0% 0 0 / 0.05);
     text-align: left;
+    box-shadow: 0 30px 60px oklch(0% 0 0 / 0.08);
+    line-height: 1.8;
 }
 
 .result-section h2 {
+    font-size: 2rem;
     color: var(--primary);
     text-align: center;
-    margin-bottom: 25px;
+    margin-bottom: 35px;
+    font-weight: 900;
 }
 
 /* Dark Mode Overrides */
 body.dark-mode .fortune-page-container {
-    background-color: var(--surface);
-    color: var(--text-strong);
+    background: var(--surface);
+    border-color: rgba(255, 255, 255, 0.05);
 }
 
 body.dark-mode .saju-input-section {
-    background: rgba(30, 41, 59, 0.7);
+    background: oklch(20% 0.02 250);
+}
+
+body.dark-mode .saju-input-section input,
+body.dark-mode .saju-input-section select,
+body.dark-mode .gender-buttons label {
+    background: oklch(15% 0.02 250);
     border-color: rgba(255, 255, 255, 0.1);
+    color: white;
 }
 
 body.dark-mode .result-section {
-    background: rgba(15, 23, 42, 0.5);
-    border-color: rgba(255, 255, 255, 0.1);
+    background: oklch(18% 0.02 250);
+    color: oklch(90% 0.01 250);
+}
+
+/* Mobile Optimizations */
+@media (max-width: 600px) {
+    .saju-input-section { padding: 30px 20px; }
+    .birthdate-selectors { flex-wrap: wrap; justify-content: center; }
+    .birthdate-selectors select { flex: 1; min-width: 80px; }
 }
