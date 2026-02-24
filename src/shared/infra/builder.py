@@ -50,26 +50,29 @@ def generate_news_pages():
     뉴스 도메인 전용 빌드 로직 (Firestore 연동)
     """
     articles = []
+    db_ok = False
     try:
         db = get_firestore_client()
-        if db:
-            docs = list(db.collection('posts').order_by('createdAt', direction=firestore.Query.DESCENDING).limit(100).stream())
-            # 기사 개별 페이지 생성
-            for doc in docs:
-                p = doc.to_dict()
-                title = p.get('titleKo', '제목 없음')
-                ukey = p.get('urlKey', 'news')
-                content = p.get('contentKo', '')
-                date = p.get('date', '2026-02-24')
-                
-                out_path = os.path.join(PUBLIC_DIR, f"{ukey}.html")
-                html = f"""<!DOCTYPE html>
+        if not db:
+            raise RuntimeError("No Firestore client")
+        docs = list(db.collection('posts').order_by('createdAt', direction=firestore.Query.DESCENDING).limit(100).stream())
+        db_ok = True
+        # 기사 개별 페이지 생성
+        for doc in docs:
+            p = doc.to_dict()
+            title = p.get('titleKo', '제목 없음')
+            ukey = p.get('urlKey', 'news')
+            content = p.get('contentKo', '')
+            date = p.get('date', '2026-02-24')
+            
+            out_path = os.path.join(PUBLIC_DIR, f"{ukey}.html")
+            html = f"""<!DOCTYPE html>
 <html><head><meta charset="UTF-8"><title>{title}</title></head>
 <body><main class="news-section-main"><h1>{title}</h1><div>{markdown.markdown(content)}</div></main></body></html>"""
-                
-                with open(out_path, "w", encoding="utf-8") as f: f.write(html)
-                process_html_file_for_common_elements(out_path)
-                articles.append({'title': title, 'url': f"{ukey}.html", 'date': date})
+            
+            with open(out_path, "w", encoding="utf-8") as f: f.write(html)
+            process_html_file_for_common_elements(out_path)
+            articles.append({'title': title, 'url': f"{ukey}.html", 'date': date})
     except Exception as e:
         print(f"⚠️ [NEWS BUILD WARNING] Skipping individual articles due to DB error: {e}")
 
@@ -87,8 +90,41 @@ def generate_news_pages():
         os.makedirs(os.path.dirname(dest_idx), exist_ok=True)
         with open(dest_idx, "w", encoding="utf-8") as f: f.write(final_html)
         process_html_file_for_common_elements(dest_idx)
+    return articles, db_ok
+
+def _snapshot_existing_news():
+    if not os.path.exists(PUBLIC_DIR):
+        return None
+    snapshot = {"news_index": None, "articles": {}}
+    news_index_path = os.path.join(PUBLIC_DIR, "news", "index.html")
+    if os.path.exists(news_index_path):
+        with open(news_index_path, "r", encoding="utf-8") as f:
+            snapshot["news_index"] = f.read()
+    for name in os.listdir(PUBLIC_DIR):
+        if name.endswith(".html") and name != "index.html":
+            path = os.path.join(PUBLIC_DIR, name)
+            if os.path.isfile(path):
+                with open(path, "r", encoding="utf-8") as f:
+                    snapshot["articles"][name] = f.read()
+    if snapshot["news_index"] is None and not snapshot["articles"]:
+        return None
+    return snapshot
+
+def _restore_news_snapshot(snapshot):
+    if not snapshot:
+        return
+    if snapshot.get("news_index"):
+        dest_idx = os.path.join(PUBLIC_DIR, "news", "index.html")
+        os.makedirs(os.path.dirname(dest_idx), exist_ok=True)
+        with open(dest_idx, "w", encoding="utf-8") as f:
+            f.write(snapshot["news_index"])
+    for name, content in snapshot.get("articles", {}).items():
+        out_path = os.path.join(PUBLIC_DIR, name)
+        with open(out_path, "w", encoding="utf-8") as f:
+            f.write(content)
 
 def generate_public_site():
+    news_snapshot = _snapshot_existing_news()
     if os.path.exists(PUBLIC_DIR): shutil.rmtree(PUBLIC_DIR)
     os.makedirs(PUBLIC_DIR, exist_ok=True)
     
@@ -132,7 +168,10 @@ def generate_public_site():
                         if file.endswith(".html"): process_html_file_for_common_elements(os.path.join(root, file))
     
     # 뉴스 도메인 특수 빌드
-    generate_news_pages()
+    _, db_ok = generate_news_pages()
+    if not db_ok:
+        print("⚠️ [NEWS BUILD] Restoring cached news from previous public/ build.")
+        _restore_news_snapshot(news_snapshot)
     
     # 루트 index.html 엘리먼트 처리
     process_html_file_for_common_elements(os.path.join(PUBLIC_DIR, "index.html"))
