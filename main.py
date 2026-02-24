@@ -497,7 +497,7 @@ def generate_index_html(articles_on_page, current_page, total_pages, lang='ko'):
     """
     
     updated_html = base_html.replace(
-        "<!-- News content will be injected here by the Python script -->",
+        "<!-- NEWS_INJECTION_POINT -->",
         f"""
         <section class="hero-banner">
             <h2 data-i18n="hero_title"></h2>
