@@ -3,7 +3,7 @@ import datetime
 from src.shared.infra.config import ADSENSE_CLIENT_ID
 
 def load_template(filename):
-    template_path = os.path.join("templates", filename)
+    template_path = os.path.join("src", "shared", "ui", filename)
     if not os.path.exists(template_path):
         return ""
     with open(template_path, "r", encoding="utf-8") as f:

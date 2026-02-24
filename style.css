@@ -92,7 +92,7 @@ main {
 /* Pagination */
 .pagination { margin-top: 60px; display: flex; justify-content: center; gap: 20px; font-weight: 800; width: 100%; }
 
-/* Homepage Overrides */
-body.home-page header { background: transparent !important; box-shadow: none !important; border: none !important; }
-body.home-page .header-inner { justify-content: flex-end; }
-body.home-page .site-logo-link, body.home-page nav { display: none !important; }
+/* Homepage Overrides (Navigation is now visible globally) */
+body.home-page header { background: white !important; box-shadow: 0 2px 15px rgba(0,0,0,0.08) !important; border-bottom: 2px solid var(--p-blue) !important; }
+body.home-page .header-inner { justify-content: space-between; }
+/* body.home-page .site-logo-link, body.home-page nav { display: none !important; } <-- Removed to show navigation */
