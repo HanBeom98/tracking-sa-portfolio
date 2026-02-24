@@ -1,146 +1,88 @@
-/*
- * Tracking SA Premium Global Stylesheet (Total Reset v1.0)
- * Architecture: Centered Baseline + Service-specific Containers
- */
-
+/* --- Tracking SA GLOBAL DESIGN SYSTEM (v2.0) --- */
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 
 :root {
     --p-blue: oklch(55% 0.18 260);
-    --p-blue-soft: oklch(95% 0.02 260);
     --text-main: oklch(25% 0.05 260);
-    --text-sub: oklch(50% 0.02 260);
-    --bg-main: oklch(98% 0.01 250);
-    --header-h: 70px;
-    --max-w: 1200px;
-    --radius: 20px;
-    --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
+    --bg-main: #ffffff;
+    --h-height: 70px;
 }
 
-/* Reset & Base */
+/* 1. 바닥부터 중앙 정렬 및 헤더 공간 확보 */
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+
 body {
-    font-family: 'Pretendard', -apple-system, sans-serif;
+    font-family: 'Pretendard', sans-serif;
     background-color: var(--bg-main);
     color: var(--text-main);
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-    padding-top: var(--header-h); /* Prevent content hiding under fixed header */
+    padding-top: var(--h-height) !important; /* 모든 페이지 상단 강제 점유 */
     display: flex;
     flex-direction: column;
+    align-items: center;
     min-height: 100vh;
 }
 
-/* --- THE HEADER (Fixed & High Contrast) --- */
+/* 2. 헤더 - 화면 위에 떠 있는 절대 레이어 */
 header {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    height: var(--header-h);
-    background: #ffffff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 99999;
-    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
-    padding: 0 20px;
-    border-bottom: 1px solid oklch(90% 0.02 260);
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: var(--h-height) !important;
+    background: #ffffff !important;
+    z-index: 2147483647 !important; /* 브라우저가 허용하는 가장 높은 곳 */
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+    border-bottom: 2px solid var(--p-blue) !important;
 }
 
 .header-inner {
     width: 100%;
-    max-width: var(--max-w);
+    max-width: 1200px;
+    padding: 0 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.site-logo { width: 40px; height: 40px; fill: var(--p-blue); }
-
-.desktop-menu-container { display: flex; align-items: center; gap: 30px; }
-nav ul { display: flex; list-style: none; gap: 10px; }
+/* 3. 로고 및 메뉴 - 가독성 최우선 */
+.site-logo { width: 35px; height: 35px; fill: var(--p-blue); }
+nav ul { display: flex !important; list-style: none !important; gap: 25px; }
 nav a, .dropbtn {
-    text-decoration: none;
-    color: var(--text-main);
-    font-weight: 700;
-    padding: 8px 12px;
-    border-radius: 10px;
-    transition: all 0.2s;
-    font-size: 0.95rem;
+    text-decoration: none !important;
+    color: var(--text-main) !important;
+    font-weight: 800 !important;
+    font-size: 1rem;
 }
-nav a:hover { color: var(--p-blue); background: var(--p-blue-soft); }
+nav a:hover { color: var(--p-blue) !important; }
 
-/* Utility Controls */
-.utility-controls { display: flex; align-items: center; gap: 12px; }
-#color-change { 
-    background: var(--p-blue-soft); border: none; font-size: 1.2rem; 
-    cursor: pointer; padding: 6px 10px; border-radius: 10px;
-}
-.lang-button {
-    border: 1px solid oklch(90% 0.02 260); background: white; 
-    padding: 6px 14px; border-radius: 50px; font-weight: 700; 
-    color: var(--text-sub); cursor: pointer; font-size: 0.85rem;
-}
-.lang-button.active { background: var(--p-blue); color: white; border-color: var(--p-blue); }
-
-/* Dropdown */
-.dropdown { position: relative; }
-.dropdown-content {
-    display: none; position: absolute; top: 100%; left: 0;
-    background: white; min-width: 200px; padding: 10px 0;
-    border-radius: 15px; box-shadow: var(--shadow); border: 1px solid oklch(95% 0.01 260);
-}
-.dropdown:hover .dropdown-content { display: block; }
-.dropdown-content a { display: block; padding: 12px 20px; text-decoration: none; color: var(--text-main); }
-.dropdown-content a:hover { background: var(--p-blue-soft); color: var(--p-blue); }
-
-/* --- CORE LAYOUT (CENTERING EVERYTHING) --- */
-main {
-    flex: 1;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.container, .news-section-main, .ticker-container {
-    width: 100%;
-    max-width: var(--max-w);
+/* 4. 본문 중앙 정렬 - 무조건 1200px 중앙 */
+main, .container, .news-section-main, .ticker-container {
+    width: 100% !important;
+    max-width: 1200px !important;
     margin: 0 auto !important;
-    padding: 20px;
+    position: relative;
 }
 
-/* TradingView Ticker Fix */
-.ticker-container { margin-top: 20px; min-height: 70px; }
-
-/* --- News Premium Elements --- */
-.hero-card {
-    background: var(--text-main); color: white; border-radius: var(--radius);
-    padding: 60px 40px; margin-bottom: 40px; position: relative; overflow: hidden;
+/* 5. 드롭다운 - 다른 요소에 가려지지 않게 */
+.dropdown { position: relative !important; }
+.dropdown-content {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: white;
+    min-width: 200px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    border-radius: 12px;
+    z-index: 2147483647 !important;
 }
-.hero-badge { background: var(--p-blue); padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 800; margin-bottom: 15px; display: inline-block; }
-.hero-card-title a { color: white; text-decoration: none; font-size: 2.5rem; font-weight: 800; line-height: 1.2; }
+.dropdown:hover .dropdown-content { display: block !important; }
+.dropdown-content a { padding: 15px 20px; display: block; color: var(--text-main) !important; }
 
-.news-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; }
-.news-card-premium {
-    background: white; border-radius: var(--radius); padding: 30px;
-    border: 1px solid oklch(95% 0.01 260); box-shadow: var(--shadow);
-    transition: transform 0.3s ease; text-decoration: none; color: inherit;
-}
-.news-card-premium:hover { transform: translateY(-8px); border-color: var(--p-blue); }
-.news-title-text { font-size: 1.2rem; font-weight: 700; margin-bottom: 15px; }
-
-.pagination { margin-top: 60px; display: flex; justify-content: center; align-items: center; gap: 20px; font-weight: 800; }
-
-/* Home Page Exceptions */
-body.home-page header { background: transparent !important; box-shadow: none !important; border: none !important; position: absolute; }
-body.home-page .header-inner { justify-content: flex-end; }
+/* 6. 홈 페이지 특수 처리 */
+body.home-page header { background: transparent !important; border: none !important; box-shadow: none !important; }
 body.home-page .site-logo-link, body.home-page nav { display: none !important; }
-
-/* Mobile Fallback */
-.hamburger-menu { display: none; }
-@media (max-width: 768px) {
-    .hero-card-title a { font-size: 1.8rem; }
-    .desktop-menu-container { display: none !important; }
-    /* Mobile menus will be handled in next iteration */
-}
+body.home-page .header-inner { justify-content: flex-end; }
