@@ -71,8 +71,17 @@ export async function executeWorkflow(userRequest, projectContext) {
         state.plan = await runPlanner(state, userRequest, enrichedContext);
         console.log('✅ Plan Created:', state.plan);
 
-        const folderStep = state.plan.find(s => s.toLowerCase().startsWith('folder:'));
-        const folderName = folderStep ? folderStep.split(':')[1].trim() : 'new-feature';
+        // Extract folder name robustly (handles both strings like "folder: name" and objects like { folder: "name" })
+        let folderName = 'new-feature';
+        for (const step of state.plan) {
+            if (typeof step === 'string' && step.toLowerCase().includes('folder:')) {
+                folderName = step.split(':')[1].trim();
+                break;
+            } else if (typeof step === 'object' && step.folder) {
+                folderName = step.folder;
+                break;
+            }
+        }
 
         // 2. Specialized Coding & Self-Healing Loop (Tiki-Taka)
         while (state.iteration < state.maxIterations) {
