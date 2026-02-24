@@ -16,6 +16,7 @@ Evolving Tracking-sa into a premium, framework-less web platform using a special
 - **AI Fortune (Today's Fortune)**: Implemented premium report layout with Markdown parsing. Added 429 Rate Limit error handling.
 - **Lucky Recommendation**: Reconstructed into a premium component with dynamic color visualization and absolute API paths.
 - **News Hub**: Restored magazine-style hero cards and grid layout. Fixed Firestore data loading bugs (NoneType handling).
+- **AI Tendency Test**: Redesigned with Premium Blue aesthetic (oklch colors), integrated i18n support (`translations.js`), and migrated to DDD structure (`src/domains/ai-test`).
 
 ### 2. Global UI/UX Optimization
 - **Typography**: Applied global font smoothing and Pretendard font stack for crystal clear text rendering.
@@ -29,8 +30,6 @@ Evolving Tracking-sa into a premium, framework-less web platform using a special
 
 ## 🚀 Current Focus & Next Steps
 - [ ] Monitor Web Component performance and SEO crawling.
-- [ ] Enhance "AI Tendency Test" to match the new Premium Blue aesthetic.
-- [ ] Expand the "Games" section with more premium-styled modules.
 
 ## ⚠️ Lessons Learned
 - **Cache Busting**: Always use version strings (`?v=...`) when updating JS modules to force browser refresh.

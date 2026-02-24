@@ -95,7 +95,7 @@ def generate_public_site():
         if os.path.exists(asset): shutil.copy2(asset, os.path.join(PUBLIC_DIR, asset))
     
     # 도메인 빌드
-    domains = ["animal-face", "fortune", "games"]
+    domains = ["animal-face", "fortune", "games", "ai-test"]
     for domain in domains:
         src = f"src/domains/{domain}"
         if os.path.exists(src):
