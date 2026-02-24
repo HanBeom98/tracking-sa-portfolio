@@ -1,0 +1,25 @@
+/* style.css */
+/* Global styles for the entire site */
+body {
+    font-family: 'Pretendard Variable', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    margin: 0;
+    padding: 0;
+    background-color: oklch(98% 0 0); /* Very light gray */
+    color: oklch(20% 0 0); /* Dark gray */
+}
+
+header, main, footer {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+a {
+    color: oklch(40% 0.2 260); /* A shade of blue */
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}

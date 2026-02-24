@@ -1,0 +1,140 @@
+/* --- Tracking SA PREMIUM DESIGN SYSTEM (Final Stability v3.0) --- */
+
+:root {
+    --p-blue: oklch(55% 0.18 260);
+    --p-blue-soft: oklch(95% 0.02 260);
+    --text-main: oklch(25% 0.05 260);
+    --text-sub: oklch(50% 0.02 260);
+    --bg-main: oklch(98% 0.01 250);
+    --header-h: 70px;
+    --max-w: 1200px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: 'Pretendard', sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    line-height: 1.6;
+    padding-top: var(--header-h); /* 헤더 공간 강제 확보 */
+    min-height: 100vh;
+}
+
+/* --- THE HEADER (ABSOLUTE VISIBILITY) --- */
+header {
+    position: fixed !important;
+    top: 0; left: 0; right: 0;
+    height: var(--header-h) !important;
+    background: #ffffff !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    z-index: 2147483647 !important;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.08) !important;
+    border-bottom: 2px solid var(--p-blue) !important;
+}
+
+.header-inner {
+    width: 100%;
+    max-width: var(--max-w);
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.site-logo { width: 40px; height: 40px; fill: var(--p-blue); color: var(--p-blue); }
+
+.desktop-menu-container { display: flex; align-items: center; gap: 30px; }
+nav ul { display: flex; list-style: none; gap: 15px; }
+nav a, .dropbtn {
+    text-decoration: none;
+    color: var(--text-main);
+    font-weight: 800;
+    padding: 10px 15px;
+    font-size: 1rem;
+    transition: 0.2s;
+}
+nav a:hover { color: var(--p-blue); }
+
+/* --- Footer --- */
+footer {
+    margin-top: 80px;
+    padding: 40px 20px;
+    text-align: center;
+    background: white;
+    border-top: 1px solid oklch(95% 0.01 260);
+    color: var(--text-sub);
+}
+footer a {
+    color: var(--text-sub);
+    text-decoration: none;
+    font-weight: 700;
+}
+footer a:hover { color: var(--p-blue); }
+
+/* --- CENTERED CONTENT LAYOUT --- */
+main {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* 수평 정중앙 정렬의 핵심 */
+    justify-content: flex-start;
+    margin: 0 auto;
+    min-height: 80vh;
+}
+
+/* Force centered page width for non-game pages */
+main:not(#ai-evolution-game):not(.search-main-container) {
+    max-width: var(--max-w);
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* 모든 main의 직계 자식에 대해 자동 중앙 정렬 보장 (강력한 안정화 장치) */
+main > *:not(script):not(style) {
+    display: block;
+    width: 100%;
+    max-width: var(--max-w);
+    margin: 0 auto; /* 안전장치 */
+}
+
+/* Fallback: pages rendering content directly under body (DDD 전환 이후 대비) */
+body > :not(header):not(footer):not(script):not(style):not(link):not(main):not(tetris-game) {
+    display: block;
+    width: 100%;
+    max-width: var(--max-w);
+    margin: 0 auto;
+}
+
+.container, .news-section-main, .ticker-container {
+    width: 100% !important;
+    max-width: var(--max-w) !important;
+    padding: 20px;
+    position: relative;
+    margin: 0 auto;
+}
+
+/* --- News Layout --- */
+.hero-card {
+    background: var(--text-main); color: white; border-radius: 24px;
+    padding: 60px 40px; margin-bottom: 40px; width: 100%;
+}
+.hero-card-title a { color: white; text-decoration: none; font-size: 2.5rem; font-weight: 900; }
+
+.news-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; width: 100%; }
+.news-card-premium {
+    background: white; border-radius: 20px; padding: 30px;
+    border: 1px solid oklch(95% 0.01 260); box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    text-decoration: none; color: inherit; transition: transform 0.3s;
+}
+.news-card-premium:hover { transform: translateY(-8px); border-color: var(--p-blue); }
+
+/* Pagination */
+.pagination { margin-top: 60px; display: flex; justify-content: center; gap: 20px; font-weight: 800; width: 100%; }
+
+/* Homepage Overrides (Navigation is now visible globally) */
+body.home-page header { background: white !important; box-shadow: 0 2px 15px rgba(0,0,0,0.08) !important; border-bottom: 2px solid var(--p-blue) !important; }
+body.home-page .header-inner { justify-content: space-between; }
+/* body.home-page .site-logo-link, body.home-page nav { display: none !important; } <-- Removed to show navigation */

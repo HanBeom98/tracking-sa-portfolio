@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="post_title">게시물 - TrackingSA</title>
+    <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
+    <meta name="description" content="TrackingSA에 게시된 게시물을 확인하세요. 다양한 주제의 글을 읽고 의견을 공유할 수 있습니다.">
+
+    <!-- Open Graph Tags -->
+    <meta property="og:title" content="게시물 - TrackingSA">
+    <meta property="og:description" content="TrackingSA에 게시된 게시물을 확인하세요. 다양한 주제의 글을 읽고 의견을 공유할 수 있습니다.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://trackingsa.com/post">
+    <meta property="og:image" content="https://trackingsa.com/logo.svg">
+
+    <!-- Twitter Card Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="게시물 - TrackingSA">
+    <meta property="twitter:description" content="TrackingSA에 게시된 게시물을 확인하세요. 다양한 주제의 글을 읽고 의견을 공유할 수 있습니다.">
+    <meta name="twitter:image" content="https://trackingsa.com/logo.svg">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-TGD3WRNKPZ');
+    </script>
+    <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "vb9q33ggpa");
+</script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=pub-7263630893992216" crossorigin="anonymous"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-TGD3WRNKPZ');
+</script>
+<meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
+<meta name="naver-site-verification" content="b15b33af838280b54d31eb3c7e5c358d2836743f" />
+<script type="text/javascript">
+(function(c,l,a,r,i,t,y){
+    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+})(window, document, "clarity", "script", "vb9q33ggpa");
+</script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="/style.css?v=20260224215415">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<script src="/firebase-config.js"></script>
+<script src="/translations.js"></script>
+<script src="/common.js"></script>
+
+</head>
+<body><header>
+    <div class="header-inner">
+        <a href="/" class="site-logo-link">
+            <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="site-logo">
+                <circle cx="50" cy="50" r="48" stroke="currentColor" stroke-width="4" fill="transparent"/>
+                <path d="M25 70L40 55L50 65L75 35" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="70" cy="35" r="12" stroke="currentColor" stroke-width="6" fill="currentColor"/>
+                <rect x="78" y="43" width="15" height="6" rx="3" transform="rotate(45 78 43)" fill="currentColor"/>
+            </svg>
+        </a>
+        <div class="desktop-menu-container">
+            <nav>
+                <ul>
+                    <li class="dropdown">
+                        <a href="#" class="dropbtn" data-i18n="menu_test">테스트</a>
+                        <div class="dropdown-content">
+                            <a href="/animal-face/" data-i18n="animal_face_test">동물상 테스트</a>
+                            <a href="/ai-test/" data-i18n="ai_tendency_test">AI 성향 테스트</a>
+                            <a href="/fortune/" data-i18n="saju_test">AI 운세 테스트</a>
+                            <a href="/lucky-recommendation/" data-i18n="lucky_recommendation">행운의 추천</a>
+                        </div>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropbtn" data-i18n="menu_game">게임</a>
+                        <div class="dropdown-content">
+                            <a href="/tetris-game/" data-i18n="tetris_game">테트리스</a>
+                            <a href="/ai-evolution/" data-i18n="ai_evolution">AI 진화 2048</a>
+                        </div>
+                    </li>
+                    <li><a href="/news/" data-i18n="news_home">뉴스</a></li>
+                </ul>
+            </nav>
+            <div class="utility-controls">
+                <button id="color-change">🌙</button>
+                <div id="language-switcher"></div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+    <main>
+        <section class="section-card">
+            <board-post-view></board-post-view>
+        </section>
+    </main>
+
+    
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    
+    <!-- crypto-js for password hashing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    
+    <!-- Firebase-config -->
+    <script src="/firebase-config.js"></script>
+    
+    
+    
+    <!-- 게시물 상세 로직을 위한 별도의 스크립트 -->
+    <script type="module" src="../ui/board-post-view.js"></script>
+    <script type="module" src="main.js"></script>
+<footer>
+    <p data-i18n="footer_copyright"></p>
+    <p>
+        <a href="/about" data-i18n="about_us">회사 소개</a> |
+        <a href="/contact" data-i18n="contact">문의</a> |
+        <a href="/inquiry" data-i18n="partnership_inquiry">파트너십 문의</a> |
+        <a href="/privacy-policy" data-i18n="privacy_policy">개인정보처리방침</a> |
+        <a href="/sitemap.xml" data-i18n="sitemap">사이트맵</a> |
+        <a href="/rss.xml">RSS Feed</a>
+    </p>
+</footer>
+
+</body>
+</html>
