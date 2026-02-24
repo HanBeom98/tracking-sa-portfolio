@@ -177,7 +177,11 @@ def copy_static_assets():
         print("✅ Created favicon.svg from logo.svg")
 
     for item in assets:
-        if os.path.exists(item): shutil.copy2(item, os.path.join(PUBLIC_DIR, item))
+        if os.path.exists(item):
+            dest_path = os.path.join(PUBLIC_DIR, item)
+            shutil.copy2(item, dest_path)
+            if item.endswith('.html'):
+                process_html_file_for_common_elements(dest_path)
     for d in asset_dirs:
 
         if os.path.isdir(d):
