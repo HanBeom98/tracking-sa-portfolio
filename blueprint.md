@@ -16,6 +16,7 @@ Evolving Tracking-sa into a premium, framework-less web platform using a special
 - **Domain Migration**: All features (Animal Face, AI Test, Fortune, News, Board, Games, etc.) migrated to `src/domains/`.
 - **Shared Layer Optimization**: Global assets (JS/CSS/i18n) consolidated into `src/shared/assets/` and `src/shared/ui/`.
 - **Path Standardization**: Unified entry points to `main.js` and established root-relative paths (`/xxx.js`) for all domain modules.
+- **Code-level DDD Compliance**: Unified i18n access through a global `getTranslation` utility in `common.js` and refactored domain components to use the shared layer interface.
 - **Redundancy Cleanup**: Eliminated legacy folders (`multi-agent-ai`, `core`, etc.) and consolidated multiple virtual environments into `.venv`.
 
 ### 2. Premium Module Overhaul

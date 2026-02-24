@@ -27,24 +27,21 @@ class AnimalFaceTest extends HTMLElement {
     }
 
     render() {
-        const lang = localStorage.getItem('lang') || 'ko';
-        const isEn = lang === 'en';
-
         const t = {
-            h1: isEn ? "AI Animal Face Test" : "AI 동물상 테스트",
-            p1: isEn ? "Which animal do you resemble the most?" : "당신은 어떤 동물을 가장 닮았나요?",
-            gender: isEn ? "Select Your Gender" : "성별을 선택해 주세요",
-            male: isEn ? "Male" : "남성",
-            female: isEn ? "Female" : "여성",
-            uploadHint: isEn ? "Drag & Drop or Click to Upload" : "여기에 사진을 드래그하거나 클릭하세요",
-            uploadBtn: isEn ? "Select Image" : "이미지 선택하기",
-            analyzeBtn: isEn ? "Check My Animal Face" : "나의 동물상 확인하기",
-            analyzing: isEn ? "AI is analyzing your face..." : "AI가 당신의 얼굴을 분석 중입니다...",
-            privacy: isEn ? "🔒 Photos are not stored on our server." : "🔒 사진은 서버에 저장되지 않으니 안심하세요.",
-            resultTitle: isEn ? "Analysis Result" : "AI 분석 결과",
-            shareTitle: isEn ? "Share your result" : "결과 공유하기",
-            download: isEn ? "Download" : "결과 저장",
-            retake: isEn ? "Retake Test" : "다시 테스트하기"
+            h1: window.getTranslation('animal_face_test_h1', "AI 동물상 테스트"),
+            p1: window.getTranslation('animal_face_test_p1', "당신은 어떤 동물을 가장 닮았나요?"),
+            gender: window.getTranslation('select_gender', "성별을 선택해 주세요"),
+            male: window.getTranslation('gender_male', "남성"),
+            female: window.getTranslation('gender_female', "여성"),
+            uploadHint: window.getTranslation('upload_hint', "여기에 사진을 드래그하거나 클릭하세요"),
+            uploadBtn: window.getTranslation('select_image', "이미지 선택하기"),
+            analyzeBtn: window.getTranslation('check_result', "나의 동물상 확인하기"),
+            analyzing: window.getTranslation('ai_analyzing', "AI가 당신의 얼굴을 분석 중입니다..."),
+            privacy: window.getTranslation('privacy_notice', "🔒 사진은 서버에 저장되지 않으니 안심하세요."),
+            resultTitle: window.getTranslation('analysis_result', "AI 분석 결과"),
+            shareTitle: window.getTranslation('share_result', "결과 공유하기"),
+            download: window.getTranslation('download_result', "결과 저장"),
+            retake: window.getTranslation('retake_test', "다시 테스트하기")
         };
 
         this.shadowRoot.innerHTML = `

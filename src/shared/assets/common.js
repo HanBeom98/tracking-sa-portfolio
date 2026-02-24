@@ -5,11 +5,25 @@
 
 let currentLang = localStorage.getItem('lang') || 'ko';
 
+/**
+ * Standardized translation utility for all domains.
+ * @param {string} key - Translation key
+ * @param {string} defaultValue - Fallback text
+ * @returns {string} Translated text
+ */
+window.getTranslation = function(key, defaultValue = "") {
+    if (window.translations && translations[currentLang] && translations[currentLang][key]) {
+        return translations[currentLang][key];
+    }
+    return defaultValue || key;
+};
+
 window.applyTranslations = function(lang) {
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
-        if (translations[lang] && translations[lang][key]) {
-            el.innerHTML = translations[lang][key];
+        const translated = window.getTranslation(key);
+        if (translated !== key) {
+            el.innerHTML = translated;
         }
     });
 };
