@@ -7,12 +7,14 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent`;
+const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`;
 
 async function callGemini(systemInstruction, userPrompt, temperature = 0.7) {
+    // Merge system instruction and user prompt for better compatibility with v1 API
+    const combinedPrompt = `${systemInstruction}\n\n[USER REQUEST]\n${userPrompt}`;
+    
     const body = {
-        contents: [{ parts: [{ text: userPrompt }] }],
-        systemInstruction: { parts: [{ text: systemInstruction }] },
+        contents: [{ parts: [{ text: combinedPrompt }] }],
         generationConfig: { temperature, maxOutputTokens: 4096 }
     };
 
@@ -24,29 +26,20 @@ async function callGemini(systemInstruction, userPrompt, temperature = 0.7) {
 
     const data = await response.json();
     if (!response.ok) throw new Error(data.error?.message || 'API Error');
-    return data.candidates[0].content.parts.map(p => p.text).join('
-');
+    return data.candidates[0].content.parts.map(p => p.text).join('\n');
 }
 
 async function newsDeskPipeline(title, summary) {
     try {
-        // [Step 1] 편집장 (Planner) - 기사 기획
+        console.log("📝 [Step 1] Planning the story...");
         const editorInstruction = "당신은 IT 전문 매체의 '편집장'입니다. 주어진 영문 뉴스 제목과 요약을 분석하여, 한국과 글로벌 독자들에게 가장 흥미로운 관점(Angle)과 핵심 전달 사항 3가지를 기획하세요. JSON 형식으로만 답변하세요.";
-        const editorPrompt = `뉴스 제목: ${title}
-뉴스 요약: ${summary}
-
-결과 포맷:
-{
-  "angle": "기사의 핵심 관점",
-  "targetAudience": "타겟 독자층",
-  "keyPoints": ["포인트1", "포인트2", "포인트3"]
-}`;
+        const editorPrompt = `뉴스 제목: ${title}\n뉴스 요약: ${summary}\n\n결과 포맷:\n{\n  "angle": "기사의 핵심 관점",\n  "targetAudience": "타겟 독자층",\n  "keyPoints": ["포인트1", "포인트2", "포인트3"]\n}`;
         
         let editorPlanText = await callGemini(editorInstruction, editorPrompt, 0.2);
         editorPlanText = editorPlanText.replace(/```json/gi, '').replace(/```/g, '').trim();
         const plan = JSON.parse(editorPlanText);
 
-        // [Step 2] 수석 기자 (Writer) - 한/영 기사 집필
+        console.log("✍️ [Step 2] Writing content (KO/EN)...");
         const writerInstruction = "당신은 IT 전문 '수석 기자'입니다. 편집장의 기획안을 바탕으로 전문적이고 통찰력 있는 기사를 작성하세요.";
         const writerPrompt = `
 [원본 뉴스]
@@ -73,7 +66,7 @@ async function newsDeskPipeline(title, summary) {
 `;
         const draft = await callGemini(writerInstruction, writerPrompt, 0.7);
 
-        // [Step 3] 교열 및 SEO 전문가 (Reviewer) - 최종 검수 및 해시태그 주입
+        console.log("🔍 [Step 3] Reviewing and injecting hashtags...");
         const reviewerInstruction = "당신은 'SEO 및 교열 전문가'입니다. 기자의 원고를 검토하여 오타를 수정하고, 각 언어 버전에 맞는 트렌디한 해시태그를 추가합니다.";
         const reviewerPrompt = `
 [기자 원고]
@@ -86,7 +79,7 @@ ${draft}
 `;
         const finalArticle = await callGemini(reviewerInstruction, reviewerPrompt, 0.3);
         
-        // Python이 읽을 수 있도록 콘솔에 출력
+        console.log("\n--- FINAL MULTI-AGENT CONTENT ---\n");
         console.log(finalArticle);
 
     } catch (err) {
