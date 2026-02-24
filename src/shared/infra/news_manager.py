@@ -15,8 +15,7 @@ def get_processed_urls():
 
 def log_processed_url(url):
     with open(LOG_FILE, "a") as f:
-        f.write(f"{url}
-")
+        f.write(f"{url}\n")
 
 def fetch_and_post_news():
     db = get_firestore_client()
@@ -47,7 +46,6 @@ def fetch_and_post_news():
         if ai_raw_content:
             try:
                 # 기사 파싱 (KO_START, EN_START 등 태그 기준)
-                # Note: news-desk.js의 출력을 그대로 파싱하는 로직
                 ko_content = ""
                 en_content = ""
                 
@@ -59,11 +57,9 @@ def fetch_and_post_news():
                 # 제목 추출 (#으로 시작하는 첫 줄)
                 title_ko = entry.title
                 if ko_content.startswith("#"):
-                    title_ko = ko_content.split("
-")[0].replace("#", "").strip()
-                    ko_content = "
-".join(ko_content.split("
-")[1:]).strip()
+                    lines = ko_content.split("\n")
+                    title_ko = lines[0].replace("#", "").strip()
+                    ko_content = "\n".join(lines[1:]).strip()
 
                 url_key = f"news-{int(time.time())}-{count}"
                 

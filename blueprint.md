@@ -12,15 +12,14 @@ Evolving Tracking-sa into a premium, framework-less web platform using a special
 
 ## ✅ Completed Milestones (2026-02-24)
 
-### 1. DDD Core Restructuring (Architecture 100%)
-- **Domain Migration**: All features (Animal Face, AI Test, Fortune, News, Board, Games, etc.) migrated to `src/domains/`.
-- **Shared Layer Optimization**: Global assets consolidated into `src/shared/assets/` and `src/shared/ui/`.
-- **Path Standardization**: Unified entry points to `main.js` and established root-relative paths (`/xxx.js`) for all shared assets.
-- **Code-level DDD Compliance**: Unified i18n access through a global `getTranslation` utility in `common.js`.
+### 1. Structure Consolidation (Partial)
+- **Feature Migration**: Features grouped under `src/domains/` by page/feature.
+- **Shared Layer**: Global assets consolidated into `src/shared/assets/` and `src/shared/ui/`.
+- **Path Standardization**: Root-relative paths (`/xxx.js`) used for shared assets.
 - **Automation & Logs**: Restored news generation in `src/shared/infra/news_manager.py` and implemented a unified log system in `/logs/`.
 
-### 2. Premium Module Overhaul
-- **Animal Face Test**: Fully converted to `<animal-face-test>` Web Component with standard i18n.
+### 2. Premium Module Overhaul (In Progress)
+- **Animal Face Test**: Converted to `<animal-face-test>` Web Component with standard i18n.
 - **AI Fortune**: Implemented premium report layout with Markdown parsing and 429 error handling.
 - **Lucky Recommendation**: Reconstructed into a premium component with dynamic color visualization.
 - **AI Tendency Test**: Redesigned with Premium Blue aesthetic (oklch colors) and integrated i18n support.
@@ -30,9 +29,29 @@ Evolving Tracking-sa into a premium, framework-less web platform using a special
 - **Typography**: Applied global font smoothing and Pretendard font stack.
 - **Navigation**: Restored global header/footer styles through the automated builder.
 
-## 🚀 Current Focus & Next Steps
-- [ ] Monitor Web Component performance and SEO crawling.
-- [ ] Refactor "AI Evolution 2048" logic for enhanced stability.
+## 🧭 Architecture Reality Check (2026-02-24)
+- **DDD folder names exist, but DDD layers do not**: `src/domains` currently maps to pages/features, not `domain/application/infrastructure` layers.
+- **Mixed concerns**: UI rendering, data access, and auth logic are combined in single files (example: `src/domains/board/post/main.js`).
+- **Shared infra is centralized**, but is not accessed through domain-facing interfaces or use cases.
+
+## 🚀 Prioritized Next Steps
+1. **Define DDD Target Shape (High Impact, Low Risk)**
+   - Establish layer conventions per domain: `domain/`, `application/`, `infra/`, `ui/`.
+   - Decide on shared cross-domain boundaries (`src/shared/infra`, `src/shared/ui`, `src/shared/domain` if needed).
+2. **Refactor One Pilot Domain (High Impact, Medium Risk)**
+   - Start with `board`: extract domain models + application services from `main.js`.
+   - Introduce a repository interface and move Firestore access into infra.
+3. **Create Consistent Entry Points (Medium Impact, Low Risk)**
+   - Each page `main.js` becomes thin orchestration, calling application services only.
+   - Move UI into Web Components where feasible.
+4. **Shared Utilities Cleanup (Medium Impact, Low Risk)**
+   - Consolidate cross-domain helpers into `src/shared` with clear ownership.
+5. **Incremental Migration Plan (Medium Impact, Medium Risk)**
+   - Apply the pattern domain-by-domain with minimal UI regression risk.
+
+## 🔭 Current Focus
+- [ ] Finalize DDD target layer template.
+- [ ] Build a pilot refactor plan for the `board` domain.
 
 ## ⚠️ Lessons Learned
 - **Path Resolution**: Always use absolute paths (`/`) for shared assets in deeply nested domain folders.
