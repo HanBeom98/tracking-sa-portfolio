@@ -167,13 +167,26 @@ def generate_index_html(articles_on_page, current_page, total_pages, lang='ko'):
         pagination_html = '<div class="pagination">'
         if current_page > 1:
             prev_url = f"index{'-en' if lang=='en' else ''}.html" if current_page == 2 else f"page{'-en' if lang=='en' else ''}-{current_page-1}.html"
-            pagination_html += f'<a href="/news/{prev_url}" class="pagination-button prev"><i class="fas fa-chevron-left"></i></a>'
+            pagination_html += f"""
+                <a href="/news/{prev_url}" class="pagination-button prev">
+                    <i class="fas fa-chevron-left"></i>
+                    <span data-i18n="prev_button">PREV</span>
+                </a>"""
         
-        pagination_html += f'<span class="page-number-wrapper">{current_page} <span class="page-divider">/</span> {total_pages}</span>'
+        pagination_html += f"""
+            <div class="page-number-wrapper">
+                <span class="current-page">{current_page}</span>
+                <span class="page-divider">/</span>
+                <span class="total-pages">{total_pages}</span>
+            </div>"""
         
         if current_page < total_pages:
             next_url = f"page{'-en' if lang=='en' else ''}-{current_page+1}.html"
-            pagination_html += f'<a href="/news/{next_url}" class="pagination-button next"><i class="fas fa-chevron-right"></i></a>'
+            pagination_html += f"""
+                <a href="/news/{next_url}" class="pagination-button next">
+                    <span data-i18n="next_button">NEXT</span>
+                    <i class="fas fa-chevron-right"></i>
+                </a>"""
         pagination_html += '</div>'
 
     final_content = f"""<section class="news-section-main">
