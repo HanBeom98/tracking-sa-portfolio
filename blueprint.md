@@ -17,7 +17,7 @@ Evolving Tracking-sa into a premium, framework-less web platform using a special
 - **Shared Layer Optimization**: Global assets (JS/CSS/i18n) consolidated into `src/shared/assets/` and `src/shared/ui/`.
 - **Path Standardization**: Unified entry points to `main.js` and established root-relative paths (`/xxx.js`) for all shared assets.
 - **Code-level DDD Compliance**: Unified i18n access through a global `getTranslation` utility in `common.js`.
-- **UI Synchronization**: Ensured all domain modules correctly link both global and local styles.
+- **Automation Stability**: Restored news generation logic in `src/shared/infra/news_manager.py` and synchronized with GitHub Actions.
 
 ### 2. Premium Module Overhaul
 - **Animal Face Test**: Fully converted to `<animal-face-test>` Web Component with standard i18n.
@@ -32,9 +32,9 @@ Evolving Tracking-sa into a premium, framework-less web platform using a special
 
 ## 🚀 Current Focus & Next Steps
 - [ ] Monitor Web Component performance and SEO crawling.
-- [ ] Maintain strict DDD compliance for all future feature additions.
+- [ ] Implement a unified "Logs" system to prevent root clutter.
 
 ## ⚠️ Lessons Learned
 - **Path Resolution**: Always use absolute paths (`/`) for shared assets in deeply nested domain folders.
 - **UI Integrity**: Each domain `index.html` must explicitly link its local `style.css` if it exists.
-- **Build Atomicity**: Nested domains (e.g., `games/tetris`) require `dirs_exist_ok=True` in Python's `copytree`.
+- **Orchestrator Resilience**: Ensure CLI arguments (`--build-only`) are maintained during refactoring to prevent CI/CD failures.
