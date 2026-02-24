@@ -1890,3 +1890,88 @@ body.dark-mode .separator,
 body.dark-mode .total-pages {
     color: #94a3b8;
 }
+
+/* --- News Page Remodeling (Enhanced Styles) --- */
+.news-section-main {
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+}
+
+.news-card-premium {
+    display: flex;
+    flex-direction: column;
+    padding: 35px 30px;
+    background: white;
+    border: 1px solid rgba(0,0,0,0.04);
+    border-radius: 24px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+}
+
+.news-card-premium:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 82, 204, 0.15);
+    border-color: rgba(0, 82, 204, 0.2);
+}
+
+.premium-icon-box {
+    width: 50px;
+    height: 50px;
+    border-radius: 16px;
+    background: oklch(95% 0.05 240);
+    color: #0052cc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 25px;
+    transition: all 0.3s ease;
+}
+
+.news-card-premium:hover .premium-icon-box {
+    background: #0052cc;
+    color: white;
+    transform: scale(1.1) rotate(8deg);
+}
+
+.news-title-text {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 15px;
+    line-height: 1.4;
+    word-break: keep-all;
+}
+
+.news-date-box {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Dark Mode Support for Premium Cards */
+body.dark-mode .news-card-premium {
+    background: #1e293b;
+    border-color: rgba(255,255,255,0.05);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+body.dark-mode .news-title-text {
+    color: #f8fafc;
+}
+
+body.dark-mode .news-date-box {
+    color: #94a3b8;
+}
+
+body.dark-mode .premium-icon-box {
+    background: rgba(0, 82, 204, 0.2);
+    color: #60a5fa;
+}

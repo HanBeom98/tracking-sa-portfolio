@@ -475,10 +475,11 @@ def generate_index_html(articles_on_page, current_page, total_pages, lang='ko'):
         for article in grid_articles:
             article_url = f"/{article['url']}"
             grid_news_items += f"""
-            <article class="news-card">
-                <h2 class="news-card-title"><a href="{article_url}" class="news-card-link">{article['title']}</a></h2>
-                <p class="news-card-date">{article['date']}</p>
-            </article>
+            <a href="{article_url}" class="news-card-premium">
+                <div class="premium-icon-box"><i class="fas fa-newspaper"></i></div>
+                <h2 class="news-title-text">{article['title']}</h2>
+                <div class="news-date-box">{article['date']}</div>
+            </a>
             """
         grid_news_html = f'<div class="news-grid">{grid_news_items}</div>'
 
