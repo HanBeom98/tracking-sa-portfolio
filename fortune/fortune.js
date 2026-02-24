@@ -1,6 +1,6 @@
 /**
- * FortunePremium Web Component
- * Highly modularized and premium designed for Tracking SA.
+ * FortunePremium Web Component - Correct API Version
+ * Fixed 400 Bad Request by matching backend data requirements.
  */
 class FortunePremium extends HTMLElement {
     constructor() {
@@ -25,7 +25,7 @@ class FortunePremium extends HTMLElement {
             male: isEn ? "Male" : "남성",
             female: isEn ? "Female" : "여성",
             check: isEn ? "Check Fortune" : "운세 확인하기",
-            loading: isEn ? "AI is reading your fate..." : "AI가 당신의 운세를 읽는 중입니다...",
+            loading: isEn ? "AI is reading your fate..." : "AI가 당신의 운세를 분석 중입니다...",
             placeholder: isEn ? "Enter name" : "이름을 입력하세요"
         };
 
@@ -47,7 +47,7 @@ class FortunePremium extends HTMLElement {
 
             input, select {
                 padding: 16px 20px; border-radius: 16px; border: 2px solid #f1f5f9;
-                font-size: 1.1rem; background: #f8fafc; outline: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                font-size: 1.1rem; background: #f8fafc; outline: none; transition: 0.3s;
                 color: #1e293b;
             }
             input:focus, select:focus { border-color: #0052cc; background: white; box-shadow: 0 0 0 4px rgba(0, 82, 204, 0.1); transform: translateY(-2px); }
@@ -71,7 +71,6 @@ class FortunePremium extends HTMLElement {
                 box-shadow: 0 10px 25px rgba(0, 82, 204, 0.2);
             }
             .submit-btn:hover { transform: translateY(-5px); filter: brightness(1.1); box-shadow: 0 15px 35px rgba(0, 82, 204, 0.3); }
-            .submit-btn:active { transform: translateY(0); }
 
             #result-area { margin-top: 35px; }
             .loading { text-align: center; padding: 30px; }
@@ -80,8 +79,8 @@ class FortunePremium extends HTMLElement {
 
             .fortune-box {
                 padding: 35px; background: #f8fafc; border-radius: 24px; border: 1px solid #e2e8f0;
-                line-height: 2; color: #334155; font-size: 1.15rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
-                animation: slideUp 0.6s ease-out;
+                line-height: 2; color: #334155; font-size: 1.1rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+                animation: slideUp 0.6s ease-out; white-space: pre-wrap;
             }
             @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         </style>
@@ -156,30 +155,43 @@ class FortunePremium extends HTMLElement {
         const year = this.shadowRoot.getElementById('birth-year').value;
         const month = this.shadowRoot.getElementById('birth-month').value;
         const day = this.shadowRoot.getElementById('birth-day').value;
+        const currentLang = localStorage.getItem('lang') || 'ko';
         
         if (!name) { alert("이름을 입력해 주세요."); return; }
 
         const resultArea = this.shadowRoot.getElementById('result-area');
-        resultArea.innerHTML = `<div class="loading"><div class="spinner"></div><p>AI가 당신의 운세를 분석 중입니다...</p></div>`;
+        resultArea.innerHTML = `<div class="loading"><div class="spinner"></div><p>AI가 분석 중입니다...</p></div>`;
+
+        const today = new Date();
+        const bodyData = {
+            name: name,
+            birthDate: { year: parseInt(year), month: parseInt(month), day: parseInt(day) },
+            gender: this._selectedGender,
+            language: currentLang,
+            currentDate: { 
+                year: today.getFullYear(), 
+                month: today.getMonth() + 1, 
+                day: today.getDate() 
+            }
+        };
 
         try {
-            // Updated to use the absolute URL for the API to ensure connection from any subpath
             const response = await fetch('https://tracking-sa.vercel.app/api/fortune', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, year, month, day, gender: this._selectedGender })
+                body: JSON.stringify(bodyData)
             });
 
-            if (!response.ok) throw new Error('API connection failed');
-
             const data = await response.json();
-            resultArea.innerHTML = `<div class="fortune-box">${data.fortune}</div>`;
             
-            // Scroll to result
+            if (!response.ok) throw new Error(data.error || 'API connection failed');
+
+            // Backend returns data in 'sajuReading' field
+            resultArea.innerHTML = `<div class="fortune-box">${data.sajuReading}</div>`;
             resultArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         } catch (err) {
             console.error('Fortune API Error:', err);
-            resultArea.innerHTML = `<p style="color: #ef4444; font-weight: bold; text-align: center;">운세를 가져오는 데 실패했습니다. 잠시 후 다시 시도해 주세요.</p>`;
+            resultArea.innerHTML = `<p style="color: #ef4444; font-weight: bold; text-align: center;">오류: ${err.message}</p>`;
         }
     }
 }
