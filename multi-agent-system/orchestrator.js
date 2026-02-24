@@ -62,7 +62,8 @@ function selectManuals(request) {
         { keywords: ['planner', 'strategy', '기획', '전략'], file: 'planner.md' },
         { keywords: ['developer', 'engineer', '개발', '엔지니어'], file: 'developer.md' },
         { keywords: ['reviewer', 'audit', '검수', '감사'], file: 'reviewer.md' },
-        { keywords: ['creative', 'ux', 'design', 'director', '크리에이티브', '디자인'], file: 'creative.md' }
+        { keywords: ['creative', 'ux', 'design', 'director', '크리에이티브', '디자인'], file: 'creative.md' },
+        { keywords: ['fix', 'bug', 'error', 'maintenance', 'repair', '고치기', '수정', '보수', '에러'], file: 'maintainer.md' }
     ];
 
     // Always include index & lessons learned (Knowledge Base)
