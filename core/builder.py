@@ -33,6 +33,7 @@ def process_html_file_for_common_elements(filepath):
 
         content = re.sub(r'<header[\s\S]*?</header>', '', content, flags=re.DOTALL)
         content = re.sub(r'<footer>[\s\S]*?</footer>', '', content, flags=re.DOTALL)
+        content = re.sub(r'\s*<script[^>]*src=".*?(translations|common).*?".*?></script>', '', content, flags=re.DOTALL)
 
         css_inline = ""
         if os.path.exists("style.css"):
@@ -70,7 +71,7 @@ def generate_index_html(articles, lang='ko'):
     template_path = "news/index.html"
     if not os.path.exists(template_path): return
     with open(template_path, "r", encoding="utf-8") as f: base_html = f.read()
-    grid_items = "".join([f'<a href="/{a["url"]}" class="news-card-premium"><h2 class="news-title-text">{a["title"]}</h2></a>' for a in articles])
+    grid_items = "".join([f'<a href="/{a["url"]}" class="news-card-premium"><h2 class="news-title-text">{a["title"]}</h2><div class="news-card-footer"><span>{a["date"]}</span></div></a>' for a in articles])
     final_content = f'<section class="news-section-main"><div class="news-grid">{grid_items}</div></section>'
     updated_html = base_html.replace("<!-- NEWS_INJECTION_POINT -->", final_content)
     out_name = f"index{'-en' if lang=='en' else ''}.html"
@@ -113,4 +114,3 @@ def generate_public_site():
                 articles.append({'title': title, 'url': f"{ukey}.html", 'date': date})
             generate_index_html(articles, lang=lang)
     process_html_file_for_common_elements(os.path.join(PUBLIC_DIR, "index.html"))
-    print("✅ Total Build Audit Complete.")
