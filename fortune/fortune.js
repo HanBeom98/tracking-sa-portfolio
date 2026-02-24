@@ -25,52 +25,65 @@ class FortunePremium extends HTMLElement {
             male: isEn ? "Male" : "남성",
             female: isEn ? "Female" : "여성",
             check: isEn ? "Check Fortune" : "운세 확인하기",
-            loading: isEn ? "Analyzing..." : "운세를 분석 중입니다...",
+            loading: isEn ? "AI is reading your fate..." : "AI가 당신의 운세를 읽는 중입니다...",
             placeholder: isEn ? "Enter name" : "이름을 입력하세요"
         };
 
         this.shadowRoot.innerHTML = `
         <style>
-            :host { display: block; width: 100%; max-width: 600px; margin: 0 auto; font-family: system-ui, sans-serif; }
+            :host { display: block; width: 100%; max-width: 600px; margin: 0 auto; font-family: system-ui, -apple-system, sans-serif; }
             
             .card {
-                background: white; border-radius: 24px; padding: 40px;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); border: 1px solid rgba(0, 0, 0, 0.03);
+                background: white; border-radius: 30px; padding: 45px;
+                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05); border: 1px solid rgba(0, 0, 0, 0.03);
                 display: flex; flex-direction: column; gap: 25px; text-align: left;
+                animation: fadeIn 0.8s ease-out;
             }
 
-            .field { display: flex; flex-direction: column; gap: 10px; }
-            .label { font-weight: 800; font-size: 0.9rem; color: #1e293b; text-transform: uppercase; }
+            @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+            .field { display: flex; flex-direction: column; gap: 12px; }
+            .label { font-weight: 850; font-size: 0.9rem; color: #1e293b; text-transform: uppercase; letter-spacing: 0.05em; }
 
             input, select {
-                padding: 14px 18px; border-radius: 12px; border: 2px solid #f1f5f9;
-                font-size: 1rem; background: #f8fafc; outline: none; transition: 0.3s;
+                padding: 16px 20px; border-radius: 16px; border: 2px solid #f1f5f9;
+                font-size: 1.1rem; background: #f8fafc; outline: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                color: #1e293b;
             }
-            input:focus, select:focus { border-color: #0052cc; background: white; box-shadow: 0 0 0 4px rgba(0, 82, 204, 0.1); }
+            input:focus, select:focus { border-color: #0052cc; background: white; box-shadow: 0 0 0 4px rgba(0, 82, 204, 0.1); transform: translateY(-2px); }
 
-            .gender-group { display: flex; gap: 10px; }
+            .gender-group { display: flex; gap: 12px; }
             .gender-btn {
-                flex: 1; padding: 14px; border-radius: 12px; border: 2px solid #f1f5f9;
-                background: #f1f5f9; cursor: pointer; font-weight: 700; transition: 0.3s;
+                flex: 1; padding: 16px; border-radius: 16px; border: 2px solid #f1f5f9;
+                background: #f1f5f9; cursor: pointer; font-weight: 800; transition: 0.3s;
                 display: flex; align-items: center; justify-content: center; gap: 8px; color: #64748b;
             }
             .gender-btn:hover { background: #e2e8f0; }
             
-            .gender-btn.active.male { background: #0052cc; color: white; border-color: #0052cc; box-shadow: 0 5px 15px rgba(0, 82, 204, 0.2); }
-            .gender-btn.active.female { background: #e11d48; color: white; border-color: #e11d48; box-shadow: 0 5px 15px rgba(225, 29, 72, 0.2); }
+            .gender-btn.active.male { background: #0052cc; color: white; border-color: #0052cc; box-shadow: 0 8px 20px rgba(0, 82, 204, 0.25); }
+            .gender-btn.active.female { background: #e11d48; color: white; border-color: #e11d48; box-shadow: 0 8px 20px rgba(225, 29, 72, 0.25); }
 
             .submit-btn {
-                margin-top: 10px; padding: 18px; border-radius: 14px; border: none;
+                margin-top: 15px; padding: 22px; border-radius: 20px; border: none;
                 background: linear-gradient(135deg, #0052cc 0%, #1e40af 100%);
-                color: white; font-weight: 800; font-size: 1.1rem; cursor: pointer;
-                transition: 0.3s; box-shadow: 0 10px 25px rgba(0, 82, 204, 0.2);
+                color: white; font-weight: 900; font-size: 1.2rem; cursor: pointer;
+                transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                box-shadow: 0 10px 25px rgba(0, 82, 204, 0.2);
             }
-            .submit-btn:hover { transform: translateY(-3px); filter: brightness(1.1); }
+            .submit-btn:hover { transform: translateY(-5px); filter: brightness(1.1); box-shadow: 0 15px 35px rgba(0, 82, 204, 0.3); }
+            .submit-btn:active { transform: translateY(0); }
 
-            #result-area { margin-top: 30px; line-height: 1.8; color: #334155; }
-            .loading { text-align: center; padding: 20px; }
-            .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #0052cc; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto 10px auto; }
+            #result-area { margin-top: 35px; }
+            .loading { text-align: center; padding: 30px; }
+            .spinner { border: 5px solid #f3f3f3; border-top: 5px solid #0052cc; border-radius: 50%; width: 45px; height: 45px; animation: spin 1s linear infinite; margin: 0 auto 15px auto; }
             @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+            .fortune-box {
+                padding: 35px; background: #f8fafc; border-radius: 24px; border: 1px solid #e2e8f0;
+                line-height: 2; color: #334155; font-size: 1.15rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+                animation: slideUp 0.6s ease-out;
+            }
+            @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         </style>
 
         <div class="card">
@@ -82,8 +95,8 @@ class FortunePremium extends HTMLElement {
             <div class="field">
                 <span class="label">${t.birth}</span>
                 <div style="display: flex; gap: 8px; align-items: center;">
-                    <select id="birth-year"></select> <span>-</span>
-                    <select id="birth-month"></select> <span>-</span>
+                    <select id="birth-year"></select>
+                    <select id="birth-month"></select>
                     <select id="birth-day"></select>
                 </div>
             </div>
@@ -102,10 +115,6 @@ class FortunePremium extends HTMLElement {
         </div>
         `;
         this.populateDates();
-    }
-
-    populateSelectors() {
-        // Implementation inside connectedCallback or render
     }
 
     populateDates() {
@@ -151,21 +160,30 @@ class FortunePremium extends HTMLElement {
         if (!name) { alert("이름을 입력해 주세요."); return; }
 
         const resultArea = this.shadowRoot.getElementById('result-area');
-        resultArea.innerHTML = `<div class="loading"><div class="spinner"></div><p>AI 분석 중...</p></div>`;
+        resultArea.innerHTML = `<div class="loading"><div class="spinner"></div><p>AI가 당신의 운세를 분석 중입니다...</p></div>`;
 
         try {
-            // Reusing existing serverless API logic from fortune.js
-            const response = await fetch('/api/fortune', {
+            // Updated to use the absolute URL for the API to ensure connection from any subpath
+            const response = await fetch('https://tracking-sa.vercel.app/api/fortune', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, year, month, day, gender: this._selectedGender })
             });
+
+            if (!response.ok) throw new Error('API connection failed');
+
             const data = await response.json();
-            resultArea.innerHTML = `<div style="padding: 20px; background: #f8fafc; border-radius: 16px; border: 1px solid #e2e8f0;">${data.fortune}</div>`;
+            resultArea.innerHTML = `<div class="fortune-box">${data.fortune}</div>`;
+            
+            // Scroll to result
+            resultArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         } catch (err) {
-            resultArea.innerHTML = `<p style="color: #ef4444;">운세를 가져오는 데 실패했습니다.</p>`;
+            console.error('Fortune API Error:', err);
+            resultArea.innerHTML = `<p style="color: #ef4444; font-weight: bold; text-align: center;">운세를 가져오는 데 실패했습니다. 잠시 후 다시 시도해 주세요.</p>`;
         }
     }
 }
 
-customElements.define('fortune-premium', FortunePremium);
+if (!customElements.get('fortune-premium')) {
+    customElements.define('fortune-premium', FortunePremium);
+}
