@@ -31,9 +31,9 @@ body.dark-mode {
 }
 
 body.dark-mode header {
-    background: #0f172a !important;
-    border-bottom: 2px solid var(--p-blue) !important;
-    box-shadow: 0 2px 15px rgba(0,0,0,0.35) !important;
+    background: color-mix(in oklch, oklch(18% 0.02 260) 92%, transparent) !important;
+    border-bottom: 1px solid oklch(30% 0.02 260) !important;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.45) !important;
 }
 
 body.dark-mode nav a,
@@ -43,6 +43,11 @@ body.dark-mode .dropbtn {
 
 body.dark-mode nav a:hover {
     color: var(--p-blue);
+}
+
+body.dark-mode nav a:hover,
+body.dark-mode .dropbtn:hover {
+    background: oklch(25% 0.02 260);
 }
 
 body.dark-mode footer {
@@ -60,13 +65,14 @@ header {
     position: fixed !important;
     top: 0; left: 0; right: 0;
     height: var(--header-h) !important;
-    background: #ffffff !important;
+    background: color-mix(in oklch, white 92%, transparent) !important;
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
     z-index: 2147483647 !important;
-    box-shadow: 0 2px 15px rgba(0,0,0,0.08) !important;
-    border-bottom: 2px solid var(--p-blue) !important;
+    box-shadow: 0 8px 30px rgba(2, 6, 23, 0.12) !important;
+    border-bottom: 1px solid oklch(92% 0.02 260) !important;
+    backdrop-filter: blur(14px);
 }
 
 .header-inner {
@@ -80,17 +86,46 @@ header {
 
 .site-logo { width: 40px; height: 40px; fill: var(--p-blue); color: var(--p-blue); }
 
-.desktop-menu-container { display: flex; align-items: center; gap: 30px; width: 100%; }
-nav ul { display: flex; list-style: none; gap: 15px; }
+.desktop-menu-container { display: flex; align-items: center; gap: 20px; width: 100%; }
+nav ul { display: flex; list-style: none; gap: 10px; }
 nav a, .dropbtn {
     text-decoration: none;
     color: var(--text-main);
     font-weight: 800;
-    padding: 10px 15px;
-    font-size: 1rem;
-    transition: 0.2s;
+    padding: 8px 12px;
+    font-size: 0.95rem;
+    border-radius: 999px;
+    transition: 0.2s ease;
+    background: transparent;
 }
-nav a:hover { color: var(--p-blue); }
+nav a:hover, .dropbtn:hover {
+    color: var(--p-blue);
+    background: oklch(97% 0.03 260);
+}
+.dropdown { position: relative; }
+.dropdown-content {
+    display: none;
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    min-width: 180px;
+    background: white;
+    border: 1px solid oklch(92% 0.02 260);
+    border-radius: 14px;
+    padding: 10px;
+    box-shadow: 0 20px 40px rgba(2, 6, 23, 0.12);
+    z-index: 1000;
+}
+.dropdown-content a {
+    display: block;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-weight: 700;
+}
+.dropdown-content a:hover {
+    background: oklch(97% 0.03 260);
+}
+.dropdown:hover .dropdown-content { display: block; }
 
 .utility-controls {
     margin-left: auto;
@@ -98,6 +133,15 @@ nav a:hover { color: var(--p-blue); }
     align-items: center;
     gap: 10px;
     flex-shrink: 0;
+}
+
+.utility-controls #color-change {
+    width: 36px;
+    height: 32px;
+    border-radius: 999px;
+    border: 1px solid oklch(90% 0.01 260);
+    background: white;
+    cursor: pointer;
 }
 
 /* --- Language Switcher --- */
@@ -139,6 +183,21 @@ body.dark-mode .lang-button.active {
     background: var(--p-blue);
     color: white;
     border-color: var(--p-blue);
+}
+
+body.dark-mode .dropdown-content {
+    background: oklch(20% 0.02 260);
+    border-color: oklch(30% 0.02 260);
+}
+
+body.dark-mode .dropdown-content a:hover {
+    background: oklch(25% 0.02 260);
+}
+
+body.dark-mode .utility-controls #color-change {
+    background: #0f172a;
+    border-color: oklch(35% 0.02 260);
+    color: white;
 }
 
 /* --- Footer --- */
@@ -218,6 +277,6 @@ body > :not(header):not(footer):not(script):not(style):not(link):not(main):not(t
 .pagination { margin-top: 60px; display: flex; justify-content: center; gap: 20px; font-weight: 800; width: 100%; }
 
 /* Homepage Overrides (Navigation is now visible globally) */
-body.home-page header { background: white !important; box-shadow: 0 2px 15px rgba(0,0,0,0.08) !important; border-bottom: 2px solid var(--p-blue) !important; }
+body.home-page header { background: color-mix(in oklch, white 92%, transparent) !important; box-shadow: 0 8px 30px rgba(2, 6, 23, 0.12) !important; border-bottom: 1px solid oklch(92% 0.02 260) !important; }
 body.home-page .header-inner { justify-content: space-between; }
 /* body.home-page .site-logo-link, body.home-page nav { display: none !important; } <-- Removed to show navigation */
