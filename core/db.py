@@ -13,9 +13,8 @@ def get_firestore_client():
     except ValueError:
         pass
 
-    # Use the separated JSON key file (Professional way)
+    # 1. Try local JSON key file first (Developer's local environment)
     key_path = os.path.join("core", "serviceAccountKey.json")
-    
     if os.path.exists(key_path):
         try:
             cred = credentials.Certificate(key_path)
@@ -23,9 +22,32 @@ def get_firestore_client():
             return firestore.client()
         except Exception as e:
             print(f"⚠️ Firebase initialization error from file: {e}")
-            return None
-    
-    print(f"🚨 Error: Firebase key file not found at {key_path}")
+
+    # 2. Fallback to Environment Variable (GitHub Actions / Production)
+    service_account_json = os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON")
+    if service_account_json:
+        try:
+            # Clean up potentially messy environment variable string
+            sj = service_account_json.strip()
+            if sj.startswith("'") and sj.endswith("'"): sj = sj[1:-1]
+            
+            # Robust JSON parsing
+            try:
+                cred_dict = json.loads(sj)
+            except json.JSONDecodeError:
+                sj_fixed = sj.replace("'", '"')
+                cred_dict = json.loads(sj_fixed)
+
+            if "private_key" in cred_dict:
+                cred_dict["private_key"] = cred_dict["private_key"].replace("\\n", "\n")
+            
+            cred = credentials.Certificate(cred_dict)
+            firebase_admin.initialize_app(cred)
+            return firestore.client()
+        except Exception as e:
+            print(f"⚠️ Firebase initialization error from Env Var: {e}")
+
+    print("🚨 Error: No valid Firebase credentials found (no file and no env var).")
     return None
 
 def save_article_to_firestore(content):
@@ -36,7 +58,7 @@ def save_article_to_firestore(content):
     en_content = en_match.group(1).strip() if en_match else ""
 
     if not ko_content:
-        print("⚠️ 한국어 본문을 찾을 수 없습니다. 뉴스 저장을 건너뜁니다.")
+        print("⚠️ 한국어 본문을 찾을 수 없습니다. 뉴스 저장을 건너뜜.")
         return None
 
     ko_title = extract_title_from_md(ko_content)
@@ -48,7 +70,6 @@ def save_article_to_firestore(content):
 
     db = get_firestore_client()
     if not db:
-        print("⚠️ Firestore 클라이언트가 없어 저장하지 못했습니다.")
         return None
 
     post_doc = {
@@ -65,9 +86,8 @@ def save_article_to_firestore(content):
     
     try:
         db.collection("posts").document(url_key).set(post_doc)
-        print(f"✅ Firestore에 고품질 기사 저장 완료: {url_key}")
+        print(f"✅ Firestore 저장 완료: {url_key}")
         return url_key
     except Exception as e:
         print(f"⚠️ Firestore 저장 에러: {e}")
         return None
-
