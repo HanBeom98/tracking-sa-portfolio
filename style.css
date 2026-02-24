@@ -1,11 +1,11 @@
-/* --- Tracking SA ROOT EMERGENCY FIX (ULTIMATE FORCE) --- */
+/* --- Tracking SA COMPLETE RECOVERY CSS --- */
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 
 :root {
     --premium-blue: #0052cc;
     --text-dark: #1e293b;
-    --bg-light: #f8fafc;
-    --header-height: 80px;
+    --bg-light: #ffffff;
+    --header-height: 75px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -15,78 +15,59 @@ body {
     background-color: var(--bg-light);
     color: var(--text-dark);
     line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-    padding-top: var(--header-height) !important;
+    padding-top: var(--header-height);
 }
 
-/* --- THE HEADER (GOD LAYER) --- */
+/* --- THE HEADER (ALWAYS VISIBLE) --- */
 header {
     display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
     height: var(--header-height) !important;
     background: #ffffff !important;
-    color: var(--text-dark) !important;
     position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
+    top: 0; left: 0; right: 0;
     width: 100% !important;
-    z-index: 2147483647 !important; /* 브라우저 최대 z-index */
-    align-items: center !important;
-    justify-content: space-between !important;
-    padding: 0 5% !important;
-    box-shadow: 0 4px 30px rgba(0,0,0,0.15) !important;
-    border-bottom: 4px solid var(--premium-blue) !important;
-}
-
-.site-logo-link { display: flex !important; align-items: center; }
-.site-logo { width: 50px !important; height: 50px !important; }
-
-.desktop-menu-container { 
-    display: flex !important; 
-    align-items: center; 
-    flex: 1;
+    z-index: 999999;
+    align-items: center;
     justify-content: space-between;
-    margin-left: 50px;
+    padding: 0 5%;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+    border-bottom: 2px solid var(--premium-blue);
 }
 
-nav { display: block !important; visibility: visible !important; }
-nav ul { display: flex !important; list-style: none !important; gap: 25px !important; }
+.site-logo-link { display: flex !important; align-items: center; text-decoration: none; }
+.site-logo { width: 40px; height: 40px; fill: var(--premium-blue); }
 
+.desktop-menu-container { display: flex !important; align-items: center; flex: 1; margin-left: 30px; }
+nav ul { display: flex !important; list-style: none !important; gap: 20px; }
 nav a, .dropbtn {
     text-decoration: none !important;
     color: var(--text-dark) !important;
-    font-weight: 900 !important;
-    font-size: 1.15rem !important;
-    padding: 10px !important;
+    font-weight: 800 !important;
+    font-size: 1rem;
 }
 
-.utility-controls { display: flex !important; align-items: center; gap: 20px; }
-#color-change { 
-    background: #f1f5f9; border: 2px solid #ddd; font-size: 1.5rem; cursor: pointer; 
-    padding: 5px 15px; border-radius: 15px;
-}
+.utility-controls { display: flex !important; align-items: center; gap: 15px; }
+#color-change { background: #f1f5f9; border: none; font-size: 1.2rem; cursor: pointer; padding: 5px 10px; border-radius: 10px; }
 
-.lang-button {
-    border: 2px solid #ddd; background: white; padding: 8px 16px;
-    border-radius: 12px; font-weight: 900; cursor: pointer;
-}
-.lang-button.active { background: var(--premium-blue) !important; color: white !important; }
+.lang-button { border: 1px solid #ddd; background: white; padding: 5px 10px; border-radius: 8px; font-weight: 800; cursor: pointer; }
+.lang-button.active { background: var(--premium-blue); color: white; }
 
 /* Dropdown */
-.dropdown { position: relative !important; }
+.dropdown { position: relative; }
 .dropdown-content {
-    display: none; position: absolute !important; top: 100% !important; left: 0 !important;
-    background: white !important; min-width: 250px !important;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.3) !important;
-    border-radius: 15px !important; padding: 10px 0 !important;
+    display: none; position: absolute; top: 100%; left: 0;
+    background: white; min-width: 200px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    border-radius: 10px; padding: 10px 0;
 }
-.dropdown:hover .dropdown-content { display: block !important; }
+.dropdown:hover .dropdown-content { display: block; }
+.dropdown-content a { padding: 10px 20px; display: block; color: var(--text-dark) !important; }
 
-/* --- Ticker Tape Correction --- */
-.ticker-container { 
-    z-index: 1 !important; 
-    position: relative !important;
-    margin-top: 20px !important;
+/* --- News Layout --- */
+.news-section-main { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+.hero-card {
+    background: #1e293b; color: white; border-radius: 24px; padding: 60px; margin-bottom: 40px;
 }
+.hero-card-title a { color: white; text-decoration: none; font-size: 2.5rem; }
+.news-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; }
+.news-card-premium { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); text-decoration: none; color: inherit; border: 1px solid #eee; }

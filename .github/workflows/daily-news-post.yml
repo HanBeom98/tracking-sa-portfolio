@@ -60,27 +60,6 @@ jobs:
           BASE_URL: "https://trackingsa.com/"
         run: |
           set -euo pipefail
-          
-          # Determine if we should generate news
-          # 1. Manual trigger with generate_news=true
-          # 2. Scheduled cron job
-          # Otherwise (Standard Push), we skip generation and only build UI
-          
-          SHOULD_GENERATE="false"
-          if [ "${{ github.event_name }}" == "schedule" ]; then
-            SHOULD_GENERATE="true"
-          elif [ "${{ github.event_name }}" == "workflow_dispatch" ] && [ "${{ github.event.inputs.generate_news }}" == "true" ]; then
-            SHOULD_GENERATE="true"
-          fi
-
-          if [ "$SHOULD_GENERATE" == "true" ]; then
-            echo "🚀 [FULL MODE] Generating news and building UI..."
-            python main.py
-          else
-            echo "🎨 [UI ONLY MODE] Skipping news generation, applying style fixes to existing articles..."
-          fi
-          
-          # Final build (ALWAYS RUNS on every push)
           python main.py --build-only
 
       - name: Deploy to Cloudflare Pages
@@ -91,7 +70,7 @@ jobs:
           projectName: 'tracking-sa'
           directory: 'public'
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          branch: main
+          branch: main # This MUST be your production branch
 
       - name: Commit Log changes
         if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.generate_news == 'true')
