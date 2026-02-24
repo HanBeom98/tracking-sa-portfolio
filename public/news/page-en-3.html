@@ -1,0 +1,198 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="news_home">뉴스 홈</title>
+
+    <meta name="description" content="The latest AI news and in-depth analysis, updated daily. Check AI technology trends, startup news, and industry trends at a glance.">
+    <meta property="og:title" content="AI News - Latest AI Technology Trends and Analysis (Page 3)">
+    <meta property="og:description" content="The latest AI news and in-depth analysis, updated daily. Check AI technology trends, startup news, and industry trends at a glance.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://trackingsa.com/index-en.html">
+    <meta property="og:image" content="https://trackingsa.com/logo.svg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="AI News - Latest AI Technology Trends and Analysis (Page 3)">
+    <meta name="twitter:description" content="The latest AI news and in-depth analysis, updated daily. Check AI technology trends, startup news, and industry trends at a glance.">
+    <meta name="twitter:image" content="https://trackingsa.com/logo.svg">
+    
+    <!-- CSS and other head elements will be injected by main.py -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=pub-7263630893992216" crossorigin="anonymous"></script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-TGD3WRNKPZ');
+    </script>
+    <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
+    <meta name="naver-site-verification" content="b15b33af838280b54d31eb3c7e5c358d2836743f" />
+    <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "vb9q33ggpa");
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <script src="/firebase-config.js"></script>
+    <script src="/translations.js"></script>
+    <script src="/common.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+
+</head>
+<body>
+
+<header>
+    <a href="/" class="site-logo-link">
+        <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="site-logo">
+            <circle cx="50" cy="50" r="48" stroke="white" stroke-width="4" fill="transparent"/>
+            <path d="M25 70L40 55L50 65L75 35" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="70" cy="35" r="12" stroke="white" stroke-width="6" fill="#0052cc"/>
+            <rect x="78" y="43" width="15" height="6" rx="3" transform="rotate(45 78 43)" fill="white"/>
+        </svg>
+    </a>
+    <button class="hamburger-menu" id="mobile-menu-toggle" aria-label="Open menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+    <div class="desktop-menu-container" id="slide-out-menu"> <!-- This container now serves as the slide-out for mobile -->
+        <nav>
+            <ul>
+                <li><a href="/" data-i18n="news_home">홈</a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropbtn" data-i18n="menu_test">테스트</a>
+                    <div class="dropdown-content">
+                        <a href="/animal_face_test/" data-i18n="animal_face_test">동물상 테스트</a>
+                        <a href="/ai-test/" data-i18n="ai_tendency_test">AI 성향 테스트</a>
+                        <a href="/fortune/" data-i18n="saju_test">AI 운세 테스트</a>
+                        <a href="/lucky-recommendation/" data-i18n="lucky_recommendation">행운의 추천</a>
+                    </div>
+                </li>
+                <li class="dropdown">
+                    <a href="#" class="dropbtn" data-i18n="menu_game">게임</a>
+                    <div class="dropdown-content">
+                        <a href="/tetris-game/" data-i18n="tetris_game">테트리스</a>
+                        <a href="/ai-evolution/" data-i18n="ai_evolution">AI 진화 2048</a>
+                    </div>
+                </li>
+            </ul>
+        </nav>
+        <div class="utility-controls">
+            <button id="color-change">🌙</button>
+            <div id="language-switcher"></div>
+        </div>
+    </div>
+</header>
+
+    <div style="max-width: 1200px; margin: 20px auto; background-color: white; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); padding: 10px 20px; box-sizing: border-box;">
+        <script type="module" src="https://widgets.tradingview-widget.com/w/kr/tv-ticker-tape.js"></script>
+        <tv-ticker-tape symbols='FOREXCOM:SPXUSD,FOREXCOM:NSXUSD,FOREXCOM:DJI,FX:EURUSD,BITSTAMP:BTCUSD,BITSTAMP:ETHUSD,CMCMARKETS:GOLD'></tv-ticker-tape>
+    </div>
+
+    <main>
+        
+        <section class="hero-banner">
+            <h2 data-i18n="hero_title"></h2>
+            <button class="action-button" onclick="window.location.href='/fortune'" data-i18n="start_test_button"></button>
+        </section>
+        
+        <!-- Lucky Recommendation Promo Card -->
+        <section class="lucky-promo-container" style="max-width: 1200px; margin: -30px auto 40px auto; padding: 0 20px; position: relative; z-index: 10;">
+            <div class="lucky-promo-card" style="background: white; border-radius: 20px; padding: 30px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid #eef2f7; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 15px 35px rgba(0,0,0,0.15)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(0,0,0,0.1)';">
+                <div class="lucky-promo-content" style="flex: 1;">
+                    <span style="background: oklch(90% 0.1 200); color: oklch(50% 0.15 200); padding: 5px 12px; border-radius: 50px; font-size: 0.85rem; font-weight: bold; margin-bottom: 10px; display: inline-block;" data-i18n="new_feature">NEW</span>
+                    <h3 style="font-size: 1.8rem; margin: 0 0 10px 0; color: #1e40af;" data-i18n="lucky_recommendation">행운의 추천</h3>
+                    <p style="color: #64748b; margin: 0; font-size: 1.1rem;" data-i18n="lucky_hero_subtitle">당신에게 필요한 컬러와 아이템을 추천해 드립니다.</p>
+                </div>
+                <button class="action-button" onclick="window.location.href='/lucky-recommendation'" style="background: linear-gradient(135deg, #0052cc 0%, #1e40af 100%); color: white; border: none; padding: 12px 25px; border-radius: 12px; cursor: pointer; font-weight: bold; transition: all 0.3s ease;" onmouseover="this.style.filter='brightness(1.1)';" onmouseout="this.style.filter='brightness(1)';" data-i18n="check_now">확인하기</button>
+            </div>
+        </section>
+
+        <section class="news-section-main">
+            
+        
+        <h1 class="section-title" data-i18n="all_news_grid_title"></h1>
+        <div class="news-grid">
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-05-가정용-배터리-전력망-안정화에-기여-lunar-energy-232억-달러-투자-유치-성공-에너지-자립-및-투자-기회-분석-en.html" class="news-card-link">Lunar Energy Secures $232 Million Investment: Can Home Batteries Stabilize the Power Grid? A Guide to Solar-Linked Self-Consumption Solutions</a></h2>
+                <p class="news-card-date">2026-02-05</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-08-크립토닷컴-aicom-도메인-930억-원에-인수-슈퍼볼-광고-효과-극대화-전략일까-ai-투자-배경-심층-분석-en.html" class="news-card-link">Crypto.com Buys AI.com for $70 Million: A Super Bowl Ad Play or a Strategic AI Investment? Deep Dive Analysis</a></h2>
+                <p class="news-card-date">2026-02-08</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-23-핀란드-양자컴퓨팅-유니콘-iqm-spac-합병-통한-미국-증시-상장-추진-투자-가이드-및-향후-전망-분석-en.html" class="news-card-link">Finnish Quantum Unicorn IQM Going Public via SPAC: Is it a Good Investment and What Does it Mean for Quantum Computing?</a></h2>
+                <p class="news-card-date">2026-02-23</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-02-뉴스-요약-firefox-생성형-ai-기능-차단-옵션-제공-예정-en.html" class="news-card-link">Firefox AI Blocking: How to Disable AI Features for Enhanced Privacy - A Step-by-Step Guide</a></h2>
+                <p class="news-card-date">2026-02-02</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-15-침체된-vc-시장-소외된-창업가에게-투자하는-스테이시-브라운-필폿-어떤-차별화-전략을-사용하는가-장점과-단점-분석-en.html" class="news-card-link">Overlooked Founders: How Stacy Brown-Philpot is Doubling Down in a Shifting VC Landscape - Strategy & Risks Explained</a></h2>
+                <p class="news-card-date">2026-02-15</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-15-npr-진행자-데이비드-그린-구글-notebooklm-음성-저작권-소송-ai-음성-도용-가능성-및-향후-전망은-en.html" class="news-card-link">David Greene vs. Google: Did NotebookLM Steal His Voice? Exploring AI Voice Copyright and Future Implications</a></h2>
+                <p class="news-card-date">2026-02-15</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-20-스타트업-배틀필드-200-노미네이션-오픈-disrupt-2026-참가-기회-잡는-방법-성공적인-피칭-전략은-en.html" class="news-card-link">Startup Battlefield 200 Nominations Open: How to Win & Ace Your Pitch at Disrupt 2026?</a></h2>
+                <p class="news-card-date">2026-02-20</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-16-날갯짓-비행기-차세대-ai-핵심-기술-될까-기존-ai-한계-극복-및-새로운-가능성-심층-분석-en.html" class="news-card-link">Flapping Wing Aircraft & AI: Can Biomimicry Revolutionize Artificial Intelligence? - Exploring Radically Different AI Approaches</a></h2>
+                <p class="news-card-date">2026-02-16</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-08-인도-딥테크-스타트업-지원-강화-한국-스타트업-투자-유치-전략에-미치는-영향은-en.html" class="news-card-link">How India's Enhanced Deep Tech Startup Support Impacts Korean Investment Strategies: A Guide for Global Startups</a></h2>
+                <p class="news-card-date">2026-02-08</p>
+            </article>
+            
+            <article class="news-card">
+                <h2 class="news-card-title"><a href="/2026-02-18-데이터센터-전력-효율-고민-끝-dg-matrix-6천만-달러-투자-유치-차세대-전력-관리-솔루션-도입-가이드-en.html" class="news-card-link">Is Your Data Center Power Smart Enough? DG Matrix's $60M Funding & How Solid-State Transformers Can Optimize Your Energy Consumption</a></h2>
+                <p class="news-card-date">2026-02-18</p>
+            </article>
+            </div>
+        <div class="pagination"><a href="/page-en-2.html" class="pagination-button prev" data-i18n="prev_button"><span class="arrow">←</span></a><span class="page-number-wrapper"><span class="current-page">3</span><span class="separator">/</span><span class="total-pages">22</span></span><a href="/news/page-en-4.html" class="pagination-button next" data-i18n="next_button"><span class="arrow">→</span></a></div>
+    
+        </section>
+        
+    </main>
+
+
+    <footer>
+        <p data-i18n="footer_copyright"></p>
+        <p>
+            <a href="/about" data-i18n="about_us">회사 소개</a> |
+            <a href="/contact" data-i18n="contact">문의</a> |
+            <a href="/inquiry" data-i18n="partnership_inquiry">파트너십 문의</a> |
+            <a href="/privacy-policy" data-i18n="privacy_policy">개인정보처리방침</a> |
+            <a href="/sitemap.xml" data-i18n="sitemap">사이트맵</a> |
+            <a href="/rss.xml">RSS Feed</a>
+        </p>
+    </footer>
+
+</body>
+</html>

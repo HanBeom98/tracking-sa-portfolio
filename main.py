@@ -329,11 +329,15 @@ def get_firestore_client():
         service_account_json = os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON")
         if not service_account_json:
             return None
+
         try:
-            cred_dict = json.loads(service_account_json)
+            # 줄바꿈 이스케이프 문제 해결
+            normalized_json = service_account_json.replace('\n', '\\n')
+            cred_dict = json.loads(normalized_json)
             cred = credentials.Certificate(cred_dict)
             firebase_admin.initialize_app(cred)
         except Exception as e:
+
             print(f"⚠️ Firebase initialization error: {e}")
             return None
     return firestore.client()
@@ -397,7 +401,10 @@ def generate_article_html(md_content, title, date_str, output_path, hashtags_htm
 
 
 def generate_index_html(articles_on_page, current_page, total_pages, lang='ko'):
-    with open("news/index.html", "r", encoding="utf-8") as f:
+    import os
+    template_path = "news/index.html"
+    if not os.path.exists(template_path): print(f"ERROR: {template_path} 가 없습니다!")
+    with open(template_path, "r", encoding="utf-8") as f:
         base_html = f.read()
 
     # Meta tags based on language
@@ -542,7 +549,8 @@ def generate_public_site():
         print("🗄️ Loading articles from Firestore...")
         try:
             # Single order_by to avoid composite index requirement
-            docs = db.collection('posts').order_by('createdAt', direction=firestore.Query.DESCENDING).stream()
+            docs = list(db.collection('posts').order_by('createdAt', direction=firestore.Query.DESCENDING).stream())
+            print(f"DEBUG: Firestore에서 {len(docs)}개의 기사를 가져왔습니다.")
             for doc in docs:
                 post = doc.to_dict()
                 date_str = post.get('date') or datetime.date.today().strftime("%Y-%m-%d")
@@ -932,6 +940,11 @@ def main():
     parser.add_argument("--build-only", action="store_true", 
                         help="Only build the site from existing articles, skip fetching new news and AI content generation.")
     args = parser.parse_args()
+
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
+    except ImportError: pass
 
     if not args.build_only:
         try:
