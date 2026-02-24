@@ -62,25 +62,6 @@ jobs:
           set -euo pipefail
           python main.py --build-only
 
-      - name: Write Build Stamp
-        run: |
-          set -euo pipefail
-          mkdir -p public
-          {
-            echo "commit=${GITHUB_SHA}";
-            echo "built_at_utc=$(date -u +'%Y-%m-%dT%H:%M:%SZ')";
-          } > public/build.txt
-
-      - name: Deploy to Cloudflare Pages
-        uses: cloudflare/pages-action@v1
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: 'tracking-sa'
-          directory: 'public'
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          branch: main # This MUST be your production branch
-
       - name: Commit Log changes
         if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.generate_news == 'true')
         env:

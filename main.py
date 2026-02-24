@@ -1,6 +1,7 @@
 import os
 import sys
 import argparse
+import datetime
 from dotenv import load_dotenv
 
 # DDD 경로 추가 (Import 보장)
@@ -22,8 +23,21 @@ def main():
     
     print("🚀 [BUILD] Starting DDD-based site generation...")
     generate_public_site()
+    write_build_stamp()
     
     print("\n✨ All tasks (News & Build) are completed.")
+
+def write_build_stamp():
+    commit = (
+        os.getenv("CF_PAGES_COMMIT_SHA")
+        or os.getenv("GITHUB_SHA")
+        or "unknown"
+    )
+    built_at = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    os.makedirs("public", exist_ok=True)
+    with open(os.path.join("public", "build.txt"), "w", encoding="utf-8") as f:
+        f.write(f"commit={commit}\n")
+        f.write(f"built_at_utc={built_at}\n")
 
 if __name__ == "__main__":
     main()
