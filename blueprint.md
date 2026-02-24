@@ -14,10 +14,10 @@ Evolving Tracking-sa into a premium, framework-less web platform using a special
 
 ### 1. DDD Core Restructuring (Architecture 100%)
 - **Domain Migration**: All features (Animal Face, AI Test, Fortune, News, Board, Games, etc.) migrated to `src/domains/`.
-- **Shared Layer Optimization**: Global assets (JS/CSS/i18n) consolidated into `src/shared/assets/` and `src/shared/ui/`.
+- **Shared Layer Optimization**: Global assets consolidated into `src/shared/assets/` and `src/shared/ui/`.
 - **Path Standardization**: Unified entry points to `main.js` and established root-relative paths (`/xxx.js`) for all shared assets.
 - **Code-level DDD Compliance**: Unified i18n access through a global `getTranslation` utility in `common.js`.
-- **Automation Stability**: Restored news generation logic in `src/shared/infra/news_manager.py` and synchronized with GitHub Actions.
+- **Automation & Logs**: Restored news generation in `src/shared/infra/news_manager.py` and implemented a unified log system in `/logs/`.
 
 ### 2. Premium Module Overhaul
 - **Animal Face Test**: Fully converted to `<animal-face-test>` Web Component with standard i18n.
@@ -32,9 +32,9 @@ Evolving Tracking-sa into a premium, framework-less web platform using a special
 
 ## 🚀 Current Focus & Next Steps
 - [ ] Monitor Web Component performance and SEO crawling.
-- [ ] Implement a unified "Logs" system to prevent root clutter.
+- [ ] Refactor "AI Evolution 2048" logic for enhanced stability.
 
 ## ⚠️ Lessons Learned
 - **Path Resolution**: Always use absolute paths (`/`) for shared assets in deeply nested domain folders.
 - **UI Integrity**: Each domain `index.html` must explicitly link its local `style.css` if it exists.
-- **Orchestrator Resilience**: Ensure CLI arguments (`--build-only`) are maintained during refactoring to prevent CI/CD failures.
+- **Logging Strategy**: Centralize logs in a dedicated `/logs/` folder to maintain root directory cleanliness.

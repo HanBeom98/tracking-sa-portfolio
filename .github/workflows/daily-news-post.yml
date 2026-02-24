@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
     paths-ignore:
-      - 'processed_articles.log'
+      - 'logs/**'
       - 'README.md'
       - 'blueprint.md'
   schedule:
@@ -80,7 +80,7 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add processed_articles.log
+          git add logs/processed_articles.log
           if git diff --cached --quiet; then
             echo "No changes to commit"
             exit 0

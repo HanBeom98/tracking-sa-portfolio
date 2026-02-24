@@ -5,7 +5,7 @@ from src.shared.infra.db import get_firestore_client
 from src.shared.infra.ai import generate_ai_content
 from firebase_admin import firestore
 
-LOG_FILE = "processed_articles.log"
+LOG_FILE = "logs/processed_articles.log"
 
 def get_processed_urls():
     if not os.path.exists(LOG_FILE):
