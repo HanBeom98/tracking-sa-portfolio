@@ -191,26 +191,37 @@ def generate_rss_feed(articles):
 
 def copy_static_assets():
     assets = ["index.html", "style.css", "common.js", "translations.js", "firebase-config.js", "logo.svg", "favicon.svg", "search.js"]
-    asset_dirs = ["news", "fortune", "about", "ai-test", "animal_face_test", "contact", "edit", "inquiry", "post", "privacy-policy", "write", "lucky-recommendation", "tetris-game", "ai-evolution"]
     
-    # Favicon Auto-generation if missing
+    # 1. Favicon Auto-generation if missing
     if not os.path.exists("favicon.svg") and os.path.exists("logo.svg"):
         shutil.copy2("logo.svg", "favicon.svg")
         print("✅ Created favicon.svg from logo.svg")
 
+    # 2. Copy Global Assets
     for item in assets:
         if os.path.exists(item):
             dest_path = os.path.join(PUBLIC_DIR, item)
             shutil.copy2(item, dest_path)
             if item.endswith('.html'):
                 process_html_file_for_common_elements(dest_path)
-    for d in asset_dirs:
 
-        if os.path.isdir(d):
-            dest = os.path.join(PUBLIC_DIR, d)
-            shutil.copytree(d, dest, dirs_exist_ok=True)
-            idx = os.path.join(dest, "index.html")
-            if os.path.exists(idx): process_html_file_for_common_elements(idx)
+    # 3. Dynamic Service Directory Detection
+    # Automatically copy any directory that has an index.html (Our modular services)
+    exclude_dirs = [".git", ".github", ".idx", ".venv", "venv", "myenv", "node_modules", "core", "templates", "public", "__pycache__", "api", "functions", "multi-agent-system"]
+    
+    for d in os.listdir("."):
+        if os.path.isdir(d) and d not in exclude_dirs and not d.startswith("."):
+            idx_path = os.path.join(d, "index.html")
+            if os.path.exists(idx_path):
+                dest = os.path.join(PUBLIC_DIR, d)
+                shutil.copytree(d, dest, dirs_exist_ok=True)
+                print(f"📦 Auto-copied Service: {d}")
+                
+                # Apply common layout to all HTML files in that service
+                for root, dirs, files in os.walk(dest):
+                    for file in files:
+                        if file.endswith(".html"):
+                            process_html_file_for_common_elements(os.path.join(root, file))
 
 def generate_public_site():
     if os.path.exists(PUBLIC_DIR): shutil.rmtree(PUBLIC_DIR)
