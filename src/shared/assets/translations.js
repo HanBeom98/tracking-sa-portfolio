@@ -1,6 +1,6 @@
 const translations = {
     'ko': {
-        'news_home': '뉴스 홈',
+        'news_home': '뉴스',
         'latest_news_hero_title': '주요 뉴스',
         'all_news_grid_title': '최신 기사',
         'home': '홈',
@@ -162,7 +162,7 @@ const translations = {
         'ai_matching_rate': 'AI 분석 결과 {confidence}%의 매칭률을 보입니다.'
     },
     'en': {
-        'news_home': 'News Home',
+        'news_home': 'News',
         'latest_news_hero_title': 'Featured News',
         'all_news_grid_title': 'Latest Articles',
         'home': 'Home',
