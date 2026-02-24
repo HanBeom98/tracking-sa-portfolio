@@ -8,6 +8,8 @@
     --bg-main: oklch(98% 0.01 250);
     --header-h: 70px;
     --max-w: 1200px;
+    --content-pad-top: 32px;
+    --content-pad-bottom: 40px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -148,6 +150,8 @@ nav a:hover, .dropbtn:hover {
 #language-switcher {
     display: inline-flex;
     gap: 6px;
+    min-width: 96px;
+    justify-content: flex-end;
 }
 
 .lang-button {
@@ -232,7 +236,8 @@ main:not(#ai-evolution-game):not(.search-main-container) {
     max-width: var(--max-w);
     margin-left: auto;
     margin-right: auto;
-    padding-top: 18px;
+    padding-top: var(--content-pad-top);
+    padding-bottom: var(--content-pad-bottom);
 }
 
 /* 모든 main의 직계 자식에 대해 자동 중앙 정렬 보장 (강력한 안정화 장치) */
