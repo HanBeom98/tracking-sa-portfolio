@@ -61,7 +61,7 @@ ${inputPrompt}
       const lastBracket = cleaned.lastIndexOf(']');
 
       let jsonCandidate = "";
-      if (firstBrace !== -1 && (firstBracket === -1 || firstBrace < firstBracket)) {
+      if (firstBrace !== -1 && (firstBracket === -1 || (firstBrace < firstBracket && firstBrace !== -1))) {
         jsonCandidate = cleaned.substring(firstBrace, lastBrace + 1);
       } else if (firstBracket !== -1) {
         jsonCandidate = cleaned.substring(firstBracket, lastBracket + 1);
@@ -98,23 +98,17 @@ ${inputPrompt}
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 45000); // 45 seconds timeout
 
-    // Define response schema if possible, or just force JSON mode via generationConfig
     const body = {
       contents: [{
         parts: [{ text: fullPrompt }]
       }],
       generationConfig: {
-        temperature: isJsonAgent ? 0.1 : 0.7, // Lower temperature for more stable JSON
+        temperature: isJsonAgent ? 0.1 : 0.7, 
         topP: 1,
         topK: 1,
         maxOutputTokens: 4096,
       }
     };
-
-    // Use response_mime_type for structured output if it's a JSON agent
-    if (isJsonAgent) {
-      body.generationConfig.response_mime_type = "application/json";
-    }
 
     const apiResponse = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
