@@ -21,7 +21,7 @@ const imageUploadInput = document.getElementById('image-upload');
 const predictButton = document.getElementById('predict-button');
 const loadingIndicator = document.getElementById('loading-indicator');
 const resultSection = document.getElementById('result-section');
-const resultEmoji = document.getElementById('result-emoji'); // New: get reference to the emoji div
+const resultEmoji = document.getElementById('result-emoji'); 
 const predictionResult = document.getElementById('prediction-result');
 const confidenceScore = document.getElementById('confidence-score');
 const retakeButton = document.getElementById('retake-button');
@@ -29,16 +29,14 @@ const genderSelection = document.getElementById('gender-selection');
 const genderMaleButton = document.getElementById('gender-male');
 const genderFemaleButton = document.getElementById('gender-female');
 const shareButtonsContainer = document.getElementById('share-buttons');
-const imagePreviewContainer = document.getElementById('image-preview-container'); // NEW
+const imagePreviewContainer = document.getElementById('image-preview-container');
 
 
 async function init() {
-    // Show initial loading indicator
-    showLoadingIndicator("모델 로딩 중..."); // Pass a message for clarity
+    showLoadingIndicator("모델 로딩 중..."); 
     
-    // Disable interactive elements
     predictButton.disabled = true;
-    dropZone.style.pointerEvents = 'none'; // Disable dropZone interaction
+    dropZone.style.pointerEvents = 'none'; 
     genderMaleButton.disabled = true;
     genderFemaleButton.disabled = true;
 
@@ -47,31 +45,25 @@ async function init() {
     const metadataURL = URL + "metadata.json?v=" + timestamp;
 
     try {
-        // Load the model
         model = await window.tmImage.load(modelURL, metadataURL);
         maxPredictions = model.getTotalClasses();
 
-        // Enable interactive elements after model is loaded
         predictButton.disabled = false;
-        dropZone.style.pointerEvents = 'auto'; // Enable dropZone interaction
+        dropZone.style.pointerEvents = 'auto'; 
         genderMaleButton.disabled = false;
         genderFemaleButton.disabled = false;
 
-        // Hide initial loading indicator
         hideLoadingIndicator();
-
-        // Initial UI state
         hideResultSection();
-        dropZone.style.display = 'block'; // Ensure drop zone is visible initially
-        imagePreviewContainer.style.display = 'none'; // Ensure preview container is hidden initially
+        dropZone.style.display = 'block'; 
+        imagePreviewContainer.style.display = 'none'; 
 
     } catch (error) {
         console.error("Error loading the model:", error);
         alert("AI 모델 로딩에 실패했습니다. 페이지를 새로고침 해주세요.");
-        hideLoadingIndicator(); // Hide loading indicator even on error
+        hideLoadingIndicator();
     }
 
-    // Event Listeners - these are registered regardless of model loading success
     dropZone.addEventListener('dragover', handleDragOver);
     dropZone.addEventListener('dragleave', handleDragLeave);
     dropZone.addEventListener('drop', handleFileDrop);
@@ -82,7 +74,6 @@ async function init() {
     genderMaleButton.addEventListener('click', () => selectGender('male'));
     genderFemaleButton.addEventListener('click', () => selectGender('female'));
 
-    // If an image is already present (e.g., from a previous session or if reloaded)
     if (imagePreview.src && imagePreview.src !== window.location.href) {
         document.querySelector('.image-upload-section').style.display = 'block';
     }
@@ -90,7 +81,6 @@ async function init() {
 
 function selectGender(gender) {
     selectedGender = gender;
-    // Visually update selected gender button
     genderMaleButton.classList.remove('active');
     genderFemaleButton.classList.remove('active');
     if (gender === 'male') {
@@ -98,7 +88,6 @@ function selectGender(gender) {
     } else {
         genderFemaleButton.classList.add('active');
     }
-    // console.log('Selected gender:', selectedGender);
 }
 
 function handleDragOver(event) {
@@ -129,7 +118,8 @@ function handleFileSelect(event) {
 
 function processFile(file) {
     if (!file.type.startsWith('image/')) {
-        alert(translations[currentLang]['only_image_files_alert']); // Only image files
+        const msg = (window.getTranslation && window.getTranslation(window.currentLang, 'only_image_files_alert')) || "이미지 파일만 업로드할 수 있습니다.";
+        alert(msg);
         return;
     }
     currentImageFile = file;
@@ -137,14 +127,12 @@ function processFile(file) {
     reader.onload = (e) => {
         imagePreview.src = e.target.result;
         imagePreview.style.display = 'block';
-        predictButton.style.display = 'block'; // Show predict button after image is loaded
+        predictButton.style.display = 'block'; 
         hideResultSection();
-        
-        // NEW: Hide dropZone and show imagePreviewContainer
         dropZone.style.display = 'none';
         imagePreviewContainer.style.display = 'block';
-        imagePreview.style.display = 'block'; // Make sure the image itself is visible
-        predictButton.style.display = 'block'; // Show predict button after image is loaded
+        imagePreview.style.display = 'block'; 
+        predictButton.style.display = 'block'; 
     };
     reader.readAsDataURL(file);
 }
@@ -156,43 +144,41 @@ async function predict() {
     }
 
     if (!currentImageFile) {
-        alert(window.getTranslation(window.currentLang, 'select_image_first'));
+        const msg = (window.getTranslation && window.getTranslation(window.currentLang, 'select_image_first')) || "이미지를 먼저 선택해주세요.";
+        alert(msg);
         return;
     }
 
     showLoadingIndicator();
     hideResultSection();
     
-    const image = imagePreview; // Use the image element for prediction
+    const image = imagePreview; 
     const prediction = await model.predict(image);
 
-    // Sort predictions by probability in descending order
     prediction.sort((a, b) => b.probability - a.probability);
 
     const topPrediction = prediction[0];
-    const rawName = topPrediction.className.trim(); // Trim to ensure exact match
+    const rawName = topPrediction.className.trim(); 
     const confidence = (topPrediction.probability * 100).toFixed(2);
 
-    // Find the correct animal data based on the trimmed prediction class name
     const animalInfo = animalData[rawName];
 
-    // Update resultEmoji, predictionResult, and confidenceScore
     if (animalInfo) {
-        resultEmoji.innerHTML = ''; // Removed as emoji is now part of predictionResult
+        resultEmoji.innerHTML = ''; 
         predictionResult.innerText = window.getTranslation(window.currentLang, 'your_animal_face_is') + " " + animalInfo.emoji;
-        setupShareButtons(animalInfo.kor, confidence); // Use Korean name for sharing
+        setupShareButtons(animalInfo.kor, confidence); 
     } else {
-        // Fallback if rawName is not found in animalData
-        resultEmoji.innerHTML = ''; // Removed as emoji is now part of predictionResult
+        resultEmoji.innerHTML = ''; 
         predictionResult.innerText = window.getTranslation(window.currentLang, 'your_animal_face_is') + " " + '❓';
-        setupShareButtons(rawName, confidence); // Use rawName for sharing
+        setupShareButtons(rawName, confidence); 
     }
     
-    confidenceScore.innerText = window.getTranslation(window.currentLang, 'ai_matching_rate').replace('{confidence}', confidence);
+    const rateMsg = (window.getTranslation && window.getTranslation(window.currentLang, 'ai_matching_rate')) || "AI 분석 결과 {confidence}%의 매칭률을 보입니다.";
+    confidenceScore.innerText = rateMsg.replace('{confidence}', confidence);
 
     hideLoadingIndicator();
     showResultSection();
-    document.querySelector('.image-upload-section').style.display = 'none'; // Hide upload section
+    document.querySelector('.image-upload-section').style.display = 'none'; 
 }
 
 function showLoadingIndicator(message = "이미지 분석 중...") {
@@ -217,7 +203,7 @@ function resetUI() {
     imagePreview.src = '';
     imagePreview.style.display = 'none';
     predictButton.style.display = 'none';
-    resultEmoji.innerHTML = ''; // Cleared as emoji is now part of predictionResult
+    resultEmoji.innerHTML = ''; 
     predictionResult.textContent = '';
     confidenceScore.textContent = '';
     selectedGender = null;
@@ -225,19 +211,16 @@ function resetUI() {
     genderFemaleButton.classList.remove('active');
     hideResultSection();
     hideLoadingIndicator();
-    // Show dropZone and hide imagePreviewContainer
     dropZone.style.display = 'block';
     imagePreviewContainer.style.display = 'none';
-    imageUploadInput.value = ''; // Clear the file input
-    document.querySelector('.image-upload-section').style.display = 'block'; // Ensure parent section is visible
+    imageUploadInput.value = ''; 
+    document.querySelector('.image-upload-section').style.display = 'block'; 
 }
 
 function setupShareButtons(animalName, confidence) {
-    // Example: Generate a simple text for sharing
     const shareText = `저는 ${animalName} 입니다! (${confidence}% 확률) #동물상테스트`;
-    const shareUrl = window.location.href; // URL of the current page
+    const shareUrl = window.location.href; 
 
-    // Twitter Share
     const twitterButton = shareButtonsContainer.querySelector('[data-platform="twitter"]');
     if (twitterButton) {
         twitterButton.onclick = () => {
@@ -245,7 +228,6 @@ function setupShareButtons(animalName, confidence) {
         };
     }
 
-    // Facebook Share
     const facebookButton = shareButtonsContainer.querySelector('[data-platform="facebook"]');
     if (facebookButton) {
         facebookButton.onclick = () => {
@@ -253,7 +235,6 @@ function setupShareButtons(animalName, confidence) {
         };
     }
 
-    // Download Result (simple download of the current image preview)
     const downloadButton = shareButtonsContainer.querySelector('[data-platform="download"]');
     if (downloadButton) {
         downloadButton.onclick = () => {
@@ -265,7 +246,8 @@ function setupShareButtons(animalName, confidence) {
                 link.click();
                 document.body.removeChild(link);
             } else {
-                alert(translations[currentLang]['no_image_to_download_alert']);
+                const msg = (window.getTranslation && window.getTranslation(window.currentLang, 'no_image_to_download_alert')) || "다운로드할 이미지가 없습니다.";
+                alert(msg);
             }
         };
     }
