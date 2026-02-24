@@ -4,7 +4,7 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 import re
 import datetime
-from core.utils import extract_title_from_md, clean_filename
+from src.shared.infra.utils import extract_title_from_md, clean_filename
 
 def get_firestore_client():
     try:

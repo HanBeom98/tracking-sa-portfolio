@@ -1,6 +1,6 @@
 import os
 import datetime
-from core.config import ADSENSE_CLIENT_ID
+from src.shared.infra.config import ADSENSE_CLIENT_ID
 
 def load_template(filename):
     template_path = os.path.join("templates", filename)
