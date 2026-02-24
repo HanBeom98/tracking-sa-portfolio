@@ -1,214 +1,119 @@
-// ai-test.js
-
-document.addEventListener('DOMContentLoaded', () => {
-    const startTestButton = document.getElementById('start-test-button');
-    const quizSection = document.getElementById('quiz-section');
-    const resultSection = document.getElementById('result-section');
-    const testIntroSection = document.querySelector('.test-intro');
-
-    const questionText = document.getElementById('question-text');
-    const answersContainer = document.getElementById('answers-container');
-    const nextButton = document.getElementById('next-button');
-
-    const resultEmoji = document.getElementById('result-emoji');
-    const resultName = document.getElementById('result-name');
-    const resultDescription = document.getElementById('result-description');
-    const copyLinkButton = document.getElementById('copy-link-button');
-    const retakeTestButton = document.getElementById('retake-test-button');
-
-    let currentQuestionIndex = 0;
-    let scores = {
-        chatgpt: 0,
-        claude: 0,
-        gemini: 0,
-        perplexity: 0
-    };
-
-    const questions = [
-        {
-            question: "새로운 정보를 접했을 때, 당신의 첫 반응은?",
-            options: [
-                { text: "빠르게 핵심을 파악하고 효율적인 해결책을 찾는다.", score: { chatgpt: 1 } },
-                { text: "다양한 관점에서 깊이 있게 이해하려 노력한다.", score: { claude: 1 } },
-                { text: "기존 지식과 연결하여 새로운 아이디어를 떠올린다.", score: { gemini: 1 } },
-                { text: "출처와 사실 여부를 꼼꼼히 확인하고 교차 검증한다.", score: { perplexity: 1 } }
-            ]
-        },
-        {
-            question: "동료와 프로젝트를 진행할 때, 당신의 역할은 주로?",
-            options: [
-                { text: "명확한 목표를 설정하고, 단계별 계획을 세워 리드한다.", score: { chatgpt: 1 } },
-                { text: "팀원들의 의견을 경청하고, 조화로운 분위기를 만든다.", score: { claude: 1 } },
-                { text: "다양한 아이디어를 제안하고, 여러 작업을 동시에 처리한다.", score: { gemini: 1 } },
-                { text: "필요한 정보를 정확히 찾아 팀에 제공하고, 오류를 검토한다.", score: { perplexity: 1 } }
-            ]
-        },
-        {
-            question: "어떤 종류의 글쓰기를 가장 선호하나요?",
-            options: [
-                { text: "논리정연하고 간결한 보고서나 설명문.", score: { chatgpt: 1 } },
-                { text: "감정을 풍부하게 담아내는 에세이나 스토리.", score: { claude: 1 } },
-                { text: "자유로운 형식으로 창의적인 아이디어를 펼치는 글.", score: { gemini: 1 } },
-                { text: "객관적인 사실과 데이터를 바탕으로 한 분석 글.", score: { perplexity: 1 } }
-            ]
-        },
-        {
-            question: "주말에 새로운 것을 배우기로 했다면, 무엇을 선택할까요?",
-            options: [
-                { text: "코딩이나 효율적인 문제 해결을 위한 기술.", score: { chatgpt: 1 } },
-                { text: "심리학이나 예술처럼 인간의 감성을 이해하는 분야.", score: { claude: 1 } },
-                { text: "여러 분야를 융합한 새로운 형태의 창작 활동.", score: { gemini: 1 } },
-                { text: "최신 과학 논문을 읽거나 특정 주제를 깊이 탐구하는 것.", score: { perplexity: 1 } }
-            ]
-        },
-        {
-            question: "당신이 가장 중요하게 생각하는 가치는?",
-            options: [
-                { text: "합리적인 의사결정과 생산성.", score: { chatgpt: 1 } },
-                { text: "공감 능력과 섬세한 소통.", score: { claude: 1 } },
-                { text: "독창성과 유연한 사고.", score: { gemini: 1 } },
-                { text: "진실성 있는 정보와 깊이 있는 지식.", score: { perplexity: 1 } }
-            ]
-        }
-    ];
-
-    const aiModels = {
-        chatgpt: {
-            name: "ChatGPT",
-            emoji: "🧠",
-            description: "당신은 논리적이고 효율적인 문제 해결사, ChatGPT와 닮았네요! 명확한 정보 처리와 빠른 결과 도출을 중요하게 생각하는군요."
-        },
-        claude: {
-            name: "Claude",
-            emoji: "💖",
-            description: "당신은 섬세한 감성과 깊이 있는 통찰력을 가진 Claude형! 타인의 감정을 이해하고 디테일한 부분까지 놓치지 않는군요."
-        },
-        gemini: {
-            name: "Gemini",
-            emoji: "✨",
-            description: "당신은 창의적이고 다재다능한 Gemini형! 여러 아이디어를 연결하고 새로운 결과물을 만들어내는 데 탁월합니다."
-        },
-        perplexity: {
-            name: "Perplexity",
-            emoji: "🔍",
-            description: "당신은 사실을 중요하게 생각하는 탐구자, Perplexity형! 정확한 정보를 찾아내고 검증하는 데 열정적입니다."
-        }
-    };
-
-    function displayQuestion() {
-        if (currentQuestionIndex < questions.length) {
-            const currentQ = questions[currentQuestionIndex];
-            questionText.textContent = currentQ.question;
-            answersContainer.innerHTML = '';
-            currentQ.options.forEach((option, index) => {
-                const button = document.createElement('button');
-                button.textContent = option.text;
-                button.classList.add('answer-button');
-                button.addEventListener('click', () => selectAnswer(option.score));
-                answersContainer.appendChild(button);
-            });
-            nextButton.style.display = 'none'; // Hide next button until an answer is selected
-        } else {
-            showResult();
-        }
+/**
+ * AiTestPremium Web Component
+ * Highly interactive and premium designed AI personality test.
+ */
+class AiTestPremium extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        this.currentStep = 0;
+        this.answers = [];
+        this.questions = [
+            { q: "새로운 기술이나 AI 도구가 나오면 즉시 써보는 편인가요?", a: ["완전 내 이야기!", "관심은 가요", "남들 쓰는거 보고", "별로 안 궁금함"] },
+            { q: "문제를 해결할 때 논리적인 분석보다 직관을 더 믿나요?", a: ["무조건 논리!", "대체로 분석적", "가끔은 직관", "직관이 최고"] },
+            { q: "반복적인 단순 업무를 자동화하는 것에 즐거움을 느끼나요?", "a": ["희열을 느껴요", "좋아하는 편", "그저 그래요", "직접 하는게 편함"] },
+            { q: "AI가 인간의 창의성을 완전히 대체할 수 있다고 생각하나요?", "a": ["당연히 가능!", "어느 정도는", "아직은 멀었음", "절대 불가능"] },
+            { q: "복잡한 코드를 보거나 로직을 설계할 때 흥분되나요?", "a": ["너무 재밌음!", "즐기는 편", "가끔은 힘듦", "머리 아파요"] }
+        ];
+        this.models = [
+            { name: "GPT-4o", desc: "당신은 다재다능하고 논리적인 완벽주의자입니다.", color: "#10a37f", icon: "🤖" },
+            { name: "Claude 3.5 Sonnet", desc: "당신은 따뜻한 감성과 정교한 필력을 가진 예술가형입니다.", color: "#d97757", icon: "✍️" },
+            { name: "Gemini Pro", desc: "당신은 방대한 정보를 연결하는 창의적인 전략가입니다.", color: "#4285f4", icon: "✨" },
+            { name: "Llama 3", desc: "당신은 자유롭고 거침없는 오픈소스 정신의 소유자입니다.", color: "#0668E1", icon: "🦙" }
+        ];
     }
 
-    function selectAnswer(score) {
-        // Apply score
-        for (const ai in score) {
-            scores[ai] += score[ai];
-        }
-
-        // Disable all answer buttons after selection
-        Array.from(answersContainer.children).forEach(button => {
-            button.disabled = true;
-            button.classList.remove('selected'); // Remove any previously selected class
-        });
-
-        // Add a visual indicator to the selected answer
-        event.target.classList.add('selected');
-        
-        nextButton.style.display = 'block'; // Show next button
+    connectedCallback() {
+        this.render();
     }
 
-    function showResult() {
-        quizSection.style.display = 'none';
-        resultSection.style.display = 'block';
+    render() {
+        const isResult = this.currentStep >= this.questions.length;
+        const currentLang = localStorage.getItem('lang') || 'ko';
+        const isEn = currentLang === 'en';
 
-        let maxScore = -1;
-        let resultAI = null;
-
-        for (const ai in scores) {
-            if (scores[ai] > maxScore) {
-                maxScore = scores[ai];
-                resultAI = ai;
-            } else if (scores[ai] === maxScore) {
-                // Handle ties - could be random, or a default. For now, first one wins.
-                // A more sophisticated tie-breaker could be implemented here.
+        this.shadowRoot.innerHTML = `
+        <style>
+            :host { display: block; width: 100%; max-width: 600px; margin: 0 auto; font-family: 'Pretendard', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+            .card {
+                background: white; border-radius: 35px; padding: 50px 40px;
+                box-shadow: 0 25px 70px rgba(0, 82, 204, 0.08); border: 1px solid rgba(0, 0, 0, 0.02);
+                text-align: center; animation: fadeIn 0.6s ease-out;
             }
+            h1 { font-size: 2.2rem; font-weight: 900; background: linear-gradient(135deg, #0052cc, #1e40af); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 30px; letter-spacing: -0.03em; }
+            .q-text { font-size: 1.3rem; font-weight: 700; color: #1e293b; margin-bottom: 40px; line-height: 1.5; word-break: keep-all; }
+            .options { display: flex; flex-direction: column; gap: 12px; }
+            .opt-btn {
+                padding: 18px 25px; border-radius: 18px; border: 2px solid #f1f5f9;
+                background: #f8fafc; cursor: pointer; font-size: 1.05rem; font-weight: 600;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); color: #475569;
+            }
+            .opt-btn:hover { border-color: #0052cc; color: #0052cc; background: #eff6ff; transform: translateY(-2px); }
+            
+            .progress-bar { width: 100%; height: 8px; background: #f1f5f9; border-radius: 10px; margin-bottom: 40px; overflow: hidden; }
+            .progress-inner { height: 100%; background: var(--primary, #0052cc); transition: width 0.5s ease; }
+
+            /* Result Style */
+            .res-icon { font-size: 5rem; margin-bottom: 20px; }
+            .res-name { font-size: 2.5rem; font-weight: 950; margin-bottom: 15px; }
+            .res-desc { font-size: 1.15rem; line-height: 1.8; color: #64748b; margin-bottom: 40px; word-break: keep-all; }
+            .reset-btn { background: #1e293b; color: white; border: none; padding: 16px 35px; border-radius: 15px; font-weight: 800; cursor: pointer; transition: 0.3s; }
+            .reset-btn:hover { opacity: 0.9; transform: scale(1.05); }
+
+            @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        </style>
+
+        <div class="card">
+            ${!isResult ? `
+                <h1>AI Tendency Test</h1>
+                <div class="progress-bar">
+                    <div class="progress-inner" style="width: ${(this.currentStep / this.questions.length) * 100}%"></div>
+                </div>
+                <div class="q-text">${this.questions[this.currentStep].q}</div>
+                <div class="options">
+                    ${this.questions[this.currentStep].a.map((opt, i) => `
+                        <button class="opt-btn" data-index="${i}">${opt}</button>
+                    `).join('')}
+                </div>
+            ` : this.renderResult()}
+        </div>
+        `;
+
+        if (!isResult) {
+            this.shadowRoot.querySelectorAll('.opt-btn').forEach(btn => {
+                btn.onclick = () => this.handleAnswer(btn.dataset.index);
+            });
+        } else {
+            this.shadowRoot.getElementById('reset-btn').onclick = () => this.reset();
         }
-
-        const model = aiModels[resultAI];
-        resultEmoji.textContent = model.emoji;
-        resultName.textContent = model.name;
-        resultDescription.textContent = model.description;
-
-        // Update URL for sharing
-        const resultUrl = new URL(window.location.href);
-        resultUrl.searchParams.set('result', resultAI);
-        window.history.replaceState({}, '', resultUrl);
     }
 
-    function copyResultLink() {
-        const resultUrl = window.location.href;
-        navigator.clipboard.writeText(resultUrl).then(() => {
-            alert('결과 링크가 클립보드에 복사되었습니다!');
-        }).catch(err => {
-            console.error('링크 복사 실패:', err);
-            alert('링크 복사에 실패했습니다.');
-        });
+    renderResult() {
+        const score = this.answers.reduce((a, b) => parseInt(a) + parseInt(b), 0);
+        const resultIndex = score % this.models.length;
+        const model = this.models[resultIndex];
+
+        return `
+            <div class="res-icon">${model.icon}</div>
+            <div class="res-name" style="color: ${model.color}">${model.name}</div>
+            <div class="res-desc">${model.desc}</div>
+            <button class="reset-btn" id="reset-btn">다시 테스트하기</button>
+        `;
     }
 
-    function retakeTest() {
-        currentQuestionIndex = 0;
-        scores = {
-            chatgpt: 0,
-            claude: 0,
-            gemini: 0,
-            perplexity: 0
-        };
-        testIntroSection.style.display = 'block';
-        quizSection.style.display = 'none';
-        resultSection.style.display = 'none';
-        window.history.replaceState({}, '', window.location.pathname); // Clean URL
+    handleAnswer(index) {
+        this.answers.push(index);
+        this.currentStep++;
+        this.render();
     }
 
-    // Event Listeners
-    startTestButton.addEventListener('click', () => {
-        testIntroSection.style.display = 'none';
-        quizSection.style.display = 'block';
-        displayQuestion();
-    });
-
-    nextButton.addEventListener('click', () => {
-        currentQuestionIndex++;
-        displayQuestion();
-    });
-
-    copyLinkButton.addEventListener('click', copyResultLink);
-    retakeTestButton.addEventListener('click', retakeTest);
-
-    // Check for result in URL on load (for sharing)
-    const urlParams = new URLSearchParams(window.location.search);
-    const sharedResult = urlParams.get('result');
-    if (sharedResult && aiModels[sharedResult]) {
-        testIntroSection.style.display = 'none';
-        quizSection.style.display = 'none';
-        resultSection.style.display = 'block';
-
-        const model = aiModels[sharedResult];
-        resultEmoji.textContent = model.emoji;
-        resultName.textContent = model.name;
-        resultDescription.textContent = model.description;
+    reset() {
+        this.currentStep = 0;
+        this.answers = [];
+        this.render();
     }
-});
+}
+
+if (!customElements.get('ai-test-premium')) {
+    customElements.define('ai-test-premium', AiTestPremium);
+}
