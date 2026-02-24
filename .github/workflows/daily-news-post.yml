@@ -1,6 +1,12 @@
 name: Daily AI News Post
 
 on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - 'processed_articles.log'
+      - 'README.md'
+      - 'blueprint.md'
   schedule:
     - cron: '6 22 * * *'
     - cron: '12 12 * * *'
@@ -47,22 +53,34 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run Build Script (Multi-Agent News Generation)
+      - name: Run Build Script (Smart Execution)
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
           BASE_URL: "https://trackingsa.com/"
         run: |
           set -euo pipefail
-          # 1. Generate news only if scheduled or manually requested
-          if [ "${{ github.event_name }}" == "schedule" ] || [ "${{ github.event.inputs.generate_news }}" == "true" ]; then
-            echo "🚀 Generating new articles..."
+          
+          # Determine if we should generate news
+          # 1. Manual trigger with generate_news=true
+          # 2. Scheduled cron job
+          # Otherwise (Standard Push), we skip generation and only build UI
+          
+          SHOULD_GENERATE="false"
+          if [ "${{ github.event_name }}" == "schedule" ]; then
+            SHOULD_GENERATE="true"
+          elif [ "${{ github.event_name }}" == "workflow_dispatch" ] && [ "${{ github.event.inputs.generate_news }}" == "true" ]; then
+            SHOULD_GENERATE="true"
+          fi
+
+          if [ "$SHOULD_GENERATE" == "true" ]; then
+            echo "🚀 [FULL MODE] Generating news and building UI..."
             python main.py
           else
-            echo "ℹ️ Skipping news generation, running build-only mode."
+            echo "🎨 [UI ONLY MODE] Skipping news generation, applying style fixes to existing articles..."
           fi
           
-          # 2. Final build from Firestore data (ALWAYS RUNS)
+          # Final build (ALWAYS RUNS on every push)
           python main.py --build-only
 
       - name: Deploy to Cloudflare Pages
