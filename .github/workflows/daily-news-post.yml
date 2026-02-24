@@ -2,56 +2,64 @@ name: Daily AI News Post
 
 on:
   schedule:
-    - cron: '6 22 * * *'  # UTC 22:06 = KST 07:06 (오전 7시 6분)
-    - cron: '12 12 * * *' # UTC 12:12 = KST 21:12 (오후 9시 12분)
-  workflow_dispatch: # 직접 실행 버튼 활성화
+    - cron: '6 22 * * *'
+    - cron: '12 12 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-ai-news-post
+  cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    # 깃허브 액션이 저장소에 글을 쓸 수 있도록 권한 부여
-    permissions:
-      contents: write
-      
-    steps:
-      - uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: 'pip'
 
       - name: Install dependencies
         run: |
-          pip install --upgrade pip
-          pip install feedparser python-dotenv requests markdown google-genai
-
-
-
-      - name: Show posts directory before script runs
-        run: |
-          echo "--- Contents of posts/ before running main.py ---"
-          ls -R posts/ || echo "posts/ directory does not exist yet."
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Run Script
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: python main.py
-
-      - name: Show posts directory after script runs
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+          BASE_URL: "https://trackingsa.com/"
         run: |
-          echo "--- Contents of posts/ after running main.py ---"
-          ls -R posts/ || echo "posts/ directory not found."
-
-      - name: Check git status
-        run: |
-          echo "--- Git status after running main.py ---"
-          git status
+          set -euo pipefail
+          # 1. Generate news and store in Firestore
+          python main.py
+          # 2. Final build from Firestore data
+          python main.py --build-only
 
       - name: Commit and Push changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add .
-          git commit -m "Auto-post news updates $(date +'%Y-%m-%d %H:%M')" || echo "No changes to commit"
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Only commit the log file to keep the repository clean.
+          # Articles are now stored in Firestore and generated into public/ (which should be ignored or handled by hosting).
+          git add processed_articles.log
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git commit -m "chore: update processed articles log $(date -u +'%Y-%m-%d %H:%M UTC') [skip ci]"
           git push

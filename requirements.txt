@@ -3,3 +3,4 @@ python-dotenv
 requests
 markdown
 google-genai
+firebase-admin

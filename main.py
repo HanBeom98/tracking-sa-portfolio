@@ -11,9 +11,13 @@ import shutil
 import time
 import math
 from xml.sax.saxutils import escape
+import json
+import firebase_admin
+from firebase_admin import credentials, firestore
 
 PUBLIC_DIR = "public"
-NEWS_POSTS_DIR = "posts"
+# NEWS_POSTS_DIR is now used only for fallback build if Firestore is unavailable
+NEWS_POSTS_DIR = "posts" 
 PROCESSED_ARTICLES_LOG = "processed_articles.log"
 ADSENSE_CLIENT_ID = "pub-7263630893992216"
 SITEMAP_PATH = os.path.join(PUBLIC_DIR, "sitemap.xml")
@@ -314,6 +318,22 @@ def generate_rss_feed(articles_info):
         f.write(rss_content)
     print("✅ RSS feed generated at rss.xml")
 
+def get_firestore_client():
+    try:
+        firebase_admin.get_app()
+    except ValueError:
+        service_account_json = os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON")
+        if not service_account_json:
+            return None
+        try:
+            cred_dict = json.loads(service_account_json)
+            cred = credentials.Certificate(cred_dict)
+            firebase_admin.initialize_app(cred)
+        except Exception as e:
+            print(f"⚠️ Firebase initialization error: {e}")
+            return None
+    return firestore.client()
+
 
 def generate_article_html(md_content, title, date_str, output_path, hashtags_html="", description="", image_url="", lang="ko"):
     # Default values for description and image_url if not provided
@@ -509,93 +529,126 @@ def generate_public_site():
     create_ads_txt()
     create_robots_txt()
 
-    if not os.path.exists(NEWS_POSTS_DIR):
-        # Generate empty index files if no posts directory
+    articles_meta_ko = []
+    articles_meta_en = []
+    
+    # Priority: Firestore
+    db = get_firestore_client()
+    if db:
+        print("🗄️ Loading articles from Firestore...")
+        try:
+            # Single order_by to avoid composite index requirement
+            docs = db.collection('posts').order_by('createdAt', direction=firestore.Query.DESCENDING).stream()
+            for doc in docs:
+                post = doc.to_dict()
+                date_str = post.get('date') or datetime.date.today().strftime("%Y-%m-%d")
+                slug = post.get('slug') or ""
+                url_key = post.get("urlKey") or f"{date_str}-{slug}"
+                
+                # KO
+                ko_content = post.get('contentKo', '')
+                ko_title = post.get('titleKo', '새로운 뉴스')
+                ko_processed_content, ko_hashtags_html = _extract_and_format_hashtags(ko_content, log_prefix=f"[ko-fs] ")
+                ko_url = f"{url_key}.html"
+                articles_meta_ko.append({'title': ko_title, 'date': date_str, 'url': ko_url})
+                ko_description = extract_description_from_md(ko_processed_content, lang="ko")
+                generate_article_html(ko_processed_content, ko_title, date_str, os.path.join(PUBLIC_DIR, ko_url), ko_hashtags_html, description=ko_description, lang="ko")
+                
+                # EN
+                en_content = post.get('contentEn')
+                if en_content:
+                    en_title = post.get('titleEn', 'New Article')
+                    en_processed_content, en_hashtags_html = _extract_and_format_hashtags(en_content, log_prefix=f"[en-fs] ")
+                    en_url = f"{url_key}-en.html"
+                    articles_meta_en.append({'title': en_title, 'date': date_str, 'url': en_url})
+                    en_description = extract_description_from_md(en_processed_content, lang="en")
+                    generate_article_html(en_processed_content, en_title, date_str, os.path.join(PUBLIC_DIR, en_url), en_hashtags_html, description=en_description, lang="en")
+        except Exception as e:
+            print(f"⚠️ Firestore load error: {e}. Falling back to local files.")
+            db = None
+
+    # Fallback: Local Markdown files
+    if not db:
+        posts_dir_exists = os.path.exists(NEWS_POSTS_DIR) and any(f.endswith('.md') for f in os.listdir(NEWS_POSTS_DIR))
+        if posts_dir_exists:
+            print("📁 Loading articles from local Markdown files...")
+            # --- Korean Articles ---
+            all_ko_md_files = []
+            for fn in os.listdir(NEWS_POSTS_DIR):
+                if fn.endswith('.md') and not fn.endswith('-en.md') and "{base_name}" not in fn:
+                    file_path = os.path.join(NEWS_POSTS_DIR, fn)
+                    date_match = re.match(r'(\d{4}-\d{2}-\d{2})', fn)
+                    date_str = date_match.group(1) if date_match else datetime.date.today().strftime("%Y-%m-%d")
+                    date_obj = datetime.datetime.strptime(date_str, '%Y-%m-%d').date() if date_match else datetime.date.today().date()
+                    mod_time = os.path.getmtime(file_path)
+                    all_ko_md_files.append({'filename': fn, 'date_obj': date_obj, 'date_str': date_str, 'mod_time': mod_time})
+
+            all_ko_md_files.sort(key=lambda x: (x['date_obj'], x['mod_time']), reverse=True)
+            
+            for file_info in all_ko_md_files:
+                fn = file_info['filename']
+                date_str = file_info['date_str']
+                with open(os.path.join(NEWS_POSTS_DIR, fn), 'r', encoding='utf-8') as f:
+                    original_content = f.read()
+                
+                processed_content, hashtags_html = _extract_and_format_hashtags(original_content, log_prefix=f"[ko - {fn}]")
+                title = extract_title_from_md(processed_content)
+                url = f"{date_str}-{clean_filename(title)}.html"
+                articles_meta_ko.append({'title': title, 'date': date_str, 'url': url})
+                description = extract_description_from_md(processed_content, lang="ko")
+                generate_article_html(processed_content, title, date_str, os.path.join(PUBLIC_DIR, url), hashtags_html, description=description, lang="ko")
+
+            # --- English Articles ---
+            all_en_md_files = []
+            for fn in os.listdir(NEWS_POSTS_DIR):
+                if fn.endswith('-en.md') and "{base_name}" not in fn:
+                    file_path = os.path.join(NEWS_POSTS_DIR, fn)
+                    date_match = re.match(r'(\d{4}-\d{2}-\d{2})', fn)
+                    date_str = date_match.group(1) if date_match else datetime.date.today().strftime("%Y-%m-%d")
+                    date_obj = datetime.datetime.strptime(date_str, '%Y-%m-%d').date() if date_match else datetime.date.today().date()
+                    mod_time = os.path.getmtime(file_path)
+                    all_en_md_files.append({'filename': fn, 'date_obj': date_obj, 'date_str': date_str, 'mod_time': mod_time})
+
+            all_en_md_files.sort(key=lambda x: (x['date_obj'], x['mod_time']), reverse=True)
+
+            for file_info in all_en_md_files:
+                fn = file_info['filename']
+                date_str = file_info['date_str']
+                with open(os.path.join(NEWS_POSTS_DIR, fn), 'r', encoding='utf-8') as f:
+                    original_content = f.read()
+                    
+                processed_content, hashtags_html = _extract_and_format_hashtags(original_content, log_prefix=f"[en - {fn}]")
+                title = extract_title_from_md(processed_content)
+                # Generate the '-en.html' URL
+                url = f"{fn.replace('.md', '.html')}"
+                articles_meta_en.append({'title': title, 'date': date_str, 'url': url})
+                description = extract_description_from_md(processed_content, lang="en")
+                generate_article_html(processed_content, title, date_str, os.path.join(PUBLIC_DIR, url), hashtags_html, description=description, lang="en")
+
+    if not articles_meta_ko:
+        # Generate empty index files if no content found
         generate_index_html([], 1, 1, lang='ko')
         generate_index_html([], 1, 1, lang='en')
         _generate_sitemap([], 1, 1)
-        generate_rss_feed([]) # Also generate an empty RSS feed
+        generate_rss_feed([])
         return
-
-    # --- Korean Articles ---
-    all_ko_md_files = []
-    for fn in os.listdir(NEWS_POSTS_DIR):
-        if fn.endswith('.md') and not fn.endswith('-en.md') and "{base_name}" not in fn:
-            file_path = os.path.join(NEWS_POSTS_DIR, fn)
-            date_match = re.match(r'(\d{4}-\d{2}-\d{2})', fn)
-            date_str = date_match.group(1) if date_match else datetime.date.today().strftime("%Y-%m-%d")
-            date_obj = datetime.datetime.strptime(date_str, '%Y-%m-%d').date() if date_match else datetime.date.today().date()
-            mod_time = os.path.getmtime(file_path)
-            all_ko_md_files.append({'filename': fn, 'date_obj': date_obj, 'date_str': date_str, 'mod_time': mod_time})
-
-    all_ko_md_files.sort(key=lambda x: (x['date_obj'], x['mod_time']), reverse=True)
-    
-    articles_meta_ko = []
-    for file_info in all_ko_md_files:
-        fn = file_info['filename']
-        date_str = file_info['date_str']
-        with open(os.path.join(NEWS_POSTS_DIR, fn), 'r', encoding='utf-8') as f:
-            original_content = f.read()
-        
-        processed_content, hashtags_html = _extract_and_format_hashtags(original_content, log_prefix=f"[ko - {fn}]")
-        title = extract_title_from_md(processed_content)
-        url = f"{date_str}-{clean_filename(title)}.html"
-        articles_meta_ko.append({'title': title, 'date': date_str, 'url': url})
-        description = extract_description_from_md(processed_content, lang="ko")
-        generate_article_html(processed_content, title, date_str, os.path.join(PUBLIC_DIR, url), hashtags_html, description=description, lang="ko")
-
-    # --- English Articles ---
-    all_en_md_files = []
-    for fn in os.listdir(NEWS_POSTS_DIR):
-        if fn.endswith('-en.md') and "{base_name}" not in fn:
-            file_path = os.path.join(NEWS_POSTS_DIR, fn)
-            date_match = re.match(r'(\d{4}-\d{2}-\d{2})', fn)
-            date_str = date_match.group(1) if date_match else datetime.date.today().strftime("%Y-%m-%d")
-            date_obj = datetime.datetime.strptime(date_str, '%Y-%m-%d').date() if date_match else datetime.date.today().date()
-            mod_time = os.path.getmtime(file_path)
-            all_en_md_files.append({'filename': fn, 'date_obj': date_obj, 'date_str': date_str, 'mod_time': mod_time})
-
-    all_en_md_files.sort(key=lambda x: (x['date_obj'], x['mod_time']), reverse=True)
-
-    articles_meta_en = []
-    for file_info in all_en_md_files:
-        fn = file_info['filename']
-        date_str = file_info['date_str']
-        with open(os.path.join(NEWS_POSTS_DIR, fn), 'r', encoding='utf-8') as f:
-            original_content = f.read()
-            
-        processed_content, hashtags_html = _extract_and_format_hashtags(original_content, log_prefix=f"[en - {fn}]")
-        title = extract_title_from_md(processed_content)
-        # Generate the '-en.html' URL
-        url = f"{fn.replace('.md', '.html')}"
-        articles_meta_en.append({'title': title, 'date': date_str, 'url': url})
-        description = extract_description_from_md(processed_content, lang="en")
-        generate_article_html(processed_content, title, date_str, os.path.join(PUBLIC_DIR, url), hashtags_html, description=description, lang="en")
 
     # --- Pagination Logic ---
     ARTICLES_PER_PAGE = 10
     
     # Korean Pagination
-    total_pages_ko = 1
-    if not articles_meta_ko:
-        generate_index_html([], 1, 1, lang='ko')
-    else:
-        total_pages_ko = math.ceil(len(articles_meta_ko) / ARTICLES_PER_PAGE)
-        for page_num in range(1, total_pages_ko + 1):
-            start_index = (page_num - 1) * ARTICLES_PER_PAGE
-            end_index = start_index + ARTICLES_PER_PAGE
-            generate_index_html(articles_meta_ko[start_index:end_index], page_num, total_pages_ko, lang='ko')
+    total_pages_ko = math.ceil(len(articles_meta_ko) / ARTICLES_PER_PAGE) if articles_meta_ko else 1
+    for page_num in range(1, total_pages_ko + 1):
+        start_index = (page_num - 1) * ARTICLES_PER_PAGE
+        end_index = start_index + ARTICLES_PER_PAGE
+        generate_index_html(articles_meta_ko[start_index:end_index], page_num, total_pages_ko, lang='ko')
             
     # English Pagination
-    total_pages_en = 1
-    if not articles_meta_en:
-        generate_index_html([], 1, 1, lang='en')
-    else:
-        total_pages_en = math.ceil(len(articles_meta_en) / ARTICLES_PER_PAGE)
-        for page_num in range(1, total_pages_en + 1):
-            start_index = (page_num - 1) * ARTICLES_PER_PAGE
-            end_index = start_index + ARTICLES_PER_PAGE
-            generate_index_html(articles_meta_en[start_index:end_index], page_num, total_pages_en, lang='en')
+    total_pages_en = math.ceil(len(articles_meta_en) / ARTICLES_PER_PAGE) if articles_meta_en else 1
+    for page_num in range(1, total_pages_en + 1):
+        start_index = (page_num - 1) * ARTICLES_PER_PAGE
+        end_index = start_index + ARTICLES_PER_PAGE
+        generate_index_html(articles_meta_en[start_index:end_index], page_num, total_pages_en, lang='en')
 
     # Combine all articles for sitemap and RSS
     all_articles_meta = articles_meta_ko + articles_meta_en
@@ -804,7 +857,6 @@ def _extract_and_format_hashtags(original_content, log_prefix=""):
     return modified_content.strip(), hashtags_html
 
 def save_post_and_generate_html(content):
-    os.makedirs(NEWS_POSTS_DIR, exist_ok=True)
     today = datetime.date.today().strftime("%Y-%m-%d")
 
     # Extract Korean and English content
@@ -823,10 +875,6 @@ def save_post_and_generate_html(content):
     ko_cleaned = clean_filename(ko_title)
     ko_processed_content, ko_hashtags_html = _extract_and_format_hashtags(ko_content, log_prefix="[save_post_ko] ")
     
-    ko_md_path = os.path.join(NEWS_POSTS_DIR, f"{today}-{ko_cleaned}.md")
-    with open(ko_md_path, "w", encoding="utf-8") as f:
-        f.write(ko_processed_content)
-    
     ko_html_filename = f"{today}-{ko_cleaned}.html"
     ko_description = extract_description_from_md(ko_processed_content, lang="ko")
     generate_article_html(
@@ -837,16 +885,12 @@ def save_post_and_generate_html(content):
     print(f"✅ 한국어 기사 생성됨: {ko_html_filename}")
 
     # --- Process English Article ---
+    en_title, en_processed_content = "", ""
     if en_content:
         en_title = extract_title_from_md(en_content)
         en_cleaned = clean_filename(en_title)
         en_processed_content, en_hashtags_html = _extract_and_format_hashtags(en_content, log_prefix="[save_post_en] ")
 
-        # Save English markdown file with '-en' suffix
-        en_md_path = os.path.join(NEWS_POSTS_DIR, f"{today}-{ko_cleaned}-en.md") # Use Korean cleaned title for consistency
-        with open(en_md_path, "w", encoding="utf-8") as f:
-            f.write(en_processed_content)
-            
         en_html_filename = f"{today}-{ko_cleaned}-en.html" # Use Korean cleaned title for consistency
         en_description = extract_description_from_md(en_processed_content, lang="en")
         generate_article_html(
@@ -856,13 +900,32 @@ def save_post_and_generate_html(content):
         )
         print(f"✅ 영어 기사 생성됨: {en_html_filename}")
 
+    # Store in Firestore
+    db = get_firestore_client()
+    if db:
+        url_key = f"{today}-{ko_cleaned}"
+        post_doc = {
+            "date": today,
+            "slug": ko_cleaned,
+            "urlKey": url_key,
+            "titleKo": ko_title,
+            "contentKo": ko_processed_content,
+            "createdAt": firestore.SERVER_TIMESTAMP
+        }
+        if en_content:
+            post_doc["titleEn"] = en_title
+            post_doc["contentEn"] = en_processed_content
+        
+        db.collection("posts").document(url_key).set(post_doc)
+        print(f"✅ Firestore에 기사 저장됨: {url_key}")
+
     # Return the primary (Korean) article info
     return ko_html_filename, ko_title, today
 
 def main():
     parser = argparse.ArgumentParser(description="Generate static news site with optional AI content generation.")
     parser.add_argument("--build-only", action="store_true", 
-                        help="Only build the site from existing markdown files, skip fetching new news and AI content generation.")
+                        help="Only build the site from existing articles, skip fetching new news and AI content generation.")
     args = parser.parse_args()
 
     if not args.build_only:
@@ -871,14 +934,10 @@ def main():
             load_dotenv() # Load environment variables here, only if not --build-only
         except ImportError:
             print("Warning: python-dotenv not installed. Environment variables will not be loaded from .env file.")
-        # This line is removed to prevent forced regeneration of all articles
-        # if os.path.exists(PROCESSED_ARTICLES_LOG):
-        #     os.remove(PROCESSED_ARTICLES_LOG)
 
         api_key = os.getenv("GEMINI_API_KEY")
         if not api_key: 
             print("에러: .env 파일에 GEMINI_API_KEY가 없습니다.")
-            # Do not return here if build-only is false, still need to generate_public_site
         
         rss_urls = [
             "https://techcrunch.com/category/artificial-intelligence/feed/",

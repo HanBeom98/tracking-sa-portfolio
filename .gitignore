@@ -5,15 +5,23 @@ myenv/
 __pycache__/
 *.pyc
 
-# Build Outputs (뉴스는 IDX/Cloudflare에는 남고, Git 목록에서만 사라집니다)
+# Content Data (Now stored in Firestore)
+posts/
+processed_articles.log.tmp
+
+# Build Outputs (Static site generation)
 public/*.html
-public/page-*/
+public/page-*.html
+public/page-en-*.html
+public/sitemap.xml
+public/rss.xml
 sitemap.xml
 rss.xml
+
+# Node.js
 node_modules/
 firebase-functions/node_modules/
 functions/node_modules/
-.firebase/
 
 # Firebase & Cloudflare
 .firebase/
@@ -23,11 +31,13 @@ firebase-debug.log
 # IDE & OS
 .vscode/
 .idx/
+.DS_Store
 
-# Secrets (보안상 제외)
+# Secrets
 .env
 *.json
-!package.jsonworkdocs/
-workdocs/
-workdocs/
+!package.json
+!firebase-config.js
+
+# Project specific
 workdocs/
