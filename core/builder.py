@@ -235,36 +235,47 @@ def generate_public_site():
     db = get_firestore_client()
     articles_ko, articles_en = [], []
     
-    if db:
-        try:
-            docs = list(db.collection('posts').order_by('createdAt', direction=firestore.Query.DESCENDING).stream())
-            for doc in docs:
-                p = doc.to_dict()
-                date = p.get('date', '2026-02-24')
-                ukey = p.get('urlKey', f"{date}-news")
-                
-                title_ko = p.get('titleKo') or "제목 없음"
-                content_ko = p.get('contentKo') or ""
-                title_en = p.get('titleEn') or title_ko
-                content_en = p.get('contentEn') or content_ko
+    if not db:
+        print("🚨 에러: Firestore 클라이언트를 생성할 수 없습니다. 배포를 중단합니다.")
+        return
 
-                # KO
-                ko_body, ko_tags = _extract_and_format_hashtags(content_ko)
-                generate_article_html(ko_body, title_ko, date, os.path.join(PUBLIC_DIR, f"{ukey}.html"), ko_tags, lang="ko")
-                articles_ko.append({'title': title_ko, 'date': date, 'url': f"{ukey}.html"})
-                
-                # EN
-                en_body, en_tags = _extract_and_format_hashtags(content_en)
-                generate_article_html(en_body, title_en, date, os.path.join(PUBLIC_DIR, f"{ukey}-en.html"), en_tags, lang="en")
-                articles_en.append({'title': title_en, 'date': date, 'url': f"{ukey}-en.html"})
-        except Exception as e:
-            print(f"⚠️ Firestore Load Error: {e}")
-            import traceback
-            traceback.print_exc()
+    try:
+        print("🔍 Firestore에서 기사 목록을 가져오는 중...")
+        docs = list(db.collection('posts').order_by('createdAt', direction=firestore.Query.DESCENDING).stream())
+        print(f"📄 총 {len(docs)}개의 문서를 발견했습니다.")
+        
+        for doc in docs:
+            p = doc.to_dict()
+            date = p.get('date', '2026-02-24')
+            ukey = p.get('urlKey', f"{date}-news")
+            
+            title_ko = p.get('titleKo') or "제목 없음"
+            content_ko = p.get('contentKo') or ""
+            title_en = p.get('titleEn') or title_ko
+            content_en = p.get('contentEn') or content_ko
+
+            # KO
+            ko_body, ko_tags = _extract_and_format_hashtags(content_ko)
+            generate_article_html(ko_body, title_ko, date, os.path.join(PUBLIC_DIR, f"{ukey}.html"), ko_tags, lang="ko")
+            articles_ko.append({'title': title_ko, 'date': date, 'url': f"{ukey}.html"})
+            
+            # EN
+            en_body, en_tags = _extract_and_format_hashtags(content_en)
+            generate_article_html(en_body, title_en, date, os.path.join(PUBLIC_DIR, f"{ukey}-en.html"), en_tags, lang="en")
+            articles_en.append({'title': title_en, 'date': date, 'url': f"{ukey}-en.html"})
+            
+    except Exception as e:
+        print(f"⚠️ Firestore Load Error: {e}")
+        import traceback
+        traceback.print_exc()
+
+    if not articles_ko:
+        print("🚨 경고: 생성된 한국어 기사가 하나도 없습니다! '기사를 찾을 수 없습니다' 메시지가 출력될 수 있습니다.")
 
     # Index Pages
     for lang, arts in [('ko', articles_ko), ('en', articles_en)]:
         total_pages = math.ceil(len(arts) / ARTICLES_PER_PAGE) if arts else 1
+        print(f"📂 {lang.upper()} 인덱스 페이지 생성 중... (총 {len(arts)}개 기사, {total_pages}페이지)")
         for p_num in range(1, total_pages + 1):
             start = (p_num - 1) * ARTICLES_PER_PAGE
             generate_index_html(arts[start:start+ARTICLES_PER_PAGE], p_num, total_pages, lang=lang)
