@@ -1,75 +1,38 @@
-# Project Blueprint: Modernizing `tracking-sa` Styles
+# Tracking SA Project Blueprint
 
-## Project Overview
-The `tracking-sa` project is a web application with several HTML pages, CSS styling, and JavaScript functionality. The goal is to create a visually appealing, functional, and modern web experience.
+## 🎯 Project Vision
+Evolving Tracking-sa into a premium, framework-less web platform using a specialized 5-agent AI orchestration system.
 
-## Implemented Style, Design, and Features
--   **General Layout:** Responsive design with a sticky header, main content area, and footer.
--   **Navigation:** Desktop navigation with hover effects.
--   **Hero Banner:** Prominent hero section with action button.
--   **News Section:** Grid-based display for news cards, with distinct styling for hero cards.
--   **Dark Mode:** Basic dark mode support for various elements.
--   **Utility Controls:** Theme and language switchers in the header.
--   **AI Test Page (`ai-test.html`):** Styling for quiz-like interactive elements.
--   **Animal Face Test Page (`animal_face_test.html`):** Styling for image upload, gender selection, and prediction results.
-    -   **Translation Update for H1:** The Korean phrase "당신은 어떤 동물을 닮았나요?" in the `animal_face_test.html` page has been translated to "Which animal do you resemble?" in English.
-    -   **Result Text Modification:** The result text "Your animal is" has been updated to "The animal that resembles you is {emoji}" to provide a more descriptive output including the predicted animal's emoji.
-    -   **AI Matching Rate Translation:** The AI matching rate text ("AI 분석 결과 ~%의 매칭률을 보입니다.") is now translated using a new translation key `ai_matching_rate` in `translations.js` and dynamically integrated into `main.js`.
-    -   **Script Loading Order Correction:** The `animal_face_test.html` now correctly loads all necessary scripts (TensorFlow, Teachable Machine, translations.js, common.js) within the `<head>` section via dynamic injection by `main.py`, ensuring proper global scope access for `main.js`. `main.js` is conditionally injected into the `<body>` for this specific page.
-    -   **Redundant Emoji Removal:** The separate large emoji (`resultEmoji` element) is now cleared (`resultEmoji.innerHTML = ''`) since the emoji is now directly part of the `predictionResult` text.
-    -   **"당신과 닮은" Translation Issue Resolved:** The "당신과 닮은" phrase now correctly translates based on the selected language. The issue was resolved by ensuring the latest version of `translations.js` was loaded by the browser, likely resolving a caching issue.
--   **"Back to List" Button:** Redesigned button on news detail pages.
--   **SEO Enhancement:** Cleaned header, enhanced footer with sitemap/RSS links, and favicon generation logic.
--   **Firebase Integration:** Added Firebase server configurations to `.idx/mcp.json` as required for the Firebase Studio environment.
+## 🛠️ Tech Stack & Standards
+- **Architecture**: Web Components (Custom Elements) with Shadow DOM.
+- **Styling**: Pure CSS with oklch colors, Container Queries, and -webkit-font-smoothing.
+- **Backend**: Vercel Serverless Functions (Node.js).
+- **Build System**: Custom Python builder (`main.py`) for SEO, AdSense, and i18n injection.
 
-## Cloud Database & Build Architecture (Single Source of Truth)
--   **SSOT (Single Source of Truth):** All news articles are now managed via **Firebase Firestore** (`posts` collection). Local `.md` files are no longer stored in Git.
--   **Firestore Document Structure:** Documents use `urlKey` (format: `YYYY-MM-DD-slug`) as their ID. Fields include `date`, `slug`, `urlKey`, `titleKo`, `contentKo`, `titleEn`, `contentEn`, and `createdAt`.
--   **Build Workflow:**
-    -   **Firestore-First:** The `main.py` script prioritizes Firestore for building static HTML files.
-    -   **Fallback:** Local `posts/*.md` files are only used if Firestore connection fails (e.g., missing credentials).
-    -   **GitHub Actions:** Automates news generation and storage into Firestore. Only `processed_articles.log` is committed back to Git to keep the repository clean.
--   **Home Redesign:**
-    -   `index.html` is now a minimalist Google-style search engine hub.
-    -   `search.js` implements real-time Firestore prefix searching for article titles.
-    -   Original news list moved to `/news/index.html`.
+## ✅ Completed Milestones (2026-02-24)
 
-## Current Task: Implement Multi-Agent AI System
+### 1. Premium Module Overhaul
+- **Animal Face Test**: Fully converted to `<animal-face-test>` Web Component. Fixed UI flickering and restored sharing/download features.
+- **AI Fortune (Today's Fortune)**: Implemented premium report layout with Markdown parsing. Added 429 Rate Limit error handling.
+- **Lucky Recommendation**: Reconstructed into a premium component with dynamic color visualization and absolute API paths.
+- **News Hub**: Restored magazine-style hero cards and grid layout. Fixed Firestore data loading bugs (NoneType handling).
 
-### System Overview
-A Node.js-based system for orchestrating multiple AI agents to collaboratively complete complex tasks. The system is designed with a clear separation of concerns, making it modular and extensible.
+### 2. Global UI/UX Optimization
+- **Typography**: Applied global font smoothing and Pretendard font stack for crystal clear text rendering.
+- **Home Page**: Implemented "Minimalist Hub" mode. Navigation is hidden on the home page but utility buttons (Theme/Lang) are preserved.
+- **Navigation**: Restored global header/footer styles that were lost during modularization.
 
-### Core Architecture
--   **Orchestrator:** The central component (`orchestrator.js`) that manages the workflow. It initializes a `state` object and calls a sequence of agents (`Planner` -> `Developer` -> `Reviewer`), passing the state between them.
--   **Agents:** Specialized functions in `agents.js` that perform specific tasks.
--   **State Object:** A JavaScript object that acts as a shared memory or context for the agents. It holds the initial request, intermediate results (plan, code), and the final output.
--   **Prompt Management:** Agent personas and instructions are stored in a separate `prompts.js` file. For agents requiring structured output, prompts include explicit instructions to return JSON.
+### 3. Orchestrator Intelligence
+- **Resilience**: Fixed TypeError in Reviewer feedback parsing.
+- **File System**: Added support for nested path saving (`path/to/file.js`) within the agent loop.
+- **Compliance**: Updated prompts to strictly enforce Shadow DOM standards and Design-First principles.
 
-### Implemented Components (`multi-agent-system/`)
--   **`index.js`:** The main entry point to trigger a test run of the system.
--   **`orchestrator.js`:** Implements the main orchestration logic.
--   **`agents.js`:** Implements the agent runners. After debugging, this was refactored to bypass the `@google/generative-ai` SDK and use direct `fetch` calls to the Gemini v1 REST API. This was the key to resolving persistent `404 Not Found` errors.
--   **`prompts.js`:** Exports a configuration object for agent personas and instructions.
+## 🚀 Current Focus & Next Steps
+- [ ] Monitor Web Component performance and SEO crawling.
+- [ ] Enhance "AI Tendency Test" to match the new Premium Blue aesthetic.
+- [ ] Expand the "Games" section with more premium-styled modules.
 
-### API & Model Configuration
--   **Method:** Direct `fetch` calls to the Gemini REST API.
--   **Endpoint Version:** `v1`
--   **Model:** `gemini-2.0-flash` (as identified from the working `fortune` service).
--   **Dependencies:** `dotenv` for API key management. The `@google/generative-ai` SDK was removed.
-
-### Current Status
-Completed and operational. The system successfully connects to the Gemini API and executes a full workflow, demonstrating that the orchestration, state management, and API integration are working correctly.
-
-- [2026-02-22 12:29:21] Feature updated: tetris-game (Request: folder: tetris-game 생성. 기존 웹사이트의 헤더/푸터 레이아웃을 유지하면서...)
-- [2026-02-22 13:00:11] Feature updated: tetris-game (Request: folder: tetris-game의 빌드 오류 수정. main.py의 빌드 프로세스가 t...)- [2026-02-22 13:05:11] Feature updated: tetris-game (Optimized: scroll prevention and responsive UI fitting)
-
-- [2026-02-22 13:38:39] Feature updated: tetris-game (Request: folder: tetris-game의 부서진 UI 완전 복구 및 레이아웃 재설계. 현재 H...)
-- [2026-02-22 14:15:00] Feature updated: fortune (Removed birth time input from Daily Fortune service to simplify user experience and improve privacy.)
-- [2026-02-22 20:15:12] Feature updated: ai-evolution-2048 (Request: [프로젝트 정보]
-
-사이트: trackingsa.com
-게임명: AI EVOLUTION 2...)
-- [2026-02-22 20:17:37] Feature updated: project-summary (Request:  너 뭘 만들었는지 설명해...)
-- [2026-02-24 03:19:20] Feature updated: google-search-home (Request: [DESIGN PRESERVATION MISSION] 1. 리모델링 대상: 루트 index...)
-- [2026-02-24 03:48:38] Feature updated: google-search-home (Request: [MAINTENANCE] 1. 문제 진단: 홈화면(index.html)에서 기존 네비게이션...)
-- [2026-02-24 06:33:40] Feature updated: ai-gen-feature (Success via Multi-Agent)
+## ⚠️ Lessons Learned
+- **Cache Busting**: Always use version strings (`?v=...`) when updating JS modules to force browser refresh.
+- **Defensive Build**: Always check for `None` values when pulling data from Firestore to prevent entire site build failures.
+- **Shadow DOM Style Isolation**: Global styles don't bleed in; font-smoothing must be re-declared inside components.
