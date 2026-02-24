@@ -658,3 +658,45 @@ body.home-page header {
 body.home-page .site-logo-link {
     display: none; /* Logo is already in the main center area */
 }
+
+/* --- Refined Premium Navigation Logic --- */
+header {
+    height: 70px;
+    background: var(--surface);
+    backdrop-filter: blur(15px);
+    position: sticky;
+    top: 0;
+    z-index: 10000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 5%;
+    border-bottom: 1px solid oklch(0% 0 0 / 0.05);
+    box-shadow: 0 4px 12px oklch(0% 0 0 / 0.03);
+    transition: var(--transition);
+}
+
+/* Home Page specific overrides */
+body.home-page header {
+    background: transparent;
+    border-bottom: none;
+    box-shadow: none;
+    position: absolute; /* Place it on top of the search area */
+    width: 90%;
+    left: 5%;
+}
+
+body.home-page header nav, 
+body.home-page header .site-logo-link,
+body.home-page header .hamburger-menu {
+    display: none !important; /* Hide menu items on Home Page Hub */
+}
+
+body.home-page header .utility-controls {
+    margin-left: auto; /* Push utility to the right */
+}
+
+/* Sub-page navigation visibility guarantee */
+body:not(.home-page) header nav {
+    display: block;
+}
