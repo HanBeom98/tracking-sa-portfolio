@@ -7,6 +7,7 @@ class AnimalFaceTest extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         this._model = null;
+        this._modelReady = false;
         this._selectedGender = 'male';
         this._currentImage = null;
         this._modelUrl = "https://teachablemachine.withgoogle.com/models/e52yfi_eK/";
@@ -159,7 +160,7 @@ class AnimalFaceTest extends HTMLElement {
 
                 <div id="preview-container">
                     <img id="preview">
-                    <button class="main-btn" id="predict-btn">${t.btn}</button>
+                    <button class="main-btn" id="predict-btn">${t.analyzeBtn}</button>
                 </div>
 
                 <p style="margin-top:30px; font-size:0.9rem; color:#94a3b8;">${t.privacy}</p>
@@ -242,15 +243,28 @@ class AnimalFaceTest extends HTMLElement {
     }
 
     async loadModel() {
-        if (window.tmImage) {
-            try {
-                this._model = await window.tmImage.load(this._modelUrl + "model.json", this._modelUrl + "metadata.json");
-            } catch(e) { console.error("Model load error", e); }
+        // Wait for tmImage to be available (script load can lag on first paint)
+        for (let i = 0; i < 20; i++) {
+            if (window.tmImage) break;
+            await new Promise(r => setTimeout(r, 200));
+        }
+        if (!window.tmImage) {
+            console.error("tmImage not available.");
+            return;
+        }
+        try {
+            this._model = await window.tmImage.load(this._modelUrl + "model.json", this._modelUrl + "metadata.json");
+            this._modelReady = true;
+        } catch(e) {
+            console.error("Model load error", e);
         }
     }
 
     async predict() {
-        if (!this._model) return;
+        if (!this._model) {
+            alert("AI 모델을 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+            return;
+        }
         const root = this.shadowRoot;
         root.getElementById('preview-container').style.display = 'none';
         root.getElementById('loading').style.display = 'flex';
