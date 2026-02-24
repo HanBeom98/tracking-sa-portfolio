@@ -10,5 +10,8 @@
 4.  **전역 유산 보호:** 기존 HTML 헤더에 포함된 GTM, Firebase, Translations 스크립트 등을 절대 삭제하거나 훼손하지 않는다.
 
 ## 🛠️ 개발 기술 표준
--   Shadow DOM과 Web Components를 사용하여 신구 코드 간 간섭을 원천 차단한다.
+-   **DDD 아키텍처 준수:** 모든 코드는 `src/domains/`에 배치하고, 공통 자산은 `src/shared/`를 참조한다. 루트 경로 직접 파일 생성을 엄금한다.
+-   **경로 표준화:** 공통 JS/CSS는 반드시 루트 경로(`/common.js`)로 참조하며, 도메인 핵심 스크립트는 `main.js`로 통일한다.
+-   **i18n 표준화:** 코드 내 텍스트 하드코딩을 절대 금지한다. `translations.js`에 키를 등록하고 `window.getTranslation('key')`를 사용하라.
+-   **Shadow DOM 활용:** Shadow DOM과 Web Components를 사용하여 신구 코드 간 간섭을 원천 차단한다.
 -   유지보수 시 기존 변수 명명 규칙을 철저히 따른다.
