@@ -1,3 +1,56 @@
+/* 
+   --------------------------------------------------------------------------
+   🎨 TRACKING SA DESIGN SYSTEM (Corporate Edition)
+   Modern Standards: oklch(), CSS Variables, Container Queries
+   --------------------------------------------------------------------------
+*/
+
+:root {
+    /* Color Palette - okLCH based for better depth */
+    --p-base: 50% 0.2 250; /* Brand Blue */
+    --primary: oklch(var(--p-base));
+    --primary-soft: oklch(var(--p-base) / 0.1);
+    --primary-deep: oklch(40% 0.2 250);
+    
+    --bg-base: 98% 0.01 250;
+    --background: oklch(var(--bg-base));
+    --surface: oklch(100% 0 0);
+    
+    --text-main: oklch(20% 0.02 250);
+    --text-muted: oklch(50% 0.02 250);
+    
+    /* Layout Tokens */
+    --header-height: 70px;
+    --border-radius-lg: 24px;
+    --border-radius-md: 12px;
+    --max-width: 1200px;
+    --shadow-sm: 0 4px 20px oklch(0% 0 0 / 0.03);
+    --shadow-md: 0 10px 30px oklch(0% 0 0 / 0.08);
+    
+    /* Animation Tokens */
+    --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 0.3s var(--ease-standard);
+}
+
+/* Dark Mode Tokens */
+body.dark-mode {
+    --bg-base: 15% 0.02 250;
+    --surface: oklch(20% 0.02 250);
+    --text-main: oklch(90% 0.02 250);
+    --text-muted: oklch(70% 0.02 250);
+    --shadow-md: 0 10px 40px oklch(0% 0 0 / 0.4);
+}
+
+/* Base Reset & Corporate Typography */
+body {
+    font-family: 'Inter', 'Pretendard', sans-serif;
+    background: var(--background);
+    color: var(--text-main);
+    line-height: 1.6;
+    margin: 0;
+    transition: background var(--transition-base), color var(--transition-base);
+}
+
 /* General Layout */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
