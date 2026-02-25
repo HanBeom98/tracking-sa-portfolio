@@ -22,7 +22,7 @@
   - `KOSPI200_BASE`, `FUTURES_REQUEST_TIMEOUT_SEC` 빈 값 시 기본값 사용.
 
 ### 4) Workflow 실행 커밋 혼동 방지
-- `.github/workflows/futures-estimate-sync.yml`
+- `.github/workflows/futures-estimate-sync-v2.yml`
   - `actions/checkout@v4`에 `ref: main` 고정.
   - debug step 추가(`HEAD SHA`, 스크립트 상단 출력).
 
@@ -32,7 +32,7 @@
   - 현재는 Stooq 공개 시세(`es.f`) 1회 조회로 `futures_price`, `futures_prev_close`를 수집.
   - 추정값 계산 후 Firestore 저장.
   - 소스 표기: `source=stooq_public_quote`
-- `.github/workflows/futures-estimate-sync.yml`
+- `.github/workflows/futures-estimate-sync-v2.yml`
   - KIS 시크릿 제거.
   - 선택 시크릿: `STOOQ_SYMBOL`(기본 `es.f`)
 
