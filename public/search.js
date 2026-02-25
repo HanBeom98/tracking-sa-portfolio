@@ -2,6 +2,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     const searchInput = document.getElementById('searchInput');
     const searchResultsContainer = document.getElementById('searchResults');
+    if (!searchInput || !searchResultsContainer) return;
 
     const currentLang = localStorage.getItem('lang') || 'ko';
     const titleField = currentLang === 'en' ? 'titleEn' : 'titleKo';
@@ -12,6 +13,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const db = (window.db || (typeof firebase !== 'undefined' && firebase.apps.length ? firebase.firestore() : null));
 
     let debounceTimer;
+    function moveToSearchPage(rawQuery) {
+        const query = (rawQuery || '').trim();
+        if (query.length < 2) return;
+        window.location.href = `/search/?q=${encodeURIComponent(query)}`;
+    }
+
     searchInput.addEventListener('input', function () {
         clearTimeout(debounceTimer);
         const searchTerm = searchInput.value.trim();
@@ -25,6 +32,12 @@ document.addEventListener('DOMContentLoaded', function () {
         debounceTimer = setTimeout(() => {
             searchPosts(searchTerm);
         }, 300);
+    });
+
+    searchInput.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+        moveToSearchPage(searchInput.value);
     });
 
     async function searchPosts(searchTerm) {
@@ -43,9 +56,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
             displayResults(snapshot.docs, searchTerm);
         } catch (error) {
-            console.error("Search error:", error);
-            searchResultsContainer.innerHTML = '<div class="search-no-results">검색 중 오류가 발생했습니다.</div>';
-            searchResultsContainer.classList.add('active');
+            console.warn("Search prefix query failed, falling back to client filter:", error);
+            try {
+                const fallbackSnapshot = await db.collection('posts')
+                    .orderBy('createdAt', 'desc')
+                    .limit(120)
+                    .get();
+                const q = searchTerm.toLowerCase();
+                const filteredDocs = fallbackSnapshot.docs.filter((doc) => {
+                    const data = doc.data();
+                    const title = String(data[titleField] || data[fallbackTitleField] || '').toLowerCase();
+                    return title.includes(q);
+                }).slice(0, 10);
+                displayResults(filteredDocs, searchTerm);
+            } catch (fallbackError) {
+                console.error("Search error:", fallbackError);
+                searchResultsContainer.innerHTML = '<div class="search-no-results">검색 중 오류가 발생했습니다.</div>';
+                searchResultsContainer.classList.add('active');
+            }
         }
     }
 

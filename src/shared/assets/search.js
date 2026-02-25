@@ -56,9 +56,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
             displayResults(snapshot.docs, searchTerm);
         } catch (error) {
-            console.error("Search error:", error);
-            searchResultsContainer.innerHTML = '<div class="search-no-results">검색 중 오류가 발생했습니다.</div>';
-            searchResultsContainer.classList.add('active');
+            console.warn("Search prefix query failed, falling back to client filter:", error);
+            try {
+                const fallbackSnapshot = await db.collection('posts')
+                    .orderBy('createdAt', 'desc')
+                    .limit(120)
+                    .get();
+                const q = searchTerm.toLowerCase();
+                const filteredDocs = fallbackSnapshot.docs.filter((doc) => {
+                    const data = doc.data();
+                    const title = String(data[titleField] || data[fallbackTitleField] || '').toLowerCase();
+                    return title.includes(q);
+                }).slice(0, 10);
+                displayResults(filteredDocs, searchTerm);
+            } catch (fallbackError) {
+                console.error("Search error:", fallbackError);
+                searchResultsContainer.innerHTML = '<div class="search-no-results">검색 중 오류가 발생했습니다.</div>';
+                searchResultsContainer.classList.add('active');
+            }
         }
     }
 
