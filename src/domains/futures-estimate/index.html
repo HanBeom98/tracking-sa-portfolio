@@ -133,8 +133,8 @@
     <section class="futures-panel">
       <a class="tv-link" href="https://kr.tradingview.com/symbols/KRX-K2I1!/?contract=K2IH2026" target="_blank" rel="noopener nofollow">야간선물 K2I1! 원페이지에서 보기</a>
 
-      <div class="panel-title">야간 영향 4종 모니터</div>
-      <div class="panel-subtitle">SPY, QQQ, DIA, USDKRW 동시 확인</div>
+      <div class="panel-title">야간 영향 6종 모니터</div>
+      <div class="panel-subtitle">SPY, QQQ, DIA, USDKRW, GOLD, BTC 동시 확인</div>
       <div class="multi-grid">
         <div class="mini-card">
           <div class="mini-title">AMEX:SPY (S&P500 ETF)</div>
@@ -152,6 +152,33 @@
           <div class="mini-title">FX_IDC:USDKRW (달러/원)</div>
           <div id="tv-krw-widget" class="mini-widget"></div>
         </div>
+        <div class="mini-card">
+          <div class="mini-title">TVC:GOLD (금 현물)</div>
+          <div id="tv-gold-widget" class="mini-widget"></div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-title">BITSTAMP:BTCUSD (비트코인)</div>
+          <div id="tv-btc-widget" class="mini-widget"></div>
+        </div>
+      </div>
+
+      <div class="panel-title" style="margin-top:16px;">야간 영향 분석표</div>
+      <div class="panel-subtitle" id="analysis-updated-at">데이터 업데이트 대기중</div>
+      <div class="mini-card">
+        <table style="width:100%; border-collapse: collapse; font-size:0.84rem;">
+          <thead>
+            <tr style="text-align:left; border-bottom:1px solid #e2e8f0;">
+              <th style="padding:8px 6px;">지표</th>
+              <th style="padding:8px 6px;">현재값</th>
+              <th style="padding:8px 6px;">등락률</th>
+              <th style="padding:8px 6px;">국장 시그널</th>
+            </tr>
+          </thead>
+          <tbody id="impact-analysis-body">
+            <tr><td colspan="4" style="padding:10px 6px; color:#64748b;">분석 데이터를 불러오는 중...</td></tr>
+          </tbody>
+        </table>
+        <div id="impact-summary" style="margin-top:10px; font-weight:800; color:#0f172a;"></div>
       </div>
     </section>
   </main>
@@ -177,6 +204,8 @@
         { id: "tv-nq-widget", symbol: "NASDAQ:QQQ" },
         { id: "tv-vix-widget", symbol: "AMEX:DIA" },
         { id: "tv-krw-widget", symbol: "FX_IDC:USDKRW" },
+        { id: "tv-gold-widget", symbol: "TVC:GOLD" },
+        { id: "tv-btc-widget", symbol: "BITSTAMP:BTCUSD" },
       ];
 
       miniSymbols.forEach(({ id, symbol }) => {
@@ -199,7 +228,98 @@
       });
     }
 
-    document.addEventListener("DOMContentLoaded", initWidgets);
+    function classifySignal(key, change) {
+      if (key === "FX_IDC:USDKRW") {
+        if (change >= 0.2) return { score: -2, text: "원화 약세(부담)" };
+        if (change > 0) return { score: -1, text: "원화 약세 소폭" };
+        if (change <= -0.2) return { score: 2, text: "원화 강세(우호)" };
+        return { score: 1, text: "원화 강세 소폭" };
+      }
+      if (key === "TVC:GOLD") {
+        if (change >= 0.4) return { score: -1, text: "리스크오프 경계" };
+        if (change <= -0.4) return { score: 1, text: "리스크온 보조" };
+        return { score: 0, text: "중립" };
+      }
+      if (key === "BITSTAMP:BTCUSD") {
+        if (change >= 1.0) return { score: 1, text: "리스크온 보조" };
+        if (change <= -1.0) return { score: -1, text: "리스크오프 보조" };
+        return { score: 0, text: "중립" };
+      }
+      if (change >= 0.5) return { score: 2, text: "상승 우호" };
+      if (change > 0) return { score: 1, text: "상승 보조" };
+      if (change <= -0.5) return { score: -2, text: "하락 우려" };
+      return { score: -1, text: "약세 보조" };
+    }
+
+    function formatNum(v) {
+      if (typeof v !== "number" || Number.isNaN(v)) return "-";
+      return v.toLocaleString();
+    }
+
+    async function loadImpactAnalysis() {
+      const tickers = [
+        "AMEX:SPY",
+        "NASDAQ:QQQ",
+        "AMEX:DIA",
+        "FX_IDC:USDKRW",
+        "TVC:GOLD",
+        "BITSTAMP:BTCUSD",
+      ];
+      const bodyEl = document.getElementById("impact-analysis-body");
+      const summaryEl = document.getElementById("impact-summary");
+      const updatedEl = document.getElementById("analysis-updated-at");
+
+      try {
+        const res = await fetch("https://scanner.tradingview.com/global/scan", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            symbols: { tickers, query: { types: [] } },
+            columns: ["name", "description", "close", "change"],
+          }),
+        });
+        if (!res.ok) throw new Error("scanner_http_" + res.status);
+        const data = await res.json();
+        const rows = (data && data.data) || [];
+        if (!rows.length) throw new Error("scanner_empty");
+
+        let totalScore = 0;
+        const bySymbol = new Map(rows.map((r) => [r.s, r.d]));
+        const ordered = tickers.filter((s) => bySymbol.has(s));
+        const html = ordered.map((s) => {
+          const d = bySymbol.get(s);
+          const name = d[0];
+          const close = d[2];
+          const chg = d[3];
+          const signal = classifySignal(s, chg);
+          totalScore += signal.score;
+          const chgTxt = (typeof chg === "number" ? chg.toFixed(2) : "-") + "%";
+          return `<tr style="border-bottom:1px solid #f1f5f9;">
+            <td style="padding:8px 6px;">${name}</td>
+            <td style="padding:8px 6px;">${formatNum(close)}</td>
+            <td style="padding:8px 6px;">${chgTxt}</td>
+            <td style="padding:8px 6px;">${signal.text}</td>
+          </tr>`;
+        }).join("");
+
+        let verdict = "중립";
+        if (totalScore >= 4) verdict = "상승 우위";
+        if (totalScore <= -4) verdict = "하락 우위";
+
+        bodyEl.innerHTML = html;
+        summaryEl.textContent = `종합 점수 ${totalScore}점: ${verdict}`;
+        updatedEl.textContent = `업데이트: ${new Date().toLocaleString("ko-KR")}`;
+      } catch (_e) {
+        bodyEl.innerHTML = '<tr><td colspan="4" style="padding:10px 6px; color:#b91c1c;">분석 데이터 조회 실패(CORS/소스 제한 가능). 위젯 시각 확인만 가능합니다.</td></tr>';
+        summaryEl.textContent = "종합 점수 계산 불가";
+        updatedEl.textContent = "업데이트 실패";
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      initWidgets();
+      loadImpactAnalysis();
+    });
   </script>
 </body>
 </html>
