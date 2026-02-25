@@ -35,24 +35,69 @@ REQUEST_TIMEOUT = _env_float("FUTURES_REQUEST_TIMEOUT_SEC", 12.0)
 
 
 def _fetch_stooq_quote() -> dict:
-    url = f"https://stooq.com/q/l/?s={STOOQ_SYMBOL}&f={STOOQ_FIELDS}"
-    res = requests.get(url, timeout=REQUEST_TIMEOUT)
-    if res.status_code >= 400:
-        raise RuntimeError(f"Stooq quote error: {res.status_code} {res.text[:120]}")
-    line = res.text.strip()
-    if not line:
-        raise RuntimeError("Stooq quote error: empty response")
+    headers = {"User-Agent": "Mozilla/5.0"}
+    candidates = [
+        ("f", f"https://stooq.com/q/l/?s={STOOQ_SYMBOL}&f={STOOQ_FIELDS}"),
+        ("i", f"https://stooq.com/q/l/?s={STOOQ_SYMBOL}&i=1"),
+    ]
 
-    # sd2t2ohlcvcp => symbol,date,time,open,high,low,volume,close,prev_close
-    parts = [x.strip() for x in line.split(",")]
-    if len(parts) < 9:
-        raise RuntimeError(f"Stooq quote parse error: unexpected columns ({len(parts)})")
+    last_error = "unknown"
+    symbol = date_s = time_s = open_s = high_s = low_s = vol_s = close_s = prev_close_s = ""
 
-    symbol, date_s, time_s, open_s, high_s, low_s, vol_s, close_s, prev_close_s = parts[:9]
-    if close_s in ("", "N/D"):
-        raise RuntimeError("Stooq quote error: close price unavailable")
-    if prev_close_s in ("", "N/D"):
-        prev_close_s = close_s
+    for mode, url in candidates:
+        try:
+            res = requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT)
+            if res.status_code >= 400:
+                last_error = f"http {res.status_code}"
+                continue
+
+            raw = res.text.strip()
+            line = ""
+            for ln in raw.splitlines():
+                ln = ln.strip()
+                if ln and not ln.startswith("<"):
+                    line = ln
+                    break
+            if not line:
+                last_error = "empty response line"
+                continue
+
+            sep = "," if "," in line else ";"
+            parts = [x.strip() for x in line.split(sep)]
+
+            if mode == "f":
+                # sd2t2ohlcvcp => symbol,date,time,open,high,low,volume,close,prev_close
+                if len(parts) < 9:
+                    last_error = f"f-mode columns={len(parts)}"
+                    continue
+                symbol, date_s, time_s, open_s, high_s, low_s, vol_s, close_s, prev_close_s = parts[:9]
+            else:
+                # i=1 => symbol,date,time,open,high,low,close,volume,(optional prev_close)
+                if len(parts) < 7:
+                    last_error = f"i-mode columns={len(parts)}"
+                    continue
+                symbol = parts[0]
+                date_s = parts[1]
+                time_s = parts[2]
+                open_s = parts[3]
+                high_s = parts[4]
+                low_s = parts[5]
+                close_s = parts[6]
+                vol_s = parts[7] if len(parts) > 7 else ""
+                prev_close_s = parts[8] if len(parts) > 8 else ""
+
+            if close_s in ("", "N/D"):
+                last_error = "close unavailable"
+                continue
+            if prev_close_s in ("", "N/D"):
+                prev_close_s = close_s
+            break
+        except Exception as e:
+            last_error = str(e)
+            continue
+
+    if not close_s:
+        raise RuntimeError(f"Stooq quote parse error: {last_error}")
 
     ts = int(time.time())
     if date_s and time_s and date_s != "N/D" and time_s != "N/D":
