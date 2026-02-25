@@ -1,2 +1,4 @@
- /animal_face_test/* /animal-face/:splat 301
+/animal_face_test/* /animal-face/:splat 301
 /*.html /:splat 301
+/news/style.css /news/ui/style.css 200
+/en/news/style.css /news/ui/style.css 200
