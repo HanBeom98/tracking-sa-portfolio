@@ -1,0 +1,81 @@
+name: Futures Prediction Cycle
+
+on:
+  schedule:
+    # 08:50 KST on Mon-Fri = 23:50 UTC on Sun-Thu
+    - cron: "50 23 * * 0-4"
+    # 15:40 KST on Mon-Fri = 06:40 UTC on Mon-Fri
+    - cron: "40 6 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "predict / evaluate / both"
+        required: true
+        default: "predict"
+        type: choice
+        options:
+          - predict
+          - evaluate
+          - both
+      target_date:
+        description: "YYYY-MM-DD (empty => today KST)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: futures-prediction-cycle
+  cancel-in-progress: false
+
+jobs:
+  run-cycle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Resolve mode/date
+        id: resolve
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "schedule" ]]; then
+            if [[ "${{ github.event.schedule }}" == "50 23 * * 0-4" ]]; then
+              MODE="predict"
+            else
+              MODE="evaluate"
+            fi
+            TARGET_DATE="$(TZ=Asia/Seoul date +%F)"
+            MANUAL_FLAG=""
+          else
+            MODE="${{ github.event.inputs.mode }}"
+            TARGET_DATE="${{ github.event.inputs.target_date }}"
+            if [[ -z "$TARGET_DATE" ]]; then
+              TARGET_DATE="$(TZ=Asia/Seoul date +%F)"
+            fi
+            MANUAL_FLAG="--manual"
+          fi
+          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
+          echo "target_date=$TARGET_DATE" >> "$GITHUB_OUTPUT"
+          echo "manual_flag=$MANUAL_FLAG" >> "$GITHUB_OUTPUT"
+
+      - name: Run prediction cycle
+        env:
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+          TV_ANALYSIS_API_URL: "https://tracking-sa.vercel.app/api/tv-scan"
+        run: |
+          python scripts/futures_prediction_cycle.py \
+            --mode "${{ steps.resolve.outputs.mode }}" \
+            --target-date "${{ steps.resolve.outputs.target_date }}" \
+            ${{ steps.resolve.outputs.manual_flag }}
+
