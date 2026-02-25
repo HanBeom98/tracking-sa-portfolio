@@ -119,11 +119,14 @@ function initDropdownMenus() {
             dropdown.classList.add('open');
         };
 
-        const scheduleClose = () => {
+        const scheduleClose = (event) => {
+            if (event && event.relatedTarget && dropdown.contains(event.relatedTarget)) {
+                return;
+            }
             if (closeTimer) clearTimeout(closeTimer);
             closeTimer = setTimeout(() => {
                 dropdown.classList.remove('open');
-            }, 320);
+            }, 420);
         };
 
         dropdown.addEventListener('mouseenter', open);

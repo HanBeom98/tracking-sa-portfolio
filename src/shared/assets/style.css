@@ -107,10 +107,27 @@ nav a:hover, .dropbtn:hover {
 .dropdown {
     position: relative;
 }
+
+.dropdown::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 100%;
+    width: 220px;
+    height: 14px;
+    display: none;
+}
+
+.dropdown:hover::after,
+.dropdown.open::after,
+.dropdown:focus-within::after {
+    display: block;
+}
+
 .dropdown-content {
     display: none;
     position: absolute;
-    top: 100%;
+    top: calc(100% - 4px);
     margin-top: 0;
     left: 0;
     min-width: 180px;
