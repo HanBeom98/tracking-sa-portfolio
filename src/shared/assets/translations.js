@@ -236,6 +236,8 @@ const translations = {
         'search_count_suffix': ' results',
         'search_no_results': 'No results found.',
         'search_error': 'An error occurred while searching.',
+        'prev_button': 'Previous',
+        'next_button': 'Next',
         'select_image': 'Select Image',
         'check_result': 'Check Result',
         'post_title': 'Post',
