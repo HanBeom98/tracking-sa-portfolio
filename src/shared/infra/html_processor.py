@@ -23,8 +23,43 @@ def process_html_file_for_common_elements(filepath):
         content = re.sub(r'<script src="/common.js"></script>', '', content)
         content = re.sub(r'<style>[\s\S]*?/\* --- Tracking SA PREMIUM DESIGN SYSTEM[\s\S]*?</style>', '', content)
 
+        seo_fallback = []
+        if not re.search(r'<meta\s+name=["\']description["\']', content, flags=re.IGNORECASE):
+            seo_fallback.append('<meta name="description" content="Tracking SA에서 AI 테스트, 게임, 뉴스 등 다양한 서비스를 만나보세요.">')
+        if not re.search(r'<meta\s+name=["\']keywords["\']', content, flags=re.IGNORECASE):
+            seo_fallback.append('<meta name="keywords" content="Tracking SA, AI 테스트, AI 뉴스, 인공지능, ChatGPT, Claude, Gemini">')
+        if not re.search(r'<meta\s+name=["\']robots["\']', content, flags=re.IGNORECASE):
+            seo_fallback.append('<meta name="robots" content="index, follow">')
+        if not re.search(r'<meta\s+property=["\']og:type["\']', content, flags=re.IGNORECASE):
+            seo_fallback.append('<meta property="og:type" content="website">')
+        if not re.search(r'<meta\s+property=["\']og:site_name["\']', content, flags=re.IGNORECASE):
+            seo_fallback.append('<meta property="og:site_name" content="Tracking SA">')
+        if not re.search(r'<meta\s+property=["\']og:title["\']', content, flags=re.IGNORECASE):
+            seo_fallback.append('<meta property="og:title" content="Tracking SA - AI Services & Hub">')
+        if not re.search(r'<meta\s+property=["\']og:description["\']', content, flags=re.IGNORECASE):
+            seo_fallback.append('<meta property="og:description" content="AI 테스트, 게임, 뉴스를 한 곳에서. Tracking SA">')
+        if not re.search(r'<meta\s+property=["\']og:image["\']', content, flags=re.IGNORECASE):
+            seo_fallback.append('<meta property="og:image" content="https://trackingsa.com/logo.svg">')
+        if not re.search(r'<meta\s+property=["\']og:url["\']', content, flags=re.IGNORECASE):
+            seo_fallback.append('<meta property="og:url" content="https://trackingsa.com/">')
+        if not re.search(r'<meta\s+name=["\']twitter:card["\']', content, flags=re.IGNORECASE):
+            seo_fallback.append('<meta name="twitter:card" content="summary_large_image">')
+        if not re.search(r'<meta\s+name=["\']twitter:title["\']', content, flags=re.IGNORECASE):
+            seo_fallback.append('<meta name="twitter:title" content="Tracking SA - AI Services & Hub">')
+        if not re.search(r'<meta\s+name=["\']twitter:description["\']', content, flags=re.IGNORECASE):
+            seo_fallback.append('<meta name="twitter:description" content="AI 테스트, 게임, 뉴스를 한 곳에서. Tracking SA">')
+        if not re.search(r'<meta\s+name=["\']twitter:image["\']', content, flags=re.IGNORECASE):
+            seo_fallback.append('<meta name="twitter:image" content="https://trackingsa.com/logo.svg">')
+        if not re.search(r'<link\s+[^>]*type=["\']application/rss\+xml["\']', content, flags=re.IGNORECASE):
+            seo_fallback.append('<link rel="alternate" type="application/rss+xml" title="Tracking SA RSS Feed" href="/rss.xml">')
+        if not re.search(r'<link\s+[^>]*rel=["\']sitemap["\']', content, flags=re.IGNORECASE):
+            seo_fallback.append('<link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">')
+        seo_fallback_html = ""
+        if seo_fallback:
+            seo_fallback_html = "\n" + "\n".join(seo_fallback) + "\n"
+
         if '</head>' in content:
-            content = content.replace('</head>', f'{get_common_head()}\n</head>')
+            content = content.replace('</head>', f'{seo_fallback_html}{get_common_head()}\n</head>')
 
         header_html = get_common_header()
         # Header scripts are already included in get_common_head() via head.html

@@ -4,7 +4,7 @@ import os
 PUBLIC_DIR = "public"
 NEWS_POSTS_DIR = "posts"
 PROCESSED_ARTICLES_LOG = "processed_articles.log"
-ADSENSE_CLIENT_ID = "pub-7263630893992216"
+ADSENSE_CLIENT_ID = "ca-pub-7263630893992216"
 BASE_URL = os.getenv("BASE_URL", "https://trackingsa.com/")
 SITEMAP_PATH = os.path.join(PUBLIC_DIR, "sitemap.xml")
 DEFAULT_OG_IMAGE_URL = f"{BASE_URL}logo.svg"
