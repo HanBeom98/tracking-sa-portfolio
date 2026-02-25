@@ -2,49 +2,6 @@
  * AnimalFaceTest Web Component - Ultra Premium Version
  * Fully functional with Gender Selection, Image Upload, Result Analysis, and Sharing.
  */
-function loadScriptOnce(src) {
-    return new Promise((resolve, reject) => {
-        const existing = document.querySelector(`script[data-src="${src}"]`);
-        if (existing) {
-            if (existing.dataset.loaded === '1') {
-                resolve();
-                return;
-            }
-            existing.addEventListener('load', () => resolve(), { once: true });
-            existing.addEventListener('error', () => reject(new Error(`Failed to load script: ${src}`)), { once: true });
-            return;
-        }
-
-        const script = document.createElement('script');
-        script.src = src;
-        script.async = true;
-        script.dataset.src = src;
-        script.onload = () => {
-            script.dataset.loaded = '1';
-            resolve();
-        };
-        script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
-        document.head.appendChild(script);
-    });
-}
-
-async function ensureTmImageReady() {
-    if (window.tmImage) return;
-
-    if (!window.tf) {
-        await loadScriptOnce('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js');
-    }
-    try {
-        await loadScriptOnce('https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js');
-    } catch (e) {
-        await loadScriptOnce('https://unpkg.com/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js');
-    }
-
-    // If a CJS-style export path was chosen by the library, map it to window.tmImage.
-    if (!window.tmImage && window.module && window.module.exports && typeof window.module.exports.load === 'function') {
-        window.tmImage = window.module.exports;
-    }
-}
 
 class AnimalFaceTest extends HTMLElement {
     constructor() {
@@ -294,20 +251,13 @@ class AnimalFaceTest extends HTMLElement {
     }
 
     async loadModel() {
-        try {
-            await ensureTmImageReady();
-        } catch (e) {
-            console.error("Failed to load TM image runtime.", e);
-            return;
-        }
-
-        // Wait for tmImage global to settle after script execution
-        for (let i = 0; i < 20; i++) {
+        // tmImage is loaded via static script tags in index.html.
+        for (let i = 0; i < 30; i++) {
             if (window.tmImage) break;
-            await new Promise(r => setTimeout(r, 200));
+            await new Promise((r) => setTimeout(r, 100));
         }
         if (!window.tmImage) {
-            console.error("tmImage not available.");
+            console.error("tmImage not available. Check TM script loading in index.html.");
             return;
         }
         try {
