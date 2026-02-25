@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>검색 결과 | Tracking SA</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="search-page">
+    <section class="search-head">
+      <h1 data-i18n="search_results_title">검색</h1>
+      <div class="search-box">
+        <input id="searchPageInput" type="text" autocomplete="off" placeholder="검색어를 입력하세요">
+        <button id="searchPageButton" type="button">검색</button>
+      </div>
+      <p id="searchSummary" class="summary"></p>
+    </section>
+
+    <section id="searchPageResults" class="results" aria-live="polite"></section>
+  </main>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>

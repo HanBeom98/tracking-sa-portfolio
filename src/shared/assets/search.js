@@ -2,6 +2,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     const searchInput = document.getElementById('searchInput');
     const searchResultsContainer = document.getElementById('searchResults');
+    if (!searchInput || !searchResultsContainer) return;
 
     const currentLang = localStorage.getItem('lang') || 'ko';
     const titleField = currentLang === 'en' ? 'titleEn' : 'titleKo';
@@ -12,6 +13,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const db = (window.db || (typeof firebase !== 'undefined' && firebase.apps.length ? firebase.firestore() : null));
 
     let debounceTimer;
+    function moveToSearchPage(rawQuery) {
+        const query = (rawQuery || '').trim();
+        if (query.length < 2) return;
+        window.location.href = `/search/?q=${encodeURIComponent(query)}`;
+    }
+
     searchInput.addEventListener('input', function () {
         clearTimeout(debounceTimer);
         const searchTerm = searchInput.value.trim();
@@ -25,6 +32,12 @@ document.addEventListener('DOMContentLoaded', function () {
         debounceTimer = setTimeout(() => {
             searchPosts(searchTerm);
         }, 300);
+    });
+
+    searchInput.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+        moveToSearchPage(searchInput.value);
     });
 
     async function searchPosts(searchTerm) {
