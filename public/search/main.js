@@ -51,20 +51,48 @@ function renderFallbackItems(container, items, lang) {
   `).join('');
 }
 
+function decodeHtmlEntities(text) {
+  const temp = document.createElement('textarea');
+  temp.innerHTML = text;
+  return temp.value;
+}
+
+function parseCardsFromHtml(html) {
+  if (typeof DOMParser !== 'undefined') {
+    const parsed = new DOMParser().parseFromString(html, 'text/html');
+    const cards = Array.from(parsed.querySelectorAll('.news-card-premium'));
+    if (cards.length) {
+      return cards.map((card) => ({
+        href: card.getAttribute('href') || '',
+        title: (card.querySelector('.news-title-text')?.textContent || '').trim(),
+        date: (card.querySelector('.news-date')?.textContent || '').trim()
+      }));
+    }
+  }
+
+  const items = [];
+  const cardRegex = /<a[^>]*class="news-card-premium"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi;
+  let cardMatch;
+  while ((cardMatch = cardRegex.exec(html)) !== null) {
+    const href = cardMatch[1] || '';
+    const inner = cardMatch[2] || '';
+    const titleMatch = inner.match(/<h2[^>]*class="news-title-text"[^>]*>([\s\S]*?)<\/h2>/i);
+    const dateMatch = inner.match(/<span[^>]*class="news-date"[^>]*>([\s\S]*?)<\/span>/i);
+    const title = decodeHtmlEntities((titleMatch?.[1] || '').replace(/<[^>]*>/g, '').trim());
+    const date = decodeHtmlEntities((dateMatch?.[1] || '').replace(/<[^>]*>/g, '').trim());
+    if (href && title) items.push({ href, title, date });
+  }
+  return items;
+}
+
 async function searchFromNewsIndex(query, lang, limit = 200) {
   const newsPath = lang === 'en' ? '/en/news/' : '/news/';
   const res = await fetch(newsPath, { cache: 'no-store' });
   if (!res.ok) return [];
   const html = await res.text();
-  const parsed = new DOMParser().parseFromString(html, 'text/html');
-  const cards = Array.from(parsed.querySelectorAll('.news-card-premium'));
+  const cards = parseCardsFromHtml(html);
   const q = query.toLowerCase();
   return cards
-    .map((card) => ({
-      href: card.getAttribute('href') || '',
-      title: (card.querySelector('.news-title-text')?.textContent || '').trim(),
-      date: (card.querySelector('.news-date')?.textContent || '').trim()
-    }))
     .filter((item) => item.href && item.title.toLowerCase().includes(q))
     .slice(0, limit);
 }
@@ -86,8 +114,14 @@ async function runSearch(query) {
   }
 
   if (!db) {
-    summary.textContent = tr('search_error', '검색 서비스를 불러올 수 없습니다.');
-    container.innerHTML = `<div class="result-empty">${tr('search_error', '검색 서비스를 불러올 수 없습니다.')}</div>`;
+    try {
+      const items = await searchFromNewsIndex(query, lang, 200);
+      summary.textContent = `${tr('search_results_for', '검색어')}: "${query}" · ${items.length}${tr('search_count_suffix', '건')}`;
+      renderFallbackItems(container, items, lang);
+    } catch (_) {
+      summary.textContent = tr('search_error', '검색 서비스를 불러올 수 없습니다.');
+      container.innerHTML = `<div class="result-empty">${tr('search_error', '검색 서비스를 불러올 수 없습니다.')}</div>`;
+    }
     return;
   }
 

@@ -14,20 +14,48 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let debounceTimer;
 
+    function decodeHtmlEntities(text) {
+        const temp = document.createElement('textarea');
+        temp.innerHTML = text;
+        return temp.value;
+    }
+
+    function parseCardsFromHtml(html) {
+        if (typeof DOMParser !== 'undefined') {
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const cards = Array.from(doc.querySelectorAll('.news-card-premium'));
+            if (cards.length) {
+                return cards.map((card) => ({
+                    href: card.getAttribute('href') || '',
+                    title: (card.querySelector('.news-title-text')?.textContent || '').trim(),
+                    date: (card.querySelector('.news-date')?.textContent || '').trim()
+                }));
+            }
+        }
+
+        const items = [];
+        const cardRegex = /<a[^>]*class="news-card-premium"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi;
+        let cardMatch;
+        while ((cardMatch = cardRegex.exec(html)) !== null) {
+            const href = cardMatch[1] || '';
+            const inner = cardMatch[2] || '';
+            const titleMatch = inner.match(/<h2[^>]*class="news-title-text"[^>]*>([\s\S]*?)<\/h2>/i);
+            const dateMatch = inner.match(/<span[^>]*class="news-date"[^>]*>([\s\S]*?)<\/span>/i);
+            const title = decodeHtmlEntities((titleMatch?.[1] || '').replace(/<[^>]*>/g, '').trim());
+            const date = decodeHtmlEntities((dateMatch?.[1] || '').replace(/<[^>]*>/g, '').trim());
+            if (href && title) items.push({ href, title, date });
+        }
+        return items;
+    }
+
     async function searchFromNewsIndex(searchTerm, limit = 10) {
         const newsPath = currentLang === 'en' ? '/en/news/' : '/news/';
         const res = await fetch(newsPath, { cache: 'no-store' });
         if (!res.ok) return [];
         const html = await res.text();
-        const doc = new DOMParser().parseFromString(html, 'text/html');
-        const cards = Array.from(doc.querySelectorAll('.news-card-premium'));
+        const cards = parseCardsFromHtml(html);
         const q = searchTerm.toLowerCase();
         return cards
-            .map((card) => ({
-                href: card.getAttribute('href') || '',
-                title: (card.querySelector('.news-title-text')?.textContent || '').trim(),
-                date: (card.querySelector('.news-date')?.textContent || '').trim()
-            }))
             .filter((item) => item.title.toLowerCase().includes(q) && item.href)
             .slice(0, limit);
     }
@@ -77,8 +105,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     async function searchPosts(searchTerm) {
         if (!db) {
-            searchResultsContainer.innerHTML = '<div class="search-no-results">검색 서비스를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.</div>';
-            searchResultsContainer.classList.add('active');
+            try {
+                const items = await searchFromNewsIndex(searchTerm, 10);
+                renderFallbackItems(items);
+            } catch (_) {
+                searchResultsContainer.innerHTML = '<div class="search-no-results">검색 서비스를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.</div>';
+                searchResultsContainer.classList.add('active');
+            }
             return;
         }
         try {
