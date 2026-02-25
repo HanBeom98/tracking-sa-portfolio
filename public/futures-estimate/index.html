@@ -98,10 +98,46 @@
       min-height: var(--futures-ta-height);
     }
 
+    .multi-grid {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .mini-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      background: #fff;
+      padding: 8px;
+    }
+
+    .mini-title {
+      margin: 2px 2px 8px;
+      color: #0f172a;
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    .mini-widget {
+      min-height: 280px;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
     @media (max-width: 860px) {
       :root {
         --futures-main-height: 700px;
         --futures-ta-height: 460px;
+      }
+
+      .multi-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .mini-widget {
+        min-height: 240px;
       }
     }
   </style>
@@ -145,11 +181,11 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<link rel="stylesheet" href="/style.css?v=20260225110651">
+<link rel="stylesheet" href="/style.css?v=20260225111131">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script src="/firebase-config.js"></script>
-<script src="/translations.js?v=20260225110651"></script>
-<script src="/common.js?v=20260225110651"></script>
+<script src="/translations.js?v=20260225111131"></script>
+<script src="/common.js?v=20260225111131"></script>
 
 </head>
 <body><header>
@@ -213,6 +249,27 @@
       <div class="panel-title">TVC:KOSPI200 기술적 분석</div>
       <div class="panel-subtitle">오실레이터/이동평균 시그널</div>
       <div id="tv-ta-widget" class="tv-wrap"></div>
+
+      <div class="panel-title">야간 영향 4종 모니터</div>
+      <div class="panel-subtitle">ES1!, NQ1!, VIX, USDKRW 동시 확인</div>
+      <div class="multi-grid">
+        <div class="mini-card">
+          <div class="mini-title">CME_MINI:ES1! (S&P500 선물)</div>
+          <div id="tv-es-widget" class="mini-widget"></div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-title">CME_MINI:NQ1! (나스닥 선물)</div>
+          <div id="tv-nq-widget" class="mini-widget"></div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-title">CBOE:VIX (변동성 지수)</div>
+          <div id="tv-vix-widget" class="mini-widget"></div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-title">FX_IDC:USDKRW (달러/원)</div>
+          <div id="tv-krw-widget" class="mini-widget"></div>
+        </div>
+      </div>
     </section>
   </main>
 
@@ -232,6 +289,12 @@
     function initWidgets() {
       const htmlLang = (document.documentElement.lang || "ko").toLowerCase();
       const locale = htmlLang.startsWith("en") ? "en" : "kr";
+      const miniSymbols = [
+        { id: "tv-es-widget", symbol: "CME_MINI:ES1!" },
+        { id: "tv-nq-widget", symbol: "CME_MINI:NQ1!" },
+        { id: "tv-vix-widget", symbol: "CBOE:VIX" },
+        { id: "tv-krw-widget", symbol: "FX_IDC:USDKRW" },
+      ];
 
       buildWidget(
         "tv-main-widget",
@@ -271,6 +334,25 @@
           colorTheme: "light",
         }
       );
+
+      miniSymbols.forEach(({ id, symbol }) => {
+        buildWidget(
+          id,
+          "https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js",
+          {
+            symbol,
+            width: "100%",
+            height: 280,
+            locale,
+            dateRange: "1D",
+            colorTheme: "light",
+            isTransparent: false,
+            largeChartUrl: "",
+            chartOnly: false,
+            noTimeScale: false,
+          }
+        );
+      });
     }
 
     document.addEventListener("DOMContentLoaded", initWidgets);
