@@ -1,5 +1,3 @@
-import crypto from "crypto";
-
 function addCORSHeaders(response) {
   response.headers.set("Access-Control-Allow-Origin", "*");
   response.headers.set("Access-Control-Allow-Methods", "GET, OPTIONS");
@@ -8,15 +6,34 @@ function addCORSHeaders(response) {
   return response;
 }
 
-function b64url(input) {
-  return Buffer.from(input)
-    .toString("base64")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/g, "");
+function toBase64(bytes) {
+  let bin = "";
+  const arr = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+  for (let i = 0; i < arr.length; i += 1) bin += String.fromCharCode(arr[i]);
+  if (typeof btoa === "function") return btoa(bin);
+  return Buffer.from(arr).toString("base64");
 }
 
-function signJwt(serviceAccount) {
+function b64urlFromText(text) {
+  const bytes = new TextEncoder().encode(text);
+  return toBase64(bytes).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+
+function b64urlFromBytes(bytes) {
+  return toBase64(bytes).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+
+function pemToArrayBuffer(pem) {
+  const b64 = pem.replace(/-----BEGIN PRIVATE KEY-----/g, "")
+    .replace(/-----END PRIVATE KEY-----/g, "")
+    .replace(/\s+/g, "");
+  const raw = typeof atob === "function" ? atob(b64) : Buffer.from(b64, "base64").toString("binary");
+  const out = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i += 1) out[i] = raw.charCodeAt(i);
+  return out.buffer;
+}
+
+async function signJwt(serviceAccount) {
   const iat = Math.floor(Date.now() / 1000);
   const exp = iat + 3600;
   const header = { alg: "RS256", typ: "JWT" };
@@ -28,16 +45,26 @@ function signJwt(serviceAccount) {
     exp,
   };
 
-  const encoded = `${b64url(JSON.stringify(header))}.${b64url(JSON.stringify(payload))}`;
-  const signer = crypto.createSign("RSA-SHA256");
-  signer.update(encoded);
-  signer.end();
-  const sig = signer.sign(serviceAccount.private_key);
-  return `${encoded}.${b64url(sig)}`;
+  const encoded = `${b64urlFromText(JSON.stringify(header))}.${b64urlFromText(JSON.stringify(payload))}`;
+
+  const keyData = pemToArrayBuffer(serviceAccount.private_key);
+  const key = await crypto.subtle.importKey(
+    "pkcs8",
+    keyData,
+    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const sig = await crypto.subtle.sign(
+    "RSASSA-PKCS1-v1_5",
+    key,
+    new TextEncoder().encode(encoded)
+  );
+  return `${encoded}.${b64urlFromBytes(new Uint8Array(sig))}`;
 }
 
 async function fetchAccessToken(serviceAccount) {
-  const assertion = signJwt(serviceAccount);
+  const assertion = await signJwt(serviceAccount);
   const body = new URLSearchParams({
     grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
     assertion,
@@ -86,7 +113,9 @@ function parseDocument(doc) {
 }
 
 function getServiceAccount(env) {
-  const raw = env?.FIREBASE_SERVICE_ACCOUNT_JSON || process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+  const raw =
+    env?.FIREBASE_SERVICE_ACCOUNT_JSON ||
+    (typeof process !== "undefined" ? process.env.FIREBASE_SERVICE_ACCOUNT_JSON : null);
   if (!raw) throw new Error("missing_service_account_json");
   const parsed = JSON.parse(raw);
   if (parsed.private_key && parsed.private_key.includes("\\n")) {
@@ -159,4 +188,3 @@ export async function onRequest(context) {
     );
   }
 }
-
