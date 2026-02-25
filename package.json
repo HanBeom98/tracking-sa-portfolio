@@ -5,6 +5,8 @@
   "type": "module",
   "main": "common.js",
   "scripts": {
+    "build": "venv/bin/python main.py --build-only",
+    "build:full": "venv/bin/python main.py",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
