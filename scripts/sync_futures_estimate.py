@@ -18,12 +18,22 @@ if str(ROOT_DIR) not in sys.path:
 from src.shared.infra.db import get_firestore_client
 
 
+def _env_float(name: str, default: float) -> float:
+    raw = os.getenv(name)
+    if raw is None or not str(raw).strip():
+        return default
+    try:
+        return float(raw)
+    except ValueError as e:
+        raise RuntimeError(f"{name} must be a number, got: {raw!r}") from e
+
+
 KOSCOM_BASE_URL = os.getenv("KOSCOM_BASE_URL", "https://api.koscom.co.kr").rstrip("/")
 KOSCOM_API_KEY = os.getenv("KOSCOM_API_KEY", "").strip()
 KOSCOM_MARKET_CODE = os.getenv("KOSCOM_MARKET_CODE", "CME").strip()
 KOSCOM_ISSUE_CODE = os.getenv("KOSCOM_ISSUE_CODE", "ES").strip()
-KOSPI200_BASE = float(os.getenv("KOSPI200_BASE", "350"))
-REQUEST_TIMEOUT = float(os.getenv("FUTURES_REQUEST_TIMEOUT_SEC", "12"))
+KOSPI200_BASE = _env_float("KOSPI200_BASE", 350.0)
+REQUEST_TIMEOUT = _env_float("FUTURES_REQUEST_TIMEOUT_SEC", 12.0)
 
 
 def _iter_values(node: Any) -> Iterable[Any]:
