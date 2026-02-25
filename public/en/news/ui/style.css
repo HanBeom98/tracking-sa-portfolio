@@ -277,6 +277,26 @@
     margin-bottom: 8px;
 }
 
+.news-hashtags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 18px 0 4px;
+}
+
+.news-hashtag-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: oklch(96% 0.02 260);
+    border: 1px solid oklch(90% 0.02 260);
+    color: oklch(40% 0.08 255);
+    font-size: 0.82rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
 .news-card-meta {
     display: flex;
     justify-content: flex-start;
@@ -388,6 +408,12 @@ body.dark-mode .news-article-content {
 body.dark-mode .news-article-date {
     background: oklch(24% 0.02 260);
     color: oklch(85% 0.02 260);
+}
+
+body.dark-mode .news-hashtag-chip {
+    background: oklch(24% 0.02 260);
+    border-color: oklch(34% 0.02 260);
+    color: oklch(85% 0.06 255);
 }
 
 body.dark-mode .news-hero-inner {

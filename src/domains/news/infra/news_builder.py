@@ -42,6 +42,25 @@ def _make_excerpt(markdown_text, limit=160):
     return text[:limit].rstrip() + "…"
 
 
+def _render_markdown_with_hashtags(markdown_text):
+    if not markdown_text:
+        return ""
+    normalized = re.sub(
+        r'^##HASHTAGS##:\s*(.*)$',
+        lambda m: (
+            '<div class="news-hashtags">' +
+            "".join(
+                f'<span class="news-hashtag-chip">{tag}</span>'
+                for tag in re.findall(r'#[^\s#]+', m.group(1))
+            ) +
+            '</div>'
+        ),
+        markdown_text,
+        flags=re.MULTILINE
+    )
+    return markdown.markdown(normalized)
+
+
 def _extract_excerpt_from_article(slug, limit=160):
     path = os.path.join(PUBLIC_DIR, slug)
     if not os.path.exists(path):
@@ -277,14 +296,14 @@ def generate_news_pages():
             excerpt_en = _make_excerpt(content_en)
 
             out_path = os.path.join(PUBLIC_DIR, f"{ukey}.html")
-            html = _wrap_article_html(title, markdown.markdown(content), date, is_en=False)
+            html = _wrap_article_html(title, _render_markdown_with_hashtags(content), date, is_en=False)
 
             with open(out_path, "w", encoding="utf-8") as f:
                 f.write(html)
             process_html_file_for_common_elements(out_path)
             en_out_path = os.path.join(PUBLIC_DIR, "en", f"{ukey}.html")
             os.makedirs(os.path.dirname(en_out_path), exist_ok=True)
-            en_html = _wrap_article_html(title_en, markdown.markdown(content_en), date, is_en=True)
+            en_html = _wrap_article_html(title_en, _render_markdown_with_hashtags(content_en), date, is_en=True)
             with open(en_out_path, "w", encoding="utf-8") as f:
                 f.write(en_html)
             process_html_file_for_common_elements(en_out_path)
