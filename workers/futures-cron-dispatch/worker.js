@@ -30,6 +30,7 @@ async function dispatchWorkflow(env) {
     headers: {
       "Authorization": `Bearer ${token}`,
       "Accept": "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
       "Content-Type": "application/json",
       "User-Agent": "tracking-sa-futures-cron-worker"
     },
