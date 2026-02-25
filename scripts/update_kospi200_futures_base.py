@@ -19,11 +19,41 @@ from src.shared.infra.db import get_firestore_client
 REQUEST_TIMEOUT = float(os.getenv("FUTURES_REQUEST_TIMEOUT_SEC", "12"))
 
 
-def _extract_first_float(text: str) -> float:
-    m = re.search(r"([0-9]{2,4}(?:\.[0-9]+)?)", text or "")
-    if not m:
-        raise RuntimeError("number not found")
-    return float(m.group(1))
+def _to_float(raw: str) -> float:
+    txt = (raw or "").strip().replace(",", "")
+    if not txt:
+        raise RuntimeError("empty number")
+    return float(txt)
+
+
+def _fetch_from_investing() -> tuple[float, str]:
+    url = "https://kr.investing.com/indices/korea-200-futures-historical-data"
+    headers = {
+        "User-Agent": "Mozilla/5.0",
+        "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
+    }
+    res = requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT)
+    if res.status_code >= 400:
+        raise RuntimeError(f"http {res.status_code}")
+    html = res.text
+
+    # Try metadata-like numeric fields first.
+    patterns = [
+        r'"last_last"\s*:\s*"([0-9][0-9,\.]*)"',
+        r'"last_close"\s*:\s*"([0-9][0-9,\.]*)"',
+        r'"last"\s*:\s*"([0-9][0-9,\.]*)"',
+    ]
+    for p in patterns:
+        m = re.search(p, html, flags=re.IGNORECASE)
+        if m:
+            return _to_float(m.group(1)), "investing_kospi200_futures_close"
+
+    # Fallback: first reasonable numeric price token near 800~1200 band.
+    candidates = re.findall(r'([89][0-9]{2}(?:\.[0-9]+)?)', html)
+    if candidates:
+        return _to_float(candidates[0]), "investing_kospi200_futures_close_fallback"
+
+    raise RuntimeError("investing parse failed")
 
 
 def _fetch_from_esignal() -> tuple[float, str]:
@@ -47,10 +77,22 @@ def _fetch_from_esignal() -> tuple[float, str]:
 
 
 def _resolve_base_value() -> tuple[float, str]:
+    errors = []
+    try:
+        return _fetch_from_investing()
+    except Exception as e:
+        errors.append(f"investing: {e}")
+
+    try:
+        return _fetch_from_esignal()
+    except Exception as e:
+        errors.append(f"esignal: {e}")
+
     manual = os.getenv("KOSPI200_BASE")
     if manual and str(manual).strip():
-        return float(manual), "manual_env"
-    return _fetch_from_esignal()
+        return float(manual), "manual_env_fallback"
+
+    raise RuntimeError(" / ".join(errors) if errors else "no source available")
 
 
 def main() -> int:
