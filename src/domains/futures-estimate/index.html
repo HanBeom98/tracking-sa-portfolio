@@ -268,12 +268,14 @@
         }).join("");
 
         bodyEl.innerHTML = html;
-        summaryEl.textContent = `종합 점수 ${data.totalScore}점: ${data.verdict}`;
+        const pTxt = typeof data.probabilityUp === "number" ? `${data.probabilityUp}%` : "-";
+        const nTxt = typeof data.samples === "number" ? `${data.samples}` : "-";
+        summaryEl.textContent = `종합 점수 ${data.totalScore}점 | 상승확률 ${pTxt} | 판정 ${data.verdict} (표본 ${nTxt})`;
         const updated = data.updatedAt ? new Date(data.updatedAt) : new Date();
         updatedEl.textContent = `업데이트: ${updated.toLocaleString("ko-KR")}`;
       } catch (_e) {
         bodyEl.innerHTML = '<tr><td colspan="4" style="padding:10px 6px; color:#b91c1c;">분석 데이터 조회 실패(CORS/소스 제한 가능). 위젯 시각 확인만 가능합니다.</td></tr>';
-        summaryEl.textContent = "종합 점수 계산 불가";
+        summaryEl.textContent = "모델 계산 불가";
         updatedEl.textContent = "업데이트 실패";
       }
     }

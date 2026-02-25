@@ -1,6 +1,7 @@
 import { normalizeTickers } from "../../src/domains/futures-estimate/domain/impact_rules.js";
 import { fetchTradingViewScan, mapTradingViewRowsToQuotes } from "../../src/domains/futures-estimate/infra/tv_scan_service.js";
 import { buildImpactAnalysis } from "../../src/domains/futures-estimate/application/build_impact_analysis.js";
+import { runLogisticMarketModel } from "../../src/domains/futures-estimate/application/logistic_model.js";
 
 function addCORSHeaders(response) {
   response.headers.set("Access-Control-Allow-Origin", "*");
@@ -47,7 +48,16 @@ export async function onRequest(context) {
     }
     const scannerJson = await scannerRes.json();
     const quotes = mapTradingViewRowsToQuotes(scannerJson?.data || []);
-    const analysis = buildImpactAnalysis(safeTickers, quotes);
+    if (!quotes.length) throw new Error("quotes_empty");
+
+    const currentReturnsMap = new Map(
+      quotes
+        .filter((q) => typeof q?.change === "number")
+        .map((q) => [q.symbol, q.change / 100])
+    );
+
+    const modelResult = await runLogisticMarketModel(safeTickers, currentReturnsMap);
+    const analysis = buildImpactAnalysis(safeTickers, quotes, modelResult);
 
     return addCORSHeaders(
       new Response(JSON.stringify(analysis), {

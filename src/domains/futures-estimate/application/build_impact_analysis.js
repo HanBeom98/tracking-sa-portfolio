@@ -1,9 +1,8 @@
-import { classifySignal, verdictFromScore } from "../domain/impact_rules.js";
+import { classifyContribution, verdictFromProbability } from "../domain/impact_rules.js";
 
-export function buildImpactAnalysis(tickers, quotes) {
+export function buildImpactAnalysis(tickers, quotes, modelResult) {
   const bySymbol = new Map((quotes || []).map((q) => [q.symbol, q]));
 
-  let totalScore = 0;
   const items = tickers.map((symbol) => {
     const q = bySymbol.get(symbol);
     if (!q) {
@@ -14,11 +13,14 @@ export function buildImpactAnalysis(tickers, quotes) {
         change: null,
         signal: "데이터 없음",
         score: 0,
+        weighted: 0,
       };
     }
 
-    const signal = classifySignal(symbol, q.change ?? 0);
-    totalScore += signal.score;
+    const w = modelResult?.weightsBySymbol?.[symbol] ?? 0;
+    const z = modelResult?.zBySymbol?.[symbol] ?? 0;
+    const weighted = w * z;
+    const signal = classifyContribution(weighted);
 
     return {
       symbol,
@@ -27,13 +29,21 @@ export function buildImpactAnalysis(tickers, quotes) {
       change: q.change,
       signal: signal.text,
       score: signal.score,
+      weighted: Number(weighted.toFixed(4)),
     };
   });
+
+  const pUp = modelResult?.pUp ?? 0.5;
+  const totalScore = Number(((pUp - 0.5) * 20).toFixed(2));
 
   return {
     items,
     totalScore,
-    verdict: verdictFromScore(totalScore),
+    probabilityUp: Number((pUp * 100).toFixed(2)),
+    verdict: verdictFromProbability(pUp),
+    model: "logistic_regression",
+    samples: modelResult?.samples ?? 0,
+    target: modelResult?.target ?? "EWY",
     updatedAt: new Date().toISOString(),
   };
 }
