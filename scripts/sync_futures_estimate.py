@@ -424,10 +424,22 @@ def _estimate_model_coefficients() -> dict:
         }
 
 
-def _resolve_kospi200_base() -> float:
+def _resolve_kospi200_base() -> tuple[float, str]:
     configured = os.getenv("KOSPI200_BASE")
     if configured is not None and str(configured).strip():
-        return float(configured)
+        return float(configured), "manual_futures_close"
+
+    db = get_firestore_client()
+    if db:
+        try:
+            doc = db.collection("futures_estimate_meta").document("base_current").get()
+            if doc.exists:
+                data = doc.to_dict() or {}
+                val = data.get("kospi200_futures_close")
+                if val is not None and str(val).strip():
+                    return float(val), str(data.get("base_source") or "firestore_base_current")
+        except Exception:
+            pass
 
     headers = {"User-Agent": "Mozilla/5.0"}
     url = f"https://query1.finance.yahoo.com/v8/finance/chart/{YAHOO_KOSPI200_TARGET_SYMBOL}?interval=1d&range=5d"
@@ -445,9 +457,10 @@ def _resolve_kospi200_base() -> float:
         base = meta.get("previousClose") or meta.get("regularMarketPrice")
         if base in (None, "", "N/D"):
             raise RuntimeError("previousClose missing")
-        return float(base)
+        # Fallback only when manual futures close is not configured.
+        return float(base), "spot_fallback"
     except Exception:
-        return float(DEFAULT_KOSPI200_BASE)
+        return float(DEFAULT_KOSPI200_BASE), "default_fallback"
 
 
 def _fetch_public_quote(yahoo_symbol: str, stooq_symbol: str) -> dict:
@@ -463,7 +476,14 @@ def _fetch_public_quote(yahoo_symbol: str, stooq_symbol: str) -> dict:
     raise RuntimeError(" / ".join(errors))
 
 
-def _extract_quote(raw_es: dict, raw_nq: dict, raw_fx: dict, kospi200_base: float, model: dict) -> dict:
+def _extract_quote(
+    raw_es: dict,
+    raw_nq: dict,
+    raw_fx: dict,
+    kospi200_base: float,
+    base_source: str,
+    model: dict,
+) -> dict:
     es_price = float(raw_es["futures_price"])
     es_prev = float(raw_es["futures_prev_close"]) if float(raw_es["futures_prev_close"]) > 0 else es_price
     es_ret = (es_price - es_prev) / es_prev if es_prev else 0.0
@@ -507,6 +527,7 @@ def _extract_quote(raw_es: dict, raw_nq: dict, raw_fx: dict, kospi200_base: floa
         "model_sample_size": int(model["sample_size"]),
         "model_method": str(model["method"]),
         "model_target_symbol": str(model["target_symbol"]),
+        "base_source": str(base_source),
         "model_fit_mae_pct": float(model["fit_mae"] * 100.0),
         "model_fit_rmse_pct": float(model["fit_rmse"] * 100.0),
         "model_fit_dir_acc_pct": float(model["fit_dir_acc"] * 100.0),
@@ -571,9 +592,9 @@ def main() -> int:
                 "futures_prev_close": 1.0,
             }
 
-        kospi200_base = _resolve_kospi200_base()
+        kospi200_base, base_source = _resolve_kospi200_base()
         model = _estimate_model_coefficients()
-        payload = _extract_quote(raw_es, raw_nq, raw_fx, kospi200_base, model)
+        payload = _extract_quote(raw_es, raw_nq, raw_fx, kospi200_base, base_source, model)
         _save_firestore(payload)
         ts_text = datetime.datetime.utcfromtimestamp(payload["ts"]).strftime("%Y-%m-%d %H:%M:%S UTC")
         print(
