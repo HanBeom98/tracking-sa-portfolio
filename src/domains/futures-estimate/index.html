@@ -244,7 +244,7 @@
       </table>
       <div class="futures-summary-grid">
         <div class="metric-card">
-          <div class="metric-label" data-i18n="futures_gap_label">디커플링 갭</div>
+          <div class="metric-label" data-i18n="futures_gap_label">전일 종가 대비</div>
           <div class="metric-value" id="gap-value">-</div>
         </div>
         <div class="metric-card">
@@ -263,7 +263,7 @@
       </div>
 
       <div class="panel-title" data-i18n="futures_tv_title">TradingView 기술적 분석</div>
-        <div class="panel-subtitle" data-i18n="futures_tv_subtitle">CME_MINI:ES1! 기술적 시그널(참고용)</div>
+      <div class="panel-subtitle" data-i18n="futures_tv_subtitle">KRX:K2I1! 기술적 시그널(참고용)</div>
       <div id="tv-widget-container"></div>
 
       <div class="futures-footnote">
@@ -483,7 +483,7 @@
       }
 
       const headline = document.getElementById("estimate-headline");
-      headline.textContent = `${tr("futures_estimate_label", "추정가")}: ${formatNum(q.estimate)} (${q.delta >= 0 ? "+" : ""}${formatNum(q.delta)}, ${q.deltaRate >= 0 ? "+" : ""}${q.deltaRate.toFixed(2)}%)`;
+      headline.textContent = `${tr("futures_estimate_label", "코스피200 선물(지연)")}: ${formatNum(q.estimate)} (${q.delta >= 0 ? "+" : ""}${formatNum(q.delta)}, ${q.deltaRate >= 0 ? "+" : ""}${q.deltaRate.toFixed(2)}%)`;
       headline.classList.toggle("down", q.delta < 0);
       document.getElementById("gap-value").textContent = `${formatNum(q.estimate - q.kospi200Base)} pt`;
       renderReferenceLines(q);
