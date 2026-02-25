@@ -1,25 +1,13 @@
 name: Daily AI News Post
 
 on:
-  push:
-    branches: [ main ]
-    paths-ignore:
-      - 'logs/**'
-      - 'README.md'
-      - 'blueprint.md'
   schedule:
     - cron: '6 22 * * *'
     - cron: '12 12 * * *'
   workflow_dispatch:
-    inputs:
-      generate_news:
-        description: '새 뉴스를 생성하시겠습니까?'
-        type: boolean
-        default: false
 
 permissions:
   contents: write
-  deployments: write
 
 concurrency:
   group: daily-ai-news-post
@@ -53,21 +41,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run Build Script (Smart Execution)
+      - name: Run News Generation + Build
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
           BASE_URL: "https://trackingsa.com/"
         run: |
           set -euo pipefail
-          if [[ "${{ github.event_name }}" == "schedule" || ( "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.generate_news }}" == "true" ) ]]; then
-            python main.py
-          else
-            python main.py --build-only
-          fi
+          python main.py
 
-      - name: Commit News Build (schedule only)
-        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.generate_news == 'true')
+      - name: Commit News Build
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
