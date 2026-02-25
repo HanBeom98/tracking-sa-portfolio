@@ -33,14 +33,19 @@ STOOQ_NQ_SYMBOL = os.getenv("STOOQ_NQ_SYMBOL", "nq.f").strip().lower()
 STOOQ_FIELDS = os.getenv("STOOQ_FIELDS", "sd2t2ohlcvcp").strip()
 YAHOO_SYMBOL = os.getenv("YAHOO_SYMBOL", "ES=F").strip()
 YAHOO_NQ_SYMBOL = os.getenv("YAHOO_NQ_SYMBOL", "NQ=F").strip()
-YAHOO_KOSPI200_SYMBOL = os.getenv("YAHOO_KOSPI200_SYMBOL", "^KS200").strip()
+YAHOO_USDKRW_SYMBOL = os.getenv("YAHOO_USDKRW_SYMBOL", "KRW=X").strip()
+YAHOO_KOSPI200_TARGET_SYMBOL = os.getenv("YAHOO_KOSPI200_TARGET_SYMBOL", "^KS200").strip()
 DEFAULT_KOSPI200_BASE = _env_float("DEFAULT_KOSPI200_BASE", 350.0)
 REQUEST_TIMEOUT = _env_float("FUTURES_REQUEST_TIMEOUT_SEC", 12.0)
 RETENTION_DAYS = int(_env_float("FUTURES_RETENTION_DAYS", 14.0))
 LOOKBACK_DAYS = int(_env_float("FUTURES_LOOKBACK_DAYS", 60.0))
 MIN_MODEL_POINTS = int(_env_float("FUTURES_MIN_MODEL_POINTS", 20.0))
+MODEL_BACKTEST_DAYS = int(_env_float("FUTURES_MODEL_BACKTEST_DAYS", 20.0))
+INTERCEPT_CLAMP = _env_float("FUTURES_INTERCEPT_CLAMP", 0.002)
+PREDICT_RETURN_CLAMP = _env_float("FUTURES_PREDICT_RETURN_CLAMP", 0.08)
 DEFAULT_BETA_ES = _env_float("FUTURES_DEFAULT_BETA_ES", 0.75)
 DEFAULT_BETA_NQ = _env_float("FUTURES_DEFAULT_BETA_NQ", 0.25)
+DEFAULT_BETA_USDKRW = _env_float("FUTURES_DEFAULT_BETA_USDKRW", 0.10)
 
 
 def _fetch_stooq_quote(symbol_code: str) -> dict:
@@ -234,10 +239,10 @@ def _build_returns(series: list[tuple[int, float]]) -> dict[str, float]:
     return out
 
 
-def _solve_3x3(matrix: list[list[float]], vector: list[float]) -> tuple[float, float, float]:
+def _solve_linear_system(matrix: list[list[float]], vector: list[float]) -> list[float]:
     a = [row[:] for row in matrix]
     b = vector[:]
-    n = 3
+    n = len(vector)
     for col in range(n):
         pivot = col
         for r in range(col + 1, n):
@@ -263,57 +268,159 @@ def _solve_3x3(matrix: list[list[float]], vector: list[float]) -> tuple[float, f
             for c in range(col, n):
                 a[r][c] -= f * a[col][c]
             b[r] -= f * b[col]
-    return b[0], b[1], b[2]
+    return b
+
+
+def _clip(value: float, low: float, high: float) -> float:
+    return max(min(float(value), float(high)), float(low))
+
+
+def _fit_error_metrics(rows: list[tuple[float, float, float, float]], coeffs: list[float]) -> dict:
+    if not rows:
+        return {"mae": 0.0, "rmse": 0.0, "dir_acc": 0.0}
+    errs = []
+    dir_ok = 0
+    a0, b_es, b_nq, b_fx = coeffs
+    for es_r, nq_r, fx_r, target_r in rows:
+        pred_r = a0 + b_es * es_r + b_nq * nq_r + b_fx * fx_r
+        errs.append(target_r - pred_r)
+        if (target_r >= 0 and pred_r >= 0) or (target_r < 0 and pred_r < 0):
+            dir_ok += 1
+    mae = sum(abs(e) for e in errs) / len(errs)
+    rmse = (sum(e * e for e in errs) / len(errs)) ** 0.5
+    return {"mae": float(mae), "rmse": float(rmse), "dir_acc": float(dir_ok / len(errs))}
+
+
+def _rolling_backtest(rows: list[tuple[float, float, float, float]], train_window: int, test_window: int) -> dict:
+    if len(rows) < train_window + 1:
+        return {"n": 0, "mae": 0.0, "rmse": 0.0, "dir_acc": 0.0}
+    start = max(train_window, len(rows) - test_window)
+    errors: list[float] = []
+    dir_ok = 0
+    n_eval = 0
+    for i in range(start, len(rows)):
+        train = rows[i - train_window : i]
+        if len(train) < train_window:
+            continue
+        try:
+            n = float(len(train))
+            sx1 = sum(r[0] for r in train)
+            sx2 = sum(r[1] for r in train)
+            sx3 = sum(r[2] for r in train)
+            sy = sum(r[3] for r in train)
+            sx1x1 = sum(r[0] * r[0] for r in train)
+            sx2x2 = sum(r[1] * r[1] for r in train)
+            sx3x3 = sum(r[2] * r[2] for r in train)
+            sx1x2 = sum(r[0] * r[1] for r in train)
+            sx1x3 = sum(r[0] * r[2] for r in train)
+            sx2x3 = sum(r[1] * r[2] for r in train)
+            sx1y = sum(r[0] * r[3] for r in train)
+            sx2y = sum(r[1] * r[3] for r in train)
+            sx3y = sum(r[2] * r[3] for r in train)
+            m = [
+                [n, sx1, sx2, sx3],
+                [sx1, sx1x1, sx1x2, sx1x3],
+                [sx2, sx1x2, sx2x2, sx2x3],
+                [sx3, sx1x3, sx2x3, sx3x3],
+            ]
+            v = [sy, sx1y, sx2y, sx3y]
+            coeffs = _solve_linear_system(m, v)
+            coeffs[0] = _clip(coeffs[0], -INTERCEPT_CLAMP, INTERCEPT_CLAMP)
+            es_r, nq_r, fx_r, target_r = rows[i]
+            pred_r = coeffs[0] + coeffs[1] * es_r + coeffs[2] * nq_r + coeffs[3] * fx_r
+            errors.append(target_r - pred_r)
+            if (target_r >= 0 and pred_r >= 0) or (target_r < 0 and pred_r < 0):
+                dir_ok += 1
+            n_eval += 1
+        except Exception:
+            continue
+
+    if not errors:
+        return {"n": 0, "mae": 0.0, "rmse": 0.0, "dir_acc": 0.0}
+
+    mae = sum(abs(e) for e in errors) / len(errors)
+    rmse = (sum(e * e for e in errors) / len(errors)) ** 0.5
+    return {"n": int(n_eval), "mae": float(mae), "rmse": float(rmse), "dir_acc": float(dir_ok / len(errors))}
 
 
 def _estimate_model_coefficients() -> dict:
     try:
         es_daily = _fetch_yahoo_daily_closes(YAHOO_SYMBOL)
         nq_daily = _fetch_yahoo_daily_closes(YAHOO_NQ_SYMBOL)
-        ks_daily = _fetch_yahoo_daily_closes(YAHOO_KOSPI200_SYMBOL)
+        fx_daily = _fetch_yahoo_daily_closes(YAHOO_USDKRW_SYMBOL)
+        ks_daily = _fetch_yahoo_daily_closes(YAHOO_KOSPI200_TARGET_SYMBOL)
 
         es_r = _build_returns(es_daily)
         nq_r = _build_returns(nq_daily)
+        fx_r = _build_returns(fx_daily)
         ks_r = _build_returns(ks_daily)
 
-        common_dates = sorted(set(es_r.keys()) & set(nq_r.keys()) & set(ks_r.keys()))
+        common_dates = sorted(set(es_r.keys()) & set(nq_r.keys()) & set(fx_r.keys()) & set(ks_r.keys()))
         common_dates = common_dates[-LOOKBACK_DAYS:]
-        rows = [(es_r[d], nq_r[d], ks_r[d]) for d in common_dates]
+        rows = [(es_r[d], nq_r[d], fx_r[d], ks_r[d]) for d in common_dates]
         if len(rows) < MIN_MODEL_POINTS:
             raise RuntimeError(f"insufficient points: {len(rows)}")
 
         n = float(len(rows))
         sx1 = sum(r[0] for r in rows)
         sx2 = sum(r[1] for r in rows)
-        sy = sum(r[2] for r in rows)
+        sx3 = sum(r[2] for r in rows)
+        sy = sum(r[3] for r in rows)
         sx1x1 = sum(r[0] * r[0] for r in rows)
         sx2x2 = sum(r[1] * r[1] for r in rows)
+        sx3x3 = sum(r[2] * r[2] for r in rows)
         sx1x2 = sum(r[0] * r[1] for r in rows)
-        sx1y = sum(r[0] * r[2] for r in rows)
-        sx2y = sum(r[1] * r[2] for r in rows)
+        sx1x3 = sum(r[0] * r[2] for r in rows)
+        sx2x3 = sum(r[1] * r[2] for r in rows)
+        sx1y = sum(r[0] * r[3] for r in rows)
+        sx2y = sum(r[1] * r[3] for r in rows)
+        sx3y = sum(r[2] * r[3] for r in rows)
 
         m = [
-            [n, sx1, sx2],
-            [sx1, sx1x1, sx1x2],
-            [sx2, sx1x2, sx2x2],
+            [n, sx1, sx2, sx3],
+            [sx1, sx1x1, sx1x2, sx1x3],
+            [sx2, sx1x2, sx2x2, sx2x3],
+            [sx3, sx1x3, sx2x3, sx3x3],
         ]
-        v = [sy, sx1y, sx2y]
-        a0, b_es, b_nq = _solve_3x3(m, v)
+        v = [sy, sx1y, sx2y, sx3y]
+        coeffs = _solve_linear_system(m, v)
+        a0, b_es, b_nq, b_fx = coeffs
+        a0 = _clip(a0, -INTERCEPT_CLAMP, INTERCEPT_CLAMP)
+        fit = _fit_error_metrics(rows, [a0, b_es, b_nq, b_fx])
+        backtest = _rolling_backtest(rows, train_window=max(MIN_MODEL_POINTS, 20), test_window=max(MODEL_BACKTEST_DAYS, 10))
 
         return {
             "intercept": float(a0),
             "beta_es": float(b_es),
             "beta_nq": float(b_nq),
+            "beta_usdkrw": float(b_fx),
             "sample_size": int(len(rows)),
-            "method": "ols_60d",
+            "method": "ols_60d_fx",
+            "target_symbol": YAHOO_KOSPI200_TARGET_SYMBOL,
+            "fit_mae": float(fit["mae"]),
+            "fit_rmse": float(fit["rmse"]),
+            "fit_dir_acc": float(fit["dir_acc"]),
+            "backtest_n": int(backtest["n"]),
+            "backtest_mae": float(backtest["mae"]),
+            "backtest_rmse": float(backtest["rmse"]),
+            "backtest_dir_acc": float(backtest["dir_acc"]),
         }
     except Exception:
         return {
             "intercept": 0.0,
             "beta_es": float(DEFAULT_BETA_ES),
             "beta_nq": float(DEFAULT_BETA_NQ),
+            "beta_usdkrw": float(DEFAULT_BETA_USDKRW),
             "sample_size": 0,
             "method": "fallback_weighted",
+            "target_symbol": YAHOO_KOSPI200_TARGET_SYMBOL,
+            "fit_mae": 0.0,
+            "fit_rmse": 0.0,
+            "fit_dir_acc": 0.0,
+            "backtest_n": 0,
+            "backtest_mae": 0.0,
+            "backtest_rmse": 0.0,
+            "backtest_dir_acc": 0.0,
         }
 
 
@@ -323,7 +430,7 @@ def _resolve_kospi200_base() -> float:
         return float(configured)
 
     headers = {"User-Agent": "Mozilla/5.0"}
-    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{YAHOO_KOSPI200_SYMBOL}?interval=1d&range=5d"
+    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{YAHOO_KOSPI200_TARGET_SYMBOL}?interval=1d&range=5d"
     try:
         res = requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT)
         if res.status_code >= 400:
@@ -356,7 +463,7 @@ def _fetch_public_quote(yahoo_symbol: str, stooq_symbol: str) -> dict:
     raise RuntimeError(" / ".join(errors))
 
 
-def _extract_quote(raw_es: dict, raw_nq: dict, kospi200_base: float, model: dict) -> dict:
+def _extract_quote(raw_es: dict, raw_nq: dict, raw_fx: dict, kospi200_base: float, model: dict) -> dict:
     es_price = float(raw_es["futures_price"])
     es_prev = float(raw_es["futures_prev_close"]) if float(raw_es["futures_prev_close"]) > 0 else es_price
     es_ret = (es_price - es_prev) / es_prev if es_prev else 0.0
@@ -365,9 +472,18 @@ def _extract_quote(raw_es: dict, raw_nq: dict, kospi200_base: float, model: dict
     nq_prev = float(raw_nq["futures_prev_close"]) if float(raw_nq["futures_prev_close"]) > 0 else nq_price
     nq_ret = (nq_price - nq_prev) / nq_prev if nq_prev else 0.0
 
-    ts = max(int(raw_es.get("ts") or 0), int(raw_nq.get("ts") or 0), int(time.time()))
-    predicted_return = float(model["intercept"]) + float(model["beta_es"]) * es_ret + float(model["beta_nq"]) * nq_ret
-    predicted_return = max(min(predicted_return, 0.08), -0.08)
+    fx_price = float(raw_fx["futures_price"])
+    fx_prev = float(raw_fx["futures_prev_close"]) if float(raw_fx["futures_prev_close"]) > 0 else fx_price
+    fx_ret = (fx_price - fx_prev) / fx_prev if fx_prev else 0.0
+
+    ts = max(int(raw_es.get("ts") or 0), int(raw_nq.get("ts") or 0), int(raw_fx.get("ts") or 0), int(time.time()))
+    predicted_return = (
+        float(model["intercept"])
+        + float(model["beta_es"]) * es_ret
+        + float(model["beta_nq"]) * nq_ret
+        + float(model["beta_usdkrw"]) * fx_ret
+    )
+    predicted_return = _clip(predicted_return, -PREDICT_RETURN_CLAMP, PREDICT_RETURN_CLAMP)
 
     estimate = kospi200_base * (1 + predicted_return)
     delta = estimate - kospi200_base
@@ -381,11 +497,23 @@ def _extract_quote(raw_es: dict, raw_nq: dict, kospi200_base: float, model: dict
         "futures_nq_price": float(nq_price),
         "futures_nq_prev_close": float(nq_prev),
         "futures_nq_return": float(nq_ret),
+        "usdkrw_price": float(fx_price),
+        "usdkrw_prev_close": float(fx_prev),
+        "usdkrw_return": float(fx_ret),
         "model_intercept": float(model["intercept"]),
         "model_beta_es": float(model["beta_es"]),
         "model_beta_nq": float(model["beta_nq"]),
+        "model_beta_usdkrw": float(model["beta_usdkrw"]),
         "model_sample_size": int(model["sample_size"]),
         "model_method": str(model["method"]),
+        "model_target_symbol": str(model["target_symbol"]),
+        "model_fit_mae_pct": float(model["fit_mae"] * 100.0),
+        "model_fit_rmse_pct": float(model["fit_rmse"] * 100.0),
+        "model_fit_dir_acc_pct": float(model["fit_dir_acc"] * 100.0),
+        "backtest_n": int(model["backtest_n"]),
+        "backtest_mae_pct": float(model["backtest_mae"] * 100.0),
+        "backtest_rmse_pct": float(model["backtest_rmse"] * 100.0),
+        "backtest_dir_acc_pct": float(model["backtest_dir_acc"] * 100.0),
         "predicted_return": float(predicted_return),
         "kospi200_base": float(kospi200_base),
         "estimate": float(estimate),
@@ -393,7 +521,7 @@ def _extract_quote(raw_es: dict, raw_nq: dict, kospi200_base: float, model: dict
         "delta_rate": float(delta_rate),
         "market_code": "cme",
         "issue_code": str(raw_es.get("symbol", STOOQ_SYMBOL)),
-        "source": "public_quote_model_v2",
+        "source": "public_quote_model_v3",
     }
 
 
@@ -433,16 +561,26 @@ def main() -> int:
     try:
         raw_es = _fetch_public_quote(YAHOO_SYMBOL, STOOQ_SYMBOL)
         raw_nq = _fetch_public_quote(YAHOO_NQ_SYMBOL, STOOQ_NQ_SYMBOL)
+        try:
+            raw_fx = _fetch_yahoo_quote(YAHOO_USDKRW_SYMBOL)
+        except Exception:
+            raw_fx = {
+                "symbol": YAHOO_USDKRW_SYMBOL,
+                "ts": max(int(raw_es.get("ts") or 0), int(raw_nq.get("ts") or 0), int(time.time())),
+                "futures_price": 1.0,
+                "futures_prev_close": 1.0,
+            }
 
         kospi200_base = _resolve_kospi200_base()
         model = _estimate_model_coefficients()
-        payload = _extract_quote(raw_es, raw_nq, kospi200_base, model)
+        payload = _extract_quote(raw_es, raw_nq, raw_fx, kospi200_base, model)
         _save_firestore(payload)
         ts_text = datetime.datetime.utcfromtimestamp(payload["ts"]).strftime("%Y-%m-%d %H:%M:%S UTC")
         print(
             f"✅ Futures sync complete: estimate={payload['estimate']:.2f}, "
             f"delta={payload['delta']:+.2f} ({payload['delta_rate']:+.2f}%), ts={ts_text}, "
-            f"retention={RETENTION_DAYS}d, model={payload['model_method']}({payload['model_sample_size']})"
+            f"retention={RETENTION_DAYS}d, model={payload['model_method']}({payload['model_sample_size']}), "
+            f"oos_dir_acc={payload['backtest_dir_acc_pct']:.1f}%"
         )
         return 0
     except Exception as e:

@@ -40,7 +40,7 @@
 
     .futures-metrics {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 10px;
       margin-top: 14px;
     }
@@ -220,6 +220,10 @@
         <div class="metric-card">
           <div class="metric-label" data-i18n="futures_updated_at">업데이트</div>
           <div class="metric-value" id="updated-at" style="font-size:0.95rem;">-</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">모델 정확도</div>
+          <div class="metric-value" id="model-acc-value" style="font-size:0.95rem;">-</div>
         </div>
       </div>
     </section>
@@ -469,6 +473,14 @@
 
       document.getElementById("table-sp-base").textContent = formatNum(q.futuresPrevClose);
       document.getElementById("table-kospi-base").textContent = formatNum(q.kospi200Base);
+      const modelAccEl = document.getElementById("model-acc-value");
+      if (modelAccEl) {
+        if (q.backtestN > 0) {
+          modelAccEl.textContent = `${q.modelMethod} / Dir ${q.backtestDirAccPct.toFixed(1)}% / MAE ${q.backtestMaePct.toFixed(2)}%`;
+        } else {
+          modelAccEl.textContent = `${q.modelMethod} / n.a.`;
+        }
+      }
 
       const headline = document.getElementById("estimate-headline");
       headline.textContent = `${tr("futures_estimate_label", "추정가")}: ${formatNum(q.estimate)} (${q.delta >= 0 ? "+" : ""}${formatNum(q.delta)}, ${q.deltaRate >= 0 ? "+" : ""}${q.deltaRate.toFixed(2)}%)`;
@@ -505,6 +517,10 @@
         futuresPrice: Number(d.futures_price || d.futuresPrice || 0),
         futuresPrevClose: Number(d.futures_prev_close || d.futuresPrevClose || 0),
         kospi200Base: Number(d.kospi200_base || d.kospi200Base || 0),
+        modelMethod: String(d.model_method || "unknown"),
+        backtestN: Number(d.backtest_n || 0),
+        backtestMaePct: Number(d.backtest_mae_pct || 0),
+        backtestDirAccPct: Number(d.backtest_dir_acc_pct || 0),
       };
       if (!isFinite(q.estimate) || q.estimate <= 0) {
         throw new Error("invalid current quote");
