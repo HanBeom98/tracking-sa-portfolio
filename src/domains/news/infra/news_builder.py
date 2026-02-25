@@ -87,9 +87,11 @@ def _strip_leading_title(content_html, title):
         return content_html
 
 
-def _wrap_article_html(title, content_html, date_text):
+def _wrap_article_html(title, content_html, date_text, is_en=False):
     date_block = f'<span class="news-article-date">{date_text}</span>' if date_text else ''
     content_html = _strip_leading_title(content_html, title)
+    back_href = "/en/news/" if is_en else "/news/"
+    back_label = "Back to News" if is_en else "뉴스 목록으로"
     return f"""<!DOCTYPE html>
 <html>
 <head>
@@ -102,6 +104,9 @@ def _wrap_article_html(title, content_html, date_text):
 <body>
   <main class="news-article-main">
     <article class="news-article-card">
+      <div class="article-nav-top">
+        <a class="back-list-btn" href="{back_href}">{back_label}</a>
+      </div>
       <div class="news-article-meta">{date_block}</div>
       <h1 class="news-article-title">{title}</h1>
       <div class="news-article-content">
@@ -202,7 +207,7 @@ def upgrade_cached_article_pages():
     if not os.path.exists(PUBLIC_DIR):
         return
 
-    def _upgrade_in_dir(root_dir):
+    def _upgrade_in_dir(root_dir, is_en=False):
         for name in os.listdir(root_dir):
             if not name.endswith(".html") or name == "index.html":
                 continue
@@ -235,15 +240,15 @@ def upgrade_cached_article_pages():
             content_html = _strip_leading_title(content_html, title)
 
             date_text = _extract_date_from_slug(name)
-            new_html = _wrap_article_html(title, content_html, date_text)
+            new_html = _wrap_article_html(title, content_html, date_text, is_en=is_en)
             with open(path, "w", encoding="utf-8") as f:
                 f.write(new_html)
             process_html_file_for_common_elements(path)
 
-    _upgrade_in_dir(PUBLIC_DIR)
+    _upgrade_in_dir(PUBLIC_DIR, is_en=False)
     en_dir = os.path.join(PUBLIC_DIR, "en")
     if os.path.isdir(en_dir):
-        _upgrade_in_dir(en_dir)
+        _upgrade_in_dir(en_dir, is_en=True)
 
 
 def generate_news_pages():
@@ -272,14 +277,14 @@ def generate_news_pages():
             excerpt_en = _make_excerpt(content_en)
 
             out_path = os.path.join(PUBLIC_DIR, f"{ukey}.html")
-            html = _wrap_article_html(title, markdown.markdown(content), date)
+            html = _wrap_article_html(title, markdown.markdown(content), date, is_en=False)
 
             with open(out_path, "w", encoding="utf-8") as f:
                 f.write(html)
             process_html_file_for_common_elements(out_path)
             en_out_path = os.path.join(PUBLIC_DIR, "en", f"{ukey}.html")
             os.makedirs(os.path.dirname(en_out_path), exist_ok=True)
-            en_html = _wrap_article_html(title_en, markdown.markdown(content_en), date)
+            en_html = _wrap_article_html(title_en, markdown.markdown(content_en), date, is_en=True)
             with open(en_out_path, "w", encoding="utf-8") as f:
                 f.write(en_html)
             process_html_file_for_common_elements(en_out_path)
