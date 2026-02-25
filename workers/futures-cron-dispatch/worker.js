@@ -63,13 +63,8 @@ export default {
     ctx.waitUntil(run());
   },
 
-  async fetch(_req, env) {
-    // Health/debug endpoint (manual invoke)
-    try {
-      await dispatchWorkflow(env);
-      return new Response("ok", { status: 200 });
-    } catch (e) {
-      return new Response(`error: ${String(e)}`, { status: 500 });
-    }
+  async fetch(_req, _env) {
+    // Health endpoint only. Do not dispatch from HTTP requests.
+    return new Response("ok", { status: 200 });
   }
 };
