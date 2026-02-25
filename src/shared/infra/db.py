@@ -67,7 +67,8 @@ def save_article_to_firestore(content):
         return None
 
     ko_title = extract_title_from_md(ko_content)
-    en_title = extract_title_from_md(en_content) if en_content else ""
+    en_content_fallback = en_content or ko_content
+    en_title = extract_title_from_md(en_content_fallback) if en_content_fallback else ""
     slug = clean_filename(ko_title)
     
     today = datetime.date.today().strftime("%Y-%m-%d")
@@ -85,9 +86,9 @@ def save_article_to_firestore(content):
         "contentKo": ko_content,
         "createdAt": firestore.SERVER_TIMESTAMP
     }
-    if en_content:
-        post_doc["titleEn"] = en_title
-        post_doc["contentEn"] = en_content
+    if en_content_fallback:
+        post_doc["titleEn"] = en_title or ko_title
+        post_doc["contentEn"] = en_content_fallback
     
     try:
         db.collection("posts").document(url_key).set(post_doc)

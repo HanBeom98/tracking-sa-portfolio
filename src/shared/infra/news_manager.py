@@ -61,12 +61,27 @@ def fetch_and_post_news():
                     title_ko = lines[0].replace("#", "").strip()
                     ko_content = "\n".join(lines[1:]).strip()
 
+                title_en = entry.title
+                if en_content.startswith("#"):
+                    lines = en_content.split("\n")
+                    title_en = lines[0].replace("#", "").strip()
+                    en_content = "\n".join(lines[1:]).strip()
+
+                # 최소 보장: 한쪽이 비어있으면 다른 언어로 채움
+                if not ko_content and en_content:
+                    ko_content = en_content
+                if not en_content and ko_content:
+                    en_content = ko_content
+                if not title_en and title_ko:
+                    title_en = title_ko
+
                 url_key = f"news-{int(time.time())}-{count}"
                 
                 # Firestore 저장
                 doc_ref = db.collection('posts').document(url_key)
                 doc_ref.set({
                     'titleKo': title_ko,
+                    'titleEn': title_en,
                     'contentKo': ko_content,
                     'contentEn': en_content,
                     'urlKey': url_key,
