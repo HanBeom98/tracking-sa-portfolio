@@ -2,11 +2,18 @@
 import os
 import time
 import datetime
+import sys
+from pathlib import Path
 from typing import Any, Iterable, Optional
 
 import requests
 from dotenv import load_dotenv
 from firebase_admin import firestore
+
+# Ensure `src` package imports work when executed as `python scripts/...`.
+ROOT_DIR = Path(__file__).resolve().parents[1]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
 from src.shared.infra.db import get_firestore_client
 
