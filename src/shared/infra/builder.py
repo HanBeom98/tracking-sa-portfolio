@@ -71,6 +71,13 @@ def generate_public_site():
         news_style_dest_en = os.path.join(PUBLIC_DIR, "en", "news", "ui", "style.css")
         os.makedirs(os.path.dirname(news_style_dest_en), exist_ok=True)
         shutil.copy2(news_style_src, news_style_dest_en)
+        # Backward-compat aliases for older pages linking /news/style.css or /en/news/style.css
+        news_style_alias = os.path.join(PUBLIC_DIR, "news", "style.css")
+        os.makedirs(os.path.dirname(news_style_alias), exist_ok=True)
+        shutil.copy2(news_style_src, news_style_alias)
+        news_style_alias_en = os.path.join(PUBLIC_DIR, "en", "news", "style.css")
+        os.makedirs(os.path.dirname(news_style_alias_en), exist_ok=True)
+        shutil.copy2(news_style_src, news_style_alias_en)
     if os.path.exists(news_client_src):
         news_client_dest = os.path.join(PUBLIC_DIR, "news", "news-client.js")
         os.makedirs(os.path.dirname(news_client_dest), exist_ok=True)
