@@ -12,8 +12,8 @@
   <link rel="stylesheet" href="/style.css">
   <style>
     :root {
-      --futures-main-height: 820px;
-      --futures-ta-height: 520px;
+      --futures-main-height: 980px;
+      --futures-ta-height: 620px;
     }
 
     .futures-page {
@@ -85,8 +85,8 @@
 
     @media (max-width: 860px) {
       :root {
-        --futures-main-height: 620px;
-        --futures-ta-height: 420px;
+        --futures-main-height: 700px;
+        --futures-ta-height: 460px;
       }
     }
   </style>
@@ -130,11 +130,11 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<link rel="stylesheet" href="/style.css?v=20260225105010">
+<link rel="stylesheet" href="/style.css?v=20260225105250">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script src="/firebase-config.js"></script>
-<script src="/translations.js?v=20260225105010"></script>
-<script src="/common.js?v=20260225105010"></script>
+<script src="/translations.js?v=20260225105250"></script>
+<script src="/common.js?v=20260225105250"></script>
 
 </head>
 <body><header>
@@ -221,7 +221,9 @@
         "tv-main-widget",
         "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js",
         {
-          autosize: true,
+          autosize: false,
+          width: "100%",
+          height: 980,
           symbol: "KRX:K2I1!",
           interval: "5",
           timezone: "Asia/Seoul",
@@ -245,7 +247,7 @@
           interval: "5m",
           width: "100%",
           isTransparent: true,
-          height: 360,
+          height: 620,
           symbol: "KRX:K2I1!",
           showIntervalTabs: true,
           displayMode: "single",

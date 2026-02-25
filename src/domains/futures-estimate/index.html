@@ -12,8 +12,8 @@
   <link rel="stylesheet" href="/style.css">
   <style>
     :root {
-      --futures-main-height: 820px;
-      --futures-ta-height: 520px;
+      --futures-main-height: 980px;
+      --futures-ta-height: 620px;
     }
 
     .futures-page {
@@ -85,8 +85,8 @@
 
     @media (max-width: 860px) {
       :root {
-        --futures-main-height: 620px;
-        --futures-ta-height: 420px;
+        --futures-main-height: 700px;
+        --futures-ta-height: 460px;
       }
     }
   </style>
@@ -130,7 +130,9 @@
         "tv-main-widget",
         "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js",
         {
-          autosize: true,
+          autosize: false,
+          width: "100%",
+          height: 980,
           symbol: "KRX:K2I1!",
           interval: "5",
           timezone: "Asia/Seoul",
@@ -154,7 +156,7 @@
           interval: "5m",
           width: "100%",
           isTransparent: true,
-          height: 360,
+          height: 620,
           symbol: "KRX:K2I1!",
           showIntervalTabs: true,
           displayMode: "single",
