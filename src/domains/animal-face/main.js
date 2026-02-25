@@ -120,22 +120,22 @@ class AnimalFaceTest extends HTMLElement {
             /* Advanced Upload Box */
             .upload-container { margin-bottom: 30px; }
             .upload-box { 
-                border: 3px dashed #e2e8f0; border-radius: 24px; padding: 44px 24px; 
+                border: 3px dashed #e2e8f0; border-radius: 20px; padding: 30px 18px; 
                 background: #f8fafc; cursor: pointer; transition: 0.4s; 
-                display: flex; flex-direction: column; align-items: center; gap: 20px;
+                display: flex; flex-direction: column; align-items: center; gap: 14px;
             }
             .upload-box:hover { background: #f1f5f9; border-color: #0052cc; }
             .upload-box.dragover { background: #eff6ff; border-color: #0052cc; transform: scale(1.02); }
-            .upload-icon { font-size: 2.5rem; }
+            .upload-icon { font-size: 2rem; }
             .upload-box p { color: #64748b; font-weight: 700; margin: 0; }
             
             .custom-btn { 
-                background: #0052cc; color: white; padding: 14px 28px; border-radius: 12px; 
-                font-weight: 800; font-size: 1rem; border: none; cursor: pointer; transition: 0.3s;
+                background: #0052cc; color: white; padding: 12px 20px; border-radius: 10px; 
+                font-weight: 800; font-size: 0.95rem; border: none; cursor: pointer; transition: 0.3s;
             }
 
             #preview-container { display: none; flex-direction: column; align-items: center; gap: 20px; }
-            #preview { max-width: 100%; max-height: 330px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+            #preview { max-width: 100%; max-height: 280px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
 
             .main-btn { 
                 background: linear-gradient(135deg, #0052cc 0%, #1e40af 100%); 

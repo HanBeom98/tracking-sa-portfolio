@@ -100,11 +100,61 @@ function updateNewsLinksForLang() {
     links.forEach(link => link.setAttribute('href', target));
 }
 
+function initDropdownMenus() {
+    const dropdowns = Array.from(document.querySelectorAll('header .dropdown'));
+    if (!dropdowns.length) return;
+
+    const closeAll = () => dropdowns.forEach(d => d.classList.remove('open'));
+
+    dropdowns.forEach((dropdown) => {
+        const btn = dropdown.querySelector('.dropbtn');
+        let closeTimer = null;
+
+        const open = () => {
+            if (closeTimer) clearTimeout(closeTimer);
+            dropdowns.forEach((d) => {
+                if (d !== dropdown) d.classList.remove('open');
+            });
+            dropdown.classList.add('open');
+        };
+
+        const scheduleClose = () => {
+            if (closeTimer) clearTimeout(closeTimer);
+            closeTimer = setTimeout(() => {
+                dropdown.classList.remove('open');
+            }, 140);
+        };
+
+        dropdown.addEventListener('mouseenter', open);
+        dropdown.addEventListener('mouseleave', scheduleClose);
+        dropdown.addEventListener('focusin', open);
+        dropdown.addEventListener('focusout', (e) => {
+            if (!dropdown.contains(e.relatedTarget)) scheduleClose();
+        });
+
+        if (btn) {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const wasOpen = dropdown.classList.contains('open');
+                closeAll();
+                if (!wasOpen) dropdown.classList.add('open');
+            });
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('header .dropdown')) {
+            closeAll();
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     window.applyTranslations(currentLang);
     initTheme();
     initLanguageSwitcher();
     updateNewsLinksForLang();
+    initDropdownMenus();
     
     // Final Visibility Check & Force Reveal (Overriding CSS !important)
     const header = document.querySelector('header');
