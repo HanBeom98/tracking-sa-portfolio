@@ -3,6 +3,7 @@ name: Futures Estimate Sync
 on:
   schedule:
     - cron: "*/5 * * * *"
+    - cron: "2-59/5 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -15,6 +16,7 @@ concurrency:
 jobs:
   sync-futures:
     runs-on: ubuntu-latest
+    timeout-minutes: 8
 
     steps:
       - uses: actions/checkout@v4
@@ -43,4 +45,15 @@ jobs:
           STOOQ_SYMBOL: ${{ secrets.STOOQ_SYMBOL }}
           KOSPI200_BASE: ${{ secrets.KOSPI200_BASE }}
         run: |
-          python scripts/sync_futures_estimate.py
+          set -e
+          for i in 1 2 3; do
+            echo "sync attempt ${i}/3"
+            if python scripts/sync_futures_estimate.py; then
+              exit 0
+            fi
+            if [ "$i" -lt 3 ]; then
+              echo "retry after 12s..."
+              sleep 12
+            fi
+          done
+          exit 1
