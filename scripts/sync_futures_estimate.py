@@ -30,6 +30,7 @@ def _env_float(name: str, default: float) -> float:
 
 STOOQ_SYMBOL = os.getenv("STOOQ_SYMBOL", "es.f").strip().lower()
 STOOQ_FIELDS = os.getenv("STOOQ_FIELDS", "sd2t2ohlcvcp").strip()
+YAHOO_SYMBOL = os.getenv("YAHOO_SYMBOL", "ES=F").strip()
 KOSPI200_BASE = _env_float("KOSPI200_BASE", 350.0)
 REQUEST_TIMEOUT = _env_float("FUTURES_REQUEST_TIMEOUT_SEC", 12.0)
 
@@ -125,6 +126,66 @@ def _fetch_stooq_quote() -> dict:
     }
 
 
+def _fetch_yahoo_quote() -> dict:
+    headers = {"User-Agent": "Mozilla/5.0"}
+    urls = [
+        f"https://query1.finance.yahoo.com/v8/finance/chart/{YAHOO_SYMBOL}?interval=1m&range=1d",
+        f"https://query2.finance.yahoo.com/v8/finance/chart/{YAHOO_SYMBOL}?interval=1m&range=1d",
+    ]
+    last_error = "unknown"
+
+    for url in urls:
+        try:
+            res = requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT)
+            if res.status_code >= 400:
+                last_error = f"http {res.status_code}"
+                continue
+
+            obj = res.json()
+            result = (((obj or {}).get("chart") or {}).get("result") or [])
+            if not result:
+                last_error = f"no result: {((obj or {}).get('chart') or {}).get('error')}"
+                continue
+
+            meta = (result[0] or {}).get("meta") or {}
+            price = meta.get("regularMarketPrice")
+            prev = meta.get("previousClose") or meta.get("chartPreviousClose")
+            ts = int(meta.get("regularMarketTime") or time.time())
+
+            if price in (None, "", "N/D"):
+                last_error = "regularMarketPrice missing"
+                continue
+
+            price = float(price)
+            prev = float(prev) if prev not in (None, "", "N/D") else price
+
+            return {
+                "symbol": str(meta.get("symbol") or YAHOO_SYMBOL),
+                "ts": ts,
+                "futures_price": price,
+                "futures_prev_close": prev,
+                "futures_open": float(meta.get("regularMarketDayHigh") or price),
+                "futures_high": float(meta.get("regularMarketDayHigh") or price),
+                "futures_low": float(meta.get("regularMarketDayLow") or price),
+                "futures_volume": float(meta.get("regularMarketVolume") or 0.0),
+            }
+        except Exception as e:
+            last_error = str(e)
+            continue
+
+    raise RuntimeError(f"Yahoo quote error: {last_error}")
+
+
+def _fetch_public_quote() -> dict:
+    errors = []
+    for fetch in (_fetch_yahoo_quote, _fetch_stooq_quote):
+        try:
+            return fetch()
+        except Exception as e:
+            errors.append(f"{fetch.__name__}: {e}")
+    raise RuntimeError(" / ".join(errors))
+
+
 def _extract_quote(raw: dict) -> dict:
     futures_price = float(raw["futures_price"])
     prev_close = float(raw["futures_prev_close"]) if float(raw["futures_prev_close"]) > 0 else futures_price
@@ -185,7 +246,7 @@ def _save_firestore(payload: dict) -> None:
 def main() -> int:
     load_dotenv()
     try:
-        raw = _fetch_stooq_quote()
+        raw = _fetch_public_quote()
         payload = _extract_quote(raw)
         _save_firestore(payload)
         ts_text = datetime.datetime.utcfromtimestamp(payload["ts"]).strftime("%Y-%m-%d %H:%M:%S UTC")
