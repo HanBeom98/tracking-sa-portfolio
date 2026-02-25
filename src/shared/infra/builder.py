@@ -37,7 +37,8 @@ def generate_public_site():
     domains = [
         "animal-face", "fortune", "games", "ai-test", "lucky-recommendation", 
         "games/ai-evolution", "games/tetris", "privacy-policy", "about", "contact",
-        "board", "board/write", "board/edit", "board/post", "inquiry", "search"
+        "board", "board/write", "board/edit", "board/post", "inquiry", "search",
+        "futures-estimate"
     ]
     for domain in domains:
         src = f"src/domains/{domain}"
