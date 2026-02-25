@@ -281,6 +281,7 @@
   <script>
     const MAX_POINTS = 800;
     const CHART_WINDOW_SECONDS = 60 * 60 * 24;
+    const VALUE_BAND_RATIO = 0.2;
     let chart = null;
     let series = null;
     let points = [];
@@ -375,6 +376,15 @@
         const latestTs = points[points.length - 1].time;
         const minTs = latestTs - CHART_WINDOW_SECONDS;
         points = points.filter((p) => p.time >= minTs);
+      }
+
+      // Drop legacy points from old base regimes (e.g. 350 -> 900 migration)
+      // so the chart remains readable after baseline changes.
+      if (points.length > 1) {
+        const latestValue = points[points.length - 1].value;
+        const minValue = latestValue * (1 - VALUE_BAND_RATIO);
+        const maxValue = latestValue * (1 + VALUE_BAND_RATIO);
+        points = points.filter((p) => p.value >= minValue && p.value <= maxValue);
       }
 
       renderPoints();
