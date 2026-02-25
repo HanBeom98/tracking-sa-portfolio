@@ -301,28 +301,24 @@
 
     async function loadPredictionHistory() {
       const bodyEl = document.getElementById("prediction-history-body");
-      const db = window.db || (typeof firebase !== "undefined" && firebase.apps?.length ? firebase.firestore() : null);
-      if (!db) {
-        bodyEl.innerHTML = '<tr><td colspan="5" style="padding:10px 6px; color:#b91c1c;">Firestore 초기화 실패</td></tr>';
-        return;
-      }
 
       try {
-        const snap = await db
-          .collection("futures_predictions")
-          .orderBy("target_date", "desc")
-          .limit(30)
-          .get();
+        let res = await fetch("/api/futures-predictions", { method: "GET" });
+        if (!res.ok) {
+          res = await fetch("https://tracking-sa.vercel.app/api/futures-predictions", { method: "GET" });
+        }
+        if (!res.ok) throw new Error("history_http_" + res.status);
+        const data = await res.json();
+        const items = Array.isArray(data?.items) ? data.items : [];
 
-        if (snap.empty) {
+        if (!items.length) {
           bodyEl.innerHTML = '<tr><td colspan="5" style="padding:10px 6px; color:#64748b;">예측 기록이 아직 없습니다.</td></tr>';
           return;
         }
 
         const rows = [];
-        snap.forEach((doc) => {
-          const d = doc.data() || {};
-          const date = d.target_date || doc.id;
+        items.forEach((d) => {
+          const date = d.target_date || "-";
           const pred = d.prediction_label || "-";
           const actual = d.actual_label || "-";
           const pUp = typeof d.probability_up === "number" ? `${d.probability_up.toFixed(2)}%` : "-";
