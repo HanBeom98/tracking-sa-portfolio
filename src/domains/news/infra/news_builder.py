@@ -3,7 +3,6 @@ import re
 import datetime
 
 import markdown
-from firebase_admin import firestore
 
 from src.shared.infra.config import PUBLIC_DIR
 from src.shared.infra.db import get_firestore_client
@@ -297,6 +296,7 @@ def generate_news_pages():
     articles_en = []
     db_ok = False
     try:
+        from firebase_admin import firestore
         db = get_firestore_client()
         if not db:
             raise RuntimeError("No Firestore client")

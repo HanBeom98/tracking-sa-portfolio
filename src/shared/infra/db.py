@@ -1,12 +1,17 @@
 import os
 import json
-import firebase_admin
-from firebase_admin import credentials, firestore
 import re
 import datetime
 from src.shared.infra.utils import extract_title_from_md, clean_filename
 
 def get_firestore_client():
+    try:
+        import firebase_admin
+        from firebase_admin import credentials, firestore
+    except Exception as e:
+        print(f"⚠️ Firebase import error: {e}")
+        return None
+
     try:
         # Check if already initialized
         return firestore.client()
@@ -56,6 +61,12 @@ def get_firestore_client():
     return None
 
 def save_article_to_firestore(content):
+    try:
+        from firebase_admin import firestore
+    except Exception as e:
+        print(f"⚠️ Firestore import error: {e}")
+        return None
+
     ko_match = re.search(r'\[KO_START\](.*?)\[KO_END\]', content, re.DOTALL)
     en_match = re.search(r'\[EN_START\](.*?)\[EN_END\]', content, re.DOTALL)
 
