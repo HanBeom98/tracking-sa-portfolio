@@ -93,6 +93,26 @@
       padding: 8px;
     }
 
+    .toggle-wrap {
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      background: #fff;
+      padding: 8px;
+    }
+
+    .toggle-summary {
+      cursor: pointer;
+      list-style: none;
+      font-weight: 800;
+      color: #0f172a;
+      padding: 6px 4px;
+      user-select: none;
+    }
+
+    .toggle-summary::-webkit-details-marker {
+      display: none;
+    }
+
     .mini-title {
       margin: 2px 2px 8px;
       color: #0f172a;
@@ -272,9 +292,9 @@
         <div id="impact-summary" style="margin-top:10px; font-weight:800; color:#0f172a;"></div>
       </div>
 
-      <div class="panel-title" style="margin-top:16px;">예측 vs 실제 비교표</div>
-      <div class="panel-subtitle">최근 예측 기록과 평가 결과(적중/실패)</div>
-      <div class="mini-card">
+      <details class="toggle-wrap" style="margin-top:16px;">
+        <summary class="toggle-summary">예측 vs 실제 비교표 (클릭해 열기/닫기)</summary>
+        <div class="panel-subtitle" style="margin-top:4px;">최근 예측 기록과 평가 결과(적중/실패)</div>
         <table style="width:100%; border-collapse: collapse; font-size:0.84rem;">
           <thead>
             <tr style="text-align:left; border-bottom:1px solid #e2e8f0;">
@@ -289,7 +309,7 @@
             <tr><td colspan="5" style="padding:10px 6px; color:#64748b;">비교 데이터를 불러오는 중...</td></tr>
           </tbody>
         </table>
-      </div>
+      </details>
     </section>
   </main>
 
