@@ -6,6 +6,8 @@ from src.shared.infra.ai import generate_ai_content
 from firebase_admin import firestore
 
 LOG_FILE = "logs/processed_articles.log"
+MAX_LOG_LINES = int(os.getenv("PROCESSED_LOG_MAX_LINES", "5000"))
+LOG_KEEP_LINES = int(os.getenv("PROCESSED_LOG_KEEP_LINES", "3000"))
 
 def get_processed_urls():
     if not os.path.exists(LOG_FILE):
@@ -14,8 +16,22 @@ def get_processed_urls():
         return set(line.strip() for line in f)
 
 def log_processed_url(url):
+    os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
     with open(LOG_FILE, "a") as f:
         f.write(f"{url}\n")
+
+def rotate_processed_log(max_lines=MAX_LOG_LINES, keep_lines=LOG_KEEP_LINES):
+    if not os.path.exists(LOG_FILE):
+        return
+    with open(LOG_FILE, "r", encoding="utf-8") as f:
+        lines = [line.strip() for line in f if line.strip()]
+    if len(lines) <= max_lines:
+        return
+    trimmed = lines[-keep_lines:] if keep_lines > 0 else []
+    with open(LOG_FILE, "w", encoding="utf-8") as f:
+        if trimmed:
+            f.write("\n".join(trimmed) + "\n")
+    print(f"🧹 Rotated processed log: {len(lines)} -> {len(trimmed)}")
 
 def fetch_and_post_news():
     db = get_firestore_client()
@@ -23,6 +39,7 @@ def fetch_and_post_news():
         print("🚨 Firestore client not available. Skipping news generation.")
         return
 
+    rotate_processed_log()
     processed_urls = get_processed_urls()
     
     # AI 기술 관련 RSS 피드 (Google News)
@@ -91,6 +108,7 @@ def fetch_and_post_news():
                 })
                 
                 log_processed_url(entry.link)
+                rotate_processed_log()
                 print(f"✅ Posted: {title_ko}")
                 count += 1
                 

@@ -7,7 +7,40 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`;
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.0-flash";
+const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+const GEMINI_MAX_OUTPUT_TOKENS = Number(process.env.GEMINI_MAX_OUTPUT_TOKENS || 4096);
+const GEMINI_RETRY_MAX = Number(process.env.GEMINI_RETRY_MAX || 3);
+const GEMINI_RETRY_BASE_MS = Number(process.env.GEMINI_RETRY_BASE_MS || 1200);
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function extractJsonObject(text) {
+    const cleaned = text.replace(/```json/gi, '').replace(/```/g, '').trim();
+    const start = cleaned.indexOf('{');
+    const end = cleaned.lastIndexOf('}');
+    if (start === -1 || end === -1 || end <= start) {
+        throw new Error("No JSON object found");
+    }
+    return cleaned.slice(start, end + 1);
+}
+
+function normalizePlan(plan) {
+    if (!plan || typeof plan !== 'object') {
+        throw new Error("Plan must be an object");
+    }
+    const keyPoints = Array.isArray(plan.keyPoints)
+        ? plan.keyPoints.map((p) => String(p).trim()).filter(Boolean).slice(0, 3)
+        : [];
+    if (!plan.angle || keyPoints.length === 0) {
+        throw new Error("Missing required plan fields");
+    }
+    return {
+        angle: String(plan.angle).trim(),
+        targetAudience: String(plan.targetAudience || "IT/AI 관심 독자").trim(),
+        keyPoints
+    };
+}
 
 async function callGemini(systemInstruction, userPrompt, temperature = 0.7) {
     // Merge system instruction and user prompt for better compatibility with v1 API
@@ -15,29 +48,70 @@ async function callGemini(systemInstruction, userPrompt, temperature = 0.7) {
     
     const body = {
         contents: [{ parts: [{ text: combinedPrompt }] }],
-        generationConfig: { temperature, maxOutputTokens: 4096 }
+        generationConfig: { temperature, maxOutputTokens: GEMINI_MAX_OUTPUT_TOKENS }
     };
 
-    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-    });
+    let lastError;
+    for (let attempt = 1; attempt <= GEMINI_RETRY_MAX; attempt += 1) {
+        try {
+            const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error?.message || 'API Error');
+            }
+            return data.candidates[0].content.parts.map(p => p.text).join('\n');
+        } catch (err) {
+            lastError = err;
+            if (attempt >= GEMINI_RETRY_MAX) {
+                break;
+            }
+            const delay = GEMINI_RETRY_BASE_MS * (2 ** (attempt - 1));
+            console.warn(`⚠️ Gemini call failed (attempt ${attempt}/${GEMINI_RETRY_MAX}). Retrying in ${delay}ms...`);
+            await sleep(delay);
+        }
+    }
+    throw lastError || new Error("Unknown Gemini API error");
+}
 
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error?.message || 'API Error');
-    return data.candidates[0].content.parts.map(p => p.text).join('\n');
+async function planStoryWithRetry(title, summary) {
+    const editorInstruction = "당신은 IT 전문 매체의 '편집장'입니다. 주어진 영문 뉴스 제목과 요약을 분석해 JSON으로만 답하세요.";
+    const editorPrompt = `뉴스 제목: ${title}\n뉴스 요약: ${summary}\n\n결과 포맷:\n{\n  "angle": "기사의 핵심 관점",\n  "targetAudience": "타겟 독자층",\n  "keyPoints": ["포인트1", "포인트2", "포인트3"]\n}`;
+
+    let lastError;
+    for (let i = 0; i < 3; i += 1) {
+        try {
+            const raw = await callGemini(editorInstruction, editorPrompt, 0.2);
+            const parsed = JSON.parse(extractJsonObject(raw));
+            return normalizePlan(parsed);
+        } catch (err) {
+            lastError = err;
+            console.warn(`⚠️ Editor JSON parse failed (attempt ${i + 1}/3): ${err.message}`);
+        }
+    }
+
+    console.warn("⚠️ Falling back to default editor plan due to JSON parsing failure.");
+    return {
+        angle: `${title}의 핵심 기술·시장 영향`,
+        targetAudience: "IT/AI 관심 독자",
+        keyPoints: [
+            "핵심 기술 변화",
+            "산업/시장 영향",
+            "실무 활용 포인트"
+        ]
+    };
 }
 
 async function newsDeskPipeline(title, summary) {
     try {
+        if (!GEMINI_API_KEY) {
+            throw new Error("GEMINI_API_KEY is missing");
+        }
         console.log("📝 [Step 1] Planning the story...");
-        const editorInstruction = "당신은 IT 전문 매체의 '편집장'입니다. 주어진 영문 뉴스 제목과 요약을 분석하여, 한국과 글로벌 독자들에게 가장 흥미로운 관점(Angle)과 핵심 전달 사항 3가지를 기획하세요. JSON 형식으로만 답변하세요.";
-        const editorPrompt = `뉴스 제목: ${title}\n뉴스 요약: ${summary}\n\n결과 포맷:\n{\n  "angle": "기사의 핵심 관점",\n  "targetAudience": "타겟 독자층",\n  "keyPoints": ["포인트1", "포인트2", "포인트3"]\n}`;
-        
-        let editorPlanText = await callGemini(editorInstruction, editorPrompt, 0.2);
-        editorPlanText = editorPlanText.replace(/```json/gi, '').replace(/```/g, '').trim();
-        const plan = JSON.parse(editorPlanText);
+        const plan = await planStoryWithRetry(title, summary);
 
         console.log("✍️ [Step 2] Writing content (KO/EN)...");
         const writerInstruction = "당신은 IT 전문 '수석 기자'입니다. 편집장의 기획안을 바탕으로 전문적이고 통찰력 있는 기사를 작성하세요.";
