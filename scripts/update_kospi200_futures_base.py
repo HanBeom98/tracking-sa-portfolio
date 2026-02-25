@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 import datetime
 import os
-import re
 import sys
+import time
 from pathlib import Path
+from typing import Any
 
 import requests
 from dotenv import load_dotenv
@@ -17,82 +18,56 @@ from src.shared.infra.db import get_firestore_client
 
 
 REQUEST_TIMEOUT = float(os.getenv("FUTURES_REQUEST_TIMEOUT_SEC", "12"))
+TV_SYMBOL = os.getenv("TV_SYMBOL", "KRX:K2I1!").strip()
+TV_SCANNER_URL = os.getenv("TV_SCANNER_URL", "https://scanner.tradingview.com/korea/scan").strip()
 
 
-def _to_float(raw: str) -> float:
-    txt = (raw or "").strip().replace(",", "")
-    if not txt:
-        raise RuntimeError("empty number")
-    return float(txt)
+def _to_num(v: Any, default: float = 0.0) -> float:
+    try:
+        return float(v)
+    except Exception:
+        return float(default)
 
 
-def _fetch_from_investing() -> tuple[float, str]:
-    url = "https://kr.investing.com/indices/korea-200-futures-historical-data"
-    headers = {
-        "User-Agent": "Mozilla/5.0",
-        "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
-    }
-    res = requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT)
-    if res.status_code >= 400:
-        raise RuntimeError(f"http {res.status_code}")
-    html = res.text
-
-    # Try metadata-like numeric fields first.
-    patterns = [
-        r'"last_last"\s*:\s*"([0-9][0-9,\.]*)"',
-        r'"last_close"\s*:\s*"([0-9][0-9,\.]*)"',
-        r'"last"\s*:\s*"([0-9][0-9,\.]*)"',
-    ]
-    for p in patterns:
-        m = re.search(p, html, flags=re.IGNORECASE)
-        if m:
-            return _to_float(m.group(1)), "investing_kospi200_futures_close"
-
-    # Fallback: first reasonable numeric price token near 800~1200 band.
-    candidates = re.findall(r'([89][0-9]{2}(?:\.[0-9]+)?)', html)
-    if candidates:
-        return _to_float(candidates[0]), "investing_kospi200_futures_close_fallback"
-
-    raise RuntimeError("investing parse failed")
-
-
-def _fetch_from_esignal() -> tuple[float, str]:
-    url = "https://esignal.co.kr/kospi200-approx/"
+def _fetch_tradingview_quote(symbol: str) -> dict[str, Any]:
     headers = {"User-Agent": "Mozilla/5.0"}
-    res = requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT)
+    payload = {
+        "symbols": {"tickers": [symbol], "query": {"types": []}},
+        "columns": ["close", "change", "change_abs", "name", "description", "update_mode"],
+    }
+    res = requests.post(TV_SCANNER_URL, json=payload, headers=headers, timeout=REQUEST_TIMEOUT)
     if res.status_code >= 400:
-        raise RuntimeError(f"http {res.status_code}")
-    html = res.text
-
-    patterns = [
-        r"KOSPI200\s*선물\s*종가[^0-9]{0,80}([0-9]{2,4}(?:\.[0-9]+)?)",
-        r"KOSPI200\s*선물\s*종가[\s\S]{0,120}?([0-9]{2,4}(?:\.[0-9]+)?)",
-    ]
-    for p in patterns:
-        m = re.search(p, html, flags=re.IGNORECASE)
-        if m:
-            return float(m.group(1)), "esignal_kospi200_close"
-
-    raise RuntimeError("KOSPI200 futures close parse failed")
+        raise RuntimeError(f"TradingView scanner http {res.status_code}")
+    obj = res.json() or {}
+    rows = obj.get("data") or []
+    if not rows:
+        raise RuntimeError("TradingView scanner empty data")
+    row = rows[0] or {}
+    d = row.get("d") or []
+    price = _to_num(d[0], 0.0)
+    change_abs = _to_num(d[2], 0.0)
+    if price <= 0:
+        raise RuntimeError("TradingView scanner invalid close")
+    prev_close = price - change_abs
+    if prev_close <= 0:
+        prev_close = price
+    return {
+        "symbol": str(row.get("s") or symbol),
+        "ts": int(time.time()),
+        "price": float(price),
+        "prev_close": float(prev_close),
+    }
 
 
 def _resolve_base_value() -> tuple[float, str]:
-    errors = []
     try:
-        return _fetch_from_investing()
-    except Exception as e:
-        errors.append(f"investing: {e}")
-
-    try:
-        return _fetch_from_esignal()
-    except Exception as e:
-        errors.append(f"esignal: {e}")
-
-    manual = os.getenv("KOSPI200_BASE")
-    if manual and str(manual).strip():
-        return float(manual), "manual_env_fallback"
-
-    raise RuntimeError(" / ".join(errors) if errors else "no source available")
+        q = _fetch_tradingview_quote(TV_SYMBOL)
+        return float(q["prev_close"]), "tradingview_prev_close"
+    except Exception as tv_err:
+        manual = os.getenv("KOSPI200_BASE")
+        if manual and str(manual).strip():
+            return float(manual), "manual_env_fallback"
+        raise RuntimeError(f"tv={tv_err}")
 
 
 def main() -> int:
