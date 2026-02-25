@@ -3,7 +3,6 @@ import feedparser
 import time
 from src.shared.infra.db import get_firestore_client
 from src.shared.infra.ai import generate_ai_content
-from firebase_admin import firestore
 
 LOG_FILE = "logs/processed_articles.log"
 MAX_LOG_LINES = int(os.getenv("PROCESSED_LOG_MAX_LINES", "5000"))
@@ -34,6 +33,12 @@ def rotate_processed_log(max_lines=MAX_LOG_LINES, keep_lines=LOG_KEEP_LINES):
     print(f"🧹 Rotated processed log: {len(lines)} -> {len(trimmed)}")
 
 def fetch_and_post_news():
+    try:
+        from firebase_admin import firestore
+    except Exception as e:
+        print(f"⚠️ Firestore import error: {e}")
+        return
+
     db = get_firestore_client()
     if not db:
         print("🚨 Firestore client not available. Skipping news generation.")

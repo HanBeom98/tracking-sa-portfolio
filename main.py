@@ -8,7 +8,6 @@ from dotenv import load_dotenv
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'src')))
 
 from src.shared.infra.builder import generate_public_site
-from src.shared.infra.news_manager import fetch_and_post_news
 
 def main():
     load_dotenv()
@@ -18,6 +17,7 @@ def main():
     args = parser.parse_args()
 
     if not args.build_only:
+        from src.shared.infra.news_manager import fetch_and_post_news
         print("📰 [NEWS] Starting daily news generation...")
         fetch_and_post_news()
     
