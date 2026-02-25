@@ -226,21 +226,8 @@ def _save_firestore(payload: dict) -> None:
     db.collection("futures_estimate_points").document(point_id).set(payload_with_server_time, merge=True)
     db.collection("futures_estimate_meta").document("current").set(payload_with_server_time, merge=True)
 
-    # optional rolling cleanup: keep about 14 days of 5-minute docs
-    cutoff_bucket = (int(time.time()) - 14 * 24 * 60 * 60) // 300
-    old_docs = (
-        db.collection("futures_estimate_points")
-        .where("__name__", "<", str(cutoff_bucket))
-        .limit(200)
-        .stream()
-    )
-    batch = db.batch()
-    count = 0
-    for doc in old_docs:
-        batch.delete(doc.reference)
-        count += 1
-    if count:
-        batch.commit()
+    # Keep writes resilient: skip cleanup query to avoid key-type mismatch failures
+    # in different Firestore SDK/runtime combinations.
 
 
 def main() -> int:
