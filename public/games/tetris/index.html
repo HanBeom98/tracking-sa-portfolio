@@ -69,7 +69,7 @@
             display: block;
             container-type: size; /* Establish container context */
             width: 100%;
-            height: 100vh;
+            height: 100dvh;
         }
 
         /* Responsive Canvas Size */
@@ -80,7 +80,19 @@
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=pub-7263630893992216" crossorigin="anonymous"></script>
+
+<meta name="keywords" content="Tracking SA, AI 테스트, AI 뉴스, 인공지능, ChatGPT, Claude, Gemini">
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Tracking SA">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Tracking SA - AI Services & Hub">
+<meta name="twitter:description" content="AI 테스트, 게임, 뉴스를 한 곳에서. Tracking SA">
+<meta name="twitter:image" content="https://trackingsa.com/logo.svg">
+<link rel="alternate" type="application/rss+xml" title="Tracking SA RSS Feed" href="/rss.xml">
+<link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7263630893992216" crossorigin="anonymous"></script>
+<meta name="google-adsense-account" content="ca-pub-7263630893992216">
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
 <script>
@@ -108,11 +120,11 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<link rel="stylesheet" href="/style.css?v=20260224233415">
+<link rel="stylesheet" href="/style.css?v=20260225024933">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script src="/firebase-config.js"></script>
-<script src="/translations.js?v=20260224233415"></script>
-<script src="/common.js?v=20260224233415"></script>
+<script src="/translations.js?v=20260225024933"></script>
+<script src="/common.js?v=20260225024933"></script>
 
 </head>
 <body data-i18n="body"><header>
@@ -320,6 +332,8 @@
                 this.nextCanvas = this.shadowRoot.querySelector('#next-canvas');
                 this.nextCtx = this.nextCanvas.getContext('2d');
                 this.boardWrapper = this.shadowRoot.querySelector('.main-board');
+                this.layoutEl = this.shadowRoot.querySelector('.game-layout');
+                this.controlsEl = this.shadowRoot.querySelector('.controls');
 
                 const observer = new ResizeObserver(() => {
                     this.updateLayoutStyles();
@@ -343,14 +357,17 @@
                 const isDesktop = window.innerWidth >= 1024;
                 const padding = 14; 
                 const availableW = this.boardWrapper.clientWidth - padding;
-                const vh = window.innerHeight;
-                const headerHeight = 70;
                 
                 let availableH;
                 if (isDesktop) {
-                    availableH = Math.min(rect.height, vh - 100) - padding;
+                    availableH = Math.min(rect.height, window.innerHeight - 100) - padding;
                 } else {
-                    availableH = vh - headerHeight - 150 - 40; 
+                    const layoutRect = this.layoutEl ? this.layoutEl.getBoundingClientRect() : { height: window.innerHeight };
+                    const controlsHeight = this.controlsEl ? this.controlsEl.getBoundingClientRect().height : 130;
+                    const styles = this.layoutEl ? window.getComputedStyle(this.layoutEl) : null;
+                    const layoutPaddingTop = styles ? parseFloat(styles.paddingTop) || 0 : 0;
+                    const layoutPaddingBottom = styles ? parseFloat(styles.paddingBottom) || 0 : 0;
+                    availableH = layoutRect.height - controlsHeight - layoutPaddingTop - layoutPaddingBottom - 20;
                 }
                 
                 let size = Math.floor(availableH / this.ROWS);
@@ -620,12 +637,22 @@
             render() {
                 this.shadowRoot.innerHTML = `
                 <style>
-                    :host { display: block; position: relative; width: 100%; height: 100%; font-family: 'Orbitron', sans-serif; background: #000; color: white; overflow: hidden; }
-                    .game-layout { display: flex; flex-direction: column; height: 100%; padding: 10px; box-sizing: border-box; position: relative; z-index: 1; }
+                    :host { display: block; position: relative; width: 100%; height: 100%; min-height: 100dvh; font-family: 'Orbitron', sans-serif; background: #000; color: white; overflow: hidden; }
+                    .game-layout { display: flex; flex-direction: column; height: 100%; min-height: 100dvh; padding: 10px; box-sizing: border-box; position: relative; z-index: 1; }
                     
                     @media (max-width: 768px) {
-                        .game-layout { padding-top: 70px; height: 100vh; }
-                        .controls { height: 150px !important; padding: 10px !important; gap: 10px !important; }
+                        .game-layout {
+                            padding-top: calc(var(--header-height, 64px) + 8px);
+                            padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
+                            min-height: 100dvh;
+                            height: 100dvh;
+                        }
+                        .controls { min-height: 116px !important; padding: 8px !important; gap: 10px !important; margin-top: 8px; }
+                        .side-panel { width: 72px; gap: 8px; }
+                        .panel-box { padding: 6px; border-radius: 12px; }
+                        .label { font-size: 7px; }
+                        .value { font-size: 14px; }
+                        #btn-mute { top: calc(var(--header-height, 64px) + 4px); right: 12px; }
                         .btn { font-size: 24px !important; user-select: none; -webkit-user-select: none; }
                     }
 
