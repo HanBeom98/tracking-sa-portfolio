@@ -79,27 +79,8 @@
       font-weight: 700;
     }
 
-    .tv-wrap {
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      overflow: hidden;
-      background: #fff;
-    }
-
-    .tv-wrap + .panel-title {
-      margin-top: 16px;
-    }
-
-    #tv-main-widget {
-      min-height: var(--futures-main-height);
-    }
-
-    #tv-ta-widget {
-      min-height: var(--futures-ta-height);
-    }
-
     .multi-grid {
-      margin-top: 16px;
+      margin-top: 8px;
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
@@ -150,14 +131,7 @@
     </section>
 
     <section class="futures-panel">
-      <div class="panel-title">TVC:KOSPI200 메인 차트</div>
-      <div class="panel-subtitle">지연 시세 기준 (TradingView)</div>
       <a class="tv-link" href="https://kr.tradingview.com/symbols/KRX-K2I1!/?contract=K2IH2026" target="_blank" rel="noopener nofollow">야간선물 K2I1! 원페이지에서 보기</a>
-      <div id="tv-main-widget" class="tv-wrap"></div>
-
-      <div class="panel-title">TVC:KOSPI200 기술적 분석</div>
-      <div class="panel-subtitle">오실레이터/이동평균 시그널</div>
-      <div id="tv-ta-widget" class="tv-wrap"></div>
 
       <div class="panel-title">야간 영향 4종 모니터</div>
       <div class="panel-subtitle">SPY, QQQ, DIA, USDKRW 동시 확인</div>
@@ -204,45 +178,6 @@
         { id: "tv-vix-widget", symbol: "AMEX:DIA" },
         { id: "tv-krw-widget", symbol: "FX_IDC:USDKRW" },
       ];
-
-      buildWidget(
-        "tv-main-widget",
-        "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js",
-        {
-          autosize: false,
-          width: "100%",
-          height: 980,
-          symbol: "TVC:KOSPI200",
-          interval: "5",
-          timezone: "Asia/Seoul",
-          theme: "light",
-          style: "1",
-          locale: locale,
-          load_last_chart: false,
-          withdateranges: true,
-          hide_side_toolbar: false,
-          allow_symbol_change: true,
-          details: true,
-          hotlist: false,
-          studies: ["Volume@tv-basicstudies"],
-        }
-      );
-
-      buildWidget(
-        "tv-ta-widget",
-        "https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js",
-        {
-          interval: "5m",
-          width: "100%",
-          isTransparent: true,
-          height: 620,
-          symbol: "TVC:KOSPI200",
-          showIntervalTabs: true,
-          displayMode: "single",
-          locale: locale,
-          colorTheme: "light",
-        }
-      );
 
       miniSymbols.forEach(({ id, symbol }) => {
         buildWidget(
