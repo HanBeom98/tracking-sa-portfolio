@@ -45,17 +45,17 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 <script>
-  window.FIREBASE_CONFIG = {"apiKey": "PUBLIC_GEMINI_KEY_REMOVED", "authDomain": "tracking-sa-295db.firebaseapp.com", "projectId": "tracking-sa-295db", "storageBucket": "tracking-sa-295db.firebasestorage.app", "appId": "1:779289056217:web:cf023fc55f1a2913ffbfc8", "messagingSenderId": "779289056217"};
+  window.FIREBASE_CONFIG = {"apiKey": "", "authDomain": "tracking-sa-295db.firebaseapp.com", "projectId": "tracking-sa-295db", "storageBucket": "tracking-sa-295db.firebasestorage.app", "appId": "1:779289056217:web:cf023fc55f1a2913ffbfc8", "messagingSenderId": ""};
 </script>
 
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<link rel="stylesheet" href="/style.css?v=20260225022203">
+<link rel="stylesheet" href="/style.css?v=20260225134222">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script src="/firebase-config.js"></script>
-<script src="/translations.js?v=20260225022203"></script>
-<script src="/common.js?v=20260225022203"></script>
+<script src="/translations.js?v=20260225134222"></script>
+<script src="/common.js?v=20260225134222"></script>
 
 </head>
 <body><header>
@@ -71,6 +71,13 @@
         <div class="desktop-menu-container">
             <nav>
                 <ul>
+                    <li><a href="/news/" data-i18n="news_home">뉴스</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropbtn" data-i18n="menu_chart">차트</a>
+                        <div class="dropdown-content">
+                            <a href="/futures-estimate/" data-i18n="futures_estimate_index">지수</a>
+                        </div>
+                    </li>
                     <li class="dropdown">
                         <a href="#" class="dropbtn" data-i18n="menu_test">테스트</a>
                         <div class="dropdown-content">
@@ -87,7 +94,6 @@
                             <a href="/ai-evolution/" data-i18n="ai_evolution">AI 진화 2048</a>
                         </div>
                     </li>
-                    <li><a href="/news/" data-i18n="news_home">뉴스</a></li>
                 </ul>
             </nav>
             <div class="utility-controls">
@@ -146,7 +152,7 @@
 </ol>
 </li>
 </ul>
-<h2>HASHTAGS##: #AI변호사 #법률시장 #인공지능 #변호사 #미래기술</h2>
+<div class="news-hashtags"><span class="news-hashtag-chip">#AI변호사</span><span class="news-hashtag-chip">#법률시장</span><span class="news-hashtag-chip">#인공지능</span><span class="news-hashtag-chip">#변호사</span><span class="news-hashtag-chip">#미래기술</span></div>
       </div>
     </article>
   </main>

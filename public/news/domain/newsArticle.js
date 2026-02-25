@@ -18,6 +18,15 @@ export const makeExcerpt = (md = '', limit = 160) => {
 export const renderMarkdown = (md = '') => {
   if (!md) return '';
   let html = md.replace(/\r\n/g, '\n');
+  html = html.replace(/^##HASHTAGS##:\s*(.*)$/gm, (_, tags) => {
+    const chips = (tags || '')
+      .split(/\s+/)
+      .map((tag) => tag.trim())
+      .filter((tag) => tag.startsWith('#'))
+      .map((tag) => `<span class="news-hashtag-chip">${tag}</span>`)
+      .join('');
+    return chips ? `<div class="news-hashtags">${chips}</div>` : '';
+  });
   html = html.replace(/^### (.*)$/gm, '<h3>$1</h3>');
   html = html.replace(/^## (.*)$/gm, '<h2>$1</h2>');
   html = html.replace(/^# (.*)$/gm, '<h1>$1</h1>');

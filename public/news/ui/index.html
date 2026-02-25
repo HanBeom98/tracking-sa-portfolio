@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <link rel="stylesheet" href="/news/ui/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="news_home">뉴스 홈 - Tracking SA</title>
+</head>
+<body>
+    <!-- Financial Ticker Tape -->
+    <div class="ticker-container">
+        <script type="module" src="https://widgets.tradingview-widget.com/w/kr/tv-ticker-tape.js"></script>
+        <tv-ticker-tape symbols='FOREXCOM:SPXUSD,FOREXCOM:NSXUSD,FOREXCOM:DJI,FX:EURUSD,BITSTAMP:BTCUSD,BITSTAMP:ETHUSD,CMCMARKETS:GOLD'></tv-ticker-tape>
+    </div>
+
+    <main>
+        <section class="news-hero">
+            <div class="news-hero-inner">
+                <h1 data-i18n="news_home_title">Tracking SA 뉴스</h1>
+                <p data-i18n="news_home_desc">AI, 스타트업, 테크 산업의 핵심 이슈를 매일 정리합니다. 신뢰할 수 있는 요약과 분석을 확인하세요.</p>
+            </div>
+        </section>
+        <section class="news-section-main">
+            <!-- NEWS_INJECTION_POINT -->
+            <div class="pagination" id="news-pagination" hidden>
+                <button class="pagination-button" id="prev-page" data-i18n="prev_button">이전</button>
+                <span class="current-page" id="page-indicator">1</span>
+                <button class="pagination-button" id="next-page" data-i18n="next_button">다음</button>
+            </div>
+        </section>
+    </main>
+
+    <script src="/news/news-client.js" type="module"></script>
+    <script>
+    (function() {
+        const PAGE_SIZE = 12;
+        function setupPagination() {
+            const grid = document.querySelector('.news-grid');
+            const pagination = document.getElementById('news-pagination');
+            if (!grid || !pagination) return;
+
+            const cards = Array.from(grid.querySelectorAll('.news-card-premium'));
+            if (cards.length <= PAGE_SIZE) {
+                pagination.hidden = true;
+                return;
+            }
+
+            let currentPage = 1;
+            const totalPages = Math.ceil(cards.length / PAGE_SIZE);
+            const prevBtn = document.getElementById('prev-page');
+            const nextBtn = document.getElementById('next-page');
+            const indicator = document.getElementById('page-indicator');
+
+            const renderPage = (page) => {
+                currentPage = Math.max(1, Math.min(totalPages, page));
+                const start = (currentPage - 1) * PAGE_SIZE;
+                const end = start + PAGE_SIZE;
+
+                cards.forEach((card, index) => {
+                    card.style.display = index >= start && index < end ? 'flex' : 'none';
+                });
+
+                if (indicator) {
+                    indicator.textContent = currentPage + " / " + totalPages;
+                }
+                if (prevBtn) prevBtn.disabled = currentPage === 1;
+                if (nextBtn) nextBtn.disabled = currentPage === totalPages;
+            };
+
+            if (prevBtn) prevBtn.addEventListener('click', () => renderPage(currentPage - 1));
+            if (nextBtn) nextBtn.addEventListener('click', () => renderPage(currentPage + 1));
+
+            pagination.hidden = false;
+            renderPage(1);
+        }
+
+        document.addEventListener('DOMContentLoaded', setupPagination);
+    })();
+    </script>
+</body>
+</html>
