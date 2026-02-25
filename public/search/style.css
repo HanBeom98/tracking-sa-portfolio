@@ -1,0 +1,80 @@
+.search-page {
+  width: min(920px, 92vw);
+  margin: 30px auto 60px;
+}
+
+.search-head h1 {
+  font-size: 2rem;
+  margin: 0 0 16px;
+  color: var(--p-blue);
+}
+
+.search-box {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.search-box input {
+  height: 48px;
+  border-radius: 12px;
+  border: 1px solid oklch(88% 0.02 260);
+  padding: 0 14px;
+  font-size: 1rem;
+}
+
+.search-box button {
+  height: 48px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--p-blue);
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.summary {
+  color: var(--text-sub);
+  margin: 6px 0 20px;
+}
+
+.results {
+  display: grid;
+  gap: 10px;
+}
+
+.result-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.result-card:hover {
+  border-color: oklch(74% 0.15 250);
+  box-shadow: 0 10px 30px rgba(2, 6, 23, 0.08);
+}
+
+.result-title {
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 6px;
+}
+
+.result-meta {
+  font-size: 0.9rem;
+  color: var(--text-sub);
+}
+
+.result-empty {
+  background: var(--card-bg);
+  border: 1px dashed var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  color: var(--text-sub);
+}

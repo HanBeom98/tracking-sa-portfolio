@@ -38,6 +38,37 @@ function renderResults(container, docs, lang) {
   }).join('');
 }
 
+function renderFallbackItems(container, items, lang) {
+  if (!items.length) {
+    container.innerHTML = `<div class="result-empty">${tr('search_no_results', '검색 결과가 없습니다.')}</div>`;
+    return;
+  }
+  container.innerHTML = items.map((item) => `
+    <a class="result-card" href="${item.href}">
+      <div class="result-title">${item.title}</div>
+      <div class="result-meta">${item.date || ''}</div>
+    </a>
+  `).join('');
+}
+
+async function searchFromNewsIndex(query, lang, limit = 200) {
+  const newsPath = lang === 'en' ? '/en/news/' : '/news/';
+  const res = await fetch(newsPath, { cache: 'no-store' });
+  if (!res.ok) return [];
+  const html = await res.text();
+  const parsed = new DOMParser().parseFromString(html, 'text/html');
+  const cards = Array.from(parsed.querySelectorAll('.news-card-premium'));
+  const q = query.toLowerCase();
+  return cards
+    .map((card) => ({
+      href: card.getAttribute('href') || '',
+      title: (card.querySelector('.news-title-text')?.textContent || '').trim(),
+      date: (card.querySelector('.news-date')?.textContent || '').trim()
+    }))
+    .filter((item) => item.href && item.title.toLowerCase().includes(q))
+    .slice(0, limit);
+}
+
 async function runSearch(query) {
   const input = document.getElementById('searchPageInput');
   const summary = document.getElementById('searchSummary');
@@ -90,9 +121,16 @@ async function runSearch(query) {
       summary.textContent = `${tr('search_results_for', '검색어')}: "${query}" · ${filteredDocs.length}${tr('search_count_suffix', '건')}`;
       renderResults(container, filteredDocs, lang);
     } catch (fallbackError) {
-      console.error('Search page error:', fallbackError);
-      summary.textContent = tr('search_error', '검색 중 오류가 발생했습니다.');
-      container.innerHTML = `<div class="result-empty">${tr('search_error', '검색 중 오류가 발생했습니다.')}</div>`;
+      console.warn('Firestore fallback failed, trying news-index fallback:', fallbackError);
+      try {
+        const items = await searchFromNewsIndex(query, lang, 200);
+        summary.textContent = `${tr('search_results_for', '검색어')}: "${query}" · ${items.length}${tr('search_count_suffix', '건')}`;
+        renderFallbackItems(container, items, lang);
+      } catch (finalError) {
+        console.error('Search page error:', finalError);
+        summary.textContent = tr('search_error', '검색 중 오류가 발생했습니다.');
+        container.innerHTML = `<div class="result-empty">${tr('search_error', '검색 중 오류가 발생했습니다.')}</div>`;
+      }
     }
   }
 }

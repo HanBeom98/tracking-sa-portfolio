@@ -13,6 +13,41 @@ document.addEventListener('DOMContentLoaded', function () {
     const db = (window.db || (typeof firebase !== 'undefined' && firebase.apps.length ? firebase.firestore() : null));
 
     let debounceTimer;
+
+    async function searchFromNewsIndex(searchTerm, limit = 10) {
+        const newsPath = currentLang === 'en' ? '/en/news/' : '/news/';
+        const res = await fetch(newsPath, { cache: 'no-store' });
+        if (!res.ok) return [];
+        const html = await res.text();
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const cards = Array.from(doc.querySelectorAll('.news-card-premium'));
+        const q = searchTerm.toLowerCase();
+        return cards
+            .map((card) => ({
+                href: card.getAttribute('href') || '',
+                title: (card.querySelector('.news-title-text')?.textContent || '').trim(),
+                date: (card.querySelector('.news-date')?.textContent || '').trim()
+            }))
+            .filter((item) => item.title.toLowerCase().includes(q) && item.href)
+            .slice(0, limit);
+    }
+
+    function renderFallbackItems(items) {
+        if (!items.length) {
+            searchResultsContainer.innerHTML = '<div class="search-no-results">검색 결과가 없습니다.</div>';
+            searchResultsContainer.classList.add('active');
+            return;
+        }
+        const html = items.map((item) => `
+            <a href="${item.href}" class="search-result-item">
+                <div class="result-title">${item.title}</div>
+                <div class="result-date">${item.date}</div>
+            </a>
+        `).join('');
+        searchResultsContainer.innerHTML = html;
+        searchResultsContainer.classList.add('active');
+    }
+
     function moveToSearchPage(rawQuery) {
         const query = (rawQuery || '').trim();
         if (query.length < 2) return;
@@ -70,9 +105,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 }).slice(0, 10);
                 displayResults(filteredDocs, searchTerm);
             } catch (fallbackError) {
-                console.error("Search error:", fallbackError);
-                searchResultsContainer.innerHTML = '<div class="search-no-results">검색 중 오류가 발생했습니다.</div>';
-                searchResultsContainer.classList.add('active');
+                console.warn("Firestore fallback failed, trying news-index fallback:", fallbackError);
+                try {
+                    const items = await searchFromNewsIndex(searchTerm, 10);
+                    renderFallbackItems(items);
+                } catch (finalError) {
+                    console.error("Search error:", finalError);
+                    searchResultsContainer.innerHTML = '<div class="search-no-results">검색 중 오류가 발생했습니다.</div>';
+                    searchResultsContainer.classList.add('active');
+                }
             }
         }
     }
