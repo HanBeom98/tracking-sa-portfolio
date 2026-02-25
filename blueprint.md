@@ -1,96 +1,88 @@
 # Tracking SA Project Blueprint
 
 ## 🎯 Project Vision
-Evolving Tracking-sa into a premium, framework-less web platform using a specialized 5-agent AI orchestration system and a strict DDD architecture.
+Tracking SA를 프레임워크 의존 없이 안정적으로 운영 가능한 DDD 지향 웹 플랫폼으로 발전시킨다.
 
 ## 📚 Canonical Docs For AI Handoff
-- `blueprint.md`: 현재 목표/상태/우선순위
-- `docs/change-log.md`: 최근 변경 의도/영향/검증 로그
-- `docs/ddd-migration-map.md`: DDD 구조 전환 및 파일 이동 이력
+- `blueprint.md`: 현재 목표/운영방식/진행상태
+- `docs/change-log.md`: 변경 의도/영향/검증 기록
+- `docs/ddd-migration-map.md`: DDD 전환 및 파일 이동 이력
 
 ## 🛠️ Tech Stack & Standards
-- **Architecture**: Domain-Driven Design (DDD) with a clear separation of `src/domains` and `src/shared`.
-- **UI System**: Web Components (Custom Elements) with Shadow DOM.
-- **Styling**: Pure CSS with oklch colors, Container Queries, and -webkit-font-smoothing.
-- **Backend**: Vercel Serverless Functions & Firebase Functions.
-- **Build System**: Custom Python builder (`src/shared/infra/builder.py`) for automated asset injection and deployment.
+- Architecture: `src/domains` + `src/shared` 기반 DDD 지향 구조
+- Frontend: Vanilla JS + Web Components (선택적 Shadow DOM)
+- Build: `main.py` + `src/shared/infra/builder.py` 커스텀 빌더
+- Data: Firebase Firestore
+- News Gen: RSS + Gemini 기반 `multi-agent-system/news-desk.js`
 
-## ✅ Completed Milestones (2026-02-24)
+## 🚦 Deployment & Operation Model (2026-02-25 기준)
+- 일반 기능 배포: 로컬에서 `main.py --build-only` 후 `public/` 포함 커밋/푸시
+- 뉴스 자동 발행: GitHub Actions 스케줄/수동 실행에서만 `python main.py` 실행 후 `public/` 자동 커밋
+- Cloudflare Pages: `main` 변경 감지 후 자동 배포
 
-### 1. Structure Consolidation (Partial)
-- **Feature Migration**: Features grouped under `src/domains/` by page/feature.
-- **Shared Layer**: Global assets consolidated into `src/shared/assets/` and `src/shared/ui/`.
-- **Path Standardization**: Root-relative paths (`/xxx.js`) used for shared assets.
-- **Automation & Logs**: Restored news generation in `src/shared/infra/news_manager.py` and implemented a unified log system in `/logs/`.
+## ✅ Completed Milestones
 
-### 2. Premium Module Overhaul (In Progress)
-- **Animal Face Test**: Converted to `<animal-face-test>` Web Component with standard i18n.
-- **AI Fortune**: Implemented premium report layout with Markdown parsing and 429 error handling.
-- **Lucky Recommendation**: Reconstructed into a premium component with dynamic color visualization.
-- **AI Tendency Test**: Redesigned with Premium Blue aesthetic (oklch colors) and integrated i18n support.
-- **News Hub**: Restored magazine-style hero cards and fixed Firestore loading bugs.
+### 2026-02-24
+- DDD 문서화:
+  - `docs/change-log.md`, `docs/ddd-migration-map.md` 추가
+  - `blueprint.md`에 핸드오프 문서 참조 체계 반영
+- 검색 안정화 1차:
+  - Firestore prefix query 실패 시 fallback 검색 추가
+  - `/search` 라우트 및 연관 에셋 반영
 
-### 3. Global UI/UX Optimization
-- **Typography**: Applied global font smoothing and Pretendard font stack.
-- **Navigation**: Restored global header/footer styles through the automated builder.
-- **Spacing**: Added global main padding to prevent header/content crowding.
-- **Language Switcher**: Stabilized button layout to avoid position shifts.
-- **AI Tendency Test**: Fixed English i18n keys and reduced UI scale to match fortune page.
-- **Animal Face Test**: Removed placeholder header/footer and invalid navigation script.
+### 2026-02-25
+- 뉴스 도메인 정리:
+  - 뉴스 빌드 로직 분리: `src/domains/news/infra/news_builder.py`
+  - HTML 공통 처리 분리: `src/shared/infra/html_processor.py`
+  - 빌더 오케스트레이션 정리: `src/shared/infra/builder.py`
+- 뉴스 UI/기능 보강:
+  - EN 번역 동작 정합성 수정
+  - 한/영 페이지네이션 버튼 스타일 통일
+  - 뉴스 상세 상단 “목록으로” 버튼 추가 (KO/EN 분기)
+- 동물상 테스트 복구:
+  - Teachable Machine 런타임 로딩 안정화 (`exports is not defined` 이슈 해결)
+- 네비게이션/업로드 UI:
+  - 드롭다운 hover gap 제거 및 클릭 안정화
+  - 동물상 업로드 점선 박스 크기 축소
+- 운세/행운의 추천:
+  - AI 처리 중 로딩 시각 효과 강화
 
-## ✅ Completed Milestones (2026-02-25)
-- **News Build Separation**: Moved news build logic into `src/domains/news/infra/news_builder.py`.
-- **Shared HTML Processor**: Extracted `process_html_file_for_common_elements` into `src/shared/infra/html_processor.py`.
-- **Builder Cleanup**: `src/shared/infra/builder.py` now orchestrates news build via domain infra functions.
+### 2026-02-26
+- GitHub Actions 역할 고정:
+  - `daily-news-post.yml`을 예약/수동 뉴스 생성 전용으로 단순화
+  - push 트리거 및 `--build-only` 분기 제거
+- 뉴스 에이전트 안정화:
+  - Gemini 호출 재시도(backoff) 추가
+  - 기획(JSON) 파싱 실패 시 재시도 + fallback plan
+  - 모델/토큰/재시도 파라미터 환경변수화
+  - `processed_articles.log` 회전 정책 추가
+- 뉴스 본문 해시태그 렌더링 개선:
+  - `##HASHTAGS##`를 제목이 아닌 작은 chip 컴포넌트로 렌더링
+- 검색 기능 안정화 2차:
+  - Firestore unavailable 시 즉시 뉴스 인덱스 fallback
+  - DOMParser 실패 대비 HTML 정규식 파서 fallback
+  - 메인 검색바/검색결과 페이지 양쪽 동기 반영
+- 모바일 게임 UX 개선:
+  - 테트리스: 헤더/하단 safe-area 고려 레이아웃 및 버튼 가림 방지
+  - AI Evolution 2048: 단일 `index.html` 내 상단 네비게이션 내장 및 게임 영역 오프셋 적용
 
-## 🧭 Architecture Reality Check (2026-02-24)
-- **DDD folder names exist, but DDD layers do not**: `src/domains` currently maps to pages/features, not `domain/application/infrastructure` layers.
-- **Mixed concerns**: UI rendering, data access, and auth logic are combined in single files (example: `src/domains/board/post/main.js`).
-- **Shared infra is centralized**, but is not accessed through domain-facing interfaces or use cases.
-
-## 🚀 Prioritized Next Steps
-1. **Define DDD Target Shape (High Impact, Low Risk)**
-   - Establish layer conventions per domain: `domain/`, `application/`, `infra/`, `ui/`.
-   - Decide on shared cross-domain boundaries (`src/shared/infra`, `src/shared/ui`, `src/shared/domain` if needed).
-2. **Refactor One Pilot Domain (High Impact, Medium Risk)**
-   - Start with `board`: extract domain models + application services from `main.js`.
-   - Introduce a repository interface and move Firestore access into infra.
-3. **Create Consistent Entry Points (Medium Impact, Low Risk)**
-   - Each page `main.js` becomes thin orchestration, calling application services only.
-   - Move UI into Web Components where feasible.
-4. **Shared Utilities Cleanup (Medium Impact, Low Risk)**
-   - Consolidate cross-domain helpers into `src/shared` with clear ownership.
-5. **Incremental Migration Plan (Medium Impact, Medium Risk)**
-   - Apply the pattern domain-by-domain with minimal UI regression risk.
+## 🧭 Architecture Reality Check
+- `src/domains` 구조는 자리잡았지만, 도메인별 `domain/application/infra/ui` 레이어 분리는 아직 불균일
+- 일부 페이지는 UI/데이터 접근/상태 로직이 단일 파일에 결합되어 있음
+- 운영상 요구(SEO/색인/배포 속도)로 인해 일부 게임 페이지는 의도적으로 “단일 HTML 집중형” 유지
 
 ## 🔭 Current Focus
-- [ ] Finalize DDD target layer template.
-- [ ] Build a pilot refactor plan for the `board` domain.
-- [x] Apply global centering fallback for body-level content (exclude game pages).
-- [x] Rebuild public output after layout fix.
-- [x] Ensure homepage excludes global navigation header.
-- [x] Restore animal-face main component tag and module script.
-- [x] Add stricter main centering rule for non-game pages.
-- [x] Remove inline style.css injection to prevent layout flicker.
-- [x] Wrap fortune/lucky content in container for consistent centering.
-- [x] Center container blocks globally to prevent left-shift.
-- [x] Move Pretendard font load to head to reduce layout shifts.
-- [x] Move build stamp generation into build pipeline (CF Pages compatible).
-- [x] Normalize animal-face route and add redirect from legacy path.
-- [x] Remove animal-face local CSS and inline body overrides to align nav.
-- [x] Restore Teachable Machine scripts for animal-face functionality.
-- [x] Add English translations for AI tendency test intro.
-- [x] Reduce AI tendency test UI scale to match fortune.
-- [x] Add global main padding (top/bottom) for consistent page spacing.
-- [x] Fix AI tendency test English keys and result/reset labels.
-- [x] Stabilize language switcher width to prevent button shift.
-- [x] Clean animal-face page: remove placeholder header/footer and invalid nav script.
-- [x] Style footer for consistent layout.
-- [x] Expose translations on window for AI test component.
-- [x] Restore scheduled news generation in GitHub Actions (schedule only).
-- [x] Allow Firebase credential discovery from `src/shared/infra/serviceAccountKey.json`.
+- [ ] 보드(`board`) 도메인 레이어 분리 파일 설계(파일 이동 최소화 방식)
+- [ ] Firestore 규칙 정리(검색/뉴스 읽기 안정성 기준으로 최소 권한 재설계)
+- [ ] 뉴스 생성 프롬프트 품질 관리(제목 품질, 중복 스타일, 과한 해시태그 억제)
+- [x] 뉴스 상세 목록 복귀 버튼 반영
+- [x] 검색 fallback 다중화 반영
+- [x] 뉴스 에이전트 재시도/로그 회전 반영
+- [x] 테트리스 모바일 safe-area 대응
+- [x] 2048 단일파일 네비게이션 반영
 
 ## ⚠️ Lessons Learned
-- **Path Resolution**: Always use absolute paths (`/`) for shared assets in deeply nested domain folders.
-- **UI Integrity**: Each domain `index.html` must explicitly link its local `style.css` if it exists.
-- **Logging Strategy**: Centralize logs in a dedicated `/logs/` folder to maintain root directory cleanliness.
+- `public/` 커밋 여부는 배포 반영 여부와 직결된다 (현 운영모드 기준)
+- 검색은 Firestore 단일 의존으로 두면 장애 시 UX가 즉시 붕괴하므로 index fallback이 필수다
+- 모바일 게임은 `100vh`보다 `100dvh` + safe-area 보정이 실효성이 높다
+- 뉴스 본문 마크다운 규칙(`##`)은 SEO/가독성에 직접 영향이 있으므로 포맷 태그를 별도 렌더링 규칙으로 분리해야 한다
