@@ -33,6 +33,11 @@ Evolving Tracking-sa into a premium, framework-less web platform using a special
 - **AI Tendency Test**: Fixed English i18n keys and reduced UI scale to match fortune page.
 - **Animal Face Test**: Removed placeholder header/footer and invalid navigation script.
 
+## ✅ Completed Milestones (2026-02-25)
+- **News Build Separation**: Moved news build logic into `src/domains/news/infra/news_builder.py`.
+- **Shared HTML Processor**: Extracted `process_html_file_for_common_elements` into `src/shared/infra/html_processor.py`.
+- **Builder Cleanup**: `src/shared/infra/builder.py` now orchestrates news build via domain infra functions.
+
 ## 🧭 Architecture Reality Check (2026-02-24)
 - **DDD folder names exist, but DDD layers do not**: `src/domains` currently maps to pages/features, not `domain/application/infrastructure` layers.
 - **Mixed concerns**: UI rendering, data access, and auth logic are combined in single files (example: `src/domains/board/post/main.js`).
