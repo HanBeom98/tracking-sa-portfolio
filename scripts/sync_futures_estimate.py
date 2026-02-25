@@ -346,13 +346,13 @@ def _resolve_kospi200_base() -> float:
 def _fetch_public_quote(yahoo_symbol: str, stooq_symbol: str) -> dict:
     errors = []
     try:
-        return _fetch_yahoo_quote(yahoo_symbol)
-    except Exception as e:
-        errors.append(f"_fetch_yahoo_quote: {e}")
-    try:
         return _fetch_stooq_quote(stooq_symbol)
     except Exception as e:
         errors.append(f"_fetch_stooq_quote: {e}")
+    try:
+        return _fetch_yahoo_quote(yahoo_symbol)
+    except Exception as e:
+        errors.append(f"_fetch_yahoo_quote: {e}")
     raise RuntimeError(" / ".join(errors))
 
 
