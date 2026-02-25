@@ -60,6 +60,15 @@ def _make_excerpt(markdown_text, limit=160):
     return text[:limit].rstrip() + "…"
 
 
+def _has_meaningful_markdown(markdown_text):
+    if not markdown_text:
+        return False
+    # Ignore hashtag-only metadata lines used by the generator.
+    normalized = re.sub(r'^\s*##HASHTAGS##:.*$', '', markdown_text, flags=re.MULTILINE)
+    text = _strip_html(markdown.markdown(normalized))
+    return bool(text)
+
+
 def _render_markdown_with_hashtags(markdown_text):
     if not markdown_text:
         return ""
@@ -96,6 +105,20 @@ def _extract_excerpt_from_article(slug, limit=160):
         return text[:limit].rstrip() + ("…" if len(text) > limit else "")
     except Exception:
         return ""
+
+
+def _article_has_meaningful_content(slug):
+    path = os.path.join(PUBLIC_DIR, slug)
+    if not os.path.exists(path):
+        return False
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            html = f.read()
+        content_match = re.search(r'class="news-article-content"[^>]*>([\s\S]*?)</div>', html, flags=re.IGNORECASE)
+        html_block = content_match.group(1) if content_match else html
+        return bool(_strip_html(html_block))
+    except Exception:
+        return False
 
 
 def _build_news_card(href, title, date_text="", excerpt=""):
@@ -186,6 +209,8 @@ def upgrade_cached_news_index():
         enriched = []
         for href, title in cards:
             slug = href.lstrip("/")
+            if not _article_has_meaningful_content(slug):
+                continue
             date_text = _extract_date_from_slug(slug)
             excerpt = _extract_excerpt_from_article(slug)
             enriched.append({
@@ -311,16 +336,24 @@ def generate_news_pages():
             content = p.get('contentKo', '')
             content_en = p.get('contentEn', '') or content
             date = p.get('date', '2026-02-24')
+            out_path = os.path.join(PUBLIC_DIR, f"{ukey}.html")
+            en_out_path = os.path.join(PUBLIC_DIR, "en", f"{ukey}.html")
+
+            if not _has_meaningful_markdown(content):
+                # Remove stale files for entries that lost body content.
+                for stale in (out_path, en_out_path):
+                    if os.path.exists(stale):
+                        os.remove(stale)
+                continue
+
             excerpt = _make_excerpt(content)
             excerpt_en = _make_excerpt(content_en)
 
-            out_path = os.path.join(PUBLIC_DIR, f"{ukey}.html")
             html = _wrap_article_html(title, _render_markdown_with_hashtags(content), date, is_en=False)
 
             with open(out_path, "w", encoding="utf-8") as f:
                 f.write(html)
             process_html_file_for_common_elements(out_path)
-            en_out_path = os.path.join(PUBLIC_DIR, "en", f"{ukey}.html")
             os.makedirs(os.path.dirname(en_out_path), exist_ok=True)
             en_html = _wrap_article_html(title_en, _render_markdown_with_hashtags(content_en), date, is_en=True)
             with open(en_out_path, "w", encoding="utf-8") as f:
