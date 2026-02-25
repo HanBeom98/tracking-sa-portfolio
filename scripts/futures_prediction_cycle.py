@@ -2,9 +2,14 @@
 import argparse
 import datetime as dt
 import os
+import sys
 from zoneinfo import ZoneInfo
 
 import requests
+
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if ROOT_DIR not in sys.path:
+    sys.path.append(ROOT_DIR)
 
 from src.shared.infra.db import get_firestore_client
 
@@ -208,4 +213,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
