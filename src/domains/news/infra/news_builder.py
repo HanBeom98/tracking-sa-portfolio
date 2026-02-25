@@ -24,6 +24,25 @@ def _extract_date_from_slug(slug):
     return ""
 
 
+def _date_key(date_text):
+    if not date_text:
+        return datetime.date.min
+    try:
+        return datetime.datetime.strptime(date_text, "%Y-%m-%d").date()
+    except Exception:
+        return datetime.date.min
+
+
+def _created_ts_from_url(url):
+    m = re.search(r'news-(\d{10})-', url or "")
+    if not m:
+        return 0
+    try:
+        return int(m.group(1))
+    except Exception:
+        return 0
+
+
 def _strip_html(text):
     if not text:
         return ""
@@ -311,6 +330,22 @@ def generate_news_pages():
             articles_en.append({'title': title_en, 'url': f"{ukey}.html", 'date': date, 'excerpt': excerpt_en})
     except Exception as e:
         print(f"⚠️ [NEWS BUILD WARNING] Skipping individual articles due to DB error: {e}")
+
+    # Index 정렬은 날짜 우선, 동일 날짜는 생성 시각(urlKey timestamp) 우선
+    articles.sort(
+        key=lambda a: (
+            _date_key(a.get("date", "")),
+            _created_ts_from_url(a.get("url", ""))
+        ),
+        reverse=True
+    )
+    articles_en.sort(
+        key=lambda a: (
+            _date_key(a.get("date", "")),
+            _created_ts_from_url(a.get("url", ""))
+        ),
+        reverse=True
+    )
 
     # 뉴스 인덱스 페이지 생성 (데이터 유무와 상관없이 보장)
     idx_tmpl = "src/domains/news/ui/index.html"
