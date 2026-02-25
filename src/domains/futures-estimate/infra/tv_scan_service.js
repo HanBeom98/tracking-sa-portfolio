@@ -1,16 +1,6 @@
-const DEFAULT_TICKERS = [
-  "AMEX:SPY",
-  "NASDAQ:QQQ",
-  "AMEX:DIA",
-  "FX_IDC:USDKRW",
-  "TVC:GOLD",
-  "BITSTAMP:BTCUSD",
-];
+import { normalizeTickers } from "../domain/impact_rules.js";
 
-export function normalizeTickers(input) {
-  const tickers = Array.isArray(input) && input.length ? input : DEFAULT_TICKERS;
-  return tickers.map((v) => String(v).trim()).filter(Boolean).slice(0, 20);
-}
+export { normalizeTickers };
 
 export async function fetchTradingViewScan(tickers) {
   return fetch("https://scanner.tradingview.com/global/scan", {
@@ -25,4 +15,3 @@ export async function fetchTradingViewScan(tickers) {
     }),
   });
 }
-

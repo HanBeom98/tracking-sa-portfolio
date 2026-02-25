@@ -1,4 +1,5 @@
 import { fetchTradingViewScan, normalizeTickers } from "../../src/domains/futures-estimate/infra/tv_scan_service.js";
+import { buildImpactAnalysis } from "../../src/domains/futures-estimate/application/build_impact_analysis.js";
 
 function addCORSHeaders(response) {
   response.headers.set("Access-Control-Allow-Origin", "*");
@@ -40,13 +41,14 @@ export async function onRequest(context) {
 
     const scannerRes = await fetchTradingViewScan(safeTickers);
 
-    const text = await scannerRes.text();
     if (!scannerRes.ok) {
       throw new Error(`scanner_http_${scannerRes.status}`);
     }
+    const scannerJson = await scannerRes.json();
+    const analysis = buildImpactAnalysis(safeTickers, scannerJson?.data || []);
 
     return addCORSHeaders(
-      new Response(text, {
+      new Response(JSON.stringify(analysis), {
         status: 200,
         headers: { "Content-Type": "application/json" },
       })

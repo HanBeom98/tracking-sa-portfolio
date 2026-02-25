@@ -228,29 +228,6 @@
       });
     }
 
-    function classifySignal(key, change) {
-      if (key === "FX_IDC:USDKRW") {
-        if (change >= 0.2) return { score: -2, text: "원화 약세(부담)" };
-        if (change > 0) return { score: -1, text: "원화 약세 소폭" };
-        if (change <= -0.2) return { score: 2, text: "원화 강세(우호)" };
-        return { score: 1, text: "원화 강세 소폭" };
-      }
-      if (key === "TVC:GOLD") {
-        if (change >= 0.4) return { score: -1, text: "리스크오프 경계" };
-        if (change <= -0.4) return { score: 1, text: "리스크온 보조" };
-        return { score: 0, text: "중립" };
-      }
-      if (key === "BITSTAMP:BTCUSD") {
-        if (change >= 1.0) return { score: 1, text: "리스크온 보조" };
-        if (change <= -1.0) return { score: -1, text: "리스크오프 보조" };
-        return { score: 0, text: "중립" };
-      }
-      if (change >= 0.5) return { score: 2, text: "상승 우호" };
-      if (change > 0) return { score: 1, text: "상승 보조" };
-      if (change <= -0.5) return { score: -2, text: "하락 우려" };
-      return { score: -1, text: "약세 보조" };
-    }
-
     function formatNum(v) {
       if (typeof v !== "number" || Number.isNaN(v)) return "-";
       return v.toLocaleString();
@@ -282,37 +259,26 @@
             body: JSON.stringify({ tickers }),
           });
         }
-        if (!res.ok) throw new Error("scanner_http_" + res.status);
+        if (!res.ok) throw new Error("analysis_http_" + res.status);
         const data = await res.json();
-        const rows = (data && data.data) || [];
-        if (!rows.length) throw new Error("scanner_empty");
+        const items = (data && data.items) || [];
+        if (!items.length) throw new Error("analysis_empty");
 
-        let totalScore = 0;
-        const bySymbol = new Map(rows.map((r) => [r.s, r.d]));
-        const ordered = tickers.filter((s) => bySymbol.has(s));
-        const html = ordered.map((s) => {
-          const d = bySymbol.get(s);
-          const name = d[0];
-          const close = d[2];
-          const chg = d[3];
-          const signal = classifySignal(s, chg);
-          totalScore += signal.score;
+        const html = items.map((item) => {
+          const chg = item.change;
           const chgTxt = (typeof chg === "number" ? chg.toFixed(2) : "-") + "%";
           return `<tr style="border-bottom:1px solid #f1f5f9;">
-            <td style="padding:8px 6px;">${name}</td>
-            <td style="padding:8px 6px;">${formatNum(close)}</td>
+            <td style="padding:8px 6px;">${item.name}</td>
+            <td style="padding:8px 6px;">${formatNum(item.close)}</td>
             <td style="padding:8px 6px;">${chgTxt}</td>
-            <td style="padding:8px 6px;">${signal.text}</td>
+            <td style="padding:8px 6px;">${item.signal}</td>
           </tr>`;
         }).join("");
 
-        let verdict = "중립";
-        if (totalScore >= 4) verdict = "상승 우위";
-        if (totalScore <= -4) verdict = "하락 우위";
-
         bodyEl.innerHTML = html;
-        summaryEl.textContent = `종합 점수 ${totalScore}점: ${verdict}`;
-        updatedEl.textContent = `업데이트: ${new Date().toLocaleString("ko-KR")}`;
+        summaryEl.textContent = `종합 점수 ${data.totalScore}점: ${data.verdict}`;
+        const updated = data.updatedAt ? new Date(data.updatedAt) : new Date();
+        updatedEl.textContent = `업데이트: ${updated.toLocaleString("ko-KR")}`;
       } catch (_e) {
         bodyEl.innerHTML = '<tr><td colspan="4" style="padding:10px 6px; color:#b91c1c;">분석 데이터 조회 실패(CORS/소스 제한 가능). 위젯 시각 확인만 가능합니다.</td></tr>';
         summaryEl.textContent = "종합 점수 계산 불가";
