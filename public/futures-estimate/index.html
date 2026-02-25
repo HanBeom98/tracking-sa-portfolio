@@ -391,14 +391,58 @@
       return d.toLocaleString();
     }
 
+    function toUnixSeconds(time) {
+      if (typeof time === "number") return time;
+      if (time && typeof time === "object" && typeof time.timestamp === "number") {
+        return time.timestamp;
+      }
+      return 0;
+    }
+
+    function chartLocale() {
+      const htmlLang = (document.documentElement.lang || "ko").toLowerCase();
+      return htmlLang.startsWith("en") ? "en-US" : "ko-KR";
+    }
+
+    function formatChartTick(time) {
+      const ts = toUnixSeconds(time);
+      if (!ts) return "";
+      return new Date(ts * 1000).toLocaleTimeString(chartLocale(), {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      });
+    }
+
+    function formatChartCrosshair(time) {
+      const ts = toUnixSeconds(time);
+      if (!ts) return "";
+      return new Date(ts * 1000).toLocaleString(chartLocale(), {
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      });
+    }
+
     function ensureChart() {
       if (chart) return;
       const container = document.getElementById("futures-chart");
       chart = LightweightCharts.createChart(container, {
+        localization: {
+          locale: chartLocale(),
+          timeFormatter: formatChartCrosshair
+        },
         layout: { background: { color: "#ffffff" }, textColor: "#1f2937" },
         grid: { vertLines: { color: "#f1f5f9" }, horzLines: { color: "#f1f5f9" } },
         rightPriceScale: { borderColor: "#e2e8f0" },
-        timeScale: { borderColor: "#e2e8f0", timeVisible: true, secondsVisible: false }
+        timeScale: {
+          borderColor: "#e2e8f0",
+          timeVisible: true,
+          secondsVisible: false,
+          tickMarkFormatter: formatChartTick
+        }
       });
       series = chart.addLineSeries({ color: "#2563eb", lineWidth: 2 });
       window.addEventListener("resize", () => {
