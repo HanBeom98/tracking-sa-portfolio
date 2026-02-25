@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import asyncio
+import json
 import os
 import time
 import datetime
@@ -7,6 +9,7 @@ from pathlib import Path
 from typing import Any, Iterable, Optional
 
 import requests
+import websockets
 from dotenv import load_dotenv
 from firebase_admin import firestore
 
@@ -31,17 +34,16 @@ def _env_float(name: str, default: float) -> float:
 KIS_BASE_URL = os.getenv("KIS_BASE_URL", "https://openapi.koreainvestment.com:9443").rstrip("/")
 KIS_APP_KEY = os.getenv("KIS_APP_KEY", "").strip()
 KIS_APP_SECRET = os.getenv("KIS_APP_SECRET", "").strip()
-KIS_OAUTH_PATH = os.getenv("KIS_OAUTH_PATH", "/oauth2/tokenP").strip()
-KIS_QUOTE_PATH = os.getenv(
-    "KIS_QUOTE_PATH",
-    "/uapi/domestic-futureoption/v1/quotations/inquire-price",
-).strip()
-KIS_TR_ID = os.getenv("KIS_TR_ID", "FHMIF10000000").strip()
+KIS_OAUTH_TOKEN_PATH = os.getenv("KIS_OAUTH_TOKEN_PATH", "/oauth2/tokenP").strip()
+KIS_OAUTH_APPROVAL_PATH = os.getenv("KIS_OAUTH_APPROVAL_PATH", "/oauth2/Approval").strip()
+KIS_WS_URL = os.getenv("KIS_WS_URL", "ws://ops.koreainvestment.com:21000").rstrip("/")
+KIS_WS_PATH = os.getenv("KIS_WS_PATH", "/tryitout").strip()
+KIS_WS_TR_ID = os.getenv("KIS_WS_TR_ID", "H0MFCNT0").strip()
 KIS_CUSTTYPE = os.getenv("KIS_CUSTTYPE", "P").strip()
-KIS_FID_COND_MRKT_DIV_CODE = os.getenv("KIS_FID_COND_MRKT_DIV_CODE", "F").strip()
-KIS_FID_INPUT_ISCD = os.getenv("KIS_FID_INPUT_ISCD", "").strip()
+KIS_WS_TR_KEY = os.getenv("KIS_WS_TR_KEY", os.getenv("KIS_FID_INPUT_ISCD", "")).strip()
 KOSPI200_BASE = _env_float("KOSPI200_BASE", 350.0)
 REQUEST_TIMEOUT = _env_float("FUTURES_REQUEST_TIMEOUT_SEC", 12.0)
+WS_RECEIVE_TIMEOUT = _env_float("FUTURES_WS_TIMEOUT_SEC", 15.0)
 
 
 def _iter_values(node: Any) -> Iterable[Any]:
@@ -89,7 +91,7 @@ def _get_kis_access_token() -> str:
     if not KIS_APP_SECRET:
         raise RuntimeError("KIS_APP_SECRET is not set")
 
-    url = f"{KIS_BASE_URL}{KIS_OAUTH_PATH}"
+    url = f"{KIS_BASE_URL}{KIS_OAUTH_TOKEN_PATH}"
     payload = {
         "grant_type": "client_credentials",
         "appkey": KIS_APP_KEY,
@@ -105,42 +107,97 @@ def _get_kis_access_token() -> str:
     return token
 
 
-def _fetch_kis_quote() -> dict:
-    if not KIS_FID_INPUT_ISCD:
-        raise RuntimeError("KIS_FID_INPUT_ISCD is not set")
+def _get_kis_approval_key() -> str:
+    if not KIS_APP_KEY:
+        raise RuntimeError("KIS_APP_KEY is not set")
+    if not KIS_APP_SECRET:
+        raise RuntimeError("KIS_APP_SECRET is not set")
 
-    access_token = _get_kis_access_token()
-    url = f"{KIS_BASE_URL}{KIS_QUOTE_PATH}"
-    headers = {
-        "authorization": f"Bearer {access_token}",
+    url = f"{KIS_BASE_URL}{KIS_OAUTH_APPROVAL_PATH}"
+    payload = {
+        "grant_type": "client_credentials",
         "appkey": KIS_APP_KEY,
-        "appsecret": KIS_APP_SECRET,
-        "tr_id": KIS_TR_ID,
-        "custtype": KIS_CUSTTYPE,
+        "secretkey": KIS_APP_SECRET,
     }
-    params = {
-        "FID_COND_MRKT_DIV_CODE": KIS_FID_COND_MRKT_DIV_CODE,
-        "FID_INPUT_ISCD": KIS_FID_INPUT_ISCD,
-    }
-    res = requests.get(url, headers=headers, params=params, timeout=REQUEST_TIMEOUT)
+    headers = {"Content-Type": "application/json"}
+    res = requests.post(url, json=payload, headers=headers, timeout=REQUEST_TIMEOUT)
     if res.status_code >= 400:
-        raise RuntimeError(f"KIS quote error: {res.status_code} {res.text[:200]}")
-    return res.json()
+        raise RuntimeError(f"KIS approval error: {res.status_code} {res.text[:200]}")
+    approval_key = res.json().get("approval_key", "")
+    if not approval_key:
+        raise RuntimeError("KIS approval error: approval_key missing")
+    return approval_key
+
+
+async def _recv_krx_night_futures_once(approval_key: str) -> dict:
+    if not KIS_WS_TR_KEY:
+        raise RuntimeError("KIS_WS_TR_KEY is not set (e.g. 101W9000)")
+
+    url = f"{KIS_WS_URL}{KIS_WS_PATH}"
+    subscribe_msg = {
+        "header": {
+            "approval_key": approval_key,
+            "custtype": KIS_CUSTTYPE,
+            "tr_type": "1",
+            "content-type": "utf-8",
+        },
+        "body": {
+            "input": {
+                "tr_id": KIS_WS_TR_ID,
+                "tr_key": KIS_WS_TR_KEY,
+            }
+        },
+    }
+
+    async with websockets.connect(url) as ws:
+        await ws.send(json.dumps(subscribe_msg))
+        deadline = time.time() + WS_RECEIVE_TIMEOUT
+
+        while time.time() < deadline:
+            remain = max(0.1, deadline - time.time())
+            raw = await asyncio.wait_for(ws.recv(), timeout=remain)
+
+            if not raw:
+                continue
+
+            if raw[0] in ("0", "1"):
+                parts = raw.split("|")
+                if len(parts) < 4:
+                    continue
+                tr_id = parts[1]
+                if tr_id != KIS_WS_TR_ID:
+                    continue
+
+                values = parts[3].split("^")
+                # H0MFCNT0 column index from official sample:
+                # futs_prpr=5, futs_prdy_vrss=2, futs_prdy_ctrt=4
+                if len(values) < 6:
+                    continue
+
+                return {
+                    "futs_shrn_iscd": values[0],
+                    "bsop_hour": values[1],
+                    "futs_prdy_vrss": values[2],
+                    "futs_prdy_ctrt": values[4],
+                    "futs_prpr": values[5],
+                }
+
+        raise RuntimeError("KIS WS receive timeout: no night futures tick received")
+
+
+def _fetch_kis_quote() -> dict:
+    approval_key = _get_kis_approval_key()
+    return asyncio.run(_recv_krx_night_futures_once(approval_key))
 
 
 def _extract_quote(raw: dict) -> dict:
-    price_keys = {
-        "price", "last", "lastprice", "curpr", "nowpr", "tradeprice",
-        "close", "futs_prpr", "stck_prpr",
-    }
-    prev_keys = {
-        "prevclose", "previousclose", "yday_clpr", "baseprice",
-        "yesterdayclose", "futs_sdpr", "stck_sdpr",
-    }
+    price_keys = {"price", "last", "lastprice", "curpr", "nowpr", "tradeprice", "close", "futs_prpr", "stck_prpr"}
+    prev_diff_keys = {"futs_prdy_vrss", "prdy_vrss"}
     rate_keys = {"changerate", "chg_rate", "rate", "chgrate", "fltt_rt"}
 
     futures_price = _find_numeric_by_keys(raw, price_keys)
-    prev_close = _find_numeric_by_keys(raw, prev_keys)
+    prev_close = None
+    prev_diff = _find_numeric_by_keys(raw, prev_diff_keys)
     pct_change = _find_numeric_by_keys(raw, rate_keys)
     ts = _find_timestamp(raw)
 
@@ -162,6 +219,9 @@ def _extract_quote(raw: dict) -> dict:
 
     if prev_close and prev_close > 0:
         return_rate = (futures_price - prev_close) / prev_close
+    elif prev_diff is not None:
+        prev_close = futures_price - prev_diff
+        return_rate = (futures_price - prev_close) / prev_close if prev_close else 0.0
     elif pct_change is not None:
         return_rate = pct_change / 100.0
         prev_close = futures_price / (1 + return_rate) if (1 + return_rate) != 0 else futures_price
@@ -182,9 +242,9 @@ def _extract_quote(raw: dict) -> dict:
         "estimate": float(estimate),
         "delta": float(delta),
         "delta_rate": float(delta_rate),
-        "market_code": KIS_FID_COND_MRKT_DIV_CODE,
-        "issue_code": KIS_FID_INPUT_ISCD,
-        "source": "kis_openapi",
+        "market_code": "krx_night_futures",
+        "issue_code": KIS_WS_TR_KEY,
+        "source": "kis_openapi_ws",
     }
 
 

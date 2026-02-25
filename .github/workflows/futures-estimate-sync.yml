@@ -43,12 +43,13 @@ jobs:
           KIS_APP_KEY: ${{ secrets.KIS_APP_KEY }}
           KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
           KIS_BASE_URL: ${{ secrets.KIS_BASE_URL }}
-          KIS_OAUTH_PATH: ${{ secrets.KIS_OAUTH_PATH }}
-          KIS_QUOTE_PATH: ${{ secrets.KIS_QUOTE_PATH }}
-          KIS_TR_ID: ${{ secrets.KIS_TR_ID }}
+          KIS_OAUTH_APPROVAL_PATH: ${{ secrets.KIS_OAUTH_APPROVAL_PATH }}
+          KIS_WS_URL: ${{ secrets.KIS_WS_URL }}
+          KIS_WS_PATH: ${{ secrets.KIS_WS_PATH }}
+          KIS_WS_TR_ID: ${{ secrets.KIS_WS_TR_ID }}
+          KIS_WS_TR_KEY: ${{ secrets.KIS_WS_TR_KEY }}
           KIS_CUSTTYPE: ${{ secrets.KIS_CUSTTYPE }}
-          KIS_FID_COND_MRKT_DIV_CODE: ${{ secrets.KIS_FID_COND_MRKT_DIV_CODE }}
-          KIS_FID_INPUT_ISCD: ${{ secrets.KIS_FID_INPUT_ISCD }}
+          FUTURES_WS_TIMEOUT_SEC: ${{ secrets.FUTURES_WS_TIMEOUT_SEC }}
           KOSPI200_BASE: ${{ secrets.KOSPI200_BASE }}
         run: |
           python scripts/sync_futures_estimate.py
