@@ -3,199 +3,91 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title data-i18n="futures_page_title">선물야간추정지수 | Tracking SA</title>
-  <meta name="description" content="S&P500 선물 변동을 기반으로 코스피200 야간 추정 지수를 차트로 확인하세요.">
-  <meta property="og:title" content="선물야간추정지수 | Tracking SA">
-  <meta property="og:description" content="실시간에 가까운 선물 기반 코스피200 추정 지수 차트">
+  <title>코스피200 선물 모니터 | Tracking SA</title>
+  <meta name="description" content="TradingView 위젯으로 코스피200 선물(KRX:K2I1!)을 모니터링합니다.">
+  <meta property="og:title" content="코스피200 선물 모니터 | Tracking SA">
+  <meta property="og:description" content="TradingView 위젯 기반 코스피200 선물 모니터 페이지">
   <meta property="og:image" content="/logo.svg">
   <meta property="og:url" content="https://trackingsa.com/futures-estimate/">
   <link rel="stylesheet" href="/style.css">
   <style>
+    :root {
+      --futures-main-height: 560px;
+      --futures-ta-height: 420px;
+    }
+
     .futures-page {
-      width: min(1080px, 100%);
+      width: min(1120px, 100%);
       margin: 0 auto;
-      padding: 18px 16px 48px;
+      padding: 20px 16px 48px;
     }
 
     .futures-hero {
-      background: linear-gradient(160deg, #ffffff, #eff6ff);
+      background: linear-gradient(145deg, #ffffff, #f3f9ff);
       border: 1px solid #dbeafe;
-      border-radius: 22px;
-      padding: 20px 20px 16px;
-      box-shadow: 0 18px 40px -28px rgba(30, 64, 175, 0.35);
-      margin-bottom: 16px;
+      border-radius: 18px;
+      padding: 16px 18px;
+      margin-bottom: 14px;
     }
 
     .futures-hero h1 {
       margin: 0 0 6px;
-      font-size: clamp(1.2rem, 2.3vw, 1.6rem);
       color: #0f172a;
+      font-size: clamp(1.15rem, 2.2vw, 1.5rem);
+      font-weight: 800;
     }
 
     .futures-hero p {
       margin: 0;
       color: #334155;
-      font-size: 0.95rem;
+      font-size: 0.92rem;
+      line-height: 1.45;
     }
-
-    .futures-metrics {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 10px;
-      margin-top: 14px;
-    }
-
-    .metric-card {
-      background: #ffffff;
-      border: 1px solid #dbeafe;
-      border-radius: 14px;
-      padding: 10px 12px;
-    }
-
-    .metric-label {
-      color: #475569;
-      font-size: 0.76rem;
-      font-weight: 700;
-      margin-bottom: 6px;
-    }
-
-    .metric-value {
-      color: #0f172a;
-      font-size: 1.2rem;
-      font-weight: 800;
-      line-height: 1.1;
-    }
-
-    .metric-value.delta-up { color: #dc2626; }
-    .metric-value.delta-down { color: #2563eb; }
 
     .futures-panel {
       background: #fff;
       border: 1px solid #dbeafe;
-      border-radius: 18px;
+      border-radius: 16px;
       padding: 12px;
     }
 
     .panel-title {
-      margin: 4px 2px 10px;
+      margin: 2px 2px 10px;
       color: #0f172a;
-      font-size: 1.02rem;
+      font-size: 1rem;
       font-weight: 800;
     }
 
     .panel-subtitle {
       margin: 0 2px 12px;
       color: #64748b;
-      font-size: 0.86rem;
+      font-size: 0.85rem;
     }
 
-    #tv-widget-container {
+    .tv-wrap {
       border: 1px solid #e2e8f0;
       border-radius: 12px;
       overflow: hidden;
-      min-height: 320px;
-      margin-top: 16px;
       background: #fff;
     }
 
-    #futures-chart {
-      width: 100%;
-      height: 360px;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid #e2e8f0;
+    .tv-wrap + .panel-title {
+      margin-top: 16px;
     }
 
-    .estimate-headline {
-      margin-top: 12px;
-      font-size: 1.5rem;
-      font-weight: 900;
-      color: #dc2626;
-      line-height: 1.15;
+    #tv-main-widget {
+      min-height: var(--futures-main-height);
     }
 
-    .estimate-headline.down {
-      color: #2563eb;
-    }
-
-    .futures-summary-grid {
-      margin-top: 10px;
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-    }
-
-    .summary-table {
-      margin-top: 12px;
-      width: 100%;
-      border-collapse: collapse;
-      border: 1px solid #dbeafe;
-      border-radius: 10px;
-      overflow: hidden;
-      font-size: 0.92rem;
-    }
-
-    .summary-table th,
-    .summary-table td {
-      border: 1px solid #e2e8f0;
-      padding: 10px 12px;
-    }
-
-    .summary-table th {
-      background: #f8fafc;
-      color: #334155;
-      font-weight: 700;
-      text-align: left;
-    }
-
-    .summary-table td {
-      color: #0f172a;
-      font-weight: 700;
-    }
-
-    .futures-notes {
-      margin-top: 12px;
-      padding-left: 20px;
-      color: #475569;
-      font-size: 0.88rem;
-      line-height: 1.6;
-    }
-
-    .futures-footnote {
-      margin-top: 12px;
-      color: #475569;
-      font-size: 0.86rem;
-      line-height: 1.5;
-    }
-
-    .futures-actions {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      margin-top: 10px;
-    }
-
-    #refresh-btn {
-      border: 1px solid #bfdbfe;
-      background: #eff6ff;
-      color: #1d4ed8;
-      border-radius: 999px;
-      padding: 8px 14px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    #status-text {
-      margin-top: 8px;
-      min-height: 20px;
-      color: #dc2626;
-      font-size: 0.86rem;
+    #tv-ta-widget {
+      min-height: var(--futures-ta-height);
     }
 
     @media (max-width: 860px) {
-      .futures-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      #futures-chart { height: 340px; }
-      .futures-summary-grid { grid-template-columns: 1fr; }
+      :root {
+        --futures-main-height: 440px;
+        --futures-ta-height: 360px;
+      }
     }
   </style>
 
@@ -238,11 +130,11 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<link rel="stylesheet" href="/style.css?v=20260225042220">
+<link rel="stylesheet" href="/style.css?v=20260225103836">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script src="/firebase-config.js"></script>
-<script src="/translations.js?v=20260225042220"></script>
-<script src="/common.js?v=20260225042220"></script>
+<script src="/translations.js?v=20260225103836"></script>
+<script src="/common.js?v=20260225103836"></script>
 
 </head>
 <body><header>
@@ -262,7 +154,7 @@
                     <li class="dropdown">
                         <a href="#" class="dropbtn" data-i18n="menu_chart">차트</a>
                         <div class="dropdown-content">
-                            <a href="/futures-estimate/" data-i18n="futures_estimate_index">선물야간추정지수</a>
+                            <a href="/futures-estimate/" data-i18n="futures_estimate_index">지수</a>
                         </div>
                     </li>
                     <li class="dropdown">
@@ -293,333 +185,76 @@
 
   <main class="futures-page">
     <section class="futures-hero">
-      <h1 data-i18n="futures_page_title">선물야간추정지수</h1>
-      <p data-i18n="futures_page_subtitle">S&P500 선물 변동을 기반으로 코스피200 추정 지수를 계산합니다.</p>
-      <div class="futures-metrics">
-        <div class="metric-card">
-          <div class="metric-label" data-i18n="futures_live_label">실시간 추정값</div>
-          <div class="metric-value" id="estimate-value">-</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label" data-i18n="futures_sp_label">S&P500 선물</div>
-          <div class="metric-value" id="sp-value">-</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label" data-i18n="futures_kospi_label">코스피200 기준</div>
-          <div class="metric-value" id="kospi-base-value">-</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label" data-i18n="futures_updated_at">업데이트</div>
-          <div class="metric-value" id="updated-at" style="font-size:0.95rem;">-</div>
-        </div>
-      </div>
+      <h1>코스피200 선물 모니터</h1>
+      <p>소스 일관성을 위해 TradingView 위젯만 사용합니다. 위젯 크기는 CSS 변수 `--futures-main-height`, `--futures-ta-height`로 조절할 수 있습니다.</p>
     </section>
 
     <section class="futures-panel">
-      <div class="panel-title" data-i18n="futures_estimate_chart_title">Tracking SA 추정지수 차트</div>
-      <div id="futures-chart"></div>
-      <div class="estimate-headline" id="estimate-headline">-</div>
-      <table class="summary-table">
-        <tr>
-          <th data-i18n="futures_sp_base_label">S&P500 선물 기준가</th>
-          <th data-i18n="futures_kospi_close_label">코스피200 기준값</th>
-        </tr>
-        <tr>
-          <td id="table-sp-base">-</td>
-          <td id="table-kospi-base">-</td>
-        </tr>
-      </table>
-      <div class="futures-summary-grid">
-        <div class="metric-card">
-          <div class="metric-label" data-i18n="futures_gap_label">디커플링 갭</div>
-          <div class="metric-value" id="gap-value">-</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label" data-i18n="futures_updated_at">업데이트</div>
-          <div class="metric-value" id="updated-at-detail" style="font-size:0.95rem;">-</div>
-        </div>
-      </div>
-      <ul class="futures-notes">
-        <li data-i18n="futures_note_1">S&P500 선물 변동률을 반영한 코스피200 선물 추정가입니다.</li>
-        <li data-i18n="futures_note_2">5분 주기로 자동 갱신되며 데이터 지연이 발생할 수 있습니다.</li>
-        <li data-i18n="futures_note_3">실제 거래 체결가격과 차이가 있을 수 있습니다.</li>
-      </ul>
-      <div id="status-text"></div>
-      <div class="futures-actions">
-        <button id="refresh-btn" data-i18n="futures_refresh">새로고침</button>
-      </div>
+      <div class="panel-title">KRX:K2I1! 메인 차트</div>
+      <div class="panel-subtitle">지연 시세 기준 (TradingView)</div>
+      <div id="tv-main-widget" class="tv-wrap"></div>
 
-      <div class="panel-title" data-i18n="futures_tv_title">TradingView 기술적 분석</div>
-      <div class="panel-subtitle" data-i18n="futures_tv_subtitle">CME_MINI:ES1! 기준 시그널(오실레이터/이동평균)</div>
-      <div id="tv-widget-container"></div>
-
-      <div class="futures-footnote">
-        <div data-i18n="futures_calc_note">계산식: 코스피200 기준값 × (1 + S&P500 선물 등락률)</div>
-        <div data-i18n="futures_source_note">데이터: 공개 시세 기반 추정값 (지연/중단 가능)</div>
-      </div>
+      <div class="panel-title">KRX:K2I1! 기술적 분석</div>
+      <div class="panel-subtitle">오실레이터/이동평균 시그널</div>
+      <div id="tv-ta-widget" class="tv-wrap"></div>
     </section>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
   <script>
-    const MAX_POINTS = 800;
-    const CHART_WINDOW_SECONDS = 60 * 60 * 24;
-    const VALUE_BAND_RATIO = 0.2;
-    let chart = null;
-    let series = null;
-    let estimateLine = null;
-    let baseLine = null;
-    let points = [];
-
-    function tr(key, fallback) {
-      return window.getTranslation ? window.getTranslation(key, fallback) : fallback;
-    }
-
-    function setStatus(msg) {
-      const el = document.getElementById("status-text");
-      if (el) el.textContent = msg || "";
-    }
-
-    function formatNum(n) {
-      if (typeof n !== "number" || !isFinite(n)) return "-";
-      return n.toFixed(2);
-    }
-
-    function formatTime(unixTs) {
-      if (!unixTs) return "-";
-      const d = new Date(unixTs * 1000);
-      return d.toLocaleString();
-    }
-
-    function toUnixSeconds(time) {
-      if (typeof time === "number") return time;
-      if (time && typeof time === "object" && typeof time.timestamp === "number") {
-        return time.timestamp;
-      }
-      return 0;
-    }
-
-    function chartLocale() {
-      const htmlLang = (document.documentElement.lang || "ko").toLowerCase();
-      return htmlLang.startsWith("en") ? "en-US" : "ko-KR";
-    }
-
-    function formatChartTick(time) {
-      const ts = toUnixSeconds(time);
-      if (!ts) return "";
-      return new Date(ts * 1000).toLocaleTimeString(chartLocale(), {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false
-      });
-    }
-
-    function formatChartCrosshair(time) {
-      const ts = toUnixSeconds(time);
-      if (!ts) return "";
-      return new Date(ts * 1000).toLocaleString(chartLocale(), {
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false
-      });
-    }
-
-    function ensureChart() {
-      if (chart) return;
-      const container = document.getElementById("futures-chart");
-      chart = LightweightCharts.createChart(container, {
-        localization: {
-          locale: chartLocale(),
-          timeFormatter: formatChartCrosshair
-        },
-        layout: { background: { color: "#ffffff" }, textColor: "#1f2937" },
-        grid: { vertLines: { color: "#f1f5f9" }, horzLines: { color: "#f1f5f9" } },
-        rightPriceScale: { borderColor: "#e2e8f0" },
-        timeScale: {
-          borderColor: "#e2e8f0",
-          timeVisible: true,
-          secondsVisible: false,
-          tickMarkFormatter: formatChartTick
-        }
-      });
-      series = chart.addLineSeries({ color: "#2563eb", lineWidth: 2 });
-      window.addEventListener("resize", () => {
-        chart.applyOptions({ width: container.clientWidth, height: container.clientHeight });
-      });
-      chart.applyOptions({ width: container.clientWidth, height: container.clientHeight });
-    }
-
-    function renderPoints() {
-      ensureChart();
-      series.setData(points.slice(-MAX_POINTS));
-      if (chart && chart.timeScale) {
-        chart.timeScale().fitContent();
-      }
-    }
-
-    function renderReferenceLines(q) {
-      if (!chart || !series) return;
-      if (estimateLine) {
-        series.removePriceLine(estimateLine);
-      }
-      if (baseLine) {
-        series.removePriceLine(baseLine);
-      }
-      estimateLine = series.createPriceLine({
-        price: q.estimate,
-        color: "#16a34a",
-        lineWidth: 1,
-        lineStyle: 2,
-        axisLabelVisible: true,
-        title: tr("futures_estimate_line", "추정")
-      });
-      baseLine = series.createPriceLine({
-        price: q.kospi200Base,
-        color: "#64748b",
-        lineWidth: 1,
-        lineStyle: 1,
-        axisLabelVisible: true,
-        title: tr("futures_base_line", "기준")
-      });
-    }
-
-    function getDb() {
-      return window.db || (typeof firebase !== "undefined" && firebase.apps.length ? firebase.firestore() : null);
-    }
-
-    function initTradingViewWidget() {
-      const container = document.getElementById("tv-widget-container");
+    function buildWidget(containerId, scriptSrc, payload) {
+      const container = document.getElementById(containerId);
       if (!container) return;
       container.innerHTML = '<div class="tradingview-widget-container__widget"></div>';
-
-      const htmlLang = (document.documentElement.lang || "ko").toLowerCase();
-      const locale = htmlLang.startsWith("en") ? "en" : "kr";
       const script = document.createElement("script");
       script.type = "text/javascript";
       script.async = true;
-      script.src = "https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js";
-      script.text = JSON.stringify({
-        interval: "5m",
-        width: "100%",
-        isTransparent: true,
-        height: 320,
-        symbol: "CME_MINI:ES1!",
-        showIntervalTabs: true,
-        displayMode: "single",
-        locale: locale,
-        colorTheme: "light"
-      });
+      script.src = scriptSrc;
+      script.text = JSON.stringify(payload);
       container.appendChild(script);
     }
 
-    async function loadChartPoints() {
-      const db = getDb();
-      if (!db) throw new Error("db unavailable");
-      const snap = await db.collection("futures_estimate_points")
-        .orderBy("ts", "desc")
-        .limit(MAX_POINTS)
-        .get();
-      points = snap.docs
-        .map((d) => d.data())
-        .filter((d) => typeof d.ts === "number" && typeof d.estimate === "number")
-        .sort((a, b) => a.ts - b.ts)
-        .map((d) => ({ time: d.ts, value: d.estimate }));
+    function initWidgets() {
+      const htmlLang = (document.documentElement.lang || "ko").toLowerCase();
+      const locale = htmlLang.startsWith("en") ? "en" : "kr";
 
-      if (points.length > 1) {
-        const latestTs = points[points.length - 1].time;
-        const minTs = latestTs - CHART_WINDOW_SECONDS;
-        points = points.filter((p) => p.time >= minTs);
-      }
-
-      // Drop legacy points from old base regimes (e.g. 350 -> 900 migration)
-      // so the chart remains readable after baseline changes.
-      if (points.length > 1) {
-        const latestValue = points[points.length - 1].value;
-        const minValue = latestValue * (1 - VALUE_BAND_RATIO);
-        const maxValue = latestValue * (1 + VALUE_BAND_RATIO);
-        points = points.filter((p) => p.value >= minValue && p.value <= maxValue);
-      }
-
-      renderPoints();
-    }
-
-    function renderMetrics(q) {
-      const estimateEl = document.getElementById("estimate-value");
-      estimateEl.textContent = `${formatNum(q.estimate)} (${q.delta >= 0 ? "+" : ""}${formatNum(q.delta)}, ${q.deltaRate >= 0 ? "+" : ""}${q.deltaRate.toFixed(2)}%)`;
-      estimateEl.classList.remove("delta-up", "delta-down");
-      estimateEl.classList.add(q.delta >= 0 ? "delta-up" : "delta-down");
-
-      const spRate = q.futuresPrevClose > 0 ? ((q.futuresPrice - q.futuresPrevClose) / q.futuresPrevClose) * 100 : 0;
-      document.getElementById("sp-value").textContent = `${formatNum(q.futuresPrice)} (${spRate.toFixed(2)}%)`;
-      document.getElementById("kospi-base-value").textContent = formatNum(q.kospi200Base);
-      const updatedTs = q.collectedAtTs || q.ts;
-      document.getElementById("updated-at").textContent = formatTime(updatedTs);
-      document.getElementById("updated-at-detail").textContent = formatTime(updatedTs);
-
-      document.getElementById("table-sp-base").textContent = formatNum(q.futuresPrevClose);
-      document.getElementById("table-kospi-base").textContent = formatNum(q.kospi200Base);
-
-      const headline = document.getElementById("estimate-headline");
-      headline.textContent = `${tr("futures_estimate_label", "추정가")}: ${formatNum(q.estimate)} (${q.delta >= 0 ? "+" : ""}${formatNum(q.delta)}, ${q.deltaRate >= 0 ? "+" : ""}${q.deltaRate.toFixed(2)}%)`;
-      headline.classList.toggle("down", q.delta < 0);
-      document.getElementById("gap-value").textContent = `${formatNum(q.estimate - q.kospi200Base)} pt`;
-      renderReferenceLines(q);
-
-      const ageSec = Math.max(0, Math.floor(Date.now() / 1000) - updatedTs);
-      if (ageSec > 15 * 60) {
-        setStatus(tr("futures_stale_warn", "데이터가 지연되고 있습니다. 잠시 후 다시 확인해주세요."));
-      }
-    }
-
-    async function loadCurrent() {
-      const db = getDb();
-      if (!db) throw new Error("db unavailable");
-      const doc = await db.collection("futures_estimate_meta").doc("current").get();
-      if (!doc.exists) throw new Error("current doc missing");
-      const d = doc.data() || {};
-      let collectedAtTs = 0;
-      if (d.collectedAt) {
-        if (typeof d.collectedAt.seconds === "number") {
-          collectedAtTs = d.collectedAt.seconds;
-        } else if (typeof d.collectedAt.toDate === "function") {
-          collectedAtTs = Math.floor(d.collectedAt.toDate().getTime() / 1000);
+      buildWidget(
+        "tv-main-widget",
+        "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js",
+        {
+          autosize: true,
+          symbol: "KRX:K2I1!",
+          interval: "5",
+          timezone: "Asia/Seoul",
+          theme: "light",
+          style: "1",
+          locale: locale,
+          withdateranges: true,
+          hide_side_toolbar: false,
+          allow_symbol_change: false,
+          details: true,
+          hotlist: false,
+          studies: ["Volume@tv-basicstudies"],
         }
-      }
-      const q = {
-        ts: Number(d.ts || 0),
-        collectedAtTs: Number(collectedAtTs || 0),
-        estimate: Number(d.estimate || 0),
-        delta: Number(d.delta || 0),
-        deltaRate: Number(d.delta_rate || d.deltaRate || 0),
-        futuresPrice: Number(d.futures_price || d.futuresPrice || 0),
-        futuresPrevClose: Number(d.futures_prev_close || d.futuresPrevClose || 0),
-        kospi200Base: Number(d.kospi200_base || d.kospi200Base || 0),
-      };
-      if (!isFinite(q.estimate) || q.estimate <= 0) {
-        throw new Error("invalid current quote");
-      }
-      renderMetrics(q);
+      );
+
+      buildWidget(
+        "tv-ta-widget",
+        "https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js",
+        {
+          interval: "5m",
+          width: "100%",
+          isTransparent: true,
+          height: 360,
+          symbol: "KRX:K2I1!",
+          showIntervalTabs: true,
+          displayMode: "single",
+          locale: locale,
+          colorTheme: "light",
+        }
+      );
     }
 
-    async function refreshAll() {
-      try {
-        setStatus("");
-        await Promise.all([loadCurrent(), loadChartPoints()]);
-      } catch (e) {
-        setStatus(tr("futures_load_fail", "시세를 불러오지 못했습니다. 잠시 후 다시 시도해주세요."));
-      }
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      initTradingViewWidget();
-      points = [];
-      renderPoints();
-      refreshAll();
-      setInterval(refreshAll, 60000);
-      document.getElementById("refresh-btn").addEventListener("click", refreshAll);
-    });
+    document.addEventListener("DOMContentLoaded", initWidgets);
   </script>
 <footer>
     <p data-i18n="footer_copyright"></p>
