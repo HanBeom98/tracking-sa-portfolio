@@ -104,11 +104,16 @@ nav a:hover, .dropbtn:hover {
     color: var(--p-blue);
     background: oklch(97% 0.03 260);
 }
-.dropdown { position: relative; }
+.dropdown {
+    position: relative;
+    padding-bottom: 12px;
+    margin-bottom: -12px;
+}
 .dropdown-content {
     display: none;
     position: absolute;
-    top: calc(100% + 10px);
+    top: 100%;
+    margin-top: 10px;
     left: 0;
     min-width: 180px;
     background: white;
@@ -117,6 +122,14 @@ nav a:hover, .dropbtn:hover {
     padding: 10px;
     box-shadow: 0 20px 40px rgba(2, 6, 23, 0.12);
     z-index: 1000;
+}
+.dropdown::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    height: 12px;
 }
 .dropdown-content a {
     display: block;
@@ -127,7 +140,8 @@ nav a:hover, .dropbtn:hover {
 .dropdown-content a:hover {
     background: oklch(97% 0.03 260);
 }
-.dropdown:hover .dropdown-content { display: block; }
+.dropdown:hover .dropdown-content,
+.dropdown:focus-within .dropdown-content { display: block; }
 
 .utility-controls {
     margin-left: auto;
