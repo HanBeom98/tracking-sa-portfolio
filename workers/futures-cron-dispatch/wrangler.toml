@@ -1,0 +1,12 @@
+name = "tracking-sa-futures-cron-dispatch"
+main = "worker.js"
+compatibility_date = "2026-02-25"
+
+[triggers]
+crons = ["*/5 * * * *"]
+
+[vars]
+GH_OWNER = "HanBeom98"
+GH_REPO = "tracking-sa"
+GH_WORKFLOW_ID = "futures-estimate-sync-v2.yml"
+GH_REF = "main"
