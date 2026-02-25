@@ -181,11 +181,11 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<link rel="stylesheet" href="/style.css?v=20260225111131">
+<link rel="stylesheet" href="/style.css?v=20260225111520">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script src="/firebase-config.js"></script>
-<script src="/translations.js?v=20260225111131"></script>
-<script src="/common.js?v=20260225111131"></script>
+<script src="/translations.js?v=20260225111520"></script>
+<script src="/common.js?v=20260225111520"></script>
 
 </head>
 <body><header>
@@ -254,15 +254,15 @@
       <div class="panel-subtitle">ES1!, NQ1!, VIX, USDKRW 동시 확인</div>
       <div class="multi-grid">
         <div class="mini-card">
-          <div class="mini-title">CME_MINI:ES1! (S&P500 선물)</div>
+          <div class="mini-title">SP:SPX (S&P500 지수)</div>
           <div id="tv-es-widget" class="mini-widget"></div>
         </div>
         <div class="mini-card">
-          <div class="mini-title">CME_MINI:NQ1! (나스닥 선물)</div>
+          <div class="mini-title">NASDAQ:NDX (나스닥100 지수)</div>
           <div id="tv-nq-widget" class="mini-widget"></div>
         </div>
         <div class="mini-card">
-          <div class="mini-title">CBOE:VIX (변동성 지수)</div>
+          <div class="mini-title">TVC:VIX (변동성 지수)</div>
           <div id="tv-vix-widget" class="mini-widget"></div>
         </div>
         <div class="mini-card">
@@ -290,9 +290,9 @@
       const htmlLang = (document.documentElement.lang || "ko").toLowerCase();
       const locale = htmlLang.startsWith("en") ? "en" : "kr";
       const miniSymbols = [
-        { id: "tv-es-widget", symbol: "CME_MINI:ES1!" },
-        { id: "tv-nq-widget", symbol: "CME_MINI:NQ1!" },
-        { id: "tv-vix-widget", symbol: "CBOE:VIX" },
+        { id: "tv-es-widget", symbol: "SP:SPX" },
+        { id: "tv-nq-widget", symbol: "NASDAQ:NDX" },
+        { id: "tv-vix-widget", symbol: "TVC:VIX" },
         { id: "tv-krw-widget", symbol: "FX_IDC:USDKRW" },
       ];
 
