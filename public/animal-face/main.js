@@ -77,9 +77,10 @@ class AnimalFaceTest extends HTMLElement {
             /* Advanced Upload Box */
             .upload-container { margin-bottom: 30px; }
             .upload-box { 
-                border: 3px dashed #e2e8f0; border-radius: 20px; padding: 30px 18px; 
+                width: min(100%, 520px); margin: 0 auto;
+                border: 3px dashed #e2e8f0; border-radius: 20px; padding: 22px 16px; 
                 background: #f8fafc; cursor: pointer; transition: 0.4s; 
-                display: flex; flex-direction: column; align-items: center; gap: 14px;
+                display: flex; flex-direction: column; align-items: center; gap: 10px;
             }
             .upload-box:hover { background: #f1f5f9; border-color: #0052cc; }
             .upload-box.dragover { background: #eff6ff; border-color: #0052cc; transform: scale(1.02); }

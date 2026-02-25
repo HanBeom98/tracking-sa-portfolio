@@ -108,6 +108,7 @@ function initDropdownMenus() {
 
     dropdowns.forEach((dropdown) => {
         const btn = dropdown.querySelector('.dropbtn');
+        const menu = dropdown.querySelector('.dropdown-content');
         let closeTimer = null;
 
         const open = () => {
@@ -122,7 +123,7 @@ function initDropdownMenus() {
             if (closeTimer) clearTimeout(closeTimer);
             closeTimer = setTimeout(() => {
                 dropdown.classList.remove('open');
-            }, 140);
+            }, 320);
         };
 
         dropdown.addEventListener('mouseenter', open);
@@ -139,6 +140,11 @@ function initDropdownMenus() {
                 closeAll();
                 if (!wasOpen) dropdown.classList.add('open');
             });
+        }
+
+        if (menu) {
+            menu.addEventListener('mouseenter', open);
+            menu.addEventListener('mouseleave', scheduleClose);
         }
     });
 
