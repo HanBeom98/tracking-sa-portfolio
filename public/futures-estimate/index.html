@@ -160,11 +160,11 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<link rel="stylesheet" href="/style.css?v=20260225041508">
+<link rel="stylesheet" href="/style.css?v=20260225042220">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script src="/firebase-config.js"></script>
-<script src="/translations.js?v=20260225041508"></script>
-<script src="/common.js?v=20260225041508"></script>
+<script src="/translations.js?v=20260225042220"></script>
+<script src="/common.js?v=20260225042220"></script>
 
 </head>
 <body><header>
@@ -252,7 +252,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
   <script>
-    const STORAGE_KEY = "futures_estimate_history_v1";
     const MAX_POINTS = 800;
     let chart = null;
     let series = null;
@@ -278,24 +277,6 @@
       return d.toLocaleString();
     }
 
-    function loadLocalPoints() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return [];
-        const arr = JSON.parse(raw);
-        if (!Array.isArray(arr)) return [];
-        return arr.filter(p => p && typeof p.time === "number" && typeof p.value === "number");
-      } catch (_) {
-        return [];
-      }
-    }
-
-    function saveLocalPoints() {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(points.slice(-MAX_POINTS)));
-      } catch (_) {}
-    }
-
     function ensureChart() {
       if (chart) return;
       const container = document.getElementById("futures-chart");
@@ -317,41 +298,23 @@
       series.setData(points.slice(-MAX_POINTS));
     }
 
-    function addPoint(time, value) {
-      const last = points[points.length - 1];
-      if (last && last.time === time) {
-        last.value = value;
-      } else {
-        points.push({ time, value });
-      }
-      points = points.slice(-MAX_POINTS);
-      saveLocalPoints();
-      renderPoints();
+    function getDb() {
+      return window.db || (typeof firebase !== "undefined" && firebase.apps.length ? firebase.firestore() : null);
     }
 
-    async function fetchQuote() {
-      const url = "https://query1.finance.yahoo.com/v7/finance/quote?symbols=ES%3DF,%5EKS200";
-      const res = await fetch(url, { cache: "no-store" });
-      if (!res.ok) throw new Error("quote fetch failed");
-      const json = await res.json();
-      const items = (json && json.quoteResponse && json.quoteResponse.result) || [];
-      const es = items.find(x => x.symbol === "ES=F");
-      const ks = items.find(x => x.symbol === "^KS200");
-      if (!es || !ks) throw new Error("required symbols missing");
-
-      const esPrice = Number(es.regularMarketPrice);
-      const esPrev = Number(es.regularMarketPreviousClose || es.regularMarketPreviousClose || es.postMarketPreviousClose);
-      const ksBase = Number(ks.regularMarketPrice || ks.regularMarketPreviousClose);
-      const ts = Number(es.regularMarketTime || Math.floor(Date.now() / 1000));
-      if (!isFinite(esPrice) || !isFinite(esPrev) || !isFinite(ksBase) || esPrev <= 0) {
-        throw new Error("invalid quote values");
-      }
-
-      const esReturn = (esPrice - esPrev) / esPrev;
-      const estimate = ksBase * (1 + esReturn);
-      const delta = estimate - ksBase;
-      const deltaRate = (delta / ksBase) * 100;
-      return { ts, esPrice, esPrev, ksBase, estimate, delta, deltaRate };
+    async function loadChartPoints() {
+      const db = getDb();
+      if (!db) throw new Error("db unavailable");
+      const snap = await db.collection("futures_estimate_points")
+        .orderBy("ts", "desc")
+        .limit(MAX_POINTS)
+        .get();
+      points = snap.docs
+        .map((d) => d.data())
+        .filter((d) => typeof d.ts === "number" && typeof d.estimate === "number")
+        .sort((a, b) => a.ts - b.ts)
+        .map((d) => ({ time: d.ts, value: d.estimate }));
+      renderPoints();
     }
 
     function renderMetrics(q) {
@@ -360,28 +323,48 @@
       estimateEl.classList.remove("delta-up", "delta-down");
       estimateEl.classList.add(q.delta >= 0 ? "delta-up" : "delta-down");
 
-      document.getElementById("sp-value").textContent = `${formatNum(q.esPrice)} (${((q.esPrice - q.esPrev) / q.esPrev * 100).toFixed(2)}%)`;
-      document.getElementById("kospi-base-value").textContent = formatNum(q.ksBase);
+      const spRate = q.futuresPrevClose > 0 ? ((q.futuresPrice - q.futuresPrevClose) / q.futuresPrevClose) * 100 : 0;
+      document.getElementById("sp-value").textContent = `${formatNum(q.futuresPrice)} (${spRate.toFixed(2)}%)`;
+      document.getElementById("kospi-base-value").textContent = formatNum(q.kospi200Base);
       document.getElementById("updated-at").textContent = formatTime(q.ts);
     }
 
-    async function refreshQuote() {
+    async function loadCurrent() {
+      const db = getDb();
+      if (!db) throw new Error("db unavailable");
+      const doc = await db.collection("futures_estimate_meta").doc("current").get();
+      if (!doc.exists) throw new Error("current doc missing");
+      const d = doc.data() || {};
+      const q = {
+        ts: Number(d.ts || 0),
+        estimate: Number(d.estimate || 0),
+        delta: Number(d.delta || 0),
+        deltaRate: Number(d.delta_rate || d.deltaRate || 0),
+        futuresPrice: Number(d.futures_price || d.futuresPrice || 0),
+        futuresPrevClose: Number(d.futures_prev_close || d.futuresPrevClose || 0),
+        kospi200Base: Number(d.kospi200_base || d.kospi200Base || 0),
+      };
+      if (!isFinite(q.estimate) || q.estimate <= 0) {
+        throw new Error("invalid current quote");
+      }
+      renderMetrics(q);
+    }
+
+    async function refreshAll() {
       try {
         setStatus("");
-        const q = await fetchQuote();
-        renderMetrics(q);
-        addPoint(q.ts, Number(q.estimate.toFixed(3)));
+        await Promise.all([loadCurrent(), loadChartPoints()]);
       } catch (e) {
         setStatus(tr("futures_load_fail", "시세를 불러오지 못했습니다. 잠시 후 다시 시도해주세요."));
       }
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-      points = loadLocalPoints();
+      points = [];
       renderPoints();
-      refreshQuote();
-      setInterval(refreshQuote, 60000);
-      document.getElementById("refresh-btn").addEventListener("click", refreshQuote);
+      refreshAll();
+      setInterval(refreshAll, 60000);
+      document.getElementById("refresh-btn").addEventListener("click", refreshAll);
     });
   </script>
 <footer>
