@@ -119,7 +119,7 @@ def _upgrade_cached_news_index():
     if not cards:
         return
 
-    idx_tmpl = "src/domains/news/index.html"
+    idx_tmpl = "src/domains/news/ui/index.html"
     if os.path.exists(idx_tmpl):
         with open(idx_tmpl, "r", encoding="utf-8") as f:
             base_html = f.read()
@@ -309,7 +309,7 @@ def generate_news_pages():
         print(f"⚠️ [NEWS BUILD WARNING] Skipping individual articles due to DB error: {e}")
 
     # 뉴스 인덱스 페이지 생성 (데이터 유무와 상관없이 보장)
-    idx_tmpl = "src/domains/news/index.html"
+    idx_tmpl = "src/domains/news/ui/index.html"
     if os.path.exists(idx_tmpl):
         with open(idx_tmpl, "r", encoding="utf-8") as f: base_html = f.read()
         if articles:
