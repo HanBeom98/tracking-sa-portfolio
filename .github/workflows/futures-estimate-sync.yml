@@ -18,6 +18,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Debug checkout revision
+        run: |
+          echo "GITHUB_SHA=${GITHUB_SHA}"
+          git rev-parse --short HEAD
+          sed -n '1,40p' scripts/sync_futures_estimate.py
 
       - uses: actions/setup-python@v5
         with:
