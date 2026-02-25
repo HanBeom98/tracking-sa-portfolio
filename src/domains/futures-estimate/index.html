@@ -270,14 +270,18 @@
       const updatedEl = document.getElementById("analysis-updated-at");
 
       try {
-        const res = await fetch("https://scanner.tradingview.com/global/scan", {
+        let res = await fetch("/api/tv-scan", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            symbols: { tickers, query: { types: [] } },
-            columns: ["name", "description", "close", "change"],
-          }),
+          body: JSON.stringify({ tickers }),
         });
+        if (!res.ok) {
+          res = await fetch("https://tracking-sa.vercel.app/api/tv-scan", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ tickers }),
+          });
+        }
         if (!res.ok) throw new Error("scanner_http_" + res.status);
         const data = await res.json();
         const rows = (data && data.data) || [];

@@ -162,11 +162,11 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<link rel="stylesheet" href="/style.css?v=20260225112608">
+<link rel="stylesheet" href="/style.css?v=20260225112925">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script src="/firebase-config.js"></script>
-<script src="/translations.js?v=20260225112608"></script>
-<script src="/common.js?v=20260225112608"></script>
+<script src="/translations.js?v=20260225112925"></script>
+<script src="/common.js?v=20260225112925"></script>
 
 </head>
 <body><header>
@@ -361,14 +361,18 @@
       const updatedEl = document.getElementById("analysis-updated-at");
 
       try {
-        const res = await fetch("https://scanner.tradingview.com/global/scan", {
+        let res = await fetch("/api/tv-scan", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            symbols: { tickers, query: { types: [] } },
-            columns: ["name", "description", "close", "change"],
-          }),
+          body: JSON.stringify({ tickers }),
         });
+        if (!res.ok) {
+          res = await fetch("https://tracking-sa.vercel.app/api/tv-scan", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ tickers }),
+          });
+        }
         if (!res.ok) throw new Error("scanner_http_" + res.status);
         const data = await res.json();
         const rows = (data && data.data) || [];
