@@ -389,9 +389,10 @@
       const spRate = q.futuresPrevClose > 0 ? ((q.futuresPrice - q.futuresPrevClose) / q.futuresPrevClose) * 100 : 0;
       document.getElementById("sp-value").textContent = `${formatNum(q.futuresPrice)} (${spRate.toFixed(2)}%)`;
       document.getElementById("kospi-base-value").textContent = formatNum(q.kospi200Base);
-      document.getElementById("updated-at").textContent = formatTime(q.ts);
+      const updatedTs = q.collectedAtTs || q.ts;
+      document.getElementById("updated-at").textContent = formatTime(updatedTs);
 
-      const ageSec = Math.max(0, Math.floor(Date.now() / 1000) - q.ts);
+      const ageSec = Math.max(0, Math.floor(Date.now() / 1000) - updatedTs);
       if (ageSec > 15 * 60) {
         setStatus(tr("futures_stale_warn", "데이터가 지연되고 있습니다. 잠시 후 다시 확인해주세요."));
       }
@@ -403,8 +404,17 @@
       const doc = await db.collection("futures_estimate_meta").doc("current").get();
       if (!doc.exists) throw new Error("current doc missing");
       const d = doc.data() || {};
+      let collectedAtTs = 0;
+      if (d.collectedAt) {
+        if (typeof d.collectedAt.seconds === "number") {
+          collectedAtTs = d.collectedAt.seconds;
+        } else if (typeof d.collectedAt.toDate === "function") {
+          collectedAtTs = Math.floor(d.collectedAt.toDate().getTime() / 1000);
+        }
+      }
       const q = {
         ts: Number(d.ts || 0),
+        collectedAtTs: Number(collectedAtTs || 0),
         estimate: Number(d.estimate || 0),
         delta: Number(d.delta || 0),
         deltaRate: Number(d.delta_rate || d.deltaRate || 0),
