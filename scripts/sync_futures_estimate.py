@@ -31,7 +31,8 @@ def _env_float(name: str, default: float) -> float:
 STOOQ_SYMBOL = os.getenv("STOOQ_SYMBOL", "es.f").strip().lower()
 STOOQ_FIELDS = os.getenv("STOOQ_FIELDS", "sd2t2ohlcvcp").strip()
 YAHOO_SYMBOL = os.getenv("YAHOO_SYMBOL", "ES=F").strip()
-KOSPI200_BASE = _env_float("KOSPI200_BASE", 350.0)
+YAHOO_KOSPI200_SYMBOL = os.getenv("YAHOO_KOSPI200_SYMBOL", "^KS200").strip()
+DEFAULT_KOSPI200_BASE = _env_float("DEFAULT_KOSPI200_BASE", 350.0)
 REQUEST_TIMEOUT = _env_float("FUTURES_REQUEST_TIMEOUT_SEC", 12.0)
 RETENTION_DAYS = int(_env_float("FUTURES_RETENTION_DAYS", 14.0))
 
@@ -177,6 +178,32 @@ def _fetch_yahoo_quote() -> dict:
     raise RuntimeError(f"Yahoo quote error: {last_error}")
 
 
+def _resolve_kospi200_base() -> float:
+    configured = os.getenv("KOSPI200_BASE")
+    if configured is not None and str(configured).strip():
+        return float(configured)
+
+    headers = {"User-Agent": "Mozilla/5.0"}
+    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{YAHOO_KOSPI200_SYMBOL}?interval=1d&range=5d"
+    try:
+        res = requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT)
+        if res.status_code >= 400:
+            raise RuntimeError(f"http {res.status_code}")
+
+        obj = res.json()
+        result = (((obj or {}).get("chart") or {}).get("result") or [])
+        if not result:
+            raise RuntimeError("missing result")
+
+        meta = (result[0] or {}).get("meta") or {}
+        base = meta.get("previousClose") or meta.get("regularMarketPrice")
+        if base in (None, "", "N/D"):
+            raise RuntimeError("previousClose missing")
+        return float(base)
+    except Exception:
+        return float(DEFAULT_KOSPI200_BASE)
+
+
 def _fetch_public_quote() -> dict:
     errors = []
     for fetch in (_fetch_yahoo_quote, _fetch_stooq_quote):
@@ -187,22 +214,22 @@ def _fetch_public_quote() -> dict:
     raise RuntimeError(" / ".join(errors))
 
 
-def _extract_quote(raw: dict) -> dict:
+def _extract_quote(raw: dict, kospi200_base: float) -> dict:
     futures_price = float(raw["futures_price"])
     prev_close = float(raw["futures_prev_close"]) if float(raw["futures_prev_close"]) > 0 else futures_price
     return_rate = (futures_price - prev_close) / prev_close if prev_close else 0.0
     ts = int(raw["ts"])
 
-    estimate = KOSPI200_BASE * (1 + return_rate)
-    delta = estimate - KOSPI200_BASE
-    delta_rate = (delta / KOSPI200_BASE) * 100.0 if KOSPI200_BASE else 0.0
+    estimate = kospi200_base * (1 + return_rate)
+    delta = estimate - kospi200_base
+    delta_rate = (delta / kospi200_base) * 100.0 if kospi200_base else 0.0
 
     return {
         "ts": int(ts),
         "futures_price": float(futures_price),
         "futures_prev_close": float(prev_close),
         "futures_return": float(return_rate),
-        "kospi200_base": float(KOSPI200_BASE),
+        "kospi200_base": float(kospi200_base),
         "estimate": float(estimate),
         "delta": float(delta),
         "delta_rate": float(delta_rate),
@@ -247,7 +274,8 @@ def main() -> int:
     load_dotenv()
     try:
         raw = _fetch_public_quote()
-        payload = _extract_quote(raw)
+        kospi200_base = _resolve_kospi200_base()
+        payload = _extract_quote(raw, kospi200_base)
         _save_firestore(payload)
         ts_text = datetime.datetime.utcfromtimestamp(payload["ts"]).strftime("%Y-%m-%d %H:%M:%S UTC")
         print(

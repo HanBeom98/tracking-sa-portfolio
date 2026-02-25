@@ -390,6 +390,11 @@
       document.getElementById("sp-value").textContent = `${formatNum(q.futuresPrice)} (${spRate.toFixed(2)}%)`;
       document.getElementById("kospi-base-value").textContent = formatNum(q.kospi200Base);
       document.getElementById("updated-at").textContent = formatTime(q.ts);
+
+      const ageSec = Math.max(0, Math.floor(Date.now() / 1000) - q.ts);
+      if (ageSec > 15 * 60) {
+        setStatus(tr("futures_stale_warn", "데이터가 지연되고 있습니다. 잠시 후 다시 확인해주세요."));
+      }
     }
 
     async function loadCurrent() {
