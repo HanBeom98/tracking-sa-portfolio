@@ -3,6 +3,11 @@
 ## 🎯 Project Vision
 Evolving Tracking-sa into a premium, framework-less web platform using a specialized 5-agent AI orchestration system and a strict DDD architecture.
 
+## 📚 Canonical Docs For AI Handoff
+- `blueprint.md`: 현재 목표/상태/우선순위
+- `docs/change-log.md`: 최근 변경 의도/영향/검증 로그
+- `docs/ddd-migration-map.md`: DDD 구조 전환 및 파일 이동 이력
+
 ## 🛠️ Tech Stack & Standards
 - **Architecture**: Domain-Driven Design (DDD) with a clear separation of `src/domains` and `src/shared`.
 - **UI System**: Web Components (Custom Elements) with Shadow DOM.

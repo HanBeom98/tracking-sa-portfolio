@@ -1,0 +1,55 @@
+# DDD Migration Map (for Gemini/Codex)
+
+이 문서는 Tracking SA의 구조 전환 이력을 빠르게 파악하기 위한 참조 문서입니다.
+
+## 1) Current Source of Truth
+- 개발 원본: `src/*`
+- 배포 산출물: `public/*` (`npm run build`로 생성)
+- 원칙: 직접 `public/*` 수정 금지, 반드시 `src/*` 수정 후 빌드
+
+## 2) Current Structure Snapshot
+- `src/domains/*`: 기능/페이지 단위 도메인
+- `src/shared/assets/*`: 공통 JS/CSS 정적 자산
+- `src/shared/ui/*`: 공통 헤더/푸터/헤드 템플릿
+- `src/shared/infra/*`: 빌드/DB/뉴스/환경 설정 인프라
+
+참고: 폴더는 DDD 형태를 따르지만, 모든 도메인이 레이어 분리를 100% 달성한 상태는 아님.
+
+## 3) Build and Injection Flow
+1. 엔트리포인트: `main.py`
+2. 사이트 빌드: `src/shared/infra/builder.py::generate_public_site()`
+3. HTML 후처리: `src/shared/infra/html_processor.py`
+4. 공통 head/header/footer 주입 + 빌드 스탬프 기록
+
+실행:
+- `npm run build` -> `venv/bin/python main.py --build-only`
+- `npm run build:full` -> 뉴스 생성 + 빌드
+
+## 4) Key Migration History (important moves)
+- `src/shared/infra/common.js` -> `src/shared/assets/common.js`
+- `src/shared/infra/style.css` -> `src/shared/assets/style.css`
+- `src/shared/infra/premium-tag.js` -> `src/shared/ui/premium-tag.js`
+- `src/domains/news/index.html` -> `src/domains/news/ui/index.html`
+- `src/domains/news/style.css` -> `src/domains/news/ui/style.css`
+- `src/shared/assets/news-client.js` -> `src/domains/news/application/news-client.js` (domain layer split 과정)
+
+뉴스 도메인 분리 시 추가된 핵심 파일:
+- `src/domains/news/domain/newsArticle.js`
+- `src/domains/news/infra/newsRepository.js`
+- `src/domains/news/ui/newsRenderer.js`
+- `src/domains/news/infra/news_builder.py`
+
+## 5) What Gemini Should Check First
+1. `blueprint.md`
+2. `docs/change-log.md`
+3. `docs/ddd-migration-map.md` (이 문서)
+4. `main.py`, `src/shared/infra/builder.py`
+5. 수정 대상 도메인의 `src/domains/<domain>/`
+
+## 6) Guardrails for Future Changes
+- 구조 변경 시 반드시 기록:
+  - 이동 전 경로
+  - 이동 후 경로
+  - 이유(중복 제거/책임 분리/빌드 경로 정리 등)
+  - 영향 범위(런타임/빌드/SEO/i18n)
+- 커밋 메시지에 `refactor(ddd): ...` 접두어 유지 권장
