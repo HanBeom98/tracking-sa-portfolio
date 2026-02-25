@@ -263,13 +263,6 @@
           headers: { "content-type": "application/json" },
           body: JSON.stringify({}),
         });
-        if (!res.ok) {
-          res = await fetch("https://tracking-sa.vercel.app/api/tv-scan", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({}),
-          });
-        }
         if (!res.ok) throw new Error("analysis_http_" + res.status);
         const data = await res.json();
         const items = (data && data.items) || [];
@@ -304,9 +297,6 @@
 
       try {
         let res = await fetch("/api/futures-predictions", { method: "GET" });
-        if (!res.ok) {
-          res = await fetch("https://tracking-sa.vercel.app/api/futures-predictions", { method: "GET" });
-        }
         if (!res.ok) throw new Error("history_http_" + res.status);
         const data = await res.json();
         const items = Array.isArray(data?.items) ? data.items : [];

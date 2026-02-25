@@ -42,10 +42,7 @@ def prediction_api_urls():
     urls = []
     if raw:
         urls.append(raw)
-    urls.extend([
-        "https://tracking-sa.vercel.app/api/tv-scan",
-        "https://trackingsa.com/api/tv-scan",
-    ])
+    urls.append("https://trackingsa.com/api/tv-scan")
     out = []
     seen = set()
     for u in urls:

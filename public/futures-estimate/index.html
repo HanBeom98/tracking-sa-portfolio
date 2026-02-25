@@ -162,11 +162,11 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<link rel="stylesheet" href="/style.css?v=20260225132110">
+<link rel="stylesheet" href="/style.css?v=20260225132740">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script src="/firebase-config.js"></script>
-<script src="/translations.js?v=20260225132110"></script>
-<script src="/common.js?v=20260225132110"></script>
+<script src="/translations.js?v=20260225132740"></script>
+<script src="/common.js?v=20260225132740"></script>
 
 </head>
 <body><header>
@@ -354,13 +354,6 @@
           headers: { "content-type": "application/json" },
           body: JSON.stringify({}),
         });
-        if (!res.ok) {
-          res = await fetch("https://tracking-sa.vercel.app/api/tv-scan", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({}),
-          });
-        }
         if (!res.ok) throw new Error("analysis_http_" + res.status);
         const data = await res.json();
         const items = (data && data.items) || [];
@@ -395,9 +388,6 @@
 
       try {
         let res = await fetch("/api/futures-predictions", { method: "GET" });
-        if (!res.ok) {
-          res = await fetch("https://tracking-sa.vercel.app/api/futures-predictions", { method: "GET" });
-        }
         if (!res.ok) throw new Error("history_http_" + res.status);
         const data = await res.json();
         const items = Array.isArray(data?.items) ? data.items : [];
