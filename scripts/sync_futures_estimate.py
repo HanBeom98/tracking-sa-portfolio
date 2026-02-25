@@ -144,7 +144,7 @@ def _save_firestore(payload: dict) -> None:
         raise RuntimeError("Firestore client unavailable")
 
     ts = int(payload["ts"])
-    point_id = str(ts // 60)  # minute bucket
+    point_id = str(ts // 300)  # 5-minute bucket
     payload_with_server_time = {
         **payload,
         "collectedAt": firestore.SERVER_TIMESTAMP,
