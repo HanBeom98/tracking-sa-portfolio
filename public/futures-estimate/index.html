@@ -162,11 +162,11 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<link rel="stylesheet" href="/style.css?v=20260225113508">
+<link rel="stylesheet" href="/style.css?v=20260225114114">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script src="/firebase-config.js"></script>
-<script src="/translations.js?v=20260225113508"></script>
-<script src="/common.js?v=20260225113508"></script>
+<script src="/translations.js?v=20260225114114"></script>
+<script src="/common.js?v=20260225114114"></script>
 
 </head>
 <body><header>
@@ -325,14 +325,6 @@
     }
 
     async function loadImpactAnalysis() {
-      const tickers = [
-        "AMEX:SPY",
-        "NASDAQ:QQQ",
-        "AMEX:DIA",
-        "FX_IDC:USDKRW",
-        "TVC:GOLD",
-        "BITSTAMP:BTCUSD",
-      ];
       const bodyEl = document.getElementById("impact-analysis-body");
       const summaryEl = document.getElementById("impact-summary");
       const updatedEl = document.getElementById("analysis-updated-at");
@@ -341,13 +333,13 @@
         let res = await fetch("/api/tv-scan", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ tickers }),
+          body: JSON.stringify({}),
         });
         if (!res.ok) {
           res = await fetch("https://tracking-sa.vercel.app/api/tv-scan", {
             method: "POST",
             headers: { "content-type": "application/json" },
-            body: JSON.stringify({ tickers }),
+            body: JSON.stringify({}),
           });
         }
         if (!res.ok) throw new Error("analysis_http_" + res.status);

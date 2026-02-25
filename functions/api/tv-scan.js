@@ -1,4 +1,5 @@
-import { fetchTradingViewScan, normalizeTickers } from "../../src/domains/futures-estimate/infra/tv_scan_service.js";
+import { normalizeTickers } from "../../src/domains/futures-estimate/domain/impact_rules.js";
+import { fetchTradingViewScan, mapTradingViewRowsToQuotes } from "../../src/domains/futures-estimate/infra/tv_scan_service.js";
 import { buildImpactAnalysis } from "../../src/domains/futures-estimate/application/build_impact_analysis.js";
 
 function addCORSHeaders(response) {
@@ -45,7 +46,8 @@ export async function onRequest(context) {
       throw new Error(`scanner_http_${scannerRes.status}`);
     }
     const scannerJson = await scannerRes.json();
-    const analysis = buildImpactAnalysis(safeTickers, scannerJson?.data || []);
+    const quotes = mapTradingViewRowsToQuotes(scannerJson?.data || []);
+    const analysis = buildImpactAnalysis(safeTickers, quotes);
 
     return addCORSHeaders(
       new Response(JSON.stringify(analysis), {

@@ -234,14 +234,6 @@
     }
 
     async function loadImpactAnalysis() {
-      const tickers = [
-        "AMEX:SPY",
-        "NASDAQ:QQQ",
-        "AMEX:DIA",
-        "FX_IDC:USDKRW",
-        "TVC:GOLD",
-        "BITSTAMP:BTCUSD",
-      ];
       const bodyEl = document.getElementById("impact-analysis-body");
       const summaryEl = document.getElementById("impact-summary");
       const updatedEl = document.getElementById("analysis-updated-at");
@@ -250,13 +242,13 @@
         let res = await fetch("/api/tv-scan", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ tickers }),
+          body: JSON.stringify({}),
         });
         if (!res.ok) {
           res = await fetch("https://tracking-sa.vercel.app/api/tv-scan", {
             method: "POST",
             headers: { "content-type": "application/json" },
-            body: JSON.stringify({ tickers }),
+            body: JSON.stringify({}),
           });
         }
         if (!res.ok) throw new Error("analysis_http_" + res.status);

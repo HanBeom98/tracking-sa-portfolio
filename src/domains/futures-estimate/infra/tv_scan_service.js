@@ -1,7 +1,3 @@
-import { normalizeTickers } from "../domain/impact_rules.js";
-
-export { normalizeTickers };
-
 export async function fetchTradingViewScan(tickers) {
   return fetch("https://scanner.tradingview.com/global/scan", {
     method: "POST",
@@ -14,4 +10,17 @@ export async function fetchTradingViewScan(tickers) {
       columns: ["name", "description", "close", "change"],
     }),
   });
+}
+
+export function mapTradingViewRowsToQuotes(rows) {
+  return (rows || []).map((r) => {
+    const d = Array.isArray(r?.d) ? r.d : [];
+    return {
+      symbol: r?.s || "",
+      name: d[0] || r?.s || "",
+      description: d[1] || "",
+      close: typeof d[2] === "number" ? d[2] : null,
+      change: typeof d[3] === "number" ? d[3] : null,
+    };
+  }).filter((q) => q.symbol);
 }
