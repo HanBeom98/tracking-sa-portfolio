@@ -40,10 +40,15 @@ jobs:
       - name: Sync futures estimate to Firestore
         env:
           FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
-          KOSCOM_API_KEY: ${{ secrets.KOSCOM_API_KEY }}
-          KOSCOM_BASE_URL: ${{ secrets.KOSCOM_BASE_URL }}
-          KOSCOM_MARKET_CODE: ${{ secrets.KOSCOM_MARKET_CODE }}
-          KOSCOM_ISSUE_CODE: ${{ secrets.KOSCOM_ISSUE_CODE }}
+          KIS_APP_KEY: ${{ secrets.KIS_APP_KEY }}
+          KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
+          KIS_BASE_URL: ${{ secrets.KIS_BASE_URL }}
+          KIS_OAUTH_PATH: ${{ secrets.KIS_OAUTH_PATH }}
+          KIS_QUOTE_PATH: ${{ secrets.KIS_QUOTE_PATH }}
+          KIS_TR_ID: ${{ secrets.KIS_TR_ID }}
+          KIS_CUSTTYPE: ${{ secrets.KIS_CUSTTYPE }}
+          KIS_FID_COND_MRKT_DIV_CODE: ${{ secrets.KIS_FID_COND_MRKT_DIV_CODE }}
+          KIS_FID_INPUT_ISCD: ${{ secrets.KIS_FID_INPUT_ISCD }}
           KOSPI200_BASE: ${{ secrets.KOSPI200_BASE }}
         run: |
           python scripts/sync_futures_estimate.py

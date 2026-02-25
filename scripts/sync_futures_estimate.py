@@ -28,10 +28,18 @@ def _env_float(name: str, default: float) -> float:
         raise RuntimeError(f"{name} must be a number, got: {raw!r}") from e
 
 
-KOSCOM_BASE_URL = os.getenv("KOSCOM_BASE_URL", "https://api.koscom.co.kr").rstrip("/")
-KOSCOM_API_KEY = os.getenv("KOSCOM_API_KEY", "").strip()
-KOSCOM_MARKET_CODE = os.getenv("KOSCOM_MARKET_CODE", "CME").strip()
-KOSCOM_ISSUE_CODE = os.getenv("KOSCOM_ISSUE_CODE", "ES").strip()
+KIS_BASE_URL = os.getenv("KIS_BASE_URL", "https://openapi.koreainvestment.com:9443").rstrip("/")
+KIS_APP_KEY = os.getenv("KIS_APP_KEY", "").strip()
+KIS_APP_SECRET = os.getenv("KIS_APP_SECRET", "").strip()
+KIS_OAUTH_PATH = os.getenv("KIS_OAUTH_PATH", "/oauth2/tokenP").strip()
+KIS_QUOTE_PATH = os.getenv(
+    "KIS_QUOTE_PATH",
+    "/uapi/domestic-futureoption/v1/quotations/inquire-price",
+).strip()
+KIS_TR_ID = os.getenv("KIS_TR_ID", "FHMIF10000000").strip()
+KIS_CUSTTYPE = os.getenv("KIS_CUSTTYPE", "P").strip()
+KIS_FID_COND_MRKT_DIV_CODE = os.getenv("KIS_FID_COND_MRKT_DIV_CODE", "F").strip()
+KIS_FID_INPUT_ISCD = os.getenv("KIS_FID_INPUT_ISCD", "").strip()
 KOSPI200_BASE = _env_float("KOSPI200_BASE", 350.0)
 REQUEST_TIMEOUT = _env_float("FUTURES_REQUEST_TIMEOUT_SEC", 12.0)
 
@@ -75,23 +83,48 @@ def _find_timestamp(node: Any) -> int:
     return int(time.time())
 
 
-def _fetch_koscom_quote() -> dict:
-    if not KOSCOM_API_KEY:
-        raise RuntimeError("KOSCOM_API_KEY is not set")
+def _get_kis_access_token() -> str:
+    if not KIS_APP_KEY:
+        raise RuntimeError("KIS_APP_KEY is not set")
+    if not KIS_APP_SECRET:
+        raise RuntimeError("KIS_APP_SECRET is not set")
 
-    url = (
-        f"{KOSCOM_BASE_URL}/v3/market/realtime/derivative/futures/night/"
-        f"{KOSCOM_MARKET_CODE}/{KOSCOM_ISSUE_CODE}/price"
-    )
-    headers = {
-        "Authorization": f"Bearer {KOSCOM_API_KEY}",
-        "api-key": KOSCOM_API_KEY,
-        "x-api-key": KOSCOM_API_KEY,
-        "Content-Type": "application/json",
+    url = f"{KIS_BASE_URL}{KIS_OAUTH_PATH}"
+    payload = {
+        "grant_type": "client_credentials",
+        "appkey": KIS_APP_KEY,
+        "appsecret": KIS_APP_SECRET,
     }
-    res = requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT)
+    headers = {"Content-Type": "application/json"}
+    res = requests.post(url, json=payload, headers=headers, timeout=REQUEST_TIMEOUT)
     if res.status_code >= 400:
-        raise RuntimeError(f"Koscom API error: {res.status_code} {res.text[:200]}")
+        raise RuntimeError(f"KIS token error: {res.status_code} {res.text[:200]}")
+    token = res.json().get("access_token", "")
+    if not token:
+        raise RuntimeError("KIS token error: access_token missing")
+    return token
+
+
+def _fetch_kis_quote() -> dict:
+    if not KIS_FID_INPUT_ISCD:
+        raise RuntimeError("KIS_FID_INPUT_ISCD is not set")
+
+    access_token = _get_kis_access_token()
+    url = f"{KIS_BASE_URL}{KIS_QUOTE_PATH}"
+    headers = {
+        "authorization": f"Bearer {access_token}",
+        "appkey": KIS_APP_KEY,
+        "appsecret": KIS_APP_SECRET,
+        "tr_id": KIS_TR_ID,
+        "custtype": KIS_CUSTTYPE,
+    }
+    params = {
+        "FID_COND_MRKT_DIV_CODE": KIS_FID_COND_MRKT_DIV_CODE,
+        "FID_INPUT_ISCD": KIS_FID_INPUT_ISCD,
+    }
+    res = requests.get(url, headers=headers, params=params, timeout=REQUEST_TIMEOUT)
+    if res.status_code >= 400:
+        raise RuntimeError(f"KIS quote error: {res.status_code} {res.text[:200]}")
     return res.json()
 
 
@@ -149,9 +182,9 @@ def _extract_quote(raw: dict) -> dict:
         "estimate": float(estimate),
         "delta": float(delta),
         "delta_rate": float(delta_rate),
-        "market_code": KOSCOM_MARKET_CODE,
-        "issue_code": KOSCOM_ISSUE_CODE,
-        "source": "koscom_openapi",
+        "market_code": KIS_FID_COND_MRKT_DIV_CODE,
+        "issue_code": KIS_FID_INPUT_ISCD,
+        "source": "kis_openapi",
     }
 
 
@@ -190,7 +223,7 @@ def _save_firestore(payload: dict) -> None:
 def main() -> int:
     load_dotenv()
     try:
-        raw = _fetch_koscom_quote()
+        raw = _fetch_kis_quote()
         payload = _extract_quote(raw)
         _save_firestore(payload)
         ts_text = datetime.datetime.utcfromtimestamp(payload["ts"]).strftime("%Y-%m-%d %H:%M:%S UTC")
