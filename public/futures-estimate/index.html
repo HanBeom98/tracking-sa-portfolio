@@ -181,11 +181,11 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<link rel="stylesheet" href="/style.css?v=20260225111520">
+<link rel="stylesheet" href="/style.css?v=20260225111736">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script src="/firebase-config.js"></script>
-<script src="/translations.js?v=20260225111520"></script>
-<script src="/common.js?v=20260225111520"></script>
+<script src="/translations.js?v=20260225111736"></script>
+<script src="/common.js?v=20260225111736"></script>
 
 </head>
 <body><header>
@@ -251,7 +251,7 @@
       <div id="tv-ta-widget" class="tv-wrap"></div>
 
       <div class="panel-title">야간 영향 4종 모니터</div>
-      <div class="panel-subtitle">ES1!, NQ1!, VIX, USDKRW 동시 확인</div>
+      <div class="panel-subtitle">SPX, NDX, VIX, NI225 동시 확인</div>
       <div class="multi-grid">
         <div class="mini-card">
           <div class="mini-title">SP:SPX (S&P500 지수)</div>
@@ -266,7 +266,7 @@
           <div id="tv-vix-widget" class="mini-widget"></div>
         </div>
         <div class="mini-card">
-          <div class="mini-title">FX_IDC:USDKRW (달러/원)</div>
+          <div class="mini-title">TVC:NI225 (일본225 지수)</div>
           <div id="tv-krw-widget" class="mini-widget"></div>
         </div>
       </div>
@@ -293,7 +293,7 @@
         { id: "tv-es-widget", symbol: "SP:SPX" },
         { id: "tv-nq-widget", symbol: "NASDAQ:NDX" },
         { id: "tv-vix-widget", symbol: "TVC:VIX" },
-        { id: "tv-krw-widget", symbol: "FX_IDC:USDKRW" },
+        { id: "tv-krw-widget", symbol: "TVC:NI225" },
       ];
 
       buildWidget(
