@@ -87,6 +87,7 @@ header {
 }
 
 .site-logo { width: 40px; height: 40px; fill: var(--p-blue); color: var(--p-blue); }
+.site-logo-link { margin-right: 12px; flex-shrink: 0; }
 
 .desktop-menu-container { display: flex; align-items: center; gap: 20px; width: 100%; }
 nav ul { display: flex; list-style: none; gap: 10px; }

@@ -51,11 +51,11 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<link rel="stylesheet" href="/style.css?v=20260225022204">
+<link rel="stylesheet" href="/style.css?v=20260225042221">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script src="/firebase-config.js"></script>
-<script src="/translations.js?v=20260225022204"></script>
-<script src="/common.js?v=20260225022204"></script>
+<script src="/translations.js?v=20260225042221"></script>
+<script src="/common.js?v=20260225042221"></script>
 
 </head>
 <body><header>
@@ -71,6 +71,13 @@
         <div class="desktop-menu-container">
             <nav>
                 <ul>
+                    <li><a href="/news/" data-i18n="news_home">뉴스</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropbtn" data-i18n="menu_chart">차트</a>
+                        <div class="dropdown-content">
+                            <a href="/futures-estimate/" data-i18n="futures_estimate_index">선물야간추정지수</a>
+                        </div>
+                    </li>
                     <li class="dropdown">
                         <a href="#" class="dropbtn" data-i18n="menu_test">테스트</a>
                         <div class="dropdown-content">
@@ -87,7 +94,6 @@
                             <a href="/ai-evolution/" data-i18n="ai_evolution">AI 진화 2048</a>
                         </div>
                     </li>
-                    <li><a href="/news/" data-i18n="news_home">뉴스</a></li>
                 </ul>
             </nav>
             <div class="utility-controls">
@@ -128,7 +134,7 @@
 <li><strong>Monetization Idea 2:</strong> Partner with Anthropic to provide AI solution consulting and implementation services to Korean businesses, leveraging Anthropic's technology and expertise.</li>
 <li><strong>Monetization Idea 3:</strong> Develop and sell educational programs based on Anthropic's AI technology (e.g., AI ethics training, AI developer training courses) aimed at upskilling the Korean workforce.</li>
 </ul>
-<h2>HASHTAGS##: #Anthropic #OpenAI #AIInvestment #KoreanAIMarket #EthicalAI</h2>
+<div class="news-hashtags"><span class="news-hashtag-chip">#Anthropic</span><span class="news-hashtag-chip">#OpenAI</span><span class="news-hashtag-chip">#AIInvestment</span><span class="news-hashtag-chip">#KoreanAIMarket</span><span class="news-hashtag-chip">#EthicalAI</span></div>
       </div>
     </article>
   </main>
