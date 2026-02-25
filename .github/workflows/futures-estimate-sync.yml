@@ -40,16 +40,7 @@ jobs:
       - name: Sync futures estimate to Firestore
         env:
           FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
-          KIS_APP_KEY: ${{ secrets.KIS_APP_KEY }}
-          KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
-          KIS_BASE_URL: ${{ secrets.KIS_BASE_URL }}
-          KIS_OAUTH_APPROVAL_PATH: ${{ secrets.KIS_OAUTH_APPROVAL_PATH }}
-          KIS_WS_URL: ${{ secrets.KIS_WS_URL }}
-          KIS_WS_PATH: ${{ secrets.KIS_WS_PATH }}
-          KIS_WS_TR_ID: ${{ secrets.KIS_WS_TR_ID }}
-          KIS_WS_TR_KEY: ${{ secrets.KIS_WS_TR_KEY }}
-          KIS_CUSTTYPE: ${{ secrets.KIS_CUSTTYPE }}
-          FUTURES_WS_TIMEOUT_SEC: ${{ secrets.FUTURES_WS_TIMEOUT_SEC }}
+          STOOQ_SYMBOL: ${{ secrets.STOOQ_SYMBOL }}
           KOSPI200_BASE: ${{ secrets.KOSPI200_BASE }}
         run: |
           python scripts/sync_futures_estimate.py
