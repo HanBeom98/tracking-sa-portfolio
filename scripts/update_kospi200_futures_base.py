@@ -19,7 +19,8 @@ from src.shared.infra.db import get_firestore_client
 
 REQUEST_TIMEOUT = float(os.getenv("FUTURES_REQUEST_TIMEOUT_SEC", "12"))
 TV_SYMBOL = os.getenv("TV_SYMBOL", "KRX:K2I1!").strip()
-TV_SCANNER_URL = os.getenv("TV_SCANNER_URL", "https://scanner.tradingview.com/korea/scan").strip()
+TV_SCANNER_URL = os.getenv("TV_SCANNER_URL", "https://scanner.tradingview.com/global/scan").strip()
+TV_SCANNER_FALLBACK_URL = os.getenv("TV_SCANNER_FALLBACK_URL", "https://scanner.tradingview.com/korea/scan").strip()
 
 
 def _to_num(v: Any, default: float = 0.0) -> float:
@@ -35,13 +36,23 @@ def _fetch_tradingview_quote(symbol: str) -> dict[str, Any]:
         "symbols": {"tickers": [symbol], "query": {"types": []}},
         "columns": ["close", "change", "change_abs", "name", "description", "update_mode"],
     }
-    res = requests.post(TV_SCANNER_URL, json=payload, headers=headers, timeout=REQUEST_TIMEOUT)
-    if res.status_code >= 400:
-        raise RuntimeError(f"TradingView scanner http {res.status_code}")
-    obj = res.json() or {}
-    rows = obj.get("data") or []
+    rows = []
+    last_error = "unknown"
+    for url in [TV_SCANNER_URL, TV_SCANNER_FALLBACK_URL]:
+        try:
+            res = requests.post(url, json=payload, headers=headers, timeout=REQUEST_TIMEOUT)
+            if res.status_code >= 400:
+                last_error = f"{url} http {res.status_code}"
+                continue
+            obj = res.json() or {}
+            rows = obj.get("data") or []
+            if rows:
+                break
+            last_error = f"{url} empty data"
+        except Exception as e:
+            last_error = f"{url} {e}"
     if not rows:
-        raise RuntimeError("TradingView scanner empty data")
+        raise RuntimeError(f"TradingView scanner failed: {last_error}")
     row = rows[0] or {}
     d = row.get("d") or []
     price = _to_num(d[0], 0.0)
