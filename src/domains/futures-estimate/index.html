@@ -162,6 +162,7 @@
   <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
   <script>
     const MAX_POINTS = 800;
+    const CHART_WINDOW_SECONDS = 60 * 60 * 24;
     let chart = null;
     let series = null;
     let points = [];
@@ -205,6 +206,9 @@
     function renderPoints() {
       ensureChart();
       series.setData(points.slice(-MAX_POINTS));
+      if (chart && chart.timeScale) {
+        chart.timeScale().fitContent();
+      }
     }
 
     function getDb() {
@@ -223,6 +227,13 @@
         .filter((d) => typeof d.ts === "number" && typeof d.estimate === "number")
         .sort((a, b) => a.ts - b.ts)
         .map((d) => ({ time: d.ts, value: d.estimate }));
+
+      if (points.length > 1) {
+        const latestTs = points[points.length - 1].time;
+        const minTs = latestTs - CHART_WINDOW_SECONDS;
+        points = points.filter((p) => p.time >= minTs);
+      }
+
       renderPoints();
     }
 

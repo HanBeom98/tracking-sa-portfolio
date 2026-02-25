@@ -33,6 +33,7 @@ STOOQ_FIELDS = os.getenv("STOOQ_FIELDS", "sd2t2ohlcvcp").strip()
 YAHOO_SYMBOL = os.getenv("YAHOO_SYMBOL", "ES=F").strip()
 KOSPI200_BASE = _env_float("KOSPI200_BASE", 350.0)
 REQUEST_TIMEOUT = _env_float("FUTURES_REQUEST_TIMEOUT_SEC", 12.0)
+RETENTION_DAYS = int(_env_float("FUTURES_RETENTION_DAYS", 14.0))
 
 
 def _fetch_stooq_quote() -> dict:
@@ -207,7 +208,7 @@ def _extract_quote(raw: dict) -> dict:
         "delta_rate": float(delta_rate),
         "market_code": "cme",
         "issue_code": str(raw.get("symbol", STOOQ_SYMBOL)),
-        "source": "stooq_public_quote",
+        "source": "public_quote",
     }
 
 
@@ -226,8 +227,20 @@ def _save_firestore(payload: dict) -> None:
     db.collection("futures_estimate_points").document(point_id).set(payload_with_server_time, merge=True)
     db.collection("futures_estimate_meta").document("current").set(payload_with_server_time, merge=True)
 
-    # Keep writes resilient: skip cleanup query to avoid key-type mismatch failures
-    # in different Firestore SDK/runtime combinations.
+    # Delete very old points so legacy manual test docs do not stretch chart x-axis.
+    cutoff_ts = int(time.time()) - (RETENTION_DAYS * 24 * 60 * 60)
+    old_query = (
+        db.collection("futures_estimate_points")
+        .where("ts", "<", cutoff_ts)
+        .order_by("ts")
+        .limit(300)
+    )
+    old_docs = list(old_query.stream())
+    if old_docs:
+        batch = db.batch()
+        for doc in old_docs:
+            batch.delete(doc.reference)
+        batch.commit()
 
 
 def main() -> int:
@@ -239,7 +252,8 @@ def main() -> int:
         ts_text = datetime.datetime.utcfromtimestamp(payload["ts"]).strftime("%Y-%m-%d %H:%M:%S UTC")
         print(
             f"✅ Futures sync complete: estimate={payload['estimate']:.2f}, "
-            f"delta={payload['delta']:+.2f} ({payload['delta_rate']:+.2f}%), ts={ts_text}"
+            f"delta={payload['delta']:+.2f} ({payload['delta_rate']:+.2f}%), ts={ts_text}, "
+            f"retention={RETENTION_DAYS}d"
         )
         return 0
     except Exception as e:
