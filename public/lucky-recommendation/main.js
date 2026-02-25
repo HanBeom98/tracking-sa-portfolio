@@ -77,6 +77,49 @@ class LuckyRecommendation extends HTMLElement {
             .loading { text-align: center; padding: 20px; }
             .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #0052cc; border-radius: 50%; width: 35px; height: 35px; animation: spin 1s linear infinite; margin: 0 auto 15px auto; }
             @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+            .loading-card {
+                background: linear-gradient(135deg, #f8fbff 0%, #eff6ff 100%);
+                border: 1px solid #dbeafe;
+                border-radius: 20px;
+                padding: 22px 16px;
+                box-shadow: 0 8px 20px rgba(0, 82, 204, 0.08);
+            }
+            .loading-title {
+                color: #1e40af;
+                font-weight: 900;
+                font-size: 1.02rem;
+                margin-bottom: 5px;
+                animation: glowPulse 1.6s ease-in-out infinite;
+            }
+            .loading-sub {
+                color: #64748b;
+                font-size: 0.9rem;
+                font-weight: 600;
+            }
+            .loading-dots {
+                margin-top: 12px;
+                display: inline-flex;
+                gap: 7px;
+                align-items: center;
+                justify-content: center;
+            }
+            .loading-dot {
+                width: 7px;
+                height: 7px;
+                border-radius: 999px;
+                background: #3b82f6;
+                animation: dotJump 0.9s ease-in-out infinite;
+            }
+            .loading-dot:nth-child(2) { animation-delay: 0.15s; }
+            .loading-dot:nth-child(3) { animation-delay: 0.3s; }
+            @keyframes dotJump {
+                0%, 80%, 100% { transform: translateY(0); opacity: 0.45; }
+                40% { transform: translateY(-5px); opacity: 1; }
+            }
+            @keyframes glowPulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.6; }
+            }
 
             .result-card {
                 padding: 35px; background: #f8fafc; border-radius: 24px; border: 1px solid #e2e8f0;
@@ -153,9 +196,23 @@ class LuckyRecommendation extends HTMLElement {
         const month = this.shadowRoot.getElementById('birth-month').value;
         const day = this.shadowRoot.getElementById('birth-day').value;
         const lang = localStorage.getItem('lang') || 'ko';
+        const isEn = lang === 'en';
 
         const resultArea = this.shadowRoot.getElementById('result-area');
-        resultArea.innerHTML = `<div class="loading"><div class="spinner"></div><p>행운을 찾는 중...</p></div>`;
+        const loadingTitle = isEn ? "AI is finding your lucky recommendation..." : "AI가 오늘의 행운 추천을 찾고 있습니다...";
+        const loadingSub = isEn ? "Checking your vibe, color signal, and best lucky item." : "오늘의 기운, 컬러 신호, 추천 아이템을 분석 중입니다.";
+        resultArea.innerHTML = `
+            <div class="loading loading-card">
+                <div class="spinner"></div>
+                <p class="loading-title">${loadingTitle}</p>
+                <p class="loading-sub">${loadingSub}</p>
+                <div class="loading-dots" aria-hidden="true">
+                    <span class="loading-dot"></span>
+                    <span class="loading-dot"></span>
+                    <span class="loading-dot"></span>
+                </div>
+            </div>
+        `;
 
         try {
             const response = await fetch('https://tracking-sa.vercel.app/api/lucky', {
