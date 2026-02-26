@@ -94,15 +94,15 @@ jobs:
         env:
           FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
         run: |
-          # Verify directory content
-          ls -la
-          
           # Create temporary service account key file
           echo "$FIREBASE_SERVICE_ACCOUNT_JSON" > firebase-sa-key.json
           export GOOGLE_APPLICATION_CREDENTIALS=firebase-sa-key.json
           
-          # Install firebase-tools and deploy with explicit project ID
-          npx firebase-tools deploy --only firestore:rules --project tracking-sa-295db --json
+          # Install firebase-tools locally for stability
+          npm install firebase-tools
+          
+          # Deploy with explicit config and project ID
+          ./node_modules/.bin/firebase deploy --only firestore:rules --project tracking-sa-295db --config firebase.json --json
           
           # Cleanup
           rm firebase-sa-key.json
