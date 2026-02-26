@@ -56,7 +56,10 @@ async function renderAccount() {
 
   const profile = (window.getCurrentUserProfile && window.getCurrentUserProfile()) || null;
   const providerIds = (user.providerData || []).map((p) => p.providerId);
-  const subscriptionStatus = (profile && profile.subscription && profile.subscription.status) || "free";
+  const subscription = (profile && profile.subscription) || {};
+  const subscriptionStatus = subscription.status || "free";
+  const subscriptionRenewAt = subscription.renewAt || subscription.nextBillingAt || "";
+  const subscriptionExpiresAt = subscription.currentPeriodEnd || subscription.expiresAt || "";
   const nickname = (profile && profile.nickname) || user.displayName || "";
   const photoURL = (profile && profile.photoURL) || user.photoURL || "";
 
@@ -72,6 +75,14 @@ async function renderAccount() {
     <div class="account-row">
       <div class="account-label" data-i18n="account_subscription">구독 상태</div>
       <div class="account-value">${formatSubscription(subscriptionStatus)}</div>
+    </div>
+    <div class="account-row">
+      <div class="account-label" data-i18n="account_subscription_renew">다음 결제일</div>
+      <div class="account-value">${subscriptionRenewAt ? formatDate(subscriptionRenewAt) : "-"}</div>
+    </div>
+    <div class="account-row">
+      <div class="account-label" data-i18n="account_subscription_expires">만료일</div>
+      <div class="account-value">${subscriptionExpiresAt ? formatDate(subscriptionExpiresAt) : "-"}</div>
     </div>
     <div class="account-row">
       <div class="account-label" data-i18n="account_uid">UID</div>
@@ -95,6 +106,10 @@ async function renderAccount() {
         <div>
           <label for="photo-url" data-i18n="profile_image">프로필 이미지</label>
           <input id="photo-url" type="text" value="${photoURL}" placeholder="${window.getTranslation('profile_image_placeholder', '이미지 URL을 입력하세요')}">
+          <div class="avatar-row" style="margin-top:10px;">
+            <input id="avatar-file" type="file" accept="image/*">
+            <button type="button" id="avatar-upload" data-i18n="profile_image_upload">업로드</button>
+          </div>
           <div class="profile-preview" id="profile-preview" style="margin-top:10px;">
             ${photoURL ? `<img src="${photoURL}" alt="profile">` : ""}
             <span class="helper" data-i18n="profile_image_hint">원형 이미지로 표시됩니다.</span>
@@ -121,6 +136,8 @@ async function renderAccount() {
   const nicknameCheckBtn = document.getElementById("nickname-check");
   const nicknameStatus = document.getElementById("nickname-status");
   const photoInput = document.getElementById("photo-url");
+  const avatarFileInput = document.getElementById("avatar-file");
+  const avatarUploadBtn = document.getElementById("avatar-upload");
   const profilePreview = document.getElementById("profile-preview");
   const profileSaveBtn = document.getElementById("profile-save");
   const profileStatus = document.getElementById("profile-status");
@@ -135,6 +152,12 @@ async function renderAccount() {
 
   function normalizeNickname(value) {
     return (value || "").trim().toLowerCase();
+  }
+
+  function setProfileStatus(messageKey, fallback, ok = false) {
+    if (!profileStatus) return;
+    profileStatus.textContent = window.getTranslation(messageKey, fallback);
+    profileStatus.style.color = ok ? "#1b7f3a" : "#c62828";
   }
 
   function validateNickname(value) {
@@ -183,6 +206,56 @@ async function renderAccount() {
     });
   }
 
+  async function resizeImage(file) {
+    const maxSize = 256;
+    const img = await new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => resolve(image);
+      image.onerror = reject;
+      image.src = URL.createObjectURL(file);
+    });
+    const canvas = document.createElement("canvas");
+    const size = Math.min(maxSize, Math.max(img.width, img.height));
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d");
+    const sx = Math.max(0, (img.width - img.height) / 2);
+    const sy = Math.max(0, (img.height - img.width) / 2);
+    const sSize = Math.min(img.width, img.height);
+    ctx.drawImage(img, sx, sy, sSize, sSize, 0, 0, size, size);
+    return await new Promise((resolve) => {
+      canvas.toBlob((blob) => resolve(blob), "image/jpeg", 0.9);
+    });
+  }
+
+  if (avatarUploadBtn && avatarFileInput) {
+    avatarUploadBtn.addEventListener("click", async () => {
+      if (!authService) return;
+      const file = avatarFileInput.files && avatarFileInput.files[0];
+      if (!file) {
+        setProfileStatus("profile_image_required", "이미지를 선택해주세요.", false);
+        return;
+      }
+      try {
+        setProfileStatus("profile_image_uploading", "이미지 업로드 중...", true);
+        const resized = await resizeImage(file);
+        const uploadUrl = await authService.uploadAvatar(resized || file);
+        if (photoInput) photoInput.value = uploadUrl;
+        if (profilePreview) {
+          profilePreview.innerHTML = `<img src="${uploadUrl}" alt="profile"><span class="helper" data-i18n="profile_image_hint">원형 이미지로 표시됩니다.</span>`;
+        }
+        setProfileStatus("profile_image_uploaded", "업로드 완료", true);
+        if (window.applyTranslations) {
+          const lang = localStorage.getItem("lang") || "ko";
+          window.applyTranslations(lang);
+        }
+      } catch (error) {
+        console.error("이미지 업로드 실패:", error);
+        setProfileStatus("profile_image_upload_failed", "업로드에 실패했습니다.", false);
+      }
+    });
+  }
+
   if (profileSaveBtn) {
     profileSaveBtn.addEventListener("click", async () => {
       if (!authService) return;
@@ -201,10 +274,7 @@ async function renderAccount() {
           nickname: nextNickname.trim(),
           photoURL: nextPhoto.trim(),
         });
-        if (profileStatus) {
-          profileStatus.textContent = window.getTranslation("profile_saved", "저장되었습니다.");
-          profileStatus.style.color = "#1b7f3a";
-        }
+        setProfileStatus("profile_saved", "저장되었습니다.", true);
         if (window.updateAuthControls) window.updateAuthControls(window.getCurrentUser());
       } catch (error) {
         console.error("프로필 저장 실패:", error);
@@ -216,10 +286,11 @@ async function renderAccount() {
           setNicknameStatus("nickname_invalid", "닉네임은 2-12자(영문/숫자/한글/_)만 가능합니다.", false);
           return;
         }
-        if (profileStatus) {
-          profileStatus.textContent = window.getTranslation("profile_save_failed", "저장에 실패했습니다.");
-          profileStatus.style.color = "#c62828";
+        if (error && error.code === "auth/nickname-cooldown") {
+          setNicknameStatus("nickname_cooldown", "닉네임은 24시간에 1회만 변경할 수 있습니다.", false);
+          return;
         }
+        setProfileStatus("profile_save_failed", "저장에 실패했습니다.", false);
       }
     });
   }

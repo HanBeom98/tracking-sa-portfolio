@@ -128,6 +128,28 @@
       font-weight: 700;
       cursor: pointer;
     }
+    .avatar-row {
+      display: grid;
+      grid-template-columns: 1fr 140px;
+      gap: 8px;
+      align-items: center;
+    }
+    .avatar-row input[type="file"] {
+      height: 46px;
+      padding: 8px;
+      border-radius: 12px;
+      border: 1px dashed oklch(84% 0.02 260);
+      background: #f8faff;
+    }
+    .avatar-row button {
+      height: 46px;
+      border-radius: 12px;
+      border: none;
+      background: var(--p-blue);
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+    }
     .profile-preview {
       display: flex;
       align-items: center;

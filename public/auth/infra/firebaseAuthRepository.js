@@ -70,12 +70,24 @@ export function createFirebaseAuthRepository({ firebaseApp = window.firebase, db
     const profileSnap = await profileRef.get();
     const currentProfile = profileSnap.exists ? profileSnap.data() : {};
     const currentNickname = currentProfile.nickname || "";
+    const lastNicknameUpdatedAt = currentProfile.nicknameUpdatedAt;
+    const now = Date.now();
+    const cooldownMs = 24 * 60 * 60 * 1000;
 
     if (typeof nickname === "string") {
       const key = normalizeNickname(nickname);
       if (!key) {
         const error = new Error("Invalid nickname");
         error.code = "auth/invalid-nickname";
+        throw error;
+      }
+      const lastTs = lastNicknameUpdatedAt && typeof lastNicknameUpdatedAt.toMillis === "function"
+        ? lastNicknameUpdatedAt.toMillis()
+        : (lastNicknameUpdatedAt ? new Date(lastNicknameUpdatedAt).getTime() : null);
+      if (lastTs && now - lastTs < cooldownMs && normalizeNickname(currentNickname) !== key) {
+        const error = new Error("Nickname change cooldown");
+        error.code = "auth/nickname-cooldown";
+        error.retryAfterMs = cooldownMs - (now - lastTs);
         throw error;
       }
       const availability = await checkNicknameAvailability(nickname);
@@ -95,6 +107,7 @@ export function createFirebaseAuthRepository({ firebaseApp = window.firebase, db
         });
       }
       updates.nickname = nickname;
+      updates.nicknameUpdatedAt = getServerTimestamp();
       await user.updateProfile({ displayName: nickname });
     }
 
@@ -108,6 +121,26 @@ export function createFirebaseAuthRepository({ firebaseApp = window.firebase, db
     }
 
     return getUserProfile(user.uid);
+  }
+
+  async function uploadAvatar(file) {
+    const user = auth.currentUser;
+    if (!user) {
+      throw new Error("Not authenticated");
+    }
+    if (!firebaseApp.storage) {
+      throw new Error("Firebase Storage SDK is not available");
+    }
+    if (!file) {
+      throw new Error("No file provided");
+    }
+    const storage = firebaseApp.storage();
+    const ref = storage.ref().child(`avatars/${user.uid}/profile.jpg`);
+    const snapshot = await ref.put(file, {
+      contentType: file.type || "image/jpeg",
+      cacheControl: "public,max-age=31536000",
+    });
+    return snapshot.ref.getDownloadURL();
   }
 
   async function deleteAccount({ password } = {}) {
@@ -161,6 +194,7 @@ export function createFirebaseAuthRepository({ firebaseApp = window.firebase, db
       displayName: user.displayName || "",
       photoURL: user.photoURL || "",
       nickname: "",
+      subscription: { status: "free" },
       role: DEFAULT_ROLE,
       createdAt: getServerTimestamp(),
     };
@@ -181,6 +215,7 @@ export function createFirebaseAuthRepository({ firebaseApp = window.firebase, db
     signOut,
     checkNicknameAvailability,
     updateProfile,
+    uploadAvatar,
     deleteAccount,
     onAuthStateChanged,
     ensureUserProfile,
