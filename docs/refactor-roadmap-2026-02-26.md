@@ -62,6 +62,8 @@
   - unit test 추가:
     - `tests/unit/auth-state-bus.test.js`
     - `tests/unit/auth-action-handlers.test.js`
+    - `tests/unit/board-auth-gateway.test.js`
+    - `tests/unit/board-write-auth.test.js`
   - 헤더 인증 메뉴 UID 노출 제거.
   - `smoke_auth_release.sh`를 분리 구조 기준으로 안정화(pipefail-safe).
   - 배포 후 `smoke_auth_release.sh` 자동 실행 워크플로우 연결.
