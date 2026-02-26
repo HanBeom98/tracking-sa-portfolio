@@ -81,3 +81,6 @@
 - `tests/unit/futures-api-contract.test.js`
   - `tv-scan` 성공 응답 스키마 계약 검증
   - `futures-predictions` Firestore 문서 -> API item 매핑 계약 검증
+
+## Related
+- 에러코드/문구 매핑: `docs/futures-error-code-mapping.md`
