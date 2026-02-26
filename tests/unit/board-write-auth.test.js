@@ -4,7 +4,7 @@ import {
   WRITE_PATH,
   ensureAuthenticated,
   getCurrentUser,
-} from "../../src/domains/board/write/application/write-auth.js";
+} from "../../src/domains/board/application/write-auth.js";
 
 function withWindow(stubWindow, fn) {
   const previous = globalThis.window;

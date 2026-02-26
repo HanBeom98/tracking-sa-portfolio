@@ -1,8 +1,8 @@
 import { buildPostService } from "../application/postService.js";
 import { createFirestorePostRepository } from "../infra/firestorePostRepository.js";
-import { ensureAuthenticated, getCurrentUser } from "./application/write-auth.js";
-import { createSubmitPostUseCase } from "./application/submit-post-use-case.js";
-import { renderWriteAccess } from "./ui/write-access-renderer.js";
+import { ensureAuthenticated, getCurrentUser } from "../application/write-auth.js";
+import { createSubmitPostUseCase } from "../application/submit-post-use-case.js";
+import { renderWriteAccess } from "../ui/write-access-renderer.js";
 
 const postService = buildPostService({
   postRepository: createFirestorePostRepository(),

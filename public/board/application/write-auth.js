@@ -1,4 +1,4 @@
-import { getCurrentUser as getBoardCurrentUser, requireAuth as requireBoardAuth } from "../../application/authGateway.js";
+import { getCurrentUser as getBoardCurrentUser, requireAuth as requireBoardAuth } from "./authGateway.js";
 
 const WRITE_PATH = "/board/write";
 

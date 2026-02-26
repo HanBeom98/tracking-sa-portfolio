@@ -52,6 +52,9 @@ Tracking SA를 프레임워크 의존 없이 안정적으로 운영 가능한 DD
   - `NewsPresenter` 도입으로 데이터 매핑 로직 완벽 분리 및 `tests/unit/news-presenter.test.js` 검증.
   - 모든 모듈 import 경로를 상대 경로로 전환하여 단위 테스트 환경과 브라우저 런타임 호환성 확보.
   - 빌드 스크립트(`builder.py`) 수정: 뉴스 `application/` 디렉토리 전체 배포 구조 반영.
+- 보드 도메인 레이어 평탄화 및 통합 완료 (By Gemini CLI):
+  - 하위 폴더(`write`, `edit`, `post`)에 파편화된 레이어 로직을 도메인 루트(`application/`, `ui/`)로 집결.
+  - 전체 게시판 기능의 `import` 경로 수술적 최적화 및 단위 테스트 100% 통과 확인.
 - 게임 도메인 DDD 분리 완료:
   - 테트리스, AI Evolution 게임 로직을 `application/`, `infra/` 레이어로 물리적 분리 완료.
 - GitHub Actions 역할 고정:
@@ -70,13 +73,11 @@ Tracking SA를 프레임워크 의존 없이 안정적으로 운영 가능한 DD
   - 2048: 단일 `index.html` 내 상단 네비게이션 내장 및 오프셋 적용.
 
 ## 🧭 Architecture Reality Check
-- `news`, `games`, `account`, `futures-estimate` 도메인은 성숙한 4계층 DDD 구조를 갖춤.
-- `board` 도메인은 기능별 하위 폴더(`write`, `edit`) 구조를 유지하고 있어, 레이어 통합(Flattening)이 필요한 상태.
+- `news`, `board`, `games`, `account`, `futures-estimate` 도메인은 성숙한 4계층 DDD 구조를 갖춤.
 - `fortune`, `animal-face` 등 레거시 도메인은 여전히 `main.js`에 인프라 로직이 결합되어 있음.
 - 공유 자산(`common.js`)의 책임 분리가 지속적으로 진행 중.
 
 ## 🔭 Current Focus
-- [ ] 보드(`board`) 도메인 레이어 평탄화 및 통합(하위 폴더 제거 및 루트 레이어 집중)
 - [ ] 배포 안정성 강화: 릴리즈 스모크 테스트(`docs/release-smoke-ops.md`) 자동화 및 시나리오 보강
 - [ ] 레거시 도메인(`fortune`, `animal-face`) API 호출 로직 `infra` 계층으로 분리
 - [ ] Firestore 규칙 최소 권한 재설계 및 검색/뉴스 읽기 안정성 기준 재검토

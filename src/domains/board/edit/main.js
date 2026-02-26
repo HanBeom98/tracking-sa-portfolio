@@ -1,7 +1,7 @@
 import { buildPostService } from "../application/postService.js";
 import { requireAuth } from "../application/authGateway.js";
 import { createFirestorePostRepository } from "../infra/firestorePostRepository.js";
-import { createEditPostUseCases } from "./application/edit-post-use-cases.js";
+import { createEditPostUseCases } from "../application/edit-post-use-cases.js";
 
 const postService = buildPostService({
   postRepository: createFirestorePostRepository(),

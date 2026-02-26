@@ -35,11 +35,12 @@
 - `src/domains/account/ui/account-renderer.js`: 게스트/계정 화면 렌더링 및 상태 메시지 유틸
 - `src/domains/account/main.js`: 인증 상태 구독 + 액션 바인딩 오케스트레이션
 
-### [Board/Write 도메인] (2026-02-26 기준)
-- `src/domains/board/write/application/write-auth.js`: 인증 상태 확인/현재 사용자 접근 유틸
-- `src/domains/board/write/application/submit-post-use-case.js`: 게시글 제출 유스케이스(인증 포함)
-- `src/domains/board/write/ui/write-access-renderer.js`: 비로그인 상태 렌더링 및 로그인 유도 UI
-- `src/domains/board/write/main.js`: 게시글 제출 + 상태 이벤트 오케스트레이션
+### [Board 도메인] (2026-02-26 평탄화 완료)
+- `src/domains/board/application/`: 모든 유스케이스 통합 (`submit-post`, `edit-post`, `post-detail`, `postService`, `authGateway`)
+- `src/domains/board/ui/`: 모든 UI 컴포넌트 통합 (`board-list`, `write-form`, `edit-form`, `post-view`, `access-renderer`)
+- `src/domains/board/infra/`: 공통 인프라 (`firestorePostRepository`, `cryptoAdapter`)
+- `src/domains/board/domain/`: 순수 비즈니스 규칙 (`validators`, `nickname`)
+- **특이사항**: 하위 폴더(`write`, `edit`, `post`) 구조를 제거하고 루트 레이어로 로직을 집결하여 관리 효율성 극대화.
 
 ### [Futures-estimate 도메인] (2026-02-26 기준)
 - `src/domains/futures-estimate/main.js`: 위젯/분석/히스토리 로딩 오케스트레이션

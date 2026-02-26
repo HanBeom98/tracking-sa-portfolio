@@ -198,3 +198,25 @@
   - `npm run test:unit` 통과 (뉴스 프레젠터 테스트 포함).
   - `python3 main.py --build-only` 빌드 성공 및 `public/` 구조 확인.
   - `public/news/application/` 내 모든 의존성 파일 존재 확인.
+
+### refactor(board): flatten domain structure and unify layers (2026-02-26)
+- 문제/증상:
+  - 게시판 도메인이 기능별 하위 폴더(`write`, `edit`, `post`)로 파편화되어 레이어 로직(application, ui) 추적이 어렵고 중복 위험이 높음.
+  - 소규모 프로젝트에서 과도한 폴더 분할로 인한 관리 오버헤드 발생.
+- 변경:
+  - 파일 이동 (하위 폴더 -> 루트 레이어):
+    - `board/write/application/*`, `board/edit/application/*`, `board/post/application/*` -> `src/domains/board/application/`
+    - `board/write/ui/*` -> `src/domains/board/ui/`
+  - 참조 경로 최신화:
+    - `main.js`, `index.html` 내 스크립트 참조 및 모듈 import 경로를 이동된 위치에 맞게 수술적으로 수정.
+    - 모든 import를 상대 경로 표준으로 유지.
+  - 테스트 호환성 확보:
+    - `tests/unit/board-*.test.js` 파일들의 import 경로를 갱신하여 평탄화 후에도 테스트가 정상 동작하도록 보장.
+  - 구조 정리:
+    - 로직이 비워진 하위 `application`, `ui` 폴더들을 삭제하여 DDD 계층 구조 명확화.
+- 영향 범위:
+  - 게시판(목록, 작성, 수정, 상세) 전체 기능의 코드 구조 및 빌드 경로.
+- 검증:
+  - `npm run test:unit` 실행 (82개 테스트 전체 통과 확인).
+  - `python3 main.py --build-only` 빌드 성공 확인.
+  - `find src/domains/board` 명령으로 평탄화된 물리 구조 육안 확인.

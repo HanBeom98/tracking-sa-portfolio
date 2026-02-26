@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createSubmitPostUseCase } from "../../src/domains/board/write/application/submit-post-use-case.js";
+import { createSubmitPostUseCase } from "../../src/domains/board/application/submit-post-use-case.js";
 
 test("submit post use-case throws AUTH_REQUIRED when no user", async () => {
   const postService = {

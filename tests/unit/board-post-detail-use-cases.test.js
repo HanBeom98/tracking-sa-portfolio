@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createPostDetailUseCases } from "../../src/domains/board/post/application/post-detail-use-cases.js";
+import { createPostDetailUseCases } from "../../src/domains/board/application/post-detail-use-cases.js";
 
 test("post detail use-cases loads post and edit permission", async () => {
   const post = { id: "p1", authorUid: "u1" };

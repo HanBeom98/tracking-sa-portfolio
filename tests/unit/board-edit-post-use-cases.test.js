@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createEditPostUseCases } from "../../src/domains/board/edit/application/edit-post-use-cases.js";
+import { createEditPostUseCases } from "../../src/domains/board/application/edit-post-use-cases.js";
 
 test("edit post use-cases rejects unauthorized user", async () => {
   const postService = {
