@@ -101,6 +101,10 @@
     - 시그널(`item.signal`) ko/en 혼합 입력 -> canonical 분류 -> locale 문구 매핑
   - unit test 추가:
     - `tests/unit/futures-impact-table-presenter.test.js`
+    - `tests/unit/futures-api-contract.test.js`
+  - futures API 계약 문서화:
+    - `docs/futures-api-contract.md`
+    - `tv-scan`/`futures-predictions` 응답 스키마 및 default/error 규약 명시
   - 헤더 인증 메뉴 UID 노출 제거.
   - `smoke_auth_release.sh`를 분리 구조 기준으로 안정화(pipefail-safe).
   - 배포 후 `smoke_auth_release.sh` 자동 실행 워크플로우 연결.
@@ -112,7 +116,7 @@
   - CI `Unit Tests` 워크플로우로 unit test 필수 게이트 연결.
 - 진행중:
   - 로그인 UI 문구/알림의 도메인별 상세 키 세분화(현재는 공통 키 중심).
-  - futures API 응답 스키마(analysis/history) 명시 문서화 및 계약 테스트 추가.
+  - futures API 에러 코드 체계(`*_http_*`, `*_network`, `*_timeout`)와 UI 매핑표 운영문서화.
 
 ## Phase 2 (Short-term, 3-5 days)
 - 인증 UI/상태 로직을 모듈화:

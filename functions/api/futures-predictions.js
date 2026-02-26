@@ -112,6 +112,18 @@ function parseDocument(doc) {
   return out;
 }
 
+function toPredictionHistoryItems(documents) {
+  const docs = Array.isArray(documents) ? documents : [];
+  return docs.map(parseDocument).map((d) => ({
+    target_date: d.target_date || "",
+    prediction_label: d.prediction_label || "-",
+    actual_label: d.actual_label || "-",
+    status: d.status || "predicted",
+    is_hit: typeof d.is_hit === "boolean" ? d.is_hit : null,
+    probability_up: typeof d.probability_up === "number" ? d.probability_up : null,
+  }));
+}
+
 function getServiceAccount(env) {
   const raw =
     env?.FIREBASE_SERVICE_ACCOUNT_JSON ||
@@ -163,15 +175,7 @@ export async function onRequest(context) {
     });
     if (!res.ok) throw new Error(`firestore_http_${res.status}`);
     const data = await res.json();
-    const docs = Array.isArray(data.documents) ? data.documents : [];
-    const rows = docs.map(parseDocument).map((d) => ({
-      target_date: d.target_date || "",
-      prediction_label: d.prediction_label || "-",
-      actual_label: d.actual_label || "-",
-      status: d.status || "predicted",
-      is_hit: typeof d.is_hit === "boolean" ? d.is_hit : null,
-      probability_up: typeof d.probability_up === "number" ? d.probability_up : null,
-    }));
+    const rows = toPredictionHistoryItems(data.documents);
 
     return addCORSHeaders(
       new Response(JSON.stringify({ items: rows }), {
@@ -188,3 +192,5 @@ export async function onRequest(context) {
     );
   }
 }
+
+export { toPredictionHistoryItems };
