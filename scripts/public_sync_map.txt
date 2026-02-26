@@ -27,6 +27,10 @@ src/domains/board/edit/application/edit-post-use-cases.js|public/board/edit/appl
 src/domains/board/edit/main.js|public/board/edit/main.js
 src/domains/news/application/news-client.js|public/news/news-client.js
 src/domains/news/application/news-pagination.js|public/news/news-pagination.js
+src/domains/news/application/news-routing.js|public/news/news-routing.js
+src/domains/news/application/news-index-page.js|public/news/news-index-page.js
+src/domains/news/application/news-article-page.js|public/news/news-article-page.js
+src/domains/news/application/news-admin-actions.js|public/news/news-admin-actions.js
 src/domains/news/ui/style.css|public/news/ui/style.css
 src/domains/news/ui/style.css|public/en/news/ui/style.css
 src/domains/animal-face/main.js|public/animal-face/main.js
