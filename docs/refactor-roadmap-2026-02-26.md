@@ -92,6 +92,9 @@
   - futures 에러코드별 사용자 메시지 세분화:
     - `src/domains/futures-estimate/application/error-messages.js`
     - `main.js`에서 에러코드 -> 메시지키 매핑 후 UI 렌더로 전달
+  - futures 페이지 위젯 심볼 라벨 i18n 키화:
+    - `src/domains/futures-estimate/index.html`의 6개 심볼 타이틀을 `data-i18n`으로 전환
+    - `src/shared/assets/translations.js`에 ko/en 심볼 라벨 키 추가
   - 헤더 인증 메뉴 UID 노출 제거.
   - `smoke_auth_release.sh`를 분리 구조 기준으로 안정화(pipefail-safe).
   - 배포 후 `smoke_auth_release.sh` 자동 실행 워크플로우 연결.
@@ -103,7 +106,7 @@
   - CI `Unit Tests` 워크플로우로 unit test 필수 게이트 연결.
 - 진행중:
   - 로그인 UI 문구/알림의 도메인별 상세 키 세분화(현재는 공통 키 중심).
-  - futures 페이지 테이블/위젯 레이블의 완전 i18n 키화(현재 일부 심볼 라벨은 고정 텍스트).
+  - futures API 성공 응답의 `signal` 값(en/ko 혼합 가능)을 locale별 표시 텍스트로 정규화.
 
 ## Phase 2 (Short-term, 3-5 days)
 - 인증 UI/상태 로직을 모듈화:
