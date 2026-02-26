@@ -68,6 +68,7 @@
     - `tests/unit/futures-impact-summary.test.js`
     - `tests/unit/app-shell-runtime.test.js`
     - `tests/unit/auth-session-runtime.test.js`
+    - `tests/unit/auth-prompt-kit.test.js`
   - `app-shell-runtime` 분리:
     - `src/shared/assets/app-shell-runtime.js`
     - `common.js`에서 i18n/테마/드롭다운 초기화 책임 분리
@@ -92,7 +93,6 @@
   - CI `Unit Tests` 워크플로우로 unit test 필수 게이트 연결.
 - 진행중:
   - 로그인 UI 문구/알림의 도메인별 상세 키 세분화(현재는 공통 키 중심).
-  - `auth-prompt-kit` 단위 테스트 추가(현재 통합 동작 검증 중심).
   - futures API 에러 코드/재시도 정책 분리(현재 UI 단순 처리).
 
 ## Phase 2 (Short-term, 3-5 days)
