@@ -26,7 +26,7 @@ function showError(error) {
       alert(t("post_required_fields", "모든 필드를 입력해주세요."));
       return;
     case "AUTH_REQUIRED":
-      alert(t("auth_required", "로그인이 필요합니다."));
+      alert(t("board_edit_auth_required", "게시글 수정은 로그인 후 이용할 수 있습니다."));
       return;
     case "NOT_AUTHORIZED":
       alert(t("post_not_authorized", "수정 권한이 없습니다."));

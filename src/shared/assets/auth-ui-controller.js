@@ -50,7 +50,7 @@
 
     function showAuthMenu() {
       if (!authControlsController) {
-        alert(t("auth_required", "로그인이 필요합니다."));
+        alert(t("auth_controls_unavailable", "로그인 UI를 불러오지 못했습니다. 잠시 후 다시 시도해주세요."));
         return;
       }
       authControlsController.showAuthMenu();
@@ -58,7 +58,7 @@
 
     function openAuthPrompt() {
       if (!authControlsController) {
-        alert(t("auth_required", "로그인이 필요합니다."));
+        alert(t("auth_controls_unavailable", "로그인 UI를 불러오지 못했습니다. 잠시 후 다시 시도해주세요."));
         return;
       }
       authControlsController.openAuthPrompt();

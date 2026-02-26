@@ -20,7 +20,7 @@ function showError(error) {
       alert(t("post_required_fields", "모든 필드를 입력해주세요."));
       return;
     case "AUTH_REQUIRED":
-      alert(t("auth_required", "로그인이 필요합니다."));
+      alert(t("board_write_auth_required", "게시글 작성은 로그인 후 이용할 수 있습니다."));
       return;
     default:
       alert(t("post_create_failed", "게시물 등록에 실패했습니다. 잠시 후 다시 시도해주세요."));
