@@ -15,19 +15,33 @@
 
 참고: 폴더는 DDD 형태를 따르지만, 모든 도메인이 레이어 분리를 100% 달성한 상태는 아님.
 
-account 도메인(2026-02-26 기준):
+### [News 도메인] (2026-02-26 최신 표준)
+- `src/domains/news/domain/newsArticle.js`: 순수 도메인 로직 (마크다운, 필드 분석)
+- `src/domains/news/application/news-presenter.js`: 데이터 매핑 및 변환 (Presenter 패턴)
+- `src/domains/news/application/news-*-page.js`: 페이지별 유스케이스 및 오케스트레이션
+- `src/domains/news/infra/newsRepository.js`: Firestore 접근 로직
+- `src/domains/news/ui/newsRenderer.js`: DOM 렌더링 전용
+- **특이사항**: 모든 모듈 import는 상대 경로(`./`, `../`)를 사용하여 단위 테스트 호환성 확보.
+
+### [Games 도메인] (2026-02-26 기준)
+- `src/domains/games/ai-evolution/application/ai-evolution-game.js`: 게임 로직 및 상태 관리
+- `src/domains/games/ai-evolution/infra/firebase-runtime.js`: Firebase 점수 기록 등 연동
+- `src/domains/games/tetris/application/tetris-game.js`: 테트리스 핵심 로직
+- `src/domains/games/tetris/infra/firebase-runtime.js`: Firebase 연동
+
+### [Account 도메인] (2026-02-26 기준)
 - `src/domains/account/domain/nickname.js`: 닉네임 정규화/검증/쿨다운 값 객체 로직
 - `src/domains/account/application/account-view-model.js`: 표시/검증/뷰모델 계산 로직
 - `src/domains/account/ui/account-renderer.js`: 게스트/계정 화면 렌더링 및 상태 메시지 유틸
 - `src/domains/account/main.js`: 인증 상태 구독 + 액션 바인딩 오케스트레이션
 
-board/write 도메인(2026-02-26 기준):
+### [Board/Write 도메인] (2026-02-26 기준)
 - `src/domains/board/write/application/write-auth.js`: 인증 상태 확인/현재 사용자 접근 유틸
 - `src/domains/board/write/application/submit-post-use-case.js`: 게시글 제출 유스케이스(인증 포함)
 - `src/domains/board/write/ui/write-access-renderer.js`: 비로그인 상태 렌더링 및 로그인 유도 UI
 - `src/domains/board/write/main.js`: 게시글 제출 + 상태 이벤트 오케스트레이션
 
-futures-estimate 도메인(2026-02-26 기준):
+### [Futures-estimate 도메인] (2026-02-26 기준)
 - `src/domains/futures-estimate/main.js`: 위젯/분석/히스토리 로딩 오케스트레이션
 - `src/domains/futures-estimate/infra/futures-api-client.js`: API 호출 경계(`/api/tv-scan`, `/api/futures-predictions`)
 - `src/domains/futures-estimate/infra/futures-retry-policy.js`: API 재시도/타임아웃 정책 분리
@@ -38,7 +52,13 @@ futures-estimate 도메인(2026-02-26 기준):
 - `src/domains/futures-estimate/ui/futures-page.js`: 위젯 초기화/DOM 렌더링
 - `src/domains/futures-estimate/ui/style.css`: 페이지 스타일 분리
 
-공통 인증 경계(2026-02-26 기준):
+### [Legacy/Small 도메인] (2026-02-26 기준)
+- **Fortune**: `application/` (copy, markdown)과 `ui/`로 나뉘어 있으나, `main.js`에서 직접 API 호출. `infra/` 계층 부재.
+- **Animal-face**: `application/` 로직은 분리되어 있으나, `Teachable Machine` 연동 로직이 `main.js`에 포함됨.
+- **Search**: `application/search-data.js`로 데이터 파싱 분리. 나머지는 루트에 집중.
+- **Inquiry/Contact/Privacy-policy**: 레이어 분리 없이 단일 `index.html`, `style.css` 구조 유지 중.
+
+### [공통 인증 경계] (2026-02-26 기준)
 - `src/shared/assets/common.js`의 `window.AuthGateway`를 통해 인증 의존을 단일 인터페이스로 노출
   - `waitForReady()`
   - `getCurrentUser()`
@@ -65,10 +85,6 @@ futures-estimate 도메인(2026-02-26 기준):
 2. 사이트 빌드: `src/shared/infra/builder.py::generate_public_site()`
 3. HTML 후처리: `src/shared/infra/html_processor.py`
 4. 공통 head/header/footer 주입 + 빌드 스탬프 기록
-
-실행:
-- `npm run build` -> `venv/bin/python main.py --build-only`
-- `npm run build:full` -> 뉴스 생성 + 빌드
 
 ## 4) Key Migration History (important moves)
 - `src/shared/infra/common.js` -> `src/shared/assets/common.js`

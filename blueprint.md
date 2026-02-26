@@ -48,41 +48,44 @@ Tracking SA를 프레임워크 의존 없이 안정적으로 운영 가능한 DD
   - AI 처리 중 로딩 시각 효과 강화
 
 ### 2026-02-26
+- 뉴스 도메인 DDD 완성 (By Gemini CLI):
+  - `NewsPresenter` 도입으로 데이터 매핑 로직 완벽 분리 및 `tests/unit/news-presenter.test.js` 검증.
+  - 모든 모듈 import 경로를 상대 경로로 전환하여 단위 테스트 환경과 브라우저 런타임 호환성 확보.
+  - 빌드 스크립트(`builder.py`) 수정: 뉴스 `application/` 디렉토리 전체 배포 구조 반영.
+- 게임 도메인 DDD 분리 완료:
+  - 테트리스, AI Evolution 게임 로직을 `application/`, `infra/` 레이어로 물리적 분리 완료.
 - GitHub Actions 역할 고정:
-  - `daily-news-post.yml`을 예약/수동 뉴스 생성 전용으로 단순화
-  - push 트리거 및 `--build-only` 분기 제거
+  - `daily-news-post.yml`을 예약/수동 뉴스 생성 전용으로 단순화 (push 트리거 제거).
 - 뉴스 에이전트 안정화:
-  - Gemini 호출 재시도(backoff) 추가
-  - 기획(JSON) 파싱 실패 시 재시도 + fallback plan
-  - 모델/토큰/재시도 파라미터 환경변수화
-  - `processed_articles.log` 회전 정책 추가
+  - Gemini 호출 재시도(backoff) 및 기획(JSON) 파싱 실패 시 fallback plan 추가.
+  - `processed_articles.log` 회전 정책 및 파라미터 환경변수화.
 - 뉴스 본문 해시태그 렌더링 개선:
-  - `##HASHTAGS##`를 제목이 아닌 작은 chip 컴포넌트로 렌더링
+  - `##HASHTAGS##`를 작은 chip 컴포넌트로 렌더링하도록 UI 개선.
 - 검색 기능 안정화 2차:
-  - Firestore unavailable 시 즉시 뉴스 인덱스 fallback
-  - DOMParser 실패 대비 HTML 정규식 파서 fallback
-  - 메인 검색바/검색결과 페이지 양쪽 동기 반영
+  - Firestore unavailable 시 뉴스 인덱스 즉시 fallback.
+  - DOMParser 실패 대비 HTML 정규식 파서 fallback 구현.
+  - 메인 검색바 및 결과 페이지 동기화 반영.
 - 모바일 게임 UX 개선:
-  - 테트리스: 헤더/하단 safe-area 고려 레이아웃 및 버튼 가림 방지
-  - AI Evolution 2048: 단일 `index.html` 내 상단 네비게이션 내장 및 게임 영역 오프셋 적용
+  - 테트리스: 헤더/하단 safe-area 고려 레이아웃(`100dvh`) 및 버튼 가림 방지.
+  - 2048: 단일 `index.html` 내 상단 네비게이션 내장 및 오프셋 적용.
 
 ## 🧭 Architecture Reality Check
-- `src/domains` 구조는 자리잡았지만, 도메인별 `domain/application/infra/ui` 레이어 분리는 아직 불균일
-- 일부 페이지는 UI/데이터 접근/상태 로직이 단일 파일에 결합되어 있음
-- 운영상 요구(SEO/색인/배포 속도)로 인해 일부 게임 페이지는 의도적으로 “단일 HTML 집중형” 유지
+- `news`, `games`, `account`, `futures-estimate` 도메인은 성숙한 4계층 DDD 구조를 갖춤.
+- `board` 도메인은 기능별 하위 폴더(`write`, `edit`) 구조를 유지하고 있어, 레이어 통합(Flattening)이 필요한 상태.
+- `fortune`, `animal-face` 등 레거시 도메인은 여전히 `main.js`에 인프라 로직이 결합되어 있음.
+- 공유 자산(`common.js`)의 책임 분리가 지속적으로 진행 중.
 
 ## 🔭 Current Focus
-- [ ] 보드(`board`) 도메인 레이어 분리 파일 설계(파일 이동 최소화 방식)
-- [ ] Firestore 규칙 정리(검색/뉴스 읽기 안정성 기준으로 최소 권한 재설계)
-- [ ] 뉴스 생성 프롬프트 품질 관리(제목 품질, 중복 스타일, 과한 해시태그 억제)
-- [x] 뉴스 상세 목록 복귀 버튼 반영
-- [x] 검색 fallback 다중화 반영
-- [x] 뉴스 에이전트 재시도/로그 회전 반영
-- [x] 테트리스 모바일 safe-area 대응
-- [x] 2048 단일파일 네비게이션 반영
+- [ ] 보드(`board`) 도메인 레이어 평탄화 및 통합(하위 폴더 제거 및 루트 레이어 집중)
+- [ ] 배포 안정성 강화: 릴리즈 스모크 테스트(`docs/release-smoke-ops.md`) 자동화 및 시나리오 보강
+- [ ] 레거시 도메인(`fortune`, `animal-face`) API 호출 로직 `infra` 계층으로 분리
+- [ ] Firestore 규칙 최소 권한 재설계 및 검색/뉴스 읽기 안정성 기준 재검토
+- [ ] 뉴스 생성 프롬프트 품질 관리(제목 품질, 중복 스타일 억제)
 
 ## ⚠️ Lessons Learned
-- `public/` 커밋 여부는 배포 반영 여부와 직결된다 (현 운영모드 기준)
-- 검색은 Firestore 단일 의존으로 두면 장애 시 UX가 즉시 붕괴하므로 index fallback이 필수다
-- 모바일 게임은 `100vh`보다 `100dvh` + safe-area 보정이 실효성이 높다
-- 뉴스 본문 마크다운 규칙(`##`)은 SEO/가독성에 직접 영향이 있으므로 포맷 태그를 별도 렌더링 규칙으로 분리해야 한다
+- `public/` 커밋 여부는 배포 반영 여부와 직결된다 (현 운영모드 기준).
+- 검색은 Firestore 단일 의존 시 장애 파급력이 크므로 index fallback이 필수다.
+- 모바일 게임은 `100vh`보다 `100dvh` + safe-area 보정이 실효성이 높다.
+- 모듈 import 경로를 상대 경로로 유지해야 브라우저와 Node.js 테스트 환경 양쪽에서 호환된다.
+- 도메인 하위의 과도한 폴더 분할보다는 레이어 중심의 평탄한 구조가 유지보수에 유리하다.
+- 리팩토링 시 빌드 스크립트(`builder.py`)의 복사 규칙 최신화는 필수다.

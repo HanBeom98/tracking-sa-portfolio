@@ -174,3 +174,27 @@
   - `npm run test:unit` 통과.
   - `npm run sync:public`, `npm run check:public-sync` 통과.
   - `npm run test:smoke:release` 통과.
+
+### refactor(news): extract presenter and standardize DDD module imports (2026-02-26)
+- 문제/증상:
+  - 뉴스 도메인의 데이터 변환 로직이 UI 핸들러와 섞여 있어 재사용 및 테스트가 어려움.
+  - 모듈의 절대 경로(`/news/...`) 사용으로 인해 Node.js 기반 단위 테스트 환경에서 모듈을 찾지 못하는 문제 발생.
+  - 빌드 시 뉴스 `application` 디렉토리의 일부 파일만 복사되어 의존성 누락 위험이 있음.
+- 변경:
+  - `src/domains/news/application/news-presenter.js` 신규 생성:
+    - `mapNewsDocToCard`, `mapNewsDocToArticle`로 데이터 매핑 로직 추출.
+  - 모듈 경로 표준화:
+    - 뉴스 도메인 내 모든 JS 파일을 상대 경로(`../`, `./`)로 수정하여 테스트 호환성 확보.
+  - 뉴스 페이지 리팩토링:
+    - `news-index-page.js`, `news-article-page.js`가 프레젠터를 사용하도록 개선.
+  - 빌드 시스템 보강:
+    - `src/shared/infra/builder.py`에서 뉴스 `application` 디렉토리 전체를 복사하도록 수정.
+    - `news_builder.py` 및 `index.html`에서 스크립트 참조 경로 최신화.
+  - 테스트:
+    - `tests/unit/news-presenter.test.js` 추가 및 검증 완료.
+- 영향 범위:
+  - 뉴스 목록/상세 페이지 렌더링, 뉴스 도메인 빌드 프로세스, 단위 테스트 환경.
+- 검증:
+  - `npm run test:unit` 통과 (뉴스 프레젠터 테스트 포함).
+  - `python3 main.py --build-only` 빌드 성공 및 `public/` 구조 확인.
+  - `public/news/application/` 내 모든 의존성 파일 존재 확인.
