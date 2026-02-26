@@ -66,6 +66,10 @@
     - `tests/unit/board-write-auth.test.js`
     - `tests/unit/futures-prediction-labels.test.js`
     - `tests/unit/futures-impact-summary.test.js`
+    - `tests/unit/app-shell-runtime.test.js`
+  - `app-shell-runtime` 분리:
+    - `src/shared/assets/app-shell-runtime.js`
+    - `common.js`에서 i18n/테마/드롭다운 초기화 책임 분리
   - futures 도메인 1차 분리:
     - `src/domains/futures-estimate/main.js` (오케스트레이션)
     - `src/domains/futures-estimate/infra/futures-api-client.js`

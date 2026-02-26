@@ -1,170 +1,7 @@
 /**
- * Tracking SA Core Logic (Total Reset v1.0)
- * Handles: i18n, Theme Toggle, Layout Stability
+ * Tracking SA Core Runtime
+ * app shell/i18n setup is delegated to app-shell-runtime.js
  */
-
-let currentLang = localStorage.getItem('lang') || 'ko';
-const initialPath = window.location.pathname || "/";
-if (initialPath.startsWith('/en/')) {
-    currentLang = 'en';
-}
-localStorage.setItem('lang', currentLang);
-document.documentElement.setAttribute('lang', currentLang === 'en' ? 'en' : 'ko');
-
-/**
- * Standardized translation utility for all domains.
- * @param {string} key - Translation key
- * @param {string} defaultValue - Fallback text
- * @returns {string} Translated text
- */
-window.getTranslation = function(key, defaultValue = "") {
-    const dict = (window.translations && window.translations[currentLang]) || null;
-    if (dict && dict[key]) {
-        return dict[key];
-    }
-    return defaultValue || key;
-};
-
-window.applyTranslations = function(lang) {
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        const translated = window.getTranslation(key);
-        if (translated !== key) {
-            el.innerHTML = translated;
-        }
-    });
-};
-
-window.setLanguage = function(lang) {
-    localStorage.setItem('lang', lang);
-    currentLang = lang;
-    document.documentElement.setAttribute('lang', lang === 'en' ? 'en' : 'ko');
-    const path = window.location.pathname || "/";
-
-    const isNewsIndex = path === "/news" || path === "/news/" || path === "/news/index.html";
-    const isNewsArticle = /^\/\d{4}-\d{2}-\d{2}-.+\.html$/.test(path) || /^\/news-\d{10}-\d+\.html$/.test(path);
-    const isEnglishPath = path.startsWith("/en/");
-
-    if (lang === "en") {
-        if (isEnglishPath) {
-            location.reload();
-            return;
-        }
-        if (isNewsIndex) {
-            location.href = "/en/news/";
-            return;
-        }
-        if (isNewsArticle) {
-            location.href = "/en" + path;
-            return;
-        }
-    }
-
-    if (lang === "ko") {
-        if (isEnglishPath) {
-            location.href = path.replace(/^\/en\//, "/");
-            return;
-        }
-    }
-
-    location.reload();
-};
-
-function initTheme() {
-    const body = document.body;
-    const themeBtn = document.getElementById('color-change');
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    
-    if (savedTheme === 'dark') {
-        body.classList.add('dark-mode');
-        if (themeBtn) themeBtn.innerText = '🌙';
-    } else {
-        body.classList.remove('dark-mode');
-        if (themeBtn) themeBtn.innerText = '☀️';
-    }
-
-    if (themeBtn) {
-        themeBtn.onclick = () => {
-            const isDark = body.classList.toggle('dark-mode');
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            themeBtn.innerText = isDark ? '🌙' : '☀️';
-        };
-    }
-}
-
-function initLanguageSwitcher() {
-    const container = document.getElementById('language-switcher');
-    if (container) {
-        container.innerHTML = `
-            <button class="lang-button ${currentLang==='ko'?'active':''}" onclick="setLanguage('ko')">KOR</button>
-            <button class="lang-button ${currentLang==='en'?'active':''}" onclick="setLanguage('en')">ENG</button>
-        `;
-    }
-}
-
-function updateNewsLinksForLang() {
-    const links = document.querySelectorAll('a[href="/news/"], a[href="/news"]');
-    const target = currentLang === 'en' ? '/en/news/' : '/news/';
-    links.forEach(link => link.setAttribute('href', target));
-}
-
-function initDropdownMenus() {
-    const dropdowns = Array.from(document.querySelectorAll('header .dropdown'));
-    if (!dropdowns.length) return;
-
-    const closeAll = () => dropdowns.forEach(d => d.classList.remove('open'));
-
-    dropdowns.forEach((dropdown) => {
-        const btn = dropdown.querySelector('.dropbtn');
-        const menu = dropdown.querySelector('.dropdown-content');
-        let closeTimer = null;
-
-        const open = () => {
-            if (closeTimer) clearTimeout(closeTimer);
-            dropdowns.forEach((d) => {
-                if (d !== dropdown) d.classList.remove('open');
-            });
-            dropdown.classList.add('open');
-        };
-
-        const scheduleClose = (event) => {
-            if (event && event.relatedTarget && dropdown.contains(event.relatedTarget)) {
-                return;
-            }
-            if (closeTimer) clearTimeout(closeTimer);
-            closeTimer = setTimeout(() => {
-                dropdown.classList.remove('open');
-            }, 420);
-        };
-
-        dropdown.addEventListener('mouseenter', open);
-        dropdown.addEventListener('mouseleave', scheduleClose);
-        dropdown.addEventListener('focusin', open);
-        dropdown.addEventListener('focusout', (e) => {
-            if (!dropdown.contains(e.relatedTarget)) scheduleClose();
-        });
-
-        if (btn) {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                const wasOpen = dropdown.classList.contains('open');
-                closeAll();
-                if (!wasOpen) dropdown.classList.add('open');
-            });
-        }
-
-        if (menu) {
-            menu.addEventListener('mouseenter', open);
-            menu.addEventListener('mouseleave', scheduleClose);
-        }
-    });
-
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('header .dropdown')) {
-            closeAll();
-        }
-    });
-}
 
 let authUser = null;
 let authProfile = null;
@@ -173,6 +10,7 @@ let authUiController = null;
 let authPromptKit = null;
 let inlineModalController = null;
 let authStateBus = null;
+let appShellRuntime = null;
 window.authStateReady = new Promise((resolve) => {
     authReadyResolve = resolve;
 });
@@ -280,6 +118,38 @@ async function getAuthService() {
         if (service) return service;
     }
     return null;
+}
+
+async function loadAppShellRuntimeFactory() {
+    if (typeof window.createAppShellRuntime === "function") {
+        return window.createAppShellRuntime;
+    }
+    await new Promise((resolve, reject) => {
+        const existing = document.querySelector('script[data-app-shell-runtime="true"]');
+        if (existing) {
+            existing.addEventListener("load", resolve, { once: true });
+            existing.addEventListener("error", reject, { once: true });
+            return;
+        }
+        const script = document.createElement("script");
+        script.src = "/app-shell-runtime.js";
+        script.async = true;
+        script.dataset.appShellRuntime = "true";
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+    return window.createAppShellRuntime;
+}
+
+async function ensureAppShellRuntime() {
+    if (appShellRuntime) return appShellRuntime;
+    const factory = await loadAppShellRuntimeFactory();
+    if (typeof factory !== "function") {
+        throw new Error("App shell runtime factory is not available.");
+    }
+    appShellRuntime = factory();
+    return appShellRuntime;
 }
 
 async function loadInlineLoginModalFactory() {
@@ -572,11 +442,8 @@ window.AuthGateway = {
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
-    window.applyTranslations(currentLang);
-    initTheme();
-    initLanguageSwitcher();
-    updateNewsLinksForLang();
-    initDropdownMenus();
+    const shell = await ensureAppShellRuntime();
+    shell.initShell();
     await ensureAuthStateBus();
     await ensureAuthPromptKit();
     await initAuthControls();

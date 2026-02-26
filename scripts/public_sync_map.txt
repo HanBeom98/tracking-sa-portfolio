@@ -1,4 +1,5 @@
 src/shared/assets/common.js|public/common.js
+src/shared/assets/app-shell-runtime.js|public/app-shell-runtime.js
 src/shared/assets/style.css|public/style.css
 src/shared/assets/translations.js|public/translations.js
 src/shared/assets/firebase-config.js|public/firebase-config.js
