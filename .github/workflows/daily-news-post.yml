@@ -69,8 +69,10 @@ jobs:
           git push
           echo "committed=true" >> "$GITHUB_OUTPUT"
 
-      - name: Trigger Cloudflare Pages Deploy Hook
-        if: steps.commit_news.outputs.committed == 'true' && secrets.CLOUDFLARE_PAGES_DEPLOY_HOOK != ''
-        run: |
-          set -euo pipefail
-          curl -fsS -X POST "${{ secrets.CLOUDFLARE_PAGES_DEPLOY_HOOK }}"
+      - name: Deploy to Cloudflare Pages (Direct Upload)
+        if: steps.commit_news.outputs.committed == 'true'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy public --project-name=tracking-sa --branch=main
