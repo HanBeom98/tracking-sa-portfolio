@@ -45,6 +45,11 @@
   - `auth-ui-controller` 분리:
     - `src/shared/assets/auth-ui-controller.js`
     - `common.js`는 인증 UI 오케스트레이션 호출만 담당
+  - 인증/게시판 주요 알림 메시지를 번역 키로 공통화:
+    - `auth_required/auth_service_unavailable/auth_ui_load_failed`
+    - `post_required_fields/post_create_success/post_create_failed`
+    - `post_edit_success/post_edit_failed/post_not_authorized`
+    - `board_write_login_required`
   - 헤더 인증 메뉴 UID 노출 제거.
   - `smoke_auth_release.sh`를 분리 구조 기준으로 안정화(pipefail-safe).
   - 배포 후 `smoke_auth_release.sh` 자동 실행 워크플로우 연결.
@@ -55,7 +60,7 @@
     - `tests/unit/board-edit-post-use-cases.test.js`
   - CI `Unit Tests` 워크플로우로 unit test 필수 게이트 연결.
 - 진행중:
-  - 인증 관련 번역 키/메시지 공통 딕셔너리 정리.
+  - `auth-state-bus` 단위 테스트 추가(현재 런타임 검증 중심).
 
 ## Phase 2 (Short-term, 3-5 days)
 - 인증 UI/상태 로직을 모듈화:

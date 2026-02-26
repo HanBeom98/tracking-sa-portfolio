@@ -303,7 +303,7 @@ async function initAuthControls() {
 
 window.showAuthMenu = () => {
     if (!authUiController) {
-        alert("로그인이 필요합니다.");
+        alert(window.getTranslation("auth_required", "로그인이 필요합니다."));
         return;
     }
     authUiController.showAuthMenu();
@@ -311,7 +311,7 @@ window.showAuthMenu = () => {
 
 window.openAuthPrompt = () => {
     if (!authUiController) {
-        alert("로그인이 필요합니다.");
+        alert(window.getTranslation("auth_required", "로그인이 필요합니다."));
         return;
     }
     authUiController.openAuthPrompt();
@@ -328,7 +328,7 @@ window.openInlineLoginModal = async ({ redirectTo = "/" } = {}) => {
         await controller.open({ redirectTo });
     } catch (error) {
         console.error("Inline login modal open failed:", error);
-        alert("로그인 기능을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
+        alert(window.getTranslation("auth_ui_load_failed", "로그인 기능을 불러오지 못했습니다. 잠시 후 다시 시도해주세요."));
     }
 };
 
@@ -345,7 +345,7 @@ window.promptLogin = ({ redirectTo = "/" } = {}) => {
 window.createLoginRequiredPrompt = ({
     promptId = "",
     wrapperClass = "",
-    messageKey = "",
+    messageKey = "auth_required",
     messageText = "로그인이 필요합니다.",
     buttonId = "",
     redirectTo = "/",

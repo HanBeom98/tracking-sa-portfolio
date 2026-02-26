@@ -10,17 +10,20 @@ const postService = buildPostService({
 const submitPost = createSubmitPostUseCase({ postService, getCurrentUser });
 
 const BOARD_PATH = "/board";
+const t = (key, fallback) => (
+  window.getTranslation ? window.getTranslation(key, fallback) : fallback
+);
 
 function showError(error) {
   switch (error.code) {
     case "REQUIRED_FIELDS":
-      alert("모든 필드를 입력해주세요.");
+      alert(t("post_required_fields", "모든 필드를 입력해주세요."));
       return;
     case "AUTH_REQUIRED":
-      alert("로그인이 필요합니다.");
+      alert(t("auth_required", "로그인이 필요합니다."));
       return;
     default:
-      alert("게시물 등록에 실패했습니다. 잠시 후 다시 시도해주세요.");
+      alert(t("post_create_failed", "게시물 등록에 실패했습니다. 잠시 후 다시 시도해주세요."));
   }
 }
 
@@ -29,7 +32,7 @@ function bindWriteSubmit(writeForm, section) {
     writeForm.setSubmitting(true);
     try {
       await submitPost({ values });
-      alert("게시물이 성공적으로 등록되었습니다.");
+      alert(t("post_create_success", "게시물이 성공적으로 등록되었습니다."));
       window.location.href = BOARD_PATH;
     } catch (error) {
       if (error && error.code === "AUTH_REQUIRED") {
