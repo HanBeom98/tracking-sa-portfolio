@@ -171,7 +171,7 @@ let authProfile = null;
 let authReadyResolve = null;
 let authUiController = null;
 let inlineModalController = null;
-const authStateListeners = new Set();
+let authStateBus = null;
 window.authStateReady = new Promise((resolve) => {
     authReadyResolve = resolve;
 });
@@ -183,29 +183,92 @@ function resolveAuthReady(user) {
     }
 }
 
+function createFallbackAuthStateBus() {
+    const listeners = new Set();
+    return {
+        subscribe(listener) {
+            if (typeof listener !== "function") return () => {};
+            listeners.add(listener);
+            return () => {
+                listeners.delete(listener);
+            };
+        },
+        publish(state = {}) {
+            listeners.forEach((listener) => {
+                try {
+                    listener(state);
+                } catch (error) {
+                    console.error("AuthStateBus listener failed:", error);
+                }
+            });
+        },
+        getSnapshot() {
+            return { user: authUser, profile: authProfile };
+        },
+    };
+}
+
+async function loadAuthStateBusFactory() {
+    if (typeof window.createAuthStateBus === "function") {
+        return window.createAuthStateBus;
+    }
+    await new Promise((resolve, reject) => {
+        const existing = document.querySelector('script[data-auth-state-bus="true"]');
+        if (existing) {
+            existing.addEventListener("load", resolve, { once: true });
+            existing.addEventListener("error", reject, { once: true });
+            return;
+        }
+        const script = document.createElement("script");
+        script.src = "/auth-state-bus.js";
+        script.async = true;
+        script.dataset.authStateBus = "true";
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+    return window.createAuthStateBus;
+}
+
+async function ensureAuthStateBus() {
+    if (authStateBus) return authStateBus;
+    try {
+        const factory = await loadAuthStateBusFactory();
+        if (typeof factory === "function") {
+            authStateBus = factory({
+                onListenerError(error) {
+                    console.error("AuthStateBus listener failed:", error);
+                },
+            });
+        }
+    } catch (error) {
+        console.error("AuthStateBus factory load failed:", error);
+    }
+    if (!authStateBus) {
+        authStateBus = createFallbackAuthStateBus();
+    }
+    return authStateBus;
+}
+
 function publishAuthStateChange(user, profile) {
+    if (authStateBus && typeof authStateBus.publish === "function") {
+        authStateBus.publish({ user, profile });
+    }
     window.dispatchEvent(new CustomEvent("auth-state-changed", {
         detail: { user, profile }
     }));
-    authStateListeners.forEach((listener) => {
-        try {
-            listener({ user, profile });
-        } catch (error) {
-            console.error("AuthStateBus listener failed:", error);
-        }
-    });
 }
 
 window.AuthStateBus = {
     subscribe(listener) {
-        if (typeof listener !== "function") return () => {};
-        authStateListeners.add(listener);
-        return () => {
-            authStateListeners.delete(listener);
-        };
+        if (!authStateBus || typeof authStateBus.subscribe !== "function") return () => {};
+        return authStateBus.subscribe(listener);
     },
     getSnapshot() {
-        return { user: authUser, profile: authProfile };
+        if (!authStateBus || typeof authStateBus.getSnapshot !== "function") {
+            return { user: authUser, profile: authProfile };
+        }
+        return authStateBus.getSnapshot();
     },
 };
 
@@ -450,6 +513,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initLanguageSwitcher();
     updateNewsLinksForLang();
     initDropdownMenus();
+    await ensureAuthStateBus();
     await initAuthControls();
     initAuthGateLinks();
     initAuth();

@@ -3,6 +3,7 @@ src/shared/assets/style.css|public/style.css
 src/shared/assets/translations.js|public/translations.js
 src/shared/assets/firebase-config.js|public/firebase-config.js
 src/shared/assets/auth-controls.js|public/auth-controls.js
+src/shared/assets/auth-state-bus.js|public/auth-state-bus.js
 src/shared/assets/auth-ui-controller.js|public/auth-ui-controller.js
 src/shared/assets/inline-login-modal.js|public/inline-login-modal.js
 src/domains/account/index.html|public/account/index.html
