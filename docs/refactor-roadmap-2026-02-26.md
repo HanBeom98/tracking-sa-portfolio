@@ -42,6 +42,9 @@
     - `edit/application/edit-post-use-cases.js`
   - `AuthStateBus` 도입으로 인증 상태 발행 경로 단일화(`common.js`).
   - `account`, `board/write` 인증 상태 구독을 `AuthStateBus` 우선으로 전환(이벤트 fallback 유지).
+  - `auth-ui-controller` 분리:
+    - `src/shared/assets/auth-ui-controller.js`
+    - `common.js`는 인증 UI 오케스트레이션 호출만 담당
   - 헤더 인증 메뉴 UID 노출 제거.
   - `smoke_auth_release.sh`를 분리 구조 기준으로 안정화(pipefail-safe).
   - 배포 후 `smoke_auth_release.sh` 자동 실행 워크플로우 연결.
@@ -52,7 +55,6 @@
     - `tests/unit/board-edit-post-use-cases.test.js`
   - CI `Unit Tests` 워크플로우로 unit test 필수 게이트 연결.
 - 진행중:
-  - `auth-ui-controller` 분리(`common.js`의 헤더 인증 버튼/드롭다운 오케스트레이션 분리).
   - 인증 관련 번역 키/메시지 공통 딕셔너리 정리.
 
 ## Phase 2 (Short-term, 3-5 days)

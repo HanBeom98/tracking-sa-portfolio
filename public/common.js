@@ -169,7 +169,7 @@ function initDropdownMenus() {
 let authUser = null;
 let authProfile = null;
 let authReadyResolve = null;
-let authControlsController = null;
+let authUiController = null;
 let inlineModalController = null;
 const authStateListeners = new Set();
 window.authStateReady = new Promise((resolve) => {
@@ -240,26 +240,26 @@ async function loadInlineLoginModalFactory() {
     return window.createInlineLoginModalController;
 }
 
-async function loadAuthControlsFactory() {
-    if (typeof window.createAuthControlsController === "function") {
-        return window.createAuthControlsController;
+async function loadAuthUiControllerFactory() {
+    if (typeof window.createAuthUiController === "function") {
+        return window.createAuthUiController;
     }
     await new Promise((resolve, reject) => {
-        const existing = document.querySelector('script[data-auth-controls="true"]');
+        const existing = document.querySelector('script[data-auth-ui-controller="true"]');
         if (existing) {
             existing.addEventListener("load", resolve, { once: true });
             existing.addEventListener("error", reject, { once: true });
             return;
         }
         const script = document.createElement("script");
-        script.src = "/auth-controls.js";
+        script.src = "/auth-ui-controller.js";
         script.async = true;
-        script.dataset.authControls = "true";
+        script.dataset.authUiController = "true";
         script.onload = resolve;
         script.onerror = reject;
         document.head.appendChild(script);
     });
-    return window.createAuthControlsController;
+    return window.createAuthUiController;
 }
 
 async function ensureInlineLoginModalController() {
@@ -272,32 +272,14 @@ async function ensureInlineLoginModalController() {
     return inlineModalController;
 }
 
-async function signInWithProvider(providerId) {
-    const authService = await getAuthService();
-    if (!authService) {
-        alert("로그인 기능이 아직 준비되지 않았습니다.");
-        return;
-    }
-    try {
-        await authService.signInWithProvider(providerId);
-    } catch (error) {
-        console.error("로그인 실패:", error);
-        alert("로그인에 실패했습니다. 잠시 후 다시 시도해주세요.");
-    }
-}
-
-async function initAuthControls() {
-    const container = document.getElementById('auth-controls');
-    if (!container) return;
-    const factory = await loadAuthControlsFactory();
+async function ensureAuthUiController() {
+    if (authUiController) return authUiController;
+    const factory = await loadAuthUiControllerFactory();
     if (typeof factory !== "function") {
-        console.error("Auth controls factory is not available.");
-        return;
+        throw new Error("Auth UI controller factory is not available.");
     }
-    authControlsController = factory({
-        container,
+    authUiController = factory({
         getAuthService,
-        signInWithProvider,
         getCurrentUser: () => authUser,
         onLogoutSuccess: () => {
             const path = window.location.pathname || "/";
@@ -307,28 +289,38 @@ async function initAuthControls() {
             }
         },
     });
-
-    window.showAuthMenu = () => {
-        if (!authControlsController) {
-            alert("로그인이 필요합니다.");
-            return;
-        }
-        authControlsController.showAuthMenu();
-    };
-
-    window.openAuthPrompt = () => {
-        if (!authControlsController) {
-            alert("로그인이 필요합니다.");
-            return;
-        }
-        authControlsController.openAuthPrompt();
-    };
-
-    window.updateAuthControls = (user) => {
-        if (!authControlsController) return;
-        authControlsController.setUser(user, authProfile);
-    };
+    return authUiController;
 }
+
+async function initAuthControls() {
+    try {
+        const controller = await ensureAuthUiController();
+        await controller.init();
+    } catch (error) {
+        console.error("Auth UI controller init failed:", error);
+    }
+}
+
+window.showAuthMenu = () => {
+    if (!authUiController) {
+        alert("로그인이 필요합니다.");
+        return;
+    }
+    authUiController.showAuthMenu();
+};
+
+window.openAuthPrompt = () => {
+    if (!authUiController) {
+        alert("로그인이 필요합니다.");
+        return;
+    }
+    authUiController.openAuthPrompt();
+};
+
+window.updateAuthControls = (user) => {
+    if (!authUiController) return;
+    authUiController.updateUser(user, authProfile);
+};
 
 window.openInlineLoginModal = async ({ redirectTo = "/" } = {}) => {
     try {

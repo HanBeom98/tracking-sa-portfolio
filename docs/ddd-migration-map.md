@@ -38,6 +38,8 @@ board/write 도메인(2026-02-26 기준):
   - `subscribe(listener)` (unsubscribe 함수 반환)
   - `getSnapshot()`
   - 기존 `auth-state-changed` DOM 이벤트는 하위 호환으로 유지
+- 헤더 인증 UI 오케스트레이션은 `src/shared/assets/auth-ui-controller.js`로 분리
+  - `common.js`는 인증 상태/게이트웨이/프롬프트 엔트리만 유지
 
 ## 3) Build and Injection Flow
 1. 엔트리포인트: `main.py`
