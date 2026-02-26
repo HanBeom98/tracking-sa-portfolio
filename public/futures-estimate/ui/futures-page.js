@@ -10,6 +10,10 @@ import {
   toDirectionTextWithTranslator,
   toPredictionResultTextWithTranslator,
 } from "../application/prediction-labels.js";
+import {
+  toIndicatorNameWithTranslator,
+  toImpactSignalTextWithTranslator,
+} from "../application/impact-table-presenter.js";
 
 function t(key, fallback) {
   return typeof window !== "undefined" && window.getTranslation
@@ -70,10 +74,10 @@ function renderImpactAnalysisSuccess(data) {
   const items = Array.isArray(data?.items) ? data.items : [];
   const rows = items.map((item) => `
     <tr style="border-bottom:1px solid #f1f5f9;">
-      <td style="padding:8px 6px;">${item.name}</td>
+      <td style="padding:8px 6px;">${toIndicatorNameWithTranslator(item.symbol, item.name, t)}</td>
       <td style="padding:8px 6px;">${formatNumber(item.close)}</td>
       <td style="padding:8px 6px;">${formatChangePercent(item.change)}</td>
-      <td style="padding:8px 6px;">${toDirectionTextWithTranslator(normalizeDirectionLabel(item.signal), t)}</td>
+      <td style="padding:8px 6px;">${toImpactSignalTextWithTranslator(item.signal, t)}</td>
     </tr>
   `).join("");
 

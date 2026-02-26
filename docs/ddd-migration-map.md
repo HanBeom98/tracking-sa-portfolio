@@ -33,6 +33,7 @@ futures-estimate 도메인(2026-02-26 기준):
 - `src/domains/futures-estimate/infra/futures-retry-policy.js`: API 재시도/타임아웃 정책 분리
 - `src/domains/futures-estimate/application/prediction-labels.js`: 임계값/라벨 표시 규칙
 - `src/domains/futures-estimate/application/impact-summary.js`: 수치/요약 문구 포맷터
+- `src/domains/futures-estimate/application/impact-table-presenter.js`: 영향표 지표명/시그널 locale 표시 매퍼
 - `src/domains/futures-estimate/application/error-messages.js`: 에러코드별 사용자 메시지 키 매핑
 - `src/domains/futures-estimate/ui/futures-page.js`: 위젯 초기화/DOM 렌더링
 - `src/domains/futures-estimate/ui/style.css`: 페이지 스타일 분리

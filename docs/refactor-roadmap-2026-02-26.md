@@ -95,6 +95,12 @@
   - futures 페이지 위젯 심볼 라벨 i18n 키화:
     - `src/domains/futures-estimate/index.html`의 6개 심볼 타이틀을 `data-i18n`으로 전환
     - `src/shared/assets/translations.js`에 ko/en 심볼 라벨 키 추가
+  - futures 영향표 locale 표시 정규화:
+    - `src/domains/futures-estimate/application/impact-table-presenter.js` 추가
+    - 지표명(`item.symbol`) -> locale 표시명 매핑
+    - 시그널(`item.signal`) ko/en 혼합 입력 -> canonical 분류 -> locale 문구 매핑
+  - unit test 추가:
+    - `tests/unit/futures-impact-table-presenter.test.js`
   - 헤더 인증 메뉴 UID 노출 제거.
   - `smoke_auth_release.sh`를 분리 구조 기준으로 안정화(pipefail-safe).
   - 배포 후 `smoke_auth_release.sh` 자동 실행 워크플로우 연결.
@@ -106,7 +112,7 @@
   - CI `Unit Tests` 워크플로우로 unit test 필수 게이트 연결.
 - 진행중:
   - 로그인 UI 문구/알림의 도메인별 상세 키 세분화(현재는 공통 키 중심).
-  - futures 영향표 지표명(`item.name`) locale 표시 체계 정리(현재는 데이터 소스 표기 우선).
+  - futures API 응답 스키마(analysis/history) 명시 문서화 및 계약 테스트 추가.
 
 ## Phase 2 (Short-term, 3-5 days)
 - 인증 UI/상태 로직을 모듈화:
