@@ -108,12 +108,20 @@ document.addEventListener('DOMContentLoaded', function () {
         try {
             const index = await loadSearchIndex();
             const q = searchTerm.toLowerCase();
-            const items = (index?.items?.[currentLang] || []).filter((item) => {
+            const primary = index?.items?.[currentLang] || [];
+            const fallbackLang = currentLang === 'en' ? 'ko' : 'en';
+            const secondary = index?.items?.[fallbackLang] || [];
+            const match = (item) => {
                 const title = (item.title || '').toLowerCase();
                 if (title.includes(q)) return true;
                 const keywords = Array.isArray(item.keywords) ? item.keywords : [];
                 return keywords.some((kw) => String(kw || '').toLowerCase().includes(q));
-            }).slice(0, 10);
+            };
+            let items = primary.filter(match);
+            if (!items.length && secondary.length) {
+                items = secondary.filter(match);
+            }
+            items = items.slice(0, 10);
             renderFallbackItems(items);
         } catch (error) {
             console.warn("Search index failed, falling back to news index:", error);

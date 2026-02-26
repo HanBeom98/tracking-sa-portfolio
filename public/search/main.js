@@ -95,12 +95,19 @@ async function runSearch(query) {
   try {
     const index = await loadSearchIndex();
     const q = query.toLowerCase();
-    const items = (index?.items?.[lang] || []).filter((item) => {
+    const primary = index?.items?.[lang] || [];
+    const fallbackLang = lang === 'en' ? 'ko' : 'en';
+    const secondary = index?.items?.[fallbackLang] || [];
+    const match = (item) => {
       const title = (item.title || '').toLowerCase();
       if (title.includes(q)) return true;
       const keywords = Array.isArray(item.keywords) ? item.keywords : [];
       return keywords.some((kw) => String(kw || '').toLowerCase().includes(q));
-    });
+    };
+    let items = primary.filter(match);
+    if (!items.length && secondary.length) {
+      items = secondary.filter(match);
+    }
     summary.textContent = `${tr('search_results_for', '검색어')}: "${query}" · ${items.length}${tr('search_count_suffix', '건')}`;
     renderFallbackItems(container, items, lang);
   } catch (e) {
