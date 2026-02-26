@@ -5,6 +5,9 @@ const postService = buildPostService({
   postRepository: createFirestorePostRepository(),
 });
 
+const WRITE_PATH = "/board/write";
+const BOARD_PATH = "/board";
+
 function showError(error) {
   switch (error.code) {
     case "REQUIRED_FIELDS":
@@ -18,14 +21,15 @@ function showError(error) {
   }
 }
 
-const writeForm = document.querySelector("board-write-form");
-if (!writeForm) {
-  throw new Error("board-write-form not found");
+function applyCurrentLangTranslations() {
+  if (!window.applyTranslations) return;
+  const lang = localStorage.getItem("lang") || "ko";
+  window.applyTranslations(lang);
 }
 
 async function ensureAuthenticated() {
   if (window.requireAuth) {
-    return window.requireAuth({ redirectTo: "/board/write" });
+    return window.requireAuth({ redirectTo: WRITE_PATH });
   }
   return null;
 }
@@ -34,58 +38,58 @@ function getCurrentUser() {
   return typeof window.getCurrentUser === "function" ? window.getCurrentUser() : null;
 }
 
-function renderWriteAccess(user) {
-  const section = document.querySelector(".write-form-section");
-  if (!section) return;
+function createGuestMessageElement() {
+  const message = document.createElement("div");
+  message.id = "board-write-login-required";
+  message.style.display = "grid";
+  message.style.gap = "10px";
+  message.style.justifyItems = "center";
+  message.style.padding = "28px 0 10px";
+  message.innerHTML = `
+    <p style="text-align:center;color:var(--text-sub);margin:0;">게시글 작성은 로그인 후 이용할 수 있습니다.</p>
+    <button type="button" class="auth-button primary" id="board-write-login-btn" data-i18n="login">로그인</button>
+  `;
+
+  const loginBtn = message.querySelector("#board-write-login-btn");
+  if (loginBtn) {
+    loginBtn.addEventListener("click", () => {
+      if (window.promptLogin) window.promptLogin({ redirectTo: WRITE_PATH });
+    });
+  }
+
+  return message;
+}
+
+function renderWriteAccess({ section, writeForm, user }) {
   let message = section.querySelector("#board-write-login-required");
   if (!user) {
     if (!message) {
-      message = document.createElement("div");
-      message.id = "board-write-login-required";
-      message.style.display = "grid";
-      message.style.gap = "10px";
-      message.style.justifyItems = "center";
-      message.style.padding = "28px 0 10px";
-      message.innerHTML = `
-        <p style="text-align:center;color:var(--text-sub);margin:0;">게시글 작성은 로그인 후 이용할 수 있습니다.</p>
-        <button type="button" class="auth-button primary" id="board-write-login-btn" data-i18n="login">로그인</button>
-      `;
+      message = createGuestMessageElement();
       section.appendChild(message);
-      if (window.applyTranslations) {
-        const lang = localStorage.getItem("lang") || "ko";
-        window.applyTranslations(lang);
-      }
-      const loginBtn = message.querySelector("#board-write-login-btn");
-      if (loginBtn) {
-        loginBtn.addEventListener("click", () => {
-          if (window.promptLogin) window.promptLogin({ redirectTo: "/board/write" });
-        });
-      }
+      applyCurrentLangTranslations();
     }
     writeForm.style.display = "none";
     return;
   }
+
   if (message) message.remove();
   writeForm.style.display = "";
 }
 
-async function initWriteForm() {
-  const user = await ensureAuthenticated();
-  renderWriteAccess(user);
-  if (!user) return;
-
+function bindWriteSubmit(writeForm, section) {
   writeForm.onSubmit(async (values) => {
     const currentUser = getCurrentUser();
     if (!currentUser) {
-      renderWriteAccess(null);
+      renderWriteAccess({ section, writeForm, user: null });
       showError({ code: "AUTH_REQUIRED" });
       return;
     }
+
     writeForm.setSubmitting(true);
     try {
       await postService.createPost({ ...values, author: currentUser });
       alert("게시물이 성공적으로 등록되었습니다.");
-      window.location.href = "/board";
+      window.location.href = BOARD_PATH;
     } catch (error) {
       console.error("게시물 등록 실패:", error);
       showError(error);
@@ -94,10 +98,26 @@ async function initWriteForm() {
   });
 }
 
+async function initWriteForm() {
+  const section = document.querySelector(".write-form-section");
+  const writeForm = document.querySelector("board-write-form");
+  if (!section) return;
+  if (!writeForm) throw new Error("board-write-form not found");
+
+  const user = await ensureAuthenticated();
+  renderWriteAccess({ section, writeForm, user });
+  if (!user) return;
+
+  bindWriteSubmit(writeForm, section);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   initWriteForm();
   window.addEventListener("auth-state-changed", (event) => {
+    const section = document.querySelector(".write-form-section");
+    const writeForm = document.querySelector("board-write-form");
+    if (!section || !writeForm) return;
     const user = event && event.detail ? event.detail.user : getCurrentUser();
-    renderWriteAccess(user);
+    renderWriteAccess({ section, writeForm, user });
   });
 });
