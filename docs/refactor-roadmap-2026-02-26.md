@@ -121,6 +121,12 @@
   - 로그인 UI 문구/알림의 도메인별 상세 키 세분화(계정/게시판 1차 완료, 나머지 페이지 확장 필요).
   - account 도메인 저장/탈퇴 에러코드별 번역키 분리(1차 완료, auth provider별 세분화 추가 여지).
   - animal-face 도메인 1차 분리 시작(결과 계산/공유 URL 로직 application 모듈화).
+  - animal-face 메시지 모듈 분리:
+    - `src/domains/animal-face/application/messages.js`
+    - 모델 로딩/분석 실패 알림, 점수 라벨 텍스트를 `main.js`에서 분리
+    - 번역 키 추가: `animal_face_model_loading`, `animal_face_analysis_error`
+  - unit test 추가:
+    - `tests/unit/animal-face-messages.test.js`
 
 ## Phase 2 (Short-term, 3-5 days)
 - 인증 UI/상태 로직을 모듈화:

@@ -319,6 +319,8 @@ const translations = {
         'download_result': '결과 다운로드',
         'your_animal_face_is': '당신과 닮은 동물은',
         'ai_matching_rate': 'AI 분석 결과 {confidence}%의 매칭률을 보입니다.',
+        'animal_face_model_loading': 'AI 모델을 불러오는 중입니다. 잠시 후 다시 시도해주세요.',
+        'animal_face_analysis_error': '분석 중 오류가 발생했습니다.',
         'search_placeholder': '검색어를 입력하세요',
         'search_button': '검색',
         'search_results_title': '검색 결과',
@@ -659,7 +661,9 @@ const translations = {
         'gender_female': 'Female',
         'download_result': 'Download Result',
         'your_animal_face_is': 'The animal that resembles you is ',
-        'ai_matching_rate': 'AI analysis result shows {confidence}% matching rate.'
+        'ai_matching_rate': 'AI analysis result shows {confidence}% matching rate.',
+        'animal_face_model_loading': 'AI model is still loading. Please try again in a moment.',
+        'animal_face_analysis_error': 'An error occurred while analyzing your image.'
     }
 };
 

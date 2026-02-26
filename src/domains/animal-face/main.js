@@ -6,6 +6,7 @@ import {
     buildAnimalFaceShareText,
     buildAnimalFaceShareUrl,
 } from "./application/share-message.js";
+import { createAnimalFaceMessages } from "./application/messages.js";
 
 class AnimalFaceTest extends HTMLElement {
     constructor() {
@@ -17,6 +18,8 @@ class AnimalFaceTest extends HTMLElement {
         this._currentImage = null;
         this._modelUrl = "https://teachablemachine.withgoogle.com/models/e52yfi_eK/";
         this._animalData = DEFAULT_ANIMAL_DATA;
+        const translate = window.getTranslation || ((_, fallback) => fallback);
+        this._messages = createAnimalFaceMessages(translate);
     }
 
     async connectedCallback() {
@@ -268,7 +271,7 @@ class AnimalFaceTest extends HTMLElement {
 
     async predict() {
         if (!this._model) {
-            alert("AI 모델을 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+            alert(this._messages.modelLoading());
             return;
         }
         const root = this.shadowRoot;
@@ -285,9 +288,9 @@ class AnimalFaceTest extends HTMLElement {
             root.getElementById('result').style.display = 'block';
             root.getElementById('res-emoji').innerText = result.emoji;
             root.getElementById('res-name').innerText = result.name;
-            root.getElementById('res-score').innerText = `매칭률: ${result.score}%`;
+            root.getElementById('res-score').innerText = this._messages.scoreLabel(result.score);
         } catch(e) {
-            alert("분석 중 오류가 발생했습니다.");
+            alert(this._messages.analysisError());
             this.reset();
         }
     }
