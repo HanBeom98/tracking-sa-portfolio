@@ -21,7 +21,7 @@ echo "  OK"
 echo "[3/4] Check auth event bridge..."
 rg -q "auth-state-changed" <<< "$COMMON_JS"
 rg -q "loadInlineLoginModalFactory" <<< "$COMMON_JS"
-rg -q "loadAuthControlsFactory" <<< "$COMMON_JS"
+rg -q "loadAuthUiControllerFactory" <<< "$COMMON_JS"
 echo "  OK"
 
 echo "[4/4] Check board write auth guard..."
