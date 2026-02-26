@@ -14,7 +14,8 @@
   - `generate_and_deploy`: 뉴스 생성 + 배포
   - `generate_only`: 뉴스 생성 커밋만 수행(배포 없음)
 - 배포 후 런타임 스모크: `Release Auth Smoke`
-- 배포 후 인증 회귀 확인: `E2E Auth Smoke` (자동 트리거 + 필요 시 수동 실행)
+- 배포 후 페이지 회귀 확인: `E2E Smoke` (자동 트리거 + 필요 시 수동 실행)
+  - 포함 범위: `/account/`, `/board/write`, `/ai-test/`, `/fortune/`, `/lucky-recommendation/`
 - Cloudflare Pages `Automatic deployments`는 `Disabled` 유지
 
 ## Before Push
@@ -32,7 +33,7 @@
   - `Unit Tests` 성공 확인
   - `Site Deploy (Build Only)` 성공 확인
   - `Release Auth Smoke` 성공 확인
-  - `E2E Auth Smoke` 성공 확인 (실패 시 artifact에서 trace 확인)
+  - `E2E Smoke` 성공 확인 (실패 시 artifact에서 trace 확인)
 - 계정 페이지:
   - 로그아웃 상태에서 가운데 로그인 버튼 클릭 시 모달 열림
   - 로그인 후 로그아웃 시 `/account/` 게스트 상태 전환

@@ -1,4 +1,4 @@
-name: E2E Auth Smoke
+name: E2E Smoke
 
 on:
   workflow_dispatch:
@@ -18,7 +18,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: e2e-auth-smoke
+  group: e2e-smoke
   cancel-in-progress: true
 
 jobs:
@@ -51,16 +51,16 @@ jobs:
             echo "url=https://trackingsa.com" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Run auth smoke tests
+      - name: Run e2e smoke tests
         env:
           TRACKING_SA_BASE_URL: ${{ steps.target.outputs.url }}
-        run: npm run test:e2e:auth
+        run: npm run test:e2e:smoke
 
       - name: Upload Playwright artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-auth-smoke-${{ github.run_id }}
+          name: playwright-e2e-smoke-${{ github.run_id }}
           path: |
             playwright-report
             test-results

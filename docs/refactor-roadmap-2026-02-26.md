@@ -159,6 +159,10 @@
     - `Daily AI News Post` 수동 실행 입력(`run_mode`) 추가
     - `generate_only`와 `generate_and_deploy` 경로 분리
     - `phase1-ops-checklist`에 일반 배포 vs 뉴스 배포 선택 규칙 명시
+  - E2E 스모크 범위 확장:
+    - `tests/e2e/pages-smoke.spec.js` 추가
+    - `/ai-test/`, `/fortune/`, `/lucky-recommendation/` 기본 플로우 점검
+    - 워크플로 `E2E Smoke`에서 `test:e2e:smoke` 실행으로 확대
   - unit test 추가:
     - `tests/unit/animal-face-messages.test.js`
     - `tests/unit/animal-face-view-text.test.js`

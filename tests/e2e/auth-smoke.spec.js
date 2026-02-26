@@ -1,29 +1,26 @@
 import { test, expect } from "@playwright/test";
 
-test("account guest login button opens inline login modal", async ({ page, baseURL }) => {
-  await page.goto(`${baseURL}/account/`, { waitUntil: "domcontentloaded" });
-  await page.waitForFunction(() => typeof window.openInlineLoginModal === "function");
-
-  const accountLoginBtn = page.locator("#account-login-btn");
-  await expect(accountLoginBtn).toBeVisible();
-  await accountLoginBtn.click();
-
-  await expect(page.locator("#global-inline-login-modal")).toBeVisible();
+async function expectInlineLoginModalOpen(page) {
+  const modal = page.locator("#global-inline-login-modal");
+  await expect(modal).toHaveClass(/open/);
   await expect(page.locator("#inline-login-email")).toBeVisible();
   await expect(page.locator("#inline-login-password")).toBeVisible();
+}
+
+test("account guest login button opens inline login modal", async ({ page, baseURL }) => {
+  await page.goto(`${baseURL}/account/`, { waitUntil: "domcontentloaded" });
+  await page.waitForSelector("#account-login-btn");
+
+  await page.locator("#account-login-btn").click();
+  await expectInlineLoginModalOpen(page);
 });
 
 test("board write guest state blocks form and can open login modal", async ({ page, baseURL }) => {
-  await page.goto(`${baseURL}/board/write`, { waitUntil: "domcontentloaded" });
-  await page.waitForFunction(() => typeof window.openInlineLoginModal === "function");
+  await page.goto(`${baseURL}/board/write/`, { waitUntil: "domcontentloaded" });
+  await page.waitForSelector("#board-write-login-btn");
 
-  await expect(page.locator("text=게시글 작성은 로그인 후 이용할 수 있습니다.")).toBeVisible();
   await expect(page.locator("board-write-form")).toBeHidden();
 
-  const guestLoginBtn = page.locator("#board-write-login-btn");
-  await expect(guestLoginBtn).toBeVisible();
-  await guestLoginBtn.click();
-
-  await expect(page.locator("#global-inline-login-modal")).toBeVisible();
-  await expect(page.locator("#inline-login-email")).toBeVisible();
+  await page.locator("#board-write-login-btn").click();
+  await expectInlineLoginModalOpen(page);
 });

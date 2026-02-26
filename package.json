@@ -14,7 +14,8 @@
     "test:unit": "node --test tests/unit/*.test.js",
     "test:e2e": "playwright test",
     "test:e2e:auth": "playwright test tests/e2e/auth-smoke.spec.js",
-    "test": "npm run test:e2e:auth"
+    "test": "npm run test:e2e:auth",
+    "test:e2e:smoke": "playwright test tests/e2e/auth-smoke.spec.js tests/e2e/pages-smoke.spec.js"
   },
   "keywords": [],
   "author": "",
