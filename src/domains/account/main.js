@@ -1,10 +1,22 @@
-function getAccountModules() {
-  const domain = window.AccountDomain || {};
-  const viewmodel = domain.viewmodel || {};
-  const ui = domain.ui || {};
-  const errorMessages = domain.errorMessages || {};
-  return { viewmodel, ui, errorMessages };
-}
+import {
+  t,
+  normalizeNickname,
+  validateNickname,
+  getNicknameCooldownInfo,
+  formatProvider,
+  formatSubscription,
+  formatDate,
+  getAccountViewModel,
+} from "./application/account-view-model.js";
+import {
+  resolveProfileSaveError,
+  resolveDeleteAccountError,
+} from "./application/error-messages.js";
+import {
+  renderGuestView,
+  renderAccountView,
+  setStatusText,
+} from "./ui/account-renderer.js";
 
 function getAuthGateway() {
   return window.AuthGateway || null;
@@ -18,12 +30,6 @@ async function ensureLogin() {
 }
 
 function bindDeleteAction(providerIds) {
-  const { viewmodel, errorMessages } = getAccountModules();
-  const t = viewmodel.t || ((_, fallback) => fallback);
-  const resolveDeleteAccountError = errorMessages.resolveDeleteAccountError || (() => ({
-    key: "delete_account_failed",
-    fallback: "회원탈퇴에 실패했습니다.",
-  }));
   const deleteBtn = document.getElementById("account-delete-btn");
   if (!deleteBtn) return;
 
@@ -67,18 +73,6 @@ function bindDeleteAction(providerIds) {
 }
 
 async function bindProfileActions(viewModel) {
-  const { viewmodel, ui, errorMessages } = getAccountModules();
-  const normalizeNickname = viewmodel.normalizeNickname || ((value) => (value || "").trim().toLowerCase());
-  const validateNickname = viewmodel.validateNickname || (() => false);
-  const getNicknameCooldownInfo = viewmodel.getNicknameCooldownInfo || (() => null);
-  const formatDate = viewmodel.formatDate || ((value) => value || "-");
-  const setStatusText = ui.setStatusText || (() => {});
-  const resolveProfileSaveError = errorMessages.resolveProfileSaveError || (() => ({
-    key: "profile_save_failed",
-    fallback: "저장에 실패했습니다.",
-    target: "profile",
-  }));
-
   let nicknameChecked = false;
   let nicknameCheckedValue = normalizeNickname(viewModel.nickname);
 
@@ -97,9 +91,9 @@ async function bindProfileActions(viewModel) {
   const cooldownInfo = getNicknameCooldownInfo(viewModel.nicknameUpdatedAt);
   if (nicknameCooldown) {
     if (cooldownInfo && cooldownInfo.remainingMs > 0) {
-      nicknameCooldown.textContent = `${viewmodel.t("nickname_next_change", "다음 변경 가능:")} ${formatDate(cooldownInfo.nextAt)}`;
+      nicknameCooldown.textContent = `${t("nickname_next_change", "다음 변경 가능:")} ${formatDate(cooldownInfo.nextAt)}`;
     } else {
-      nicknameCooldown.textContent = viewmodel.t("nickname_change_available", "지금 변경 가능합니다.");
+      nicknameCooldown.textContent = t("nickname_change_available", "지금 변경 가능합니다.");
     }
   }
 
@@ -114,12 +108,12 @@ async function bindProfileActions(viewModel) {
     nicknameCheckBtn.addEventListener("click", async () => {
       const value = (nicknameInput && nicknameInput.value) || "";
       if (!validateNickname(value)) {
-        setStatusText(nicknameStatus, "nickname_invalid", "닉네임은 2-12자(영문/숫자/한글/_)만 가능합니다.", false);
+        setStatusText(nicknameStatus, "nickname_invalid", "닉네임은 2-12자(영문/숫자/한글/_)만 가능합니다.", false, t);
         return;
       }
       if (!authService) {
         const mapped = resolveProfileSaveError({ code: "auth/service-unavailable" });
-        setStatusText(profileStatus, mapped.key, mapped.fallback, false);
+        setStatusText(profileStatus, mapped.key, mapped.fallback, false, t);
         return;
       }
 
@@ -127,14 +121,14 @@ async function bindProfileActions(viewModel) {
       if (result.available && result.owned) {
         nicknameChecked = true;
         nicknameCheckedValue = normalizeNickname(value);
-        setStatusText(nicknameStatus, "nickname_owned", "현재 사용 중인 닉네임입니다.", true);
+        setStatusText(nicknameStatus, "nickname_owned", "현재 사용 중인 닉네임입니다.", true, t);
       } else if (result.available) {
         nicknameChecked = true;
         nicknameCheckedValue = normalizeNickname(value);
-        setStatusText(nicknameStatus, "nickname_available", "사용 가능한 닉네임입니다.", true);
+        setStatusText(nicknameStatus, "nickname_available", "사용 가능한 닉네임입니다.", true, t);
       } else {
         nicknameChecked = false;
-        setStatusText(nicknameStatus, "nickname_taken", "이미 사용 중인 닉네임입니다.", false);
+        setStatusText(nicknameStatus, "nickname_taken", "이미 사용 중인 닉네임입니다.", false, t);
       }
     });
   }
@@ -147,37 +141,36 @@ async function bindProfileActions(viewModel) {
 
       if (nextNormalized !== normalizeNickname(viewModel.nickname)) {
         if (!nicknameChecked || nicknameCheckedValue !== nextNormalized) {
-          setStatusText(nicknameStatus, "nickname_check_required", "닉네임 중복확인이 필요합니다.", false);
+          setStatusText(nicknameStatus, "nickname_check_required", "닉네임 중복확인이 필요합니다.", false, t);
           return;
         }
       }
 
       try {
         await authService.updateProfile({ nickname: nextNickname.trim() });
-        setStatusText(profileStatus, "profile_saved", "저장되었습니다.", true);
+        setStatusText(profileStatus, "profile_saved", "저장되었습니다.", true, t);
         if (window.updateAuthControls) window.updateAuthControls(window.getCurrentUser());
       } catch (error) {
         console.error("프로필 저장 실패:", error);
         const mapped = resolveProfileSaveError(error);
         if (mapped.target === "nickname") {
-          setStatusText(nicknameStatus, mapped.key, mapped.fallback, false);
+          setStatusText(nicknameStatus, mapped.key, mapped.fallback, false, t);
           return;
         }
-        setStatusText(profileStatus, mapped.key, mapped.fallback, false);
+        setStatusText(profileStatus, mapped.key, mapped.fallback, false, t);
       }
     });
   }
 }
 
 async function renderAccount() {
-  const { viewmodel, ui } = getAccountModules();
   const infoEl = document.getElementById("account-info");
   const actionsEl = document.getElementById("account-actions");
   if (!infoEl || !actionsEl) return;
 
   const user = await ensureLogin();
   if (!user) {
-    if (ui.renderGuestView) ui.renderGuestView(infoEl, actionsEl);
+    renderGuestView(infoEl, actionsEl);
     return;
   }
 
@@ -185,10 +178,14 @@ async function renderAccount() {
   const profile = gateway && gateway.getCurrentUserProfile
     ? gateway.getCurrentUserProfile()
     : ((window.getCurrentUserProfile && window.getCurrentUserProfile()) || null);
-  const accountViewModel = viewmodel.getAccountViewModel ? viewmodel.getAccountViewModel(user, profile) : null;
-  if (!accountViewModel) return;
+  const accountViewModel = getAccountViewModel(user, profile);
 
-  if (ui.renderAccountView) ui.renderAccountView(infoEl, actionsEl, user, accountViewModel);
+  renderAccountView(infoEl, actionsEl, user, accountViewModel, {
+    formatProvider,
+    formatSubscription,
+    formatDate,
+    translate: t,
+  });
   await bindProfileActions(accountViewModel);
   bindDeleteAction(accountViewModel.providerIds);
 }
