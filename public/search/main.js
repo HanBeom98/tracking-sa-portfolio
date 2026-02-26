@@ -94,8 +94,12 @@ async function runSearch(query) {
 
   try {
     const index = await loadSearchIndex();
+    const q = query.toLowerCase();
     const items = (index?.items?.[lang] || []).filter((item) => {
-      return (item.title || '').toLowerCase().includes(query.toLowerCase());
+      const title = (item.title || '').toLowerCase();
+      if (title.includes(q)) return true;
+      const keywords = Array.isArray(item.keywords) ? item.keywords : [];
+      return keywords.some((kw) => String(kw || '').toLowerCase().includes(q));
     });
     summary.textContent = `${tr('search_results_for', '검색어')}: "${query}" · ${items.length}${tr('search_count_suffix', '건')}`;
     renderFallbackItems(container, items, lang);

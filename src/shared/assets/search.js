@@ -107,8 +107,12 @@ document.addEventListener('DOMContentLoaded', function () {
     async function searchPosts(searchTerm) {
         try {
             const index = await loadSearchIndex();
+            const q = searchTerm.toLowerCase();
             const items = (index?.items?.[currentLang] || []).filter((item) => {
-                return (item.title || '').toLowerCase().includes(searchTerm.toLowerCase());
+                const title = (item.title || '').toLowerCase();
+                if (title.includes(q)) return true;
+                const keywords = Array.isArray(item.keywords) ? item.keywords : [];
+                return keywords.some((kw) => String(kw || '').toLowerCase().includes(q));
             }).slice(0, 10);
             renderFallbackItems(items);
         } catch (error) {

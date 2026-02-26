@@ -132,43 +132,54 @@ def build_search_index():
         with open(path, "r", encoding="utf-8") as f:
             return f.read()
 
+    def add_keywords(items):
+        enriched = []
+        for item in items:
+            title = (item.get("title") or "").strip()
+            keywords = item.get("keywords") or []
+            if title:
+                tokens = [t.strip() for t in re.split(r"\s+", title) if t.strip()]
+                keywords = list(dict.fromkeys(keywords + tokens + [title]))
+            enriched.append({**item, "keywords": keywords})
+        return enriched
+
     ko_html = load_html(os.path.join(PUBLIC_DIR, "news", "index.html"))
     en_html = load_html(os.path.join(PUBLIC_DIR, "en", "news", "index.html"))
     static_items = {
         "ko": [
-            {"href": "/news/", "title": "테크 인사이트", "date": ""},
-            {"href": "/futures-estimate/", "title": "코스피200", "date": ""},
-            {"href": "/board/", "title": "게시판", "date": ""},
-            {"href": "/ai-test/", "title": "AI 성향 테스트", "date": ""},
-            {"href": "/animal-face/", "title": "동물상 테스트", "date": ""},
-            {"href": "/fortune/", "title": "AI 운세", "date": ""},
-            {"href": "/lucky-recommendation/", "title": "행운의 추천", "date": ""},
-            {"href": "/tetris-game/", "title": "테트리스", "date": ""},
-            {"href": "/ai-evolution/", "title": "AI 진화 게임", "date": ""},
-            {"href": "/about/", "title": "회사 소개", "date": ""},
-            {"href": "/contact", "title": "문의하기", "date": ""},
-            {"href": "/inquiry", "title": "파트너십 문의", "date": ""},
+            {"href": "/news/", "title": "테크 인사이트", "date": "", "keywords": ["뉴스", "인사이트"]},
+            {"href": "/futures-estimate/", "title": "코스피200", "date": "", "keywords": ["지수", "선물", "코스피", "K200"]},
+            {"href": "/board/", "title": "게시판", "date": "", "keywords": ["커뮤니티", "글쓰기"]},
+            {"href": "/ai-test/", "title": "AI 성향 테스트", "date": "", "keywords": ["테스트", "성향"]},
+            {"href": "/animal-face/", "title": "동물상 테스트", "date": "", "keywords": ["테스트", "동물상"]},
+            {"href": "/fortune/", "title": "AI 운세", "date": "", "keywords": ["운세", "사주"]},
+            {"href": "/lucky-recommendation/", "title": "행운의 추천", "date": "", "keywords": ["추천", "행운"]},
+            {"href": "/tetris-game/", "title": "테트리스", "date": "", "keywords": ["게임", "퍼즐"]},
+            {"href": "/ai-evolution/", "title": "AI 진화 게임", "date": "", "keywords": ["게임", "AI 진화"]},
+            {"href": "/about/", "title": "회사 소개", "date": "", "keywords": ["소개", "about"]},
+            {"href": "/contact", "title": "문의하기", "date": "", "keywords": ["문의", "contact"]},
+            {"href": "/inquiry", "title": "파트너십 문의", "date": "", "keywords": ["파트너십", "협업"]},
         ],
         "en": [
-            {"href": "/en/news/", "title": "Tech Insights", "date": ""},
-            {"href": "/futures-estimate/", "title": "KOSPI200", "date": ""},
-            {"href": "/board/", "title": "Board", "date": ""},
-            {"href": "/ai-test/", "title": "AI Tendency Test", "date": ""},
-            {"href": "/animal-face/", "title": "Animal Face Test", "date": ""},
-            {"href": "/fortune/", "title": "AI Fortune", "date": ""},
-            {"href": "/lucky-recommendation/", "title": "Lucky Recommendation", "date": ""},
-            {"href": "/tetris-game/", "title": "Tetris", "date": ""},
-            {"href": "/ai-evolution/", "title": "AI Evolution", "date": ""},
-            {"href": "/about/", "title": "About", "date": ""},
-            {"href": "/contact", "title": "Contact", "date": ""},
-            {"href": "/inquiry", "title": "Partnership Inquiry", "date": ""},
+            {"href": "/en/news/", "title": "Tech Insights", "date": "", "keywords": ["news", "insights"]},
+            {"href": "/futures-estimate/", "title": "KOSPI200", "date": "", "keywords": ["index", "futures", "K200"]},
+            {"href": "/board/", "title": "Board", "date": "", "keywords": ["community", "posts"]},
+            {"href": "/ai-test/", "title": "AI Tendency Test", "date": "", "keywords": ["test", "personality"]},
+            {"href": "/animal-face/", "title": "Animal Face Test", "date": "", "keywords": ["test", "animal face"]},
+            {"href": "/fortune/", "title": "AI Fortune", "date": "", "keywords": ["fortune", "saju"]},
+            {"href": "/lucky-recommendation/", "title": "Lucky Recommendation", "date": "", "keywords": ["recommendation", "lucky"]},
+            {"href": "/tetris-game/", "title": "Tetris", "date": "", "keywords": ["game", "puzzle"]},
+            {"href": "/ai-evolution/", "title": "AI Evolution", "date": "", "keywords": ["game", "evolution"]},
+            {"href": "/about/", "title": "About", "date": "", "keywords": ["about", "company"]},
+            {"href": "/contact", "title": "Contact", "date": "", "keywords": ["contact", "support"]},
+            {"href": "/inquiry", "title": "Partnership Inquiry", "date": "", "keywords": ["partnership", "inquiry"]},
         ],
     }
     payload = {
         "generated_at": datetime.datetime.utcnow().isoformat() + "Z",
         "items": {
-            "ko": static_items["ko"] + parse_cards(ko_html),
-            "en": static_items["en"] + parse_cards(en_html),
+            "ko": add_keywords(static_items["ko"] + parse_cards(ko_html)),
+            "en": add_keywords(static_items["en"] + parse_cards(en_html)),
         },
     }
     out_path = os.path.join(PUBLIC_DIR, "search-index.json")
