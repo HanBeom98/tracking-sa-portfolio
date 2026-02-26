@@ -19,6 +19,10 @@ export function buildAuthService({ authRepository }) {
     return authRepository.signOut();
   }
 
+  function deleteAccount({ password } = {}) {
+    return authRepository.deleteAccount({ password });
+  }
+
   function onAuthStateChanged(callback) {
     return authRepository.onAuthStateChanged(async (user) => {
       if (!user) {
@@ -40,6 +44,7 @@ export function buildAuthService({ authRepository }) {
     signInWithEmail,
     signUpWithEmail,
     signOut,
+    deleteAccount,
     onAuthStateChanged,
   };
 }

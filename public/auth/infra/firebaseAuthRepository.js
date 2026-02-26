@@ -37,6 +37,40 @@ export function createFirebaseAuthRepository({ firebaseApp = window.firebase, db
     return auth.signOut();
   }
 
+  async function deleteAccount({ password } = {}) {
+    const user = auth.currentUser;
+    if (!user) {
+      throw new Error("Not authenticated");
+    }
+
+    const providerIds = (user.providerData || []).map((p) => p.providerId);
+    const hasPassword = providerIds.includes("password");
+
+    if (hasPassword) {
+      if (!password) {
+        const error = new Error("Password required for reauthentication");
+        error.code = "auth/password-required";
+        throw error;
+      }
+      const credential = firebaseApp.auth.EmailAuthProvider.credential(
+        user.email,
+        password
+      );
+      await user.reauthenticateWithCredential(credential);
+    } else if (providerIds.includes("google.com")) {
+      const provider = new firebaseApp.auth.GoogleAuthProvider();
+      await user.reauthenticateWithPopup(provider);
+    }
+
+    try {
+      await db.collection("users").doc(user.uid).delete();
+    } catch (error) {
+      console.warn("Failed to delete user profile:", error);
+    }
+
+    await user.delete();
+  }
+
   function onAuthStateChanged(callback) {
     return auth.onAuthStateChanged(callback);
   }
@@ -71,6 +105,7 @@ export function createFirebaseAuthRepository({ firebaseApp = window.firebase, db
     signInWithEmail,
     signUpWithEmail,
     signOut,
+    deleteAccount,
     onAuthStateChanged,
     ensureUserProfile,
     getUserProfile,

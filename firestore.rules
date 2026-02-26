@@ -34,6 +34,7 @@ service cloud.firestore {
       allow update: if request.auth != null
         && request.auth.uid == userId
         && request.resource.data.role == resource.data.role;
+      allow delete: if request.auth != null && request.auth.uid == userId;
     }
 
     // Futures estimate chart public read access

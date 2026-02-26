@@ -302,6 +302,16 @@ body.dark-mode .utility-controls #color-change {
     background: oklch(97% 0.03 260);
 }
 
+.auth-button.danger {
+    background: #ffe8e8;
+    color: #c62828;
+    border: 1px solid #f2b8b8;
+}
+
+.auth-button.danger:hover {
+    background: #ffd6d6;
+}
+
 body.dark-mode .auth-button {
     background: #0f172a;
     border-color: oklch(35% 0.02 260);

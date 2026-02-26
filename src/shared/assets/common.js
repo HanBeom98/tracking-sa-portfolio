@@ -207,6 +207,8 @@ function initAuthControls() {
     const container = document.getElementById('auth-controls');
     if (!container) return;
 
+    const deleteAccountLabel = window.getTranslation('delete_account', '회원탈퇴');
+
     container.innerHTML = `
         <button id="auth-login" class="auth-button primary">로그인</button>
         <button id="auth-logout" class="auth-button" style="display:none;">로그아웃</button>
@@ -223,6 +225,7 @@ function initAuthControls() {
                 <div class="auth-helper">이메일/비밀번호 로그인은 기본 제공업체 설정이 필요합니다.</div>
                 <button type="button" id="auth-show-uid" class="auth-button">내 UID 확인</button>
                 <div id="auth-uid" class="auth-helper" style="display:none;"></div>
+                <button type="button" id="auth-delete-account" class="auth-button danger">${deleteAccountLabel}</button>
             </div>
         </div>
     `;
@@ -237,6 +240,7 @@ function initAuthControls() {
     const emailSignupBtn = container.querySelector('#auth-email-signup');
     const showUidBtn = container.querySelector('#auth-show-uid');
     const uidLabel = container.querySelector('#auth-uid');
+    const deleteAccountBtn = container.querySelector('#auth-delete-account');
 
     loginButton.addEventListener('click', (event) => {
         event.preventDefault();
@@ -284,6 +288,52 @@ function initAuthControls() {
         uidLabel.textContent = `UID: ${user.uid}`;
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(user.uid).catch(() => {});
+        }
+    });
+
+    deleteAccountBtn.addEventListener('click', async () => {
+        const user = window.getCurrentUser ? window.getCurrentUser() : null;
+        if (!user) {
+            alert("로그인 후 이용해주세요.");
+            return;
+        }
+
+        const confirmMessage = window.getTranslation(
+            'delete_account_confirm',
+            '정말 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.'
+        );
+        if (!confirm(confirmMessage)) return;
+
+        const authService = await getAuthService();
+        if (!authService) return;
+
+        const providerIds = (user.providerData || []).map((p) => p.providerId);
+        let password = null;
+
+        if (providerIds.includes("password")) {
+            const promptMessage = window.getTranslation(
+                'delete_account_password_prompt',
+                '탈퇴를 위해 비밀번호를 입력해주세요.'
+            );
+            password = prompt(promptMessage) || "";
+            if (!password) return;
+        }
+
+        try {
+            await authService.deleteAccount({ password });
+            container.classList.remove('open');
+            alert(window.getTranslation('delete_account_success', '회원탈퇴가 완료되었습니다.'));
+        } catch (error) {
+            console.error("회원탈퇴 실패:", error);
+            if (error && error.code === "auth/requires-recent-login") {
+                alert(window.getTranslation('delete_account_requires_recent_login', '보안을 위해 다시 로그인 후 탈퇴를 진행해주세요.'));
+                return;
+            }
+            if (error && error.code === "auth/password-required") {
+                alert(window.getTranslation('delete_account_password_prompt', '탈퇴를 위해 비밀번호를 입력해주세요.'));
+                return;
+            }
+            alert(window.getTranslation('delete_account_failed', '회원탈퇴에 실패했습니다.'));
         }
     });
 
