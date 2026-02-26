@@ -20,6 +20,14 @@ while IFS='|' read -r src dst; do
   [[ -z "${src}" ]] && continue
   [[ "${src}" =~ ^# ]] && continue
 
+  # Domain index pages are assembled via builder (shared head/header/footer injection).
+  # Copying src->public directly causes destructive overwrite of injected production markup.
+  if [[ "$src" =~ ^src/domains/.+/index\.html$ ]]; then
+    echo "invalid mapping (managed by builder): $src -> $dst" >&2
+    mismatch=1
+    continue
+  fi
+
   if [[ ! -f "$src" ]]; then
     echo "Missing source: $src" >&2
     mismatch=1

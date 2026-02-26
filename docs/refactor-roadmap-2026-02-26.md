@@ -148,6 +148,10 @@
     - `src/domains/ai-test/application/ai-test-progress.js` (진행률/결과 스텝 계산)
     - `src/domains/ai-test/ui/ai-test-view.js` (질문/결과 뷰 렌더 + 이벤트 바인딩)
     - `main.js`는 상태 전이/뷰모델 조립 중심으로 축소
+  - `public` 동기화 가드레일 추가:
+    - `scripts/public_sync_map.txt`에서 `src/domains/*/index.html` 매핑 제거
+    - `scripts/sync_public_assets.sh`에 도메인 `index.html` 매핑 차단 검증 추가
+    - 템플릿 주입형 페이지는 `builder` 경로로만 생성되도록 고정
   - unit test 추가:
     - `tests/unit/animal-face-messages.test.js`
     - `tests/unit/animal-face-view-text.test.js`
