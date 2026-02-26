@@ -40,13 +40,31 @@ function renderWriteAccess(user) {
   let message = section.querySelector("#board-write-login-required");
   if (!user) {
     if (!message) {
-      message = document.createElement("p");
+      message = document.createElement("div");
       message.id = "board-write-login-required";
-      message.style.textAlign = "center";
-      message.style.padding = "40px 0";
-      message.style.color = "var(--text-sub)";
-      message.textContent = "게시글 작성은 로그인 후 이용할 수 있습니다.";
+      message.style.display = "grid";
+      message.style.gap = "10px";
+      message.style.justifyItems = "center";
+      message.style.padding = "28px 0 10px";
+      message.innerHTML = `
+        <p style="text-align:center;color:var(--text-sub);margin:0;">게시글 작성은 로그인 후 이용할 수 있습니다.</p>
+        <button type="button" class="auth-button primary" id="board-write-login-btn" data-i18n="login">로그인</button>
+      `;
       section.appendChild(message);
+      if (window.applyTranslations) {
+        const lang = localStorage.getItem("lang") || "ko";
+        window.applyTranslations(lang);
+      }
+      const loginBtn = message.querySelector("#board-write-login-btn");
+      if (loginBtn) {
+        loginBtn.addEventListener("click", () => {
+          if (window.openInlineLoginModal) {
+            window.openInlineLoginModal({ redirectTo: "/board/write" });
+            return;
+          }
+          if (window.openAuthPrompt) window.openAuthPrompt();
+        });
+      }
     }
     writeForm.style.display = "none";
     return;
