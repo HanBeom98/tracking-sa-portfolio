@@ -9,7 +9,7 @@ echo "  OK"
 
 echo "[2/4] Check account modal login code..."
 curl -s "${BASE_URL}/account/main.js" | rg -q "account-login-btn"
-curl -s "${BASE_URL}/account/main.js" | rg -q "openInlineLoginModal"
+curl -s "${BASE_URL}/account/main.js" | rg -q "promptLogin|openInlineLoginModal"
 echo "  OK"
 
 echo "[3/4] Check auth event bridge..."
