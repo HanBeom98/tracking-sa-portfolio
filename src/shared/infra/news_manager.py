@@ -1,6 +1,7 @@
 import os
 import feedparser
 import time
+import re
 from src.shared.infra.db import get_firestore_client
 from src.shared.infra.ai import generate_ai_content
 from src.shared.infra.utils import kst_date_str
@@ -8,6 +9,18 @@ from src.shared.infra.utils import kst_date_str
 LOG_FILE = "logs/processed_articles.log"
 MAX_LOG_LINES = int(os.getenv("PROCESSED_LOG_MAX_LINES", "5000"))
 LOG_KEEP_LINES = int(os.getenv("PROCESSED_LOG_KEEP_LINES", "3000"))
+
+
+def _has_hangul(text):
+    return bool(re.search(r"[가-힣]", text or ""))
+
+
+def _first_nonempty_line(text):
+    for line in (text or "").splitlines():
+        cleaned = line.strip().lstrip("#").strip()
+        if cleaned:
+            return cleaned
+    return ""
 
 def get_processed_urls():
     if not os.path.exists(LOG_FILE):
@@ -78,11 +91,13 @@ def fetch_and_post_news():
                     en_content = ai_raw_content.split("[EN_START]")[1].split("[EN_END]")[0].strip()
                 
                 # 제목 추출 (#으로 시작하는 첫 줄)
-                title_ko = entry.title
+                title_ko = ""
                 if ko_content.startswith("#"):
                     lines = ko_content.split("\n")
                     title_ko = lines[0].replace("#", "").strip()
                     ko_content = "\n".join(lines[1:]).strip()
+                if not title_ko:
+                    title_ko = _first_nonempty_line(ko_content)
 
                 title_en = entry.title
                 if en_content.startswith("#"):
@@ -90,9 +105,15 @@ def fetch_and_post_news():
                     title_en = lines[0].replace("#", "").strip()
                     en_content = "\n".join(lines[1:]).strip()
 
-                # 최소 보장: 한쪽이 비어있으면 다른 언어로 채움
-                if not ko_content and en_content:
-                    ko_content = en_content
+                # KO 본문/제목에 한글이 없으면 저장하지 않는다.
+                # (영문 기사가 KO 페이지로 노출되는 문제 방지)
+                if not ko_content or not _has_hangul(ko_content) or not _has_hangul(title_ko):
+                    print("⚠️ Skip posting: KO content/title is missing or non-Korean.")
+                    log_processed_url(entry.link)
+                    rotate_processed_log()
+                    continue
+
+                # EN 최소 보장: 비어 있으면 KO를 사용
                 if not en_content and ko_content:
                     en_content = ko_content
                 if not title_en and title_ko:
