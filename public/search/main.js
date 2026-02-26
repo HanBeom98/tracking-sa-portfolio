@@ -10,34 +10,6 @@ function tr(key, fallback) {
   return (window.getTranslation ? window.getTranslation(key, fallback) : fallback);
 }
 
-function getDb() {
-  return window.db || (typeof firebase !== 'undefined' && firebase.apps.length ? firebase.firestore() : null);
-}
-
-function renderResults(container, docs, lang) {
-  const titleField = lang === 'en' ? 'titleEn' : 'titleKo';
-  const fallbackTitleField = lang === 'en' ? 'titleKo' : 'titleEn';
-  const basePath = lang === 'en' ? '/en' : '';
-
-  if (!docs.length) {
-    container.innerHTML = `<div class="result-empty">${tr('search_no_results', '검색 결과가 없습니다.')}</div>`;
-    return;
-  }
-
-  container.innerHTML = docs.map((doc) => {
-    const data = doc.data();
-    const urlKey = data.urlKey ? `${data.urlKey}.html` : `${data.date}-${data.slug}.html`;
-    const url = `${basePath}/${urlKey}`;
-    const title = data[titleField] || data[fallbackTitleField] || '';
-    return `
-      <a class="result-card" href="${url}">
-        <div class="result-title">${title}</div>
-        <div class="result-meta">${data.date || ''}</div>
-      </a>
-    `;
-  }).join('');
-}
-
 function renderFallbackItems(container, items, lang) {
   if (!items.length) {
     container.innerHTML = `<div class="result-empty">${tr('search_no_results', '검색 결과가 없습니다.')}</div>`;
@@ -85,6 +57,12 @@ function parseCardsFromHtml(html) {
   return items;
 }
 
+async function loadSearchIndex() {
+  const res = await fetch('/search-index.json', { cache: 'no-store' });
+  if (!res.ok) throw new Error('index_http_' + res.status);
+  return res.json();
+}
+
 async function searchFromNewsIndex(query, lang, limit = 200) {
   const newsPath = lang === 'en' ? '/en/news/' : '/news/';
   const res = await fetch(newsPath, { cache: 'no-store' });
@@ -102,8 +80,6 @@ async function runSearch(query) {
   const summary = document.getElementById('searchSummary');
   const container = document.getElementById('searchPageResults');
   const lang = getLang();
-  const titleField = lang === 'en' ? 'titleEn' : 'titleKo';
-  const db = getDb();
 
   input.value = query;
 
@@ -113,49 +89,19 @@ async function runSearch(query) {
     return;
   }
 
-  if (!db) {
-    try {
-      const items = await searchFromNewsIndex(query, lang, 200);
-      summary.textContent = `${tr('search_results_for', '검색어')}: "${query}" · ${items.length}${tr('search_count_suffix', '건')}`;
-      renderFallbackItems(container, items, lang);
-    } catch (_) {
-      summary.textContent = tr('search_error', '검색 서비스를 불러올 수 없습니다.');
-      container.innerHTML = `<div class="result-empty">${tr('search_error', '검색 서비스를 불러올 수 없습니다.')}</div>`;
-    }
-    return;
-  }
-
   summary.textContent = tr('search_loading', '검색 중...');
   container.innerHTML = '';
 
   try {
-    const snapshot = await db.collection('posts')
-      .where(titleField, '>=', query)
-      .where(titleField, '<=', query + '\uf8ff')
-      .limit(40)
-      .get();
-
-    summary.textContent = `${tr('search_results_for', '검색어')}: "${query}" · ${snapshot.docs.length}${tr('search_count_suffix', '건')}`;
-    renderResults(container, snapshot.docs, lang);
+    const index = await loadSearchIndex();
+    const items = (index?.items?.[lang] || []).filter((item) => {
+      return (item.title || '').toLowerCase().includes(query.toLowerCase());
+    });
+    summary.textContent = `${tr('search_results_for', '검색어')}: "${query}" · ${items.length}${tr('search_count_suffix', '건')}`;
+    renderFallbackItems(container, items, lang);
   } catch (e) {
-    console.warn('Search page prefix query failed, falling back to client filter:', e);
+    console.warn('Search index failed, falling back to news-index:', e);
     try {
-      const fallbackSnapshot = await db.collection('posts')
-        .orderBy('createdAt', 'desc')
-        .limit(200)
-        .get();
-      const q = query.toLowerCase();
-      const titleFallbackField = lang === 'en' ? 'titleKo' : 'titleEn';
-      const filteredDocs = fallbackSnapshot.docs.filter((doc) => {
-        const data = doc.data();
-        const title = String(data[titleField] || data[titleFallbackField] || '').toLowerCase();
-        return title.includes(q);
-      });
-
-      summary.textContent = `${tr('search_results_for', '검색어')}: "${query}" · ${filteredDocs.length}${tr('search_count_suffix', '건')}`;
-      renderResults(container, filteredDocs, lang);
-    } catch (fallbackError) {
-      console.warn('Firestore fallback failed, trying news-index fallback:', fallbackError);
       try {
         const items = await searchFromNewsIndex(query, lang, 200);
         summary.textContent = `${tr('search_results_for', '검색어')}: "${query}" · ${items.length}${tr('search_count_suffix', '건')}`;

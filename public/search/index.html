@@ -31,7 +31,6 @@
   gtag('js', new Date());
   gtag('config', 'G-TGD3WRNKPZ');
 </script>
-<script async src="https://cse.google.com/cse.js?cx=8427c6cf0bed54cc8"></script>
 <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
 <meta name="naver-site-verification" content="b15b33af838280b54d31eb3c7e5c358d2836743f" />
 <script type="text/javascript">
@@ -58,11 +57,11 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<link rel="stylesheet" href="/style.css?v=20260226042150">
+<link rel="stylesheet" href="/style.css?v=20260226043341">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script src="/firebase-config.js"></script>
-<script src="/translations.js?v=20260226042150"></script>
-<script src="/common.js?v=20260226042150"></script>
+<script src="/translations.js?v=20260226043341"></script>
+<script src="/common.js?v=20260226043341"></script>
 
 </head>
 <body><header>
@@ -115,12 +114,17 @@
   <main class="search-page">
     <section class="search-head">
       <h1 data-i18n="search_results_title">검색</h1>
+      <div class="search-box">
+        <input id="searchPageInput" type="text" autocomplete="off" placeholder="검색어를 입력하세요">
+        <button id="searchPageButton" type="button">검색</button>
+      </div>
+      <p id="searchSummary" class="summary"></p>
     </section>
 
-    <section class="results" aria-live="polite">
-      <div class="gcse-searchresults-only"></div>
-    </section>
+    <section id="searchPageResults" class="results" aria-live="polite"></section>
   </main>
+
+  <script type="module" src="main.js"></script>
 <footer>
     <p data-i18n="footer_copyright"></p>
     <p>

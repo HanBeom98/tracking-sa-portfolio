@@ -1,5 +1,8 @@
 import os
 import shutil
+import json
+import datetime
+import re
 
 from src.shared.infra.config import *
 from src.shared.infra.html_processor import process_html_file_for_common_elements
@@ -96,7 +99,48 @@ def generate_public_site():
         restore_news_snapshot(news_snapshot)
         upgrade_cached_news_index()
         upgrade_cached_article_pages()
+
+    build_search_index()
     
     # 루트 index.html 엘리먼트 처리
     process_html_file_for_common_elements(os.path.join(PUBLIC_DIR, "index.html"))
     print("✨ Total DDD Build Success with Shared Assets.")
+
+
+def build_search_index():
+    def parse_cards(html):
+        items = []
+        if not html:
+            return items
+        card_regex = re.compile(r'<a[^>]*class="news-card-premium"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)</a>', re.I)
+        title_regex = re.compile(r'<h2[^>]*class="news-title-text"[^>]*>([\s\S]*?)</h2>', re.I)
+        date_regex = re.compile(r'<span[^>]*class="news-date"[^>]*>([\s\S]*?)</span>', re.I)
+        for match in card_regex.finditer(html):
+            href = match.group(1) or ""
+            inner = match.group(2) or ""
+            title_match = title_regex.search(inner)
+            date_match = date_regex.search(inner)
+            title = re.sub(r"<[^>]*>", "", title_match.group(1)).strip() if title_match else ""
+            date = re.sub(r"<[^>]*>", "", date_match.group(1)).strip() if date_match else ""
+            if href and title:
+                items.append({"href": href, "title": title, "date": date})
+        return items
+
+    def load_html(path):
+        if not os.path.exists(path):
+            return ""
+        with open(path, "r", encoding="utf-8") as f:
+            return f.read()
+
+    ko_html = load_html(os.path.join(PUBLIC_DIR, "news", "index.html"))
+    en_html = load_html(os.path.join(PUBLIC_DIR, "en", "news", "index.html"))
+    payload = {
+        "generated_at": datetime.datetime.utcnow().isoformat() + "Z",
+        "items": {
+            "ko": parse_cards(ko_html),
+            "en": parse_cards(en_html),
+        },
+    }
+    out_path = os.path.join(PUBLIC_DIR, "search-index.json")
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False)

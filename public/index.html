@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tracking SA - AI Services & Hub</title>
     <!-- CSS and other head elements will be injected by main.py -->
-    <script async src="https://cse.google.com/cse.js?cx=8427c6cf0bed54cc8"></script>
+    <script src="/search.js" defer></script>
     <style>
         .home-controls-wrap {
             position: fixed;
@@ -141,32 +141,6 @@
             background: rgba(0, 82, 204, 0.05);
         }
 
-        /* Google CSE overrides */
-        .gcse-search {
-            width: 100%;
-        }
-        .gsc-control-cse {
-            padding: 0 !important;
-            border: none !important;
-            background: transparent !important;
-        }
-        .gsc-search-box .gsc-input input {
-            height: 50px !important;
-            font-size: 1.05rem !important;
-            border-radius: 999px !important;
-            border: 1px solid rgba(0, 82, 204, 0.2) !important;
-            padding: 0 16px !important;
-        }
-        .gsc-search-box .gsc-search-button button {
-            height: 50px !important;
-            border-radius: 999px !important;
-            background: #0052cc !important;
-            border: none !important;
-            padding: 0 18px !important;
-        }
-        .gsc-search-box .gsc-search-button svg {
-            fill: white !important;
-        }
         
         /* Corporate Category Layout */
         .category-wrapper {
@@ -350,7 +324,6 @@
   gtag('js', new Date());
   gtag('config', 'G-TGD3WRNKPZ');
 </script>
-<script async src="https://cse.google.com/cse.js?cx=8427c6cf0bed54cc8"></script>
 <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
 <meta name="naver-site-verification" content="b15b33af838280b54d31eb3c7e5c358d2836743f" />
 <script type="text/javascript">
@@ -377,11 +350,11 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<link rel="stylesheet" href="/style.css?v=20260226042529">
+<link rel="stylesheet" href="/style.css?v=20260226043343">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script src="/firebase-config.js"></script>
-<script src="/translations.js?v=20260226042529"></script>
-<script src="/common.js?v=20260226042529"></script>
+<script src="/translations.js?v=20260226043343"></script>
+<script src="/common.js?v=20260226043343"></script>
 
 </head>
 <body>
@@ -406,7 +379,11 @@
             </div>
 
             <div class="search-container">
-                <div class="gcse-searchbox-only" data-resultsUrl="/search/" data-newWindow="false"></div>
+                <div class="search-bar-wrapper">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="searchInput" placeholder="궁금한 AI 뉴스나 서비스를 검색하세요..." autocomplete="off">
+                </div>
+                <div id="searchResults"></div>
             </div>
         </section>
 

@@ -5,12 +5,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!searchInput || !searchResultsContainer) return;
 
     const currentLang = localStorage.getItem('lang') || 'ko';
-    const titleField = currentLang === 'en' ? 'titleEn' : 'titleKo';
-    const fallbackTitleField = currentLang === 'en' ? 'titleKo' : 'titleEn';
-    const basePath = currentLang === 'en' ? '/en' : '';
-
-    // Use existing Firebase instance if available, otherwise initialized by common scripts
-    const db = (window.db || (typeof firebase !== 'undefined' && firebase.apps.length ? firebase.firestore() : null));
+    const indexUrl = '/search-index.json';
 
     let debounceTimer;
 
@@ -48,16 +43,10 @@ document.addEventListener('DOMContentLoaded', function () {
         return items;
     }
 
-    async function searchFromNewsIndex(searchTerm, limit = 10) {
-        const newsPath = currentLang === 'en' ? '/en/news/' : '/news/';
-        const res = await fetch(newsPath, { cache: 'no-store' });
-        if (!res.ok) return [];
-        const html = await res.text();
-        const cards = parseCardsFromHtml(html);
-        const q = searchTerm.toLowerCase();
-        return cards
-            .filter((item) => item.title.toLowerCase().includes(q) && item.href)
-            .slice(0, limit);
+    async function loadSearchIndex() {
+        const res = await fetch(indexUrl, { cache: 'no-store' });
+        if (!res.ok) throw new Error('index_http_' + res.status);
+        return res.json();
     }
 
     function renderFallbackItems(items) {
@@ -74,6 +63,18 @@ document.addEventListener('DOMContentLoaded', function () {
         `).join('');
         searchResultsContainer.innerHTML = html;
         searchResultsContainer.classList.add('active');
+    }
+
+    async function searchFromNewsIndex(searchTerm, limit = 10) {
+        const newsPath = currentLang === 'en' ? '/en/news/' : '/news/';
+        const res = await fetch(newsPath, { cache: 'no-store' });
+        if (!res.ok) return [];
+        const html = await res.text();
+        const cards = parseCardsFromHtml(html);
+        const q = searchTerm.toLowerCase();
+        return cards
+            .filter((item) => item.title.toLowerCase().includes(q) && item.href)
+            .slice(0, limit);
     }
 
     function moveToSearchPage(rawQuery) {
@@ -104,49 +105,21 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     async function searchPosts(searchTerm) {
-        if (!db) {
+        try {
+            const index = await loadSearchIndex();
+            const items = (index?.items?.[currentLang] || []).filter((item) => {
+                return (item.title || '').toLowerCase().includes(searchTerm.toLowerCase());
+            }).slice(0, 10);
+            renderFallbackItems(items);
+        } catch (error) {
+            console.warn("Search index failed, falling back to news index:", error);
             try {
                 const items = await searchFromNewsIndex(searchTerm, 10);
                 renderFallbackItems(items);
-            } catch (_) {
-                searchResultsContainer.innerHTML = '<div class="search-no-results">검색 서비스를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.</div>';
+            } catch (finalError) {
+                console.error("Search error:", finalError);
+                searchResultsContainer.innerHTML = '<div class="search-no-results">검색 중 오류가 발생했습니다.</div>';
                 searchResultsContainer.classList.add('active');
-            }
-            return;
-        }
-        try {
-            // Firestore search logic: matches prefix of title
-            const snapshot = await db.collection('posts')
-                .where(titleField, '>=', searchTerm)
-                .where(titleField, '<=', searchTerm + '\uf8ff')
-                .limit(10)
-                .get();
-
-            displayResults(snapshot.docs, searchTerm);
-        } catch (error) {
-            console.warn("Search prefix query failed, falling back to client filter:", error);
-            try {
-                const fallbackSnapshot = await db.collection('posts')
-                    .orderBy('createdAt', 'desc')
-                    .limit(120)
-                    .get();
-                const q = searchTerm.toLowerCase();
-                const filteredDocs = fallbackSnapshot.docs.filter((doc) => {
-                    const data = doc.data();
-                    const title = String(data[titleField] || data[fallbackTitleField] || '').toLowerCase();
-                    return title.includes(q);
-                }).slice(0, 10);
-                displayResults(filteredDocs, searchTerm);
-            } catch (fallbackError) {
-                console.warn("Firestore fallback failed, trying news-index fallback:", fallbackError);
-                try {
-                    const items = await searchFromNewsIndex(searchTerm, 10);
-                    renderFallbackItems(items);
-                } catch (finalError) {
-                    console.error("Search error:", finalError);
-                    searchResultsContainer.innerHTML = '<div class="search-no-results">검색 중 오류가 발생했습니다.</div>';
-                    searchResultsContainer.classList.add('active');
-                }
             }
         }
     }
