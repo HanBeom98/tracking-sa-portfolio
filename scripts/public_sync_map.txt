@@ -33,5 +33,6 @@ src/domains/futures-estimate/main.js|public/futures-estimate/main.js
 src/domains/futures-estimate/application/prediction-labels.js|public/futures-estimate/application/prediction-labels.js
 src/domains/futures-estimate/application/impact-summary.js|public/futures-estimate/application/impact-summary.js
 src/domains/futures-estimate/infra/futures-api-client.js|public/futures-estimate/infra/futures-api-client.js
+src/domains/futures-estimate/infra/futures-retry-policy.js|public/futures-estimate/infra/futures-retry-policy.js
 src/domains/futures-estimate/ui/futures-page.js|public/futures-estimate/ui/futures-page.js
 src/domains/futures-estimate/ui/style.css|public/futures-estimate/ui/style.css

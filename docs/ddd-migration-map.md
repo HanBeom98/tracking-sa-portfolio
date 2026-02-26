@@ -30,6 +30,7 @@ board/write 도메인(2026-02-26 기준):
 futures-estimate 도메인(2026-02-26 기준):
 - `src/domains/futures-estimate/main.js`: 위젯/분석/히스토리 로딩 오케스트레이션
 - `src/domains/futures-estimate/infra/futures-api-client.js`: API 호출 경계(`/api/tv-scan`, `/api/futures-predictions`)
+- `src/domains/futures-estimate/infra/futures-retry-policy.js`: API 재시도/타임아웃 정책 분리
 - `src/domains/futures-estimate/application/prediction-labels.js`: 임계값/라벨 표시 규칙
 - `src/domains/futures-estimate/application/impact-summary.js`: 수치/요약 문구 포맷터
 - `src/domains/futures-estimate/ui/futures-page.js`: 위젯 초기화/DOM 렌더링

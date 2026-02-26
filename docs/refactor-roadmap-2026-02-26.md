@@ -82,6 +82,12 @@
     - `src/domains/futures-estimate/application/impact-summary.js`
     - `src/domains/futures-estimate/ui/futures-page.js`
     - `src/domains/futures-estimate/ui/style.css`
+  - futures API 재시도 정책 분리:
+    - `src/domains/futures-estimate/infra/futures-retry-policy.js`
+    - `src/domains/futures-estimate/infra/futures-api-client.js`는 정책 기반 재시도/타임아웃 처리
+  - unit test 추가:
+    - `tests/unit/futures-retry-policy.test.js`
+    - `tests/unit/futures-api-client.test.js`
   - 헤더 인증 메뉴 UID 노출 제거.
   - `smoke_auth_release.sh`를 분리 구조 기준으로 안정화(pipefail-safe).
   - 배포 후 `smoke_auth_release.sh` 자동 실행 워크플로우 연결.
@@ -93,7 +99,7 @@
   - CI `Unit Tests` 워크플로우로 unit test 필수 게이트 연결.
 - 진행중:
   - 로그인 UI 문구/알림의 도메인별 상세 키 세분화(현재는 공통 키 중심).
-  - futures API 에러 코드/재시도 정책 분리(현재 UI 단순 처리).
+  - futures API 에러 코드별 사용자 메시지 세분화(현재는 단일 실패 문구).
 
 ## Phase 2 (Short-term, 3-5 days)
 - 인증 UI/상태 로직을 모듈화:
