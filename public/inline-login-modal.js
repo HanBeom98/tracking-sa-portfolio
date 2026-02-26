@@ -7,6 +7,9 @@
 
   function createInlineLoginModalController({ getAuthService }) {
     let modal = null;
+    const actionHandlers = window.createAuthActionHandlers
+      ? window.createAuthActionHandlers({ getAuthService })
+      : null;
 
     function ensureModal() {
       if (modal) return modal;
@@ -73,43 +76,47 @@
 
       if (googleBtn) {
         googleBtn.onclick = async () => {
-          const authService = await getAuthService();
-          if (!authService) return;
-          try {
-            await authService.signInWithProvider("google");
-            modal.classList.remove("open");
-            document.body.style.overflow = "";
-          } catch (error) {
-            console.error("Google 로그인 실패:", error);
-            setError(t("auth_login_retry", "로그인에 실패했습니다. 다시 시도해주세요."));
-          }
+          if (!actionHandlers) return;
+          await actionHandlers.signInWithProvider("google", {
+            onSuccess() {
+              modal.classList.remove("open");
+              document.body.style.overflow = "";
+            },
+            onError(message) {
+              setError(message);
+            },
+          });
         };
       }
 
       if (emailBtn) {
         emailBtn.onclick = async () => {
-          const authService = await getAuthService();
-          if (!authService) return;
-          const email = (modal.querySelector("#inline-login-email")?.value || "").trim();
-          const password = modal.querySelector("#inline-login-password")?.value || "";
-          if (!email || !password) {
-            setError(t("auth_email_password_required", "이메일과 비밀번호를 입력해주세요."));
-            return;
-          }
-          try {
-            await authService.signInWithEmail(email, password);
-            modal.classList.remove("open");
-            document.body.style.overflow = "";
-          } catch (error) {
-            console.error("이메일 로그인 실패:", error);
-            setError(t("auth_login_failed", "로그인에 실패했습니다. 이메일/비밀번호를 확인해주세요."));
-          }
+          if (!actionHandlers) return;
+          await actionHandlers.signInWithEmail(
+            {
+              email: (modal.querySelector("#inline-login-email")?.value || "").trim(),
+              password: modal.querySelector("#inline-login-password")?.value || "",
+            },
+            {
+              onSuccess() {
+                modal.classList.remove("open");
+                document.body.style.overflow = "";
+              },
+              onValidationError(message) {
+                setError(message);
+              },
+              onError(message) {
+                setError(message);
+              },
+            }
+          );
         };
       }
 
       if (signupBtn) {
         signupBtn.onclick = () => {
-          window.location.href = `/auth/signup?redirect=${encodeURIComponent(redirectTo)}`;
+          if (!actionHandlers) return;
+          actionHandlers.goToSignup({ redirectTo });
         };
       }
     }

@@ -1,10 +1,4 @@
 (function () {
-  function t(key, fallback) {
-    return typeof window !== "undefined" && window.getTranslation
-      ? window.getTranslation(key, fallback)
-      : fallback;
-  }
-
   async function loadAuthControlsFactory() {
     if (typeof window.createAuthControlsController === "function") {
       return window.createAuthControlsController;
@@ -36,20 +30,6 @@
   }) {
     let authControlsController = null;
 
-    async function signInWithProvider(providerId) {
-      const authService = await getAuthService();
-      if (!authService) {
-        alert(t("auth_service_unavailable", "로그인 기능이 아직 준비되지 않았습니다."));
-        return;
-      }
-      try {
-        await authService.signInWithProvider(providerId);
-      } catch (error) {
-        console.error("로그인 실패:", error);
-        alert(t("auth_login_retry", "로그인에 실패했습니다. 다시 시도해주세요."));
-      }
-    }
-
     async function init() {
       const container = document.getElementById("auth-controls");
       if (!container) return;
@@ -63,7 +43,6 @@
       authControlsController = factory({
         container,
         getAuthService,
-        signInWithProvider,
         getCurrentUser,
         onLogoutSuccess,
       });

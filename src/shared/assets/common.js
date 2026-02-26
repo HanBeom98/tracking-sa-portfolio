@@ -283,6 +283,7 @@ async function getAuthService() {
 }
 
 async function loadInlineLoginModalFactory() {
+    await loadAuthActionHandlersFactory();
     if (typeof window.createInlineLoginModalController === "function") {
         return window.createInlineLoginModalController;
     }
@@ -304,7 +305,30 @@ async function loadInlineLoginModalFactory() {
     return window.createInlineLoginModalController;
 }
 
+async function loadAuthActionHandlersFactory() {
+    if (typeof window.createAuthActionHandlers === "function") {
+        return window.createAuthActionHandlers;
+    }
+    await new Promise((resolve, reject) => {
+        const existing = document.querySelector('script[data-auth-action-handlers="true"]');
+        if (existing) {
+            existing.addEventListener("load", resolve, { once: true });
+            existing.addEventListener("error", reject, { once: true });
+            return;
+        }
+        const script = document.createElement("script");
+        script.src = "/auth-action-handlers.js";
+        script.async = true;
+        script.dataset.authActionHandlers = "true";
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+    return window.createAuthActionHandlers;
+}
+
 async function loadAuthUiControllerFactory() {
+    await loadAuthActionHandlersFactory();
     if (typeof window.createAuthUiController === "function") {
         return window.createAuthUiController;
     }

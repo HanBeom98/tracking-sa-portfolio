@@ -56,8 +56,12 @@
   - `auth-prompt-kit` 분리:
     - `src/shared/assets/auth-prompt-kit.js`
     - `common.js`의 로그인 프롬프트/게이트링크 생성 책임을 모듈로 이동
+  - 인증 액션 핸들러 분리:
+    - `src/shared/assets/auth-action-handlers.js`
+    - `auth-controls`, `inline-login-modal`의 provider/email/signup/logout 중복 로직 통합
   - unit test 추가:
     - `tests/unit/auth-state-bus.test.js`
+    - `tests/unit/auth-action-handlers.test.js`
   - 헤더 인증 메뉴 UID 노출 제거.
   - `smoke_auth_release.sh`를 분리 구조 기준으로 안정화(pipefail-safe).
   - 배포 후 `smoke_auth_release.sh` 자동 실행 워크플로우 연결.

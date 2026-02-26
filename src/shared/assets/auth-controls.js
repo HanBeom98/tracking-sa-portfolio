@@ -8,10 +8,12 @@
   function createAuthControlsController({
     container,
     getAuthService,
-    signInWithProvider,
     getCurrentUser,
     onLogoutSuccess,
   }) {
+    const actionHandlers = window.createAuthActionHandlers
+      ? window.createAuthActionHandlers({ getAuthService })
+      : null;
     container.innerHTML = `
       <button id="auth-login" class="auth-button primary">${t("login", "로그인")}</button>
       <button id="auth-logout" class="auth-button" style="display:none;">${t("logout", "로그아웃")}</button>
@@ -69,40 +71,50 @@
       const provider = button.dataset.provider;
       if (!provider) return;
       container.classList.remove("open");
-      signInWithProvider(provider);
+      if (actionHandlers) {
+        actionHandlers.signInWithProvider(provider, {
+          onError(message) {
+            alert(message);
+          },
+        });
+      }
     });
 
     emailLoginBtn.addEventListener("click", async () => {
-      const authService = await getAuthService();
-      if (!authService || !emailInput || !passwordInput) return;
-      const email = emailInput.value.trim();
-      const password = passwordInput.value;
-      if (!email || !password) {
-        alert(t("auth_email_password_required", "이메일과 비밀번호를 입력해주세요."));
-        return;
-      }
-      try {
-        await authService.signInWithEmail(email, password);
-        container.classList.remove("open");
-      } catch (error) {
-        console.error("이메일 로그인 실패:", error);
-        alert(t("auth_login_failed", "로그인에 실패했습니다. 이메일/비밀번호를 확인해주세요."));
-      }
+      if (!emailInput || !passwordInput || !actionHandlers) return;
+      await actionHandlers.signInWithEmail(
+        {
+          email: emailInput.value.trim(),
+          password: passwordInput.value,
+        },
+        {
+          onSuccess() {
+            container.classList.remove("open");
+          },
+          onValidationError(message) {
+            alert(message);
+          },
+          onError(message) {
+            alert(message);
+          },
+        }
+      );
     });
 
     emailSignupBtn.addEventListener("click", () => {
-      window.location.href = `/auth/signup?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+      if (!actionHandlers) return;
+      actionHandlers.goToSignup({
+        redirectTo: window.location.pathname + window.location.search,
+      });
     });
 
     logoutButton.addEventListener("click", async () => {
-      const authService = await getAuthService();
-      if (!authService) return;
-      try {
-        await authService.signOut();
-        if (typeof onLogoutSuccess === "function") onLogoutSuccess();
-      } catch (error) {
-        console.error("로그아웃 실패:", error);
-      }
+      if (!actionHandlers) return;
+      await actionHandlers.signOut({
+        onSuccess() {
+          if (typeof onLogoutSuccess === "function") onLogoutSuccess();
+        },
+      });
     });
 
     document.addEventListener("click", (event) => {
