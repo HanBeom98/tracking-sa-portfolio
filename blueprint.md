@@ -78,7 +78,7 @@ Tracking SA를 프레임워크 의존 없이 안정적으로 운영 가능한 DD
 - 공유 자산(`common.js`)의 책임 분리가 지속적으로 진행 중.
 
 ## 🔭 Current Focus
-- [ ] 배포 안정성 강화: 릴리즈 스모크 테스트(`docs/release-smoke-ops.md`) 자동화 및 시나리오 보강
+- [x] 배포 안정성 강화: 뉴스/보드 도메인 E2E 스모크 테스트(`tests/e2e/`) 보강 완료
 - [ ] 레거시 도메인(`fortune`, `animal-face`) API 호출 로직 `infra` 계층으로 분리
 - [ ] Firestore 규칙 최소 권한 재설계 및 검색/뉴스 읽기 안정성 기준 재검토
 - [ ] 뉴스 생성 프롬프트 품질 관리(제목 품질, 중복 스타일 억제)

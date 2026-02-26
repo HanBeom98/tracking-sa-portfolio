@@ -1,5 +1,32 @@
 import { test, expect } from "@playwright/test";
 
+test("news index page renders news grid", async ({ page, baseURL }) => {
+  await page.goto(`${baseURL}/news/`, { waitUntil: "domcontentloaded" });
+  // Wait for the news grid to be hydrated
+  await page.waitForSelector(".news-grid");
+  const cards = page.locator(".news-card-premium");
+  await expect(cards.first()).toBeVisible();
+  
+  const title = await cards.first().locator(".news-title-text").textContent();
+  expect(title?.length).toBeGreaterThan(0);
+});
+
+test("news article page renders content", async ({ page, baseURL }) => {
+  // Go to news index first to find a valid article link
+  await page.goto(`${baseURL}/news/`, { waitUntil: "domcontentloaded" });
+  await page.waitForSelector(".news-grid");
+  const firstArticleLink = page.locator(".news-card-premium").first();
+  const href = await firstArticleLink.getAttribute("href");
+  
+  // Navigate to the article
+  await page.goto(`${baseURL}${href}`, { waitUntil: "domcontentloaded" });
+  await page.waitForSelector(".news-article-card");
+  
+  await expect(page.locator(".news-article-title")).toBeVisible();
+  await expect(page.locator(".news-article-content")).toBeVisible();
+  await expect(page.locator(".back-list-btn")).toBeVisible();
+});
+
 test("ai-test page loads and question advances", async ({ page, baseURL }) => {
   await page.goto(`${baseURL}/ai-test/`, { waitUntil: "domcontentloaded" });
   await page.waitForFunction(() => {

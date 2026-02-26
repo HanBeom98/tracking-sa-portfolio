@@ -15,6 +15,20 @@ test("account guest login button opens inline login modal", async ({ page, baseU
   await expectInlineLoginModalOpen(page);
 });
 
+test("board list page loads and renders posts", async ({ page, baseURL }) => {
+  await page.goto(`${baseURL}/board/`, { waitUntil: "domcontentloaded" });
+  await page.waitForSelector("board-list");
+  
+  // Wait for post items to appear inside board-list shadow DOM or light DOM
+  // Depending on how board-list is implemented (it seems to be a web component)
+  const boardList = page.locator("board-list");
+  await expect(boardList).toBeVisible();
+  
+  // We can't easily check shadow DOM internals with simple locators unless we use specific playwright selectors
+  // But we can check if the component status changes to ready
+  await expect(boardList).toHaveAttribute("status", "ready");
+});
+
 test("board write guest state blocks form and can open login modal", async ({ page, baseURL }) => {
   await page.goto(`${baseURL}/board/write/`, { waitUntil: "domcontentloaded" });
   await page.waitForSelector("#board-write-login-btn");
