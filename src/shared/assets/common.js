@@ -244,7 +244,11 @@ function initAuthControls() {
 
     loginButton.addEventListener('click', (event) => {
         event.preventDefault();
-        container.classList.toggle('open');
+        if (window.openAuthPrompt) {
+            window.openAuthPrompt();
+            return;
+        }
+        container.classList.add('open');
     });
 
     menu.addEventListener('click', (event) => {
