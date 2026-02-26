@@ -60,8 +60,10 @@ async function renderAccount() {
   const subscriptionStatus = subscription.status || "free";
   const subscriptionRenewAt = subscription.renewAt || subscription.nextBillingAt || "";
   const subscriptionExpiresAt = subscription.currentPeriodEnd || subscription.expiresAt || "";
+  const subscriptionPlan = subscription.planName || subscription.plan || subscription.tier || "";
   const nickname = (profile && profile.nickname) || user.displayName || "";
   const photoURL = (profile && profile.photoURL) || user.photoURL || "";
+  const nicknameUpdatedAt = profile && profile.nicknameUpdatedAt;
 
   infoEl.innerHTML = `
     <div class="account-row">
@@ -75,6 +77,10 @@ async function renderAccount() {
     <div class="account-row">
       <div class="account-label" data-i18n="account_subscription">구독 상태</div>
       <div class="account-value">${formatSubscription(subscriptionStatus)}</div>
+    </div>
+    <div class="account-row">
+      <div class="account-label" data-i18n="account_subscription_plan">구독 플랜</div>
+      <div class="account-value">${subscriptionPlan || "-"}</div>
     </div>
     <div class="account-row">
       <div class="account-label" data-i18n="account_subscription_renew">다음 결제일</div>
@@ -102,6 +108,7 @@ async function renderAccount() {
             <button type="button" id="nickname-check" data-i18n="nickname_check">중복확인</button>
           </div>
           <div class="helper" id="nickname-status"></div>
+          <div class="helper" id="nickname-cooldown"></div>
         </div>
         <div>
           <label for="photo-url" data-i18n="profile_image">프로필 이미지</label>
@@ -110,6 +117,7 @@ async function renderAccount() {
             <input id="avatar-file" type="file" accept="image/*">
             <button type="button" id="avatar-upload" data-i18n="profile_image_upload">업로드</button>
           </div>
+          <div class="avatar-drop" id="avatar-drop" data-i18n="profile_image_drop">이미지를 드래그해서 올리거나 클릭하세요.</div>
           <div class="profile-preview" id="profile-preview" style="margin-top:10px;">
             ${photoURL ? `<img src="${photoURL}" alt="profile">` : ""}
             <span class="helper" data-i18n="profile_image_hint">원형 이미지로 표시됩니다.</span>
@@ -135,9 +143,11 @@ async function renderAccount() {
   const nicknameInput = document.getElementById("nickname");
   const nicknameCheckBtn = document.getElementById("nickname-check");
   const nicknameStatus = document.getElementById("nickname-status");
+  const nicknameCooldown = document.getElementById("nickname-cooldown");
   const photoInput = document.getElementById("photo-url");
   const avatarFileInput = document.getElementById("avatar-file");
   const avatarUploadBtn = document.getElementById("avatar-upload");
+  const avatarDrop = document.getElementById("avatar-drop");
   const profilePreview = document.getElementById("profile-preview");
   const profileSaveBtn = document.getElementById("profile-save");
   const profileStatus = document.getElementById("profile-status");
@@ -164,6 +174,33 @@ async function renderAccount() {
     const trimmed = (value || "").trim();
     const regex = /^[A-Za-z0-9가-힣_]{2,12}$/;
     return regex.test(trimmed);
+  }
+
+  function getNicknameCooldownInfo() {
+    if (!nicknameUpdatedAt) return null;
+    const lastTs = typeof nicknameUpdatedAt.toMillis === "function"
+      ? nicknameUpdatedAt.toMillis()
+      : new Date(nicknameUpdatedAt).getTime();
+    if (!lastTs) return null;
+    const cooldownMs = 24 * 60 * 60 * 1000;
+    const nextAt = lastTs + cooldownMs;
+    const now = Date.now();
+    return { nextAt, remainingMs: Math.max(0, nextAt - now) };
+  }
+
+  const cooldownInfo = getNicknameCooldownInfo();
+  if (nicknameCooldown) {
+    if (cooldownInfo && cooldownInfo.remainingMs > 0) {
+      nicknameCooldown.textContent = window.getTranslation(
+        "nickname_next_change",
+        "다음 변경 가능:"
+      ) + " " + formatDate(cooldownInfo.nextAt);
+    } else {
+      nicknameCooldown.textContent = window.getTranslation(
+        "nickname_change_available",
+        "지금 변경 가능합니다."
+      );
+    }
   }
 
   if (nicknameInput) {
@@ -228,31 +265,57 @@ async function renderAccount() {
     });
   }
 
+  async function handleAvatarFile(file) {
+    if (!authService) return;
+    if (!file) {
+      setProfileStatus("profile_image_required", "이미지를 선택해주세요.", false);
+      return;
+    }
+    try {
+      setProfileStatus("profile_image_uploading", "이미지 업로드 중...", true);
+      const resized = await resizeImage(file);
+      const uploadUrl = await authService.uploadAvatar(resized || file);
+      if (photoInput) photoInput.value = uploadUrl;
+      if (profilePreview) {
+        profilePreview.innerHTML = `<img src="${uploadUrl}" alt="profile"><span class="helper" data-i18n="profile_image_hint">원형 이미지로 표시됩니다.</span>`;
+      }
+      setProfileStatus("profile_image_uploaded", "업로드 완료", true);
+      if (window.applyTranslations) {
+        const lang = localStorage.getItem("lang") || "ko";
+        window.applyTranslations(lang);
+      }
+    } catch (error) {
+      console.error("이미지 업로드 실패:", error);
+      setProfileStatus("profile_image_upload_failed", "업로드에 실패했습니다.", false);
+    }
+  }
+
   if (avatarUploadBtn && avatarFileInput) {
     avatarUploadBtn.addEventListener("click", async () => {
-      if (!authService) return;
       const file = avatarFileInput.files && avatarFileInput.files[0];
-      if (!file) {
-        setProfileStatus("profile_image_required", "이미지를 선택해주세요.", false);
-        return;
+      await handleAvatarFile(file);
+    });
+  }
+
+  if (avatarDrop) {
+    avatarDrop.addEventListener("click", () => {
+      if (avatarFileInput) avatarFileInput.click();
+    });
+    avatarDrop.addEventListener("dragover", (event) => {
+      event.preventDefault();
+      avatarDrop.classList.add("dragover");
+    });
+    avatarDrop.addEventListener("dragleave", () => {
+      avatarDrop.classList.remove("dragover");
+    });
+    avatarDrop.addEventListener("drop", async (event) => {
+      event.preventDefault();
+      avatarDrop.classList.remove("dragover");
+      const file = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0];
+      if (avatarFileInput && file) {
+        avatarFileInput.files = event.dataTransfer.files;
       }
-      try {
-        setProfileStatus("profile_image_uploading", "이미지 업로드 중...", true);
-        const resized = await resizeImage(file);
-        const uploadUrl = await authService.uploadAvatar(resized || file);
-        if (photoInput) photoInput.value = uploadUrl;
-        if (profilePreview) {
-          profilePreview.innerHTML = `<img src="${uploadUrl}" alt="profile"><span class="helper" data-i18n="profile_image_hint">원형 이미지로 표시됩니다.</span>`;
-        }
-        setProfileStatus("profile_image_uploaded", "업로드 완료", true);
-        if (window.applyTranslations) {
-          const lang = localStorage.getItem("lang") || "ko";
-          window.applyTranslations(lang);
-        }
-      } catch (error) {
-        console.error("이미지 업로드 실패:", error);
-        setProfileStatus("profile_image_upload_failed", "업로드에 실패했습니다.", false);
-      }
+      await handleAvatarFile(file);
     });
   }
 
