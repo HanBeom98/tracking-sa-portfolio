@@ -153,8 +153,9 @@ def _wrap_article_html(title, content_html, date_text, is_en=False):
     content_html = _strip_leading_title(content_html, title)
     back_href = "/en/news/" if is_en else "/news/"
     back_label = "Back to News" if is_en else "뉴스 목록으로"
+    lang_attr = "en" if is_en else "ko"
     return f"""<!DOCTYPE html>
-<html>
+<html lang="{lang_attr}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">

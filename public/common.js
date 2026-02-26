@@ -4,6 +4,12 @@
  */
 
 let currentLang = localStorage.getItem('lang') || 'ko';
+const initialPath = window.location.pathname || "/";
+if (initialPath.startsWith('/en/')) {
+    currentLang = 'en';
+}
+localStorage.setItem('lang', currentLang);
+document.documentElement.setAttribute('lang', currentLang === 'en' ? 'en' : 'ko');
 
 /**
  * Standardized translation utility for all domains.
@@ -31,6 +37,8 @@ window.applyTranslations = function(lang) {
 
 window.setLanguage = function(lang) {
     localStorage.setItem('lang', lang);
+    currentLang = lang;
+    document.documentElement.setAttribute('lang', lang === 'en' ? 'en' : 'ko');
     const path = window.location.pathname || "/";
 
     const isNewsIndex = path === "/news" || path === "/news/" || path === "/news/index.html";

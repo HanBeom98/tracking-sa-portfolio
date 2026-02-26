@@ -11,6 +11,7 @@ def process_html_file_for_common_elements(filepath):
             content = f.read()
 
         is_root_homepage = os.path.abspath(filepath) == os.path.abspath(os.path.join(PUBLIC_DIR, "index.html"))
+        is_en_page = os.path.abspath(filepath).startswith(os.path.abspath(os.path.join(PUBLIC_DIR, "en")) + os.sep)
 
         # Clean old injections to prevent duplicates
         content = re.sub(r'<header[\s\S]*?</header>', '', content, flags=re.DOTALL)
@@ -60,6 +61,12 @@ def process_html_file_for_common_elements(filepath):
 
         if '</head>' in content:
             content = content.replace('</head>', f'{seo_fallback_html}{get_common_head()}\n</head>')
+
+        if is_en_page:
+            if re.search(r'<html[^>]*\blang=', content, flags=re.IGNORECASE):
+                content = re.sub(r'(<html[^>]*\blang=)[\'"][^\'"]+[\'"]', r'\1"en"', content, flags=re.IGNORECASE)
+            else:
+                content = re.sub(r'(<html)([^>]*>)', r'\1 lang="en"\2', content, count=1, flags=re.IGNORECASE)
 
         header_html = get_common_header()
         # Header scripts are already included in get_common_head() via head.html
