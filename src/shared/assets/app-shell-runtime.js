@@ -141,12 +141,34 @@
       });
     }
 
+    function ensureShellVisibility() {
+      if (!root.document || typeof root.document.querySelector !== "function") return;
+      const header = root.document.querySelector("header");
+      if (header) {
+        header.style.setProperty("display", "flex", "important");
+        header.style.setProperty("visibility", "visible", "important");
+
+        const nav = typeof header.querySelector === "function" ? header.querySelector("nav") : null;
+        if (nav) nav.style.setProperty("display", "block", "important");
+
+        const logo = typeof header.querySelector === "function" ? header.querySelector(".site-logo-link") : null;
+        if (logo) logo.style.setProperty("display", "block", "important");
+      }
+
+      const footer = root.document.querySelector("footer");
+      if (footer) {
+        footer.style.setProperty("display", "block", "important");
+        footer.style.setProperty("visibility", "visible", "important");
+      }
+    }
+
     function initShell() {
       applyTranslations();
       initTheme();
       initLanguageSwitcher();
       updateNewsLinksForLang();
       initDropdownMenus();
+      ensureShellVisibility();
     }
 
     root.getTranslation = getTranslation;
@@ -155,6 +177,7 @@
 
     return {
       initShell,
+      ensureShellVisibility,
       getCurrentLang: () => currentLang,
     };
   }
