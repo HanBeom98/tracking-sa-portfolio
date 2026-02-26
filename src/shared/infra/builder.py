@@ -101,10 +101,95 @@ def generate_public_site():
         upgrade_cached_article_pages()
 
     build_search_index()
+    build_sitemap()
     
     # 루트 index.html 엘리먼트 처리
     process_html_file_for_common_elements(os.path.join(PUBLIC_DIR, "index.html"))
     print("✨ Total DDD Build Success with Shared Assets.")
+
+
+def build_sitemap():
+    def is_public_page(rel_path):
+        if not rel_path.endswith(".html"):
+            return False
+        if rel_path.startswith("ui/") or "/ui/" in rel_path:
+            return False
+        if "/domain/" in rel_path or "/infra/" in rel_path or "/application/" in rel_path:
+            return False
+        return True
+
+    def to_url(rel_path):
+        if rel_path.endswith("index.html"):
+            base = rel_path[:-len("index.html")]
+            return "/" + base
+        return "/" + rel_path
+
+    def lastmod_for(path):
+        try:
+            ts = os.path.getmtime(path)
+            return datetime.datetime.utcfromtimestamp(ts).date().isoformat()
+        except Exception:
+            return None
+
+    def escape(value):
+        return (
+            value.replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace('"', "&quot;")
+            .replace("'", "&apos;")
+        )
+
+    entries = []
+    alternates = {}
+
+    for root, _, files in os.walk(PUBLIC_DIR):
+        for name in files:
+            rel_path = os.path.relpath(os.path.join(root, name), PUBLIC_DIR).replace("\\", "/")
+            if not is_public_page(rel_path):
+                continue
+            url_path = to_url(rel_path)
+            lang = "en" if rel_path.startswith("en/") else "ko"
+            lastmod = lastmod_for(os.path.join(root, name))
+            entries.append({"rel_path": rel_path, "url_path": url_path, "lang": lang, "lastmod": lastmod})
+
+            key = rel_path[3:] if rel_path.startswith("en/") else rel_path
+            alternates.setdefault(key, {})[lang] = url_path
+
+    lines = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">'
+    ]
+
+    base_url = BASE_URL.rstrip("/")
+
+    for entry in entries:
+        rel_path = entry["rel_path"]
+        url_path = entry["url_path"]
+        lang = entry["lang"]
+        lastmod = entry["lastmod"]
+        key = rel_path[3:] if rel_path.startswith("en/") else rel_path
+        alt = alternates.get(key, {})
+
+        lines.append("  <url>")
+        lines.append(f"    <loc>{escape(base_url + url_path)}</loc>")
+        if lastmod:
+            lines.append(f"    <lastmod>{lastmod}</lastmod>")
+        for alt_lang, alt_path in sorted(alt.items()):
+            lines.append(
+                f'    <xhtml:link rel="alternate" hreflang="{escape(alt_lang)}" href="{escape(base_url + alt_path)}" />'
+            )
+        if "ko" in alt:
+            lines.append(
+                f'    <xhtml:link rel="alternate" hreflang="x-default" href="{escape(base_url + alt["ko"])}" />'
+            )
+        lines.append("  </url>")
+
+    lines.append("</urlset>")
+
+    os.makedirs(os.path.dirname(SITEMAP_PATH), exist_ok=True)
+    with open(SITEMAP_PATH, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
 
 
 def build_search_index():
