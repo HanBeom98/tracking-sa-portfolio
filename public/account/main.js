@@ -205,7 +205,11 @@ async function renderAccount() {
       }
       if (!authService) return;
       const result = await authService.checkNicknameAvailability(value);
-      if (result.available) {
+      if (result.available && result.owned) {
+        nicknameChecked = true;
+        nicknameCheckedValue = normalizeNickname(value);
+        setNicknameStatus("nickname_owned", "현재 사용 중인 닉네임입니다.", true);
+      } else if (result.available) {
         nicknameChecked = true;
         nicknameCheckedValue = normalizeNickname(value);
         setNicknameStatus("nickname_available", "사용 가능한 닉네임입니다.", true);
