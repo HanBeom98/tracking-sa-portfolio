@@ -8,6 +8,7 @@
 ## Deploy Rules
 - 일반 배포(디자인/기능): `Site Deploy (Build Only)`
 - 뉴스 생성/게시: `Daily AI News Post`
+- 배포 후 런타임 스모크: `Release Auth Smoke`
 - 배포 후 인증 회귀 확인: `E2E Auth Smoke` (자동 트리거 + 필요 시 수동 실행)
 - Cloudflare Pages `Automatic deployments`는 `Disabled` 유지
 
@@ -23,6 +24,7 @@
 ## After Deploy (Quick Smoke)
 - Actions:
   - `Site Deploy (Build Only)` 성공 확인
+  - `Release Auth Smoke` 성공 확인
   - `E2E Auth Smoke` 성공 확인 (실패 시 artifact에서 trace 확인)
 - 계정 페이지:
   - 로그아웃 상태에서 가운데 로그인 버튼 클릭 시 모달 열림
@@ -38,3 +40,5 @@
 - 배포 누락:
   - GitHub Actions 실행 성공 여부 확인
   - Cloudflare Deploy 기록에서 Direct Upload 확인
+- Playwright 로컬 크래시:
+  - `docs/playwright-ops.md` 기준으로 CI 결과 우선 판정

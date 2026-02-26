@@ -9,6 +9,7 @@
     "build:full": "[ -x venv/bin/python ] && venv/bin/python main.py || python3 main.py",
     "sync:public": "bash scripts/sync_public_assets.sh",
     "check:public-sync": "bash scripts/sync_public_assets.sh --check",
+    "test:smoke:release": "bash scripts/smoke_auth_release.sh",
     "test:e2e": "playwright test",
     "test:e2e:auth": "playwright test tests/e2e/auth-smoke.spec.js",
     "test": "npm run test:e2e:auth"

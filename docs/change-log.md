@@ -87,3 +87,24 @@
 - 남은 리스크/후속 과제:
   - 로컬 Playwright 환경(Chromium crash)으로 E2E 신뢰도 제한이 있어 CI 기준 검증 유지 필요.
   - 다음 단계로 account 도메인의 파일 단위 분리(application/ui helper) 진행 가능.
+
+### refactor(ddd/ops): account·board 파일 분리 + 릴리즈 스모크 자동화 (`be7a4c6`, `949899b`, `b4e570d`, `f8892d6`)
+- 문제/증상:
+  - account/board 페이지에 인라인 스타일·단일 파일 로직이 남아 구조 추적이 어려움.
+  - 배포 후 수동 점검 의존도가 높아 운영 회귀 탐지 속도가 느림.
+- 변경:
+  - account 도메인:
+    - `application/account-view-model.js`, `ui/account-renderer.js`, `ui/account.css`, `main.js`로 분리.
+  - board/write 도메인:
+    - `application/write-auth.js`, `ui/write-access-renderer.js`, `main.js`로 분리.
+  - CI:
+    - `.github/workflows/release-auth-smoke.yml` 추가(배포 성공 후 자동 스모크).
+  - 운영:
+    - `scripts/smoke_auth_release.sh`를 분리 구조에 맞게 갱신하고 pipefail-safe 처리.
+    - `scripts/public_sync_map.txt` 신규 파일 매핑 확장.
+- 영향 범위:
+  - 계정/게시글 작성 도메인 구조, 배포 후 인증 회귀 점검 체계.
+- 검증:
+  - `npm run sync:public`, `npm run check:public-sync` 통과.
+  - `./scripts/smoke_auth_release.sh` 통과.
+  - 관련 JS 문법 체크(`node --check`) 통과.
