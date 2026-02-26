@@ -47,30 +47,25 @@ test("firestore rules: posts allow only public read + admin delete", () => {
   const block = normalize(extractMatchBlock(rules, "/posts/{document=**}"));
 
   assert.ok(block.includes("allow read: if true;"));
-  assert.ok(block.includes("allow delete: if request.auth != null"));
-  assert.ok(
-    block.includes('get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";'),
-  );
+  assert.ok(block.includes("allow delete: if isAdmin();"));
   assert.ok(block.includes("allow create, update: if false;"));
 });
 
-test("firestore rules: board_posts enforce author ownership", () => {
+test("firestore rules: board_posts enforce author ownership and immutability", () => {
   const rules = readRules();
-  const block = normalize(extractMatchBlock(rules, "/board_posts/{document=**}"));
+  const block = normalize(extractMatchBlock(rules, "/board_posts/{postId}"));
 
   assert.ok(block.includes("allow read: if true;"));
   assert.ok(block.includes("allow create: if request.auth != null && request.resource.data.authorUid == request.auth.uid;"));
-  assert.ok(block.includes("allow update, delete: if request.auth != null && resource.data.authorUid == request.auth.uid;"));
+  assert.ok(block.includes("request.resource.data.authorUid == resource.data.authorUid;")); // immutability check
 });
 
-test("firestore rules: users role is immutable and defaults to free", () => {
+test("firestore rules: users profile use isOwner helper and forces free role", () => {
   const rules = readRules();
   const block = normalize(extractMatchBlock(rules, "/users/{userId}"));
 
-  assert.ok(block.includes("allow create: if request.auth != null"));
-  assert.ok(block.includes('request.resource.data.role == "free";'));
-  assert.ok(block.includes("allow update: if request.auth != null"));
-  assert.ok(block.includes("request.resource.data.role == resource.data.role;"));
+  assert.ok(block.includes("allow create: if isOwner(userId) && request.resource.data.role == \"free\";"));
+  assert.ok(block.includes("allow update: if isOwner(userId) && request.resource.data.role == resource.data.role;"));
 });
 
 test("firestore rules: nicknames allow guarded create/delete only", () => {
@@ -83,6 +78,15 @@ test("firestore rules: nicknames allow guarded create/delete only", () => {
   assert.ok(block.includes("!exists(/databases/$(database)/documents/nicknames/$(nickname));"));
   assert.ok(block.includes("allow delete: if request.auth != null && resource.data.uid == request.auth.uid;"));
   assert.ok(block.includes("allow update: if false;"));
+});
+
+test("firestore rules: game rankings are create-only with valid score", () => {
+  const rules = readRules();
+  const block = normalize(extractMatchBlock(rules, "/tetris_rankings/{docId}"));
+
+  assert.ok(block.includes("allow read: if true;"));
+  assert.ok(block.includes("allow create: if request.resource.data.score is number;"));
+  assert.ok(block.includes("allow update, delete: if false;"));
 });
 
 test("firestore rules: default deny exists", () => {

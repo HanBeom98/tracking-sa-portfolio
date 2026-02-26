@@ -110,18 +110,17 @@
     </div>
 </header>
 
-    <main>
-        <section class="container">
-            <div class="news-card-premium" style="margin-top: 40px; padding: 60px;">
-                <h1 data-i18n="about_us" style="font-size: 3rem; font-weight: 950; margin-bottom: 30px; color: var(--p-blue);">About Us</h1>
-                <div style="font-size: 1.25rem; line-height: 1.8; color: var(--text-main); display: flex; flex-direction: column; gap: 20px;">
-                    <p data-i18n="about_us_intro1">AI, 기술 및 다양한 주제에 대한 최신 뉴스 및 통찰력을 얻을 수 있는 TrackingSA에 오신 것을 환영합니다.</p>
-                    <p data-i18n="about_us_intro2">우리는 고급 AI 기능을 활용하여 유익한 콘텐츠를 제공합니다.</p>
-                    <p data-i18n="about_us_thanks" style="font-weight: 800; color: var(--p-blue);">방문해 주셔서 감사합니다!</p>
-                </div>
-            </div>
-        </section>
-    </main>
+    <app-layout 
+      data-i18n-attr="page-title:about_us_title"
+      page-title="About Us">
+        <div style="font-size: 1.1rem; line-height: 1.8; display: flex; flex-direction: column; gap: 20px; max-width: 800px; margin: 0 auto;">
+            <p data-i18n="about_us_intro1">AI, 기술 및 다양한 주제에 대한 최신 뉴스 및 통찰력을 얻을 수 있는 TrackingSA에 오신 것을 환영합니다.</p>
+            <p data-i18n="about_us_intro2">우리는 고급 AI 기능을 활용하여 유익한 콘텐츠를 제공합니다.</p>
+            <p data-i18n="about_us_thanks" style="font-weight: 800; color: #0052cc; text-align: center; font-size: 1.2rem;">방문해 주셔서 감사합니다!</p>
+        </div>
+    </app-layout>
+
+    <script src="/ui/app-layout.js" type="module"></script>
 <footer>
     <p data-i18n="footer_copyright"></p>
     <p>

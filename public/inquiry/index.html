@@ -110,30 +110,29 @@
     </div>
 </header>
 
-    <main>
-        <section class="container">
-            <div class="news-card-premium" style="margin-top: 40px; padding: 60px;">
-                <h1 data-i18n="partnership_inquiry_title" style="font-size: 3rem; font-weight: 950; margin-bottom: 30px; color: var(--p-blue);">Partnership Inquiry</h1>
-                <p data-i18n="partnership_inquiry_description" style="font-size: 1.25rem; margin-bottom: 40px;">TrackingSA와 파트너십에 관심 있으신가요? 아래 양식을 작성하여 문의해 주세요!</p>
-                
-                <form class="inquiry-form" style="display: flex; flex-direction: column; gap: 25px;">
-                    <div style="display: flex; flex-direction: column; gap: 10px; text-align: left;">
-                        <label data-i18n="name" style="font-weight: 800;">이름</label>
-                        <input type="text" style="padding: 15px; border-radius: 12px; border: 2px solid var(--p-blue-soft); font-size: 1rem; width: 100%;">
-                    </div>
-                    <div style="display: flex; flex-direction: column; gap: 10px; text-align: left;">
-                        <label data-i18n="email" style="font-weight: 800;">이메일</label>
-                        <input type="email" style="padding: 15px; border-radius: 12px; border: 2px solid var(--p-blue-soft); font-size: 1rem; width: 100%;">
-                    </div>
-                    <div style="display: flex; flex-direction: column; gap: 10px; text-align: left;">
-                        <label data-i18n="message" style="font-weight: 800;">메시지</label>
-                        <textarea rows="5" style="padding: 15px; border-radius: 12px; border: 2px solid var(--p-blue-soft); font-size: 1rem; resize: none; width: 100%;"></textarea>
-                    </div>
-                    <button type="submit" style="background: var(--p-blue); color: white; padding: 20px; border-radius: 15px; border: none; font-weight: 900; font-size: 1.2rem; cursor: pointer; transition: 0.3s;" data-i18n="send_inquiry">문의 보내기</button>
-                </form>
+    <app-layout 
+      data-i18n-attr="page-title:partnership_inquiry_title;page-description:partnership_inquiry_description"
+      page-title="Partnership Inquiry" 
+      page-description="TrackingSA와 파트너십에 관심 있으신가요? 아래 양식을 작성하여 문의해 주세요!">
+        
+        <form class="inquiry-form" style="display: flex; flex-direction: column; gap: 25px; max-width: 800px; margin: 0 auto;">
+            <div style="display: flex; flex-direction: column; gap: 10px; text-align: left;">
+                <label data-i18n="name" style="font-weight: 800;">이름</label>
+                <input type="text" style="padding: 15px; border-radius: 12px; border: 2px solid #e2e8f0; font-size: 1rem; width: 100%;">
             </div>
-        </section>
-    </main>
+            <div style="display: flex; flex-direction: column; gap: 10px; text-align: left;">
+                <label data-i18n="email" style="font-weight: 800;">이메일</label>
+                <input type="email" style="padding: 15px; border-radius: 12px; border: 2px solid #e2e8f0; font-size: 1rem; width: 100%;">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px; text-align: left;">
+                <label data-i18n="message" style="font-weight: 800;">메시지</label>
+                <textarea rows="5" style="padding: 15px; border-radius: 12px; border: 2px solid #e2e8f0; font-size: 1rem; resize: none; width: 100%;"></textarea>
+            </div>
+            <button type="submit" style="background: #0052cc; color: white; padding: 20px; border-radius: 15px; border: none; font-weight: 900; font-size: 1.2rem; cursor: pointer; transition: 0.3s;" data-i18n="send_inquiry">문의 보내기</button>
+        </form>
+    </app-layout>
+
+    <script src="/ui/app-layout.js" type="module"></script>
 <footer>
     <p data-i18n="footer_copyright"></p>
     <p>

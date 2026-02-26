@@ -1,45 +1,60 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Game rankings (existing behavior)
-    match /tetris_rankings/{document=**} {
-      allow read, write: if true;
+    
+    // Helper: check if user is admin
+    function isAdmin() {
+      return request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";
     }
 
-    match /ai_evolution_rankings/{document=**} {
-      allow read, write: if true;
+    // Helper: check if resource owner
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
     }
 
-    // News/search read access for public pages
+    // Game rankings: Only allow adding new records, prevent modification of existing ones
+    match /tetris_rankings/{docId} {
+      allow read: if true;
+      allow create: if request.resource.data.score is number;
+      allow update, delete: if false;
+    }
+
+    match /ai_evolution_rankings/{docId} {
+      allow read: if true;
+      allow create: if request.resource.data.score is number;
+      allow update, delete: if false;
+    }
+
+    // News/search: Public read, admin-only management
     match /posts/{document=**} {
       allow read: if true;
-      allow delete: if request.auth != null
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";
-      allow create, update: if false;
+      allow delete: if isAdmin();
+      allow create, update: if false; // Managed via Admin SDK / MAS
     }
 
-    // Board posts (write requires auth, edit/delete only by author)
-    match /board_posts/{document=**} {
+    // Board posts: Public read, authenticated write, owner-only edit/delete
+    match /board_posts/{postId} {
       allow read: if true;
-      allow create: if request.auth != null
+      allow create: if request.auth != null 
         && request.resource.data.authorUid == request.auth.uid;
-      allow update, delete: if request.auth != null
-        && resource.data.authorUid == request.auth.uid;
+      allow update: if request.auth != null 
+        && resource.data.authorUid == request.auth.uid
+        && request.resource.data.authorUid == resource.data.authorUid; // authorUid must be immutable
+      allow delete: if request.auth != null 
+        && (resource.data.authorUid == request.auth.uid || isAdmin());
     }
 
-    // Users profile (self read/write, role immutable for clients)
+    // Users profile: Self read/write, role controlled
     match /users/{userId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow create: if request.auth != null
-        && request.auth.uid == userId
-        && request.resource.data.role == "free";
-      allow update: if request.auth != null
-        && request.auth.uid == userId
-        && request.resource.data.role == resource.data.role;
-      allow delete: if request.auth != null && request.auth.uid == userId;
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) 
+        && request.resource.data.role == "free"; // Default role forced
+      allow update: if isOwner(userId) 
+        && request.resource.data.role == resource.data.role; // Prevent self-elevation to admin
+      allow delete: if isOwner(userId);
     }
 
-    // Nickname availability index (public read, guarded create/delete)
+    // Nickname availability index
     match /nicknames/{nickname} {
       allow read: if true;
       allow create: if request.auth != null
