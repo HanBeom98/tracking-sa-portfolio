@@ -169,6 +169,8 @@ function initDropdownMenus() {
 let authUser = null;
 let authProfile = null;
 let authReadyResolve = null;
+let authControlsController = null;
+let inlineModalController = null;
 window.authStateReady = new Promise((resolve) => {
     authReadyResolve = resolve;
 });
@@ -211,6 +213,28 @@ async function loadInlineLoginModalFactory() {
     return window.createInlineLoginModalController;
 }
 
+async function loadAuthControlsFactory() {
+    if (typeof window.createAuthControlsController === "function") {
+        return window.createAuthControlsController;
+    }
+    await new Promise((resolve, reject) => {
+        const existing = document.querySelector('script[data-auth-controls="true"]');
+        if (existing) {
+            existing.addEventListener("load", resolve, { once: true });
+            existing.addEventListener("error", reject, { once: true });
+            return;
+        }
+        const script = document.createElement("script");
+        script.src = "/auth-controls.js";
+        script.async = true;
+        script.dataset.authControls = "true";
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+    return window.createAuthControlsController;
+}
+
 async function signInWithProvider(providerId) {
     const authService = await getAuthService();
     if (!authService) {
@@ -225,143 +249,42 @@ async function signInWithProvider(providerId) {
     }
 }
 
-function initAuthControls() {
+async function initAuthControls() {
     const container = document.getElementById('auth-controls');
     if (!container) return;
-
-    container.innerHTML = `
-        <button id="auth-login" class="auth-button primary">로그인</button>
-        <button id="auth-logout" class="auth-button" style="display:none;">로그아웃</button>
-        <span id="auth-user" class="auth-user" style="display:none;"></span>
-        <div id="auth-menu" class="auth-menu">
-            <button type="button" data-provider="google">Google로 로그인</button>
-            <div class="auth-form">
-                <input id="auth-email" type="email" placeholder="이메일" autocomplete="email">
-                <input id="auth-password" type="password" placeholder="비밀번호" autocomplete="current-password">
-                <div class="auth-actions">
-                    <button type="button" id="auth-email-login" class="auth-button primary">이메일 로그인</button>
-                    <button type="button" id="auth-email-signup" class="auth-button">회원가입</button>
-                </div>
-                <div class="auth-helper">이메일/비밀번호 로그인은 기본 제공업체 설정이 필요합니다.</div>
-                <button type="button" id="auth-show-uid" class="auth-button">내 UID 확인</button>
-                <div id="auth-uid" class="auth-helper" style="display:none;"></div>
-            </div>
-        </div>
-    `;
-
-    const loginButton = container.querySelector('#auth-login');
-    const logoutButton = container.querySelector('#auth-logout');
-    const userLabel = container.querySelector('#auth-user');
-    const menu = container.querySelector('#auth-menu');
-    const emailInput = container.querySelector('#auth-email');
-    const passwordInput = container.querySelector('#auth-password');
-    const emailLoginBtn = container.querySelector('#auth-email-login');
-    const emailSignupBtn = container.querySelector('#auth-email-signup');
-    const showUidBtn = container.querySelector('#auth-show-uid');
-    const uidLabel = container.querySelector('#auth-uid');
-    let inlineModalController = null;
-    userLabel.addEventListener('click', () => {
-        if (!authUser) return;
-        window.location.href = '/account/';
-    });
-
-    loginButton.addEventListener('click', (event) => {
-        event.preventDefault();
-        if (window.openAuthPrompt) {
-            window.openAuthPrompt();
-            return;
-        }
-        container.classList.add('open');
-    });
-
-    menu.addEventListener('click', (event) => {
-        const button = event.target.closest('button');
-        if (!button) return;
-        const provider = button.dataset.provider;
-        if (!provider) return;
-        container.classList.remove('open');
-        signInWithProvider(provider);
-    });
-
-    emailLoginBtn.addEventListener('click', async () => {
-        const authService = await getAuthService();
-        if (!authService || !emailInput || !passwordInput) return;
-        const email = emailInput.value.trim();
-        const password = passwordInput.value;
-        if (!email || !password) {
-            alert("이메일과 비밀번호를 입력해주세요.");
-            return;
-        }
-        try {
-            await authService.signInWithEmail(email, password);
-            container.classList.remove('open');
-        } catch (error) {
-            console.error("이메일 로그인 실패:", error);
-            alert("로그인에 실패했습니다. 이메일/비밀번호를 확인해주세요.");
-        }
-    });
-
-    emailSignupBtn.addEventListener('click', () => {
-        window.location.href = `/auth/signup?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`;
-    });
-
-    showUidBtn.addEventListener('click', () => {
-        const user = window.getCurrentUser ? window.getCurrentUser() : null;
-        if (!user || !user.uid) {
-            alert("로그인 후 확인할 수 있습니다.");
-            return;
-        }
-        uidLabel.style.display = 'block';
-        uidLabel.textContent = `UID: ${user.uid}`;
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(user.uid).catch(() => {});
-        }
-    });
-
-    logoutButton.addEventListener('click', async () => {
-        const authService = await getAuthService();
-        if (!authService) return;
-        try {
-            await authService.signOut();
+    const factory = await loadAuthControlsFactory();
+    if (typeof factory !== "function") {
+        console.error("Auth controls factory is not available.");
+        return;
+    }
+    authControlsController = factory({
+        container,
+        getAuthService,
+        signInWithProvider,
+        getCurrentUser: () => authUser,
+        onLogoutSuccess: () => {
             const path = window.location.pathname || "/";
             const isAccountPage = path === "/account/" || path === "/account" || path === "/account/index.html";
             if (isAccountPage) {
                 window.location.href = "/account/";
             }
-        } catch (error) {
-            console.error("로그아웃 실패:", error);
-        }
-    });
-
-    document.addEventListener('click', (event) => {
-        if (!container.contains(event.target)) {
-            container.classList.remove('open');
-        }
+        },
     });
 
     window.showAuthMenu = () => {
-        if (!container) {
+        if (!authControlsController) {
             alert("로그인이 필요합니다.");
             return;
         }
-        container.classList.add('open');
+        authControlsController.showAuthMenu();
     };
 
     window.openAuthPrompt = () => {
-        if (!container) {
+        if (!authControlsController) {
             alert("로그인이 필요합니다.");
             return;
         }
-        container.classList.add('open');
-        const top = container.getBoundingClientRect().top + window.scrollY - 110;
-        if (top >= 0) {
-            window.scrollTo({ top, behavior: "smooth" });
-        }
-        if (emailInput) {
-            setTimeout(() => {
-                emailInput.focus();
-            }, 120);
-        }
+        authControlsController.openAuthPrompt();
     };
 
     window.openInlineLoginModal = async ({ redirectTo = "/" } = {}) => {
@@ -377,23 +300,8 @@ function initAuthControls() {
     };
 
     window.updateAuthControls = (user) => {
-        if (!container) return;
-        if (user) {
-            loginButton.style.display = 'none';
-            logoutButton.style.display = 'inline-flex';
-            userLabel.style.display = 'inline-flex';
-            const nickname = (authProfile && authProfile.nickname) || user.displayName || user.email || '로그인됨';
-            const photoURL = (authProfile && authProfile.photoURL) || user.photoURL || '';
-            if (photoURL) {
-                userLabel.innerHTML = `<img class="auth-avatar" src="${photoURL}" alt="profile"><span class="auth-user-label">${nickname}</span>`;
-            } else {
-                userLabel.textContent = nickname;
-            }
-        } else {
-            loginButton.style.display = 'inline-flex';
-            logoutButton.style.display = 'none';
-            userLabel.style.display = 'none';
-        }
+        if (!authControlsController) return;
+        authControlsController.setUser(user, authProfile);
     };
 }
 
@@ -450,13 +358,13 @@ window.requireAuth = async ({ redirectTo } = {}) => {
     return null;
 };
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     window.applyTranslations(currentLang);
     initTheme();
     initLanguageSwitcher();
     updateNewsLinksForLang();
     initDropdownMenus();
-    initAuthControls();
+    await initAuthControls();
     initAuthGateLinks();
     initAuth();
     
