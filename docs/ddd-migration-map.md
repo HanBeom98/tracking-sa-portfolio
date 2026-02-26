@@ -20,6 +20,11 @@ account 도메인(2026-02-26 기준):
 - `src/domains/account/ui/account-renderer.js`: 게스트/계정 화면 렌더링 및 상태 메시지 유틸
 - `src/domains/account/main.js`: 인증 상태 구독 + 액션 바인딩 오케스트레이션
 
+board/write 도메인(2026-02-26 기준):
+- `src/domains/board/write/application/write-auth.js`: 인증 상태 확인/현재 사용자 접근 유틸
+- `src/domains/board/write/ui/write-access-renderer.js`: 비로그인 상태 렌더링 및 로그인 유도 UI
+- `src/domains/board/write/main.js`: 게시글 제출 + 상태 이벤트 오케스트레이션
+
 ## 3) Build and Injection Flow
 1. 엔트리포인트: `main.py`
 2. 사이트 빌드: `src/shared/infra/builder.py::generate_public_site()`

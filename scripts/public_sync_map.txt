@@ -8,6 +8,8 @@ src/domains/account/index.html|public/account/index.html
 src/domains/account/application/account-view-model.js|public/account/application/account-view-model.js
 src/domains/account/ui/account-renderer.js|public/account/ui/account-renderer.js
 src/domains/account/main.js|public/account/main.js
+src/domains/board/write/application/write-auth.js|public/board/write/application/write-auth.js
+src/domains/board/write/ui/write-access-renderer.js|public/board/write/ui/write-access-renderer.js
 src/domains/board/write/main.js|public/board/write/main.js
 src/domains/news/application/news-client.js|public/news/news-client.js
 src/domains/news/ui/style.css|public/news/ui/style.css

@@ -4,6 +4,7 @@ set -euo pipefail
 BASE_URL="${1:-https://trackingsa.com}"
 ACCOUNT_HTML="$(curl -s "${BASE_URL}/account/")"
 ACCOUNT_MAIN="$(curl -s "${BASE_URL}/account/main.js")"
+ACCOUNT_RENDERER="$(curl -s "${BASE_URL}/account/ui/account-renderer.js")"
 COMMON_JS="$(curl -s "${BASE_URL}/common.js")"
 BOARD_WRITE_MAIN="$(curl -s "${BASE_URL}/board/write/main.js")"
 
@@ -12,8 +13,8 @@ rg -q 'src="main.js"' <<< "$ACCOUNT_HTML"
 echo "  OK"
 
 echo "[2/4] Check account modal login code..."
-rg -q "account-login-btn" <<< "$ACCOUNT_MAIN"
-rg -q "promptLogin|createLoginRequiredPrompt" <<< "$ACCOUNT_MAIN"
+rg -q "account-login-btn|createLoginRequiredPrompt" <<< "$ACCOUNT_RENDERER"
+rg -q "getAccountModules|bindProfileActions" <<< "$ACCOUNT_MAIN"
 echo "  OK"
 
 echo "[3/4] Check auth event bridge..."
