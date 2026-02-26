@@ -26,6 +26,7 @@ src/domains/board/post/main.js|public/board/post/main.js
 src/domains/board/edit/application/edit-post-use-cases.js|public/board/edit/application/edit-post-use-cases.js
 src/domains/board/edit/main.js|public/board/edit/main.js
 src/domains/news/application/news-client.js|public/news/news-client.js
+src/domains/news/application/news-pagination.js|public/news/news-pagination.js
 src/domains/news/ui/style.css|public/news/ui/style.css
 src/domains/news/ui/style.css|public/en/news/ui/style.css
 src/domains/animal-face/main.js|public/animal-face/main.js
@@ -58,3 +59,9 @@ src/domains/ai-test/application/ai-test-data.js|public/ai-test/application/ai-te
 src/domains/ai-test/application/ai-test-result.js|public/ai-test/application/ai-test-result.js
 src/domains/ai-test/application/ai-test-progress.js|public/ai-test/application/ai-test-progress.js
 src/domains/ai-test/ui/ai-test-view.js|public/ai-test/ui/ai-test-view.js
+src/domains/games/ai-evolution/main.js|public/ai-evolution/main.js
+src/domains/games/ai-evolution/infra/firebase-runtime.js|public/ai-evolution/infra/firebase-runtime.js
+src/domains/games/ai-evolution/application/ai-evolution-game.js|public/ai-evolution/application/ai-evolution-game.js
+src/domains/games/tetris/main.js|public/tetris-game/main.js
+src/domains/games/tetris/infra/firebase-runtime.js|public/tetris-game/infra/firebase-runtime.js
+src/domains/games/tetris/application/tetris-game.js|public/tetris-game/application/tetris-game.js
