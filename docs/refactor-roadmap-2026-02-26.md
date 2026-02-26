@@ -152,6 +152,9 @@
     - `scripts/public_sync_map.txt`에서 `src/domains/*/index.html` 매핑 제거
     - `scripts/sync_public_assets.sh`에 도메인 `index.html` 매핑 차단 검증 추가
     - 템플릿 주입형 페이지는 `builder` 경로로만 생성되도록 고정
+  - Firestore Rules 가드 테스트 추가:
+    - `tests/unit/firestore-rules-guards.test.js`
+    - 뉴스(`posts`) admin 삭제/생성 금지, 게시판(`board_posts`) 작성자 제약, 사용자(`users`) role immutable, 닉네임(`nicknames`) 생성/삭제 제약, default deny 검증
   - unit test 추가:
     - `tests/unit/animal-face-messages.test.js`
     - `tests/unit/animal-face-view-text.test.js`

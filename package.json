@@ -10,6 +10,7 @@
     "sync:public": "bash scripts/sync_public_assets.sh",
     "check:public-sync": "bash scripts/sync_public_assets.sh --check",
     "test:smoke:release": "bash scripts/smoke_auth_release.sh",
+    "test:rules": "node --test tests/unit/firestore-rules-guards.test.js",
     "test:unit": "node --test tests/unit/*.test.js",
     "test:e2e": "playwright test",
     "test:e2e:auth": "playwright test tests/e2e/auth-smoke.spec.js",
