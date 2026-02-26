@@ -10,6 +10,20 @@ from src.shared.infra.db import get_firestore_client
 from src.shared.infra.html_processor import process_html_file_for_common_elements
 
 
+def _write_if_changed(path, content):
+    if os.path.exists(path):
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                if f.read() == content:
+                    return False
+        except Exception:
+            pass
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(content)
+    return True
+
+
 def _extract_date_from_slug(slug):
     m = re.match(r'^(\d{4}-\d{2}-\d{2})', slug)
     if m:
@@ -353,14 +367,13 @@ def generate_news_pages():
 
             html = _wrap_article_html(title, _render_markdown_with_hashtags(content), date, is_en=False)
 
-            with open(out_path, "w", encoding="utf-8") as f:
-                f.write(html)
-            process_html_file_for_common_elements(out_path)
-            os.makedirs(os.path.dirname(en_out_path), exist_ok=True)
+            changed_ko = _write_if_changed(out_path, html)
+            if changed_ko:
+                process_html_file_for_common_elements(out_path)
             en_html = _wrap_article_html(title_en, _render_markdown_with_hashtags(content_en), date, is_en=True)
-            with open(en_out_path, "w", encoding="utf-8") as f:
-                f.write(en_html)
-            process_html_file_for_common_elements(en_out_path)
+            changed_en = _write_if_changed(en_out_path, en_html)
+            if changed_en:
+                process_html_file_for_common_elements(en_out_path)
             articles.append({'title': title, 'url': f"{ukey}.html", 'date': date, 'excerpt': excerpt})
             articles_en.append({'title': title_en, 'url': f"{ukey}.html", 'date': date, 'excerpt': excerpt_en})
     except Exception as e:
@@ -407,15 +420,14 @@ def generate_news_pages():
 
         dest_idx = os.path.join(PUBLIC_DIR, "news", "index.html")
         os.makedirs(os.path.dirname(dest_idx), exist_ok=True)
-        with open(dest_idx, "w", encoding="utf-8") as f:
-            f.write(final_html)
-        process_html_file_for_common_elements(dest_idx)
+        changed_idx = _write_if_changed(dest_idx, final_html)
+        if changed_idx:
+            process_html_file_for_common_elements(dest_idx)
 
         dest_idx_en = os.path.join(PUBLIC_DIR, "en", "news", "index.html")
-        os.makedirs(os.path.dirname(dest_idx_en), exist_ok=True)
-        with open(dest_idx_en, "w", encoding="utf-8") as f:
-            f.write(final_html_en)
-        process_html_file_for_common_elements(dest_idx_en)
+        changed_idx_en = _write_if_changed(dest_idx_en, final_html_en)
+        if changed_idx_en:
+            process_html_file_for_common_elements(dest_idx_en)
     return articles, db_ok
 
 

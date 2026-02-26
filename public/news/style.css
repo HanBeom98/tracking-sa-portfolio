@@ -437,3 +437,35 @@ body.dark-mode .pagination-button {
     border-color: oklch(30% 0.02 260);
     color: oklch(85% 0.02 260);
 }
+
+.news-admin-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 12px;
+}
+
+.news-admin-delete-btn {
+    border: 1px solid #ef4444;
+    background: #fff5f5;
+    color: #b91c1c;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.news-admin-delete-btn:hover {
+    background: #fee2e2;
+}
+
+.news-admin-delete-btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+body.dark-mode .news-admin-delete-btn {
+    background: oklch(25% 0.05 25);
+    color: oklch(82% 0.09 25);
+    border-color: oklch(55% 0.2 25);
+}
