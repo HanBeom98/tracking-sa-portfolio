@@ -1,14 +1,20 @@
 import {
   formatNumber,
   formatChangePercent,
-  buildImpactSummaryText,
-  buildUpdatedAtText,
+  buildImpactSummaryTextWithTranslator,
+  buildUpdatedAtTextWithTranslator,
 } from "../application/impact-summary.js";
 import {
   computePredictionLabel,
-  toDirectionText,
-  toPredictionResultText,
+  toDirectionTextWithTranslator,
+  toPredictionResultTextWithTranslator,
 } from "../application/prediction-labels.js";
+
+function t(key, fallback) {
+  return typeof window !== "undefined" && window.getTranslation
+    ? window.getTranslation(key, fallback)
+    : fallback;
+}
 
 function buildWidget(containerId, scriptSrc, payload) {
   const container = document.getElementById(containerId);
@@ -71,8 +77,9 @@ function renderImpactAnalysisSuccess(data) {
   `).join("");
 
   bodyEl.innerHTML = rows;
-  summaryEl.textContent = buildImpactSummaryText(data);
-  updatedEl.textContent = buildUpdatedAtText(data?.updatedAt, "ko-KR");
+  summaryEl.textContent = buildImpactSummaryTextWithTranslator(data, t);
+  const locale = (document.documentElement.lang || "ko").toLowerCase().startsWith("en") ? "en-US" : "ko-KR";
+  updatedEl.textContent = buildUpdatedAtTextWithTranslator(data?.updatedAt, locale, t);
 }
 
 function renderImpactAnalysisFailure() {
@@ -81,9 +88,9 @@ function renderImpactAnalysisFailure() {
   const updatedEl = document.getElementById("analysis-updated-at");
   if (!bodyEl || !summaryEl || !updatedEl) return;
 
-  bodyEl.innerHTML = '<tr><td colspan="4" style="padding:10px 6px; color:#b91c1c;">분석 데이터 조회 실패(CORS/소스 제한 가능). 위젯 시각 확인만 가능합니다.</td></tr>';
-  summaryEl.textContent = "모델 계산 불가";
-  updatedEl.textContent = "업데이트 실패";
+  bodyEl.innerHTML = `<tr><td colspan="4" style="padding:10px 6px; color:#b91c1c;">${t("futures_analysis_fail", "분석 데이터 조회 실패(CORS/소스 제한 가능). 위젯 시각 확인만 가능합니다.")}</td></tr>`;
+  summaryEl.textContent = t("futures_model_unavailable", "모델 계산 불가");
+  updatedEl.textContent = t("futures_updated_failed", "업데이트 실패");
 }
 
 function renderPredictionHistorySuccess(items) {
@@ -91,16 +98,16 @@ function renderPredictionHistorySuccess(items) {
   if (!bodyEl) return;
 
   if (!items.length) {
-    bodyEl.innerHTML = '<tr><td colspan="5" style="padding:10px 6px; color:#64748b;">예측 기록이 아직 없습니다.</td></tr>';
+    bodyEl.innerHTML = `<tr><td colspan="5" style="padding:10px 6px; color:#64748b;">${t("futures_history_empty", "예측 기록이 아직 없습니다.")}</td></tr>`;
     return;
   }
 
   const rows = items.map((item) => {
     const date = item.target_date || "-";
     const inferredPred = item.prediction_label || computePredictionLabel(item.probability_up);
-    const pred = toDirectionText(inferredPred);
-    const actual = toDirectionText(item.actual_label || "-");
-    const resultText = toPredictionResultText(item);
+    const pred = toDirectionTextWithTranslator(inferredPred, t);
+    const actual = toDirectionTextWithTranslator(item.actual_label || "-", t);
+    const resultText = toPredictionResultTextWithTranslator(item, t);
     const probabilityText = typeof item.probability_up === "number"
       ? `${item.probability_up.toFixed(2)}%`
       : "-";
@@ -121,7 +128,7 @@ function renderPredictionHistorySuccess(items) {
 function renderPredictionHistoryFailure() {
   const bodyEl = document.getElementById("prediction-history-body");
   if (!bodyEl) return;
-  bodyEl.innerHTML = '<tr><td colspan="5" style="padding:10px 6px; color:#b91c1c;">비교 데이터 조회 실패</td></tr>';
+  bodyEl.innerHTML = `<tr><td colspan="5" style="padding:10px 6px; color:#b91c1c;">${t("futures_history_fail", "비교 데이터 조회 실패")}</td></tr>`;
 }
 
 export {

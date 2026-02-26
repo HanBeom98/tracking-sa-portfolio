@@ -15,15 +15,15 @@
 <body>
   <main class="futures-page">
     <section class="futures-hero">
-      <h1>코스피200 지수 모니터</h1>
-      <p>임베드 정책상 야간선물(K2I1!)은 TradingView 원페이지 링크로 제공하고, 페이지 내 위젯은 공개 임베드 가능한 코스피200 지수 심볼을 사용합니다.</p>
+      <h1 data-i18n="futures_monitor_title">코스피200 지수 모니터</h1>
+      <p data-i18n="futures_monitor_desc">임베드 정책상 야간선물(K2I1!)은 TradingView 원페이지 링크로 제공하고, 페이지 내 위젯은 공개 임베드 가능한 코스피200 지수 심볼을 사용합니다.</p>
     </section>
 
     <section class="futures-panel">
-      <a class="tv-link" href="https://kr.tradingview.com/symbols/KRX-K2I1!/?contract=K2IH2026" target="_blank" rel="noopener nofollow">야간선물 K2I1! 원페이지에서 보기</a>
+      <a class="tv-link" href="https://kr.tradingview.com/symbols/KRX-K2I1!/?contract=K2IH2026" target="_blank" rel="noopener nofollow" data-i18n="futures_night_link">야간선물 K2I1! 원페이지에서 보기</a>
 
-      <div class="panel-title">야간 영향 6종 모니터</div>
-      <div class="panel-subtitle">SPY, QQQ, DIA, USDKRW, GOLD, BTC 동시 확인</div>
+      <div class="panel-title" data-i18n="futures_impact_monitor_title">야간 영향 6종 모니터</div>
+      <div class="panel-subtitle" data-i18n="futures_impact_monitor_subtitle">SPY, QQQ, DIA, USDKRW, GOLD, BTC 동시 확인</div>
       <div class="multi-grid">
         <div class="mini-card">
           <div class="mini-title">AMEX:SPY (S&P500 ETF)</div>
@@ -51,40 +51,40 @@
         </div>
       </div>
 
-      <div class="panel-title" style="margin-top:16px;">야간 영향 분석표</div>
-      <div class="panel-subtitle" id="analysis-updated-at">데이터 업데이트 대기중</div>
+      <div class="panel-title" style="margin-top:16px;" data-i18n="futures_impact_table_title">야간 영향 분석표</div>
+      <div class="panel-subtitle" id="analysis-updated-at" data-i18n="futures_updated_waiting">데이터 업데이트 대기중</div>
       <div class="mini-card">
         <table style="width:100%; border-collapse: collapse; font-size:0.84rem;">
           <thead>
             <tr style="text-align:left; border-bottom:1px solid #e2e8f0;">
-              <th style="padding:8px 6px;">지표</th>
-              <th style="padding:8px 6px;">현재값</th>
-              <th style="padding:8px 6px;">등락률</th>
-              <th style="padding:8px 6px;">국장 시그널</th>
+              <th style="padding:8px 6px;" data-i18n="futures_col_indicator">지표</th>
+              <th style="padding:8px 6px;" data-i18n="futures_col_current">현재값</th>
+              <th style="padding:8px 6px;" data-i18n="futures_col_change">등락률</th>
+              <th style="padding:8px 6px;" data-i18n="futures_col_signal">국장 시그널</th>
             </tr>
           </thead>
           <tbody id="impact-analysis-body">
-            <tr><td colspan="4" style="padding:10px 6px; color:#64748b;">분석 데이터를 불러오는 중...</td></tr>
+            <tr><td colspan="4" style="padding:10px 6px; color:#64748b;" data-i18n="futures_loading_analysis">분석 데이터를 불러오는 중...</td></tr>
           </tbody>
         </table>
         <div id="impact-summary" style="margin-top:10px; font-weight:800; color:#0f172a;"></div>
       </div>
 
       <details class="toggle-wrap" style="margin-top:16px;">
-        <summary class="toggle-summary">예측 vs 실제 비교표 (클릭해 열기/닫기)</summary>
-        <div class="panel-subtitle" style="margin-top:4px;">최근 예측 기록과 평가 결과(적중/실패) · 코스피200 종가 기준</div>
+        <summary class="toggle-summary" data-i18n="futures_history_toggle">예측 vs 실제 비교표 (클릭해 열기/닫기)</summary>
+        <div class="panel-subtitle" style="margin-top:4px;" data-i18n="futures_history_subtitle">최근 예측 기록과 평가 결과(적중/실패) · 코스피200 종가 기준</div>
         <table style="width:100%; border-collapse: collapse; font-size:0.84rem;">
           <thead>
             <tr style="text-align:left; border-bottom:1px solid #e2e8f0;">
-              <th style="padding:8px 6px;">날짜</th>
-              <th style="padding:8px 6px;">예측</th>
-              <th style="padding:8px 6px;">실제</th>
-              <th style="padding:8px 6px;">결과</th>
-              <th style="padding:8px 6px;">확률</th>
+              <th style="padding:8px 6px;" data-i18n="futures_col_date">날짜</th>
+              <th style="padding:8px 6px;" data-i18n="futures_col_predicted">예측</th>
+              <th style="padding:8px 6px;" data-i18n="futures_col_actual">실제</th>
+              <th style="padding:8px 6px;" data-i18n="futures_col_result">결과</th>
+              <th style="padding:8px 6px;" data-i18n="futures_col_probability">확률</th>
             </tr>
           </thead>
           <tbody id="prediction-history-body">
-            <tr><td colspan="5" style="padding:10px 6px; color:#64748b;">비교 데이터를 불러오는 중...</td></tr>
+            <tr><td colspan="5" style="padding:10px 6px; color:#64748b;" data-i18n="futures_loading_history">비교 데이터를 불러오는 중...</td></tr>
           </tbody>
         </table>
       </details>
