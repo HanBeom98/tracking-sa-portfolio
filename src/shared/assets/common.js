@@ -346,37 +346,34 @@ function initAuthControls() {
         if (!modal) {
             modal = document.createElement("div");
             modal.id = "global-inline-login-modal";
-            modal.style.position = "fixed";
-            modal.style.inset = "0";
-            modal.style.background = "rgba(2,6,23,0.45)";
-            modal.style.display = "none";
-            modal.style.alignItems = "center";
-            modal.style.justifyContent = "center";
-            modal.style.padding = "20px";
-            modal.style.zIndex = "2147483646";
+            modal.className = "inline-login-modal";
             modal.innerHTML = `
-              <div style="width:min(420px,92vw);background:white;border:1px solid oklch(92% 0.02 260);border-radius:16px;padding:18px;box-shadow:0 24px 48px rgba(2,6,23,0.2);display:grid;gap:10px;">
-                <h2 style="margin:0;font-size:1.1rem;font-weight:800;color:var(--text-main);">로그인</h2>
-                <button type="button" class="auth-button" id="inline-login-close" style="justify-self:end;min-width:76px;">닫기</button>
+              <div class="inline-login-dialog">
+                <h2 class="inline-login-title">로그인</h2>
+                <button type="button" class="auth-button inline-login-close" id="inline-login-close">닫기</button>
                 <button type="button" class="auth-button" id="inline-login-google">Google로 로그인</button>
-                <input id="inline-login-email" type="email" placeholder="이메일" autocomplete="email" style="height:42px;border-radius:10px;border:1px solid oklch(88% 0.02 260);padding:0 12px;">
-                <input id="inline-login-password" type="password" placeholder="비밀번호" autocomplete="current-password" style="height:42px;border-radius:10px;border:1px solid oklch(88% 0.02 260);padding:0 12px;">
-                <button type="button" class="auth-button primary" id="inline-login-email-submit">이메일 로그인</button>
-                <button type="button" class="auth-button" id="inline-login-signup">회원가입</button>
-                <p id="inline-login-error" style="margin:0;font-size:0.85rem;color:#c62828;min-height:1.2em;"></p>
+                <div class="inline-login-row">
+                    <input id="inline-login-email" class="inline-login-input" type="email" placeholder="이메일" autocomplete="email">
+                    <input id="inline-login-password" class="inline-login-input" type="password" placeholder="비밀번호" autocomplete="current-password">
+                </div>
+                <div class="inline-login-actions">
+                    <button type="button" class="auth-button primary" id="inline-login-email-submit">이메일 로그인</button>
+                    <button type="button" class="auth-button" id="inline-login-signup">회원가입</button>
+                </div>
+                <p id="inline-login-error" class="inline-login-error"></p>
               </div>
             `;
             document.body.appendChild(modal);
 
             const close = () => {
-                modal.style.display = "none";
+                modal.classList.remove("open");
                 document.body.style.overflow = "";
             };
             modal.addEventListener("click", (event) => {
                 if (event.target === modal) close();
             });
             document.addEventListener("keydown", (event) => {
-                if (event.key === "Escape" && modal.style.display !== "none") close();
+                if (event.key === "Escape" && modal.classList.contains("open")) close();
             });
             const closeBtn = modal.querySelector("#inline-login-close");
             if (closeBtn) {
@@ -390,7 +387,7 @@ function initAuthControls() {
         };
 
         const open = () => {
-            modal.style.display = "flex";
+            modal.classList.add("open");
             document.body.style.overflow = "hidden";
             const emailEl = modal.querySelector("#inline-login-email");
             if (emailEl) setTimeout(() => emailEl.focus(), 80);
@@ -408,7 +405,7 @@ function initAuthControls() {
                 if (!authService) return;
                 try {
                     await authService.signInWithProvider("google");
-                    modal.style.display = "none";
+                    modal.classList.remove("open");
                     document.body.style.overflow = "";
                 } catch (error) {
                     console.error("Google 로그인 실패:", error);
@@ -429,7 +426,7 @@ function initAuthControls() {
                 }
                 try {
                     await authService.signInWithEmail(email, password);
-                    modal.style.display = "none";
+                    modal.classList.remove("open");
                     document.body.style.overflow = "";
                 } catch (error) {
                     console.error("이메일 로그인 실패:", error);
