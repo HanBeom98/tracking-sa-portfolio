@@ -53,3 +53,37 @@
   - 영향 범위
   - 검증 방법
   - 남은 리스크/후속 과제
+
+## 2026-02-26
+
+### refactor(auth/account/board): 인증 흐름 공통화 + 계정/글쓰기 스크립트 구조화 (`4292128`, `58d826b`, `b47d0f2`, `b87d27c`, `93a2a58`, `c64af32`)
+- 문제/증상:
+  - 로그인 유도 코드가 페이지별로 중복되어 변경 시 누락/회귀 위험이 높음.
+  - `account/main.js`, `board/write/main.js`가 한 파일에 로직이 뭉쳐 추적이 어려움.
+  - 헤더 인증 메뉴에서 UID 노출 버튼이 남아 보안/운영 관점에서 불필요함.
+- 변경:
+  - `src/shared/assets/common.js`
+    - `window.promptLogin` 추가(로그인 유도 진입점 단일화).
+    - `window.createLoginRequiredPrompt` 추가(게스트 로그인 안내 UI 공통화).
+    - 인라인 로그인 모달 로딩 경로를 auth-controls 초기화와 분리해 항상 호출 가능하게 보강.
+  - `src/domains/account/main.js`
+    - 렌더링/뷰모델/프로필 저장/탈퇴 액션을 함수 단위로 분리.
+    - 게스트 상태 UI를 공통 `createLoginRequiredPrompt` 사용으로 전환.
+  - `src/domains/board/write/main.js`
+    - 접근 제어 렌더링/제출 바인딩/초기화를 분리.
+    - 게스트 상태 UI를 공통 `createLoginRequiredPrompt` 사용으로 전환.
+  - `src/shared/assets/auth-controls.js`
+    - 헤더 메뉴의 `내 UID 확인` UI/로직 제거.
+  - `scripts/smoke_auth_release.sh`
+    - 공통화된 인증 진입점(`promptLogin`, `createLoginRequiredPrompt`) 기준으로 체크 업데이트.
+  - 대응 `public/*` 동기화 파일 반영.
+- 영향 범위:
+  - 계정 페이지, 게시글 작성 페이지, 공통 로그인 모달 진입.
+  - 인증 UI 회귀 점검 스크립트.
+- 검증:
+  - `node --check`로 `common/account/board` 문법 확인.
+  - `npm run sync:public`, `npm run check:public-sync` 통과.
+  - `./scripts/smoke_auth_release.sh` 통과.
+- 남은 리스크/후속 과제:
+  - 로컬 Playwright 환경(Chromium crash)으로 E2E 신뢰도 제한이 있어 CI 기준 검증 유지 필요.
+  - 다음 단계로 account 도메인의 파일 단위 분리(application/ui helper) 진행 가능.

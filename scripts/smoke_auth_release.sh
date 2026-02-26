@@ -9,7 +9,7 @@ echo "  OK"
 
 echo "[2/4] Check account modal login code..."
 curl -s "${BASE_URL}/account/main.js" | rg -q "account-login-btn"
-curl -s "${BASE_URL}/account/main.js" | rg -q "promptLogin|openInlineLoginModal"
+curl -s "${BASE_URL}/account/main.js" | rg -q "promptLogin|createLoginRequiredPrompt"
 echo "  OK"
 
 echo "[3/4] Check auth event bridge..."
@@ -20,6 +20,7 @@ echo "  OK"
 
 echo "[4/4] Check board write auth guard..."
 curl -s "${BASE_URL}/board/write/main.js" | rg -q "AUTH_REQUIRED"
+curl -s "${BASE_URL}/board/write/main.js" | rg -q "createLoginRequiredPrompt"
 echo "  OK"
 
 echo "Smoke check passed for ${BASE_URL}"
