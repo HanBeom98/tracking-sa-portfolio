@@ -64,6 +64,15 @@
     - `tests/unit/auth-action-handlers.test.js`
     - `tests/unit/board-auth-gateway.test.js`
     - `tests/unit/board-write-auth.test.js`
+    - `tests/unit/futures-prediction-labels.test.js`
+    - `tests/unit/futures-impact-summary.test.js`
+  - futures 도메인 1차 분리:
+    - `src/domains/futures-estimate/main.js` (오케스트레이션)
+    - `src/domains/futures-estimate/infra/futures-api-client.js`
+    - `src/domains/futures-estimate/application/prediction-labels.js`
+    - `src/domains/futures-estimate/application/impact-summary.js`
+    - `src/domains/futures-estimate/ui/futures-page.js`
+    - `src/domains/futures-estimate/ui/style.css`
   - 헤더 인증 메뉴 UID 노출 제거.
   - `smoke_auth_release.sh`를 분리 구조 기준으로 안정화(pipefail-safe).
   - 배포 후 `smoke_auth_release.sh` 자동 실행 워크플로우 연결.
@@ -76,6 +85,7 @@
 - 진행중:
   - 로그인 UI 문구/알림의 도메인별 상세 키 세분화(현재는 공통 키 중심).
   - `auth-prompt-kit` 단위 테스트 추가(현재 통합 동작 검증 중심).
+  - futures 도메인 i18n 적용(현재 일부 한국어 고정 문구 유지).
 
 ## Phase 2 (Short-term, 3-5 days)
 - 인증 UI/상태 로직을 모듈화:

@@ -27,6 +27,14 @@ board/write 도메인(2026-02-26 기준):
 - `src/domains/board/write/ui/write-access-renderer.js`: 비로그인 상태 렌더링 및 로그인 유도 UI
 - `src/domains/board/write/main.js`: 게시글 제출 + 상태 이벤트 오케스트레이션
 
+futures-estimate 도메인(2026-02-26 기준):
+- `src/domains/futures-estimate/main.js`: 위젯/분석/히스토리 로딩 오케스트레이션
+- `src/domains/futures-estimate/infra/futures-api-client.js`: API 호출 경계(`/api/tv-scan`, `/api/futures-predictions`)
+- `src/domains/futures-estimate/application/prediction-labels.js`: 임계값/라벨 표시 규칙
+- `src/domains/futures-estimate/application/impact-summary.js`: 수치/요약 문구 포맷터
+- `src/domains/futures-estimate/ui/futures-page.js`: 위젯 초기화/DOM 렌더링
+- `src/domains/futures-estimate/ui/style.css`: 페이지 스타일 분리
+
 공통 인증 경계(2026-02-26 기준):
 - `src/shared/assets/common.js`의 `window.AuthGateway`를 통해 인증 의존을 단일 인터페이스로 노출
   - `waitForReady()`
