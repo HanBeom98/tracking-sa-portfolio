@@ -63,6 +63,14 @@ async function renderAccount() {
   const subscriptionPlan = subscription.planName || subscription.plan || subscription.tier || "";
   const nickname = (profile && profile.nickname) || user.displayName || "";
   const nicknameUpdatedAt = profile && profile.nicknameUpdatedAt;
+  const isAdmin = !!(profile && profile.role === "admin");
+  const uidRow = isAdmin
+    ? `
+    <div class="account-row">
+      <div class="account-label" data-i18n="account_uid">UID</div>
+      <div class="account-value">${user.uid || "-"}</div>
+    </div>`
+    : "";
 
   infoEl.innerHTML = `
     <div class="account-row">
@@ -89,10 +97,7 @@ async function renderAccount() {
       <div class="account-label" data-i18n="account_subscription_expires">만료일</div>
       <div class="account-value">${subscriptionExpiresAt ? formatDate(subscriptionExpiresAt) : "-"}</div>
     </div>
-    <div class="account-row">
-      <div class="account-label" data-i18n="account_uid">UID</div>
-      <div class="account-value">${user.uid || "-"}</div>
-    </div>
+    ${uidRow}
     <div class="account-row">
       <div class="account-label" data-i18n="account_created">가입일</div>
       <div class="account-value">${formatDate(user.metadata && user.metadata.creationTime)}</div>
