@@ -53,11 +53,7 @@ async function renderAccount() {
     const loginBtn = document.getElementById("account-login-btn");
     if (loginBtn) {
       loginBtn.addEventListener("click", () => {
-        if (window.openInlineLoginModal) {
-          window.openInlineLoginModal({ redirectTo: "/account/" });
-          return;
-        }
-        if (window.openAuthPrompt) window.openAuthPrompt();
+        if (window.promptLogin) window.promptLogin({ redirectTo: "/account/" });
       });
     }
     return;

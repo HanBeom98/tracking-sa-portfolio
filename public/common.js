@@ -313,6 +313,16 @@ window.openInlineLoginModal = async ({ redirectTo = "/" } = {}) => {
     }
 };
 
+window.promptLogin = ({ redirectTo = "/" } = {}) => {
+    if (window.openInlineLoginModal) {
+        window.openInlineLoginModal({ redirectTo });
+        return;
+    }
+    if (window.openAuthPrompt) {
+        window.openAuthPrompt();
+    }
+};
+
 function initAuthGateLinks() {
     const links = document.querySelectorAll('a[data-require-auth="true"]');
     if (!links.length) return;

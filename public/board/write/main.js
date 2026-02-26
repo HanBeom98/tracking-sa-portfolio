@@ -58,11 +58,7 @@ function renderWriteAccess(user) {
       const loginBtn = message.querySelector("#board-write-login-btn");
       if (loginBtn) {
         loginBtn.addEventListener("click", () => {
-          if (window.openInlineLoginModal) {
-            window.openInlineLoginModal({ redirectTo: "/board/write" });
-            return;
-          }
-          if (window.openAuthPrompt) window.openAuthPrompt();
+          if (window.promptLogin) window.promptLogin({ redirectTo: "/board/write" });
         });
       }
     }
