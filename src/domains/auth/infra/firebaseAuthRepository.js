@@ -123,25 +123,6 @@ export function createFirebaseAuthRepository({ firebaseApp = window.firebase, db
     return getUserProfile(user.uid);
   }
 
-  async function uploadAvatar(file) {
-    const user = auth.currentUser;
-    if (!user) {
-      throw new Error("Not authenticated");
-    }
-    if (!firebaseApp.storage) {
-      throw new Error("Firebase Storage SDK is not available");
-    }
-    if (!file) {
-      throw new Error("No file provided");
-    }
-    const storage = firebaseApp.storage();
-    const ref = storage.ref().child(`avatars/${user.uid}/profile.jpg`);
-    const snapshot = await ref.put(file, {
-      contentType: file.type || "image/jpeg",
-      cacheControl: "public,max-age=31536000",
-    });
-    return snapshot.ref.getDownloadURL();
-  }
 
   async function deleteAccount({ password } = {}) {
     const user = auth.currentUser;
@@ -215,7 +196,6 @@ export function createFirebaseAuthRepository({ firebaseApp = window.firebase, db
     signOut,
     checkNicknameAvailability,
     updateProfile,
-    uploadAvatar,
     deleteAccount,
     onAuthStateChanged,
     ensureUserProfile,

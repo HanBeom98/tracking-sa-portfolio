@@ -27,10 +27,6 @@ export function buildAuthService({ authRepository }) {
     return authRepository.updateProfile({ nickname, photoURL });
   }
 
-  function uploadAvatar(file) {
-    return authRepository.uploadAvatar(file);
-  }
-
   function deleteAccount({ password } = {}) {
     return authRepository.deleteAccount({ password });
   }
@@ -58,7 +54,6 @@ export function buildAuthService({ authRepository }) {
     signOut,
     checkNicknameAvailability,
     updateProfile,
-    uploadAvatar,
     deleteAccount,
     onAuthStateChanged,
   };

@@ -113,11 +113,6 @@ async function renderAccount() {
         <div>
           <label for="photo-url" data-i18n="profile_image">프로필 이미지</label>
           <input id="photo-url" type="text" value="${photoURL}" placeholder="${window.getTranslation('profile_image_placeholder', '이미지 URL을 입력하세요')}">
-          <div class="avatar-row" style="margin-top:10px;">
-            <input id="avatar-file" type="file" accept="image/*">
-            <button type="button" id="avatar-upload" data-i18n="profile_image_upload">업로드</button>
-          </div>
-          <div class="avatar-drop" id="avatar-drop" data-i18n="profile_image_drop">이미지를 드래그해서 올리거나 클릭하세요.</div>
           <div class="profile-preview" id="profile-preview" style="margin-top:10px;">
             ${photoURL ? `<img src="${photoURL}" alt="profile">` : ""}
             <span class="helper" data-i18n="profile_image_hint">원형 이미지로 표시됩니다.</span>
@@ -145,9 +140,6 @@ async function renderAccount() {
   const nicknameStatus = document.getElementById("nickname-status");
   const nicknameCooldown = document.getElementById("nickname-cooldown");
   const photoInput = document.getElementById("photo-url");
-  const avatarFileInput = document.getElementById("avatar-file");
-  const avatarUploadBtn = document.getElementById("avatar-upload");
-  const avatarDrop = document.getElementById("avatar-drop");
   const profilePreview = document.getElementById("profile-preview");
   const profileSaveBtn = document.getElementById("profile-save");
   const profileStatus = document.getElementById("profile-status");
@@ -243,81 +235,6 @@ async function renderAccount() {
     });
   }
 
-  async function resizeImage(file) {
-    const maxSize = 256;
-    const img = await new Promise((resolve, reject) => {
-      const image = new Image();
-      image.onload = () => resolve(image);
-      image.onerror = reject;
-      image.src = URL.createObjectURL(file);
-    });
-    const canvas = document.createElement("canvas");
-    const size = Math.min(maxSize, Math.max(img.width, img.height));
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext("2d");
-    const sx = Math.max(0, (img.width - img.height) / 2);
-    const sy = Math.max(0, (img.height - img.width) / 2);
-    const sSize = Math.min(img.width, img.height);
-    ctx.drawImage(img, sx, sy, sSize, sSize, 0, 0, size, size);
-    return await new Promise((resolve) => {
-      canvas.toBlob((blob) => resolve(blob), "image/jpeg", 0.9);
-    });
-  }
-
-  async function handleAvatarFile(file) {
-    if (!authService) return;
-    if (!file) {
-      setProfileStatus("profile_image_required", "이미지를 선택해주세요.", false);
-      return;
-    }
-    try {
-      setProfileStatus("profile_image_uploading", "이미지 업로드 중...", true);
-      const resized = await resizeImage(file);
-      const uploadUrl = await authService.uploadAvatar(resized || file);
-      if (photoInput) photoInput.value = uploadUrl;
-      if (profilePreview) {
-        profilePreview.innerHTML = `<img src="${uploadUrl}" alt="profile"><span class="helper" data-i18n="profile_image_hint">원형 이미지로 표시됩니다.</span>`;
-      }
-      setProfileStatus("profile_image_uploaded", "업로드 완료", true);
-      if (window.applyTranslations) {
-        const lang = localStorage.getItem("lang") || "ko";
-        window.applyTranslations(lang);
-      }
-    } catch (error) {
-      console.error("이미지 업로드 실패:", error);
-      setProfileStatus("profile_image_upload_failed", "업로드에 실패했습니다.", false);
-    }
-  }
-
-  if (avatarUploadBtn && avatarFileInput) {
-    avatarUploadBtn.addEventListener("click", async () => {
-      const file = avatarFileInput.files && avatarFileInput.files[0];
-      await handleAvatarFile(file);
-    });
-  }
-
-  if (avatarDrop) {
-    avatarDrop.addEventListener("click", () => {
-      if (avatarFileInput) avatarFileInput.click();
-    });
-    avatarDrop.addEventListener("dragover", (event) => {
-      event.preventDefault();
-      avatarDrop.classList.add("dragover");
-    });
-    avatarDrop.addEventListener("dragleave", () => {
-      avatarDrop.classList.remove("dragover");
-    });
-    avatarDrop.addEventListener("drop", async (event) => {
-      event.preventDefault();
-      avatarDrop.classList.remove("dragover");
-      const file = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0];
-      if (avatarFileInput && file) {
-        avatarFileInput.files = event.dataTransfer.files;
-      }
-      await handleAvatarFile(file);
-    });
-  }
 
   if (profileSaveBtn) {
     profileSaveBtn.addEventListener("click", async () => {

@@ -128,44 +128,6 @@
       font-weight: 700;
       cursor: pointer;
     }
-    .avatar-row {
-      display: grid;
-      grid-template-columns: 1fr 140px;
-      gap: 8px;
-      align-items: center;
-    }
-    .avatar-row input[type="file"] {
-      height: 46px;
-      padding: 8px;
-      border-radius: 12px;
-      border: 1px dashed oklch(84% 0.02 260);
-      background: #f8faff;
-    }
-    .avatar-row button {
-      height: 46px;
-      border-radius: 12px;
-      border: none;
-      background: var(--p-blue);
-      color: white;
-      font-weight: 700;
-      cursor: pointer;
-    }
-    .avatar-drop {
-      border: 1px dashed oklch(82% 0.02 260);
-      border-radius: 14px;
-      padding: 14px;
-      background: #f7f9ff;
-      text-align: center;
-      font-size: 0.9rem;
-      color: var(--text-sub);
-      transition: border 0.2s, background 0.2s;
-      cursor: pointer;
-    }
-    .avatar-drop.dragover {
-      border-color: var(--p-blue);
-      background: #eef4ff;
-      color: var(--text-main);
-    }
     .profile-preview {
       display: flex;
       align-items: center;
@@ -250,7 +212,6 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 <script>
   window.FIREBASE_CONFIG = {"apiKey": "PUBLIC_FIREBASE_WEB_KEY_REMOVED", "authDomain": "tracking-sa-295db.firebaseapp.com", "projectId": "tracking-sa-295db", "storageBucket": "tracking-sa-295db.firebasestorage.app", "appId": "1:779289056217:web:cf023fc55f1a2913ffbfc8", "messagingSenderId": "779289056217"};
@@ -265,11 +226,11 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<link rel="stylesheet" href="/style.css?v=20260226064755">
+<link rel="stylesheet" href="/style.css?v=20260226065629">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script src="/firebase-config.js"></script>
-<script src="/translations.js?v=20260226064755"></script>
-<script src="/common.js?v=20260226064755"></script>
+<script src="/translations.js?v=20260226065629"></script>
+<script src="/common.js?v=20260226065629"></script>
 
 </head>
 <body><header>
