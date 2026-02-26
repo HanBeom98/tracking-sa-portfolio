@@ -1,10 +1,12 @@
 import { buildPostService } from "../application/postService.js";
 import { requireAuth } from "../application/authGateway.js";
 import { createFirestorePostRepository } from "../infra/firestorePostRepository.js";
+import { createEditPostUseCases } from "./application/edit-post-use-cases.js";
 
 const postService = buildPostService({
   postRepository: createFirestorePostRepository(),
 });
+const editPostUseCases = createEditPostUseCases({ postService });
 
 const postId = new URLSearchParams(window.location.search).get("id");
 const editForm = document.querySelector("board-edit-form");
@@ -35,13 +37,7 @@ function attachSubmit(post, user) {
   editForm.onSubmit(async (values) => {
     editForm.setSubmitting(true);
     try {
-      await postService.updatePost({
-        id: postId,
-        title: values.title,
-        content: values.content,
-        post,
-        user,
-      });
+      await editPostUseCases.submitEdit({ postId, user, post, values });
       alert("게시물이 성공적으로 수정되었습니다.");
       window.location.href = `/board/post?id=${postId}`;
     } catch (error) {
@@ -64,12 +60,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       editForm.renderNotFound();
       return;
     }
-    const post = await postService.getPost(postId);
+    const post = await editPostUseCases.loadEditablePost({ postId, user });
     if (!post) {
-      editForm.renderNotFound();
-      return;
-    }
-    if (!postService.canEditPost({ user, post })) {
       editForm.renderNotFound();
       return;
     }
