@@ -147,13 +147,20 @@ function bindEvents() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+function initSearchPage() {
   const input = document.getElementById('searchPageInput');
   const button = document.getElementById('searchPageButton');
+  if (!input || !button) return;
 
   input.placeholder = tr('search_placeholder', '검색어를 입력하세요');
   button.textContent = tr('search_button', '검색');
 
   bindEvents();
   runSearch(qs('q').trim());
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initSearchPage);
+} else {
+  initSearchPage();
+}
