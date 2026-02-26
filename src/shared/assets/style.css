@@ -233,6 +233,7 @@ body.dark-mode .utility-controls #color-change {
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    justify-content: flex-end;
 }
 
 .auth-button {
@@ -246,6 +247,10 @@ body.dark-mode .utility-controls #color-change {
     cursor: pointer;
     transition: 0.2s;
     white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
 }
 
 .auth-button.primary {
@@ -268,6 +273,7 @@ body.dark-mode .utility-controls #color-change {
     top: calc(100% + 10px);
     right: 0;
     min-width: 180px;
+    max-width: 280px;
     background: white;
     border: 1px solid oklch(92% 0.02 260);
     border-radius: 14px;
