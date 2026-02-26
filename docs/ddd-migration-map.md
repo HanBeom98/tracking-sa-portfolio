@@ -15,6 +15,11 @@
 
 참고: 폴더는 DDD 형태를 따르지만, 모든 도메인이 레이어 분리를 100% 달성한 상태는 아님.
 
+account 도메인(2026-02-26 기준):
+- `src/domains/account/application/account-view-model.js`: 표시/검증/뷰모델 계산 로직
+- `src/domains/account/ui/account-renderer.js`: 게스트/계정 화면 렌더링 및 상태 메시지 유틸
+- `src/domains/account/main.js`: 인증 상태 구독 + 액션 바인딩 오케스트레이션
+
 ## 3) Build and Injection Flow
 1. 엔트리포인트: `main.py`
 2. 사이트 빌드: `src/shared/infra/builder.py::generate_public_site()`

@@ -1,59 +1,8 @@
-function t(key, fallback) {
-  return window.getTranslation ? window.getTranslation(key, fallback) : fallback;
-}
-
-function formatProvider(providerIds) {
-  if (providerIds.includes("password")) return t("account_provider_email", "이메일");
-  if (providerIds.includes("google.com")) return t("account_provider_google", "Google");
-  return t("account_provider_other", "기타");
-}
-
-function formatSubscription(status) {
-  if (status === "active") return t("subscription_status_active", "구독중");
-  if (status === "canceled") return t("subscription_status_canceled", "해지됨");
-  if (status === "past_due") return t("subscription_status_past_due", "결제 실패");
-  return t("subscription_status_free", "무료");
-}
-
-function formatDate(value) {
-  if (!value) return "-";
-  try {
-    return new Date(value).toLocaleString("ko-KR");
-  } catch {
-    return value;
-  }
-}
-
-function normalizeNickname(value) {
-  return (value || "").trim().toLowerCase();
-}
-
-function validateNickname(value) {
-  const trimmed = (value || "").trim();
-  return /^[A-Za-z0-9가-힣_]{2,12}$/.test(trimmed);
-}
-
-function applyCurrentLangTranslations() {
-  if (!window.applyTranslations) return;
-  const lang = localStorage.getItem("lang") || "ko";
-  window.applyTranslations(lang);
-}
-
-function getNicknameCooldownInfo(nicknameUpdatedAt) {
-  if (!nicknameUpdatedAt) return null;
-  const lastTs = typeof nicknameUpdatedAt.toMillis === "function"
-    ? nicknameUpdatedAt.toMillis()
-    : new Date(nicknameUpdatedAt).getTime();
-  if (!lastTs) return null;
-  const cooldownMs = 24 * 60 * 60 * 1000;
-  const nextAt = lastTs + cooldownMs;
-  return { nextAt, remainingMs: Math.max(0, nextAt - Date.now()) };
-}
-
-function setStatusText(element, messageKey, fallback, ok = false) {
-  if (!element) return;
-  element.textContent = t(messageKey, fallback);
-  element.style.color = ok ? "#1b7f3a" : "#c62828";
+function getAccountModules() {
+  const domain = window.AccountDomain || {};
+  const viewmodel = domain.viewmodel || {};
+  const ui = domain.ui || {};
+  return { viewmodel, ui };
 }
 
 async function ensureLogin() {
@@ -62,111 +11,9 @@ async function ensureLogin() {
   return null;
 }
 
-function getAccountViewModel(user, profile) {
-  const providerIds = (user.providerData || []).map((p) => p.providerId);
-  const subscription = (profile && profile.subscription) || {};
-  return {
-    providerIds,
-    subscriptionStatus: subscription.status || "free",
-    subscriptionRenewAt: subscription.renewAt || subscription.nextBillingAt || "",
-    subscriptionExpiresAt: subscription.currentPeriodEnd || subscription.expiresAt || "",
-    subscriptionPlan: subscription.planName || subscription.plan || subscription.tier || "",
-    nickname: (profile && profile.nickname) || user.displayName || "",
-    nicknameUpdatedAt: profile && profile.nicknameUpdatedAt,
-    isAdmin: !!(profile && profile.role === "admin"),
-  };
-}
-
-function renderGuestView(infoEl, actionsEl) {
-  infoEl.innerHTML = "";
-  const promptEl = window.createLoginRequiredPrompt
-    ? window.createLoginRequiredPrompt({
-        wrapperClass: "account-guest",
-        messageKey: "account_login_required",
-        messageText: "로그인 후 내 정보를 확인할 수 있습니다.",
-        buttonId: "account-login-btn",
-        redirectTo: "/account/",
-      })
-    : null;
-
-  if (promptEl) {
-    infoEl.appendChild(promptEl);
-  } else {
-    infoEl.innerHTML = `
-      <div class="account-guest">
-        <p data-i18n="account_login_required">로그인 후 내 정보를 확인할 수 있습니다.</p>
-        <button type="button" class="auth-button primary" id="account-login-btn" data-i18n="login">로그인</button>
-      </div>
-    `;
-  }
-  actionsEl.innerHTML = "";
-  applyCurrentLangTranslations();
-}
-
-function renderAccountView(infoEl, actionsEl, user, viewModel) {
-  const uidRow = viewModel.isAdmin
-    ? `
-    <div class="account-row">
-      <div class="account-label" data-i18n="account_uid">UID</div>
-      <div class="account-value">${user.uid || "-"}</div>
-    </div>`
-    : "";
-
-  infoEl.innerHTML = `
-    <div class="account-row">
-      <div class="account-label" data-i18n="account_email">이메일</div>
-      <div class="account-value">${user.email || "-"}</div>
-    </div>
-    <div class="account-row">
-      <div class="account-label" data-i18n="account_provider">로그인 방식</div>
-      <div class="account-value">${formatProvider(viewModel.providerIds)}</div>
-    </div>
-    <div class="account-row">
-      <div class="account-label" data-i18n="account_subscription">구독 상태</div>
-      <div class="account-value">${formatSubscription(viewModel.subscriptionStatus)}</div>
-    </div>
-    <div class="account-row">
-      <div class="account-label" data-i18n="account_subscription_plan">구독 플랜</div>
-      <div class="account-value">${viewModel.subscriptionPlan || "-"}</div>
-    </div>
-    <div class="account-row">
-      <div class="account-label" data-i18n="account_subscription_renew">다음 결제일</div>
-      <div class="account-value">${viewModel.subscriptionRenewAt ? formatDate(viewModel.subscriptionRenewAt) : "-"}</div>
-    </div>
-    <div class="account-row">
-      <div class="account-label" data-i18n="account_subscription_expires">만료일</div>
-      <div class="account-value">${viewModel.subscriptionExpiresAt ? formatDate(viewModel.subscriptionExpiresAt) : "-"}</div>
-    </div>
-    ${uidRow}
-    <div class="account-row">
-      <div class="account-label" data-i18n="account_created">가입일</div>
-      <div class="account-value">${formatDate(user.metadata && user.metadata.creationTime)}</div>
-    </div>
-    <div class="account-section">
-      <h2 data-i18n="profile_settings">프로필 설정</h2>
-      <div class="account-form">
-        <div>
-          <label for="nickname" data-i18n="nickname">닉네임</label>
-          <div class="nickname-row">
-            <input id="nickname" type="text" value="${viewModel.nickname}" placeholder="${t("nickname_placeholder", "닉네임을 입력하세요")}">
-            <button type="button" class="auth-button" id="nickname-check" data-i18n="nickname_check">중복확인</button>
-          </div>
-          <div class="helper" id="nickname-status"></div>
-          <div class="helper" id="nickname-cooldown"></div>
-        </div>
-        <button type="button" class="auth-button primary" id="profile-save" data-i18n="profile_save">저장</button>
-        <div class="helper" id="profile-status"></div>
-      </div>
-    </div>
-  `;
-
-  actionsEl.innerHTML = `
-    <button type="button" class="auth-button danger" id="account-delete-btn" data-i18n="delete_account">회원탈퇴</button>
-  `;
-  applyCurrentLangTranslations();
-}
-
 function bindDeleteAction(providerIds) {
+  const { viewmodel } = getAccountModules();
+  const t = viewmodel.t || ((_, fallback) => fallback);
   const deleteBtn = document.getElementById("account-delete-btn");
   if (!deleteBtn) return;
 
@@ -210,6 +57,13 @@ function bindDeleteAction(providerIds) {
 }
 
 async function bindProfileActions(viewModel) {
+  const { viewmodel, ui } = getAccountModules();
+  const normalizeNickname = viewmodel.normalizeNickname || ((value) => (value || "").trim().toLowerCase());
+  const validateNickname = viewmodel.validateNickname || (() => false);
+  const getNicknameCooldownInfo = viewmodel.getNicknameCooldownInfo || (() => null);
+  const formatDate = viewmodel.formatDate || ((value) => value || "-");
+  const setStatusText = ui.setStatusText || (() => {});
+
   let nicknameChecked = false;
   let nicknameCheckedValue = normalizeNickname(viewModel.nickname);
 
@@ -225,9 +79,9 @@ async function bindProfileActions(viewModel) {
   const cooldownInfo = getNicknameCooldownInfo(viewModel.nicknameUpdatedAt);
   if (nicknameCooldown) {
     if (cooldownInfo && cooldownInfo.remainingMs > 0) {
-      nicknameCooldown.textContent = `${t("nickname_next_change", "다음 변경 가능:")} ${formatDate(cooldownInfo.nextAt)}`;
+      nicknameCooldown.textContent = `${viewmodel.t("nickname_next_change", "다음 변경 가능:")} ${formatDate(cooldownInfo.nextAt)}`;
     } else {
-      nicknameCooldown.textContent = t("nickname_change_available", "지금 변경 가능합니다.");
+      nicknameCooldown.textContent = viewmodel.t("nickname_change_available", "지금 변경 가능합니다.");
     }
   }
 
@@ -301,22 +155,24 @@ async function bindProfileActions(viewModel) {
 }
 
 async function renderAccount() {
+  const { viewmodel, ui } = getAccountModules();
   const infoEl = document.getElementById("account-info");
   const actionsEl = document.getElementById("account-actions");
   if (!infoEl || !actionsEl) return;
 
   const user = await ensureLogin();
   if (!user) {
-    renderGuestView(infoEl, actionsEl);
+    if (ui.renderGuestView) ui.renderGuestView(infoEl, actionsEl);
     return;
   }
 
   const profile = (window.getCurrentUserProfile && window.getCurrentUserProfile()) || null;
-  const viewModel = getAccountViewModel(user, profile);
+  const accountViewModel = viewmodel.getAccountViewModel ? viewmodel.getAccountViewModel(user, profile) : null;
+  if (!accountViewModel) return;
 
-  renderAccountView(infoEl, actionsEl, user, viewModel);
-  await bindProfileActions(viewModel);
-  bindDeleteAction(viewModel.providerIds);
+  if (ui.renderAccountView) ui.renderAccountView(infoEl, actionsEl, user, accountViewModel);
+  await bindProfileActions(accountViewModel);
+  bindDeleteAction(accountViewModel.providerIds);
 }
 
 document.addEventListener("DOMContentLoaded", () => {

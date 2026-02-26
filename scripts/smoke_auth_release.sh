@@ -2,25 +2,29 @@
 set -euo pipefail
 
 BASE_URL="${1:-https://trackingsa.com}"
+ACCOUNT_HTML="$(curl -s "${BASE_URL}/account/")"
+ACCOUNT_MAIN="$(curl -s "${BASE_URL}/account/main.js")"
+COMMON_JS="$(curl -s "${BASE_URL}/common.js")"
+BOARD_WRITE_MAIN="$(curl -s "${BASE_URL}/board/write/main.js")"
 
 echo "[1/4] Check account page loads account script..."
-curl -s "${BASE_URL}/account/" | rg -q 'src="main.js"'
+rg -q 'src="main.js"' <<< "$ACCOUNT_HTML"
 echo "  OK"
 
 echo "[2/4] Check account modal login code..."
-curl -s "${BASE_URL}/account/main.js" | rg -q "account-login-btn"
-curl -s "${BASE_URL}/account/main.js" | rg -q "promptLogin|createLoginRequiredPrompt"
+rg -q "account-login-btn" <<< "$ACCOUNT_MAIN"
+rg -q "promptLogin|createLoginRequiredPrompt" <<< "$ACCOUNT_MAIN"
 echo "  OK"
 
 echo "[3/4] Check auth event bridge..."
-curl -s "${BASE_URL}/common.js" | rg -q "auth-state-changed"
-curl -s "${BASE_URL}/common.js" | rg -q "loadInlineLoginModalFactory"
-curl -s "${BASE_URL}/common.js" | rg -q "loadAuthControlsFactory"
+rg -q "auth-state-changed" <<< "$COMMON_JS"
+rg -q "loadInlineLoginModalFactory" <<< "$COMMON_JS"
+rg -q "loadAuthControlsFactory" <<< "$COMMON_JS"
 echo "  OK"
 
 echo "[4/4] Check board write auth guard..."
-curl -s "${BASE_URL}/board/write/main.js" | rg -q "AUTH_REQUIRED"
-curl -s "${BASE_URL}/board/write/main.js" | rg -q "createLoginRequiredPrompt"
+rg -q "AUTH_REQUIRED" <<< "$BOARD_WRITE_MAIN"
+rg -q "createLoginRequiredPrompt" <<< "$BOARD_WRITE_MAIN"
 echo "  OK"
 
 echo "Smoke check passed for ${BASE_URL}"
