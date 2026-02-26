@@ -3,6 +3,7 @@ import feedparser
 import time
 from src.shared.infra.db import get_firestore_client
 from src.shared.infra.ai import generate_ai_content
+from src.shared.infra.utils import kst_date_str
 
 LOG_FILE = "logs/processed_articles.log"
 MAX_LOG_LINES = int(os.getenv("PROCESSED_LOG_MAX_LINES", "5000"))
@@ -109,7 +110,7 @@ def fetch_and_post_news():
                     'urlKey': url_key,
                     'originalUrl': entry.link,
                     'createdAt': firestore.SERVER_TIMESTAMP,
-                    'date': time.strftime("%Y-%m-%d")
+                    'date': kst_date_str()
                 })
                 
                 log_processed_url(entry.link)

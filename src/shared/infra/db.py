@@ -2,7 +2,7 @@ import os
 import json
 import re
 import datetime
-from src.shared.infra.utils import extract_title_from_md, clean_filename
+from src.shared.infra.utils import extract_title_from_md, clean_filename, kst_date_str
 
 def get_firestore_client():
     try:
@@ -82,7 +82,7 @@ def save_article_to_firestore(content):
     en_title = extract_title_from_md(en_content_fallback) if en_content_fallback else ""
     slug = clean_filename(ko_title)
     
-    today = datetime.date.today().strftime("%Y-%m-%d")
+    today = kst_date_str()
     url_key = f"{today}-{slug}"
 
     db = get_firestore_client()

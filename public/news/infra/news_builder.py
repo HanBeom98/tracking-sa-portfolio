@@ -5,6 +5,7 @@ import datetime
 import markdown
 
 from src.shared.infra.config import PUBLIC_DIR
+from src.shared.infra.utils import kst_date_from_epoch
 from src.shared.infra.db import get_firestore_client
 from src.shared.infra.html_processor import process_html_file_for_common_elements
 
@@ -17,7 +18,7 @@ def _extract_date_from_slug(slug):
     if m:
         try:
             ts = int(m.group(1))
-            return datetime.datetime.utcfromtimestamp(ts).strftime("%Y-%m-%d")
+            return kst_date_from_epoch(ts)
         except Exception:
             return ""
     return ""
