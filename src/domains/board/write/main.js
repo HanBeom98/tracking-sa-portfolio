@@ -1,11 +1,13 @@
 import { buildPostService } from "../application/postService.js";
 import { createFirestorePostRepository } from "../infra/firestorePostRepository.js";
 import { ensureAuthenticated, getCurrentUser } from "./application/write-auth.js";
+import { createSubmitPostUseCase } from "./application/submit-post-use-case.js";
 import { renderWriteAccess } from "./ui/write-access-renderer.js";
 
 const postService = buildPostService({
   postRepository: createFirestorePostRepository(),
 });
+const submitPost = createSubmitPostUseCase({ postService, getCurrentUser });
 
 const BOARD_PATH = "/board";
 
@@ -24,19 +26,15 @@ function showError(error) {
 
 function bindWriteSubmit(writeForm, section) {
   writeForm.onSubmit(async (values) => {
-    const currentUser = getCurrentUser();
-    if (!currentUser) {
-      renderWriteAccess({ section, writeForm, user: null });
-      showError({ code: "AUTH_REQUIRED" });
-      return;
-    }
-
     writeForm.setSubmitting(true);
     try {
-      await postService.createPost({ ...values, author: currentUser });
+      await submitPost({ values });
       alert("게시물이 성공적으로 등록되었습니다.");
       window.location.href = BOARD_PATH;
     } catch (error) {
+      if (error && error.code === "AUTH_REQUIRED") {
+        renderWriteAccess({ section, writeForm, user: null });
+      }
       console.error("게시물 등록 실패:", error);
       showError(error);
       writeForm.setSubmitting(false);

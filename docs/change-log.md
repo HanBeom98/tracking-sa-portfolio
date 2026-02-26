@@ -124,3 +124,27 @@
   - `node --check` 통과.
   - `npm run sync:public`, `npm run check:public-sync` 통과.
   - `npm run test:smoke:release` 통과.
+
+### refactor(domain/usecase): account nickname value-object + board write submit use-case 분리
+- 문제/증상:
+  - 닉네임 규칙(정규화/검증/쿨다운)이 account viewmodel에 섞여 도메인 규칙 재사용이 어려움.
+  - board write 제출 로직이 main 오케스트레이터에 남아 use-case 경계가 약함.
+- 변경:
+  - `src/domains/account/domain/nickname.js` 추가:
+    - `normalizeNickname`, `validateNickname`, `getNicknameCooldownInfo`
+  - `src/domains/account/application/account-view-model.js`:
+    - nickname 규칙을 domain 계층(`window.AccountDomain.nickname`) 우선 참조
+  - `src/domains/account/index.html`:
+    - `domain/nickname.js` 로드 추가
+  - `src/domains/board/write/application/submit-post-use-case.js` 추가
+  - `src/domains/board/write/main.js`:
+    - 제출 처리 `submitPost` use-case 호출로 전환
+  - `scripts/public_sync_map.txt`:
+    - 신규 도메인/유스케이스 파일 매핑 추가
+- 영향 범위:
+  - account 닉네임 규칙 처리 경계
+  - board/write 제출 경계(use-case 분리)
+- 검증:
+  - `node --check` 통과.
+  - `npm run sync:public`, `npm run check:public-sync` 통과.
+  - `npm run test:smoke:release` 통과.

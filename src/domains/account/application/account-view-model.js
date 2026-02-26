@@ -25,16 +25,33 @@
     }
   }
 
+  function getNicknameDomain() {
+    const domain = window.AccountDomain || {};
+    return domain.nickname || {};
+  }
+
   function normalizeNickname(value) {
+    const nicknameDomain = getNicknameDomain();
+    if (nicknameDomain.normalizeNickname) {
+      return nicknameDomain.normalizeNickname(value);
+    }
     return (value || "").trim().toLowerCase();
   }
 
   function validateNickname(value) {
+    const nicknameDomain = getNicknameDomain();
+    if (nicknameDomain.validateNickname) {
+      return nicknameDomain.validateNickname(value);
+    }
     const trimmed = (value || "").trim();
     return /^[A-Za-z0-9가-힣_]{2,12}$/.test(trimmed);
   }
 
   function getNicknameCooldownInfo(nicknameUpdatedAt) {
+    const nicknameDomain = getNicknameDomain();
+    if (nicknameDomain.getNicknameCooldownInfo) {
+      return nicknameDomain.getNicknameCooldownInfo(nicknameUpdatedAt);
+    }
     if (!nicknameUpdatedAt) return null;
     const lastTs = typeof nicknameUpdatedAt.toMillis === "function"
       ? nicknameUpdatedAt.toMillis()
