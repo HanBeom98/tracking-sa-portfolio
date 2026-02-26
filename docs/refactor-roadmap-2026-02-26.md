@@ -21,6 +21,22 @@
 - 팀이 동일한 배포 루트를 사용하고, 수동 `public` 편집 없이 운영 가능.
 - 로그인/로그아웃 핵심 플로우(계정/글쓰기)가 재현 테스트 통과.
 
+### Progress Update (2026-02-26)
+- 완료:
+  - `promptLogin`, `createLoginRequiredPrompt` 공통 진입점 도입.
+  - `account` 도메인 파일 분리:
+    - `application/account-view-model.js`
+    - `ui/account-renderer.js`
+    - `main.js` 오케스트레이션
+  - `board/write` 도메인 파일 분리:
+    - `application/write-auth.js`
+    - `ui/write-access-renderer.js`
+    - `main.js` 오케스트레이션
+  - 헤더 인증 메뉴 UID 노출 제거.
+  - `smoke_auth_release.sh`를 분리 구조 기준으로 안정화(pipefail-safe).
+- 진행중:
+  - account 페이지 인라인 CSS를 도메인 CSS 파일로 분리(반영 완료, 운영 확인 대기).
+
 ## Phase 2 (Short-term, 3-5 days)
 - 인증 UI/상태 로직을 모듈화:
   - `auth-ui-controller`(모달/드롭다운/상태 전환)
