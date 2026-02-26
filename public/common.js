@@ -296,6 +296,11 @@ function initAuthControls() {
         if (!authService) return;
         try {
             await authService.signOut();
+            const path = window.location.pathname || "/";
+            const isAccountPage = path === "/account/" || path === "/account" || path === "/account/index.html";
+            if (isAccountPage) {
+                window.location.href = "/account/";
+            }
         } catch (error) {
             console.error("로그아웃 실패:", error);
         }
