@@ -47,3 +47,7 @@ src/domains/futures-estimate/infra/futures-api-client.js|public/futures-estimate
 src/domains/futures-estimate/infra/futures-retry-policy.js|public/futures-estimate/infra/futures-retry-policy.js
 src/domains/futures-estimate/ui/futures-page.js|public/futures-estimate/ui/futures-page.js
 src/domains/futures-estimate/ui/style.css|public/futures-estimate/ui/style.css
+src/domains/fortune/main.js|public/fortune/main.js
+src/domains/fortune/application/fortune-copy.js|public/fortune/application/fortune-copy.js
+src/domains/fortune/application/fortune-markdown.js|public/fortune/application/fortune-markdown.js
+src/domains/fortune/ui/fortune-view.js|public/fortune/ui/fortune-view.js

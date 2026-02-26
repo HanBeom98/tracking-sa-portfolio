@@ -129,9 +129,16 @@
     - `src/domains/animal-face/application/view-text.js` (뷰 텍스트 조합)
     - `src/domains/animal-face/ui/animal-face-view.js` (템플릿/이벤트 바인딩/상태 렌더)
     - `main.js`는 모델 예측/도메인 오케스트레이션 책임으로 축소
+  - fortune 도메인 1차 분리:
+    - `src/domains/fortune/application/fortune-copy.js` (문구/에러 메시지)
+    - `src/domains/fortune/application/fortune-markdown.js` (결과 파싱)
+    - `src/domains/fortune/ui/fortune-view.js` (템플릿/이벤트/로딩/결과 렌더)
+    - `main.js`는 API 호출/오케스트레이션만 담당
   - unit test 추가:
     - `tests/unit/animal-face-messages.test.js`
     - `tests/unit/animal-face-view-text.test.js`
+    - `tests/unit/fortune-copy.test.js`
+    - `tests/unit/fortune-markdown.test.js`
 
 ## Phase 2 (Short-term, 3-5 days)
 - 인증 UI/상태 로직을 모듈화:
