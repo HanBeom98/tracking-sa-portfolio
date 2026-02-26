@@ -2,7 +2,8 @@ function getAccountModules() {
   const domain = window.AccountDomain || {};
   const viewmodel = domain.viewmodel || {};
   const ui = domain.ui || {};
-  return { viewmodel, ui };
+  const errorMessages = domain.errorMessages || {};
+  return { viewmodel, ui, errorMessages };
 }
 
 function getAuthGateway() {
@@ -17,8 +18,12 @@ async function ensureLogin() {
 }
 
 function bindDeleteAction(providerIds) {
-  const { viewmodel } = getAccountModules();
+  const { viewmodel, errorMessages } = getAccountModules();
   const t = viewmodel.t || ((_, fallback) => fallback);
+  const resolveDeleteAccountError = errorMessages.resolveDeleteAccountError || (() => ({
+    key: "delete_account_failed",
+    fallback: "회원탈퇴에 실패했습니다.",
+  }));
   const deleteBtn = document.getElementById("account-delete-btn");
   if (!deleteBtn) return;
 
@@ -33,7 +38,11 @@ function bindDeleteAction(providerIds) {
     const authService = gateway && gateway.getAuthService
       ? await gateway.getAuthService()
       : await (window.authDomainReady || Promise.resolve(null));
-    if (!authService) return;
+    if (!authService) {
+      const mapped = resolveDeleteAccountError({ code: "auth/service-unavailable" });
+      alert(t(mapped.key, mapped.fallback));
+      return;
+    }
 
     let password = null;
     if (providerIds.includes("password")) {
@@ -51,26 +60,24 @@ function bindDeleteAction(providerIds) {
       window.location.href = "/";
     } catch (error) {
       console.error("회원탈퇴 실패:", error);
-      if (error && error.code === "auth/requires-recent-login") {
-        alert(t("delete_account_requires_recent_login", "보안을 위해 다시 로그인 후 탈퇴를 진행해주세요."));
-        return;
-      }
-      if (error && error.code === "auth/password-required") {
-        alert(t("delete_account_password_prompt", "탈퇴를 위해 비밀번호를 입력해주세요."));
-        return;
-      }
-      alert(t("delete_account_failed", "회원탈퇴에 실패했습니다."));
+      const mapped = resolveDeleteAccountError(error);
+      alert(t(mapped.key, mapped.fallback));
     }
   });
 }
 
 async function bindProfileActions(viewModel) {
-  const { viewmodel, ui } = getAccountModules();
+  const { viewmodel, ui, errorMessages } = getAccountModules();
   const normalizeNickname = viewmodel.normalizeNickname || ((value) => (value || "").trim().toLowerCase());
   const validateNickname = viewmodel.validateNickname || (() => false);
   const getNicknameCooldownInfo = viewmodel.getNicknameCooldownInfo || (() => null);
   const formatDate = viewmodel.formatDate || ((value) => value || "-");
   const setStatusText = ui.setStatusText || (() => {});
+  const resolveProfileSaveError = errorMessages.resolveProfileSaveError || (() => ({
+    key: "profile_save_failed",
+    fallback: "저장에 실패했습니다.",
+    target: "profile",
+  }));
 
   let nicknameChecked = false;
   let nicknameCheckedValue = normalizeNickname(viewModel.nickname);
@@ -110,7 +117,11 @@ async function bindProfileActions(viewModel) {
         setStatusText(nicknameStatus, "nickname_invalid", "닉네임은 2-12자(영문/숫자/한글/_)만 가능합니다.", false);
         return;
       }
-      if (!authService) return;
+      if (!authService) {
+        const mapped = resolveProfileSaveError({ code: "auth/service-unavailable" });
+        setStatusText(profileStatus, mapped.key, mapped.fallback, false);
+        return;
+      }
 
       const result = await authService.checkNicknameAvailability(value);
       if (result.available && result.owned) {
@@ -147,19 +158,12 @@ async function bindProfileActions(viewModel) {
         if (window.updateAuthControls) window.updateAuthControls(window.getCurrentUser());
       } catch (error) {
         console.error("프로필 저장 실패:", error);
-        if (error && error.code === "auth/nickname-taken") {
-          setStatusText(nicknameStatus, "nickname_taken", "이미 사용 중인 닉네임입니다.", false);
+        const mapped = resolveProfileSaveError(error);
+        if (mapped.target === "nickname") {
+          setStatusText(nicknameStatus, mapped.key, mapped.fallback, false);
           return;
         }
-        if (error && error.code === "auth/invalid-nickname") {
-          setStatusText(nicknameStatus, "nickname_invalid", "닉네임은 2-12자(영문/숫자/한글/_)만 가능합니다.", false);
-          return;
-        }
-        if (error && error.code === "auth/nickname-cooldown") {
-          setStatusText(nicknameStatus, "nickname_cooldown", "닉네임은 24시간에 1회만 변경할 수 있습니다.", false);
-          return;
-        }
-        setStatusText(profileStatus, "profile_save_failed", "저장에 실패했습니다.", false);
+        setStatusText(profileStatus, mapped.key, mapped.fallback, false);
       }
     });
   }

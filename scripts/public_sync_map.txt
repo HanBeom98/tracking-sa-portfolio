@@ -13,6 +13,7 @@ src/shared/assets/inline-login-modal.js|public/inline-login-modal.js
 src/domains/account/index.html|public/account/index.html
 src/domains/account/domain/nickname.js|public/account/domain/nickname.js
 src/domains/account/application/account-view-model.js|public/account/application/account-view-model.js
+src/domains/account/application/error-messages.js|public/account/application/error-messages.js
 src/domains/account/ui/account.css|public/account/ui/account.css
 src/domains/account/ui/account-renderer.js|public/account/ui/account-renderer.js
 src/domains/account/main.js|public/account/main.js

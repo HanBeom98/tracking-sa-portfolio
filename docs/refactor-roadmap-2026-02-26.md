@@ -119,7 +119,7 @@
   - CI `Unit Tests` 워크플로우로 unit test 필수 게이트 연결.
 - 진행중:
   - 로그인 UI 문구/알림의 도메인별 상세 키 세분화(계정/게시판 1차 완료, 나머지 페이지 확장 필요).
-  - account 도메인 저장/탈퇴 에러코드별 번역키 분리(현재 일부 공통 fallback 사용).
+  - account 도메인 저장/탈퇴 에러코드별 번역키 분리(1차 완료, auth provider별 세분화 추가 여지).
 
 ## Phase 2 (Short-term, 3-5 days)
 - 인증 UI/상태 로직을 모듈화:
