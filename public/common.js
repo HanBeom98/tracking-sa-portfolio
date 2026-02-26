@@ -323,6 +323,38 @@ window.promptLogin = ({ redirectTo = "/" } = {}) => {
     }
 };
 
+window.createLoginRequiredPrompt = ({
+    promptId = "",
+    wrapperClass = "",
+    messageKey = "",
+    messageText = "로그인이 필요합니다.",
+    buttonId = "",
+    redirectTo = "/",
+} = {}) => {
+    const wrapper = document.createElement("div");
+    if (promptId) wrapper.id = promptId;
+    if (wrapperClass) wrapper.className = wrapperClass;
+
+    const messageEl = document.createElement("p");
+    if (messageKey) messageEl.setAttribute("data-i18n", messageKey);
+    const translate = window.getTranslation || ((_, fallback) => fallback);
+    messageEl.textContent = messageKey ? translate(messageKey, messageText) : messageText;
+
+    const loginBtn = document.createElement("button");
+    loginBtn.type = "button";
+    loginBtn.className = "auth-button primary";
+    if (buttonId) loginBtn.id = buttonId;
+    loginBtn.setAttribute("data-i18n", "login");
+    loginBtn.textContent = translate("login", "로그인");
+    loginBtn.addEventListener("click", () => {
+        if (window.promptLogin) window.promptLogin({ redirectTo });
+    });
+
+    wrapper.appendChild(messageEl);
+    wrapper.appendChild(loginBtn);
+    return wrapper;
+};
+
 function initAuthGateLinks() {
     const links = document.querySelectorAll('a[data-require-auth="true"]');
     if (!links.length) return;

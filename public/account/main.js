@@ -78,20 +78,29 @@ function getAccountViewModel(user, profile) {
 }
 
 function renderGuestView(infoEl, actionsEl) {
-  infoEl.innerHTML = `
-    <div class="account-guest">
-      <p data-i18n="account_login_required">로그인 후 내 정보를 확인할 수 있습니다.</p>
-      <button type="button" class="auth-button primary" id="account-login-btn" data-i18n="login">로그인</button>
-    </div>
-  `;
+  infoEl.innerHTML = "";
+  const promptEl = window.createLoginRequiredPrompt
+    ? window.createLoginRequiredPrompt({
+        wrapperClass: "account-guest",
+        messageKey: "account_login_required",
+        messageText: "로그인 후 내 정보를 확인할 수 있습니다.",
+        buttonId: "account-login-btn",
+        redirectTo: "/account/",
+      })
+    : null;
+
+  if (promptEl) {
+    infoEl.appendChild(promptEl);
+  } else {
+    infoEl.innerHTML = `
+      <div class="account-guest">
+        <p data-i18n="account_login_required">로그인 후 내 정보를 확인할 수 있습니다.</p>
+        <button type="button" class="auth-button primary" id="account-login-btn" data-i18n="login">로그인</button>
+      </div>
+    `;
+  }
   actionsEl.innerHTML = "";
   applyCurrentLangTranslations();
-
-  const loginBtn = document.getElementById("account-login-btn");
-  if (!loginBtn) return;
-  loginBtn.addEventListener("click", () => {
-    if (window.promptLogin) window.promptLogin({ redirectTo: "/account/" });
-  });
 }
 
 function renderAccountView(infoEl, actionsEl, user, viewModel) {
