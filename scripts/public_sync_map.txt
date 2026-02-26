@@ -56,3 +56,6 @@ src/domains/lucky-recommendation/application/lucky-copy.js|public/lucky-recommen
 src/domains/lucky-recommendation/application/lucky-payload.js|public/lucky-recommendation/application/lucky-payload.js
 src/domains/lucky-recommendation/application/lucky-result-card.js|public/lucky-recommendation/application/lucky-result-card.js
 src/domains/lucky-recommendation/ui/lucky-view.js|public/lucky-recommendation/ui/lucky-view.js
+src/domains/ai-test/main.js|public/ai-test/main.js
+src/domains/ai-test/application/ai-test-data.js|public/ai-test/application/ai-test-data.js
+src/domains/ai-test/application/ai-test-result.js|public/ai-test/application/ai-test-result.js
