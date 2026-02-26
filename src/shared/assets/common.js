@@ -341,6 +341,110 @@ function initAuthControls() {
         }
     };
 
+    window.openInlineLoginModal = ({ redirectTo = "/" } = {}) => {
+        let modal = document.getElementById("global-inline-login-modal");
+        if (!modal) {
+            modal = document.createElement("div");
+            modal.id = "global-inline-login-modal";
+            modal.style.position = "fixed";
+            modal.style.inset = "0";
+            modal.style.background = "rgba(2,6,23,0.45)";
+            modal.style.display = "none";
+            modal.style.alignItems = "center";
+            modal.style.justifyContent = "center";
+            modal.style.padding = "20px";
+            modal.style.zIndex = "2147483646";
+            modal.innerHTML = `
+              <div style="width:min(420px,92vw);background:white;border:1px solid oklch(92% 0.02 260);border-radius:16px;padding:18px;box-shadow:0 24px 48px rgba(2,6,23,0.2);display:grid;gap:10px;">
+                <h2 style="margin:0;font-size:1.1rem;font-weight:800;color:var(--text-main);">로그인</h2>
+                <button type="button" class="auth-button" id="inline-login-close" style="justify-self:end;min-width:76px;">닫기</button>
+                <button type="button" class="auth-button" id="inline-login-google">Google로 로그인</button>
+                <input id="inline-login-email" type="email" placeholder="이메일" autocomplete="email" style="height:42px;border-radius:10px;border:1px solid oklch(88% 0.02 260);padding:0 12px;">
+                <input id="inline-login-password" type="password" placeholder="비밀번호" autocomplete="current-password" style="height:42px;border-radius:10px;border:1px solid oklch(88% 0.02 260);padding:0 12px;">
+                <button type="button" class="auth-button primary" id="inline-login-email-submit">이메일 로그인</button>
+                <button type="button" class="auth-button" id="inline-login-signup">회원가입</button>
+                <p id="inline-login-error" style="margin:0;font-size:0.85rem;color:#c62828;min-height:1.2em;"></p>
+              </div>
+            `;
+            document.body.appendChild(modal);
+
+            const close = () => {
+                modal.style.display = "none";
+                document.body.style.overflow = "";
+            };
+            modal.addEventListener("click", (event) => {
+                if (event.target === modal) close();
+            });
+            document.addEventListener("keydown", (event) => {
+                if (event.key === "Escape" && modal.style.display !== "none") close();
+            });
+            const closeBtn = modal.querySelector("#inline-login-close");
+            if (closeBtn) {
+                closeBtn.addEventListener("click", close);
+            }
+        }
+
+        const errorEl = modal.querySelector("#inline-login-error");
+        const setError = (message = "") => {
+            if (errorEl) errorEl.textContent = message;
+        };
+
+        const open = () => {
+            modal.style.display = "flex";
+            document.body.style.overflow = "hidden";
+            const emailEl = modal.querySelector("#inline-login-email");
+            if (emailEl) setTimeout(() => emailEl.focus(), 80);
+        };
+        open();
+        setError("");
+
+        const googleBtn = modal.querySelector("#inline-login-google");
+        const emailBtn = modal.querySelector("#inline-login-email-submit");
+        const signupBtn = modal.querySelector("#inline-login-signup");
+
+        if (googleBtn) {
+            googleBtn.onclick = async () => {
+                const authService = await getAuthService();
+                if (!authService) return;
+                try {
+                    await authService.signInWithProvider("google");
+                    modal.style.display = "none";
+                    document.body.style.overflow = "";
+                } catch (error) {
+                    console.error("Google 로그인 실패:", error);
+                    setError("로그인에 실패했습니다. 다시 시도해주세요.");
+                }
+            };
+        }
+
+        if (emailBtn) {
+            emailBtn.onclick = async () => {
+                const authService = await getAuthService();
+                if (!authService) return;
+                const email = (modal.querySelector("#inline-login-email")?.value || "").trim();
+                const password = modal.querySelector("#inline-login-password")?.value || "";
+                if (!email || !password) {
+                    setError("이메일과 비밀번호를 입력해주세요.");
+                    return;
+                }
+                try {
+                    await authService.signInWithEmail(email, password);
+                    modal.style.display = "none";
+                    document.body.style.overflow = "";
+                } catch (error) {
+                    console.error("이메일 로그인 실패:", error);
+                    setError("로그인에 실패했습니다. 이메일/비밀번호를 확인해주세요.");
+                }
+            };
+        }
+
+        if (signupBtn) {
+            signupBtn.onclick = () => {
+                window.location.href = `/auth/signup?redirect=${encodeURIComponent(redirectTo)}`;
+            };
+        }
+    };
+
     window.updateAuthControls = (user) => {
         if (!container) return;
         if (user) {

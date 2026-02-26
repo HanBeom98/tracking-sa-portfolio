@@ -107,68 +107,6 @@
       display: grid;
       gap: 12px;
     }
-    .account-login-modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(2, 6, 23, 0.45);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      z-index: 2147483646;
-    }
-    .account-login-modal.open {
-      display: flex;
-    }
-    .account-login-dialog {
-      width: min(420px, 92vw);
-      background: white;
-      border: 1px solid oklch(92% 0.02 260);
-      border-radius: 16px;
-      padding: 18px;
-      box-shadow: 0 24px 48px rgba(2, 6, 23, 0.2);
-      display: grid;
-      gap: 10px;
-    }
-    .account-login-title {
-      font-size: 1.1rem;
-      font-weight: 800;
-      color: var(--text-main);
-      margin: 0;
-    }
-    .account-login-row {
-      display: grid;
-      gap: 8px;
-    }
-    .account-login-row input {
-      width: 100%;
-      height: 42px;
-      border-radius: 10px;
-      border: 1px solid oklch(88% 0.02 260);
-      padding: 0 12px;
-      font-size: 0.92rem;
-      background: white;
-      color: var(--text-main);
-    }
-    .account-login-row input:focus {
-      outline: none;
-      border-color: var(--p-blue);
-      box-shadow: 0 0 0 3px rgba(0, 82, 204, 0.18);
-    }
-    .account-login-actions {
-      display: grid;
-      gap: 8px;
-    }
-    .account-login-close {
-      justify-self: end;
-      width: auto;
-      min-width: 76px;
-    }
-    .account-login-error {
-      font-size: 0.85rem;
-      color: #c62828;
-      min-height: 1.2em;
-    }
     .auth-button {
       height: 44px;
       padding: 0 16px;
@@ -248,16 +186,6 @@
       background: #3b1d1d;
       border-color: #5b2b2b;
       color: #ffb4b4;
-    }
-    body.dark-mode .account-login-dialog {
-      background: oklch(20% 0.02 260);
-      border-color: oklch(30% 0.02 260);
-      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
-    }
-    body.dark-mode .account-login-row input {
-      background: #0f172a;
-      border-color: oklch(35% 0.02 260);
-      color: var(--text-main);
     }
   </style>
 

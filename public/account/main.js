@@ -22,94 +22,6 @@ function formatDate(value) {
   }
 }
 
-async function getAuthService() {
-  return await (window.authDomainReady || Promise.resolve(null));
-}
-
-function ensureAccountLoginModal() {
-  let modal = document.getElementById("account-login-modal");
-  if (modal) return modal;
-
-  modal = document.createElement("div");
-  modal.id = "account-login-modal";
-  modal.className = "account-login-modal";
-  modal.innerHTML = `
-    <div class="account-login-dialog" role="dialog" aria-modal="true" aria-labelledby="account-login-title">
-      <h2 id="account-login-title" class="account-login-title">로그인</h2>
-      <button type="button" class="auth-button account-login-close" id="account-login-close">닫기</button>
-      <button type="button" class="auth-button" id="account-login-google">Google로 로그인</button>
-      <div class="account-login-row">
-        <input id="account-login-email" type="email" placeholder="이메일" autocomplete="email">
-        <input id="account-login-password" type="password" placeholder="비밀번호" autocomplete="current-password">
-      </div>
-      <div class="account-login-actions">
-        <button type="button" class="auth-button primary" id="account-login-email-submit">이메일 로그인</button>
-        <button type="button" class="auth-button" id="account-login-signup">회원가입</button>
-      </div>
-      <p class="account-login-error" id="account-login-error"></p>
-    </div>
-  `;
-  document.body.appendChild(modal);
-
-  const close = () => {
-    modal.classList.remove("open");
-    document.body.style.overflow = "";
-  };
-  const open = () => {
-    modal.classList.add("open");
-    document.body.style.overflow = "hidden";
-    const emailInput = modal.querySelector("#account-login-email");
-    if (emailInput) setTimeout(() => emailInput.focus(), 80);
-  };
-
-  modal.addEventListener("click", (event) => {
-    if (event.target === modal) close();
-  });
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && modal.classList.contains("open")) close();
-  });
-  modal.querySelector("#account-login-close").addEventListener("click", close);
-
-  modal.querySelector("#account-login-google").addEventListener("click", async () => {
-    const authService = await getAuthService();
-    if (!authService) return;
-    try {
-      await authService.signInWithProvider("google");
-      close();
-    } catch (error) {
-      console.error("Google 로그인 실패:", error);
-      const errorEl = modal.querySelector("#account-login-error");
-      if (errorEl) errorEl.textContent = "로그인에 실패했습니다. 다시 시도해주세요.";
-    }
-  });
-
-  modal.querySelector("#account-login-email-submit").addEventListener("click", async () => {
-    const authService = await getAuthService();
-    if (!authService) return;
-    const email = (modal.querySelector("#account-login-email")?.value || "").trim();
-    const password = modal.querySelector("#account-login-password")?.value || "";
-    const errorEl = modal.querySelector("#account-login-error");
-    if (!email || !password) {
-      if (errorEl) errorEl.textContent = "이메일과 비밀번호를 입력해주세요.";
-      return;
-    }
-    try {
-      await authService.signInWithEmail(email, password);
-      close();
-    } catch (error) {
-      console.error("이메일 로그인 실패:", error);
-      if (errorEl) errorEl.textContent = "로그인에 실패했습니다. 이메일/비밀번호를 확인해주세요.";
-    }
-  });
-
-  modal.querySelector("#account-login-signup").addEventListener("click", () => {
-    window.location.href = `/auth/signup?redirect=${encodeURIComponent("/account/")}`;
-  });
-
-  modal.open = open;
-  return modal;
-}
-
 async function ensureLogin() {
   if (window.authStateReady) {
     await window.authStateReady;
@@ -141,8 +53,11 @@ async function renderAccount() {
     const loginBtn = document.getElementById("account-login-btn");
     if (loginBtn) {
       loginBtn.addEventListener("click", () => {
-        const modal = ensureAccountLoginModal();
-        if (modal && typeof modal.open === "function") modal.open();
+        if (window.openInlineLoginModal) {
+          window.openInlineLoginModal({ redirectTo: "/account/" });
+          return;
+        }
+        if (window.openAuthPrompt) window.openAuthPrompt();
       });
     }
     return;
