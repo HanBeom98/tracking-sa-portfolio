@@ -57,3 +57,5 @@ Tracking SA는 최신 웹 표준 기술(Web Components, OKLCH, Container Queries
 ## 🔗 Connect
 - **Live Platform:** [trackingsa.com](https://trackingsa.com)
 - **Developer:** [HanBeom98](https://github.com/HanBeom98)
+
+_GitHub 연결 점검을 위한 README 업데이트._
