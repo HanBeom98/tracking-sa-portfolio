@@ -29,6 +29,11 @@ src/domains/board/edit/main.js|public/board/edit/main.js
 src/domains/news/application/news-client.js|public/news/news-client.js
 src/domains/news/ui/style.css|public/news/ui/style.css
 src/domains/news/ui/style.css|public/en/news/ui/style.css
+src/domains/animal-face/index.html|public/animal-face/index.html
+src/domains/animal-face/main.js|public/animal-face/main.js
+src/domains/animal-face/style.css|public/animal-face/style.css
+src/domains/animal-face/application/animal-face-result.js|public/animal-face/application/animal-face-result.js
+src/domains/animal-face/application/share-message.js|public/animal-face/application/share-message.js
 src/domains/futures-estimate/index.html|public/futures-estimate/index.html
 src/domains/futures-estimate/main.js|public/futures-estimate/main.js
 src/domains/futures-estimate/application/prediction-labels.js|public/futures-estimate/application/prediction-labels.js

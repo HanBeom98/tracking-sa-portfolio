@@ -1,7 +1,11 @@
-/**
- * AnimalFaceTest Web Component - Ultra Premium Version
- * Fully functional with Gender Selection, Image Upload, Result Analysis, and Sharing.
- */
+import {
+    DEFAULT_ANIMAL_DATA,
+    buildAnimalFaceResult,
+} from "./application/animal-face-result.js";
+import {
+    buildAnimalFaceShareText,
+    buildAnimalFaceShareUrl,
+} from "./application/share-message.js";
 
 class AnimalFaceTest extends HTMLElement {
     constructor() {
@@ -12,14 +16,7 @@ class AnimalFaceTest extends HTMLElement {
         this._selectedGender = 'male';
         this._currentImage = null;
         this._modelUrl = "https://teachablemachine.withgoogle.com/models/e52yfi_eK/";
-        this._animalData = {
-            '강아지': { emoji: '🐶', kor: '강아지상' },
-            '고양이': { emoji: '🐱', kor: '고양이상' },
-            '다람쥐': { emoji: '🐿️', kor: '다람쥐상' },
-            '곰': { emoji: '🐻', kor: '곰상' },
-            '토끼': { emoji: '🐰', kor: '토끼상' },
-            '여우': { emoji: '🦊', kor: '여우상' }
-        };
+        this._animalData = DEFAULT_ANIMAL_DATA;
     }
 
     async connectedCallback() {
@@ -280,19 +277,15 @@ class AnimalFaceTest extends HTMLElement {
 
         try {
             const prediction = await this._model.predict(root.getElementById('preview'));
-            prediction.sort((a, b) => b.probability - a.probability);
-
-            const top = prediction[0];
-            const confidence = (top.probability * 100).toFixed(2);
-            const data = this._animalData[top.className.trim()] || { emoji: '❓', kor: top.className };
-
-            this._lastResult = { name: data.kor, emoji: data.emoji, score: confidence };
+            const result = buildAnimalFaceResult(prediction, this._animalData);
+            if (!result) throw new Error("empty_prediction");
+            this._lastResult = result;
 
             root.getElementById('loading').style.display = 'none';
             root.getElementById('result').style.display = 'block';
-            root.getElementById('res-emoji').innerText = data.emoji;
-            root.getElementById('res-name').innerText = data.kor;
-            root.getElementById('res-score').innerText = `매칭률: ${confidence}%`;
+            root.getElementById('res-emoji').innerText = result.emoji;
+            root.getElementById('res-name').innerText = result.name;
+            root.getElementById('res-score').innerText = `매칭률: ${result.score}%`;
         } catch(e) {
             alert("분석 중 오류가 발생했습니다.");
             this.reset();
@@ -300,17 +293,17 @@ class AnimalFaceTest extends HTMLElement {
     }
 
     share(platform) {
+        if (!this._lastResult) return;
         const res = this._lastResult;
-        const text = `저는 ${res.name} 입니다! (${res.score}% 확률) #동물상테스트 #TrackingSA`;
+        const text = buildAnimalFaceShareText(res);
         const url = window.location.href;
-        if (platform === 'twitter') {
-            window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`);
-        } else {
-            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}`);
-        }
+        const shareUrl = buildAnimalFaceShareUrl(platform, text, url);
+        if (!shareUrl) return;
+        window.open(shareUrl);
     }
 
     downloadResult() {
+        if (!this._lastResult) return;
         const preview = this.shadowRoot.getElementById('preview');
         const link = document.createElement('a');
         link.href = preview.src;
