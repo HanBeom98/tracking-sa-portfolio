@@ -364,6 +364,9 @@ async function initAuth() {
         authUser = user || null;
         authProfile = profile || null;
         resolveAuthReady(authUser);
+        window.dispatchEvent(new CustomEvent("auth-state-changed", {
+            detail: { user: authUser, profile: authProfile }
+        }));
         if (window.updateAuthControls) window.updateAuthControls(authUser);
         if (authUser) {
             const redirectTo = sessionStorage.getItem("postLoginRedirect");

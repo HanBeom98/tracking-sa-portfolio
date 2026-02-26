@@ -23,8 +23,13 @@ function formatDate(value) {
 }
 
 async function ensureLogin() {
-  if (!window.authStateReady) return null;
-  return await window.authStateReady;
+  if (window.authStateReady) {
+    await window.authStateReady;
+  }
+  if (typeof window.getCurrentUser === "function") {
+    return window.getCurrentUser();
+  }
+  return null;
 }
 
 async function renderAccount() {
@@ -301,4 +306,7 @@ async function renderAccount() {
 
 document.addEventListener("DOMContentLoaded", () => {
   renderAccount();
+  window.addEventListener("auth-state-changed", () => {
+    renderAccount();
+  });
 });
