@@ -35,6 +35,8 @@ src/domains/animal-face/style.css|public/animal-face/style.css
 src/domains/animal-face/application/animal-face-result.js|public/animal-face/application/animal-face-result.js
 src/domains/animal-face/application/share-message.js|public/animal-face/application/share-message.js
 src/domains/animal-face/application/messages.js|public/animal-face/application/messages.js
+src/domains/animal-face/application/view-text.js|public/animal-face/application/view-text.js
+src/domains/animal-face/ui/animal-face-view.js|public/animal-face/ui/animal-face-view.js
 src/domains/futures-estimate/index.html|public/futures-estimate/index.html
 src/domains/futures-estimate/main.js|public/futures-estimate/main.js
 src/domains/futures-estimate/application/prediction-labels.js|public/futures-estimate/application/prediction-labels.js

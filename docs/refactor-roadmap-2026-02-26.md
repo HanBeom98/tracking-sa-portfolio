@@ -125,8 +125,13 @@
     - `src/domains/animal-face/application/messages.js`
     - 모델 로딩/분석 실패 알림, 점수 라벨 텍스트를 `main.js`에서 분리
     - 번역 키 추가: `animal_face_model_loading`, `animal_face_analysis_error`
+  - animal-face UI/문구 2차 분리:
+    - `src/domains/animal-face/application/view-text.js` (뷰 텍스트 조합)
+    - `src/domains/animal-face/ui/animal-face-view.js` (템플릿/이벤트 바인딩/상태 렌더)
+    - `main.js`는 모델 예측/도메인 오케스트레이션 책임으로 축소
   - unit test 추가:
     - `tests/unit/animal-face-messages.test.js`
+    - `tests/unit/animal-face-view-text.test.js`
 
 ## Phase 2 (Short-term, 3-5 days)
 - 인증 UI/상태 로직을 모듈화:
