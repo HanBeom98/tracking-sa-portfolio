@@ -266,6 +266,9 @@ body.dark-mode .utility-controls #color-change {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
 }
 
 .auth-menu {

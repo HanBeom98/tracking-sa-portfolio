@@ -41,7 +41,7 @@ def generate_public_site():
         "animal-face", "fortune", "games", "ai-test", "lucky-recommendation", 
         "games/ai-evolution", "games/tetris", "privacy-policy", "about", "contact",
         "board", "board/write", "board/edit", "board/post", "inquiry", "search",
-        "auth", "auth/signup",
+        "auth", "auth/signup", "account",
         "futures-estimate"
     ]
     for domain in domains:
@@ -159,6 +159,7 @@ def build_search_index():
             {"href": "/about/", "title": "회사 소개", "date": "", "keywords": ["소개", "about"]},
             {"href": "/contact", "title": "문의하기", "date": "", "keywords": ["문의", "contact"]},
             {"href": "/inquiry", "title": "파트너십 문의", "date": "", "keywords": ["파트너십", "협업"]},
+            {"href": "/account/", "title": "내 정보", "date": "", "keywords": ["계정", "회원정보", "프로필"]},
         ],
         "en": [
             {"href": "/en/news/", "title": "Tech Insights", "date": "", "keywords": ["news", "insights"]},
@@ -173,6 +174,7 @@ def build_search_index():
             {"href": "/about/", "title": "About", "date": "", "keywords": ["about", "company"]},
             {"href": "/contact", "title": "Contact", "date": "", "keywords": ["contact", "support"]},
             {"href": "/inquiry", "title": "Partnership Inquiry", "date": "", "keywords": ["partnership", "inquiry"]},
+            {"href": "/account/", "title": "Account", "date": "", "keywords": ["account", "profile"]},
         ],
     }
     payload = {

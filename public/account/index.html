@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="account_title">내 정보 | Tracking SA</title>
+  <meta name="description" content="Tracking SA 내 정보 페이지입니다. 이메일과 계정 정보를 확인하고 탈퇴할 수 있습니다.">
+  <style>
+    .account-wrap {
+      width: min(720px, 92vw);
+      margin: 40px auto 90px;
+    }
+    .account-card {
+      background: white;
+      border: 1px solid oklch(92% 0.02 260);
+      border-radius: 20px;
+      padding: 32px;
+      box-shadow: 0 18px 36px rgba(2, 6, 23, 0.08);
+      display: grid;
+      gap: 24px;
+    }
+    .account-card h1 {
+      margin: 0;
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: var(--text-main);
+    }
+    .account-card p {
+      margin: 0;
+      color: var(--text-sub);
+      font-size: 0.95rem;
+    }
+    .account-info {
+      display: grid;
+      gap: 12px;
+    }
+    .account-row {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid oklch(94% 0.02 260);
+    }
+    .account-row:last-child {
+      border-bottom: none;
+    }
+    .account-label {
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .account-value {
+      color: var(--text-sub);
+      word-break: break-all;
+    }
+    .account-actions {
+      display: grid;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .account-actions button {
+      height: 50px;
+      border-radius: 14px;
+      border: none;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .account-actions .primary {
+      background: var(--p-blue);
+      color: white;
+      box-shadow: 0 6px 16px rgba(0, 82, 204, 0.25);
+    }
+    .account-actions .danger {
+      background: #ffe8e8;
+      color: #c62828;
+      border: 1px solid #f2b8b8;
+    }
+    .account-guest {
+      display: grid;
+      gap: 12px;
+    }
+    .account-guest button {
+      height: 46px;
+      border-radius: 12px;
+      border: none;
+      background: var(--p-blue);
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    body.dark-mode .account-card {
+      background: oklch(20% 0.02 260);
+      border-color: oklch(30% 0.02 260);
+      box-shadow: 0 18px 36px rgba(0, 0, 0, 0.4);
+    }
+    body.dark-mode .account-row {
+      border-bottom-color: oklch(30% 0.02 260);
+    }
+    body.dark-mode .account-actions .danger {
+      background: #3b1d1d;
+      border-color: #5b2b2b;
+      color: #ffb4b4;
+    }
+  </style>
+
+<meta name="keywords" content="Tracking SA, AI 테스트, AI 뉴스, 인공지능, ChatGPT, Claude, Gemini">
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Tracking SA">
+<meta property="og:title" content="Tracking SA - AI Services & Hub">
+<meta property="og:description" content="AI 테스트, 게임, 뉴스를 한 곳에서. Tracking SA">
+<meta property="og:image" content="https://trackingsa.com/logo.svg">
+<meta property="og:url" content="https://trackingsa.com/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Tracking SA - AI Services & Hub">
+<meta name="twitter:description" content="AI 테스트, 게임, 뉴스를 한 곳에서. Tracking SA">
+<meta name="twitter:image" content="https://trackingsa.com/logo.svg">
+<link rel="alternate" type="application/rss+xml" title="Tracking SA RSS Feed" href="/rss.xml">
+<link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7263630893992216" crossorigin="anonymous"></script>
+<meta name="google-adsense-account" content="ca-pub-7263630893992216">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-TGD3WRNKPZ');
+</script>
+<meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
+<meta name="naver-site-verification" content="b15b33af838280b54d31eb3c7e5c358d2836743f" />
+<script type="text/javascript">
+(function(c,l,a,r,i,t,y){
+    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+})(window, document, "clarity", "script", "vb9q33ggpa");
+</script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<script>
+  window.FIREBASE_CONFIG = {"apiKey": "PUBLIC_FIREBASE_WEB_KEY_REMOVED", "authDomain": "tracking-sa-295db.firebaseapp.com", "projectId": "tracking-sa-295db", "storageBucket": "tracking-sa-295db.firebasestorage.app", "appId": "1:779289056217:web:cf023fc55f1a2913ffbfc8", "messagingSenderId": "779289056217"};
+</script>
+<script>
+  window.authDomainReady = window.authDomainReady || new Promise((resolve) => {
+    window.__resolveAuthDomain = resolve;
+  });
+</script>
+<script type="module" src="/auth/ui/auth-client.js"></script>
+
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="/style.css?v=20260226062624">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<script src="/firebase-config.js"></script>
+<script src="/translations.js?v=20260226062624"></script>
+<script src="/common.js?v=20260226062624"></script>
+
+</head>
+<body><header>
+    <div class="header-inner">
+        <a href="/" class="site-logo-link">
+            <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="site-logo">
+                <circle cx="50" cy="50" r="48" stroke="currentColor" stroke-width="4" fill="transparent"/>
+                <path d="M25 70L40 55L50 65L75 35" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="70" cy="35" r="12" stroke="currentColor" stroke-width="6" fill="currentColor"/>
+                <rect x="78" y="43" width="15" height="6" rx="3" transform="rotate(45 78 43)" fill="currentColor"/>
+            </svg>
+        </a>
+        <div class="desktop-menu-container">
+            <nav>
+                <ul>
+                    <li><a href="/news/" data-i18n="news_home">뉴스</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropbtn" data-i18n="menu_chart">차트</a>
+                        <div class="dropdown-content">
+                            <a href="/futures-estimate/" data-i18n="futures_estimate_index">지수</a>
+                        </div>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropbtn" data-i18n="menu_test">테스트</a>
+                        <div class="dropdown-content">
+                            <a href="/animal-face/" data-i18n="animal_face_test">동물상 테스트</a>
+                            <a href="/ai-test/" data-i18n="ai_tendency_test">AI 성향 테스트</a>
+                            <a href="/fortune/" data-i18n="saju_test">AI 운세 테스트</a>
+                            <a href="/lucky-recommendation/" data-i18n="lucky_recommendation">행운의 추천</a>
+                        </div>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropbtn" data-i18n="menu_game">게임</a>
+                        <div class="dropdown-content">
+                            <a href="/tetris-game/" data-i18n="tetris_game">테트리스</a>
+                            <a href="/ai-evolution/" data-i18n="ai_evolution">AI 진화 2048</a>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+            <div class="utility-controls">
+                <button id="color-change">🌙</button>
+                <div id="language-switcher"></div>
+                <div id="auth-controls" class="auth-controls"></div>
+            </div>
+        </div>
+    </div>
+</header>
+
+  <main class="account-wrap">
+    <section class="account-card" id="account-card">
+      <div>
+        <h1 data-i18n="account_title">내 정보</h1>
+        <p data-i18n="account_desc">계정 정보를 확인하고 관리할 수 있습니다.</p>
+      </div>
+
+      <div class="account-info" id="account-info"></div>
+
+      <div class="account-actions" id="account-actions"></div>
+    </section>
+  </main>
+  <script src="main.js"></script>
+<footer>
+    <p data-i18n="footer_copyright"></p>
+    <p>
+        <a href="/about" data-i18n="about_us">회사 소개</a> |
+        <a href="/contact" data-i18n="contact">문의</a> |
+        <a href="/inquiry" data-i18n="partnership_inquiry">파트너십 문의</a> |
+        <a href="/privacy-policy" data-i18n="privacy_policy">개인정보처리방침</a> |
+        <a href="/sitemap.xml" data-i18n="sitemap">사이트맵</a> |
+        <a href="/rss.xml">RSS Feed</a>
+    </p>
+</footer>
+
+</body>
+</html>
