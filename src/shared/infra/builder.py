@@ -41,7 +41,7 @@ def generate_public_site():
         "animal-face", "fortune", "games", "ai-test", "lucky-recommendation", 
         "games/ai-evolution", "games/tetris", "privacy-policy", "about", "contact",
         "board", "board/write", "board/edit", "board/post", "inquiry", "search",
-        "auth",
+        "auth", "auth/signup",
         "futures-estimate"
     ]
     for domain in domains:

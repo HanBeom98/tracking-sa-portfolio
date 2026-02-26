@@ -270,26 +270,8 @@ function initAuthControls() {
         }
     });
 
-    emailSignupBtn.addEventListener('click', async () => {
-        const authService = await getAuthService();
-        if (!authService || !emailInput || !passwordInput) return;
-        const email = emailInput.value.trim();
-        const password = passwordInput.value;
-        if (!email || !password) {
-            alert("이메일과 비밀번호를 입력해주세요.");
-            return;
-        }
-        if (password.length < 6) {
-            alert("비밀번호는 6자 이상이어야 합니다.");
-            return;
-        }
-        try {
-            await authService.signUpWithEmail(email, password);
-            container.classList.remove('open');
-        } catch (error) {
-            console.error("회원가입 실패:", error);
-            alert("회원가입에 실패했습니다. 잠시 후 다시 시도해주세요.");
-        }
+    emailSignupBtn.addEventListener('click', () => {
+        window.location.href = `/auth/signup?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`;
     });
 
     showUidBtn.addEventListener('click', () => {
