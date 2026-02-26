@@ -8,7 +8,8 @@ from src.shared.infra.templates import get_common_head, get_common_header, get_c
 def process_html_file_for_common_elements(filepath):
     try:
         with open(filepath, "r", encoding="utf-8") as f:
-            content = f.read()
+            original = f.read()
+        content = original
 
         is_root_homepage = os.path.abspath(filepath) == os.path.abspath(os.path.join(PUBLIC_DIR, "index.html"))
         is_en_page = os.path.abspath(filepath).startswith(os.path.abspath(os.path.join(PUBLIC_DIR, "en")) + os.sep)
@@ -77,7 +78,8 @@ def process_html_file_for_common_elements(filepath):
         if '</body>' in content and not is_root_homepage:
             content = content.replace('</body>', f'{get_common_footer()}\n</body>')
 
-        with open(filepath, "w", encoding="utf-8") as f:
-            f.write(content)
+        if content != original:
+            with open(filepath, "w", encoding="utf-8") as f:
+                f.write(content)
     except Exception as e:
         print(f"🚨 [BUILD ERROR] {filepath}: {e}")

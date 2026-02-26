@@ -22,7 +22,7 @@ def main():
         fetch_and_post_news()
     
     print("🚀 [BUILD] Starting DDD-based site generation...")
-    generate_public_site()
+    generate_public_site(incremental=args.build_only)
     write_build_stamp()
     
     print("\n✨ All tasks (News & Build) are completed.")

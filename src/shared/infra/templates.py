@@ -1,5 +1,4 @@
 import os
-import datetime
 import json
 from src.shared.infra.config import ADSENSE_CLIENT_ID
 
@@ -10,10 +9,23 @@ def load_template(filename):
     with open(template_path, "r", encoding="utf-8") as f:
         return f.read()
 
+
+def _asset_version():
+    # Stable cache key: changes only when core shared assets change.
+    paths = [
+        os.path.join("src", "shared", "assets", "style.css"),
+        os.path.join("src", "shared", "assets", "translations.js"),
+        os.path.join("src", "shared", "assets", "common.js"),
+    ]
+    mtimes = []
+    for path in paths:
+        if os.path.exists(path):
+            mtimes.append(int(os.path.getmtime(path)))
+    return str(max(mtimes)) if mtimes else "0"
+
 def get_common_head():
     template = load_template("head.html")
-    # Force cache busting for style.css with a build timestamp
-    version = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    version = _asset_version()
     template = template.replace('href="/style.css"', f'href="/style.css?v={version}"')
     template = template.replace('src="/translations.js"', f'src="/translations.js?v={version}"')
     template = template.replace('src="/common.js"', f'src="/common.js?v={version}"')

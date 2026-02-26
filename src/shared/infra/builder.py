@@ -14,9 +14,10 @@ from src.domains.news.infra.news_builder import (
     upgrade_cached_article_pages,
 )
 
-def generate_public_site():
+def generate_public_site(incremental=False):
     news_snapshot = snapshot_news()
-    if os.path.exists(PUBLIC_DIR): shutil.rmtree(PUBLIC_DIR)
+    if os.path.exists(PUBLIC_DIR) and not incremental:
+        shutil.rmtree(PUBLIC_DIR)
     os.makedirs(PUBLIC_DIR, exist_ok=True)
     
     # 1. 루트 정적 자산 복사
@@ -34,7 +35,7 @@ def generate_public_site():
     shared_ui_dir = "src/shared/ui"
     if os.path.exists(shared_ui_dir):
         dest_ui = os.path.join(PUBLIC_DIR, "ui")
-        shutil.copytree(shared_ui_dir, dest_ui)
+        shutil.copytree(shared_ui_dir, dest_ui, dirs_exist_ok=True)
     
     # 4. 도메인 빌드
     domains = [
