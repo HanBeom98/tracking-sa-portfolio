@@ -109,13 +109,3 @@ export function renderAccountView(infoEl, actionsEl, user, viewModel, deps) {
   `;
   applyCurrentLangTranslations();
 }
-
-if (typeof window !== "undefined") {
-  window.AccountDomain = window.AccountDomain || {};
-  window.AccountDomain.ui = {
-    applyCurrentLangTranslations,
-    setStatusText,
-    renderGuestView,
-    renderAccountView,
-  };
-}

@@ -2,9 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 async function loadNicknameDomain() {
-  globalThis.window = {};
-  await import(`../../src/domains/account/domain/nickname.js?ts=${Date.now()}`);
-  return globalThis.window.AccountDomain.nickname;
+  return import(`../../src/domains/account/domain/nickname.js?ts=${Date.now()}`);
 }
 
 test("account nickname domain normalizes and validates nickname", async () => {

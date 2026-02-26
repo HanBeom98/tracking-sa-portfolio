@@ -45,18 +45,4 @@ export function getAccountViewModel(user, profile) {
   };
 }
 
-if (typeof window !== "undefined") {
-  window.AccountDomain = window.AccountDomain || {};
-  window.AccountDomain.viewmodel = {
-    t,
-    formatProvider,
-    formatSubscription,
-    formatDate,
-    normalizeNickname,
-    validateNickname,
-    getNicknameCooldownInfo,
-    getAccountViewModel,
-  };
-}
-
 export { normalizeNickname, validateNickname, getNicknameCooldownInfo };

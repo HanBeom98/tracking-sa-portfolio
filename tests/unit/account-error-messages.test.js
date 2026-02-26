@@ -2,9 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 async function loadAccountErrorMessages() {
-  globalThis.window = {};
-  await import(`../../src/domains/account/application/error-messages.js?ts=${Date.now()}`);
-  return globalThis.window.AccountDomain.errorMessages;
+  return import(`../../src/domains/account/application/error-messages.js?ts=${Date.now()}`);
 }
 
 test("account error messages map profile save errors", async () => {

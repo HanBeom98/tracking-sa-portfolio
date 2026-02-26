@@ -34,11 +34,3 @@ export function resolveDeleteAccountError(error) {
   }
   return { key: "delete_account_failed", fallback: "회원탈퇴에 실패했습니다." };
 }
-
-if (typeof window !== "undefined") {
-  window.AccountDomain = window.AccountDomain || {};
-  window.AccountDomain.errorMessages = {
-    resolveProfileSaveError,
-    resolveDeleteAccountError,
-  };
-}

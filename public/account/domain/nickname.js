@@ -17,12 +17,3 @@ export function getNicknameCooldownInfo(nicknameUpdatedAt) {
   const nextAt = lastTs + cooldownMs;
   return { nextAt, remainingMs: Math.max(0, nextAt - Date.now()) };
 }
-
-if (typeof window !== "undefined") {
-  window.AccountDomain = window.AccountDomain || {};
-  window.AccountDomain.nickname = {
-    normalizeNickname,
-    validateNickname,
-    getNicknameCooldownInfo,
-  };
-}
