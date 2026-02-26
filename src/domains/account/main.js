@@ -5,6 +5,14 @@ function formatProvider(providerIds) {
   return t("account_provider_other", "기타");
 }
 
+function formatSubscription(status) {
+  const t = window.getTranslation || ((_, fallback) => fallback);
+  if (status === "active") return t("subscription_status_active", "구독중");
+  if (status === "canceled") return t("subscription_status_canceled", "해지됨");
+  if (status === "past_due") return t("subscription_status_past_due", "결제 실패");
+  return t("subscription_status_free", "무료");
+}
+
 function formatDate(value) {
   if (!value) return "-";
   try {
@@ -48,7 +56,9 @@ async function renderAccount() {
 
   const profile = (window.getCurrentUserProfile && window.getCurrentUserProfile()) || null;
   const providerIds = (user.providerData || []).map((p) => p.providerId);
-  const role = (profile && profile.role) || "free";
+  const subscriptionStatus = (profile && profile.subscription && profile.subscription.status) || "free";
+  const nickname = (profile && profile.nickname) || user.displayName || "";
+  const photoURL = (profile && profile.photoURL) || user.photoURL || "";
 
   infoEl.innerHTML = `
     <div class="account-row">
@@ -60,16 +70,39 @@ async function renderAccount() {
       <div class="account-value">${formatProvider(providerIds)}</div>
     </div>
     <div class="account-row">
+      <div class="account-label" data-i18n="account_subscription">구독 상태</div>
+      <div class="account-value">${formatSubscription(subscriptionStatus)}</div>
+    </div>
+    <div class="account-row">
       <div class="account-label" data-i18n="account_uid">UID</div>
       <div class="account-value">${user.uid || "-"}</div>
     </div>
     <div class="account-row">
-      <div class="account-label" data-i18n="account_role">권한</div>
-      <div class="account-value">${role}</div>
-    </div>
-    <div class="account-row">
       <div class="account-label" data-i18n="account_created">가입일</div>
       <div class="account-value">${formatDate(user.metadata && user.metadata.creationTime)}</div>
+    </div>
+    <div class="account-section">
+      <h2 data-i18n="profile_settings">프로필 설정</h2>
+      <div class="account-form">
+        <div>
+          <label for="nickname" data-i18n="nickname">닉네임</label>
+          <div class="nickname-row">
+            <input id="nickname" type="text" value="${nickname}" placeholder="${window.getTranslation('nickname_placeholder', '닉네임을 입력하세요')}">
+            <button type="button" id="nickname-check" data-i18n="nickname_check">중복확인</button>
+          </div>
+          <div class="helper" id="nickname-status"></div>
+        </div>
+        <div>
+          <label for="photo-url" data-i18n="profile_image">프로필 이미지</label>
+          <input id="photo-url" type="text" value="${photoURL}" placeholder="${window.getTranslation('profile_image_placeholder', '이미지 URL을 입력하세요')}">
+          <div class="profile-preview" id="profile-preview" style="margin-top:10px;">
+            ${photoURL ? `<img src="${photoURL}" alt="profile">` : ""}
+            <span class="helper" data-i18n="profile_image_hint">원형 이미지로 표시됩니다.</span>
+          </div>
+        </div>
+        <button type="button" class="primary" id="profile-save" data-i18n="profile_save">저장</button>
+        <div class="helper" id="profile-status"></div>
+      </div>
     </div>
   `;
 
@@ -79,6 +112,116 @@ async function renderAccount() {
   if (window.applyTranslations) {
     const lang = localStorage.getItem("lang") || "ko";
     window.applyTranslations(lang);
+  }
+
+  let nicknameChecked = false;
+  let nicknameCheckedValue = normalizeNickname(nickname);
+
+  const nicknameInput = document.getElementById("nickname");
+  const nicknameCheckBtn = document.getElementById("nickname-check");
+  const nicknameStatus = document.getElementById("nickname-status");
+  const photoInput = document.getElementById("photo-url");
+  const profilePreview = document.getElementById("profile-preview");
+  const profileSaveBtn = document.getElementById("profile-save");
+  const profileStatus = document.getElementById("profile-status");
+
+  const authService = await (window.authDomainReady || Promise.resolve(null));
+
+  function setNicknameStatus(messageKey, fallback, ok = false) {
+    if (!nicknameStatus) return;
+    nicknameStatus.textContent = window.getTranslation(messageKey, fallback);
+    nicknameStatus.style.color = ok ? "#1b7f3a" : "#c62828";
+  }
+
+  function normalizeNickname(value) {
+    return (value || "").trim().toLowerCase();
+  }
+
+  function validateNickname(value) {
+    const trimmed = (value || "").trim();
+    const regex = /^[A-Za-z0-9가-힣_]{2,12}$/;
+    return regex.test(trimmed);
+  }
+
+  if (nicknameInput) {
+    nicknameInput.addEventListener("input", () => {
+      nicknameChecked = false;
+      nicknameStatus.textContent = "";
+    });
+  }
+
+  if (nicknameCheckBtn) {
+    nicknameCheckBtn.addEventListener("click", async () => {
+      const value = (nicknameInput && nicknameInput.value) || "";
+      if (!validateNickname(value)) {
+        setNicknameStatus("nickname_invalid", "닉네임은 2-12자(영문/숫자/한글/_)만 가능합니다.", false);
+        return;
+      }
+      if (!authService) return;
+      const result = await authService.checkNicknameAvailability(value);
+      if (result.available) {
+        nicknameChecked = true;
+        nicknameCheckedValue = normalizeNickname(value);
+        setNicknameStatus("nickname_available", "사용 가능한 닉네임입니다.", true);
+      } else {
+        nicknameChecked = false;
+        setNicknameStatus("nickname_taken", "이미 사용 중인 닉네임입니다.", false);
+      }
+    });
+  }
+
+  if (photoInput && profilePreview) {
+    photoInput.addEventListener("input", () => {
+      const value = (photoInput.value || "").trim();
+      profilePreview.innerHTML = value
+        ? `<img src="${value}" alt="profile"><span class="helper" data-i18n="profile_image_hint">원형 이미지로 표시됩니다.</span>`
+        : `<span class="helper" data-i18n="profile_image_hint">원형 이미지로 표시됩니다.</span>`;
+      if (window.applyTranslations) {
+        const lang = localStorage.getItem("lang") || "ko";
+        window.applyTranslations(lang);
+      }
+    });
+  }
+
+  if (profileSaveBtn) {
+    profileSaveBtn.addEventListener("click", async () => {
+      if (!authService) return;
+      const nextNickname = (nicknameInput && nicknameInput.value) || "";
+      const nextPhoto = (photoInput && photoInput.value) || "";
+
+      if (normalizeNickname(nextNickname) !== normalizeNickname(nickname)) {
+        if (!nicknameChecked || nicknameCheckedValue !== normalizeNickname(nextNickname)) {
+          setNicknameStatus("nickname_check_required", "닉네임 중복확인이 필요합니다.", false);
+          return;
+        }
+      }
+
+      try {
+        await authService.updateProfile({
+          nickname: nextNickname.trim(),
+          photoURL: nextPhoto.trim(),
+        });
+        if (profileStatus) {
+          profileStatus.textContent = window.getTranslation("profile_saved", "저장되었습니다.");
+          profileStatus.style.color = "#1b7f3a";
+        }
+        if (window.updateAuthControls) window.updateAuthControls(window.getCurrentUser());
+      } catch (error) {
+        console.error("프로필 저장 실패:", error);
+        if (error && error.code === "auth/nickname-taken") {
+          setNicknameStatus("nickname_taken", "이미 사용 중인 닉네임입니다.", false);
+          return;
+        }
+        if (error && error.code === "auth/invalid-nickname") {
+          setNicknameStatus("nickname_invalid", "닉네임은 2-12자(영문/숫자/한글/_)만 가능합니다.", false);
+          return;
+        }
+        if (profileStatus) {
+          profileStatus.textContent = window.getTranslation("profile_save_failed", "저장에 실패했습니다.");
+          profileStatus.style.color = "#c62828";
+        }
+      }
+    });
   }
 
   const deleteBtn = document.getElementById("account-delete-btn");

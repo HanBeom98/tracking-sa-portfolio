@@ -269,6 +269,17 @@ body.dark-mode .utility-controls #color-change {
     cursor: pointer;
     text-decoration: underline;
     text-underline-offset: 3px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.auth-avatar {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid oklch(90% 0.02 260);
 }
 
 .auth-menu {

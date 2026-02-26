@@ -37,6 +37,17 @@ service cloud.firestore {
       allow delete: if request.auth != null && request.auth.uid == userId;
     }
 
+    // Nickname availability index (public read, guarded create/delete)
+    match /nicknames/{nickname} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.resource.data.uid == request.auth.uid
+        && !exists(/databases/$(database)/documents/nicknames/$(nickname));
+      allow delete: if request.auth != null
+        && resource.data.uid == request.auth.uid;
+      allow update: if false;
+    }
+
     // Futures estimate chart public read access
     match /futures_estimate_points/{document=**} {
       allow read: if true;

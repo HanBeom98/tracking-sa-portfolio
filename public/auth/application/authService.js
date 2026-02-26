@@ -19,6 +19,14 @@ export function buildAuthService({ authRepository }) {
     return authRepository.signOut();
   }
 
+  function checkNicknameAvailability(nickname) {
+    return authRepository.checkNicknameAvailability(nickname);
+  }
+
+  function updateProfile({ nickname, photoURL } = {}) {
+    return authRepository.updateProfile({ nickname, photoURL });
+  }
+
   function deleteAccount({ password } = {}) {
     return authRepository.deleteAccount({ password });
   }
@@ -44,6 +52,8 @@ export function buildAuthService({ authRepository }) {
     signInWithEmail,
     signUpWithEmail,
     signOut,
+    checkNicknameAvailability,
+    updateProfile,
     deleteAccount,
     onAuthStateChanged,
   };

@@ -321,7 +321,13 @@ function initAuthControls() {
             loginButton.style.display = 'none';
             logoutButton.style.display = 'inline-flex';
             userLabel.style.display = 'inline-flex';
-            userLabel.textContent = user.displayName || user.email || '로그인됨';
+            const nickname = (authProfile && authProfile.nickname) || user.displayName || user.email || '로그인됨';
+            const photoURL = (authProfile && authProfile.photoURL) || user.photoURL || '';
+            if (photoURL) {
+                userLabel.innerHTML = `<img class="auth-avatar" src="${photoURL}" alt="profile"><span class="auth-user-label">${nickname}</span>`;
+            } else {
+                userLabel.textContent = nickname;
+            }
         } else {
             loginButton.style.display = 'inline-flex';
             logoutButton.style.display = 'none';

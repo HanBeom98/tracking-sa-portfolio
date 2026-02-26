@@ -9,6 +9,7 @@ export function createFirebaseAuthRepository({ firebaseApp = window.firebase, db
   }
 
   const auth = firebaseApp.auth();
+  const nicknamesCollection = db.collection("nicknames");
 
   function getServerTimestamp() {
     if (firebaseApp && firebaseApp.firestore && firebaseApp.firestore.FieldValue) {
@@ -35,6 +36,78 @@ export function createFirebaseAuthRepository({ firebaseApp = window.firebase, db
 
   function signOut() {
     return auth.signOut();
+  }
+
+  function normalizeNickname(value) {
+    return (value || "").trim().toLowerCase();
+  }
+
+  async function checkNicknameAvailability(nickname) {
+    const key = normalizeNickname(nickname);
+    if (!key) {
+      return { available: false, key, reason: "invalid" };
+    }
+    const snapshot = await nicknamesCollection.doc(key).get();
+    if (!snapshot.exists) {
+      return { available: true, key };
+    }
+    const data = snapshot.data() || {};
+    const user = auth.currentUser;
+    if (user && data.uid === user.uid) {
+      return { available: true, key, owned: true };
+    }
+    return { available: false, key, reason: "taken" };
+  }
+
+  async function updateProfile({ nickname, photoURL } = {}) {
+    const user = auth.currentUser;
+    if (!user) {
+      throw new Error("Not authenticated");
+    }
+
+    const updates = {};
+    const profileRef = db.collection("users").doc(user.uid);
+    const profileSnap = await profileRef.get();
+    const currentProfile = profileSnap.exists ? profileSnap.data() : {};
+    const currentNickname = currentProfile.nickname || "";
+
+    if (typeof nickname === "string") {
+      const key = normalizeNickname(nickname);
+      if (!key) {
+        const error = new Error("Invalid nickname");
+        error.code = "auth/invalid-nickname";
+        throw error;
+      }
+      const availability = await checkNicknameAvailability(nickname);
+      if (!availability.available) {
+        const error = new Error("Nickname already taken");
+        error.code = "auth/nickname-taken";
+        throw error;
+      }
+      if (normalizeNickname(currentNickname) !== key) {
+        if (currentNickname) {
+          await nicknamesCollection.doc(normalizeNickname(currentNickname)).delete().catch(() => {});
+        }
+        await nicknamesCollection.doc(key).set({
+          uid: user.uid,
+          nickname,
+          updatedAt: getServerTimestamp(),
+        });
+      }
+      updates.nickname = nickname;
+      await user.updateProfile({ displayName: nickname });
+    }
+
+    if (typeof photoURL === "string") {
+      updates.photoURL = photoURL;
+      await user.updateProfile({ photoURL: photoURL || "" });
+    }
+
+    if (Object.keys(updates).length) {
+      await profileRef.set(updates, { merge: true });
+    }
+
+    return getUserProfile(user.uid);
   }
 
   async function deleteAccount({ password } = {}) {
@@ -87,6 +160,7 @@ export function createFirebaseAuthRepository({ firebaseApp = window.firebase, db
       email: user.email || "",
       displayName: user.displayName || "",
       photoURL: user.photoURL || "",
+      nickname: "",
       role: DEFAULT_ROLE,
       createdAt: getServerTimestamp(),
     };
@@ -105,6 +179,8 @@ export function createFirebaseAuthRepository({ firebaseApp = window.firebase, db
     signInWithEmail,
     signUpWithEmail,
     signOut,
+    checkNicknameAvailability,
+    updateProfile,
     deleteAccount,
     onAuthStateChanged,
     ensureUserProfile,
