@@ -51,6 +51,7 @@ jobs:
           python main.py
 
       - name: Commit News Build
+        id: commit_news
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -61,7 +62,15 @@ jobs:
           git add public/ logs/processed_articles.log
           if git diff --cached --quiet; then
             echo "No changes to commit"
+            echo "committed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git commit -m "chore: update news build $(date -u +'%Y-%m-%d %H:%M UTC')"
           git push
+          echo "committed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Trigger Cloudflare Pages Deploy Hook
+        if: steps.commit_news.outputs.committed == 'true' && secrets.CLOUDFLARE_PAGES_DEPLOY_HOOK != ''
+        run: |
+          set -euo pipefail
+          curl -fsS -X POST "${{ secrets.CLOUDFLARE_PAGES_DEPLOY_HOOK }}"
