@@ -203,7 +203,7 @@
 
       <details class="toggle-wrap" style="margin-top:16px;">
         <summary class="toggle-summary">예측 vs 실제 비교표 (클릭해 열기/닫기)</summary>
-        <div class="panel-subtitle" style="margin-top:4px;">최근 예측 기록과 평가 결과(적중/실패)</div>
+        <div class="panel-subtitle" style="margin-top:4px;">최근 예측 기록과 평가 결과(적중/실패) · 코스피200 종가 기준</div>
         <table style="width:100%; border-collapse: collapse; font-size:0.84rem;">
           <thead>
             <tr style="text-align:left; border-bottom:1px solid #e2e8f0;">
@@ -314,6 +314,23 @@
 
     async function loadPredictionHistory() {
       const bodyEl = document.getElementById("prediction-history-body");
+      const PRED_UP_THRESHOLD = 58.0;
+      const PRED_DOWN_THRESHOLD = 42.0;
+
+      const toLabelText = (label) => {
+        if (label === "up") return "상승";
+        if (label === "down") return "하락";
+        if (label === "neutral") return "중립";
+        if (label === "flat") return "보합";
+        return "-";
+      };
+
+      const computePredLabel = (probUp) => {
+        if (typeof probUp !== "number") return "-";
+        if (probUp >= PRED_UP_THRESHOLD) return "up";
+        if (probUp <= PRED_DOWN_THRESHOLD) return "down";
+        return "neutral";
+      };
 
       try {
         let res = await fetch("/api/futures-predictions", { method: "GET" });
@@ -329,8 +346,9 @@
         const rows = [];
         items.forEach((d) => {
           const date = d.target_date || "-";
-          const pred = d.prediction_label || "-";
-          const actual = d.actual_label || "-";
+          const inferredPred = d.prediction_label || computePredLabel(d.probability_up);
+          const pred = toLabelText(inferredPred);
+          const actual = toLabelText(d.actual_label || "-");
           const pUp = typeof d.probability_up === "number" ? `${d.probability_up.toFixed(2)}%` : "-";
           let resultText = "대기";
           if (d.status === "evaluated") {

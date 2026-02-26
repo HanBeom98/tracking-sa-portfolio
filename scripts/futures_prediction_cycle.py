@@ -26,7 +26,7 @@ FEATURES = [
     ("TVC:GOLD", "xauusd", "GOLD"),
     ("BITSTAMP:BTCUSD", "btcusd", "BTCUSD"),
 ]
-TARGET_SOURCE = "ewy.us"
+TARGET_SOURCE = "^KS200"
 
 
 def now_kst():
@@ -251,25 +251,50 @@ def fetch_analysis_snapshot():
     return build_local_analysis_snapshot()
 
 
-def fetch_ewy_return_for_date(target_date):
-    url = "https://stooq.com/q/d/l/?s=ewy.us&i=d"
-    res = requests.get(url, timeout=30)
-    res.raise_for_status()
-    lines = [ln.strip() for ln in res.text.splitlines() if ln.strip()]
-    if len(lines) < 3 or lines[0].lower().startswith("no data"):
+def fetch_ks200_return_for_date(target_date):
+    urls = [
+        "https://query1.finance.yahoo.com/v8/finance/chart/%5EKS200?interval=1d&range=1y",
+        "https://query2.finance.yahoo.com/v8/finance/chart/%5EKS200?interval=1d&range=1y",
+    ]
+    data = None
+    last_error = None
+    for url in urls:
+        try:
+            res = requests.get(
+                url,
+                timeout=30,
+                headers={
+                    "User-Agent": "Mozilla/5.0 (compatible; TrackingSA/1.0)",
+                    "Accept": "application/json,text/plain,*/*",
+                },
+            )
+            res.raise_for_status()
+            data = res.json()
+            break
+        except Exception as exc:
+            last_error = exc
+            continue
+    if data is None:
+        if last_error:
+            raise last_error
+        return None
+    result = (data.get("chart") or {}).get("result") or []
+    if not result:
         return None
 
+    series = result[0]
+    timestamps = series.get("timestamp") or []
+    quotes = (series.get("indicators") or {}).get("quote") or []
+    if not timestamps or not quotes:
+        return None
+
+    closes = quotes[0].get("close") or []
     rows = []
-    for ln in lines[1:]:
-        p = ln.split(",")
-        if len(p) < 5:
+    for ts, close in zip(timestamps, closes):
+        if close is None:
             continue
-        d = p[0]
-        try:
-            c = float(p[4])
-        except Exception:
-            continue
-        rows.append((d, c))
+        d = dt.datetime.fromtimestamp(ts, tz=KST).date().isoformat()
+        rows.append((d, float(close)))
 
     rows.sort(key=lambda x: x[0])
     for i in range(1, len(rows)):
@@ -349,9 +374,9 @@ def run_evaluate(db, target_date, manual=False):
         return
 
     pred_doc = snap.to_dict() or {}
-    market = fetch_ewy_return_for_date(target_date)
+    market = fetch_ks200_return_for_date(target_date)
     if not market:
-        print(f"⚠️ no EWY close for {target_date}; skip evaluation")
+        print(f"⚠️ no KOSPI200 close for {target_date}; skip evaluation")
         return
 
     actual = actual_label(market["return_pct"])
@@ -369,7 +394,7 @@ def run_evaluate(db, target_date, manual=False):
         "actual_label": actual,
         "is_hit": is_hit,
         "status": "evaluated",
-        "evaluation_target": "EWY",
+        "evaluation_target": "KOSPI200",
         "evaluation_date": market["date"],
         "evaluation_is_manual": bool(manual),
     }
