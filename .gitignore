@@ -16,6 +16,8 @@ processed_articles.log.tmp
 node_modules/
 firebase-functions/node_modules/
 functions/node_modules/
+test-results/
+playwright-report/
 
 # Firebase & Cloudflare
 .firebase/

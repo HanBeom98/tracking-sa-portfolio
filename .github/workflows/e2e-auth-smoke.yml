@@ -1,0 +1,67 @@
+name: E2E Auth Smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "Target base URL"
+        required: false
+        default: "https://trackingsa.com"
+  workflow_run:
+    workflows:
+      - Site Deploy (Build Only)
+      - Daily AI News Post
+    types:
+      - completed
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-auth-smoke
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Resolve target URL
+        id: target
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.base_url }}" ]; then
+            echo "url=${{ github.event.inputs.base_url }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "url=https://trackingsa.com" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run auth smoke tests
+        env:
+          TRACKING_SA_BASE_URL: ${{ steps.target.outputs.url }}
+        run: npm run test:e2e:auth
+
+      - name: Upload Playwright artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-auth-smoke-${{ github.run_id }}
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
