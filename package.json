@@ -7,6 +7,8 @@
   "scripts": {
     "build": "[ -x venv/bin/python ] && venv/bin/python main.py --build-only || python3 main.py --build-only",
     "build:full": "[ -x venv/bin/python ] && venv/bin/python main.py || python3 main.py",
+    "sync:public": "bash scripts/sync_public_assets.sh",
+    "check:public-sync": "bash scripts/sync_public_assets.sh --check",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
