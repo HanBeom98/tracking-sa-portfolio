@@ -1,259 +1,86 @@
-/**
- * LuckyRecommendation Web Component - Ultimate Premium Version
- * Fully functional with API integration, dynamic color visualization, and strict encapsulation.
- */
+import { createLuckyCopy, resolveLuckyLanguage } from "./application/lucky-copy.js";
+import { buildLuckyPayload } from "./application/lucky-payload.js";
+import { buildLuckyResultCardHtml } from "./application/lucky-result-card.js";
+import {
+  bindLuckyEvents,
+  populateLuckyBirthSelectors,
+  renderLuckyError,
+  renderLuckyLoading,
+  renderLuckyResult,
+  renderLuckyView,
+} from "./ui/lucky-view.js";
+
 class LuckyRecommendation extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
-        this._selectedGender = 'male';
-        this._loading = false;
-        this._result = null;
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+    this._selectedGender = "male";
+    this._view = null;
+    this._copy = null;
+  }
+
+  connectedCallback() {
+    this.render();
+    this.setupEvents();
+  }
+
+  getTranslate() {
+    return window.getTranslation || ((_, fallback) => fallback);
+  }
+
+  render() {
+    const lang = resolveLuckyLanguage();
+    this._copy = createLuckyCopy(this.getTranslate());
+    this._view = renderLuckyView(this.shadowRoot, this._copy);
+    populateLuckyBirthSelectors(this._view, lang);
+  }
+
+  setupEvents() {
+    bindLuckyEvents(this._view, {
+      onGenderChanged: (gender) => {
+        this._selectedGender = gender;
+      },
+      onPredict: () => this.handlePredict(),
+    });
+  }
+
+  async fetchLucky(payload) {
+    const response = await fetch("https://tracking-sa.vercel.app/api/lucky", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      throw new Error("LUCKY_API_FAILED");
     }
 
-    connectedCallback() {
-        this.render();
-        this.setupEvents();
+    return response.json();
+  }
+
+  async handlePredict() {
+    const lang = resolveLuckyLanguage();
+    const name = this._view.nameInput.value.trim() || "익명";
+    const month = this._view.monthSelect.value;
+    const day = this._view.daySelect.value;
+
+    renderLuckyLoading(this._view, this._copy);
+
+    try {
+      const payload = buildLuckyPayload({
+        name,
+        month,
+        day,
+        gender: this._selectedGender,
+        language: lang,
+      });
+      const data = await this.fetchLucky(payload);
+      const resultHtml = buildLuckyResultCardHtml(data, this._copy);
+      renderLuckyResult(this._view, resultHtml);
+    } catch (error) {
+      renderLuckyError(this._view, this._copy.errorMessage);
     }
-
-    render() {
-        const lang = localStorage.getItem('lang') || 'ko';
-        const isEn = lang === 'en';
-
-        const t = {
-            name: isEn ? "Your Name" : "이름",
-            birth: isEn ? "Birth Month/Day" : "생일(월/일)",
-            gender: isEn ? "Gender" : "성별",
-            male: isEn ? "Male" : "남성",
-            female: isEn ? "Female" : "여성",
-            check: isEn ? "Get My Lucky Items" : "행운의 추천 받기",
-            analyzing: isEn ? "AI is analyzing your fate..." : "AI가 당신의 행운을 분석 중입니다...",
-            luckyColor: isEn ? "Today's Lucky Color" : "오늘의 행운 컬러",
-            luckyItem: isEn ? "Today's Lucky Item" : "오늘의 행운 아이템",
-            placeholder: isEn ? "Enter name" : "이름을 입력하세요"
-        };
-
-        this.shadowRoot.innerHTML = `
-        <style>
-            :host { display: block; width: 100%; max-width: 600px; margin: 0 auto; font-family: 'Inter', system-ui, sans-serif; }
-            
-            .card {
-                background: white; border-radius: 30px; padding: 40px;
-                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05); border: 1px solid rgba(0, 0, 0, 0.02);
-                display: flex; flex-direction: column; gap: 20px; text-align: left;
-                animation: slideIn 0.8s ease-out;
-            }
-
-            @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-            .field { display: flex; flex-direction: column; gap: 10px; }
-            .label { font-weight: 800; font-size: 0.85rem; color: #1e293b; text-transform: uppercase; letter-spacing: 0.05em; }
-
-            input, select {
-                padding: 14px 18px; border-radius: 14px; border: 2px solid #f1f5f9;
-                font-size: 1rem; background: #f8fafc; outline: none; transition: 0.3s;
-            }
-            input:focus, select:focus { border-color: #0052cc; background: white; box-shadow: 0 0 0 4px rgba(0, 82, 204, 0.1); }
-
-            .gender-group { display: flex; gap: 10px; }
-            .gender-btn {
-                flex: 1; padding: 14px; border-radius: 14px; border: 2px solid #f1f5f9;
-                background: #f1f5f9; cursor: pointer; font-weight: 700; transition: 0.3s;
-                display: flex; align-items: center; justify-content: center; gap: 8px; color: #64748b;
-            }
-            .gender-btn.active.male { background: #0052cc; color: white; border-color: #0052cc; box-shadow: 0 5px 15px rgba(0, 82, 204, 0.2); }
-            .gender-btn.active.female { background: #e11d48; color: white; border-color: #e11d48; box-shadow: 0 5px 15px rgba(225, 29, 72, 0.2); }
-
-            .submit-btn {
-                margin-top: 10px; padding: 20px; border-radius: 16px; border: none;
-                background: linear-gradient(135deg, #0052cc 0%, #1e40af 100%);
-                color: white; font-weight: 900; font-size: 1.15rem; cursor: pointer;
-                transition: 0.3s; box-shadow: 0 10px 25px rgba(0, 82, 204, 0.2);
-            }
-            .submit-btn:hover { transform: translateY(-4px); filter: brightness(1.1); box-shadow: 0 15px 35px rgba(0, 82, 204, 0.3); }
-
-            /* Result Section */
-            #result-area { margin-top: 30px; }
-            .loading { text-align: center; padding: 20px; }
-            .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #0052cc; border-radius: 50%; width: 35px; height: 35px; animation: spin 1s linear infinite; margin: 0 auto 15px auto; }
-            @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-            .loading-card {
-                background: linear-gradient(135deg, #f8fbff 0%, #eff6ff 100%);
-                border: 1px solid #dbeafe;
-                border-radius: 20px;
-                padding: 22px 16px;
-                box-shadow: 0 8px 20px rgba(0, 82, 204, 0.08);
-            }
-            .loading-title {
-                color: #1e40af;
-                font-weight: 900;
-                font-size: 1.02rem;
-                margin-bottom: 5px;
-                animation: glowPulse 1.6s ease-in-out infinite;
-            }
-            .loading-sub {
-                color: #64748b;
-                font-size: 0.9rem;
-                font-weight: 600;
-            }
-            .loading-dots {
-                margin-top: 12px;
-                display: inline-flex;
-                gap: 7px;
-                align-items: center;
-                justify-content: center;
-            }
-            .loading-dot {
-                width: 7px;
-                height: 7px;
-                border-radius: 999px;
-                background: #3b82f6;
-                animation: dotJump 0.9s ease-in-out infinite;
-            }
-            .loading-dot:nth-child(2) { animation-delay: 0.15s; }
-            .loading-dot:nth-child(3) { animation-delay: 0.3s; }
-            @keyframes dotJump {
-                0%, 80%, 100% { transform: translateY(0); opacity: 0.45; }
-                40% { transform: translateY(-5px); opacity: 1; }
-            }
-            @keyframes glowPulse {
-                0%, 100% { opacity: 1; }
-                50% { opacity: 0.6; }
-            }
-
-            .result-card {
-                padding: 35px; background: #f8fafc; border-radius: 24px; border: 1px solid #e2e8f0;
-                display: flex; flex-direction: column; gap: 25px; animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            }
-            @keyframes pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-            .res-item { display: flex; align-items: center; gap: 20px; }
-            .color-box { width: 60px; height: 60px; border-radius: 50%; border: 4px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-            .item-icon { font-size: 3rem; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1)); }
-            .res-text h3 { margin: 0; font-size: 0.85rem; color: #64748b; text-transform: uppercase; }
-            .res-text p { margin: 5px 0 0 0; font-size: 1.5rem; font-weight: 900; color: #1e293b; }
-        </style>
-
-        <div class="card">
-            <div class="field">
-                <span class="label">${t.name}</span>
-                <input type="text" id="user-name" placeholder="${t.placeholder}">
-            </div>
-
-            <div class="field">
-                <span class="label">${t.birth}</span>
-                <div style="display: flex; gap: 8px;">
-                    <select id="birth-month" style="flex:1"></select>
-                    <select id="birth-day" style="flex:1"></select>
-                </div>
-            </div>
-
-            <div class="field">
-                <span class="label">${t.gender}</span>
-                <div class="gender-group">
-                    <button class="gender-btn male active" data-gender="male">♂ ${t.male}</button>
-                    <button class="gender-btn female" data-gender="female">♀ ${t.female}</button>
-                </div>
-            </div>
-
-            <button class="submit-btn" id="predict-btn">${t.check}</button>
-
-            <div id="result-area"></div>
-        </div>
-        `;
-        this.populateSelectors();
-    }
-
-    populateSelectors() {
-        const monthSel = this.shadowRoot.getElementById('birth-month');
-        const daySel = this.shadowRoot.getElementById('birth-day');
-        for (let i = 1; i <= 12; i++) {
-            const opt = document.createElement('option'); opt.value = i; opt.innerText = i + "월";
-            monthSel.appendChild(opt);
-        }
-        for (let i = 1; i <= 31; i++) {
-            const opt = document.createElement('option'); opt.value = i; opt.innerText = i + "일";
-            daySel.appendChild(opt);
-        }
-    }
-
-    setupEvents() {
-        const root = this.shadowRoot;
-        const genderBtns = root.querySelectorAll('.gender-btn');
-        genderBtns.forEach(btn => {
-            btn.onclick = () => {
-                genderBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                this._selectedGender = btn.dataset.gender;
-            };
-        });
-
-        root.getElementById('predict-btn').onclick = () => this.handlePredict();
-    }
-
-    async handlePredict() {
-        const name = this.shadowRoot.getElementById('user-name').value.trim() || '익명';
-        const month = this.shadowRoot.getElementById('birth-month').value;
-        const day = this.shadowRoot.getElementById('birth-day').value;
-        const lang = localStorage.getItem('lang') || 'ko';
-        const isEn = lang === 'en';
-
-        const resultArea = this.shadowRoot.getElementById('result-area');
-        const loadingTitle = isEn ? "AI is finding your lucky recommendation..." : "AI가 오늘의 행운 추천을 찾고 있습니다...";
-        const loadingSub = isEn ? "Checking your vibe, color signal, and best lucky item." : "오늘의 기운, 컬러 신호, 추천 아이템을 분석 중입니다.";
-        resultArea.innerHTML = `
-            <div class="loading loading-card">
-                <div class="spinner"></div>
-                <p class="loading-title">${loadingTitle}</p>
-                <p class="loading-sub">${loadingSub}</p>
-                <div class="loading-dots" aria-hidden="true">
-                    <span class="loading-dot"></span>
-                    <span class="loading-dot"></span>
-                    <span class="loading-dot"></span>
-                </div>
-            </div>
-        `;
-
-        try {
-            const response = await fetch('https://tracking-sa.vercel.app/api/lucky', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    language: lang,
-                    userInfo: { name, birthMonth: month, birthDay: day, gender: this._selectedGender },
-                    currentDate: { year: new Date().getFullYear(), month: new Date().getMonth() + 1, day: new Date().getDate() }
-                })
-            });
-
-            if (!response.ok) throw new Error("API Failed");
-            const data = await response.json();
-            
-            // Render Result Card
-            resultArea.innerHTML = `
-                <div class="result-card">
-                    <div class="res-item">
-                        <div class="color-box" style="background: ${data.oklch}"></div>
-                        <div class="res-text">
-                            <h3>Lucky Color</h3>
-                            <p>${data.colorName}</p>
-                        </div>
-                    </div>
-                    <div style="height:1px; background:#e2e8f0;"></div>
-                    <div class="res-item">
-                        <div class="item-icon">${data.itemIcon}</div>
-                        <div class="res-text">
-                            <h3>Lucky Item</h3>
-                            <p>${data.itemName}</p>
-                        </div>
-                    </div>
-                    <p style="font-size: 1rem; color: #64748b; line-height: 1.6; margin: 0;">${data.itemAction}</p>
-                </div>
-            `;
-            resultArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        } catch (err) {
-            resultArea.innerHTML = `<p style="color: #ef4444; text-align:center;">행운 분석에 실패했습니다.</p>`;
-        }
-    }
+  }
 }
 
-customElements.define('lucky-recommendation', LuckyRecommendation);
+customElements.define("lucky-recommendation", LuckyRecommendation);

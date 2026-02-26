@@ -51,3 +51,8 @@ src/domains/fortune/main.js|public/fortune/main.js
 src/domains/fortune/application/fortune-copy.js|public/fortune/application/fortune-copy.js
 src/domains/fortune/application/fortune-markdown.js|public/fortune/application/fortune-markdown.js
 src/domains/fortune/ui/fortune-view.js|public/fortune/ui/fortune-view.js
+src/domains/lucky-recommendation/main.js|public/lucky-recommendation/main.js
+src/domains/lucky-recommendation/application/lucky-copy.js|public/lucky-recommendation/application/lucky-copy.js
+src/domains/lucky-recommendation/application/lucky-payload.js|public/lucky-recommendation/application/lucky-payload.js
+src/domains/lucky-recommendation/application/lucky-result-card.js|public/lucky-recommendation/application/lucky-result-card.js
+src/domains/lucky-recommendation/ui/lucky-view.js|public/lucky-recommendation/ui/lucky-view.js

@@ -134,11 +134,20 @@
     - `src/domains/fortune/application/fortune-markdown.js` (결과 파싱)
     - `src/domains/fortune/ui/fortune-view.js` (템플릿/이벤트/로딩/결과 렌더)
     - `main.js`는 API 호출/오케스트레이션만 담당
+  - lucky-recommendation 도메인 1차 분리:
+    - `src/domains/lucky-recommendation/application/lucky-copy.js` (문구/라벨/에러)
+    - `src/domains/lucky-recommendation/application/lucky-payload.js` (요청 payload 조립)
+    - `src/domains/lucky-recommendation/application/lucky-result-card.js` (결과 카드 HTML 생성)
+    - `src/domains/lucky-recommendation/ui/lucky-view.js` (템플릿/이벤트/로딩/결과 렌더)
+    - `main.js`는 API 호출/오케스트레이션만 담당
   - unit test 추가:
     - `tests/unit/animal-face-messages.test.js`
     - `tests/unit/animal-face-view-text.test.js`
     - `tests/unit/fortune-copy.test.js`
     - `tests/unit/fortune-markdown.test.js`
+    - `tests/unit/lucky-copy.test.js`
+    - `tests/unit/lucky-payload.test.js`
+    - `tests/unit/lucky-result-card.test.js`
 
 ## Phase 2 (Short-term, 3-5 days)
 - 인증 UI/상태 로직을 모듈화:
