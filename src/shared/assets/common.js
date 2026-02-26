@@ -111,48 +111,46 @@ async function getAuthService() {
     return null;
 }
 
-async function loadAppShellRuntimeFactory() {
-    if (typeof window.createAppShellRuntime === "function") {
-        return window.createAppShellRuntime;
+async function loadFactoryScript({
+    factoryName,
+    scriptSrc,
+    dataAttr,
+}) {
+    if (typeof window[factoryName] === "function") {
+        return window[factoryName];
     }
     await new Promise((resolve, reject) => {
-        const existing = document.querySelector('script[data-app-shell-runtime="true"]');
+        const existing = document.querySelector(`script[${dataAttr}="true"]`);
         if (existing) {
             existing.addEventListener("load", resolve, { once: true });
             existing.addEventListener("error", reject, { once: true });
             return;
         }
         const script = document.createElement("script");
-        script.src = "/app-shell-runtime.js";
+        script.src = scriptSrc;
         script.async = true;
-        script.dataset.appShellRuntime = "true";
+        script.setAttribute(dataAttr, "true");
         script.onload = resolve;
         script.onerror = reject;
         document.head.appendChild(script);
     });
-    return window.createAppShellRuntime;
+    return window[factoryName];
+}
+
+async function loadAppShellRuntimeFactory() {
+    return loadFactoryScript({
+        factoryName: "createAppShellRuntime",
+        scriptSrc: "/app-shell-runtime.js",
+        dataAttr: "data-app-shell-runtime",
+    });
 }
 
 async function loadAuthSessionRuntimeFactory() {
-    if (typeof window.createAuthSessionRuntime === "function") {
-        return window.createAuthSessionRuntime;
-    }
-    await new Promise((resolve, reject) => {
-        const existing = document.querySelector('script[data-auth-session-runtime="true"]');
-        if (existing) {
-            existing.addEventListener("load", resolve, { once: true });
-            existing.addEventListener("error", reject, { once: true });
-            return;
-        }
-        const script = document.createElement("script");
-        script.src = "/auth-session-runtime.js";
-        script.async = true;
-        script.dataset.authSessionRuntime = "true";
-        script.onload = resolve;
-        script.onerror = reject;
-        document.head.appendChild(script);
+    return loadFactoryScript({
+        factoryName: "createAuthSessionRuntime",
+        scriptSrc: "/auth-session-runtime.js",
+        dataAttr: "data-auth-session-runtime",
     });
-    return window.createAuthSessionRuntime;
 }
 
 async function ensureAppShellRuntime() {
@@ -189,92 +187,36 @@ async function ensureAuthSessionRuntime() {
 
 async function loadInlineLoginModalFactory() {
     await loadAuthActionHandlersFactory();
-    if (typeof window.createInlineLoginModalController === "function") {
-        return window.createInlineLoginModalController;
-    }
-    await new Promise((resolve, reject) => {
-        const existing = document.querySelector('script[data-inline-login-modal="true"]');
-        if (existing) {
-            existing.addEventListener("load", resolve, { once: true });
-            existing.addEventListener("error", reject, { once: true });
-            return;
-        }
-        const script = document.createElement("script");
-        script.src = "/inline-login-modal.js";
-        script.async = true;
-        script.dataset.inlineLoginModal = "true";
-        script.onload = resolve;
-        script.onerror = reject;
-        document.head.appendChild(script);
+    return loadFactoryScript({
+        factoryName: "createInlineLoginModalController",
+        scriptSrc: "/inline-login-modal.js",
+        dataAttr: "data-inline-login-modal",
     });
-    return window.createInlineLoginModalController;
 }
 
 async function loadAuthActionHandlersFactory() {
-    if (typeof window.createAuthActionHandlers === "function") {
-        return window.createAuthActionHandlers;
-    }
-    await new Promise((resolve, reject) => {
-        const existing = document.querySelector('script[data-auth-action-handlers="true"]');
-        if (existing) {
-            existing.addEventListener("load", resolve, { once: true });
-            existing.addEventListener("error", reject, { once: true });
-            return;
-        }
-        const script = document.createElement("script");
-        script.src = "/auth-action-handlers.js";
-        script.async = true;
-        script.dataset.authActionHandlers = "true";
-        script.onload = resolve;
-        script.onerror = reject;
-        document.head.appendChild(script);
+    return loadFactoryScript({
+        factoryName: "createAuthActionHandlers",
+        scriptSrc: "/auth-action-handlers.js",
+        dataAttr: "data-auth-action-handlers",
     });
-    return window.createAuthActionHandlers;
 }
 
 async function loadAuthUiControllerFactory() {
     await loadAuthActionHandlersFactory();
-    if (typeof window.createAuthUiController === "function") {
-        return window.createAuthUiController;
-    }
-    await new Promise((resolve, reject) => {
-        const existing = document.querySelector('script[data-auth-ui-controller="true"]');
-        if (existing) {
-            existing.addEventListener("load", resolve, { once: true });
-            existing.addEventListener("error", reject, { once: true });
-            return;
-        }
-        const script = document.createElement("script");
-        script.src = "/auth-ui-controller.js";
-        script.async = true;
-        script.dataset.authUiController = "true";
-        script.onload = resolve;
-        script.onerror = reject;
-        document.head.appendChild(script);
+    return loadFactoryScript({
+        factoryName: "createAuthUiController",
+        scriptSrc: "/auth-ui-controller.js",
+        dataAttr: "data-auth-ui-controller",
     });
-    return window.createAuthUiController;
 }
 
 async function loadAuthPromptKitFactory() {
-    if (typeof window.createAuthPromptKit === "function") {
-        return window.createAuthPromptKit;
-    }
-    await new Promise((resolve, reject) => {
-        const existing = document.querySelector('script[data-auth-prompt-kit="true"]');
-        if (existing) {
-            existing.addEventListener("load", resolve, { once: true });
-            existing.addEventListener("error", reject, { once: true });
-            return;
-        }
-        const script = document.createElement("script");
-        script.src = "/auth-prompt-kit.js";
-        script.async = true;
-        script.dataset.authPromptKit = "true";
-        script.onload = resolve;
-        script.onerror = reject;
-        document.head.appendChild(script);
+    return loadFactoryScript({
+        factoryName: "createAuthPromptKit",
+        scriptSrc: "/auth-prompt-kit.js",
+        dataAttr: "data-auth-prompt-kit",
     });
-    return window.createAuthPromptKit;
 }
 
 async function ensureInlineLoginModalController() {
