@@ -51,6 +51,7 @@ futures-estimate 도메인(2026-02-26 기준):
 - `src/shared/assets/auth-action-handlers.js`에 인증 액션(provider/email/signup/logout) 책임 분리(`createAuthActionHandlers`)
   - `auth-controls`, `inline-login-modal`에서 공통으로 사용
 - `src/shared/assets/app-shell-runtime.js`에 앱 셸 책임(i18n/테마/언어 스위처/드롭다운) 분리(`createAppShellRuntime`)
+- `src/shared/assets/auth-session-runtime.js`에 인증 세션 책임(Auth ready/init/redirect/requireAuth) 분리(`createAuthSessionRuntime`)
 - 헤더 인증 UI 오케스트레이션은 `src/shared/assets/auth-ui-controller.js`로 분리
   - `common.js`는 인증 상태/게이트웨이/프롬프트 엔트리만 유지
 - 인증/게시판 알림 메시지는 `src/shared/assets/translations.js` 키를 우선 사용

@@ -5,22 +5,13 @@
 
 let authUser = null;
 let authProfile = null;
-let authReadyResolve = null;
 let authUiController = null;
 let authPromptKit = null;
 let inlineModalController = null;
 let authStateBus = null;
 let appShellRuntime = null;
-window.authStateReady = new Promise((resolve) => {
-    authReadyResolve = resolve;
-});
-
-function resolveAuthReady(user) {
-    if (authReadyResolve) {
-        authReadyResolve(user);
-        authReadyResolve = null;
-    }
-}
+let authSessionRuntime = null;
+window.authStateReady = Promise.resolve(null);
 
 function createFallbackAuthStateBus() {
     const listeners = new Set();
@@ -142,6 +133,28 @@ async function loadAppShellRuntimeFactory() {
     return window.createAppShellRuntime;
 }
 
+async function loadAuthSessionRuntimeFactory() {
+    if (typeof window.createAuthSessionRuntime === "function") {
+        return window.createAuthSessionRuntime;
+    }
+    await new Promise((resolve, reject) => {
+        const existing = document.querySelector('script[data-auth-session-runtime="true"]');
+        if (existing) {
+            existing.addEventListener("load", resolve, { once: true });
+            existing.addEventListener("error", reject, { once: true });
+            return;
+        }
+        const script = document.createElement("script");
+        script.src = "/auth-session-runtime.js";
+        script.async = true;
+        script.dataset.authSessionRuntime = "true";
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+    return window.createAuthSessionRuntime;
+}
+
 async function ensureAppShellRuntime() {
     if (appShellRuntime) return appShellRuntime;
     const factory = await loadAppShellRuntimeFactory();
@@ -150,6 +163,28 @@ async function ensureAppShellRuntime() {
     }
     appShellRuntime = factory();
     return appShellRuntime;
+}
+
+async function ensureAuthSessionRuntime() {
+    if (authSessionRuntime) return authSessionRuntime;
+    const factory = await loadAuthSessionRuntimeFactory();
+    if (typeof factory !== "function") {
+        throw new Error("Auth session runtime factory is not available.");
+    }
+    authSessionRuntime = factory({
+        getAuthService,
+        onStateChanged({ user, profile }) {
+            authUser = user || null;
+            authProfile = profile || null;
+            publishAuthStateChange(authUser, authProfile);
+            if (window.updateAuthControls) window.updateAuthControls(authUser);
+        },
+        onAuthRequired() {
+            if (window.showAuthMenu) window.showAuthMenu();
+        },
+    });
+    window.authStateReady = authSessionRuntime.waitForReady();
+    return authSessionRuntime;
 }
 
 async function loadInlineLoginModalFactory() {
@@ -387,56 +422,39 @@ window.createLoginRequiredPrompt = ({
     return wrapper;
 };
 
-async function initAuth() {
-    const authService = await getAuthService();
-    if (!authService) {
-        resolveAuthReady(null);
-        publishAuthStateChange(null, null);
-        if (window.updateAuthControls) window.updateAuthControls(null);
-        return;
-    }
-
-    authService.onAuthStateChanged(({ user, profile }) => {
-        authUser = user || null;
-        authProfile = profile || null;
-        resolveAuthReady(authUser);
-        publishAuthStateChange(authUser, authProfile);
-        if (window.updateAuthControls) window.updateAuthControls(authUser);
-        if (authUser) {
-            const redirectTo = sessionStorage.getItem("postLoginRedirect");
-            if (redirectTo) {
-                sessionStorage.removeItem("postLoginRedirect");
-                window.location.href = redirectTo;
-            }
-        }
-    });
-}
-
-window.getCurrentUser = () => authUser;
-window.getCurrentUserProfile = () => authProfile;
+window.getCurrentUser = () => (
+    authSessionRuntime && typeof authSessionRuntime.getCurrentUser === "function"
+        ? authSessionRuntime.getCurrentUser()
+        : authUser
+);
+window.getCurrentUserProfile = () => (
+    authSessionRuntime && typeof authSessionRuntime.getCurrentUserProfile === "function"
+        ? authSessionRuntime.getCurrentUserProfile()
+        : authProfile
+);
 window.requireAuth = async ({ redirectTo } = {}) => {
-    if (!window.authStateReady) return null;
-    const user = await window.authStateReady;
-    if (user) return user;
-    sessionStorage.setItem("postLoginRedirect", redirectTo || window.location.pathname + window.location.search);
-    if (window.showAuthMenu) window.showAuthMenu();
-    return null;
+    const runtime = await ensureAuthSessionRuntime();
+    return runtime.requireAuth({ redirectTo });
 };
 
 window.AuthGateway = {
     waitForReady: async () => {
-        if (!window.authStateReady) return null;
-        return window.authStateReady;
+        const runtime = await ensureAuthSessionRuntime();
+        return runtime.waitForReady();
     },
-    getCurrentUser: () => authUser,
-    getCurrentUserProfile: () => authProfile,
+    getCurrentUser: () => (
+        authSessionRuntime && typeof authSessionRuntime.getCurrentUser === "function"
+            ? authSessionRuntime.getCurrentUser()
+            : authUser
+    ),
+    getCurrentUserProfile: () => (
+        authSessionRuntime && typeof authSessionRuntime.getCurrentUserProfile === "function"
+            ? authSessionRuntime.getCurrentUserProfile()
+            : authProfile
+    ),
     requireAuth: async ({ redirectTo } = {}) => {
-        if (!window.authStateReady) return null;
-        const user = await window.authStateReady;
-        if (user) return user;
-        sessionStorage.setItem("postLoginRedirect", redirectTo || window.location.pathname + window.location.search);
-        if (window.showAuthMenu) window.showAuthMenu();
-        return null;
+        const runtime = await ensureAuthSessionRuntime();
+        return runtime.requireAuth({ redirectTo });
     },
     getAuthService,
 };
@@ -450,7 +468,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (authPromptKit && typeof authPromptKit.initAuthGateLinks === "function") {
         authPromptKit.initAuthGateLinks();
     }
-    initAuth();
+    const sessionRuntime = await ensureAuthSessionRuntime();
+    await sessionRuntime.init();
     
     // Final Visibility Check & Force Reveal (Overriding CSS !important)
     const header = document.querySelector('header');
