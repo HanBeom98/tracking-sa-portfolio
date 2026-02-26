@@ -82,13 +82,15 @@ function renderImpactAnalysisSuccess(data) {
   updatedEl.textContent = buildUpdatedAtTextWithTranslator(data?.updatedAt, locale, t);
 }
 
-function renderImpactAnalysisFailure() {
+function renderImpactAnalysisFailure(errorInfo = {}) {
   const bodyEl = document.getElementById("impact-analysis-body");
   const summaryEl = document.getElementById("impact-summary");
   const updatedEl = document.getElementById("analysis-updated-at");
   if (!bodyEl || !summaryEl || !updatedEl) return;
 
-  bodyEl.innerHTML = `<tr><td colspan="4" style="padding:10px 6px; color:#b91c1c;">${t("futures_analysis_fail", "분석 데이터 조회 실패(CORS/소스 제한 가능). 위젯 시각 확인만 가능합니다.")}</td></tr>`;
+  const messageKey = errorInfo.messageKey || "futures_analysis_fail";
+  const fallback = errorInfo.fallback || "분석 데이터 조회 실패(CORS/소스 제한 가능). 위젯 시각 확인만 가능합니다.";
+  bodyEl.innerHTML = `<tr><td colspan="4" style="padding:10px 6px; color:#b91c1c;">${t(messageKey, fallback)}</td></tr>`;
   summaryEl.textContent = t("futures_model_unavailable", "모델 계산 불가");
   updatedEl.textContent = t("futures_updated_failed", "업데이트 실패");
 }
@@ -125,10 +127,12 @@ function renderPredictionHistorySuccess(items) {
   bodyEl.innerHTML = rows;
 }
 
-function renderPredictionHistoryFailure() {
+function renderPredictionHistoryFailure(errorInfo = {}) {
   const bodyEl = document.getElementById("prediction-history-body");
   if (!bodyEl) return;
-  bodyEl.innerHTML = `<tr><td colspan="5" style="padding:10px 6px; color:#b91c1c;">${t("futures_history_fail", "비교 데이터 조회 실패")}</td></tr>`;
+  const messageKey = errorInfo.messageKey || "futures_history_fail";
+  const fallback = errorInfo.fallback || "비교 데이터 조회 실패";
+  bodyEl.innerHTML = `<tr><td colspan="5" style="padding:10px 6px; color:#b91c1c;">${t(messageKey, fallback)}</td></tr>`;
 }
 
 export {

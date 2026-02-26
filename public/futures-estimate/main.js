@@ -2,6 +2,7 @@ import {
   fetchImpactAnalysis,
   fetchPredictionHistory,
 } from "./infra/futures-api-client.js";
+import { resolveFuturesErrorKeys } from "./application/error-messages.js";
 import {
   initWidgets,
   renderImpactAnalysisSuccess,
@@ -18,7 +19,8 @@ async function loadImpactAnalysis() {
     renderImpactAnalysisSuccess(data);
   } catch (error) {
     console.error("futures impact analysis load failed:", error);
-    renderImpactAnalysisFailure();
+    const errorInfo = resolveFuturesErrorKeys("analysis", error);
+    renderImpactAnalysisFailure(errorInfo);
   }
 }
 
@@ -29,7 +31,8 @@ async function loadPredictionHistory() {
     renderPredictionHistorySuccess(items);
   } catch (error) {
     console.error("futures prediction history load failed:", error);
-    renderPredictionHistoryFailure();
+    const errorInfo = resolveFuturesErrorKeys("history", error);
+    renderPredictionHistoryFailure(errorInfo);
   }
 }
 
