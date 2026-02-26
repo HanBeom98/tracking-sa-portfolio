@@ -164,6 +164,8 @@
     - `tests/unit/account-nickname-domain.test.js`
     - `tests/unit/board-submit-post-use-case.test.js`
     - `package.json`에 `test:unit` 스크립트 추가
+  - CI:
+    - `.github/workflows/unit-tests.yml` 추가 (push/PR unit gate)
   - 운영 매핑 확장:
     - `scripts/public_sync_map.txt`에 board/auth 관련 신규 파일 추가
 - 영향 범위:

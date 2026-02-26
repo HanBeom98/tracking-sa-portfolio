@@ -43,8 +43,9 @@
   - unit test 추가:
     - `tests/unit/account-nickname-domain.test.js`
     - `tests/unit/board-submit-post-use-case.test.js`
+  - CI `Unit Tests` 워크플로우로 unit test 필수 게이트 연결.
 - 진행중:
-  - CI에 unit test를 필수 게이트로 연결(현재는 로컬/수동 기준 실행).
+  - board `post/edit` 전용 use-case 파일 분리(현재는 `postService` 중심).
 
 ## Phase 2 (Short-term, 3-5 days)
 - 인증 UI/상태 로직을 모듈화:

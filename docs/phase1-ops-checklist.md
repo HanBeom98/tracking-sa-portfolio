@@ -6,6 +6,7 @@
 - 예외: 자동 생성 산출물(뉴스 워크플로 커밋)만 허용한다.
 
 ## Deploy Rules
+- 코드 병합/배포 전 unit gate: `Unit Tests` 워크플로우 성공 확인
 - 일반 배포(디자인/기능): `Site Deploy (Build Only)`
 - 뉴스 생성/게시: `Daily AI News Post`
 - 배포 후 런타임 스모크: `Release Auth Smoke`
@@ -24,6 +25,7 @@
 
 ## After Deploy (Quick Smoke)
 - Actions:
+  - `Unit Tests` 성공 확인
   - `Site Deploy (Build Only)` 성공 확인
   - `Release Auth Smoke` 성공 확인
   - `E2E Auth Smoke` 성공 확인 (실패 시 artifact에서 trace 확인)
