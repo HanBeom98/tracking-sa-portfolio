@@ -25,6 +25,14 @@ board/write 도메인(2026-02-26 기준):
 - `src/domains/board/write/ui/write-access-renderer.js`: 비로그인 상태 렌더링 및 로그인 유도 UI
 - `src/domains/board/write/main.js`: 게시글 제출 + 상태 이벤트 오케스트레이션
 
+공통 인증 경계(2026-02-26 기준):
+- `src/shared/assets/common.js`의 `window.AuthGateway`를 통해 인증 의존을 단일 인터페이스로 노출
+  - `waitForReady()`
+  - `getCurrentUser()`
+  - `getCurrentUserProfile()`
+  - `requireAuth({ redirectTo })`
+  - `getAuthService()`
+
 ## 3) Build and Injection Flow
 1. 엔트리포인트: `main.py`
 2. 사이트 빌드: `src/shared/infra/builder.py::generate_public_site()`

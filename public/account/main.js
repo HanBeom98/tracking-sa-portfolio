@@ -5,9 +5,14 @@ function getAccountModules() {
   return { viewmodel, ui };
 }
 
+function getAuthGateway() {
+  return window.AuthGateway || null;
+}
+
 async function ensureLogin() {
-  if (window.authStateReady) await window.authStateReady;
-  if (typeof window.getCurrentUser === "function") return window.getCurrentUser();
+  const gateway = getAuthGateway();
+  if (gateway && gateway.waitForReady) await gateway.waitForReady();
+  if (gateway && gateway.getCurrentUser) return gateway.getCurrentUser();
   return null;
 }
 
@@ -24,7 +29,10 @@ function bindDeleteAction(providerIds) {
     );
     if (!confirm(confirmMessage)) return;
 
-    const authService = await (window.authDomainReady || Promise.resolve(null));
+    const gateway = getAuthGateway();
+    const authService = gateway && gateway.getAuthService
+      ? await gateway.getAuthService()
+      : await (window.authDomainReady || Promise.resolve(null));
     if (!authService) return;
 
     let password = null;
@@ -74,7 +82,10 @@ async function bindProfileActions(viewModel) {
   const profileSaveBtn = document.getElementById("profile-save");
   const profileStatus = document.getElementById("profile-status");
 
-  const authService = await (window.authDomainReady || Promise.resolve(null));
+  const gateway = getAuthGateway();
+  const authService = gateway && gateway.getAuthService
+    ? await gateway.getAuthService()
+    : await (window.authDomainReady || Promise.resolve(null));
 
   const cooldownInfo = getNicknameCooldownInfo(viewModel.nicknameUpdatedAt);
   if (nicknameCooldown) {
@@ -166,7 +177,10 @@ async function renderAccount() {
     return;
   }
 
-  const profile = (window.getCurrentUserProfile && window.getCurrentUserProfile()) || null;
+  const gateway = getAuthGateway();
+  const profile = gateway && gateway.getCurrentUserProfile
+    ? gateway.getCurrentUserProfile()
+    : ((window.getCurrentUserProfile && window.getCurrentUserProfile()) || null);
   const accountViewModel = viewmodel.getAccountViewModel ? viewmodel.getAccountViewModel(user, profile) : null;
   if (!accountViewModel) return;
 

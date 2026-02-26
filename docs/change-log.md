@@ -108,3 +108,19 @@
   - `npm run sync:public`, `npm run check:public-sync` 통과.
   - `./scripts/smoke_auth_release.sh` 통과.
   - 관련 JS 문법 체크(`node --check`) 통과.
+
+### refactor(auth-boundary): AuthGateway 인터페이스로 page/domain 결합 완화
+- 문제/증상:
+  - account/board 도메인이 `window` 인증 전역 함수에 직접 결합되어 테스트/교체 지점이 분산됨.
+- 변경:
+  - `src/shared/assets/common.js`
+    - `window.AuthGateway` 추가:
+      - `waitForReady`, `getCurrentUser`, `getCurrentUserProfile`, `requireAuth`, `getAuthService`
+  - `src/domains/account/main.js`, `src/domains/board/write/application/write-auth.js`
+    - 인증 조회/요구/서비스 접근을 `AuthGateway` 우선 사용으로 전환.
+- 영향 범위:
+  - account/board 인증 접근 경계 단일화.
+- 검증:
+  - `node --check` 통과.
+  - `npm run sync:public`, `npm run check:public-sync` 통과.
+  - `npm run test:smoke:release` 통과.

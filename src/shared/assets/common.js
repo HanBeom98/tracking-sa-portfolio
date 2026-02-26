@@ -408,6 +408,24 @@ window.requireAuth = async ({ redirectTo } = {}) => {
     return null;
 };
 
+window.AuthGateway = {
+    waitForReady: async () => {
+        if (!window.authStateReady) return null;
+        return window.authStateReady;
+    },
+    getCurrentUser: () => authUser,
+    getCurrentUserProfile: () => authProfile,
+    requireAuth: async ({ redirectTo } = {}) => {
+        if (!window.authStateReady) return null;
+        const user = await window.authStateReady;
+        if (user) return user;
+        sessionStorage.setItem("postLoginRedirect", redirectTo || window.location.pathname + window.location.search);
+        if (window.showAuthMenu) window.showAuthMenu();
+        return null;
+    },
+    getAuthService,
+};
+
 document.addEventListener('DOMContentLoaded', async () => {
     window.applyTranslations(currentLang);
     initTheme();
