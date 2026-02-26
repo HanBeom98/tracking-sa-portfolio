@@ -13,7 +13,9 @@ service cloud.firestore {
     // News/search read access for public pages
     match /posts/{document=**} {
       allow read: if true;
-      allow write: if false;
+      allow delete: if request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";
+      allow create, update: if false;
     }
 
     // Board posts (write requires auth, edit/delete only by author)
