@@ -10,12 +10,12 @@ BOARD_WRITE_MAIN="$(curl -s "${BASE_URL}/board/write/main.js")"
 BOARD_WRITE_UI="$(curl -s "${BASE_URL}/board/write/ui/write-access-renderer.js")"
 
 echo "[1/4] Check account page loads account script..."
-rg -q 'src="main.js"' <<< "$ACCOUNT_HTML"
+rg -q 'src="main\.js([^"]*)"' <<< "$ACCOUNT_HTML"
 echo "  OK"
 
 echo "[2/4] Check account modal login code..."
 rg -q "account-login-btn|createLoginRequiredPrompt" <<< "$ACCOUNT_RENDERER"
-rg -q "getAccountModules|bindProfileActions" <<< "$ACCOUNT_MAIN"
+rg -q "bindProfileActions|getAccountViewModel|resolveProfileSaveError" <<< "$ACCOUNT_MAIN"
 echo "  OK"
 
 echo "[3/4] Check auth event bridge..."
