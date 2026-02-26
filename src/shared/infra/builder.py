@@ -134,11 +134,41 @@ def build_search_index():
 
     ko_html = load_html(os.path.join(PUBLIC_DIR, "news", "index.html"))
     en_html = load_html(os.path.join(PUBLIC_DIR, "en", "news", "index.html"))
+    static_items = {
+        "ko": [
+            {"href": "/news/", "title": "테크 인사이트", "date": ""},
+            {"href": "/futures-estimate/", "title": "코스피200", "date": ""},
+            {"href": "/board/", "title": "게시판", "date": ""},
+            {"href": "/ai-test/", "title": "AI 성향 테스트", "date": ""},
+            {"href": "/animal-face/", "title": "동물상 테스트", "date": ""},
+            {"href": "/fortune/", "title": "AI 운세", "date": ""},
+            {"href": "/lucky-recommendation/", "title": "행운의 추천", "date": ""},
+            {"href": "/tetris-game/", "title": "테트리스", "date": ""},
+            {"href": "/ai-evolution/", "title": "AI 진화 게임", "date": ""},
+            {"href": "/about/", "title": "회사 소개", "date": ""},
+            {"href": "/contact", "title": "문의하기", "date": ""},
+            {"href": "/inquiry", "title": "파트너십 문의", "date": ""},
+        ],
+        "en": [
+            {"href": "/en/news/", "title": "Tech Insights", "date": ""},
+            {"href": "/futures-estimate/", "title": "KOSPI200", "date": ""},
+            {"href": "/board/", "title": "Board", "date": ""},
+            {"href": "/ai-test/", "title": "AI Tendency Test", "date": ""},
+            {"href": "/animal-face/", "title": "Animal Face Test", "date": ""},
+            {"href": "/fortune/", "title": "AI Fortune", "date": ""},
+            {"href": "/lucky-recommendation/", "title": "Lucky Recommendation", "date": ""},
+            {"href": "/tetris-game/", "title": "Tetris", "date": ""},
+            {"href": "/ai-evolution/", "title": "AI Evolution", "date": ""},
+            {"href": "/about/", "title": "About", "date": ""},
+            {"href": "/contact", "title": "Contact", "date": ""},
+            {"href": "/inquiry", "title": "Partnership Inquiry", "date": ""},
+        ],
+    }
     payload = {
         "generated_at": datetime.datetime.utcnow().isoformat() + "Z",
         "items": {
-            "ko": parse_cards(ko_html),
-            "en": parse_cards(en_html),
+            "ko": static_items["ko"] + parse_cards(ko_html),
+            "en": static_items["en"] + parse_cards(en_html),
         },
     }
     out_path = os.path.join(PUBLIC_DIR, "search-index.json")
