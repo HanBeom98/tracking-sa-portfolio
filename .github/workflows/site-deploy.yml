@@ -91,11 +91,18 @@ jobs:
           python main.py --build-only
 
       - name: Deploy Firestore Rules
-        uses: w9jds/firebase-action@master
-        with:
-          args: deploy --only firestore:rules
         env:
-          GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+        run: |
+          # Create temporary service account key file
+          echo "$FIREBASE_SERVICE_ACCOUNT_JSON" > firebase-sa-key.json
+          export GOOGLE_APPLICATION_CREDENTIALS=firebase-sa-key.json
+          
+          # Install firebase-tools and deploy
+          npx firebase-tools deploy --only firestore:rules --json
+          
+          # Cleanup
+          rm firebase-sa-key.json
 
       - name: Deploy to Cloudflare Pages (Direct Upload)
         uses: cloudflare/wrangler-action@v3
