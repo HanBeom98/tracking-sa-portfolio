@@ -235,6 +235,16 @@ async function loadAuthControlsFactory() {
     return window.createAuthControlsController;
 }
 
+async function ensureInlineLoginModalController() {
+    if (inlineModalController) return inlineModalController;
+    const factory = await loadInlineLoginModalFactory();
+    if (typeof factory !== "function") {
+        throw new Error("Inline login modal factory is not available.");
+    }
+    inlineModalController = factory({ getAuthService });
+    return inlineModalController;
+}
+
 async function signInWithProvider(providerId) {
     const authService = await getAuthService();
     if (!authService) {
@@ -287,23 +297,21 @@ async function initAuthControls() {
         authControlsController.openAuthPrompt();
     };
 
-    window.openInlineLoginModal = async ({ redirectTo = "/" } = {}) => {
-        if (!inlineModalController) {
-            const factory = await loadInlineLoginModalFactory();
-            if (typeof factory !== "function") {
-                console.error("Inline login modal factory is not available.");
-                return;
-            }
-            inlineModalController = factory({ getAuthService });
-        }
-        await inlineModalController.open({ redirectTo });
-    };
-
     window.updateAuthControls = (user) => {
         if (!authControlsController) return;
         authControlsController.setUser(user, authProfile);
     };
 }
+
+window.openInlineLoginModal = async ({ redirectTo = "/" } = {}) => {
+    try {
+        const controller = await ensureInlineLoginModalController();
+        await controller.open({ redirectTo });
+    } catch (error) {
+        console.error("Inline login modal open failed:", error);
+        alert("로그인 기능을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
+    }
+};
 
 function initAuthGateLinks() {
     const links = document.querySelectorAll('a[data-require-auth="true"]');

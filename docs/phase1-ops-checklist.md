@@ -8,6 +8,7 @@
 ## Deploy Rules
 - 일반 배포(디자인/기능): `Site Deploy (Build Only)`
 - 뉴스 생성/게시: `Daily AI News Post`
+- 배포 후 인증 회귀 확인: `E2E Auth Smoke` (자동 트리거 + 필요 시 수동 실행)
 - Cloudflare Pages `Automatic deployments`는 `Disabled` 유지
 
 ## Before Push
@@ -20,6 +21,9 @@
   - 헤더 로그인 버튼 동작
 
 ## After Deploy (Quick Smoke)
+- Actions:
+  - `Site Deploy (Build Only)` 성공 확인
+  - `E2E Auth Smoke` 성공 확인 (실패 시 artifact에서 trace 확인)
 - 계정 페이지:
   - 로그아웃 상태에서 가운데 로그인 버튼 클릭 시 모달 열림
   - 로그인 후 로그아웃 시 `/account/` 게스트 상태 전환
