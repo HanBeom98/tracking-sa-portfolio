@@ -8,6 +8,17 @@ function computePredictionLabel(probabilityUp) {
   return "neutral";
 }
 
+function normalizeDirectionLabel(rawLabel) {
+  const normalized = String(rawLabel || "").trim().toLowerCase();
+  if (!normalized) return "-";
+
+  if (["up", "상승", "rise", "bullish", "long", "buy"].includes(normalized)) return "up";
+  if (["down", "하락", "fall", "bearish", "short", "sell"].includes(normalized)) return "down";
+  if (["neutral", "중립", "sideways", "mixed"].includes(normalized)) return "neutral";
+  if (["flat", "보합"].includes(normalized)) return "flat";
+  return "-";
+}
+
 function toDirectionText(label) {
   return toDirectionTextWithTranslator(label, (_, fallback) => fallback);
 }
@@ -37,6 +48,7 @@ export {
   PRED_UP_THRESHOLD,
   PRED_DOWN_THRESHOLD,
   computePredictionLabel,
+  normalizeDirectionLabel,
   toDirectionText,
   toPredictionResultText,
   toDirectionTextWithTranslator,

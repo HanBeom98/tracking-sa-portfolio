@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   computePredictionLabel,
+  normalizeDirectionLabel,
   toDirectionText,
   toPredictionResultText,
 } from "../../src/domains/futures-estimate/application/prediction-labels.js";
@@ -19,6 +20,17 @@ test("futures prediction labels map display text", () => {
   assert.equal(toDirectionText("neutral"), "중립");
   assert.equal(toDirectionText("flat"), "보합");
   assert.equal(toDirectionText("x"), "-");
+});
+
+test("futures prediction labels normalize mixed signal values", () => {
+  assert.equal(normalizeDirectionLabel("up"), "up");
+  assert.equal(normalizeDirectionLabel("상승"), "up");
+  assert.equal(normalizeDirectionLabel("bullish"), "up");
+  assert.equal(normalizeDirectionLabel("하락"), "down");
+  assert.equal(normalizeDirectionLabel("SELL"), "down");
+  assert.equal(normalizeDirectionLabel("중립"), "neutral");
+  assert.equal(normalizeDirectionLabel("보합"), "flat");
+  assert.equal(normalizeDirectionLabel("unknown"), "-");
 });
 
 test("futures prediction labels map result status text", () => {

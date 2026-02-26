@@ -6,6 +6,7 @@ import {
 } from "../application/impact-summary.js";
 import {
   computePredictionLabel,
+  normalizeDirectionLabel,
   toDirectionTextWithTranslator,
   toPredictionResultTextWithTranslator,
 } from "../application/prediction-labels.js";
@@ -72,7 +73,7 @@ function renderImpactAnalysisSuccess(data) {
       <td style="padding:8px 6px;">${item.name}</td>
       <td style="padding:8px 6px;">${formatNumber(item.close)}</td>
       <td style="padding:8px 6px;">${formatChangePercent(item.change)}</td>
-      <td style="padding:8px 6px;">${item.signal}</td>
+      <td style="padding:8px 6px;">${toDirectionTextWithTranslator(normalizeDirectionLabel(item.signal), t)}</td>
     </tr>
   `).join("");
 

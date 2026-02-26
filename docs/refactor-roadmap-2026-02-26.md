@@ -106,7 +106,7 @@
   - CI `Unit Tests` 워크플로우로 unit test 필수 게이트 연결.
 - 진행중:
   - 로그인 UI 문구/알림의 도메인별 상세 키 세분화(현재는 공통 키 중심).
-  - futures API 성공 응답의 `signal` 값(en/ko 혼합 가능)을 locale별 표시 텍스트로 정규화.
+  - futures 영향표 지표명(`item.name`) locale 표시 체계 정리(현재는 데이터 소스 표기 우선).
 
 ## Phase 2 (Short-term, 3-5 days)
 - 인증 UI/상태 로직을 모듈화:
