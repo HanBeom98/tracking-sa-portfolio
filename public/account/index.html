@@ -70,23 +70,6 @@
       gap: 10px;
       margin-top: 10px;
     }
-    .account-actions button {
-      height: 50px;
-      border-radius: 14px;
-      border: none;
-      font-weight: 800;
-      cursor: pointer;
-    }
-    .account-actions .primary {
-      background: var(--p-blue);
-      color: white;
-      box-shadow: 0 6px 16px rgba(0, 82, 204, 0.25);
-    }
-    .account-actions .danger {
-      background: #ffe8e8;
-      color: #c62828;
-      border: 1px solid #f2b8b8;
-    }
     .account-form {
       display: grid;
       gap: 12px;
@@ -120,38 +103,42 @@
       grid-template-columns: 1fr 110px;
       gap: 8px;
     }
-    .nickname-row button {
-      border: none;
-      border-radius: 12px;
-      background: #eef4ff;
-      color: #2147d6;
-      font-weight: 700;
-      cursor: pointer;
-    }
-    .profile-preview {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .profile-preview img {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 1px solid oklch(90% 0.02 260);
-    }
     .account-guest {
       display: grid;
       gap: 12px;
     }
-    .account-guest button {
-      height: 46px;
-      border-radius: 12px;
-      border: none;
-      background: var(--p-blue);
-      color: white;
+    .auth-button {
+      height: 32px;
+      padding: 0 12px;
+      border-radius: 999px;
+      border: 1px solid oklch(90% 0.01 260);
+      background: white;
+      color: var(--text-main);
       font-weight: 700;
       cursor: pointer;
+      transition: 0.2s;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+    .auth-button.primary {
+      background: var(--p-blue);
+      border-color: var(--p-blue);
+      color: white;
+    }
+    .auth-button.danger {
+      background: #ffe8e8;
+      color: #c62828;
+      border: 1px solid #f2b8b8;
+    }
+    .auth-button.danger:hover {
+      background: #ffd6d6;
+    }
+    .account-actions .auth-button,
+    .account-guest .auth-button {
+      width: 100%;
     }
     body.dark-mode .account-card {
       background: oklch(20% 0.02 260);
@@ -164,15 +151,25 @@
     body.dark-mode .account-section {
       border-top-color: oklch(30% 0.02 260);
     }
-    body.dark-mode .account-actions .danger {
-      background: #3b1d1d;
-      border-color: #5b2b2b;
-      color: #ffb4b4;
-    }
     body.dark-mode .account-form input {
       background: #0f172a;
       border-color: oklch(35% 0.02 260);
       color: var(--text-main);
+    }
+    body.dark-mode .auth-button {
+      background: #0f172a;
+      border-color: oklch(35% 0.02 260);
+      color: var(--text-main);
+    }
+    body.dark-mode .auth-button.primary {
+      background: var(--p-blue);
+      border-color: var(--p-blue);
+      color: white;
+    }
+    body.dark-mode .auth-button.danger {
+      background: #3b1d1d;
+      border-color: #5b2b2b;
+      color: #ffb4b4;
     }
   </style>
 
@@ -226,11 +223,11 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<link rel="stylesheet" href="/style.css?v=20260226065629">
+<link rel="stylesheet" href="/style.css?v=20260226071941">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script src="/firebase-config.js"></script>
-<script src="/translations.js?v=20260226065629"></script>
-<script src="/common.js?v=20260226065629"></script>
+<script src="/translations.js?v=20260226071941"></script>
+<script src="/common.js?v=20260226071941"></script>
 
 </head>
 <body><header>

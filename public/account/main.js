@@ -37,7 +37,7 @@ async function renderAccount() {
     infoEl.innerHTML = `
       <div class="account-guest">
         <p data-i18n="account_login_required">로그인 후 내 정보를 확인할 수 있습니다.</p>
-        <button type="button" id="account-login-btn" data-i18n="login">로그인</button>
+        <button type="button" class="auth-button primary" id="account-login-btn" data-i18n="login">로그인</button>
       </div>
     `;
     actionsEl.innerHTML = "";
@@ -62,7 +62,6 @@ async function renderAccount() {
   const subscriptionExpiresAt = subscription.currentPeriodEnd || subscription.expiresAt || "";
   const subscriptionPlan = subscription.planName || subscription.plan || subscription.tier || "";
   const nickname = (profile && profile.nickname) || user.displayName || "";
-  const photoURL = (profile && profile.photoURL) || user.photoURL || "";
   const nicknameUpdatedAt = profile && profile.nicknameUpdatedAt;
 
   infoEl.innerHTML = `
@@ -105,27 +104,19 @@ async function renderAccount() {
           <label for="nickname" data-i18n="nickname">닉네임</label>
           <div class="nickname-row">
             <input id="nickname" type="text" value="${nickname}" placeholder="${window.getTranslation('nickname_placeholder', '닉네임을 입력하세요')}">
-            <button type="button" id="nickname-check" data-i18n="nickname_check">중복확인</button>
+            <button type="button" class="auth-button" id="nickname-check" data-i18n="nickname_check">중복확인</button>
           </div>
           <div class="helper" id="nickname-status"></div>
           <div class="helper" id="nickname-cooldown"></div>
         </div>
-        <div>
-          <label for="photo-url" data-i18n="profile_image">프로필 이미지</label>
-          <input id="photo-url" type="text" value="${photoURL}" placeholder="${window.getTranslation('profile_image_placeholder', '이미지 URL을 입력하세요')}">
-          <div class="profile-preview" id="profile-preview" style="margin-top:10px;">
-            ${photoURL ? `<img src="${photoURL}" alt="profile">` : ""}
-            <span class="helper" data-i18n="profile_image_hint">원형 이미지로 표시됩니다.</span>
-          </div>
-        </div>
-        <button type="button" class="primary" id="profile-save" data-i18n="profile_save">저장</button>
+        <button type="button" class="auth-button primary" id="profile-save" data-i18n="profile_save">저장</button>
         <div class="helper" id="profile-status"></div>
       </div>
     </div>
   `;
 
   actionsEl.innerHTML = `
-    <button type="button" class="danger" id="account-delete-btn" data-i18n="delete_account">회원탈퇴</button>
+    <button type="button" class="auth-button danger" id="account-delete-btn" data-i18n="delete_account">회원탈퇴</button>
   `;
   if (window.applyTranslations) {
     const lang = localStorage.getItem("lang") || "ko";
@@ -139,8 +130,6 @@ async function renderAccount() {
   const nicknameCheckBtn = document.getElementById("nickname-check");
   const nicknameStatus = document.getElementById("nickname-status");
   const nicknameCooldown = document.getElementById("nickname-cooldown");
-  const photoInput = document.getElementById("photo-url");
-  const profilePreview = document.getElementById("profile-preview");
   const profileSaveBtn = document.getElementById("profile-save");
   const profileStatus = document.getElementById("profile-status");
 
@@ -222,25 +211,10 @@ async function renderAccount() {
     });
   }
 
-  if (photoInput && profilePreview) {
-    photoInput.addEventListener("input", () => {
-      const value = (photoInput.value || "").trim();
-      profilePreview.innerHTML = value
-        ? `<img src="${value}" alt="profile"><span class="helper" data-i18n="profile_image_hint">원형 이미지로 표시됩니다.</span>`
-        : `<span class="helper" data-i18n="profile_image_hint">원형 이미지로 표시됩니다.</span>`;
-      if (window.applyTranslations) {
-        const lang = localStorage.getItem("lang") || "ko";
-        window.applyTranslations(lang);
-      }
-    });
-  }
-
-
   if (profileSaveBtn) {
     profileSaveBtn.addEventListener("click", async () => {
       if (!authService) return;
       const nextNickname = (nicknameInput && nicknameInput.value) || "";
-      const nextPhoto = (photoInput && photoInput.value) || "";
 
       if (normalizeNickname(nextNickname) !== normalizeNickname(nickname)) {
         if (!nicknameChecked || nicknameCheckedValue !== normalizeNickname(nextNickname)) {
@@ -252,7 +226,6 @@ async function renderAccount() {
       try {
         await authService.updateProfile({
           nickname: nextNickname.trim(),
-          photoURL: nextPhoto.trim(),
         });
         setProfileStatus("profile_saved", "저장되었습니다.", true);
         if (window.updateAuthControls) window.updateAuthControls(window.getCurrentUser());

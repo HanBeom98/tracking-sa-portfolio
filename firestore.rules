@@ -48,17 +48,6 @@ service cloud.firestore {
       allow update: if false;
     }
 
-    // Futures estimate chart public read access
-    match /futures_estimate_points/{document=**} {
-      allow read: if true;
-      allow write: if false;
-    }
-
-    match /futures_estimate_meta/{document=**} {
-      allow read: if true;
-      allow write: if false;
-    }
-
     // Default deny
     match /{document=**} {
       allow read, write: if false;
