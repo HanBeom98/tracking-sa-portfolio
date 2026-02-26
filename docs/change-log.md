@@ -148,3 +148,27 @@
   - `node --check` 통과.
   - `npm run sync:public`, `npm run check:public-sync` 통과.
   - `npm run test:smoke:release` 통과.
+
+### refactor(auth/board): board 전역 인증 접근 정렬 + unit test 도입
+- 문제/증상:
+  - board `post/edit/write`에서 인증 접근 방식이 분산되어(`window.requireAuth`, `window.authStateReady`) 경계가 일관되지 않음.
+  - 핵심 도메인 규칙(account nickname, board submit use-case)에 단위 검증이 부족함.
+- 변경:
+  - `src/domains/board/application/authGateway.js` 추가:
+    - `waitAuthReady`, `getCurrentUser`, `requireAuth`, `getAuthService`
+  - board 도메인 적용:
+    - `src/domains/board/write/application/write-auth.js`
+    - `src/domains/board/post/main.js`
+    - `src/domains/board/edit/main.js`
+  - 테스트:
+    - `tests/unit/account-nickname-domain.test.js`
+    - `tests/unit/board-submit-post-use-case.test.js`
+    - `package.json`에 `test:unit` 스크립트 추가
+  - 운영 매핑 확장:
+    - `scripts/public_sync_map.txt`에 board/auth 관련 신규 파일 추가
+- 영향 범위:
+  - board 인증 경계 일관성, 도메인 규칙 회귀 검증 기반.
+- 검증:
+  - `npm run test:unit` 통과.
+  - `npm run sync:public`, `npm run check:public-sync` 통과.
+  - `npm run test:smoke:release` 통과.

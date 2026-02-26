@@ -1,4 +1,5 @@
 import { buildPostService } from "../application/postService.js";
+import { waitAuthReady } from "../application/authGateway.js";
 import { createFirestorePostRepository } from "../infra/firestorePostRepository.js";
 
 const postService = buildPostService({
@@ -50,7 +51,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   try {
-    const user = window.authStateReady ? await window.authStateReady : null;
+    const user = await waitAuthReady();
     const post = await postService.getPost(postId);
     if (!post) {
       postView.renderNotFound();

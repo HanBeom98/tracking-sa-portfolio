@@ -1,24 +1,13 @@
+import { getCurrentUser as getBoardCurrentUser, requireAuth as requireBoardAuth } from "../../application/authGateway.js";
+
 const WRITE_PATH = "/board/write";
 
-function getAuthGateway() {
-  return window.AuthGateway || null;
-}
-
 async function ensureAuthenticated() {
-  const gateway = getAuthGateway();
-  if (gateway && gateway.requireAuth) {
-    return gateway.requireAuth({ redirectTo: WRITE_PATH });
-  }
-  if (window.requireAuth) {
-    return window.requireAuth({ redirectTo: WRITE_PATH });
-  }
-  return null;
+  return requireBoardAuth({ redirectTo: WRITE_PATH });
 }
 
 function getCurrentUser() {
-  const gateway = getAuthGateway();
-  if (gateway && gateway.getCurrentUser) return gateway.getCurrentUser();
-  return typeof window.getCurrentUser === "function" ? window.getCurrentUser() : null;
+  return getBoardCurrentUser();
 }
 
 export { WRITE_PATH, ensureAuthenticated, getCurrentUser };

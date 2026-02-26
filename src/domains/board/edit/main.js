@@ -1,4 +1,5 @@
 import { buildPostService } from "../application/postService.js";
+import { requireAuth } from "../application/authGateway.js";
 import { createFirestorePostRepository } from "../infra/firestorePostRepository.js";
 
 const postService = buildPostService({
@@ -42,7 +43,7 @@ function attachSubmit(post, user) {
         user,
       });
       alert("게시물이 성공적으로 수정되었습니다.");
-      window.location.href = `/post?id=${postId}`;
+      window.location.href = `/board/post?id=${postId}`;
     } catch (error) {
       console.error("게시물 수정 실패:", error);
       showError(error);
@@ -58,7 +59,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   try {
-    const user = window.requireAuth ? await window.requireAuth({ redirectTo: `/board/edit?id=${postId}` }) : null;
+    const user = await requireAuth({ redirectTo: `/board/edit?id=${postId}` });
     if (!user) {
       editForm.renderNotFound();
       return;

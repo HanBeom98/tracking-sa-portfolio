@@ -14,6 +14,9 @@ src/domains/board/write/application/write-auth.js|public/board/write/application
 src/domains/board/write/application/submit-post-use-case.js|public/board/write/application/submit-post-use-case.js
 src/domains/board/write/ui/write-access-renderer.js|public/board/write/ui/write-access-renderer.js
 src/domains/board/write/main.js|public/board/write/main.js
+src/domains/board/application/authGateway.js|public/board/application/authGateway.js
+src/domains/board/post/main.js|public/board/post/main.js
+src/domains/board/edit/main.js|public/board/edit/main.js
 src/domains/news/application/news-client.js|public/news/news-client.js
 src/domains/news/ui/style.css|public/news/ui/style.css
 src/domains/news/ui/style.css|public/en/news/ui/style.css

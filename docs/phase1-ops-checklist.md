@@ -16,6 +16,7 @@
 - `src` 기준으로만 수정했는지 확인
 - 동기화 체크: `npm run check:public-sync`
 - 필요 시 동기화 반영: `npm run sync:public`
+- 도메인/유스케이스 수정 시 unit test 실행: `npm run test:unit`
 - 인증 관련 수정 시 최소 점검 범위:
   - `/account/` 게스트/로그인/로그아웃
   - `/board/write` 로그인 필요 상태

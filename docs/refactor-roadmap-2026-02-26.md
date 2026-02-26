@@ -24,19 +24,27 @@
 ### Progress Update (2026-02-26)
 - 완료:
   - `promptLogin`, `createLoginRequiredPrompt` 공통 진입점 도입.
+  - `AuthGateway` 인증 경계 도입(`waitForReady/getCurrentUser/getCurrentUserProfile/requireAuth/getAuthService`).
   - `account` 도메인 파일 분리:
+    - `domain/nickname.js` (정규화/검증/쿨다운 값 객체)
     - `application/account-view-model.js`
     - `ui/account-renderer.js`
+    - `ui/account.css`
     - `main.js` 오케스트레이션
   - `board/write` 도메인 파일 분리:
+    - `application/submit-post-use-case.js`
     - `application/write-auth.js`
     - `ui/write-access-renderer.js`
     - `main.js` 오케스트레이션
+  - `board/post`, `board/edit` 인증 접근을 `AuthGateway` 경계로 정렬.
   - 헤더 인증 메뉴 UID 노출 제거.
   - `smoke_auth_release.sh`를 분리 구조 기준으로 안정화(pipefail-safe).
+  - 배포 후 `smoke_auth_release.sh` 자동 실행 워크플로우 연결.
+  - unit test 추가:
+    - `tests/unit/account-nickname-domain.test.js`
+    - `tests/unit/board-submit-post-use-case.test.js`
 - 진행중:
-  - account 페이지 인라인 CSS를 도메인 CSS 파일로 분리(반영 완료, 운영 확인 대기).
-  - 배포 후 `smoke_auth_release.sh` 자동 실행 워크플로우 연결(설정 반영 완료, Actions 결과 확인 대기).
+  - CI에 unit test를 필수 게이트로 연결(현재는 로컬/수동 기준 실행).
 
 ## Phase 2 (Short-term, 3-5 days)
 - 인증 UI/상태 로직을 모듈화:
