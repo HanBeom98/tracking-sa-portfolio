@@ -26,8 +26,6 @@
             <button type="button" id="auth-email-signup" class="auth-button">${t("signup", "회원가입")}</button>
           </div>
           <div class="auth-helper">${t("auth_email_password_provider_hint", "이메일/비밀번호 로그인은 기본 제공업체 설정이 필요합니다.")}</div>
-          <button type="button" id="auth-show-uid" class="auth-button">${t("auth_show_uid", "내 UID 확인")}</button>
-          <div id="auth-uid" class="auth-helper" style="display:none;"></div>
         </div>
       </div>
     `;
@@ -40,8 +38,6 @@
     const passwordInput = container.querySelector("#auth-password");
     const emailLoginBtn = container.querySelector("#auth-email-login");
     const emailSignupBtn = container.querySelector("#auth-email-signup");
-    const showUidBtn = container.querySelector("#auth-show-uid");
-    const uidLabel = container.querySelector("#auth-uid");
 
     userLabel.addEventListener("click", () => {
       const user = getCurrentUser ? getCurrentUser() : null;
@@ -96,19 +92,6 @@
 
     emailSignupBtn.addEventListener("click", () => {
       window.location.href = `/auth/signup?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`;
-    });
-
-    showUidBtn.addEventListener("click", () => {
-      const user = getCurrentUser ? getCurrentUser() : null;
-      if (!user || !user.uid) {
-        alert(t("account_login_required", "로그인 후 내 정보를 확인할 수 있습니다."));
-        return;
-      }
-      uidLabel.style.display = "block";
-      uidLabel.textContent = `UID: ${user.uid}`;
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(user.uid).catch(() => {});
-      }
     });
 
     logoutButton.addEventListener("click", async () => {
