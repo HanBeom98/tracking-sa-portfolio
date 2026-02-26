@@ -53,6 +53,9 @@
   - `auth-state-bus`를 독립 자산으로 분리:
     - `src/shared/assets/auth-state-bus.js`
     - `common.js`는 버스 로딩/연결만 담당
+  - `auth-prompt-kit` 분리:
+    - `src/shared/assets/auth-prompt-kit.js`
+    - `common.js`의 로그인 프롬프트/게이트링크 생성 책임을 모듈로 이동
   - unit test 추가:
     - `tests/unit/auth-state-bus.test.js`
   - 헤더 인증 메뉴 UID 노출 제거.
@@ -66,6 +69,7 @@
   - CI `Unit Tests` 워크플로우로 unit test 필수 게이트 연결.
 - 진행중:
   - 로그인 UI 문구/알림의 도메인별 상세 키 세분화(현재는 공통 키 중심).
+  - `auth-prompt-kit` 단위 테스트 추가(현재 통합 동작 검증 중심).
 
 ## Phase 2 (Short-term, 3-5 days)
 - 인증 UI/상태 로직을 모듈화:

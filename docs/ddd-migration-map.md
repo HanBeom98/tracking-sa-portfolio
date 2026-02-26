@@ -39,6 +39,7 @@ board/write 도메인(2026-02-26 기준):
   - `getSnapshot()`
   - 기존 `auth-state-changed` DOM 이벤트는 하위 호환으로 유지
 - `src/shared/assets/auth-state-bus.js`에 상태 버스 생성 로직 분리(`createAuthStateBus`)
+- `src/shared/assets/auth-prompt-kit.js`에 로그인 프롬프트/게이트 링크 생성 책임 분리(`createAuthPromptKit`)
 - 헤더 인증 UI 오케스트레이션은 `src/shared/assets/auth-ui-controller.js`로 분리
   - `common.js`는 인증 상태/게이트웨이/프롬프트 엔트리만 유지
 - 인증/게시판 알림 메시지는 `src/shared/assets/translations.js` 키를 우선 사용

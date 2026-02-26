@@ -170,6 +170,7 @@ let authUser = null;
 let authProfile = null;
 let authReadyResolve = null;
 let authUiController = null;
+let authPromptKit = null;
 let inlineModalController = null;
 let authStateBus = null;
 window.authStateReady = new Promise((resolve) => {
@@ -325,6 +326,28 @@ async function loadAuthUiControllerFactory() {
     return window.createAuthUiController;
 }
 
+async function loadAuthPromptKitFactory() {
+    if (typeof window.createAuthPromptKit === "function") {
+        return window.createAuthPromptKit;
+    }
+    await new Promise((resolve, reject) => {
+        const existing = document.querySelector('script[data-auth-prompt-kit="true"]');
+        if (existing) {
+            existing.addEventListener("load", resolve, { once: true });
+            existing.addEventListener("error", reject, { once: true });
+            return;
+        }
+        const script = document.createElement("script");
+        script.src = "/auth-prompt-kit.js";
+        script.async = true;
+        script.dataset.authPromptKit = "true";
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+    return window.createAuthPromptKit;
+}
+
 async function ensureInlineLoginModalController() {
     if (inlineModalController) return inlineModalController;
     const factory = await loadInlineLoginModalFactory();
@@ -333,6 +356,26 @@ async function ensureInlineLoginModalController() {
     }
     inlineModalController = factory({ getAuthService });
     return inlineModalController;
+}
+
+async function ensureAuthPromptKit() {
+    if (authPromptKit) return authPromptKit;
+    const factory = await loadAuthPromptKitFactory();
+    if (typeof factory !== "function") {
+        throw new Error("Auth prompt kit factory is not available.");
+    }
+    authPromptKit = factory({
+        ensureInlineLoginModalController,
+        openAuthPrompt: () => {
+            if (window.openAuthPrompt) window.openAuthPrompt();
+        },
+        getAuthStateReady: () => window.authStateReady,
+        showAuthMenu: () => {
+            if (window.showAuthMenu) window.showAuthMenu();
+        },
+        getTranslation: (key, fallback) => window.getTranslation(key, fallback),
+    });
+    return authPromptKit;
 }
 
 async function ensureAuthUiController() {
@@ -387,21 +430,23 @@ window.updateAuthControls = (user) => {
 
 window.openInlineLoginModal = async ({ redirectTo = "/" } = {}) => {
     try {
-        const controller = await ensureInlineLoginModalController();
-        await controller.open({ redirectTo });
+        const kit = await ensureAuthPromptKit();
+        return kit.openInlineLoginModal({ redirectTo });
     } catch (error) {
-        console.error("Inline login modal open failed:", error);
+        console.error("Auth prompt kit openInlineLoginModal failed:", error);
         alert(window.getTranslation("auth_ui_load_failed", "로그인 기능을 불러오지 못했습니다. 잠시 후 다시 시도해주세요."));
+        return null;
     }
 };
 
-window.promptLogin = ({ redirectTo = "/" } = {}) => {
-    if (window.openInlineLoginModal) {
-        window.openInlineLoginModal({ redirectTo });
-        return;
-    }
-    if (window.openAuthPrompt) {
-        window.openAuthPrompt();
+window.promptLogin = async ({ redirectTo = "/" } = {}) => {
+    try {
+        const kit = await ensureAuthPromptKit();
+        return kit.promptLogin({ redirectTo });
+    } catch (error) {
+        console.error("Auth prompt kit promptLogin failed:", error);
+        if (window.openAuthPrompt) window.openAuthPrompt();
+        return null;
     }
 };
 
@@ -413,6 +458,17 @@ window.createLoginRequiredPrompt = ({
     buttonId = "",
     redirectTo = "/",
 } = {}) => {
+    if (authPromptKit && typeof authPromptKit.createLoginRequiredPrompt === "function") {
+        return authPromptKit.createLoginRequiredPrompt({
+            promptId,
+            wrapperClass,
+            messageKey,
+            messageText,
+            buttonId,
+            redirectTo,
+        });
+    }
+
     const wrapper = document.createElement("div");
     if (promptId) wrapper.id = promptId;
     if (wrapperClass) wrapper.className = wrapperClass;
@@ -436,22 +492,6 @@ window.createLoginRequiredPrompt = ({
     wrapper.appendChild(loginBtn);
     return wrapper;
 };
-
-function initAuthGateLinks() {
-    const links = document.querySelectorAll('a[data-require-auth="true"]');
-    if (!links.length) return;
-
-    links.forEach((link) => {
-        link.addEventListener('click', async (event) => {
-            if (!window.authStateReady) return;
-            const user = await window.authStateReady;
-            if (user) return;
-            event.preventDefault();
-            sessionStorage.setItem("postLoginRedirect", link.getAttribute("href") || "/");
-            if (window.showAuthMenu) window.showAuthMenu();
-        });
-    });
-}
 
 async function initAuth() {
     const authService = await getAuthService();
@@ -514,8 +554,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateNewsLinksForLang();
     initDropdownMenus();
     await ensureAuthStateBus();
+    await ensureAuthPromptKit();
     await initAuthControls();
-    initAuthGateLinks();
+    if (authPromptKit && typeof authPromptKit.initAuthGateLinks === "function") {
+        authPromptKit.initAuthGateLinks();
+    }
     initAuth();
     
     // Final Visibility Check & Force Reveal (Overriding CSS !important)
