@@ -53,6 +53,10 @@ async function renderAccount() {
     const loginBtn = document.getElementById("account-login-btn");
     if (loginBtn) {
       loginBtn.addEventListener("click", () => {
+        if (window.openAuthPrompt) {
+          window.openAuthPrompt();
+          return;
+        }
         if (window.showAuthMenu) window.showAuthMenu();
       });
     }

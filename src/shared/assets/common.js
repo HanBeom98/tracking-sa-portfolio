@@ -315,6 +315,23 @@ function initAuthControls() {
         container.classList.add('open');
     };
 
+    window.openAuthPrompt = () => {
+        if (!container) {
+            alert("로그인이 필요합니다.");
+            return;
+        }
+        container.classList.add('open');
+        const top = container.getBoundingClientRect().top + window.scrollY - 110;
+        if (top >= 0) {
+            window.scrollTo({ top, behavior: "smooth" });
+        }
+        if (emailInput) {
+            setTimeout(() => {
+                emailInput.focus();
+            }, 120);
+        }
+    };
+
     window.updateAuthControls = (user) => {
         if (!container) return;
         if (user) {
