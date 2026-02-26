@@ -190,7 +190,7 @@ def _wrap_article_html(title, content_html, date_text, is_en=False):
       </div>
     </article>
   </main>
-  <script src="/news/news-client.js" type="module"></script>
+  <script src="/news/application/news-client.js" type="module"></script>
 </body>
 </html>"""
 

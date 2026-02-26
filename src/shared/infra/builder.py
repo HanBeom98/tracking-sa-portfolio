@@ -65,10 +65,10 @@ def generate_public_site(incremental=False):
     _, db_ok = generate_news_pages()
     # 뉴스 도메인 CSS 복사 (KO/EN)
     news_style_src = os.path.join("src", "domains", "news", "ui", "style.css")
-    news_client_src = os.path.join("src", "domains", "news", "application", "news-client.js")
     news_domain_js = os.path.join("src", "domains", "news", "domain")
     news_infra_js = os.path.join("src", "domains", "news", "infra")
     news_ui_js = os.path.join("src", "domains", "news", "ui")
+    news_app_js = os.path.join("src", "domains", "news", "application")
     if os.path.exists(news_style_src):
         news_style_dest = os.path.join(PUBLIC_DIR, "news", "ui", "style.css")
         os.makedirs(os.path.dirname(news_style_dest), exist_ok=True)
@@ -84,14 +84,11 @@ def generate_public_site(incremental=False):
         news_style_alias_en = os.path.join(PUBLIC_DIR, "en", "news", "style.css")
         os.makedirs(os.path.dirname(news_style_alias_en), exist_ok=True)
         shutil.copy2(news_style_src, news_style_alias_en)
-    if os.path.exists(news_client_src):
-        news_client_dest = os.path.join(PUBLIC_DIR, "news", "news-client.js")
-        os.makedirs(os.path.dirname(news_client_dest), exist_ok=True)
-        shutil.copy2(news_client_src, news_client_dest)
     for src_dir, dest_dir in [
         (news_domain_js, os.path.join(PUBLIC_DIR, "news", "domain")),
         (news_infra_js, os.path.join(PUBLIC_DIR, "news", "infra")),
         (news_ui_js, os.path.join(PUBLIC_DIR, "news", "ui")),
+        (news_app_js, os.path.join(PUBLIC_DIR, "news", "application")),
     ]:
         if os.path.exists(src_dir):
             shutil.copytree(src_dir, dest_dir, dirs_exist_ok=True)
