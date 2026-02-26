@@ -21,6 +21,9 @@ if (typeof firebase !== 'undefined') {
     }
     // Firestore 인스턴스를 전역 window 객체에 할당
     window.db = firebase.firestore();
+    if (firebase.auth) {
+      window.auth = firebase.auth();
+    }
   }
 } else {
   console.error("Firebase SDK not loaded.");

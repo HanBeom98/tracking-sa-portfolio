@@ -3,7 +3,7 @@ export function createFirestorePostRepository({ db = window.db, firebaseApp = wi
     throw new Error("Firestore db is not available on window.db");
   }
 
-  const postsCollection = db.collection("posts");
+  const postsCollection = db.collection("board_posts");
 
   async function add(postData) {
     const payload = {

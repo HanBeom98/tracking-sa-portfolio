@@ -7,14 +7,14 @@ export function assertRequiredFields(fields) {
   }
 }
 
-export function assertPasswordMatch(password, passwordConfirm) {
-  if (password !== passwordConfirm) {
-    throw makeError("PASSWORD_MISMATCH");
-  }
-}
-
 export function assertPostExists(post) {
   if (!post) {
     throw makeError("POST_NOT_FOUND");
+  }
+}
+
+export function assertAuthor(author) {
+  if (!author || !author.uid) {
+    throw makeError("AUTH_REQUIRED");
   }
 }

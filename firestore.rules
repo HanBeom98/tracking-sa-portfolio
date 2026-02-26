@@ -16,6 +16,26 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Board posts (write requires auth, edit/delete only by author)
+    match /board_posts/{document=**} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.resource.data.authorUid == request.auth.uid;
+      allow update, delete: if request.auth != null
+        && resource.data.authorUid == request.auth.uid;
+    }
+
+    // Users profile (self read/write, role immutable for clients)
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.role == "free";
+      allow update: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.role == resource.data.role;
+    }
+
     // Futures estimate chart public read access
     match /futures_estimate_points/{document=**} {
       allow read: if true;

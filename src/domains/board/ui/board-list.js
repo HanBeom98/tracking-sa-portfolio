@@ -69,10 +69,10 @@ class BoardList extends HTMLElement {
   renderCard(post) {
     const title = post.title || "제목 없음";
     const excerpt = this.buildExcerpt(post.content);
-    const nickname = post.nickname || "익명";
+    const nickname = post.authorName || post.nickname || "익명";
     const date = this.formatDate(post.createdAt);
     return `
-      <a class="card" href="/post?id=${post.id}">
+      <a class="card" href="/board/post?id=${post.id}">
         <h3 style="margin-bottom: 12px;">${title}</h3>
         <p style="color: var(--text-sub);">${excerpt}</p>
         <div class="meta">${nickname} · ${date}</div>

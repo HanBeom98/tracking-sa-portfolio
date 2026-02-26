@@ -1,29 +1,25 @@
 import { makeError } from "./errors.js";
 import { generateRandomNickname } from "../domain/nickname.js";
-import { assertPasswordMatch, assertPostExists, assertRequiredFields } from "../domain/validators.js";
+import { assertAuthor, assertPostExists, assertRequiredFields } from "../domain/validators.js";
 
-const DEFAULT_ADMIN_PASSWORD = "admin";
-
-export function buildPostService({ postRepository, crypto, adminPassword = DEFAULT_ADMIN_PASSWORD }) {
+export function buildPostService({ postRepository }) {
   if (!postRepository) {
     throw new Error("postRepository is required");
   }
-  if (!crypto) {
-    throw new Error("crypto adapter is required");
-  }
 
-  async function createPost({ title, content, password, passwordConfirm }) {
-    assertRequiredFields({ title, content, password });
-    assertPasswordMatch(password, passwordConfirm);
+  async function createPost({ title, content, author }) {
+    assertRequiredFields({ title, content });
+    assertAuthor(author);
 
-    const nickname = generateRandomNickname();
-    const passwordHash = crypto.hash(password);
+    const nickname = author.displayName || author.email || generateRandomNickname();
 
     await postRepository.add({
       title,
       content,
-      nickname,
-      passwordHash,
+      authorUid: author.uid,
+      authorName: nickname,
+      authorEmail: author.email || "",
+      authorPhoto: author.photoURL || "",
     });
   }
 
@@ -38,42 +34,34 @@ export function buildPostService({ postRepository, crypto, adminPassword = DEFAU
     return postRepository.list({ limit });
   }
 
-  async function updatePost({ id, title, content, password, post }) {
-    assertRequiredFields({ title, content, password });
+  async function updatePost({ id, title, content, user, post }) {
+    assertRequiredFields({ title, content });
     assertPostExists(post);
+    assertAuthor(user);
 
-    const passwordHash = crypto.hash(password);
-    if (passwordHash !== post.passwordHash) {
-      throw makeError("PASSWORD_INVALID");
+    if (post.authorUid && post.authorUid !== user.uid) {
+      throw makeError("NOT_AUTHORIZED");
     }
 
     await postRepository.update(id, { title, content });
   }
 
-  async function deletePost({ id, password, post }) {
-    assertRequiredFields({ password });
+  async function deletePost({ id, user, post }) {
     assertPostExists(post);
+    assertAuthor(user);
 
-    if (!isAdminPassword(password)) {
-      const passwordHash = crypto.hash(password);
-      if (passwordHash !== post.passwordHash) {
-        throw makeError("PASSWORD_INVALID");
-      }
+    if (post.authorUid && post.authorUid !== user.uid) {
+      throw makeError("NOT_AUTHORIZED");
     }
 
     await postRepository.remove(id);
   }
 
-  function canEditPost({ password, post }) {
-    assertRequiredFields({ password });
+  function canEditPost({ user, post }) {
     assertPostExists(post);
+    assertAuthor(user);
 
-    const passwordHash = crypto.hash(password);
-    return passwordHash === post.passwordHash;
-  }
-
-  function isAdminPassword(password) {
-    return password === adminPassword;
+    return post.authorUid === user.uid;
   }
 
   return {
@@ -83,6 +71,5 @@ export function buildPostService({ postRepository, crypto, adminPassword = DEFAU
     updatePost,
     deletePost,
     canEditPost,
-    isAdminPassword,
   };
 }

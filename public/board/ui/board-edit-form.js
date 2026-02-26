@@ -44,10 +44,6 @@ class BoardEditForm extends HTMLElement {
           <label for="content">${t("content", "내용")}</label>
           <textarea id="content" rows="15" required>${content}</textarea>
         </div>
-        <div class="form-field">
-          <label for="password">${t("password", "비밀번호")}</label>
-          <input type="password" id="password" placeholder="${t("password_for_edit_delete", "수정하려면 원본 비밀번호를 입력하세요")}" required>
-        </div>
         <button type="submit" id="submit-button" class="go-test-button">${t("edit_complete", "수정 완료")}</button>
         ${cancelLink}
       </form>
@@ -65,7 +61,6 @@ class BoardEditForm extends HTMLElement {
     return {
       title: this.shadowRoot.getElementById("title").value,
       content: this.shadowRoot.getElementById("content").value,
-      password: this.shadowRoot.getElementById("password").value,
     };
   }
 

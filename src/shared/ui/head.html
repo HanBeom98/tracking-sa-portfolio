@@ -19,10 +19,17 @@
 </script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 <script>
   window.FIREBASE_CONFIG = {{FIREBASE_CONFIG}};
 </script>
+<script>
+  window.authDomainReady = window.authDomainReady || new Promise((resolve) => {
+    window.__resolveAuthDomain = resolve;
+  });
+</script>
+<script type="module" src="/auth/ui/auth-client.js"></script>
 
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">

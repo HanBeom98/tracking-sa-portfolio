@@ -30,14 +30,6 @@ class BoardWriteForm extends HTMLElement {
           <label for="content">${t("content", "내용")}</label>
           <textarea id="content" rows="15" placeholder="${t("enter_content", "내용을 입력하세요")}" required></textarea>
         </div>
-        <div class="form-field">
-          <label for="password">${t("password", "비밀번호")}</label>
-          <input type="password" id="password" placeholder="${t("password_for_edit_delete", "수정/삭제 시 사용할 비밀번호")}" required>
-        </div>
-        <div class="form-field">
-          <label for="password-confirm">${t("confirm_password", "비밀번호 확인")}</label>
-          <input type="password" id="password-confirm" placeholder="${t("re_enter_password", "비밀번호를 다시 한번 입력하세요")}" required>
-        </div>
         <button type="submit" id="submit-button" class="go-test-button">${t("register", "등록하기")}</button>
       </form>
     `;
@@ -47,8 +39,6 @@ class BoardWriteForm extends HTMLElement {
     return {
       title: this.shadowRoot.getElementById("title").value,
       content: this.shadowRoot.getElementById("content").value,
-      password: this.shadowRoot.getElementById("password").value,
-      passwordConfirm: this.shadowRoot.getElementById("password-confirm").value,
     };
   }
 
