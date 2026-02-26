@@ -60,12 +60,27 @@ async function initWriteForm() {
   bindWriteSubmit(writeForm, section);
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  initWriteForm();
-  window.addEventListener("auth-state-changed", (event) => {
+function bindAuthStateUpdates() {
+  if (window.AuthStateBus && typeof window.AuthStateBus.subscribe === "function") {
+    return window.AuthStateBus.subscribe(({ user }) => {
+      const { section, writeForm } = getWritePageElements();
+      if (!section || !writeForm) return;
+      renderWriteAccess({ section, writeForm, user: user || null });
+    });
+  }
+
+  const handler = (event) => {
     const { section, writeForm } = getWritePageElements();
     if (!section || !writeForm) return;
     const user = event && event.detail ? event.detail.user : getCurrentUser();
     renderWriteAccess({ section, writeForm, user });
-  });
+  };
+  window.addEventListener("auth-state-changed", handler);
+  return () => window.removeEventListener("auth-state-changed", handler);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  initWriteForm();
+  const unsubscribe = bindAuthStateUpdates();
+  window.addEventListener("pagehide", () => unsubscribe(), { once: true });
 });

@@ -171,6 +171,7 @@ let authProfile = null;
 let authReadyResolve = null;
 let authControlsController = null;
 let inlineModalController = null;
+const authStateListeners = new Set();
 window.authStateReady = new Promise((resolve) => {
     authReadyResolve = resolve;
 });
@@ -181,6 +182,32 @@ function resolveAuthReady(user) {
         authReadyResolve = null;
     }
 }
+
+function publishAuthStateChange(user, profile) {
+    window.dispatchEvent(new CustomEvent("auth-state-changed", {
+        detail: { user, profile }
+    }));
+    authStateListeners.forEach((listener) => {
+        try {
+            listener({ user, profile });
+        } catch (error) {
+            console.error("AuthStateBus listener failed:", error);
+        }
+    });
+}
+
+window.AuthStateBus = {
+    subscribe(listener) {
+        if (typeof listener !== "function") return () => {};
+        authStateListeners.add(listener);
+        return () => {
+            authStateListeners.delete(listener);
+        };
+    },
+    getSnapshot() {
+        return { user: authUser, profile: authProfile };
+    },
+};
 
 async function getAuthService() {
     if (window.AuthService) return window.AuthService;
@@ -375,6 +402,7 @@ async function initAuth() {
     const authService = await getAuthService();
     if (!authService) {
         resolveAuthReady(null);
+        publishAuthStateChange(null, null);
         if (window.updateAuthControls) window.updateAuthControls(null);
         return;
     }
@@ -383,9 +411,7 @@ async function initAuth() {
         authUser = user || null;
         authProfile = profile || null;
         resolveAuthReady(authUser);
-        window.dispatchEvent(new CustomEvent("auth-state-changed", {
-            detail: { user: authUser, profile: authProfile }
-        }));
+        publishAuthStateChange(authUser, authProfile);
         if (window.updateAuthControls) window.updateAuthControls(authUser);
         if (authUser) {
             const redirectTo = sessionStorage.getItem("postLoginRedirect");

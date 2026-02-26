@@ -189,9 +189,22 @@ async function renderAccount() {
   bindDeleteAction(accountViewModel.providerIds);
 }
 
+function bindAuthStateUpdates() {
+  if (window.AuthStateBus && typeof window.AuthStateBus.subscribe === "function") {
+    return window.AuthStateBus.subscribe(() => {
+      renderAccount();
+    });
+  }
+
+  const handler = () => {
+    renderAccount();
+  };
+  window.addEventListener("auth-state-changed", handler);
+  return () => window.removeEventListener("auth-state-changed", handler);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   renderAccount();
-  window.addEventListener("auth-state-changed", () => {
-    renderAccount();
-  });
+  const unsubscribe = bindAuthStateUpdates();
+  window.addEventListener("pagehide", () => unsubscribe(), { once: true });
 });
