@@ -144,6 +144,10 @@
     - `src/domains/ai-test/application/ai-test-data.js` (질문/모델 정적 데이터)
     - `src/domains/ai-test/application/ai-test-result.js` (점수 합산/결과 인덱스 계산)
     - `main.js`의 결과 계산 및 데이터 상수 책임 축소
+  - ai-test 도메인 2차 분리:
+    - `src/domains/ai-test/application/ai-test-progress.js` (진행률/결과 스텝 계산)
+    - `src/domains/ai-test/ui/ai-test-view.js` (질문/결과 뷰 렌더 + 이벤트 바인딩)
+    - `main.js`는 상태 전이/뷰모델 조립 중심으로 축소
   - unit test 추가:
     - `tests/unit/animal-face-messages.test.js`
     - `tests/unit/animal-face-view-text.test.js`
@@ -153,6 +157,8 @@
     - `tests/unit/lucky-payload.test.js`
     - `tests/unit/lucky-result-card.test.js`
     - `tests/unit/ai-test-result.test.js`
+    - `tests/unit/ai-test-progress.test.js`
+    - `tests/unit/ai-test-view.test.js`
 
 ## Phase 2 (Short-term, 3-5 days)
 - 인증 UI/상태 로직을 모듈화:

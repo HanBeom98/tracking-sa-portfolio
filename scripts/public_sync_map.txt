@@ -59,3 +59,5 @@ src/domains/lucky-recommendation/ui/lucky-view.js|public/lucky-recommendation/ui
 src/domains/ai-test/main.js|public/ai-test/main.js
 src/domains/ai-test/application/ai-test-data.js|public/ai-test/application/ai-test-data.js
 src/domains/ai-test/application/ai-test-result.js|public/ai-test/application/ai-test-result.js
+src/domains/ai-test/application/ai-test-progress.js|public/ai-test/application/ai-test-progress.js
+src/domains/ai-test/ui/ai-test-view.js|public/ai-test/ui/ai-test-view.js
