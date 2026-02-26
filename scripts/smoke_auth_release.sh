@@ -14,7 +14,7 @@ echo "  OK"
 
 echo "[3/4] Check auth event bridge..."
 curl -s "${BASE_URL}/common.js" | rg -q "auth-state-changed"
-curl -s "${BASE_URL}/common.js" | rg -q "global-inline-login-modal"
+curl -s "${BASE_URL}/common.js" | rg -q "loadInlineLoginModalFactory"
 echo "  OK"
 
 echo "[4/4] Check board write auth guard..."
