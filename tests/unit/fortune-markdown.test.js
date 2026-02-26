@@ -3,24 +3,32 @@ import assert from "node:assert/strict";
 import { parseFortuneMarkdown } from "../../src/domains/fortune/application/fortune-markdown.js";
 
 test("fortune markdown parser renders summary and sections", () => {
-  const input = [
-    "### 🌟 오늘의 운세 요약",
-    "### 재물운",
-    "- 지출을 줄이세요",
-    "- 충동구매 주의",
-    "### 인간관계",
-    "따뜻한 말이 도움이 됩니다",
-  ].join("\n");
+  const markdown = `
+### 🌟 Summary Title
+Summary content.
 
-  const html = parseFortuneMarkdown(input);
-  assert.ok(html.includes("summary-box"));
-  assert.ok(html.includes("section-card"));
-  assert.ok(html.includes("<li>지출을 줄이세요</li>"));
-  assert.ok(html.includes("<p>따뜻한 말이 도움이 됩니다</p>"));
+### Section Title
+- List item 1
+- List item 2
+
+Plain paragraph outside section.
+  `;
+  const html = parseFortuneMarkdown(markdown);
+
+  assert.match(html, /<div class="summary-box">🌟 Summary Title<\/div>/);
+  assert.match(html, /<div class="section-card"><h3>Section Title<\/h3>/);
+  assert.match(html, /<li>List item 1<\/li>/);
+  assert.match(html, /<li>List item 2<\/li>/);
+  assert.match(html, /<\/ul><p>Plain paragraph outside section\.<\/p><\/div>/); // Correct nesting
+});
+
+test("fortune markdown parser handles empty or null input", () => {
+  assert.equal(parseFortuneMarkdown(""), "");
+  assert.equal(parseFortuneMarkdown(null), "");
 });
 
 test("fortune markdown parser closes open tags for list-only text", () => {
-  const html = parseFortuneMarkdown("- 항목1\n- 항목2");
-  assert.ok(html.startsWith('<div class="section-card">'));
-  assert.ok(html.endsWith("</div>"));
+  const markdown = "- Item without section";
+  const html = parseFortuneMarkdown(markdown);
+  assert.equal(html, '<div class="section-card"><ul><li>Item without section</li></ul></div>');
 });

@@ -1,11 +1,9 @@
 import {
-  DEFAULT_ANIMAL_DATA,
-  buildAnimalFaceResult,
-} from "./application/animal-face-result.js";
-import {
   buildAnimalFaceShareText,
   buildAnimalFaceShareUrl,
 } from "./application/share-message.js";
+import { createAnimalFaceUseCase } from "./application/animal-face-use-case.js";
+import { createAnimalFaceRepository } from "./infra/animalFaceRepository.js";
 import { createAnimalFaceMessages } from "./application/messages.js";
 import { buildAnimalFaceViewText } from "./application/view-text.js";
 import {
@@ -20,20 +18,25 @@ class AnimalFaceTest extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
-    this._model = null;
-    this._modelReady = false;
     this._selectedGender = "male";
     this._currentImage = null;
-    this._modelUrl = "https://teachablemachine.withgoogle.com/models/e52yfi_eK/";
-    this._animalData = DEFAULT_ANIMAL_DATA;
     this._view = null;
     this._messages = null;
+    this._lastResult = null;
+
+    // DDD Layers Setup
+    const animalFaceRepository = createAnimalFaceRepository();
+    this._useCase = createAnimalFaceUseCase({ animalFaceRepository });
   }
 
   async connectedCallback() {
     this.render();
     this.setupEvents();
-    await this.loadModel();
+    try {
+      await this._useCase.init();
+    } catch (error) {
+      console.error("AnimalFace Model Init Error", error);
+    }
   }
 
   getTranslator() {
@@ -70,40 +73,15 @@ class AnimalFaceTest extends HTMLElement {
     reader.readAsDataURL(file);
   }
 
-  async loadModel() {
-    // tmImage is loaded via static script tags in index.html.
-    for (let i = 0; i < 30; i += 1) {
-      if (window.tmImage) break;
-      await new Promise((resolve) => setTimeout(resolve, 100));
-    }
-    if (!window.tmImage) {
-      console.error("tmImage not available. Check TM script loading in index.html.");
-      return;
-    }
-    try {
-      this._model = await window.tmImage.load(`${this._modelUrl}model.json`, `${this._modelUrl}metadata.json`);
-      this._modelReady = true;
-    } catch (error) {
-      console.error("Model load error", error);
-    }
-  }
-
   async predict() {
-    if (!this._model) {
-      alert(this._messages.modelLoading());
-      return;
-    }
-
     showLoadingState(this._view);
 
     try {
-      const prediction = await this._model.predict(this._view.preview);
-      const result = buildAnimalFaceResult(prediction, this._animalData);
-      if (!result) throw new Error("empty_prediction");
+      const result = await this._useCase.executePredict(this._view.preview);
       this._lastResult = result;
-
       showResultState(this._view, result, this._messages.scoreLabel(result.score));
     } catch (error) {
+      console.error("Prediction failed", error);
       alert(this._messages.analysisError());
       this.reset();
     }

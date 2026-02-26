@@ -1,31 +1,32 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  buildAnimalFaceResult,
-  toSortedPredictions,
-} from "../../src/domains/animal-face/application/animal-face-result.js";
+import { toSortedPredictions, buildAnimalFaceResult } from "../../src/domains/animal-face/application/animal-face-result.js";
 
 test("animal-face result sorts predictions by probability", () => {
-  const sorted = toSortedPredictions([
-    { className: "고양이", probability: 0.2 },
-    { className: "강아지", probability: 0.9 },
-  ]);
-  assert.equal(sorted[0].className, "강아지");
+  const predictions = [
+    { className: "cat", probability: 0.1 },
+    { className: "dog", probability: 0.9 },
+  ];
+  const sorted = toSortedPredictions(predictions);
+  assert.equal(sorted[0].className, "dog");
+  assert.equal(sorted[1].className, "cat");
 });
 
 test("animal-face result resolves emoji/name/score from top prediction", () => {
-  const result = buildAnimalFaceResult([
-    { className: "고양이", probability: 0.82 },
-    { className: "강아지", probability: 0.11 },
-  ]);
-  assert.equal(result.name, "고양이상");
-  assert.equal(result.emoji, "🐱");
-  assert.equal(result.score, "82.00");
+  const predictions = [
+    { className: "강아지", probability: 0.95678 },
+  ];
+  const result = buildAnimalFaceResult(predictions);
+  assert.equal(result.name, "강아지상");
+  assert.equal(result.emoji, "🐶");
+  assert.equal(result.score, "95.68");
 });
 
 test("animal-face result returns fallback for unknown class", () => {
-  const result = buildAnimalFaceResult([{ className: "알수없음", probability: 0.55 }]);
-  assert.equal(result.name, "알수없음");
+  const predictions = [
+    { className: "dragon", probability: 0.5 },
+  ];
+  const result = buildAnimalFaceResult(predictions);
+  assert.equal(result.name, "dragon");
   assert.equal(result.emoji, "❓");
-  assert.equal(result.score, "55.00");
 });

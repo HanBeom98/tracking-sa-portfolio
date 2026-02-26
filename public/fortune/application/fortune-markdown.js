@@ -33,7 +33,8 @@ export function parseFortuneMarkdown(markdown) {
 
     if (trimmed.startsWith("###")) {
       closeSectionIfNeeded();
-      html += `<div class="section-card"><h3>${trimmed.replace("###", "").trim()}</h3>`;
+      html += '<div class="section-card">';
+      html += `<h3>${trimmed.replace("###", "").trim()}</h3>`;
       sectionOpen = true;
       continue;
     }

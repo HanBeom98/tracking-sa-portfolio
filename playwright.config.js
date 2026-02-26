@@ -34,8 +34,11 @@ const config = {
     launchOptions: chromiumPath
       ? {
           executablePath: chromiumPath,
+          args: ["--no-sandbox", "--disable-setuid-sandbox"],
         }
-      : undefined,
+      : {
+          args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        },
   },
   reporter: [["list"]],
 };

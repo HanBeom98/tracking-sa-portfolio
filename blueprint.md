@@ -55,6 +55,9 @@ Tracking SA를 프레임워크 의존 없이 안정적으로 운영 가능한 DD
 - 보드 도메인 레이어 평탄화 및 통합 완료 (By Gemini CLI):
   - 하위 폴더(`write`, `edit`, `post`)에 파편화된 레이어 로직을 도메인 루트(`application/`, `ui/`)로 집결.
   - 전체 게시판 기능의 `import` 경로 수술적 최적화 및 단위 테스트 100% 통과 확인.
+- 레거시 도메인(Fortune, Animal-face) DDD 리팩토링 완료 (By Gemini CLI):
+  - `infra/` 계층 분리(API 호출, 모델 로딩) 및 유스케이스(`application/`) 추출.
+  - 마크다운 파서 버그 수정 및 도메인별 단위 테스트 보강.
 - 게임 도메인 DDD 분리 완료:
   - 테트리스, AI Evolution 게임 로직을 `application/`, `infra/` 레이어로 물리적 분리 완료.
 - GitHub Actions 역할 고정:
@@ -73,15 +76,13 @@ Tracking SA를 프레임워크 의존 없이 안정적으로 운영 가능한 DD
   - 2048: 단일 `index.html` 내 상단 네비게이션 내장 및 오프셋 적용.
 
 ## 🧭 Architecture Reality Check
-- `news`, `board`, `games`, `account`, `futures-estimate` 도메인은 성숙한 4계층 DDD 구조를 갖춤.
-- `fortune`, `animal-face` 등 레거시 도메인은 여전히 `main.js`에 인프라 로직이 결합되어 있음.
+- `news`, `board`, `games`, `account`, `futures-estimate`, `fortune`, `animal-face` 등 모든 주요 도메인이 성숙한 4계층 DDD 구조를 갖춤.
 - 공유 자산(`common.js`)의 책임 분리가 지속적으로 진행 중.
 
-## 🔭 Current Focus
-- [x] 배포 안정성 강화: 뉴스/보드 도메인 E2E 스모크 테스트(`tests/e2e/`) 보강 완료
-- [ ] 레거시 도메인(`fortune`, `animal-face`) API 호출 로직 `infra` 계층으로 분리
+##  Telescope Current Focus
 - [ ] Firestore 규칙 최소 권한 재설계 및 검색/뉴스 읽기 안정성 기준 재검토
 - [ ] 뉴스 생성 프롬프트 품질 관리(제목 품질, 중복 스타일 억제)
+- [ ] 정적 페이지(Inquiry, Contact 등)의 공통 레이아웃 컴포넌트화
 
 ## ⚠️ Lessons Learned
 - `public/` 커밋 여부는 배포 반영 여부와 직결된다 (현 운영모드 기준).

@@ -1,5 +1,6 @@
 import { createFortuneCopy, resolveFortuneLanguage } from "./application/fortune-copy.js";
-import { parseFortuneMarkdown } from "./application/fortune-markdown.js";
+import { createFortuneUseCase } from "./application/fortune-use-case.js";
+import { createFortuneRepository } from "./infra/fortuneRepository.js";
 import {
   bindFortuneEvents,
   populateBirthSelectors,
@@ -16,6 +17,10 @@ class FortunePremium extends HTMLElement {
     this._selectedGender = "male";
     this._view = null;
     this._copy = null;
+    
+    // DDD Layers Setup
+    const fortuneRepository = createFortuneRepository();
+    this._useCase = createFortuneUseCase({ fortuneRepository });
   }
 
   connectedCallback() {
@@ -43,44 +48,6 @@ class FortunePremium extends HTMLElement {
     });
   }
 
-  buildPayload(name, year, month, day, lang) {
-    const now = new Date();
-    return {
-      name,
-      gender: this._selectedGender,
-      language: lang,
-      birthDate: {
-        year: Number.parseInt(year, 10),
-        month: Number.parseInt(month, 10),
-        day: Number.parseInt(day, 10),
-      },
-      currentDate: {
-        year: now.getFullYear(),
-        month: now.getMonth() + 1,
-        day: now.getDate(),
-      },
-    };
-  }
-
-  async fetchFortune(payload) {
-    const response = await fetch("https://tracking-sa.vercel.app/api/fortune", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    if (response.status === 429) {
-      throw new Error("TOO_MANY_REQUESTS");
-    }
-
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error("FORTUNE_API_FAILED");
-    }
-
-    return data;
-  }
-
   async handlePredict() {
     const lang = resolveFortuneLanguage();
     const name = this._view?.nameInput?.value?.trim() || "";
@@ -96,10 +63,15 @@ class FortunePremium extends HTMLElement {
     renderFortuneLoading(this._view, this._copy);
 
     try {
-      const payload = this.buildPayload(name, year, month, day, lang);
-      const data = await this.fetchFortune(payload);
-      const html = parseFortuneMarkdown(data.sajuReading);
-      renderFortuneHtml(this._view, html);
+      const { htmlContent } = await this._useCase.predictFortune({
+        name,
+        gender: this._selectedGender,
+        year,
+        month,
+        day,
+        lang,
+      });
+      renderFortuneHtml(this._view, htmlContent);
     } catch (error) {
       console.error("Fortune API Error:", error);
       const message = error.message === "TOO_MANY_REQUESTS" ? this._copy.tooManyRequests : this._copy.apiError;

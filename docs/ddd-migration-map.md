@@ -53,9 +53,17 @@
 - `src/domains/futures-estimate/ui/futures-page.js`: 위젯 초기화/DOM 렌더링
 - `src/domains/futures-estimate/ui/style.css`: 페이지 스타일 분리
 
-### [Legacy/Small 도메인] (2026-02-26 기준)
-- **Fortune**: `application/` (copy, markdown)과 `ui/`로 나뉘어 있으나, `main.js`에서 직접 API 호출. `infra/` 계층 부재.
-- **Animal-face**: `application/` 로직은 분리되어 있으나, `Teachable Machine` 연동 로직이 `main.js`에 포함됨.
+### [Legacy/Small 도메인] (2026-02-26 리팩토링 완료)
+- **Fortune**: 
+  - `infra/fortuneRepository.js`: API 호출 전담.
+  - `application/fortune-use-case.js`: 비즈니스 로직 조율.
+  - `application/fortune-markdown.js`: 마크다운 파싱.
+  - `ui/fortune-view.js`: 렌더링.
+- **Animal-face**:
+  - `infra/animalFaceRepository.js`: Teachable Machine 모델 로딩 및 추론.
+  - `application/animal-face-use-case.js`: 추론 조율.
+  - `application/animal-face-result.js`: 결과 데이터 가공.
+  - `ui/animal-face-view.js`: 렌더링.
 - **Search**: `application/search-data.js`로 데이터 파싱 분리. 나머지는 루트에 집중.
 - **Inquiry/Contact/Privacy-policy**: 레이어 분리 없이 단일 `index.html`, `style.css` 구조 유지 중.
 
