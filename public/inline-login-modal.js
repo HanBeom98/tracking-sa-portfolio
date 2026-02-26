@@ -1,4 +1,10 @@
 (function () {
+  function t(key, fallback) {
+    return typeof window !== "undefined" && window.getTranslation
+      ? window.getTranslation(key, fallback)
+      : fallback;
+  }
+
   function createInlineLoginModalController({ getAuthService }) {
     let modal = null;
 
@@ -10,16 +16,16 @@
       modal.className = "inline-login-modal";
       modal.innerHTML = `
         <div class="inline-login-dialog">
-          <h2 class="inline-login-title">로그인</h2>
-          <button type="button" class="auth-button inline-login-close" id="inline-login-close">닫기</button>
-          <button type="button" class="auth-button" id="inline-login-google">Google로 로그인</button>
+          <h2 class="inline-login-title">${t("login", "로그인")}</h2>
+          <button type="button" class="auth-button inline-login-close" id="inline-login-close">${t("close", "닫기")}</button>
+          <button type="button" class="auth-button" id="inline-login-google">${t("auth_google_login", "Google로 로그인")}</button>
           <div class="inline-login-row">
-            <input id="inline-login-email" class="inline-login-input" type="email" placeholder="이메일" autocomplete="email">
-            <input id="inline-login-password" class="inline-login-input" type="password" placeholder="비밀번호" autocomplete="current-password">
+            <input id="inline-login-email" class="inline-login-input" type="email" placeholder="${t("email", "이메일")}" autocomplete="email">
+            <input id="inline-login-password" class="inline-login-input" type="password" placeholder="${t("password", "비밀번호")}" autocomplete="current-password">
           </div>
           <div class="inline-login-actions">
-            <button type="button" class="auth-button primary" id="inline-login-email-submit">이메일 로그인</button>
-            <button type="button" class="auth-button" id="inline-login-signup">회원가입</button>
+            <button type="button" class="auth-button primary" id="inline-login-email-submit">${t("auth_email_login", "이메일 로그인")}</button>
+            <button type="button" class="auth-button" id="inline-login-signup">${t("signup", "회원가입")}</button>
           </div>
           <p id="inline-login-error" class="inline-login-error"></p>
         </div>
@@ -75,7 +81,7 @@
             document.body.style.overflow = "";
           } catch (error) {
             console.error("Google 로그인 실패:", error);
-            setError("로그인에 실패했습니다. 다시 시도해주세요.");
+            setError(t("auth_login_retry", "로그인에 실패했습니다. 다시 시도해주세요."));
           }
         };
       }
@@ -87,7 +93,7 @@
           const email = (modal.querySelector("#inline-login-email")?.value || "").trim();
           const password = modal.querySelector("#inline-login-password")?.value || "";
           if (!email || !password) {
-            setError("이메일과 비밀번호를 입력해주세요.");
+            setError(t("auth_email_password_required", "이메일과 비밀번호를 입력해주세요."));
             return;
           }
           try {
@@ -96,7 +102,7 @@
             document.body.style.overflow = "";
           } catch (error) {
             console.error("이메일 로그인 실패:", error);
-            setError("로그인에 실패했습니다. 이메일/비밀번호를 확인해주세요.");
+            setError(t("auth_login_failed", "로그인에 실패했습니다. 이메일/비밀번호를 확인해주세요."));
           }
         };
       }
