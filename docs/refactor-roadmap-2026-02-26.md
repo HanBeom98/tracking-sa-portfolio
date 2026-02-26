@@ -155,6 +155,10 @@
   - Firestore Rules 가드 테스트 추가:
     - `tests/unit/firestore-rules-guards.test.js`
     - 뉴스(`posts`) admin 삭제/생성 금지, 게시판(`board_posts`) 작성자 제약, 사용자(`users`) role immutable, 닉네임(`nicknames`) 생성/삭제 제약, default deny 검증
+  - 배포 파이프라인 운영 고정:
+    - `Daily AI News Post` 수동 실행 입력(`run_mode`) 추가
+    - `generate_only`와 `generate_and_deploy` 경로 분리
+    - `phase1-ops-checklist`에 일반 배포 vs 뉴스 배포 선택 규칙 명시
   - unit test 추가:
     - `tests/unit/animal-face-messages.test.js`
     - `tests/unit/animal-face-view-text.test.js`

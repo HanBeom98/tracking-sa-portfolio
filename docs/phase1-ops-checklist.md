@@ -9,6 +9,10 @@
 - 코드 병합/배포 전 unit gate: `Unit Tests` 워크플로우 성공 확인
 - 일반 배포(디자인/기능): `Site Deploy (Build Only)`
 - 뉴스 생성/게시: `Daily AI News Post`
+- 디자인/기능 배포 시 `Daily AI News Post` 수동 실행 금지
+- 뉴스 워크플로 수동 실행 시 `run_mode`:
+  - `generate_and_deploy`: 뉴스 생성 + 배포
+  - `generate_only`: 뉴스 생성 커밋만 수행(배포 없음)
 - 배포 후 런타임 스모크: `Release Auth Smoke`
 - 배포 후 인증 회귀 확인: `E2E Auth Smoke` (자동 트리거 + 필요 시 수동 실행)
 - Cloudflare Pages `Automatic deployments`는 `Disabled` 유지

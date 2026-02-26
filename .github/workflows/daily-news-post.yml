@@ -5,6 +5,15 @@ on:
     - cron: '6 22 * * *'
     - cron: '12 12 * * *'
   workflow_dispatch:
+    inputs:
+      run_mode:
+        description: "Run mode for manual execution"
+        required: true
+        default: "generate_and_deploy"
+        type: choice
+        options:
+          - generate_and_deploy
+          - generate_only
 
 permissions:
   contents: write
@@ -81,9 +90,16 @@ jobs:
           echo "committed=true" >> "$GITHUB_OUTPUT"
 
       - name: Deploy to Cloudflare Pages (Direct Upload)
-        if: steps.commit_news.outputs.committed == 'true'
+        if: steps.commit_news.outputs.committed == 'true' && (github.event_name != 'workflow_dispatch' || github.event.inputs.run_mode == 'generate_and_deploy')
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy public --project-name=tracking-sa --branch=main
+
+      - name: Workflow Summary
+        if: always()
+        run: |
+          echo "event=${{ github.event_name }}"
+          echo "run_mode=${{ github.event.inputs.run_mode || 'scheduled' }}"
+          echo "committed=${{ steps.commit_news.outputs.committed || 'false' }}"
