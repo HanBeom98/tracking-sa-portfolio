@@ -1,4 +1,4 @@
-name: Site Deploy (Build Only)
+name: Site Deploy (Test & Build)
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "src/**"
+      - "tests/**"
       - "main.py"
       - "requirements.txt"
       - "package.json"
@@ -19,13 +20,34 @@ permissions:
   contents: read
 
 concurrency:
-  group: site-deploy-build-only
+  group: site-deploy-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
+  # 1단계: 테스트 수행
+  test:
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install Node dependencies
+        run: npm install
+
+      - name: Run Unit Tests
+        run: npm run test:unit
+
+      - name: Run Firestore Rules Tests
+        run: npm run test:rules
+
+  # 2단계: 테스트 성공 시에만 빌드 및 배포
+  build-and-deploy:
+    needs: test
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:

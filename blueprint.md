@@ -15,10 +15,11 @@ Tracking SA를 프레임워크 의존 없이 안정적으로 운영 가능한 DD
 - Data: Firebase Firestore
 - News Gen: RSS + Gemini 기반 `multi-agent-system/news-desk.js`
 
-## 🚦 Deployment & Operation Model (2026-02-25 기준)
-- 일반 기능 배포: 로컬에서 `main.py --build-only` 후 `public/` 포함 커밋/푸시
-- 뉴스 자동 발행: GitHub Actions 스케줄/수동 실행에서만 `python main.py` 실행 후 `public/` 자동 커밋
-- Cloudflare Pages: `main` 변경 감지 후 자동 배포
+## 🚦 Deployment & Operation Model (2026-02-26 기준)
+- **배포 원칙 (Test-First)**: 모든 코드 변경은 GitHub Actions에서 **단위 테스트 및 Firestore 규칙 검증을 통과해야만** Cloudflare Pages로 배포됩니다.
+- 일반 기능 배포: 로컬에서 `main.py --build-only` 후 `public/` 포함 커밋/푸시 -> CI 테스트 -> 자동 배포.
+- 뉴스 자동 발행: GitHub Actions 스케줄 실행에서 `python main.py` 실행 후 `public/` 자동 커밋.
+- Cloudflare Pages: GitHub Actions 워크플로우 성공 시 배포된 `public/` 정적 파일을 호스팅.
 
 ## ✅ Completed Milestones
 
