@@ -1,0 +1,50 @@
+name: Release Auth Smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "Target base URL"
+        required: false
+        default: "https://trackingsa.com"
+  workflow_run:
+    workflows:
+      - Site Deploy (Build Only)
+      - Daily AI News Post
+    types:
+      - completed
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-auth-smoke
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ripgrep
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ripgrep
+
+      - name: Resolve target URL
+        id: target
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.base_url }}" ]; then
+            echo "url=${{ github.event.inputs.base_url }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "url=https://trackingsa.com" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run release auth smoke
+        shell: bash
+        run: ./scripts/smoke_auth_release.sh "${{ steps.target.outputs.url }}"

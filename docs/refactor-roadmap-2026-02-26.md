@@ -36,6 +36,7 @@
   - `smoke_auth_release.sh`를 분리 구조 기준으로 안정화(pipefail-safe).
 - 진행중:
   - account 페이지 인라인 CSS를 도메인 CSS 파일로 분리(반영 완료, 운영 확인 대기).
+  - 배포 후 `smoke_auth_release.sh` 자동 실행 워크플로우 연결(설정 반영 완료, Actions 결과 확인 대기).
 
 ## Phase 2 (Short-term, 3-5 days)
 - 인증 UI/상태 로직을 모듈화:
