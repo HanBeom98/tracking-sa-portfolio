@@ -1,0 +1,57 @@
+# Refactor Roadmap (2026-02-26)
+
+## Goal
+- 기능 개발 속도를 유지하면서 중복 수정, 배포 충돌, 인증 로직 분산 문제를 줄인다.
+- 기준: `src` 중심 개발, 예측 가능한 배포, 도메인별 책임 분리.
+
+## Current Pain Points
+- `src`와 `public` 동시 수정이 자주 발생해 실수 가능성이 높다.
+- 인증/로그인 UI 로직이 `common.js`, `account`, `board/write`에 분산되어 있다.
+- 페이지별 인라인 스타일/스크립트가 커져 재사용성과 테스트가 낮다.
+- 뉴스/사이트 배포 워크플로 책임이 분리됐지만 운영 규칙 문서화가 부족하다.
+
+## Phase 1 (Now, 1-2 days)
+- `src`를 단일 소스로 고정하고 수동 `public` 편집 금지 규칙 확정.
+- 운영 규칙 문서화:
+  - 디자인/기능 수정 배포: `Site Deploy (Build Only)`
+  - 뉴스 생성 배포: `Daily AI News Post`
+- 계정/게시판 인증 관련 최근 핫픽스 동작 점검 체크리스트 추가.
+
+### Done Criteria
+- 팀이 동일한 배포 루트를 사용하고, 수동 `public` 편집 없이 운영 가능.
+- 로그인/로그아웃 핵심 플로우(계정/글쓰기)가 재현 테스트 통과.
+
+## Phase 2 (Short-term, 3-5 days)
+- 인증 UI/상태 로직을 모듈화:
+  - `auth-ui-controller`(모달/드롭다운/상태 전환)
+  - `auth-state-bus`(페이지별 구독만 수행)
+- `account/main.js`와 `board/write/main.js`에서 공통 인증 코드 제거.
+- 번역 키/메시지 처리 공통화.
+
+### Done Criteria
+- 인증 관련 코드 중복 30% 이상 감소.
+- 로그아웃/세션만료 시 모든 페이지에서 일관된 처리.
+
+## Phase 3 (Mid-term, 1 week+)
+- 인라인 스타일 축소:
+  - `account`/`board` 페이지 스타일을 도메인 CSS로 분리.
+- 빌드 파이프라인 정리:
+  - 생성 산출물(`public`) 커밋 범위 최소화(뉴스 생성 파이프라인 중심).
+- 도메인별 회귀 테스트 시나리오 문서화(수동 + 스모크).
+
+### Done Criteria
+- 페이지 템플릿의 인라인 CSS/JS 최소화.
+- 배포 이슈 재현/진단 시간이 크게 감소.
+
+## Execution Order (Recommended)
+1. Phase 1 운영 규칙 문서/체크리스트 확정
+2. Phase 2 인증 모듈화
+3. Phase 3 스타일/빌드 정리
+
+## Risks
+- 빠른 핫픽스가 필요한 상황에서 다시 `public` 직접 수정으로 회귀할 수 있음.
+- 뉴스 생성 파이프라인과 사이트 배포 파이프라인 책임 경계가 흐려질 수 있음.
+
+## Guardrails
+- 모든 기능 수정은 `src`만 수정하고 워크플로로 배포한다.
+- 인증 관련 변경은 `account + board/write + common` 3개 플로우를 반드시 함께 테스트한다.
