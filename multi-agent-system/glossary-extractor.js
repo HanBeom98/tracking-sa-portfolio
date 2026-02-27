@@ -44,10 +44,7 @@ try {
 const GLOSSARY_PATH = path.join(rootDir, 'src/domains/glossary/application/glossary-data.js');
 
 async function callGemini(systemInstruction, userPrompt) {
-    const combinedPrompt = `${systemInstruction}
-
-[USER REQUEST]
-${userPrompt}`;
+    const combinedPrompt = `${systemInstruction}\n\n[USER REQUEST]\n${userPrompt}`;
     const body = {
         contents: [{ parts: [{ text: combinedPrompt }] }],
         generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
@@ -61,8 +58,7 @@ ${userPrompt}`;
     
     const data = await response.json();
     if (!response.ok) throw new Error(data.error?.message || 'API Error');
-    return data.candidates[0].content.parts.map(p => p.text).join('
-');
+    return data.candidates[0].content.parts.map(p => p.text).join('\n');
 }
 
 function extractJsonObject(text) {
@@ -99,10 +95,7 @@ async function extractNewTerms() {
         const snapshot = await db.collection('posts').orderBy('createdAt', 'desc').limit(5).get();
         snapshot.forEach(doc => {
             const data = doc.data();
-            recentTexts += `
---- 기사 제목: ${data.titleKo} ---
-${data.contentKo}
-`;
+            recentTexts += `\n--- 기사 제목: ${data.titleKo} ---\n${data.contentKo}\n`;
         });
     }
 
@@ -112,15 +105,14 @@ ${data.contentKo}
     }
 
     console.log("🤖 Asking Gemini to extract new terms...");
-    const systemInstruction = `당신은 글로벌 기술 트렌드를 분석하는 '수석 테크 애널리스트'입니다.
-    주어진 최근 뉴스 기사들을 읽고, 대중이 어려워할 만한 전문 기술/투자 용어를 정확히 3개만 추출하세요.`;
+    const systemInstruction = `당신은 글로벌 기술 트렌드를 분석하는 '수석 테크 애널리스트'입니다.\n주어진 최근 뉴스 기사들을 읽고, 대중이 어려워할 만한 전문 기술/투자 용어를 정확히 3개만 추출하세요.`;
 
     const userPrompt = `
 [기존에 이미 등록된 단어 목록 (절대 중복 추출 금지)]
 ${existingIds.join(', ')}
 
 [최근 뉴스 기사 본문]
-${recentTexts.substring(0, 10000)} // 최대 길이 제한
+${recentTexts.substring(0, 10000)}
 
 위 기사에서 기존 목록에 없는 새롭고 중요한 테크/투자 용어 딱 3개를 찾아 아래 JSON 배열 포맷으로 반환하세요.
 반드시 투자자의 관점에서 아주 쉽고 재치 있게 설명해야 합니다.
@@ -164,8 +156,7 @@ ${recentTexts.substring(0, 10000)} // 최대 길이 제한
         // 닫히는 대괄호 ] 앞에 새로운 데이터 주입
         const lastBracketIndex = existingContent.lastIndexOf(']');
         if (lastBracketIndex !== -1) {
-            const updatedContent = existingContent.substring(0, lastBracketIndex) + injectionString + "
-" + existingContent.substring(lastBracketIndex);
+            const updatedContent = existingContent.substring(0, lastBracketIndex) + injectionString + "\n" + existingContent.substring(lastBracketIndex);
             fs.writeFileSync(GLOSSARY_PATH, updatedContent, 'utf8');
             console.log("✅ Successfully appended new terms to glossary-data.js!");
             newTerms.forEach(t => console.log(` - ${t.term}`));
