@@ -64,6 +64,11 @@
   - `application/animal-face-use-case.js`: 추론 조율.
   - `application/animal-face-result.js`: 결과 데이터 가공.
   - `ui/animal-face-view.js`: 렌더링.
+- **Glossary** (2026-02-27 신규):
+  - `src/domains/glossary/index.html`: 용어 목록 및 상세 통합 뷰.
+  - `src/domains/glossary/style.css`: 용어사전 전용 스타일.
+  - `src/domains/glossary/main.js`: Firestore(용어 데이터) 연동 및 렌더링 오케스트레이션.
+  - **특이사항**: `multi-agent-system/glossary-extractor.js`를 통해 콘텐츠가 자동 생성되며, 뉴스 도메인과 상호 참조됨.
 - **Search**: `application/search-data.js`로 데이터 파싱 분리. 나머지는 루트에 집중.
 - **Inquiry/Contact/Privacy-policy**: 레이어 분리 없이 단일 `index.html`, `style.css` 구조 유지 중.
 

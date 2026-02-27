@@ -364,3 +364,52 @@
 - 검증:
   - `npm run test:unit` 88개 전체 Pass 확인.
   - `npm run build` 성공 및 `public/` 구조 정합성 육안 검증.
+
+### feat(ai/glossary): implement automated glossary extraction and internal linking (`e48395e`, `0be4d38`, `e915c39`)
+- 문제/증상:
+  - 단순 뉴스 요약만으로는 SEO 및 AdSense 승인에 필요한 콘텐츠 깊이(Depth) 확보에 한계가 있음.
+  - 전문 용어에 대한 설명이 부족하여 독자 이탈 가능성 존재.
+- 변경:
+  - **Glossary Domain**: `src/domains/glossary/` 신규 추가 및 용어 목록/상세 UI 구축.
+  - **Agentic Workflow**:
+    - `multi-agent-system/glossary-extractor.js`: 뉴스 본문에서 핵심 키워드를 추출하고 백과사전식 정의를 생성하는 에이전트 도입.
+    - `multi-agent-system/news-desk.js`: 뉴스 생성 파이프라인 마지막 단계에서 추출된 용어를 감지하여 본문에 자동 내부 링크(`<a>`) 삽입 로직 추가.
+  - **Manual Agent**: 용어사전만 별도로 추출/관리할 수 있는 수동 워크플로(`multi-agent-system/manuals/glossary.md`) 제공.
+- 영향 범위: 뉴스 도메인(SEO 최적화), 신규 용어사전 도메인, 멀티 에이전트 시스템.
+- 검증:
+  - 뉴스 생성 시 본문에 `glossary` 링크 삽입 확인.
+  - `public/glossary/` 내 정적 파일 생성 및 렌더링 확인.
+
+### fix(ui/fouc): eliminate text FOUC across all domains (`a9debe0`, `4018f31`, `17ea165`)
+- 문제/증상:
+  - 페이지 로드 시 번역 JSON이 로드되기 전까지 헤더/푸터 및 네비게이션 텍스트가 비어 있거나 영어 기본값으로 노출되어 깜빡임(FOUC) 발생.
+- 변경:
+  - `src/shared/ui/header.html`, `footer.html`: 모든 placeholder 텍스트를 가장 빈번하게 사용되는 한국어 기본값(예: "인사이트", "문의하기")으로 하드코딩.
+  - `src/shared/assets/translations.js`: 번역 적용 전 불필요한 공백 치환 로직 제거 및 덮어쓰기 최적화.
+  - `src/shared/assets/app-shell-runtime.js`: DOM 로드 직후 최우선적으로 정적 텍스트 정합성을 맞추도록 실행 순서 조정.
+- 영향 범위: 전 도메인 공통 UI 안정성 및 시각적 품질.
+- 검증:
+  - 네트워크 속도를 늦춘 환경(Slow 3G)에서 로드 시 텍스트 깜빡임 발생 여부 육안 확인.
+
+### fix(branding): unify persona to 'Global Expert' and remove legacy names (`1abcf91`, `609d885`)
+- 문제/증상:
+  - 사이트 곳곳에 '실리콘밸리' 등 특정 지역에 한정된 표현이 남아 있어 독자층 확장 및 범용성 저해.
+- 변경:
+  - `index.html`, `multi-agent-system/prompts.js`: 모든 '실리콘밸리' 지칭을 '글로벌 IT 전문가' 또는 '전문가'로 교체.
+  - 에이전트 페르소나 업데이트: 뉴스/용어사전 에이전트의 지침을 'Global Tech Analyst'로 통일하여 일관된 톤앤매너 유지.
+- 영향 범위: 사이트 전체 브랜딩 및 AI 콘텐츠 출력물.
+- 검증:
+  - `grep -r "실리콘밸리" src/` 검색을 통한 잔존 키워드 전수 제거 확인.
+
+### fix(board): restore admin role enrichment in edit page for notice modifications
+- 문제/증상:
+  - 공지사항 수정을 위해 접근 시, "게시물을 찾을 수 없습니다" 화면 노출 및 접근 거부 발생.
+  - 관리자 계정임에도 불구하고, `edit/main.js` 진입 시 유저의 role 정보가 병합되지 않아 `free` 유저로 인식되는 현상.
+- 변경:
+  - `src/domains/board/edit/main.js`: 
+    - `requireAuth` 성공 직후 `getCurrentUserProfile`을 호출하여 유저 객체에 `role` 정보를 병합하도록 로직 복구.
+- 영향 범위:
+  - 공지사항 및 게시판 수정 페이지(`edit/main.js`) 권한 검증.
+- 검증:
+  - `npm run test:unit` 전체 통과.
+  - 관리자 계정 로그인 상태에서 수정 폼 렌더링 정상 동작 확인.

@@ -1,5 +1,5 @@
 import { buildPostService } from "../application/postService.js";
-import { requireAuth } from "../application/authGateway.js";
+import { requireAuth, getCurrentUserProfile } from "../application/authGateway.js";
 import { createFirestorePostRepository } from "../infra/firestorePostRepository.js";
 import { createEditPostUseCases } from "../application/edit-post-use-cases.js";
 
@@ -58,11 +58,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   try {
-    const user = await requireAuth({ redirectTo: `/board/edit?id=${postId}` });
-    if (!user) {
+    const authUser = await requireAuth({ redirectTo: `/board/edit?id=${postId}` });
+    if (!authUser) {
       editForm.renderNotFound();
       return;
     }
+
+    const profile = getCurrentUserProfile();
+    const user = {
+      ...authUser,
+      role: (profile && profile.role) || "free"
+    };
+
     const post = await editPostUseCases.loadEditablePost({ postId, user });
     if (!post) {
       editForm.renderNotFound();

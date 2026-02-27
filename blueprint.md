@@ -94,7 +94,14 @@ Tracking SA를 프레임워크 의존 없이 안정적으로 운영 가능한 DD
   - 뉴스 수집 시 시스템 시간이 아닌 **RSS 원본 발행 시간(published_parsed)**을 추출해 Firestore에 저장하도록 로직을 수정하여 기사 정렬의 논리적 순서 확보.
 - **운영 도구 및 브랜딩 개선 (NEW)**:
   - 기존 기사들을 새로운 고품질 프롬프트로 안전하게 일괄 재생성할 수 있는 `scripts/regenerate_news.py` 개발 및 배치 완료.
-  - 사이트 내 사용된 '실리콘밸리' 표현을 '전문가'로 일괄 교체하여 독자층 확대 및 범용성 확보.
+  - 사이트 내 사용된 '실리콘밸리' 표현을 '글로벌 전문가'로 일괄 교체하여 독자층 확대 및 범용성 확보.
+- **AI 용어사전(Glossary) 시스템 구축 및 SEO 자동화 (NEW)**:
+  - 뉴스 본문 내 핵심 용어를 자동으로 추출하고 백과사전식 설명을 생성하는 `multi-agent-system/glossary-extractor.js` 및 전용 에이전트 도입.
+  - 생성된 용어사전을 기반으로 뉴스 본문에 자동으로 내부 링크를 삽입하는 SEO 최적화 파이프라인 구축.
+  - 용어사전 도메인(`public/glossary/`) 신규 추가로 AdSense 승인용 고품질 정적 콘텐츠 대량 확보.
+- **FOUC(Flash of Unstyled Content) 완전 해결 및 UI 안정화 (NEW)**:
+  - 번역 데이터 로딩 전 기본 텍스트 노출로 인한 깜빡임을 방지하기 위해 헤더/푸터 및 네비게이션 기본값을 한국어('인사이트' 등)로 동기화.
+  - 모든 도메인 페이지의 `app-shell-runtime.js` 로딩 순서를 최적화하여 레이아웃 시프트와 텍스트 유실 방지.
 
 ## 🧭 Architecture Reality Check
 - `news`, `board`, `games`, `account`, `futures-estimate`, `fortune`, `animal-face`, `lucky-recommendation`, `search` 등 전 도메인이 **안정적인 1:1 미러링 DDD 구조**를 갖춤.

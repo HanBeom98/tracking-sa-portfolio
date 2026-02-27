@@ -31,6 +31,7 @@ Tracking SA는 최신 웹 표준 기술(Web Components, OKLCH, Container Queries
 - 🍀 **행운의 추천**: 나만의 컬러와 아이템을 시각적으로 구현하여 제공하는 개인화 서비스.
 - 📸 **AI 동물상 테스트**: TensorFlow.js 기반의 온디바이스 비전 분석 UX.
 - 📰 **Tech Insights**: 히어로 카드와 지능형 페이지네이션으로 즐기는 프리미엄 테크 매거진.
+- 📖 **AI Glossary**: 뉴스 본문 용어를 자동 추출하여 백과사전식 설명을 제공하고 내부 SEO를 강화하는 지능형 용어사전.
 - 📝 **Community Board**: 공지사항 강조와 가독성 높은 리스트를 갖춘 정통 커뮤니티 공간.
 
 ---
@@ -40,6 +41,8 @@ Tracking SA는 최신 웹 표준 기술(Web Components, OKLCH, Container Queries
 ### **Architecture & UX Consolidation**
 - **Architecture**: 전 도메인 1:1 미러링 DDD 구조 확립 및 경로 무결성 장애 완전 해결.
 - **Board UI**: 게시판 목록을 카드 그리드에서 **번호/제목/작성자/날짜 기반의 리스트 형식**으로 개편.
+- **AI Glossary**: 뉴스 본문 용어 자동 추출 및 **자동 내부 링크 삽입(SEO)** 시스템 구축.
+- **UI Stability**: 헤더/푸터 및 네비게이션 동기화를 통한 **FOUC(깜빡임) 문제 완전 해결**.
 - **RSS Feed**: 뉴스 도메인 RSS 2.0 자동 생성 시스템 구축으로 SEO 및 배포 채널 확장.
 - **Stability**: 단위 테스트 케이스 88개 확충 및 실제 운영 환경 기반 E2E 테스트 통과.
 

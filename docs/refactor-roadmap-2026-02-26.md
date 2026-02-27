@@ -174,6 +174,13 @@
     - `tests/unit/ai-test-result.test.js`
     - `tests/unit/ai-test-progress.test.js`
     - `tests/unit/ai-test-view.test.js`
+  - **2026-02-27 업데이트**:
+    - **아키텍처 안정화**: `ui/` 폴더 중첩으로 인한 경로 파손을 해결하고 **Source-Build 1:1 미러링 구조**로 전 도메인 복구.
+    - **게시판 UI 전면 개편**: 카드 방식에서 **전통적인 리스트 방식**으로 전환하여 가독성 및 정보 밀도 최적화.
+    - **AI 용어사전(Glossary) 시스템 도입**: 뉴스 본문 용어 자동 추출, 백과사전식 정의 생성 및 **자동 내부 링크 삽입(SEO)** 파이프라인 구축.
+    - **FOUC(Flash of Unstyled Content) 원천 차단**: 헤더/푸터/네비게이션의 기본 텍스트를 한국어로 동기화하고 로딩 순서를 최적화하여 UI 깜빡임 해결.
+    - **브랜딩 일관성 강화**: 사이트 내 '실리콘밸리' 등 특정 지칭을 **'글로벌 IT 전문가'**로 일괄 교체하여 페르소나 통일.
+    - **뉴스 데이터 무결성 개선**: RSS 발행 시간(published_parsed) 기반 Firestore 저장 로직으로 정렬 논리성 확보.
 
 ## Phase 2 (Short-term, 3-5 days)
 - 인증 UI/상태 로직을 모듈화:
