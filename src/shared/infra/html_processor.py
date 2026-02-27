@@ -83,11 +83,19 @@ def process_html_file_for_common_elements(filepath):
 
         # 5. Inject Header & Footer
         header_html = get_common_header()
-        if not is_root_homepage:
+        footer_html = get_common_footer()
+
+        # Handle Header
+        if "<!-- HEADER_INJECTION -->" in content:
+            content = content.replace("<!-- HEADER_INJECTION -->", header_html)
+        elif not is_root_homepage:
             content = re.sub(r'(<body[^>]*>)', r'\1' + header_html, content, count=1, flags=re.IGNORECASE)
 
-        if '</body>' in content and not is_root_homepage:
-            content = content.replace('</body>', f'{get_common_footer()}\n</body>')
+        # Handle Footer
+        if "<!-- FOOTER_INJECTION -->" in content:
+            content = content.replace("<!-- FOOTER_INJECTION -->", footer_html)
+        elif '</body>' in content and not is_root_homepage:
+            content = content.replace('</body>', f'{footer_html}\n</body>')
 
         if content != original:
             with open(filepath, "w", encoding="utf-8") as f:
