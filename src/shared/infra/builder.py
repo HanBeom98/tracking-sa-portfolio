@@ -247,12 +247,12 @@ def build_search_index():
         items = []
         if not html:
             return items
-        card_regex = re.compile(r'<a[^>]*class="news-card-premium"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)</a>', re.I)
+        card_regex = re.compile(r'<a[^>]+href="([^"]+)"[^>]*class="news-card-premium"[^>]*>([\s\S]*?)</a>|<a[^>]*class="news-card-premium"[^>]+href="([^"]+)"[^>]*>([\s\S]*?)</a>', re.I)
         title_regex = re.compile(r'<h2[^>]*class="news-title-text"[^>]*>([\s\S]*?)</h2>', re.I)
         date_regex = re.compile(r'<span[^>]*class="news-date"[^>]*>([\s\S]*?)</span>', re.I)
         for match in card_regex.finditer(html):
-            href = match.group(1) or ""
-            inner = match.group(2) or ""
+            href = match.group(1) or match.group(3) or ""
+            inner = match.group(2) or match.group(4) or ""
             title_match = title_regex.search(inner)
             date_match = date_regex.search(inner)
             title = re.sub(r"<[^>]*>", "", title_match.group(1)).strip() if title_match else ""
