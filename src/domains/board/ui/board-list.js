@@ -25,7 +25,19 @@ class BoardList extends HTMLElement {
   }
 
   setPosts(posts = []) {
-    this.state.posts = Array.isArray(posts) ? posts : [];
+    if (!Array.isArray(posts)) {
+      this.state.posts = [];
+    } else {
+      // 공지사항(notice)을 최상단으로 올리고, 그 안에서 최신순 정렬
+      this.state.posts = [...posts].sort((a, b) => {
+        const aNotice = a.category === "notice";
+        const bNotice = b.category === "notice";
+        if (aNotice && !bNotice) return -1;
+        if (!aNotice && bNotice) return 1;
+        // 둘 다 공지거나 둘 다 일반글이면 최신순(내림차순) 정렬
+        return (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0);
+      });
+    }
     this.render();
   }
 
