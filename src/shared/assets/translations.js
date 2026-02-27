@@ -63,6 +63,7 @@ const translations = {
         'loading_post': '게시물을 불러오는 중...', 
         'write_post_title': '글쓰기',
         'write_post_h1': '자유게시판 글쓰기',
+        'notice_write_h1': '공지사항 글쓰기',
         'title': '제목',
         'enter_title': '제목을 입력하세요',
         'content': '내용',

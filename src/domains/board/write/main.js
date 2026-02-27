@@ -66,6 +66,18 @@ async function initWriteForm() {
   writeForm.setAttribute("user-role", user.role || "free");
   writeForm.setAttribute("initial-category", category);
 
+  // Update title dynamically
+  const h1 = section.querySelector("h1");
+  if (h1) {
+    if (category === "notice") {
+      h1.textContent = t("notice_write_h1", "공지사항 글쓰기");
+      h1.setAttribute("data-i18n", "notice_write_h1");
+    } else {
+      h1.textContent = t("write_post_h1", "자유게시판 글쓰기");
+      h1.setAttribute("data-i18n", "write_post_h1");
+    }
+  }
+
   bindWriteSubmit(writeForm, section);
 }
 
