@@ -21,8 +21,6 @@
     <script type="module" src="./ui/board-list.js"></script>
     <script type="module" src="main.js"></script>
     <script type="module">
-        import { getUserProfile } from "/auth-session-runtime.js";
-        
         async function updateUI() {
             const urlParams = new URLSearchParams(window.location.search);
             const category = urlParams.get("category");
@@ -43,7 +41,12 @@
             writeLink.href = "/board/write" + (category ? "?category=" + category : "");
             
             // Check visibility
-            const profile = await getUserProfile();
+            // wait for auth state ready
+            if (window.AuthGateway) {
+                await window.AuthGateway.waitForReady();
+            }
+            const profile = window.getCurrentUserProfile ? window.getCurrentUserProfile() : null;
+            
             if (category === "notice") {
                 if (profile && profile.role === "admin") {
                     writeLink.style.display = "inline-block";
