@@ -76,14 +76,29 @@ Tracking SA를 프레임워크 의존 없이 안정적으로 운영 가능한 DD
   - 테트리스: 헤더/하단 safe-area 고려 레이아웃(`100dvh`) 및 버튼 가림 방지.
   - 2048: 단일 `index.html` 내 상단 네비게이션 내장 및 오프셋 적용.
 
+### 2026-02-27
+- **DDD 프로젝트 전역 리팩토링 완결** (By Gemini CLI):
+  - `Lucky-recommendation`, `Search` 등 모든 활성 도메인의 4계층 DDD(Domain-Application-Infra-UI) 구조 이관 완료.
+  - `infra/` 계층 분리를 통해 데이터 접근 로직과 비즈니스 로직의 완전한 결합 해제.
+- **자동화된 RSS 피드 시스템 구축**:
+  - 뉴스 도메인 내 `rss_builder.py` 추가 및 공유 빌더(`builder.py`) 연동.
+  - `/rss.xml` 및 `/en/rss.xml` 자동 생성으로 검색 엔진 및 자동 배포 최적화.
+  - `index.html`에 RSS 자동 인식 링크(Auto-discovery) 태그 주입.
+- **인증 보안 및 UX 고도화**:
+  - `auth-session-runtime.js`에 무한 리다이렉트 방지 가드 및 URL 검증 로직 도입.
+  - 로그인 성공 후 리다이렉트 대상이 현재 페이지일 경우 강제 새로고침(`location.reload`)을 수행하여 즉각적인 상태 반영 구현.
+- **테스트 무결성 확보**:
+  - 전체 단위 테스트 86개 케이스 100% 통과 및 E2E 스모크 테스트(뉴스, 보드, AI테스트) 검증 완료.
+
 ## 🧭 Architecture Reality Check
-- `news`, `board`, `games`, `account`, `futures-estimate`, `fortune`, `animal-face` 등 모든 주요 도메인이 성숙한 4계층 DDD 구조를 갖춤.
-- 공유 자산(`common.js`)의 책임 분리가 지속적으로 진행 중.
+- `news`, `board`, `games`, `account`, `futures-estimate`, `fortune`, `animal-face`, `lucky-recommendation`, `search` 등 프로젝트의 100% 활성 도메인이 견고한 DDD 구조를 갖춤.
+- 공유 자산 및 빌드 시스템이 도메인별 자산 분리 구조를 완벽하게 지원함.
 
 ##  Telescope Current Focus
 - [ ] Firestore 규칙 최소 권한 재설계 및 검색/뉴스 읽기 안정성 기준 재검토
 - [ ] 뉴스 생성 프롬프트 품질 관리(제목 품질, 중복 스타일 억제)
 - [ ] 정적 페이지(Inquiry, Contact 등)의 공통 레이아웃 컴포넌트화
+- [ ] (NEW) RSS 피드 내 뉴스 본문 및 이미지 포함 여부 고도화 검토
 
 ## ⚠️ Lessons Learned
 - `public/` 커밋 여부는 배포 반영 여부와 직결된다 (현 운영모드 기준).

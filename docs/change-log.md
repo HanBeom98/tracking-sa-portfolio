@@ -45,6 +45,46 @@
 - `004c479`: 검색 입력 Enter 시 결과 페이지 라우팅(포털형 검색 UX 기초).
 - `568afa3`, `b5e0cb5`, `7af4a0d`: 네비게이션 드롭다운 안정화 1~3차 수정.
 
+## 2026-02-27
+
+### refactor(ddd): complete domain-driven migration for all active modules
+- 문제/증상:
+  - `lucky-recommendation`, `search`, `games` 등의 도메인에 데이터 접근 로직과 UI 처리가 혼재되어 유지보수 및 테스트가 어려움.
+- 변경:
+  - 전 도메인 4계층 DDD 구조 적용:
+    - `infra/`: Firestore 접근 및 외부 API 연동 캡슐화.
+    - `application/`: 비즈니스 로직 및 유스케이스 분리.
+    - `ui/`: 순수 렌더링 및 이벤트 핸들링 전담.
+  - 신규 생성 파일:
+    - `src/domains/lucky-recommendation/infra/luckyRepository.js`
+    - `src/domains/search/infra/searchRepository.js`
+  - 기존 파일 리팩토링: `games`, `news`, `board` 등의 레이어 간 결합도 제거.
+- 영향 범위: 프로젝트 내 모든 활성 도메인 모듈 및 빌드 파이프라인.
+- 검증:
+  - 단위 테스트 86개 전원 통과 확인 (`npm run test:unit`).
+  - 로컬 빌드 및 도메인별 자산 로딩 무결성 확인.
+
+### feat(news/rss): implement automated RSS feed generation
+- 문제/증상:
+  - 뉴스 도메인에 RSS 피드가 없어 검색 엔진 인덱싱 및 자동화된 콘텐츠 배포에 제약이 있음.
+- 변경:
+  - `src/domains/news/application/rss_builder.py`: 뉴스 데이터를 RSS 2.0 XML로 변환하는 도메인 로직 구현.
+  - `src/shared/infra/builder.py`: 사이트 빌드 시 `/rss.xml` 및 `/en/rss.xml`을 자동 생성하도록 인프라 연동.
+  - `index.html`: RSS 자동 인식 링크 태그 추가.
+- 영향 범위: 뉴스 도메인 콘텐츠 소비 채널 확장 및 SEO 성능 향상.
+- 검증:
+  - `npm run build`를 통한 XML 파일 생성 및 규격 확인.
+
+### fix(auth): ensure page refresh on same-URL redirects after login
+- 문제/증상:
+  - '내 정보' 등 인증 필수 페이지에서 로그인 성공 시, 리다이렉트 대상이 현재 페이지와 같으면 화면이 갱신되지 않는 이슈 발생.
+- 변경:
+  - `src/shared/assets/auth-session-runtime.js`:
+    - 리다이렉트 가드 로직 개선: 대상 URL이 현재와 동일할 경우 `location.reload()`를 강제 수행하도록 수정.
+- 영향 범위: 인증 세션 관리 및 전역 로그인 성공 시나리오 UX.
+- 검증:
+  - 단위 테스트 통과 확인 및 시나리오 검토.
+
 ## 작업 규칙 (향후 AI용)
 - 소스는 `src/*`를 먼저 수정하고, 반드시 `npm run build`로 `public/*`를 동기화한다.
 - 커밋은 기능 단위로 작게 나누고, 아래 5가지를 남긴다:
