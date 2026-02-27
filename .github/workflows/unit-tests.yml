@@ -2,15 +2,6 @@ name: Unit Tests
 
 on:
   pull_request:
-  push:
-    branches:
-      - main
-    paths:
-      - "src/**"
-      - "tests/**"
-      - "package.json"
-      - "package-lock.json"
-      - ".github/workflows/unit-tests.yml"
   workflow_dispatch:
 
 permissions:

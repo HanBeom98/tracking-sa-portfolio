@@ -9,7 +9,7 @@ on:
         default: "https://trackingsa.com"
   workflow_run:
     workflows:
-      - Site Deploy (Build Only)
+      - Site Deploy (Test & Build)
       - Daily AI News Post
     types:
       - completed
