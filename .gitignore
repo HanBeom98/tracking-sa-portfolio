@@ -14,7 +14,7 @@ processed_articles.log.tmp
 
 # Node.js
 node_modules/
-firebase-functions/node_modules/
+firebase-functions/
 functions/node_modules/
 test-results/
 playwright-report/
