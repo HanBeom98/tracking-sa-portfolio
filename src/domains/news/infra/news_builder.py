@@ -352,6 +352,20 @@ def generate_news_pages():
             content = p.get('contentKo', '')
             content_en = p.get('contentEn', '') or content
             date = p.get('date', '2026-02-24')
+            # Firestore timestamp handled by firebase-admin automatically converts to datetime
+            created_at = p.get('createdAt')
+            
+            # For sorting consistency
+            sort_val = 0
+            if created_at:
+                if hasattr(created_at, 'timestamp'):
+                    sort_val = int(created_at.timestamp())
+                else:
+                    # Fallback for unexpected formats
+                    sort_val = _created_ts_from_url(ukey)
+            else:
+                sort_val = _created_ts_from_url(ukey)
+
             out_path = os.path.join(PUBLIC_DIR, f"{ukey}.html")
             en_out_path = os.path.join(PUBLIC_DIR, "en", f"{ukey}.html")
 
@@ -374,26 +388,14 @@ def generate_news_pages():
             changed_en = _write_if_changed(en_out_path, en_html)
             if changed_en:
                 process_html_file_for_common_elements(en_out_path)
-            articles.append({'title': title, 'url': f"{ukey}.html", 'date': date, 'excerpt': excerpt})
-            articles_en.append({'title': title_en, 'url': f"{ukey}.html", 'date': date, 'excerpt': excerpt_en})
+            articles.append({'title': title, 'url': f"{ukey}.html", 'date': date, 'excerpt': excerpt, 'sort_val': sort_val})
+            articles_en.append({'title': title_en, 'url': f"{ukey}.html", 'date': date, 'excerpt': excerpt_en, 'sort_val': sort_val})
     except Exception as e:
         print(f"⚠️ [NEWS BUILD WARNING] Skipping individual articles due to DB error: {e}")
 
-    # Index 정렬은 날짜 우선, 동일 날짜는 생성 시각(urlKey timestamp) 우선
-    articles.sort(
-        key=lambda a: (
-            _date_key(a.get("date", "")),
-            _created_ts_from_url(a.get("url", ""))
-        ),
-        reverse=True
-    )
-    articles_en.sort(
-        key=lambda a: (
-            _date_key(a.get("date", "")),
-            _created_ts_from_url(a.get("url", ""))
-        ),
-        reverse=True
-    )
+    # Index 정렬은 생성 시각(createdAt) 최신순 우선
+    articles.sort(key=lambda a: a.get("sort_val", 0), reverse=True)
+    articles_en.sort(key=lambda a: a.get("sort_val", 0), reverse=True)
 
     # 뉴스 인덱스 페이지 생성 (데이터 유무와 상관없이 보장)
     idx_tmpl = "src/domains/news/ui/index.html"

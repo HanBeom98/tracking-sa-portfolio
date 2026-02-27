@@ -2,6 +2,7 @@ import { resolveNewsLocale } from "./news-routing.js";
 import { hydrateNewsIndex } from "./news-index-page.js";
 import { hydrateEnglishNewsArticle } from "./news-article-page.js";
 import { mountAdminDeleteButton } from "./news-admin-actions.js";
+import { setupPagination } from "./news-pagination.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
   if (!window.db) return;
@@ -14,6 +15,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (grid) {
     try {
       await hydrateNewsIndex({ db: window.db, grid, isEn });
+      // Initialize pagination after grid is populated
+      setupPagination();
     } catch (err) {
       console.error("News index fetch failed:", err);
     }
