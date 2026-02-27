@@ -56,8 +56,9 @@ test("firestore rules: board_posts enforce author ownership and immutability", (
   const block = normalize(extractMatchBlock(rules, "/board_posts/{postId}"));
 
   assert.ok(block.includes("allow read: if true;"));
-  assert.ok(block.includes("allow create: if request.auth != null && request.resource.data.authorUid == request.auth.uid;"));
-  assert.ok(block.includes("request.resource.data.authorUid == resource.data.authorUid;")); // immutability check
+  assert.ok(block.includes("allow create: if request.auth != null && request.resource.data.authorUid == request.auth.uid && (request.resource.data.category != \"notice\" || isAdmin());"));
+  assert.ok(block.includes("resource.data.authorUid == request.auth.uid && request.resource.data.authorUid == resource.data.authorUid && resource.data.category != \"notice\"")); // immutability and category check
+  assert.ok(block.includes("|| isAdmin()"));
 });
 
 test("firestore rules: users profile use isOwner helper and forces free role", () => {

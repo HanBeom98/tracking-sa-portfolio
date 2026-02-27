@@ -60,6 +60,12 @@ async function initWriteForm() {
   renderWriteAccess({ section, writeForm, user });
   if (!user) return;
 
+  // Pass user role and initial category to form
+  const urlParams = new URLSearchParams(window.location.search);
+  const category = urlParams.get("category") || "free";
+  writeForm.setAttribute("user-role", user.role || "free");
+  writeForm.setAttribute("initial-category", category);
+
   bindWriteSubmit(writeForm, section);
 }
 

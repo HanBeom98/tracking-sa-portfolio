@@ -1,6 +1,6 @@
 class BoardList extends HTMLElement {
   static get observedAttributes() {
-    return ["status"];
+    return ["status", "category"];
   }
 
   constructor() {
@@ -9,6 +9,7 @@ class BoardList extends HTMLElement {
     this.state = {
       status: "idle",
       posts: [],
+      category: ""
     };
   }
 
@@ -17,8 +18,8 @@ class BoardList extends HTMLElement {
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    if (name === "status" && oldValue !== newValue) {
-      this.state.status = newValue;
+    if ((name === "status" || name === "category") && oldValue !== newValue) {
+      this.state[name] = newValue;
       this.render();
     }
   }
@@ -42,11 +43,17 @@ class BoardList extends HTMLElement {
         background: white; border-radius: 20px; padding: 30px;
         border: 1px solid oklch(95% 0.01 260); box-shadow: 0 5px 20px rgba(0,0,0,0.05);
         text-decoration: none; color: inherit; transition: transform 0.3s; display: block;
+        position: relative;
       }
       .card:hover { transform: translateY(-8px); border-color: var(--p-blue); }
       .meta { margin-top: 16px; font-size: 0.9rem; color: var(--text-sub); }
       .empty { grid-column: 1 / -1; text-align: center; padding: 80px 20px; color: var(--text-sub); }
       .loading { grid-column: 1 / -1; text-align: center; padding: 100px 20px; color: var(--text-sub); }
+      .badge-notice {
+        display: inline-block; padding: 4px 10px; border-radius: 6px;
+        background: #fee2e2; color: #dc2626; font-size: 0.75rem; font-weight: 700;
+        margin-bottom: 10px;
+      }
     `;
 
     let content = "";
@@ -71,8 +78,15 @@ class BoardList extends HTMLElement {
     const excerpt = this.buildExcerpt(post.content);
     const nickname = post.authorName || post.nickname || "익명";
     const date = this.formatDate(post.createdAt);
+    const isNotice = post.category === "notice";
+    const t = (key, fallback) =>
+      typeof window !== "undefined" && window.getTranslation
+        ? window.getTranslation(key, fallback)
+        : fallback;
+
     return `
       <a class="card" href="/board/post?id=${post.id}">
+        ${isNotice ? `<span class="badge-notice">${t("notice", "공지사항")}</span>` : ""}
         <h3 style="margin-bottom: 12px;">${title}</h3>
         <p style="color: var(--text-sub);">${excerpt}</p>
         <div class="meta">${nickname} · ${date}</div>

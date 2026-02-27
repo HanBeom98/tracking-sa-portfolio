@@ -7,15 +7,20 @@ export function buildPostService({ postRepository }) {
     throw new Error("postRepository is required");
   }
 
-  async function createPost({ title, content, author }) {
+  async function createPost({ title, content, author, category = "free" }) {
     assertRequiredFields({ title, content });
     assertAuthor(author);
+
+    if (category === "notice" && author.role !== "admin") {
+      throw makeError("NOT_AUTHORIZED");
+    }
 
     const nickname = author.displayName || author.email || generateRandomNickname();
 
     await postRepository.add({
       title,
       content,
+      category,
       authorUid: author.uid,
       authorName: nickname,
       authorEmail: author.email || "",
@@ -30,8 +35,8 @@ export function buildPostService({ postRepository }) {
     return postRepository.getById(id);
   }
 
-  async function listPosts({ limit = 30 } = {}) {
-    return postRepository.list({ limit });
+  async function listPosts({ limit = 30, category = null } = {}) {
+    return postRepository.list({ limit, category });
   }
 
   async function updatePost({ id, title, content, user, post }) {
@@ -39,7 +44,8 @@ export function buildPostService({ postRepository }) {
     assertPostExists(post);
     assertAuthor(user);
 
-    if (post.authorUid && post.authorUid !== user.uid) {
+    const isAuthorized = user.role === "admin" || (post.authorUid && post.authorUid === user.uid && post.category !== "notice");
+    if (!isAuthorized) {
       throw makeError("NOT_AUTHORIZED");
     }
 
@@ -50,7 +56,8 @@ export function buildPostService({ postRepository }) {
     assertPostExists(post);
     assertAuthor(user);
 
-    if (post.authorUid && post.authorUid !== user.uid) {
+    const isAuthorized = user.role === "admin" || (post.authorUid && post.authorUid === user.uid);
+    if (!isAuthorized) {
       throw makeError("NOT_AUTHORIZED");
     }
 
@@ -59,7 +66,10 @@ export function buildPostService({ postRepository }) {
 
   function canEditPost({ user, post }) {
     assertPostExists(post);
-    assertAuthor(user);
+    if (!user) return false;
+
+    if (user.role === "admin") return true;
+    if (post.category === "notice") return false;
 
     return post.authorUid === user.uid;
   }

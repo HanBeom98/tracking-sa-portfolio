@@ -283,6 +283,8 @@ def build_search_index():
     static_items = {
         "ko": [
             {"href": "/news/", "title": "테크 인사이트", "date": "", "keywords": ["뉴스", "인사이트"]},
+            {"href": "/board?category=notice", "title": "공지사항", "date": "", "keywords": ["공지", "게시판", "소식"]},
+            {"href": "/board?category=free", "title": "자유게시판", "date": "", "keywords": ["커뮤니티", "자유", "게시판"]},
             {"href": "/futures-estimate/", "title": "코스피200", "date": "", "keywords": ["지수", "선물", "코스피", "K200"]},
             {"href": "/board/", "title": "게시판", "date": "", "keywords": ["커뮤니티", "글쓰기"]},
             {"href": "/ai-test/", "title": "AI 성향 테스트", "date": "", "keywords": ["테스트", "성향"]},
@@ -298,6 +300,8 @@ def build_search_index():
         ],
         "en": [
             {"href": "/en/news/", "title": "Tech Insights", "date": "", "keywords": ["news", "insights"]},
+            {"href": "/board?category=notice", "title": "Notice", "date": "", "keywords": ["notice", "announcement", "board"]},
+            {"href": "/board?category=free", "title": "Free Board", "date": "", "keywords": ["community", "free", "board"]},
             {"href": "/futures-estimate/", "title": "KOSPI200", "date": "", "keywords": ["index", "futures", "K200"]},
             {"href": "/board/", "title": "Board", "date": "", "keywords": ["community", "posts"]},
             {"href": "/ai-test/", "title": "AI Tendency Test", "date": "", "keywords": ["test", "personality"]},

@@ -10,8 +10,8 @@
     <main>
         <section class="container">
             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 40px; margin-top: 40px;">
-                <h1 data-i18n="board_h1" style="font-size: 2.5rem; font-weight: 950; color: var(--text-main);">Board</h1>
-                <a href="/board/write" data-require-auth="true" style="background: var(--p-blue); color: white; padding: 15px 30px; border-radius: 12px; font-weight: 800; text-decoration: none; transition: 0.3s;" data-i18n="write_post">글쓰기</a>
+                <h1 id="board-title-h1" style="font-size: 2.5rem; font-weight: 950; color: var(--text-main);">Board</h1>
+                <a id="board-write-link" href="/board/write" data-require-auth="true" style="background: var(--p-blue); color: white; padding: 15px 30px; border-radius: 12px; font-weight: 800; text-decoration: none; transition: 0.3s; display: none;" data-i18n="write_post">글쓰기</a>
             </div>
             
             <board-list id="board-list"></board-list>
@@ -20,5 +20,43 @@
 
     <script type="module" src="./ui/board-list.js"></script>
     <script type="module" src="main.js"></script>
+    <script type="module">
+        import { getUserProfile } from "/auth-session-runtime.js";
+        
+        async function updateUI() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const category = urlParams.get("category");
+            const h1 = document.getElementById("board-title-h1");
+            const writeLink = document.getElementById("board-write-link");
+            
+            const t = (key, fallback) => (window.getTranslation ? window.getTranslation(key, fallback) : fallback);
+            
+            if (category === "notice") {
+                h1.textContent = t("notice", "공지사항");
+                h1.setAttribute("data-i18n", "notice");
+            } else {
+                h1.textContent = t("free_board", "자유게시판");
+                h1.setAttribute("data-i18n", "free_board");
+            }
+            
+            // Update write link href
+            writeLink.href = "/board/write" + (category ? "?category=" + category : "");
+            
+            // Check visibility
+            const profile = await getUserProfile();
+            if (category === "notice") {
+                if (profile && profile.role === "admin") {
+                    writeLink.style.display = "inline-block";
+                } else {
+                    writeLink.style.display = "none";
+                }
+            } else {
+                writeLink.style.display = "inline-block";
+            }
+        }
+        
+        window.addEventListener('DOMContentLoaded', updateUI);
+        window.addEventListener('auth-state-changed', updateUI);
+    </script>
 </body>
 </html>
