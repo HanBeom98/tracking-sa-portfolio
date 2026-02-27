@@ -452,7 +452,17 @@ export class TetrisGame extends HTMLElement {
         this.shadowRoot.innerHTML = `
         <style>
             @import url("/style.css");
-            :host { display: block; position: relative; width: 100%; height: 100%; min-height: 100dvh; font-family: 'Pretendard', sans-serif; background: var(--bg-main); color: var(--text-main); overflow: hidden; }
+            :host { 
+                display: block; 
+                position: relative; 
+                width: 100%; 
+                height: 100%; 
+                min-height: 100dvh; 
+                font-family: 'Pretendard', sans-serif; 
+                background: oklch(98% 0.01 250); 
+                color: var(--text-main); 
+                overflow: hidden; 
+            }
             
             .game-layout { 
                 display: flex; 

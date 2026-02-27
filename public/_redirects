@@ -2,3 +2,5 @@
 /*.html /:splat 301
 /news/style.css /news/ui/style.css 200
 /en/news/style.css /news/ui/style.css 200
+/tetris-game/* /games/tetris/:splat 301
+/ai-evolution/* /games/ai-evolution/:splat 301
