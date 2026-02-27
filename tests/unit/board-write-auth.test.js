@@ -20,14 +20,16 @@ function withWindow(stubWindow, fn) {
     });
 }
 
-test("write-auth exposes fixed write path", () => {
-  assert.equal(WRITE_PATH, "/board/write");
+test("write-auth exposes write path function", () => {
+  assert.equal(typeof WRITE_PATH, "function");
+  assert.equal(WRITE_PATH(), "/board/write");
 });
 
-test("write-auth ensureAuthenticated forwards board write redirect path", async () => {
+test("write-auth ensureAuthenticated forwards dynamic redirect path", async () => {
   const calls = [];
   await withWindow(
     {
+      location: { pathname: "/custom/path", search: "?q=test" },
       AuthGateway: {
         requireAuth: async ({ redirectTo }) => {
           calls.push(redirectTo);
@@ -41,7 +43,7 @@ test("write-auth ensureAuthenticated forwards board write redirect path", async 
     }
   );
 
-  assert.deepEqual(calls, ["/board/write"]);
+  assert.deepEqual(calls, ["/custom/path?q=test"]);
 });
 
 test("write-auth getCurrentUser delegates to AuthGateway", async () => {

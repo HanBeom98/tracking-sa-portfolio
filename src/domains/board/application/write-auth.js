@@ -1,6 +1,13 @@
 import { getCurrentUser as getBoardCurrentUser, requireAuth as requireBoardAuth } from "./authGateway.js";
 
-const getWritePath = () => (window.location.pathname + window.location.search);
+const DEFAULT_WRITE_PATH = "/board/write";
+
+const getWritePath = () => {
+  if (typeof window !== "undefined" && window.location) {
+    return window.location.pathname + window.location.search;
+  }
+  return DEFAULT_WRITE_PATH;
+};
 
 async function ensureAuthenticated() {
   return requireBoardAuth({ redirectTo: getWritePath() });
