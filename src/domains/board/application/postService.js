@@ -36,6 +36,26 @@ export function buildPostService({ postRepository }) {
   }
 
   async function listPosts({ limit = 30, category = null } = {}) {
+    // 자유게시판(free) 조회 시 공지사항(notice)도 함께 가져와서 합침
+    if (category === "free") {
+      const [notices, freePosts] = await Promise.all([
+        postRepository.list({ limit: 5, category: "notice" }),
+        postRepository.list({ limit, category: "free" })
+      ]);
+      
+      const seenIds = new Set();
+      const merged = [];
+      
+      const allPosts = [...(notices || []), ...(freePosts || [])];
+      allPosts.forEach(post => {
+        if (post && post.id && !seenIds.has(post.id)) {
+          seenIds.add(post.id);
+          merged.push(post);
+        }
+      });
+      return merged;
+    }
+    
     return postRepository.list({ limit, category });
   }
 
