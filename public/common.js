@@ -11,7 +11,11 @@ let inlineModalController = null;
 let authStateBus = null;
 let appShellRuntime = null;
 let authSessionRuntime = null;
-window.authStateReady = Promise.resolve(null);
+
+let _authStateResolve = null;
+window.authStateReady = new Promise((resolve) => {
+    _authStateResolve = resolve;
+});
 
 function createFallbackAuthStateBus() {
     const listeners = new Set();
@@ -45,6 +49,10 @@ async function loadAuthStateBusFactory() {
     await new Promise((resolve, reject) => {
         const existing = document.querySelector('script[data-auth-state-bus="true"]');
         if (existing) {
+            if (typeof window.createAuthStateBus === "function") {
+                resolve();
+                return;
+            }
             existing.addEventListener("load", resolve, { once: true });
             existing.addEventListener("error", reject, { once: true });
             return;
@@ -122,6 +130,10 @@ async function loadFactoryScript({
     await new Promise((resolve, reject) => {
         const existing = document.querySelector(`script[${dataAttr}="true"]`);
         if (existing) {
+            if (typeof window[factoryName] === "function") {
+                resolve();
+                return;
+            }
             existing.addEventListener("load", resolve, { once: true });
             existing.addEventListener("error", reject, { once: true });
             return;
@@ -181,7 +193,9 @@ async function ensureAuthSessionRuntime() {
             if (window.showAuthMenu) window.showAuthMenu();
         },
     });
-    window.authStateReady = authSessionRuntime.waitForReady();
+    authSessionRuntime.waitForReady().then((user) => {
+        if (_authStateResolve) _authStateResolve(user);
+    });
     return authSessionRuntime;
 }
 
@@ -280,7 +294,7 @@ async function initAuthControls() {
 
 window.showAuthMenu = () => {
     if (!authUiController) {
-        alert(window.getTranslation("auth_controls_unavailable", "로그인 UI를 불러오지 못했습니다. 잠시 후 다시 시도해주세요."));
+        console.error(window.getTranslation("auth_controls_unavailable", "로그인 UI를 불러오지 못했습니다. 잠시 후 다시 시도해주세요."));
         return;
     }
     authUiController.showAuthMenu();
@@ -381,8 +395,7 @@ window.requireAuth = async ({ redirectTo } = {}) => {
 
 window.AuthGateway = {
     waitForReady: async () => {
-        const runtime = await ensureAuthSessionRuntime();
-        return runtime.waitForReady();
+        return window.authStateReady;
     },
     getCurrentUser: () => (
         authSessionRuntime && typeof authSessionRuntime.getCurrentUser === "function"
@@ -401,7 +414,7 @@ window.AuthGateway = {
     getAuthService,
 };
 
-document.addEventListener('DOMContentLoaded', async () => {
+async function initAll() {
     const shell = await ensureAppShellRuntime();
     shell.initShell();
     await ensureAuthStateBus();
@@ -412,4 +425,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     const sessionRuntime = await ensureAuthSessionRuntime();
     await sessionRuntime.init();
-});
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener('DOMContentLoaded', initAll);
+} else {
+    initAll();
+}

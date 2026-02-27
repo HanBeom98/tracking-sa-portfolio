@@ -1,3 +1,5 @@
+import { fetchRankings, saveRanking } from "../infra/firebase-runtime.js";
+
 export class AIEvolution2048 {
     constructor() {
         this.grid = Array(4).fill().map(() => Array(4).fill(0));
@@ -205,9 +207,8 @@ export class AIEvolution2048 {
         }
         try {
             this.rankList.innerHTML = '<div style="text-align:center;">Loading...</div>';
-            const snapshot = await window.db.collection('ai_evolution_rankings').orderBy('score', 'desc').limit(5).get();
-            this.rankList.innerHTML = snapshot.docs.map(doc => {
-                const d = doc.data();
+            const docs = await fetchRankings(window.db);
+            this.rankList.innerHTML = docs.map(d => {
                 return `<div class="rank-item"><span>${d.nickname}</span><span>${d.score}</span></div>`;
             }).join('') || '<div style="text-align:center;">No records yet</div>';
         } catch (e) {
@@ -231,11 +232,10 @@ export class AIEvolution2048 {
         this.submitBtn.disabled = true;
         this.submitBtn.innerText = "...";
         try {
-            await window.db.collection('ai_evolution_rankings').add({
+            await saveRanking(window.db, {
                 nickname: nick,
                 score: this.score,
-                maxTile: this.maxTileReached,
-                timestamp: window.firebase.firestore.FieldValue.serverTimestamp()
+                maxTile: this.maxTileReached
             });
             this.nickInput.value = "";
             this.submitBtn.innerText = "DONE";

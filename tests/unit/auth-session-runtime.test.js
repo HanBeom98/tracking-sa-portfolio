@@ -37,7 +37,7 @@ test("auth session runtime resolves null when auth service unavailable", async (
   const states = [];
   await withGlobals(
     {
-      location: { pathname: "/x", search: "", href: "" },
+      location: { pathname: "/x", search: "", href: "http://localhost/x" },
       sessionStorage: createSessionStorage(),
     },
     async () => {
@@ -62,7 +62,7 @@ test("auth session runtime requireAuth stores redirect and triggers callback", a
   let requiredCalls = 0;
   await withGlobals(
     {
-      location: { pathname: "/account/", search: "?a=1", href: "" },
+      location: { pathname: "/account/", search: "?a=1", href: "http://localhost/account/?a=1" },
       sessionStorage,
     },
     async () => {
@@ -88,7 +88,7 @@ test("auth session runtime applies auth state and consumes redirect", async () =
 
   await withGlobals(
     {
-      location: { pathname: "/", search: "", href: "" },
+      location: { pathname: "/", search: "", href: "http://localhost/" },
       sessionStorage,
     },
     async () => {

@@ -1,6 +1,7 @@
 import { createLuckyCopy, resolveLuckyLanguage } from "./application/lucky-copy.js";
 import { buildLuckyPayload } from "./application/lucky-payload.js";
 import { buildLuckyResultCardHtml } from "./application/lucky-result-card.js";
+import { postLuckyRecommendation } from "./infra/luckyRepository.js";
 import {
   bindLuckyEvents,
   populateLuckyBirthSelectors,
@@ -44,20 +45,6 @@ class LuckyRecommendation extends HTMLElement {
     });
   }
 
-  async fetchLucky(payload) {
-    const response = await fetch("https://tracking-sa.vercel.app/api/lucky", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      throw new Error("LUCKY_API_FAILED");
-    }
-
-    return response.json();
-  }
-
   async handlePredict() {
     const lang = resolveLuckyLanguage();
     const name = this._view.nameInput.value.trim() || "익명";
@@ -74,7 +61,7 @@ class LuckyRecommendation extends HTMLElement {
         gender: this._selectedGender,
         language: lang,
       });
-      const data = await this.fetchLucky(payload);
+      const data = await postLuckyRecommendation(payload);
       const resultHtml = buildLuckyResultCardHtml(data, this._copy);
       renderLuckyResult(this._view, resultHtml);
     } catch (error) {

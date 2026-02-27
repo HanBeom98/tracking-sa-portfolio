@@ -1,3 +1,5 @@
+import { fetchRankings, saveRanking } from "../infra/firebase-runtime.js";
+
 export class TetrisGame extends HTMLElement {
     constructor() {
         super();
@@ -289,10 +291,9 @@ export class TetrisGame extends HTMLElement {
     async loadRankings() {
         if (typeof window.db === "undefined") return;
         try {
-            const snapshot = await window.db.collection('tetris_rankings').orderBy('score', 'desc').limit(5).get();
+            const docs = await fetchRankings(window.db);
             const list = this.shadowRoot.querySelector('#rank-list');
-            list.innerHTML = snapshot.docs.map(doc => {
-                const d = doc.data();
+            list.innerHTML = docs.map(d => {
                 return `<div style="display:flex;justify-content:space-between;margin:2px 0;"><span>${d.nickname}</span><span>${d.score}</span></div>`;
             }).join('');
         } catch (e) { console.error(e); }
@@ -303,8 +304,8 @@ export class TetrisGame extends HTMLElement {
         const nick = this.shadowRoot.querySelector('#nick-input').value.trim();
         if (!nick || this.score === 0) return;
         try {
-            await window.db.collection('tetris_rankings').add({
-                nickname: nick, score: this.score, timestamp: window.firebase.firestore.FieldValue.serverTimestamp()
+            await saveRanking(window.db, {
+                nickname: nick, score: this.score
             });
             this.shadowRoot.querySelector('#submit-btn').disabled = true;
             this.loadRankings();

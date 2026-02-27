@@ -32,7 +32,18 @@
         const redirectTo = globalScope.sessionStorage.getItem(redirectStorageKey);
         if (redirectTo) {
           globalScope.sessionStorage.removeItem(redirectStorageKey);
-          globalScope.location.href = redirectTo;
+          
+          try {
+            const targetUrl = new URL(redirectTo, globalScope.location.href);
+            const currentUrl = new URL(globalScope.location.href);
+            
+            // Only redirect if target is different from current
+            if (targetUrl.pathname !== currentUrl.pathname || targetUrl.search !== currentUrl.search) {
+              globalScope.location.href = redirectTo;
+            }
+          } catch (e) {
+            console.error("Invalid redirect URL:", redirectTo);
+          }
         }
       }
     }

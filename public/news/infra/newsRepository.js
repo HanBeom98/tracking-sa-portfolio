@@ -8,3 +8,8 @@ export const fetchNewsDoc = async (db, urlKey) => {
   const doc = await db.collection('posts').doc(urlKey).get();
   return doc.exists ? doc.data() : null;
 };
+
+export const deleteNewsDoc = async (db, urlKey) => {
+  if (!urlKey) return;
+  return db.collection("posts").doc(urlKey).delete();
+};

@@ -1,4 +1,5 @@
 import { getNewsUrlKeyFromPath } from "./news-routing.js";
+import { deleteNewsDoc } from "../infra/newsRepository.js";
 
 export const mountAdminDeleteButton = async ({ path, isEnPath }) => {
   const articleCard = document.querySelector(".news-article-card");
@@ -30,7 +31,7 @@ export const mountAdminDeleteButton = async ({ path, isEnPath }) => {
     button.disabled = true;
     button.textContent = "삭제 중...";
     try {
-      await window.db.collection("posts").doc(urlKey).delete();
+      await deleteNewsDoc(window.db, urlKey);
       window.alert("삭제되었습니다. 다음 빌드/배포 후 목록에서도 사라집니다.");
       window.location.href = isEnPath ? "/en/news/" : "/news/";
     } catch (err) {

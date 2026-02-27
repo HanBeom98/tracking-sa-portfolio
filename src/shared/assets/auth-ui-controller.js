@@ -1,4 +1,10 @@
 (function () {
+  function t(key, fallback) {
+    return typeof window !== "undefined" && window.getTranslation
+      ? window.getTranslation(key, fallback)
+      : fallback;
+  }
+
   async function loadAuthControlsFactory() {
     if (typeof window.createAuthControlsController === "function") {
       return window.createAuthControlsController;
@@ -50,7 +56,7 @@
 
     function showAuthMenu() {
       if (!authControlsController) {
-        alert(t("auth_controls_unavailable", "로그인 UI를 불러오지 못했습니다. 잠시 후 다시 시도해주세요."));
+        console.error(t("auth_controls_unavailable", "로그인 UI를 불러오지 못했습니다. 잠시 후 다시 시도해주세요."));
         return;
       }
       authControlsController.showAuthMenu();
@@ -58,7 +64,7 @@
 
     function openAuthPrompt() {
       if (!authControlsController) {
-        alert(t("auth_controls_unavailable", "로그인 UI를 불러오지 못했습니다. 잠시 후 다시 시도해주세요."));
+        console.error(t("auth_controls_unavailable", "로그인 UI를 불러오지 못했습니다. 잠시 후 다시 시도해주세요."));
         return;
       }
       authControlsController.openAuthPrompt();

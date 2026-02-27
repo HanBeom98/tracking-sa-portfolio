@@ -10,7 +10,7 @@ async function expectInlineLoginModalOpen(page) {
 }
 
 test("account guest login button opens inline login modal", async ({ page, baseURL }) => {
-  await page.goto(`${baseURL}/account/`, { waitUntil: "networkidle" });
+  await page.goto(`${baseURL}/account/`, { waitUntil: "domcontentloaded" });
   const loginBtn = page.locator("#account-login-btn");
   await expect(loginBtn).toBeVisible({ timeout: 15000 });
 
@@ -19,7 +19,7 @@ test("account guest login button opens inline login modal", async ({ page, baseU
 });
 
 test("board list page loads and renders posts", async ({ page, baseURL }) => {
-  await page.goto(`${baseURL}/board/`, { waitUntil: "networkidle" });
+  await page.goto(`${baseURL}/board/`, { waitUntil: "domcontentloaded" });
   const boardList = page.locator("board-list");
   await expect(boardList).toBeVisible({ timeout: 15000 });
   
@@ -28,7 +28,7 @@ test("board list page loads and renders posts", async ({ page, baseURL }) => {
 });
 
 test("board write guest state blocks form and can open login modal", async ({ page, baseURL }) => {
-  await page.goto(`${baseURL}/board/write/`, { waitUntil: "networkidle" });
+  await page.goto(`${baseURL}/board/write/`, { waitUntil: "domcontentloaded" });
   const loginBtn = page.locator("#board-write-login-btn");
   await expect(loginBtn).toBeVisible({ timeout: 15000 });
 

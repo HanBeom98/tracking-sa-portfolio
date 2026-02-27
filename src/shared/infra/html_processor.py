@@ -21,8 +21,8 @@ def process_html_file_for_common_elements(filepath):
             content = re.sub(r'<footer>[\s\S]*?data-i18n="footer_copyright"[\s\S]*?</footer>', '', content, flags=re.DOTALL)
         else:
             content = re.sub(r'<footer>[\s\S]*?</footer>', '', content, flags=re.DOTALL)
-        content = re.sub(r'<script src="/translations.js"></script>', '', content)
-        content = re.sub(r'<script src="/common.js"></script>', '', content)
+        content = re.sub(r'<script src="/translations\.js(\?v=[^"]*)?"></script>', '', content)
+        content = re.sub(r'<script src="/common\.js(\?v=[^"]*)?"></script>', '', content)
         content = re.sub(r'<style>[\s\S]*?/\* --- Tracking SA PREMIUM DESIGN SYSTEM[\s\S]*?</style>', '', content)
 
         seo_fallback = []
