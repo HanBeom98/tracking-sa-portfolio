@@ -731,6 +731,12 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/inquiry/" />
   </url>
   <url>
+    <loc>https://trackingsa.com/glossary/</loc>
+    <lastmod>2026-02-27</lastmod>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/glossary/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/glossary/" />
+  </url>
+  <url>
     <loc>https://trackingsa.com/contact/</loc>
     <lastmod>2026-02-27</lastmod>
     <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/contact/" />
