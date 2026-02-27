@@ -70,8 +70,8 @@
 
 .account-actions {
   display: grid;
-  gap: 10px;
-  margin-top: 10px;
+  gap: 16px;
+  margin-top: 20px;
 }
 
 .account-form {
@@ -119,41 +119,46 @@
 }
 
 .auth-button {
-  height: 44px;
-  padding: 0 16px;
-  border-radius: 12px;
+  height: 50px;
+  padding: 0 20px;
+  border-radius: 14px;
   border: 1px solid oklch(90% 0.01 260);
   background: white;
   color: var(--text-main);
-  font-weight: 800;
+  font-weight: 700;
   cursor: pointer;
-  transition: 0.2s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   line-height: 1;
+  font-size: 0.95rem;
 }
 
 .auth-button.primary {
   background: var(--p-blue);
   border-color: var(--p-blue);
   color: white;
+  box-shadow: 0 4px 12px rgba(0, 82, 204, 0.15);
+}
+
+.auth-button.primary:hover {
+  background: #0041a3;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 82, 204, 0.2);
 }
 
 .auth-button.danger {
-  background: transparent;
-  color: oklch(60% 0.02 260);
-  border: 1px solid oklch(90% 0.02 260);
-  font-size: 0.85rem;
-  font-weight: 500;
-  margin-top: 20px;
+  background: white;
+  color: oklch(65% 0.15 20);
+  border: 1.5px solid oklch(95% 0.05 20);
 }
 
 .auth-button.danger:hover {
-  background: #fff5f5;
-  color: #c62828;
-  border-color: #f2b8b8;
+  background: oklch(98% 0.02 20);
+  border-color: oklch(85% 0.1 20);
+  color: oklch(55% 0.2 20);
 }
 
 .nickname-row .auth-button {
@@ -162,48 +167,38 @@
   border: none;
   background: #eef4ff;
   color: #2147d6;
-  font-weight: 700;
 }
 
 .nickname-row .auth-button:hover {
   background: #e2edff;
 }
 
-.account-actions .auth-button {
-  width: 100%;
-}
-
-.account-actions #profile-save {
-  height: 54px;
-  border-radius: 16px;
-  font-size: 1.05rem;
-  box-shadow: 0 8px 20px rgba(0, 82, 204, 0.2);
-}
-
-.account-actions #account-delete-btn {
-  height: 40px;
-  width: auto;
-  justify-self: center;
-  padding: 0 20px;
-  border-radius: 10px;
-}
-
+.account-actions .auth-button,
 .account-guest .auth-button {
   width: 100%;
-  height: 50px;
-  border-radius: 14px;
+}
+
+body.dark-mode .auth-button {
+  background: #0f172a;
+  border-color: oklch(35% 0.02 260);
+  color: var(--text-main);
+}
+
+body.dark-mode .auth-button.primary {
+  background: var(--p-blue);
+  border-color: var(--p-blue);
+  color: white;
 }
 
 body.dark-mode .auth-button.danger {
   background: transparent;
-  border-color: oklch(35% 0.02 260);
-  color: oklch(70% 0.02 260);
+  border-color: oklch(35% 0.1 20);
+  color: oklch(75% 0.1 20);
 }
 
 body.dark-mode .auth-button.danger:hover {
-  background: #3b1d1d;
-  border-color: #5b2b2b;
-  color: #ffb4b4;
+  background: oklch(25% 0.05 20);
+  border-color: oklch(45% 0.15 20);
 }
 
 body.dark-mode .account-card {
@@ -224,22 +219,4 @@ body.dark-mode .account-form input {
   background: #0f172a;
   border-color: oklch(35% 0.02 260);
   color: var(--text-main);
-}
-
-body.dark-mode .auth-button {
-  background: #0f172a;
-  border-color: oklch(35% 0.02 260);
-  color: var(--text-main);
-}
-
-body.dark-mode .auth-button.primary {
-  background: var(--p-blue);
-  border-color: var(--p-blue);
-  color: white;
-}
-
-body.dark-mode .auth-button.danger {
-  background: #3b1d1d;
-  border-color: #5b2b2b;
-  color: #ffb4b4;
 }
