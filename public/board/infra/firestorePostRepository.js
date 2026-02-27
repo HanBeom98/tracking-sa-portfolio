@@ -26,8 +26,11 @@ export function createFirestorePostRepository({ db = window.db, firebaseApp = wi
     await postsCollection.doc(id).delete();
   }
 
-  async function list({ limit = 30 } = {}) {
+  async function list({ limit = 30, category = null } = {}) {
     let query = postsCollection.orderBy("createdAt", "desc");
+    if (category) {
+      query = postsCollection.where("category", "==", category).orderBy("createdAt", "desc");
+    }
     if (limit) {
       query = query.limit(limit);
     }

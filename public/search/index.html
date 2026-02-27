@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>검색 결과 | Tracking SA</title>
+  <title data-i18n="search_results_title">검색 결과 | Tracking SA</title>
+  
+  <!-- HEAD_INJECTION -->
+  <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="style.css">
     <meta name="robots" content="index, follow">
     <meta property="og:type" content="website">
@@ -54,14 +57,15 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<link rel="stylesheet" href="/style.css?v=1772154920">
+<link rel="stylesheet" href="/style.css?v=1772165905">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script src="/firebase-config.js"></script>
-<script src="/translations.js?v=1772154920"></script>
-<script src="/common.js?v=1772154920"></script>
+<script src="/translations.js?v=1772165905"></script>
+<script src="/common.js?v=1772165905"></script>
 
 </head>
-<body><header>
+<body>
+  <header>
     <div class="header-inner">
         <a href="/" class="site-logo-link">
             <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="site-logo">
@@ -75,6 +79,13 @@
             <nav>
                 <ul>
                     <li><a href="/news/" data-i18n="news_home">뉴스</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropbtn" data-i18n="menu_board">게시판</a>
+                        <div class="dropdown-content">
+                            <a href="/board?category=notice" data-i18n="notice">공지사항</a>
+                            <a href="/board?category=free" data-i18n="free_board">자유게시판</a>
+                        </div>
+                    </li>
                     <li class="dropdown">
                         <a href="#" class="dropbtn" data-i18n="menu_chart">차트</a>
                         <div class="dropdown-content">
@@ -108,21 +119,23 @@
     </div>
 </header>
 
-  <main class="search-page">
-    <section class="search-head">
-      <h1 data-i18n="search_results_title">검색</h1>
-      <div class="search-box">
-        <input id="searchPageInput" type="text" autocomplete="off" placeholder="검색어를 입력하세요">
-        <button id="searchPageButton" type="button">검색</button>
-      </div>
-      <p id="searchSummary" class="summary"></p>
-    </section>
+  
+  <main class="search-page-main">
+    <div class="container">
+      <section class="search-head">
+        <h1 data-i18n="search_results_title" style="margin-top: 40px; font-weight: 950; color: var(--text-main);">검색</h1>
+        <div class="search-box">
+          <input id="searchPageInput" type="text" autocomplete="off" placeholder="검색어를 입력하세요">
+          <button id="searchPageButton" type="button" data-i18n="search_button">검색</button>
+        </div>
+        <p id="searchSummary" class="summary"></p>
+      </section>
 
-    <section id="searchPageResults" class="results" aria-live="polite"></section>
+      <section id="searchPageResults" class="results" aria-live="polite"></section>
+    </div>
   </main>
 
-  <script type="module" src="main.js?v=20260226_1"></script>
-<footer>
+  <footer>
     <p data-i18n="footer_copyright"></p>
     <p>
         <a href="/about" data-i18n="about_us">회사 소개</a> |
@@ -134,5 +147,6 @@
     </p>
 </footer>
 
+  <script type="module" src="main.js?v=20260226_1"></script>
 </body>
 </html>

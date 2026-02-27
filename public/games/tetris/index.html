@@ -87,14 +87,15 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<link rel="stylesheet" href="/style.css?v=1772154920">
+<link rel="stylesheet" href="/style.css?v=1772165905">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script src="/firebase-config.js"></script>
-<script src="/translations.js?v=1772154920"></script>
-<script src="/common.js?v=1772154920"></script>
+<script src="/translations.js?v=1772165905"></script>
+<script src="/common.js?v=1772165905"></script>
 
 </head>
-<body data-i18n="body"><header>
+<body data-i18n="body">
+    <header>
     <div class="header-inner">
         <a href="/" class="site-logo-link">
             <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="site-logo">
@@ -108,6 +109,13 @@
             <nav>
                 <ul>
                     <li><a href="/news/" data-i18n="news_home">뉴스</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropbtn" data-i18n="menu_board">게시판</a>
+                        <div class="dropdown-content">
+                            <a href="/board?category=notice" data-i18n="notice">공지사항</a>
+                            <a href="/board?category=free" data-i18n="free_board">자유게시판</a>
+                        </div>
+                    </li>
                     <li class="dropdown">
                         <a href="#" class="dropbtn" data-i18n="menu_chart">차트</a>
                         <div class="dropdown-content">
@@ -146,9 +154,7 @@
     <tetris-game></tetris-game>
 
     <!-- Scripts will be injected here -->
-    <!-- FOOTER_INJECTION -->
-    <script type="module" src="main.js?v=20260226_1"></script>
-<footer>
+    <footer>
     <p data-i18n="footer_copyright"></p>
     <p>
         <a href="/about" data-i18n="about_us">회사 소개</a> |
@@ -160,5 +166,6 @@
     </p>
 </footer>
 
+    <script type="module" src="main.js?v=20260226_1"></script>
 </body>
 </html>

@@ -1,5 +1,6 @@
 import { filterSearchItems } from "./application/search-data.js";
 import { loadSearchIndex, searchFromNewsIndex } from "./infra/searchRepository.js";
+import * as renderer from "./ui/search-renderer.js";
 
 function qs(key) {
   return new URLSearchParams(window.location.search).get(key) || "";
@@ -13,39 +14,18 @@ function tr(key, fallback) {
   return window.getTranslation ? window.getTranslation(key, fallback) : fallback;
 }
 
-function renderFallbackItems(container, items) {
-  if (!items.length) {
-    container.innerHTML = `<div class="result-empty">${tr("search_no_results", "검색 결과가 없습니다.")}</div>`;
-    return;
-  }
-  container.innerHTML = items
-    .map(
-      (item) => `
-    <a class="result-card" href="${item.href}">
-      <div class="result-title">${item.title}</div>
-      <div class="result-meta">${item.date || ""}</div>
-    </a>
-  `
-    )
-    .join("");
-}
-
 async function runSearch(query) {
   const input = document.getElementById("searchPageInput");
-  const summary = document.getElementById("searchSummary");
-  const container = document.getElementById("searchPageResults");
   const lang = getLang();
 
   input.value = query;
 
   if (query.trim().length < 2) {
-    summary.textContent = tr("search_enter_keyword", "2글자 이상 입력해주세요.");
-    container.innerHTML = `<div class="result-empty">${tr("search_enter_keyword", "2글자 이상 입력해주세요.")}</div>`;
+    renderer.renderSearchMinKeyword();
     return;
   }
 
-  summary.textContent = tr("search_loading", "검색 중...");
-  container.innerHTML = "";
+  renderer.renderSearchLoading();
 
   try {
     const index = await loadSearchIndex();
@@ -58,18 +38,17 @@ async function runSearch(query) {
       items = filterSearchItems(secondary, query);
     }
 
-    summary.textContent = `${tr("search_results_for", "검색어")}: "${query}" · ${items.length}${tr("search_count_suffix", "건")}`;
-    renderFallbackItems(container, items);
+    renderer.renderSearchSummary(query, items.length);
+    renderer.renderSearchResults(items);
   } catch (e) {
     console.warn("Search index failed, falling back to news-index:", e);
     try {
       const items = await searchFromNewsIndex(query, lang, 200);
-      summary.textContent = `${tr("search_results_for", "검색어")}: "${query}" · ${items.length}${tr("search_count_suffix", "건")}`;
-      renderFallbackItems(container, items);
+      renderer.renderSearchSummary(query, items.length);
+      renderer.renderSearchResults(items);
     } catch (finalError) {
       console.error("Search page error:", finalError);
-      summary.textContent = tr("search_error", "검색 중 오류가 발생했습니다.");
-      container.innerHTML = `<div class="result-empty">${tr("search_error", "검색 중 오류가 발생했습니다.")}</div>`;
+      renderer.renderSearchError();
     }
   }
 }

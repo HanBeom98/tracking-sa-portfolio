@@ -2,6 +2,7 @@ import { resolveNewsLocale } from "./news-routing.js";
 import { hydrateNewsIndex } from "./news-index-page.js";
 import { hydrateEnglishNewsArticle } from "./news-article-page.js";
 import { mountAdminDeleteButton } from "./news-admin-actions.js";
+import { setupPagination } from "./news-pagination.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
   if (!window.db) return;
@@ -13,9 +14,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   const grid = document.querySelector(".news-grid");
   if (grid) {
     try {
-      await hydrateNewsIndex({ db: window.db, grid, isEn });
+      // Only hydrate if grid is empty (static build failed or first visit)
+      // Otherwise, trust the static sort order from the server build
+      if (!grid.children.length) {
+        await hydrateNewsIndex({ db: window.db, grid, isEn });
+      }
+      
+      // Initialize pagination for either static or hydrated content
+      setupPagination();
     } catch (err) {
-      console.error("News index fetch failed:", err);
+      console.error("News index setup failed:", err);
     }
   }
 

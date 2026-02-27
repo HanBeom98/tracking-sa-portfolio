@@ -13,7 +13,10 @@ async function loadPosts() {
   if (!boardList) return;
   try {
     boardList.setAttribute("status", "loading");
-    const posts = await postService.listPosts({ limit: 30 });
+    const urlParams = new URLSearchParams(window.location.search);
+    const category = urlParams.get("category");
+    boardList.setAttribute("category", category || "");
+    const posts = await postService.listPosts({ limit: 30, category });
     boardList.setPosts(posts);
     boardList.setAttribute("status", "ready");
   } catch (error) {

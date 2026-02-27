@@ -1,13 +1,14 @@
 import { buildPostService } from "../application/postService.js";
 import { createFirestorePostRepository } from "../infra/firestorePostRepository.js";
 import { ensureAuthenticated, getCurrentUser } from "../application/write-auth.js";
+import { getCurrentUserProfile } from "../application/authGateway.js";
 import { createSubmitPostUseCase } from "../application/submit-post-use-case.js";
 import { renderWriteAccess } from "../ui/write-access-renderer.js";
 
 const postService = buildPostService({
   postRepository: createFirestorePostRepository(),
 });
-const submitPost = createSubmitPostUseCase({ postService, getCurrentUser });
+const submitPost = createSubmitPostUseCase({ postService, getCurrentUser, getCurrentUserProfile });
 
 const BOARD_PATH = "/board";
 const t = (key, fallback) => (
@@ -59,6 +60,28 @@ async function initWriteForm() {
   const user = await ensureAuthenticated();
   renderWriteAccess({ section, writeForm, user });
   if (!user) return;
+
+  // Use profile to get role
+  const profile = getCurrentUserProfile();
+  const userRole = (profile && profile.role) || "free";
+
+  // Pass user role and initial category to form
+  const urlParams = new URLSearchParams(window.location.search);
+  const category = urlParams.get("category") || "free";
+  writeForm.setAttribute("user-role", userRole);
+  writeForm.setAttribute("initial-category", category);
+
+  // Update title dynamically
+  const h1 = section.querySelector("h1");
+  if (h1) {
+    if (category === "notice") {
+      h1.textContent = t("notice_write_h1", "공지사항 글쓰기");
+      h1.setAttribute("data-i18n", "notice_write_h1");
+    } else {
+      h1.textContent = t("write_post_h1", "자유게시판 글쓰기");
+      h1.setAttribute("data-i18n", "write_post_h1");
+    }
+  }
 
   bindWriteSubmit(writeForm, section);
 }

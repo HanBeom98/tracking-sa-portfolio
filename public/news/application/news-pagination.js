@@ -40,6 +40,4 @@ function setupPagination() {
   renderPage(1);
 }
 
-document.addEventListener("DOMContentLoaded", setupPagination);
-
 export { setupPagination };
