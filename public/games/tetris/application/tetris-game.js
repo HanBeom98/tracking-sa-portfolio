@@ -155,8 +155,18 @@ export class TetrisGame extends HTMLElement {
         observer.observe(document.body);
         observer.observe(this.boardWrapper);
 
+        // Theme Change Observer
+        this.themeObserver = new MutationObserver(() => {
+            this.draw();
+        });
+        this.themeObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
         this.addEventListeners();
         requestAnimationFrame(this.update.bind(this));
+    }
+
+    disconnectedCallback() {
+        if (this.themeObserver) this.themeObserver.disconnect();
     }
 
     updateLayoutStyles() {
@@ -313,7 +323,11 @@ export class TetrisGame extends HTMLElement {
     }
 
     draw() {
-        this.ctx.fillStyle = '#050505';
+        // DDD 원칙에 따라 CSS 변수(디자인 레이어)에서 색상 정보를 동적으로 가져옵니다.
+        const styles = getComputedStyle(this);
+        const bgColor = styles.getPropertyValue('--bg-main').trim() || '#ffffff';
+        
+        this.ctx.fillStyle = bgColor;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.drawGhost();
         this.drawMatrix(this.board, { x: 0, y: 0 }, this.ctx);
@@ -362,7 +376,10 @@ export class TetrisGame extends HTMLElement {
     }
 
     drawNext() {
-        this.nextCtx.fillStyle = '#000';
+        const styles = getComputedStyle(this);
+        const bgColor = styles.getPropertyValue('--bg-main').trim() || '#ffffff';
+        
+        this.nextCtx.fillStyle = bgColor;
         this.nextCtx.fillRect(0, 0, this.nextCanvas.width, this.nextCanvas.height);
         const s = 15;
         this.nextPiece.matrix.forEach((row, y) => {
@@ -459,7 +476,7 @@ export class TetrisGame extends HTMLElement {
                 height: 100%; 
                 min-height: 100dvh; 
                 font-family: 'Pretendard', sans-serif; 
-                background: oklch(98% 0.01 250); 
+                background: var(--bg-main); 
                 color: var(--text-main); 
                 overflow: hidden; 
             }
