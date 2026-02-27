@@ -119,6 +119,27 @@ def fetch_and_post_news():
                 if not title_en and title_ko:
                     title_en = title_ko
 
+                # 원본 기사의 발행 시간 추출
+                import datetime
+                import calendar
+                
+                pub_dt = None
+                if hasattr(entry, 'published_parsed') and entry.published_parsed:
+                    ts = calendar.timegm(entry.published_parsed)
+                    pub_dt = datetime.datetime.fromtimestamp(ts, tz=datetime.timezone.utc)
+                elif hasattr(entry, 'updated_parsed') and entry.updated_parsed:
+                    ts = calendar.timegm(entry.updated_parsed)
+                    pub_dt = datetime.datetime.fromtimestamp(ts, tz=datetime.timezone.utc)
+                
+                if pub_dt:
+                    created_at = pub_dt
+                    # KST로 변환하여 date 문자열 생성
+                    kst_dt = pub_dt.astimezone(datetime.timezone(datetime.timedelta(hours=9)))
+                    date_str = kst_dt.strftime("%Y-%m-%d")
+                else:
+                    created_at = firestore.SERVER_TIMESTAMP
+                    date_str = kst_date_str()
+
                 url_key = f"news-{int(time.time())}-{count}"
                 
                 # Firestore 저장
@@ -130,8 +151,8 @@ def fetch_and_post_news():
                     'contentEn': en_content,
                     'urlKey': url_key,
                     'originalUrl': entry.link,
-                    'createdAt': firestore.SERVER_TIMESTAMP,
-                    'date': kst_date_str()
+                    'createdAt': created_at,
+                    'date': date_str
                 })
                 
                 log_processed_url(entry.link)
