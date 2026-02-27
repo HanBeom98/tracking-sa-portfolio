@@ -13,6 +13,7 @@ from src.domains.news.infra.news_builder import (
     upgrade_cached_news_index,
     upgrade_cached_article_pages,
 )
+from src.domains.news.application.rss_builder import build_rss_xml
 
 def generate_public_site(incremental=False):
     news_snapshot = snapshot_news()
@@ -99,11 +100,62 @@ def generate_public_site(incremental=False):
         upgrade_cached_article_pages()
 
     build_search_index()
+    build_rss()
     build_sitemap()
     
     # 루트 index.html 엘리먼트 처리
     process_html_file_for_common_elements(os.path.join(PUBLIC_DIR, "index.html"))
     print("✨ Total DDD Build Success with Shared Assets.")
+
+
+def build_rss():
+    """
+    뉴스 인덱스 페이지에서 데이터를 추출하여 rss.xml을 생성합니다.
+    """
+    def parse_cards_for_rss(html):
+        items = []
+        if not html: return items
+        # 최신 20개만 추출
+        card_regex = re.compile(r'<a[^>]*class="news-card-premium"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)</a>', re.I)
+        title_regex = re.compile(r'<h2[^>]*class="news-title-text"[^>]*>([\s\S]*?)</h2>', re.I)
+        date_regex = re.compile(r'<span[^>]*class="news-date"[^>]*>([\s\S]*?)</span>', re.I)
+        desc_regex = re.compile(r'<p[^>]*class="news-desc"[^>]*>([\s\S]*?)</p>', re.I)
+        
+        for count, match in enumerate(card_regex.finditer(html)):
+            if count >= 20: break
+            href = match.group(1) or ""
+            inner = match.group(2) or ""
+            title_match = title_regex.search(inner)
+            date_match = date_regex.search(inner)
+            desc_match = desc_regex.search(inner)
+            
+            title = re.sub(r"<[^>]*>", "", title_match.group(1)).strip() if title_match else ""
+            date = re.sub(r"<[^>]*>", "", date_match.group(1)).strip() if date_match else ""
+            desc = re.sub(r"<[^>]*>", "", desc_match.group(1)).strip() if desc_match else ""
+            
+            if href and title:
+                items.append({"href": href, "title": title, "date": date, "description": desc})
+        return items
+
+    def load_html(path):
+        if not os.path.exists(path): return ""
+        with open(path, "r", encoding="utf-8") as f: return f.read()
+
+    # KO RSS
+    ko_html = load_html(os.path.join(PUBLIC_DIR, "news", "index.html"))
+    ko_items = parse_cards_for_rss(ko_html)
+    ko_rss = build_rss_xml(ko_items, lang="ko")
+    with open(os.path.join(PUBLIC_DIR, "rss.xml"), "w", encoding="utf-8") as f:
+        f.write(ko_rss)
+
+    # EN RSS
+    en_html = load_html(os.path.join(PUBLIC_DIR, "en", "news", "index.html"))
+    en_items = parse_cards_for_rss(en_html)
+    en_rss = build_rss_xml(en_items, lang="en")
+    with open(os.path.join(PUBLIC_DIR, "en", "rss.xml"), "w", encoding="utf-8") as f:
+        f.write(en_rss)
+
+    print("📡 [RSS] Generated rss.xml and en/rss.xml")
 
 
 def build_sitemap():
