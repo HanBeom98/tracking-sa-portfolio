@@ -85,16 +85,58 @@
 - 검증:
   - 단위 테스트 통과 확인 및 시나리오 검토.
 
-### style(account): improve button hierarchy for better UX
+### feat(board): implement category system (Notice/Free Board) with role-based permissions
 - 문제/증상:
-  - '내 정보' 페이지에서 '회원탈퇴' 버튼이 '저장' 버튼만큼 눈에 띄어 사용자에게 불안감을 주거나 오조작을 유도할 수 있음.
+  - 게시판이 단일 카테고리로 운영되어 운영자 공지와 일반 유저 글이 섞임.
+  - 카테고리별 정렬 및 접근 권한 제어 기능 부재.
 - 변경:
-  - `src/domains/account/ui/account.css`:
-    - '저장' 버튼 크기 확대 및 그림자 강조 (Primary Action).
-    - '회원탈퇴' 버튼 배경 투명화(Ghost style) 및 크기 축소 (Secondary/Danger Action).
-- 영향 범위: 계정 관리 페이지 렌더링.
+  - **Infrastructure**:
+    - `src/domains/board/infra/firestorePostRepository.js`: `category` 필터링 및 정렬 쿼리 구현.
+    - `firestore.indexes.json`: 카테고리별 복합 인덱스 정의 및 자동 배포 설정 추가.
+  - **Application**:
+    - `src/domains/board/application/postService.js`: 공지사항은 관리자만, 자유게시판은 누구나 쓸 수 있도록 비즈니스 규칙 강화.
+  - **UI**:
+    - `src/domains/board/ui/board-list.js`: 공지사항 글에 전용 배지(`[공지사항]`) 표시.
+    - `src/domains/board/ui/board-write-form.js`: 관리자 여부에 따라 카테고리 선택 UI 노출 제어.
+- 영향 범위: 게시판 전체(목록, 작성, 상세) 및 Firestore 보안/인덱스 설정.
 - 검증:
-  - 로컬 빌드 후 브라우저 시각적 위계 확인.
+  - 단위 테스트 87개 100% 통과 확인.
+  - 관리자/일반유저별 글쓰기 권한 및 배지 노출 정상 작동 확인.
+
+### fix(news): ensure correct sorting and robust pagination
+- 문제/증상:
+  - 뉴스 목록의 정렬이 간헐적으로 뒤죽박죽으로 나타남.
+  - 한 페이지에 12개만 보여야 하는 페이징 로직이 동적 로딩 시점에서 씹히는 문제 발생.
+- 변경:
+  - `src/domains/news/infra/news_builder.py`: 정렬 기준을 Firestore `createdAt` 타임스탬프로 고정하여 물리적 정렬 보장.
+  - `src/domains/news/application/news-client.js`: 뉴스 데이터가 화면에 완전히 그려진(Hydration) 직후에 페이징(`setupPagination`)을 실행하도록 생명주기 조율.
+- 영향 범위: 뉴스 목록 페이지 UX.
+- 검증:
+  - 빌드 후 최신순 정렬 상태 및 12개 단위 페이징 작동 확인.
+
+### feat(home/search): add community cards and fix search page app-shell
+- 문제/증상:
+  - 홈 화면에서 게시판 접근성이 낮음.
+  - 검색 결과 페이지(`/search/`)에 네비게이션과 푸터가 누락되어 사이트 일관성 저하.
+- 변경:
+  - `index.html`: 'Community' 섹션 신규 추가 및 공지사항/자유게시판 카드 배치.
+  - `src/domains/search/index.html`: 공통 앱 셸(Header, Footer) 주입 마커 추가 및 UI 개선.
+  - `src/shared/infra/builder.py`: 검색 인덱스에 공지사항/자유게시판 추가.
+- 영향 범위: 메인 페이지 및 검색 결과 페이지.
+- 검증:
+  - 홈 화면 카드 클릭 이동 및 검색 페이지 내 네비게이션 정상 노출 확인.
+
+### ci(ops): automate firestore index deployment and optimize workflows
+- 문제/증상:
+  - 새로운 쿼리(카테고리 정렬) 추가 시 수동으로 Firebase Console에서 인덱스를 만들어야 하는 번거로움과 배포 누락 위험.
+  - 깃액션에서 동일한 테스트가 중복 실행되어 리소스 낭비.
+- 변경:
+  - `.github/workflows/site-deploy.yml`: `firebase deploy` 시 인덱스 파일도 함께 배포하도록 워크플로 확장.
+  - `.github/workflows/unit-tests.yml`: `main` 브랜치 직접 푸시 시 중복 실행되지 않도록 트리거 정리.
+  - `.gitignore`: 인덱스 설정 파일(`firestore.indexes.json`)을 추적 대상에 포함.
+- 영향 범위: CI/CD 파이프라인 및 개발 운영 효율성.
+- 검증:
+  - 깃허브 액션 실행 로그 확인 및 Firestore 인덱스 배포 상태 확인.
 
 ## 작업 규칙 (향후 AI용)
 - 소스는 `src/*`를 먼저 수정하고, 반드시 `npm run build`로 `public/*`를 동기화한다.
