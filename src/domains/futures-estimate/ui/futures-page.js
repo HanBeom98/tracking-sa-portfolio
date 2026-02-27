@@ -115,8 +115,15 @@ function renderPredictionHistorySuccess(items) {
     const pred = toDirectionTextWithTranslator(inferredPred, t);
     const actual = toDirectionTextWithTranslator(item.actual_label || "-", t);
     const resultText = toPredictionResultTextWithTranslator(item, t);
-    const probabilityText = typeof item.probability_up === "number"
-      ? `${item.probability_up.toFixed(2)}%`
+    
+    // Calculate display probability based on predicted direction
+    let displayProb = item.probability_up;
+    if (inferredPred === "down" && typeof displayProb === "number") {
+      displayProb = 100 - displayProb;
+    }
+    
+    const probabilityText = typeof displayProb === "number"
+      ? `${displayProb.toFixed(2)}%`
       : "-";
     return `
       <tr style="border-bottom:1px solid #f1f5f9;">
