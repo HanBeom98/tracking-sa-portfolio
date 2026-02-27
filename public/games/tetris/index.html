@@ -10,21 +10,19 @@
 
     <style>
         :root {
-            --bg-dark: oklch(10% 0.02 250);
-            --panel-bg: oklch(20% 0.03 250);
-            --joystick-bg: oklch(30% 0.04 250);
-            --text-color: oklch(90% 0.05 20);
-            --nav-height: 64px;
+            --bg-light: oklch(98% 0.01 250);
+            --text-color: var(--text-main);
+            --nav-height: 70px;
         }
 
         body {
-            font-family: sans-serif;
+            font-family: 'Pretendard', sans-serif;
             color: var(--text-color);
-            background-color: var(--bg-dark);
+            background-color: var(--bg-light);
             margin: 0;
             padding: 0;
-            padding-top: var(--nav-height); /* Space for navigation */
-            overflow: hidden; /* Prevent scroll */
+            padding-top: var(--nav-height);
+            overflow: hidden;
             min-height: 100dvh;
             display: flex;
             flex-direction: column;
@@ -166,6 +164,6 @@
     </p>
 </footer>
 
-    <script type="module" src="main.js?v=20260226_1"></script>
+    <script type="module" src="main.js?v=20260227_premium"></script>
 </body>
 </html>
