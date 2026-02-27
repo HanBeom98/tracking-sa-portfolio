@@ -7,13 +7,15 @@ function applyCurrentLangTranslations() {
 }
 
 function createGuestMessageElement() {
+  const currentPath = typeof WRITE_PATH === "function" ? WRITE_PATH() : WRITE_PATH;
+  
   const message = window.createLoginRequiredPrompt
     ? window.createLoginRequiredPrompt({
         promptId: "board-write-login-required",
         messageKey: "board_write_login_required",
         messageText: "게시글 작성은 로그인 후 이용할 수 있습니다.",
         buttonId: "board-write-login-btn",
-        redirectTo: WRITE_PATH,
+        redirectTo: currentPath,
       })
     : document.createElement("div");
 
@@ -26,7 +28,7 @@ function createGuestMessageElement() {
     const loginBtn = message.querySelector("#board-write-login-btn");
     if (loginBtn) {
       loginBtn.addEventListener("click", () => {
-        if (window.promptLogin) window.promptLogin({ redirectTo: WRITE_PATH });
+        if (window.promptLogin) window.promptLogin({ redirectTo: currentPath });
       });
     }
   }
