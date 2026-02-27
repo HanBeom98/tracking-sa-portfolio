@@ -38,6 +38,7 @@ function normalizePlan(plan) {
     return {
         angle: String(plan.angle).trim(),
         targetAudience: String(plan.targetAudience || "IT/AI 관심 독자").trim(),
+        verdict: String(plan.verdict || "NEUTRAL").toUpperCase(),
         keyPoints
     };
 }
@@ -78,8 +79,17 @@ async function callGemini(systemInstruction, userPrompt, temperature = 0.7) {
 }
 
 async function planStoryWithRetry(title, summary) {
-    const editorInstruction = "당신은 IT 전문 매체의 '편집장'입니다. 주어진 영문 뉴스 제목과 요약을 분석해 JSON으로만 답하세요.";
-    const editorPrompt = `뉴스 제목: ${title}\n뉴스 요약: ${summary}\n\n결과 포맷:\n{\n  "angle": "기사의 핵심 관점",\n  "targetAudience": "타겟 독자층",\n  "keyPoints": ["포인트1", "포인트2", "포인트3"]\n}`;
+    const editorInstruction = `당신은 실리콘밸리의 전설적인 기술 투자자들의 철학을 계승한 '수석 편집장'입니다. 
+    당신은 아래의 **3대 가치 심사 기준**에 따라 뉴스를 엄격히 분류합니다.
+
+    [가치 심사 기준]
+    1. 레버리지 (Leverage): 개인이나 소규모 팀이 큰 자본 없이도 압도적인 생산성을 낼 수 있게 돕는 소식인가? (예: 오픈소스 LLM, 새로운 개발 도구) -> ENTHUSIASTIC
+    2. 실질적 유틸리티 (Utility): 단순히 이름만 'AI'를 붙인 거품(AI-Washing)인가, 아니면 실제로 작동하는 실체가 있는가? (예: PPT만 있는 발표, 대기업의 홍보성 기사) -> CRITICAL
+    3. 개방성과 자유 (Freedom): 사용자의 데이터를 독점하려 하는가, 아니면 생태계를 확장하는가? (예: 폐쇄적인 데이터 정책) -> CRITICAL
+    
+    위 기준에 따라 [verdict]를 결정하세요. 판단이 모호한 단순 사실 보도는 NEUTRAL로 분류합니다.`;
+
+    const editorPrompt = `뉴스 제목: ${title}\n뉴스 요약: ${summary}\n\n결과 포맷:\n{\n  "verdict": "CRITICAL | ENTHUSIASTIC | NEUTRAL",\n  "angle": "투자자 관점에서의 기사 핵심",\n  "targetAudience": "돈과 기술의 기회를 찾는 독자",\n  "keyPoints": ["포인트1", "포인트2", "포인트3"]\n}`;
 
     let lastError;
     for (let i = 0; i < 3; i += 1) {
@@ -93,8 +103,9 @@ async function planStoryWithRetry(title, summary) {
         }
     }
 
-    console.warn("⚠️ Falling back to default editor plan due to JSON parsing failure.");
+    console.warn("⚠️ Falling back to default editor plan.");
     return {
+        verdict: "NEUTRAL",
         angle: `${title}의 핵심 기술·시장 영향`,
         targetAudience: "IT/AI 관심 독자",
         keyPoints: [
@@ -110,37 +121,36 @@ async function newsDeskPipeline(title, summary) {
         if (!GEMINI_API_KEY) {
             throw new Error("GEMINI_API_KEY is missing");
         }
-        console.log("📝 [Step 1] Planning the story...");
+        console.log("📝 [Step 1] Planning the story & Setting Tone...");
         const plan = await planStoryWithRetry(title, summary);
+        console.log(`🎯 Verdict: ${plan.verdict}`);
 
         console.log("✍️ [Step 2] Writing content (KO/EN)...");
-        const writerInstruction = "당신은 IT 전문 '수석 기자'입니다. 편집장의 기획안을 바탕으로 전문적이고 통찰력 있는 기사를 작성하세요.";
+        const writerInstruction = `당신은 업계에서 가장 '솔직한' 전문 기술 투자자입니다. 
+        당신은 편집장의 판결(Verdict)에 따라 말투와 스탠스를 180도 바꿉니다.
+
+        [판결별 말투 가이드 - 절대 엄수]
+        - CRITICAL (비판): "이건 사기입니다." 냉소적이고 날카롭게 비판하세요. 독자에게 경고를 날리세요.
+        - ENTHUSIASTIC (찬사): "이건 미쳤습니다!" 흥분을 감추지 말고, 왜 이 기술에 인생을 걸어야 하는지 열정적으로 설득하세요.
+        - NEUTRAL (중립): "팩트만 체크합시다." 차갑고 냉정하게 데이터 중심의 분석을 하세요.
+
+        [공통 원칙]
+        1. 무자비한 솔직함: 가식을 버리고 옆에서 속삭이듯 친근하면서도 권위 있는 구어체를 사용하세요.
+        2. 금지어: '혁신', '전망', '기대' 등 AI스러운 단어는 금지. 대신 '진짜', '파괴적', '뒷구멍', '돈 냄새' 같은 생생한 단어를 쓰세요.
+        3. 소제목: 내용의 성격에 따라 직접 지으세요. (예: "여기에 돈 넣으면 바보입니다" 혹은 "내가 이 기술에 열광하는 3가지 이유")`;
+
         const writerPrompt = `
 [원본 뉴스]
 제목: ${title}
 요약: ${summary}
 
-[편집장 기획안]
+[편집장의 판결]
+판결: ${plan.verdict}
 관점: ${plan.angle}
 핵심 포인트: ${plan.keyPoints.join(', ')}
 
 위 내용을 바탕으로 한국어와 영어 두 가지 버전의 기사를 작성하세요.
-
-[작성 가이드]
-1. 제목: 클릭을 부르는 흥미로운 제목을 작성하세요. '#' 문자나 '제목:' 접두사는 절대 사용하지 마세요.
-2. 본문 첫 줄에 제목을 다시 쓰지 마세요. 바로 본문 내용을 시작하세요.
-3. 가독성을 위해 불릿 포인트(-)를 적극 활용하고, 문단은 짧게 유지하세요.
-4. '## 🔍 Deep Dive': 기술적/산업적 임팩트를 깊이 있게 분석하는 3~4문장을 포함하세요.
-5. '## 💡 수익화 아이디어': 이 기술이나 소식을 활용한 실제적인 비즈니스 모델 3가지를 구체적으로 제시하세요.
-
-반드시 다음 태그로 감싸서 출력하세요:
-[KO_START]
-...한국어 내용...
-[KO_END]
-[EN_START]
-...영어 내용...
-[EN_END]
-`;
+반드시 [판결: ${plan.verdict}]에 맞는 말투와 스탠스를 유지해야 합니다.`;
         const draft = await callGemini(writerInstruction, writerPrompt, 0.7);
 
         console.log("🔍 [Step 3] Reviewing and injecting hashtags...");
