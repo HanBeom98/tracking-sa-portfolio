@@ -23,10 +23,11 @@ def process_html_file_for_common_elements(filepath):
 
         # 1. Clean up old injections and redundant metadata to ensure consistency
         content = re.sub(r'<header[\s\S]*?</header>', '', content, flags=re.DOTALL)
+        # Use more robust regex to catch <footer class="..."> etc.
         if is_root_homepage:
-            content = re.sub(r'<footer>[\s\S]*?data-i18n="footer_copyright"[\s\S]*?</footer>', '', content, flags=re.DOTALL)
+            content = re.sub(r'<footer[\s\S]*?data-i18n="footer_copyright"[\s\S]*?</footer>', '', content, flags=re.DOTALL)
         else:
-            content = re.sub(r'<footer>[\s\S]*?</footer>', '', content, flags=re.DOTALL)
+            content = re.sub(r'<footer[\s\S]*?</footer>', '', content, flags=re.DOTALL)
         
         # Remove potentially redundant/old meta tags to replace with standard ones
         meta_patterns_to_remove = [

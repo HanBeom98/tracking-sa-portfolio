@@ -1,5 +1,5 @@
 import { buildPostService } from "../application/postService.js";
-import { waitAuthReady } from "../application/authGateway.js";
+import { waitAuthReady, getCurrentUserProfile } from "../application/authGateway.js";
 import { createFirestorePostRepository } from "../infra/firestorePostRepository.js";
 import { createPostDetailUseCases } from "../application/post-detail-use-cases.js";
 
@@ -53,7 +53,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   try {
-    const user = await waitAuthReady();
+    const authUser = await waitAuthReady();
+    
+    // Enrich user with profile data (like role)
+    let user = authUser;
+    if (authUser) {
+      const profile = getCurrentUserProfile();
+      user = {
+        ...authUser,
+        role: (profile && profile.role) || "free"
+      };
+    }
+
     const { post, canEdit } = await postDetailUseCases.loadPostDetail({ postId, user });
     if (!post) {
       postView.renderNotFound();
