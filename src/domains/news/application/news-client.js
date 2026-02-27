@@ -14,11 +14,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   const grid = document.querySelector(".news-grid");
   if (grid) {
     try {
-      await hydrateNewsIndex({ db: window.db, grid, isEn });
-      // Initialize pagination after grid is populated
+      // Only hydrate if grid is empty (static build failed or first visit)
+      // Otherwise, trust the static sort order from the server build
+      if (!grid.children.length) {
+        await hydrateNewsIndex({ db: window.db, grid, isEn });
+      }
+      
+      // Initialize pagination for either static or hydrated content
       setupPagination();
     } catch (err) {
-      console.error("News index fetch failed:", err);
+      console.error("News index setup failed:", err);
     }
   }
 

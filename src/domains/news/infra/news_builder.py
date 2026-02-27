@@ -48,13 +48,24 @@ def _date_key(date_text):
 
 
 def _created_ts_from_url(url):
-    m = re.search(r'news-(\d{10})-', url or "")
-    if not m:
-        return 0
-    try:
-        return int(m.group(1))
-    except Exception:
-        return 0
+    # Case 1: news-1772146293-2.html (Timestamp)
+    m = re.search(r'news-(\d{10})', url or "")
+    if m:
+        try:
+            return int(m.group(1))
+        except Exception:
+            pass
+            
+    # Case 2: 2026-02-02-title.html (Date)
+    m = re.match(r'^(\d{4}-\d{2}-\d{2})', url or "")
+    if m:
+        try:
+            dt = datetime.datetime.strptime(m.group(1), "%Y-%m-%d")
+            return int(dt.timestamp())
+        except Exception:
+            pass
+            
+    return 0
 
 
 def _strip_html(text):
