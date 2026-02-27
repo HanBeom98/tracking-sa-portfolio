@@ -171,6 +171,17 @@ async function renderAccount() {
   const user = await ensureLogin();
   if (!user) {
     renderGuestView(infoEl, actionsEl);
+    
+    // Bind login button action
+    const loginBtn = document.getElementById("account-login-btn");
+    if (loginBtn) {
+      loginBtn.addEventListener("click", () => {
+        const gateway = getAuthGateway();
+        if (gateway && gateway.requireAuth) {
+          gateway.requireAuth({ redirectTo: "/account/" });
+        }
+      });
+    }
     return;
   }
 

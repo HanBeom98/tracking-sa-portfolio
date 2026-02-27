@@ -85,6 +85,17 @@
 - 검증:
   - 단위 테스트 통과 확인 및 시나리오 검토.
 
+### style(account): improve button hierarchy for better UX
+- 문제/증상:
+  - '내 정보' 페이지에서 '회원탈퇴' 버튼이 '저장' 버튼만큼 눈에 띄어 사용자에게 불안감을 주거나 오조작을 유도할 수 있음.
+- 변경:
+  - `src/domains/account/ui/account.css`:
+    - '저장' 버튼 크기 확대 및 그림자 강조 (Primary Action).
+    - '회원탈퇴' 버튼 배경 투명화(Ghost style) 및 크기 축소 (Secondary/Danger Action).
+- 영향 범위: 계정 관리 페이지 렌더링.
+- 검증:
+  - 로컬 빌드 후 브라우저 시각적 위계 확인.
+
 ## 작업 규칙 (향후 AI용)
 - 소스는 `src/*`를 먼저 수정하고, 반드시 `npm run build`로 `public/*`를 동기화한다.
 - 커밋은 기능 단위로 작게 나누고, 아래 5가지를 남긴다:
