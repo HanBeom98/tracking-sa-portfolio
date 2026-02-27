@@ -8,7 +8,7 @@ import { renderWriteAccess } from "../ui/write-access-renderer.js";
 const postService = buildPostService({
   postRepository: createFirestorePostRepository(),
 });
-const submitPost = createSubmitPostUseCase({ postService, getCurrentUser });
+const submitPost = createSubmitPostUseCase({ postService, getCurrentUser, getCurrentUserProfile });
 
 const BOARD_PATH = "/board";
 const t = (key, fallback) => (

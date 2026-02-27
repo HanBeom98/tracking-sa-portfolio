@@ -37,3 +37,28 @@ test("submit post use-case delegates to postService with author", async () => {
   assert.equal(calls[0].title, "제목");
   assert.equal(calls[0].content, "내용");
 });
+
+test("submit post use-case merges profile data (role, nickname)", async () => {
+  const calls = [];
+  const authUser = { uid: "u1", email: "a@b.com" };
+  const profile = { role: "admin", nickname: "Master" };
+  
+  const postService = {
+    createPost: async (payload) => {
+      calls.push(payload);
+    },
+  };
+  
+  const submitPost = createSubmitPostUseCase({
+    postService,
+    getCurrentUser: () => authUser,
+    getCurrentUserProfile: () => profile,
+  });
+
+  await submitPost({ values: { title: "공지", content: "내용", category: "notice" } });
+
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].author.role, "admin");
+  assert.equal(calls[0].author.displayName, "Master");
+  assert.equal(calls[0].category, "notice");
+});
