@@ -10,14 +10,14 @@
 
     <style>
         :root {
-            --bg-dark: #0f172a;
-            --board-bg: #1e293b;
-            --cell-bg: #334155;
-            --text-primary: #f8fafc;
-            --neon-blue: #38bdf8;
-            --neon-purple: #c084fc;
+            --bg-dark: oklch(98% 0.01 250);
+            --board-bg: white;
+            --cell-bg: oklch(94% 0.02 260);
+            --text-primary: var(--text-main);
+            --neon-blue: var(--p-blue);
+            --neon-purple: oklch(65% 0.2 300);
             --transition-ms: 150ms;
-            --nav-height: 64px;
+            --nav-height: 70px;
         }
 
         body {
@@ -30,6 +30,7 @@
             flex-direction: column;
             overflow: hidden;
             touch-action: none;
+            font-family: 'Pretendard', sans-serif;
         }
 
         #ai-evolution-game {
@@ -39,7 +40,6 @@
             align-items: center;
             padding: 20px;
             color: var(--text-primary);
-            font-family: 'Inter', -apple-system, system-ui, sans-serif;
             position: relative;
             z-index: 10;
         }
@@ -50,79 +50,90 @@
             margin: 0 auto;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 20px;
         }
 
         .game-top-bar {
             display: flex;
             justify-content: space-between;
-            align-items: flex-end;
+            align-items: center;
             margin-bottom: 5px;
         }
 
         .game-title-area h2 {
             margin: 0;
-            font-size: 1.4rem;
-            font-weight: 900;
+            font-size: 1.6rem;
+            font-weight: 950;
             letter-spacing: -1px;
-            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--text-main);
         }
 
         .badge {
             font-size: 0.9rem;
-            color: var(--neon-purple);
-            font-weight: bold;
-            margin-top: -5px;
+            color: var(--p-blue);
+            font-weight: 900;
+            margin-top: -2px;
+            display: block;
         }
 
         .score-container {
             display: flex;
-            gap: 8px;
+            gap: 10px;
         }
 
         .score-box {
-            background: var(--board-bg);
-            min-width: 70px;
-            padding: 6px 12px;
-            border-radius: 8px;
+            background: white;
+            min-width: 80px;
+            padding: 8px 12px;
+            border-radius: 16px;
             text-align: center;
-            border: 1px solid var(--cell-bg);
+            border: 1px solid oklch(92% 0.02 260);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
         }
 
         .score-box .label {
-            font-size: 0.6rem;
-            color: var(--neon-blue);
-            font-weight: bold;
+            font-size: 0.65rem;
+            color: var(--text-sub);
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 2px;
         }
 
         .score-box div:last-child {
-            font-size: 1.4rem;
-            font-weight: 800;
+            font-size: 1.2rem;
+            font-weight: 900;
+            color: var(--p-blue);
         }
 
         .main-controls {
             display: flex;
-            gap: 8px;
+            gap: 10px;
         }
 
         .action-btn {
             flex: 1;
-            padding: 12px;
-            border-radius: 10px;
-            border: 1px solid var(--cell-bg);
-            background: var(--board-bg);
-            color: white;
-            font-weight: bold;
+            padding: 14px;
+            border-radius: 14px;
+            border: 1px solid oklch(92% 0.02 260);
+            background: white;
+            color: var(--text-main);
+            font-weight: 800;
             cursor: pointer;
             transition: all 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
         }
 
         .action-btn:hover {
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+            border-color: var(--p-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.05);
+        }
+
+        #new-game-btn {
+            background: var(--p-blue);
+            color: white;
+            border: none;
+            box-shadow: 0 8px 20px -5px var(--p-blue);
         }
 
         .action-btn:active {
@@ -132,15 +143,16 @@
         .action-btn:disabled {
             opacity: 0.3;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
         #status-message {
             height: 24px;
             text-align: center;
-            color: var(--neon-purple);
-            font-weight: bold;
-            font-size: 0.95rem;
-            text-shadow: 0 0 8px rgba(192, 132, 252, 0.4);
+            color: var(--p-blue);
+            font-weight: 800;
+            font-size: 1rem;
             transition: opacity 0.5s ease;
         }
 
@@ -148,67 +160,69 @@
             position: relative;
             width: 100%;
             aspect-ratio: 1/1;
-            background: var(--board-bg);
-            border-radius: 12px;
-            padding: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            background: white;
+            border-radius: 24px;
+            padding: 14px;
+            box-shadow: 0 20px 50px rgba(2, 6, 23, 0.08);
+            border: 2px solid oklch(92% 0.02 260);
         }
 
         .grid-layer {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             grid-template-rows: repeat(4, 1fr);
-            gap: 12px;
+            gap: 14px;
             width: 100%;
             height: 100%;
         }
 
         .grid-cell {
             background: var(--cell-bg);
-            border-radius: 6px;
+            border-radius: 12px;
         }
 
         #tile-layer {
             position: absolute;
-            top: 12px; left: 12px; right: 12px; bottom: 12px;
+            top: 14px; left: 14px; right: 14px; bottom: 14px;
         }
 
         .tile {
             position: absolute;
-            width: calc(25% - 9px);
-            height: calc(25% - 9px);
-            border-radius: 6px;
+            width: calc(25% - 10.5px);
+            height: calc(25% - 10.5px);
+            border-radius: 12px;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 4px;
+            padding: 6px;
             transition: left var(--transition-ms) ease-in-out, top var(--transition-ms) ease-in-out, transform 100ms ease-out;
             z-index: 10;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
 
         .tile-inner {
             font-weight: 900;
-            font-size: 1.1rem;
+            font-size: 1rem;
             text-align: center;
             word-break: break-word;
-            line-height: 1;
+            line-height: 1.1;
         }
 
-        .tile-2 { background: #1e293b; color: #94a3b8; border: 1px solid #334155; }
-        .tile-4 { background: #334155; color: #cbd5e1; border: 1px solid var(--neon-blue); box-shadow: 0 0 10px rgba(56, 189, 248, 0.2); }
-        .tile-8 { background: #0c4a6e; color: var(--neon-blue); border: 1px solid var(--neon-blue); }
-        .tile-16 { background: #1e3a8a; color: var(--neon-blue); border: 1px solid var(--neon-blue); text-shadow: 0 0 5px var(--neon-blue); }
-        .tile-32 { background: #4c1d95; color: var(--neon-purple); border: 1px solid var(--neon-purple); }
-        .tile-64 { background: #581c87; color: var(--neon-purple); border: 1px solid var(--neon-purple); box-shadow: 0 0 15px rgba(192, 132, 252, 0.3); }
-        .tile-128 { background: #701a75; color: #f472b6; border: 1px solid #f472b6; font-size: 0.7rem; }
-        .tile-256 { background: #831843; color: #fb7185; border: 1px solid #fb7185; box-shadow: 0 0 20px rgba(251, 113, 133, 0.4); }
-        .tile-512 { background: #991b1b; color: #fca5a5; border: 1px solid #ef4444; }
-        .tile-1024 { background: #000; color: #fff; border: 2px solid var(--neon-blue); box-shadow: 0 0 25px var(--neon-blue); font-size: 0.65rem; }
-        .tile-2048 { background: #000; color: gold; border: 2px solid var(--neon-purple); box-shadow: 0 0 35px var(--neon-purple); animation: surge 2s infinite; }
+        .tile-2 { background: white; color: var(--text-main); border: 1px solid oklch(90% 0.02 260); }
+        .tile-4 { background: oklch(96% 0.02 260); color: var(--text-main); border: 1.5px solid var(--p-blue); }
+        .tile-8 { background: var(--p-blue-soft); color: var(--p-blue); }
+        .tile-16 { background: var(--p-blue); color: white; }
+        .tile-32 { background: oklch(65% 0.2 300); color: white; }
+        .tile-64 { background: oklch(55% 0.25 300); color: white; box-shadow: 0 0 20px rgba(192, 132, 252, 0.3); }
+        .tile-128 { background: #f472b6; color: white; }
+        .tile-256 { background: #fb7185; color: white; box-shadow: 0 0 20px rgba(251, 113, 133, 0.4); }
+        .tile-512 { background: #ef4444; color: white; }
+        .tile-1024 { background: #1e293b; color: white; }
+        .tile-2048 { background: #0f172a; color: gold; animation: surge 2s infinite; border: 2px solid gold; }
 
         @keyframes surge {
             0%, 100% { transform: scale(1); filter: brightness(1); }
-            50% { transform: scale(1.03); filter: brightness(1.3); }
+            50% { transform: scale(1.03); filter: brightness(1.2); }
         }
 
         .tile-new { animation: appear 200ms ease-out; }
@@ -221,28 +235,32 @@
         .modal {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.9);
+            background: rgba(2, 6, 23, 0.6);
             display: flex; justify-content: center; align-items: center;
             z-index: 1000;
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(12px);
         }
 
         .modal.hidden { display: none; }
 
         .modal-content {
-            background: var(--board-bg);
+            background: white;
             width: 85%;
-            max-width: 320px;
-            padding: 30px;
-            border-radius: 20px;
+            max-width: 340px;
+            padding: 40px 30px;
+            border-radius: 24px;
             text-align: center;
-            border: 2px solid var(--neon-blue);
-            box-shadow: 0 0 40px rgba(56, 189, 248, 0.3);
+            border: 1px solid oklch(92% 0.02 260);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.15);
         }
+
+        .modal-content h2 { font-size: 2.2rem; font-weight: 950; color: var(--p-blue); margin-bottom: 20px; }
 
         @media (max-width: 768px) {
             #ai-evolution-game { padding: 10px; }
-            #game-wrapper { margin: 0 auto; }
+            #game-wrapper { gap: 15px; }
+            .grid-layer { gap: 10px; }
+            #game-board-container { padding: 10px; }
         }
     </style>
 </head>
@@ -291,13 +309,13 @@
             <div id="game-over-modal" class="modal hidden">
                 <div class="modal-content">
                     <h2 id="modal-title" data-i18n="evolution_result">Evolution Result</h2>
-                    <div class="result-info">
-                        <p><span data-i18n="final_stage">Final Stage</span>: <span id="final-stage-name">-</span></p>
-                        <p><span data-i18n="total_score">Total Score</span>: <span id="final-score">-</span></p>
+                    <div class="result-info" style="margin-bottom: 25px; font-weight: 700; font-size: 1.1rem; color: var(--text-sub);">
+                        <p><span data-i18n="final_stage">Final Stage</span>: <span id="final-stage-name" style="color: var(--text-main);">-</span></p>
+                        <p><span data-i18n="total_score">Total Score</span>: <span id="final-score" style="color: var(--p-blue); font-weight: 900;">-</span></p>
                     </div>
                     <!-- Ranking and actions... -->
                     <div class="modal-actions">
-                        <button id="restart-btn" class="action-btn" data-i18n="try_again">Try Again</button>
+                        <button id="restart-btn" class="action-btn primary" data-i18n="try_again" style="background: var(--p-blue); color: white; border: none; width: 100%;">Try Again</button>
                     </div>
                 </div>
             </div>

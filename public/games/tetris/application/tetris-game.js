@@ -346,12 +346,14 @@ export class TetrisGame extends HTMLElement {
                 if (value !== 0) {
                     const color = this.COLORS[value];
                     context.fillStyle = color;
-                    context.shadowBlur = 10;
-                    context.shadowColor = color;
+                    // Soft shadow for depth
+                    context.shadowBlur = 4;
+                    context.shadowColor = 'rgba(0,0,0,0.1)';
                     context.fillRect((x + offset.x) * this.BLOCK_SIZE, (y + offset.y) * this.BLOCK_SIZE, this.BLOCK_SIZE - 1, this.BLOCK_SIZE - 1);
                     context.shadowBlur = 0;
                     
-                    context.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                    // Clean border
+                    context.strokeStyle = 'rgba(255, 255, 255, 0.5)';
                     context.lineWidth = 1;
                     context.strokeRect((x + offset.x) * this.BLOCK_SIZE, (y + offset.y) * this.BLOCK_SIZE, this.BLOCK_SIZE - 1, this.BLOCK_SIZE - 1);
                 }
@@ -449,62 +451,186 @@ export class TetrisGame extends HTMLElement {
     render() {
         this.shadowRoot.innerHTML = `
         <style>
-            :host { display: block; position: relative; width: 100%; height: 100%; min-height: 100dvh; font-family: 'Orbitron', sans-serif; background: #000; color: white; overflow: hidden; }
-            .game-layout { display: flex; flex-direction: column; height: 100%; min-height: 100dvh; padding: 10px; box-sizing: border-box; position: relative; z-index: 1; }
+            @import url("/style.css");
+            :host { display: block; position: relative; width: 100%; height: 100%; min-height: 100dvh; font-family: 'Pretendard', sans-serif; background: var(--bg-main); color: var(--text-main); overflow: hidden; }
+            
+            .game-layout { 
+                display: flex; 
+                flex-direction: column; 
+                height: 100%; 
+                min-height: 100dvh; 
+                padding: 20px; 
+                box-sizing: border-box; 
+                position: relative; 
+                z-index: 1; 
+                max-width: 1200px;
+                margin: 0 auto;
+            }
             
             @media (max-width: 768px) {
                 .game-layout {
-                    padding-top: calc(var(--header-height, 64px) + 8px);
-                    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
-                    min-height: 100dvh;
-                    height: 100dvh;
+                    padding-top: calc(var(--header-height, 70px) + 10px);
+                    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
+                    padding-left: 10px;
+                    padding-right: 10px;
                 }
-                .controls { min-height: 116px !important; padding: 8px !important; gap: 10px !important; margin-top: 8px; }
-                .side-panel { width: 72px; gap: 8px; }
-                .panel-box { padding: 6px; border-radius: 12px; }
-                .label { font-size: 7px; }
-                .value { font-size: 14px; }
-                #btn-mute { top: calc(var(--header-height, 64px) + 4px); right: 12px; }
-                .btn { font-size: 24px !important; user-select: none; -webkit-user-select: none; }
+                .controls { min-height: 120px !important; gap: 12px !important; }
+                .side-panel { width: 80px !important; }
+                .btn { font-size: 24px !important; }
             }
 
-            .game-main { flex: 1; display: flex; justify-content: center; gap: 5px; min-height: 0; }
+            .game-main { 
+                flex: 1; 
+                display: flex; 
+                justify-content: center; 
+                align-items: stretch;
+                gap: 20px; 
+                min-height: 0; 
+            }
+
             .main-board { 
                 position: relative; 
                 flex: 1; 
-                background: #000; 
-                border: 4px solid #222; 
-                border-radius: 12px; 
+                background: white; 
+                border: 2px solid oklch(92% 0.02 260); 
+                border-radius: 24px; 
                 display: flex; 
                 justify-content: center; 
                 align-items: center;
                 overflow: hidden; 
-                box-shadow: 0 0 20px rgba(0,0,0,0.5); 
+                box-shadow: 0 20px 40px rgba(2, 6, 23, 0.06);
                 box-sizing: border-box;
             }
+
             #game-canvas {
                 display: block;
                 max-width: 100%;
                 max-height: 100%;
+                background: #fdfdfd;
             }
-            .side-panel { width: 80px; display: flex; flex-direction: column; gap: 10px; }
-            .panel-box { background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); padding: 8px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); text-align: center; }
-            .label { font-size: 8px; color: #666; letter-spacing: 1px; margin-bottom: 5px; }
-            .value { font-size: 16px; font-weight: bold; color: oklch(75% 0.15 250); }
-            #combo-text { position: absolute; top: 30%; left: 50%; transform: translateX(-50%); color: oklch(70% 0.3 150); font-size: 1.5rem; font-weight: bold; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 10; }
-            #combo-text.pop { opacity: 1; transform: translate(-50%, -20px); }
-            #game-over { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 100; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
+
+            .side-panel { 
+                width: 120px; 
+                display: flex; 
+                flex-direction: column; 
+                gap: 15px; 
+            }
+
+            .panel-box { 
+                background: white;
+                padding: 15px; 
+                border-radius: 20px; 
+                border: 1px solid oklch(92% 0.02 260); 
+                text-align: center;
+                box-shadow: 0 10px 20px rgba(2, 6, 23, 0.03);
+            }
+
+            .label { font-size: 0.7rem; color: var(--text-sub); font-weight: 800; letter-spacing: 1px; margin-bottom: 8px; text-transform: uppercase; }
+            .value { font-size: 1.5rem; font-weight: 900; color: var(--p-blue); }
+
+            #combo-text { 
+                position: absolute; 
+                top: 25%; left: 50%; 
+                transform: translateX(-50%); 
+                color: var(--p-blue); 
+                font-size: 2rem; 
+                font-weight: 900; 
+                opacity: 0; 
+                pointer-events: none; 
+                transition: 0.3s; 
+                z-index: 10;
+                text-shadow: 0 4px 12px rgba(from var(--p-blue) l c h / 0.3);
+            }
+            #combo-text.pop { opacity: 1; transform: translate(-50%, -30px); }
+
+            #game-over { 
+                display: none; 
+                position: absolute; 
+                inset: 0; 
+                background: rgba(255, 255, 255, 0.9); 
+                backdrop-filter: blur(10px);
+                z-index: 100; 
+                flex-direction: column; 
+                align-items: center; 
+                justify-content: center; 
+                padding: 30px; 
+                text-align: center; 
+            }
             #game-over.visible { display: flex; }
-            .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 15px; height: 160px; }
+
+            .controls { 
+                display: grid; 
+                grid-template-columns: repeat(3, 1fr); 
+                gap: 15px; 
+                padding: 20px 0; 
+                height: 160px; 
+            }
             
             @media (min-width: 1024px) {
                 .controls { display: none; }
-                .game-main { align-items: center; justify-content: center; }
-                .main-board { flex: none; height: 85vh; width: calc(85vh * 0.5); max-width: 450px; }
+                .game-main { align-items: center; }
+                .main-board { flex: none; height: 80vh; width: calc(80vh * 0.5); max-width: 400px; }
             }
-            .btn { background: oklch(25% 0.05 250); border: 1px solid #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 4px 0 #000; transition: 0.1s; cursor: pointer; touch-action: manipulation; }
-            .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #000; background: oklch(35% 0.05 250); }
-            #btn-mute { position: absolute; top: 10px; right: 10px; background: none; border: none; color: white; font-size: 20px; cursor: pointer; z-index: 10; }
+
+            .btn { 
+                background: white; 
+                border: 2px solid oklch(92% 0.02 260); 
+                border-radius: 20px; 
+                display: flex; 
+                align-items: center; 
+                justify-content: center; 
+                font-size: 32px; 
+                color: var(--text-main);
+                box-shadow: 0 8px 15px rgba(2, 6, 23, 0.05); 
+                transition: all 0.2s; 
+                cursor: pointer; 
+                touch-action: manipulation; 
+            }
+            .btn:active { 
+                transform: translateY(4px); 
+                box-shadow: 0 2px 5px rgba(2, 6, 23, 0.1); 
+                background: var(--bg-main);
+                border-color: var(--p-blue);
+            }
+
+            #btn-mute { 
+                position: absolute; 
+                top: 20px; right: 20px; 
+                background: white; 
+                border: 1px solid oklch(92% 0.02 260); 
+                border-radius: 12px;
+                padding: 8px;
+                color: var(--text-main); 
+                font-size: 20px; 
+                cursor: pointer; 
+                z-index: 10; 
+                box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            }
+
+            #nick-input {
+                padding: 12px 16px;
+                border-radius: 12px;
+                border: 2px solid oklch(92% 0.02 260);
+                background: white;
+                color: var(--text-main);
+                font-weight: 700;
+                margin-bottom: 15px;
+                width: 180px;
+                text-align: center;
+                outline: none;
+            }
+            #nick-input:focus { border-color: var(--p-blue); }
+
+            #submit-btn {
+                padding: 14px 32px;
+                background: var(--p-blue);
+                color: white;
+                border: none;
+                border-radius: 12px;
+                font-weight: 800;
+                cursor: pointer;
+                box-shadow: 0 8px 20px -5px var(--p-blue);
+            }
         </style>
         <div class="game-layout">
             <button id="btn-mute">🔊</button>
@@ -513,17 +639,26 @@ export class TetrisGame extends HTMLElement {
                     <canvas id="game-canvas"></canvas>
                     <div id="combo-text">COMBO!</div>
                     <div id="game-over">
-                        <h2 style="color:oklch(60% 0.2 0); margin-bottom:10px;">GAME OVER</h2>
-                        <div id="rank-list" style="width:100%; margin-bottom:15px; font-size:13px; color:#aaa;"></div>
-                        <input type="text" id="nick-input" placeholder="NICKNAME" maxlength="8" style="padding:8px; background:#111; border:1px solid #333; color:white; width:120px; text-align:center; margin-bottom:10px;">
-                        <button id="submit-btn" style="padding:8px 20px; background:oklch(70% 0.15 250); border:none; border-radius:5px; font-weight:bold;">SAVE</button>
-                        <button onclick="location.reload()" style="margin-top:15px; color:#555; background:none; border:none; text-decoration:underline;">RETRY</button>
+                        <h2 style="color:var(--p-blue); margin-bottom:20px; font-size: 2.5rem; font-weight: 950;">GAME OVER</h2>
+                        <div id="rank-list" style="width:100%; max-width: 240px; margin-bottom:25px; font-size:14px; color:var(--text-sub); background: var(--bg-main); padding: 15px; border-radius: 16px;"></div>
+                        <input type="text" id="nick-input" placeholder="NICKNAME" maxlength="8">
+                        <button id="submit-btn">SAVE SCORE</button>
+                        <button onclick="location.reload()" style="margin-top:20px; color:var(--text-sub); background:none; border:none; text-decoration:underline; font-weight: 600; cursor: pointer;">RETRY</button>
                     </div>
                 </div>
                 <div class="side-panel">
-                    <div class="panel-box"><div class="label">NEXT</div><canvas id="next-canvas" width="60" height="60"></canvas></div>
-                    <div class="panel-box"><div class="label">SCORE</div><div id="score-val" class="value">0</div></div>
-                    <div class="panel-box"><div class="label">COMBO</div><div id="combo-val" class="value">0</div></div>
+                    <div class="panel-box">
+                        <div class="label">NEXT</div>
+                        <canvas id="next-canvas" width="60" height="60" style="background: #fafafa; border-radius: 8px;"></canvas>
+                    </div>
+                    <div class="panel-box">
+                        <div class="label">SCORE</div>
+                        <div id="score-val" class="value">0</div>
+                    </div>
+                    <div class="panel-box">
+                        <div class="label">COMBO</div>
+                        <div id="combo-val" class="value">0</div>
+                    </div>
                 </div>
             </div>
             <div class="controls">
