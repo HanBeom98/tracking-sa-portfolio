@@ -26,13 +26,16 @@ export class AIEvolution2048 {
         this.undoBtn = document.getElementById('undo-btn');
         this.statusMsg = document.getElementById('status-message');
         this.modal = document.getElementById('game-over-modal');
-        this.rankList = document.getElementById('rank-list');
-        this.nickInput = document.getElementById('nick-input');
-        this.submitBtn = document.getElementById('submit-btn');
         
+        if (!this.tileLayer) {
+            console.error("⚠️ [2048] Essential DOM element '#tile-layer' not found. Retrying in next frame...");
+            requestAnimationFrame(() => this.init());
+            return;
+        }
+
         // Add Mute Button
         const controls = document.querySelector('.main-controls');
-        if (controls) {
+        if (controls && !document.getElementById('mute-btn')) {
             const muteBtn = document.createElement('button');
             muteBtn.id = 'mute-btn';
             muteBtn.className = 'action-btn';
@@ -41,7 +44,7 @@ export class AIEvolution2048 {
             controls.appendChild(muteBtn);
         }
 
-        this.bestElem.innerText = this.bestScore;
+        if (this.bestElem) this.bestElem.innerText = this.bestScore;
         this.setupEvents();
         this.newGame();
     }
