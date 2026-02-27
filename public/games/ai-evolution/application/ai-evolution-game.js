@@ -1,7 +1,7 @@
 import { fetchRankings, saveRanking } from "../infra/firebase-runtime.js";
 
 export class AIEvolution2048 {
-    constructor() {
+    constructor(uiElements) {
         this.grid = Array(4).fill().map(() => Array(4).fill(0));
         this.score = 0;
         this.bestScore = parseInt(localStorage.getItem('ai_evolution_best')) || 0;
@@ -9,6 +9,15 @@ export class AIEvolution2048 {
         this.maxTileReached = 2;
         this.isGameOver = false;
         this.isMoving = false;
+        
+        // UI Elements Injection (DDD: Application layer should not search for DOM)
+        this.ui = uiElements;
+        this.tileLayer = uiElements.tileLayer;
+        this.scoreElem = uiElements.scoreElem;
+        this.bestElem = uiElements.bestElem;
+        this.undoBtn = uiElements.undoBtn;
+        this.statusMsg = uiElements.statusMsg;
+        this.modal = uiElements.modal;
         
         // Audio
         this.audioCtx = null;
@@ -20,28 +29,14 @@ export class AIEvolution2048 {
     }
 
     init() {
-        this.tileLayer = document.getElementById('tile-layer');
-        this.scoreElem = document.getElementById('current-score');
-        this.bestElem = document.getElementById('best-score');
-        this.undoBtn = document.getElementById('undo-btn');
-        this.statusMsg = document.getElementById('status-message');
-        this.modal = document.getElementById('game-over-modal');
-        
-        if (!this.tileLayer) {
-            console.error("⚠️ [2048] Essential DOM element '#tile-layer' not found. Retrying in next frame...");
-            requestAnimationFrame(() => this.init());
-            return;
-        }
-
-        // Add Mute Button
-        const controls = document.querySelector('.main-controls');
-        if (controls && !document.getElementById('mute-btn')) {
+        // Add Mute Button (UI Responsibility handled through injected container)
+        if (this.ui.mainControls && !document.getElementById('mute-btn')) {
             const muteBtn = document.createElement('button');
             muteBtn.id = 'mute-btn';
             muteBtn.className = 'action-btn';
             muteBtn.innerText = '🔊';
             muteBtn.onclick = () => this.toggleMute();
-            controls.appendChild(muteBtn);
+            this.ui.mainControls.appendChild(muteBtn);
         }
 
         if (this.bestElem) this.bestElem.innerText = this.bestScore;
@@ -196,32 +191,49 @@ export class AIEvolution2048 {
         }, { passive: false });
 
         document.getElementById('new-game-btn').onclick = () => this.newGame();
-        document.getElementById('restart-btn').onclick = () => { this.modal.classList.add('hidden'); this.newGame(); };
-        document.getElementById('undo-btn').onclick = () => this.undo();
-        document.getElementById('share-btn').onclick = () => this.share();
-        document.getElementById('modal-share-btn').onclick = () => this.share();
-        this.submitBtn.onclick = () => this.submitScore();
+        
+        const restartBtn = document.getElementById('restart-btn');
+        if (restartBtn) restartBtn.onclick = () => { this.modal.classList.add('hidden'); this.newGame(); };
+        
+        const undoBtn = document.getElementById('undo-btn');
+        if (undoBtn) undoBtn.onclick = () => this.undo();
+        
+        const shareBtn = document.getElementById('share-btn');
+        if (shareBtn) shareBtn.onclick = () => this.share();
+        
+        const modalShareBtn = document.getElementById('modal-share-btn');
+        if (modalShareBtn) modalShareBtn.onclick = () => this.share();
+        
+        const submitBtn = document.getElementById('submit-btn');
+        if (submitBtn) submitBtn.onclick = () => this.submitScore();
     }
 
     async loadRankings() {
+        const rankList = document.getElementById('rank-list');
+        if (!rankList) return;
+
         if (typeof window.db === "undefined" || !window.db) {
-            this.rankList.innerHTML = '<div style="text-align:center; color:#ff4444;">Ranking unavailable</div>';
+            rankList.innerHTML = '<div style="text-align:center; color:#ff4444;">Ranking unavailable</div>';
             return;
         }
         try {
-            this.rankList.innerHTML = '<div style="text-align:center;">Loading...</div>';
+            rankList.innerHTML = '<div style="text-align:center;">Loading...</div>';
             const docs = await fetchRankings(window.db);
-            this.rankList.innerHTML = docs.map(d => {
+            rankList.innerHTML = docs.map(d => {
                 return `<div class="rank-item"><span>${d.nickname}</span><span>${d.score}</span></div>`;
             }).join('') || '<div style="text-align:center;">No records yet</div>';
         } catch (e) {
             console.error("Ranking Load Error:", e);
-            this.rankList.innerHTML = '<div style="text-align:center;">Error loading</div>';
+            rankList.innerHTML = '<div style="text-align:center;">Error loading</div>';
         }
     }
 
     async submitScore() {
-        const nick = this.nickInput.value.trim();
+        const nickInput = document.getElementById('nick-input');
+        const submitBtn = document.getElementById('submit-btn');
+        if (!nickInput || !submitBtn) return;
+
+        const nick = nickInput.value.trim();
         if (!nick) {
             alert("Please enter a nickname.");
             return;
@@ -232,22 +244,22 @@ export class AIEvolution2048 {
             return;
         }
         
-        this.submitBtn.disabled = true;
-        this.submitBtn.innerText = "...";
+        submitBtn.disabled = true;
+        submitBtn.innerText = "...";
         try {
             await saveRanking(window.db, {
                 nickname: nick,
                 score: this.score,
                 maxTile: this.maxTileReached
             });
-            this.nickInput.value = "";
-            this.submitBtn.innerText = "DONE";
+            nickInput.value = "";
+            submitBtn.innerText = "DONE";
             this.loadRankings();
         } catch (e) {
             console.error("Score Submit Error:", e);
             alert("Failed to save score: " + e.message);
-            this.submitBtn.disabled = false;
-            this.submitBtn.innerText = "SAVE";
+            submitBtn.disabled = false;
+            submitBtn.innerText = "SAVE";
         }
     }
 
@@ -258,9 +270,12 @@ export class AIEvolution2048 {
         this.maxTileReached = 2;
         this.isGameOver = false;
         this.updateScoreDisplay();
-        this.undoBtn.disabled = true;
-        this.submitBtn.disabled = false;
-        this.statusMsg.innerText = "";
+        if (this.undoBtn) this.undoBtn.disabled = true;
+        
+        const submitBtn = document.getElementById('submit-btn');
+        if (submitBtn) submitBtn.disabled = false;
+        
+        if (this.statusMsg) this.statusMsg.innerText = "";
         this.addRandomTile();
         this.addRandomTile();
         this.render();
@@ -322,7 +337,7 @@ export class AIEvolution2048 {
 
         if (JSON.stringify(tempGrid) !== prevGrid) {
             this.undoBuffer = { grid: JSON.parse(prevGrid), score: this.score, maxTile: this.maxTileReached };
-            this.undoBtn.disabled = false;
+            if (this.undoBtn) this.undoBtn.disabled = false;
             
             this.grid = tempGrid;
             this.score += moveScore;
@@ -349,18 +364,16 @@ export class AIEvolution2048 {
         this.score = this.undoBuffer.score;
         this.maxTileReached = this.undoBuffer.maxTile;
         this.undoBuffer = null;
-        this.undoBtn.disabled = true;
+        if (this.undoBtn) this.undoBtn.disabled = true;
         this.updateScoreDisplay();
         this.render();
     }
 
     updateScoreDisplay() {
-        const scoreVal = document.getElementById('current-score');
-        if (scoreVal) scoreVal.innerText = this.score;
+        if (this.scoreElem) this.scoreElem.innerText = this.score;
         if (this.score > this.bestScore) {
             this.bestScore = this.score;
-            const bestVal = document.getElementById('best-score');
-            if (bestVal) bestVal.innerText = this.bestScore;
+            if (this.bestElem) this.bestElem.innerText = this.bestScore;
             localStorage.setItem('ai_evolution_best', this.bestScore);
         }
     }
@@ -368,18 +381,21 @@ export class AIEvolution2048 {
     notifyEvolution(val) {
         this.maxTileReached = val;
         const name = this.getTileName(val);
-        this.statusMsg.innerText = `Evolution Reached: ${name}!`;
-        this.statusMsg.classList.remove('fade-out');
-        
-        setTimeout(() => {
-            this.statusMsg.classList.add('fade-out');
+        if (this.statusMsg) {
+            this.statusMsg.innerText = `Evolution Reached: ${name}!`;
+            this.statusMsg.classList.remove('fade-out');
+            
             setTimeout(() => {
-                if (this.statusMsg.classList.contains('fade-out')) this.statusMsg.innerText = "";
-            }, 500);
-        }, 2000);
+                this.statusMsg.classList.add('fade-out');
+                setTimeout(() => {
+                    if (this.statusMsg.classList.contains('fade-out')) this.statusMsg.innerText = "";
+                }, 500);
+            }, 2000);
+        }
     }
 
     render() {
+        if (!this.tileLayer) return;
         this.tileLayer.innerHTML = '';
         this.grid.forEach((row, r) => {
             row.forEach((val, c) => {
@@ -418,7 +434,7 @@ export class AIEvolution2048 {
         const finalScore = document.getElementById('final-score');
         if (finalStage) finalStage.innerText = this.getTileName(this.maxTileReached);
         if (finalScore) finalScore.innerText = this.score;
-        this.modal.classList.remove('hidden');
+        if (this.modal) this.modal.classList.remove('hidden');
         this.loadRankings();
     }
 
