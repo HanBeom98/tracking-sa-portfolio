@@ -1,6 +1,7 @@
 import { buildPostService } from "../application/postService.js";
 import { createFirestorePostRepository } from "../infra/firestorePostRepository.js";
 import { ensureAuthenticated, getCurrentUser } from "../application/write-auth.js";
+import { getCurrentUserProfile } from "../application/authGateway.js";
 import { createSubmitPostUseCase } from "../application/submit-post-use-case.js";
 import { renderWriteAccess } from "../ui/write-access-renderer.js";
 
@@ -60,10 +61,14 @@ async function initWriteForm() {
   renderWriteAccess({ section, writeForm, user });
   if (!user) return;
 
+  // Use profile to get role
+  const profile = getCurrentUserProfile();
+  const userRole = (profile && profile.role) || "free";
+
   // Pass user role and initial category to form
   const urlParams = new URLSearchParams(window.location.search);
   const category = urlParams.get("category") || "free";
-  writeForm.setAttribute("user-role", user.role || "free");
+  writeForm.setAttribute("user-role", userRole);
   writeForm.setAttribute("initial-category", category);
 
   // Update title dynamically

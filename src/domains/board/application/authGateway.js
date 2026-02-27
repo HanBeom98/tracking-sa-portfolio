@@ -21,6 +21,14 @@ function getCurrentUser() {
   return typeof window.getCurrentUser === "function" ? window.getCurrentUser() : null;
 }
 
+function getCurrentUserProfile() {
+  const gateway = getGateway();
+  if (gateway && gateway.getCurrentUserProfile) {
+    return gateway.getCurrentUserProfile();
+  }
+  return typeof window.getCurrentUserProfile === "function" ? window.getCurrentUserProfile() : null;
+}
+
 async function requireAuth({ redirectTo } = {}) {
   const gateway = getGateway();
   if (gateway && gateway.requireAuth) {
@@ -40,4 +48,4 @@ async function getAuthService() {
   return window.authDomainReady || null;
 }
 
-export { waitAuthReady, getCurrentUser, requireAuth, getAuthService };
+export { waitAuthReady, getCurrentUser, getCurrentUserProfile, requireAuth, getAuthService };
