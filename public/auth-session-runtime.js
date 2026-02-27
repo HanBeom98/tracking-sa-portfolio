@@ -40,6 +40,9 @@
             // Only redirect if target is different from current
             if (targetUrl.pathname !== currentUrl.pathname || targetUrl.search !== currentUrl.search) {
               globalScope.location.href = redirectTo;
+            } else {
+              // If target is same as current, force a reload to refresh data/UI
+              globalScope.location.reload();
             }
           } catch (e) {
             console.error("Invalid redirect URL:", redirectTo);
