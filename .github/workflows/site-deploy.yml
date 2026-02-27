@@ -13,6 +13,7 @@ on:
       - "package-lock.json"
       - "firebase.json"
       - "firestore.rules"
+      - "firestore.indexes.json"
       - "index.html"
       - "logo.svg"
       - "favicon.svg"
@@ -98,7 +99,7 @@ jobs:
           set -euo pipefail
           python main.py --build-only
 
-      - name: Deploy Firestore Rules
+      - name: Deploy Firestore Rules and Indexes
         env:
           FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
         run: |
@@ -107,7 +108,7 @@ jobs:
           export GOOGLE_APPLICATION_CREDENTIALS="$HOME/firebase-sa-key.json"
           
           # Deploy using global firebase-tools with explicit project and force flag
-          firebase deploy --only firestore:rules --project tracking-sa-295db --non-interactive
+          firebase deploy --only firestore --project tracking-sa-295db --non-interactive
           
           # Cleanup
           rm "$HOME/firebase-sa-key.json"

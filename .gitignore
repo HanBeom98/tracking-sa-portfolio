@@ -33,7 +33,11 @@ firebase-debug.log
 .env
 *.json
 !package.json
+!package-lock.json
+!firebase.json
+!firestore.indexes.json
 !firebase-config.js
+!search-index.json
 
 # Project specific
 workdocs/
