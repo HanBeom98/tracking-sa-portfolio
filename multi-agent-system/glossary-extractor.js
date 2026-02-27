@@ -112,7 +112,7 @@ ${data.contentKo}
     }
 
     console.log("🤖 Asking Gemini to extract new terms...");
-    const systemInstruction = `당신은 실리콘밸리의 기술 트렌드를 분석하는 '수석 테크 애널리스트'입니다.
+    const systemInstruction = `당신은 글로벌 기술 트렌드를 분석하는 '수석 테크 애널리스트'입니다.
     주어진 최근 뉴스 기사들을 읽고, 대중이 어려워할 만한 전문 기술/투자 용어를 정확히 3개만 추출하세요.`;
 
     const userPrompt = `
