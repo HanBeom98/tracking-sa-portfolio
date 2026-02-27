@@ -79,7 +79,7 @@ async function callGemini(systemInstruction, userPrompt, temperature = 0.7) {
 }
 
 async function planStoryWithRetry(title, summary) {
-    const editorInstruction = `당신은 실리콘밸리의 전설적인 기술 투자자들의 철학을 계승한 '수석 편집장'입니다. 
+    const editorInstruction = `당신은 글로벌 기술 투자자들의 철학을 계승한 '수석 편집장'입니다. 
     당신은 아래의 **3대 가치 심사 기준**에 따라 뉴스를 엄격히 분류합니다.
 
     [가치 심사 기준]
