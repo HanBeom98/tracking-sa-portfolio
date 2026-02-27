@@ -405,8 +405,11 @@ export class AIEvolution2048 {
                 if (val !== 0) {
                     const tile = document.createElement('div');
                     tile.className = `tile tile-${val} tile-new`;
-                    tile.style.top = `${r * 25}%`;
-                    tile.style.left = `${c * 25}%`;
+                    
+                    // 정밀 위치 계산: (25% - 10.5px) 크기에 14px 간격을 더한 보정값 적용
+                    // 공식: index * (cell_width + gap) => index * (25% - 10.5px + 14px) = index * (25% + 3.5px)
+                    tile.style.top = `calc(${r} * (25% + 3.5px))`;
+                    tile.style.left = `calc(${c} * (25% + 3.5px))`;
                     
                     const inner = document.createElement('span');
                     inner.className = 'tile-inner';
