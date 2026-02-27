@@ -86,6 +86,15 @@ Tracking SA를 프레임워크 의존 없이 안정적으로 운영 가능한 DD
   - 공지사항 상단 고정 및 강조 디자인 적용.
 - **테스트 및 배포 무결성 검증**:
   - 장애 복구 후 GitHub Actions를 통해 실제 배포 사이트 대상 E2E Smoke 테스트 및 단위 테스트 88개 전원 통과 확인.
+- **애드센스 승인 최적화 및 콘텐츠 고품질화 (NEW)**:
+  - 멀티 에이전트 프롬프트를 강화하여 단순 요약을 넘어 기술적/경제적 배경 논증을 포함한 **1,200자 이상의 전문 칼럼** 형식을 강제.
+  - 기획-집필-교열 파이프라인에서 출력 포맷(`[KO_START]` 등) 파싱 안정성 개선.
+- **검색 엔진 인덱싱 버그 해결 및 데이터 무결성 강화 (NEW)**:
+  - `builder.py` 정규식을 개선하여 HTML 속성 순서(href/class)에 상관없이 100여 건의 뉴스 기사를 `search-index.json`에 100% 정상 인덱싱.
+  - 뉴스 수집 시 시스템 시간이 아닌 **RSS 원본 발행 시간(published_parsed)**을 추출해 Firestore에 저장하도록 로직을 수정하여 기사 정렬의 논리적 순서 확보.
+- **운영 도구 및 브랜딩 개선 (NEW)**:
+  - 기존 기사들을 새로운 고품질 프롬프트로 안전하게 일괄 재생성할 수 있는 `scripts/regenerate_news.py` 개발 및 배치 완료.
+  - 사이트 내 사용된 '실리콘밸리' 표현을 '전문가'로 일괄 교체하여 독자층 확대 및 범용성 확보.
 
 ## 🧭 Architecture Reality Check
 - `news`, `board`, `games`, `account`, `futures-estimate`, `fortune`, `animal-face`, `lucky-recommendation`, `search` 등 전 도메인이 **안정적인 1:1 미러링 DDD 구조**를 갖춤.
