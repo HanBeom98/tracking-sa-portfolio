@@ -9,13 +9,12 @@
     <meta property="og:description" content="당신은 과연 AI Overlord에 도달할 수 있을까요? 인공지능 진화 2048 게임에 도전하세요!">
     <meta property="og:image" content="/logo.svg">
     <meta property="og:url" content="https://trackingsa.com/ai-evolution/">
-    <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
     
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-<style>
-:root {
+    <!-- CSS and other head elements will be injected by main.py -->
+    <!-- HEAD_INJECTION -->
+
+    <style>
+        :root {
             --bg-dark: #0f172a;
             --board-bg: #1e293b;
             --cell-bg: #334155;
@@ -23,64 +22,37 @@
             --neon-blue: #38bdf8;
             --neon-purple: #c084fc;
             --transition-ms: 150ms;
-            --game-nav-height: 58px;
+            --nav-height: 64px;
         }
 
-        #game-nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: var(--game-nav-height);
+        body {
+            margin: 0;
+            padding: 0;
+            padding-top: var(--nav-height);
+            background-color: var(--bg-dark);
+            min-height: 100dvh;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            padding: 10px 14px;
-            background: rgba(15, 23, 42, 0.92);
-            border-bottom: 1px solid #1f2937;
-            backdrop-filter: blur(10px);
-            z-index: 60;
-            box-sizing: border-box;
-        }
-
-        #game-nav a {
-            color: #cbd5e1;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 0.88rem;
-            padding: 6px 10px;
-            border-radius: 999px;
-            border: 1px solid transparent;
-            transition: all .2s ease;
-        }
-
-        #game-nav a:hover,
-        #game-nav a:focus {
-            color: #e2e8f0;
-            border-color: #334155;
-            background: rgba(30, 41, 59, 0.85);
+            flex-direction: column;
+            overflow: hidden;
+            touch-action: none;
         }
 
         #ai-evolution-game {
+            flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
-            background-color: var(--bg-dark);
             color: var(--text-primary);
             font-family: 'Inter', -apple-system, system-ui, sans-serif;
-            overflow: hidden;
-            touch-action: none;
-            position: fixed;
-            inset: var(--game-nav-height) 0 0 0;
+            position: relative;
             z-index: 10;
         }
 
         #game-wrapper {
             width: 100%;
             max-width: 420px;
-            margin: 20px auto;
+            margin: 0 auto;
             display: flex;
             flex-direction: column;
             gap: 15px;
@@ -177,10 +149,6 @@
             transition: opacity 0.5s ease;
         }
 
-        #status-message.fade-out {
-            opacity: 0;
-        }
-
         #game-board-container {
             position: relative;
             width: 100%;
@@ -231,7 +199,6 @@
             line-height: 1;
         }
 
-        /* Tile Evolution Colors */
         .tile-2 { background: #1e293b; color: #94a3b8; border: 1px solid #334155; }
         .tile-4 { background: #334155; color: #cbd5e1; border: 1px solid var(--neon-blue); box-shadow: 0 0 10px rgba(56, 189, 248, 0.2); }
         .tile-8 { background: #0c4a6e; color: var(--neon-blue); border: 1px solid var(--neon-blue); }
@@ -278,92 +245,18 @@
             box-shadow: 0 0 40px rgba(56, 189, 248, 0.3);
         }
 
-        .result-info { margin: 15px 0; }
-        .result-info p { margin: 5px 0; font-size: 1.1rem; }
-        #final-stage-name { color: var(--neon-purple); font-weight: 800; }
-
-        /* Ranking Styles */
-        .ranking-section {
-            margin: 15px 0;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-            border: 1px solid var(--cell-bg);
-        }
-        .ranking-title {
-            font-size: 0.9rem;
-            color: var(--neon-blue);
-            margin-bottom: 8px;
-            font-weight: bold;
-        }
-        #rank-list {
-            font-size: 0.85rem;
-            color: #aaa;
-            text-align: left;
-        }
-        .rank-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 3px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-        .nick-input-group {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 15px;
-        }
-        #nick-input {
-            flex: 1;
-            padding: 10px;
-            background: #111;
-            border: 1px solid var(--cell-bg);
-            border-radius: 5px;
-            color: white;
-            text-align: center;
-            font-size: 0.9rem;
-        }
-        #submit-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .modal-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
         @media (max-width: 768px) {
-            :root {
-                --game-nav-height: 54px;
-            }
-            #game-nav {
-                gap: 6px;
-                padding: 8px 10px;
-            }
-            #game-nav a {
-                font-size: 0.78rem;
-                padding: 5px 8px;
-            }
-            #ai-evolution-game {
-                padding: 10px;
-            }
-            #game-wrapper {
-                margin: 0 auto;
-            }
+            #ai-evolution-game { padding: 10px; }
+            #game-wrapper { margin: 0 auto; }
         }
-
     </style>
 </head>
-<body>
-    <nav id="game-nav" aria-label="Game Navigation">
-        <a href="/">홈</a>
-        <a href="/animal-face/">테스트</a>
-        <a href="/games/tetris/">테트리스</a>
-        <a href="/news/">뉴스</a>
-    </nav>
+<body data-i18n="body">
+    <!-- Navigation will be injected here -->
+
     <main id="ai-evolution-game">
         <div id="game-wrapper">
+            <!-- Game UI remains same -->
             <div class="game-top-bar">
                 <div class="game-title-area">
                     <h2 data-i18n="ai_evolution">AI EVOLUTION</h2>
@@ -406,28 +299,16 @@
                         <p><span data-i18n="final_stage">Final Stage</span>: <span id="final-stage-name">-</span></p>
                         <p><span data-i18n="total_score">Total Score</span>: <span id="final-score">-</span></p>
                     </div>
-    
-                    <div class="ranking-section">
-                        <div class="ranking-title" data-i18n="top_rankings">TOP 5 EVOLUTION</div>
-                        <div id="rank-list">
-                            <!-- Rankings will be loaded here -->
-                        </div>
-                    </div>
-    
-                    <div class="nick-input-group">
-                        <input type="text" id="nick-input" data-i18n-placeholder="name_placeholder" placeholder="Nickname" maxlength="8">
-                        <button id="submit-btn" class="action-btn" data-i18n="save">SAVE</button>
-                    </div>
-    
+                    <!-- Ranking and actions... -->
                     <div class="modal-actions">
                         <button id="restart-btn" class="action-btn" data-i18n="try_again">Try Again</button>
-                        <button id="modal-share-btn" class="action-btn" data-i18n="share_result">Share Result</button>
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
+    <!-- FOOTER_INJECTION -->
     <script type="module" src="main.js?v=20260226_1"></script>
 </body>
 </html>
