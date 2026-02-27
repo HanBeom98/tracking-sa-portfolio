@@ -23,6 +23,9 @@ async function bootstrap() {
             undoBtn: document.getElementById('undo-btn'),
             statusMsg: document.getElementById('status-message'),
             modal: document.getElementById('game-over-modal'),
+            rankList: document.getElementById('rank-list'),
+            nickInput: document.getElementById('nick-input'),
+            submitBtn: document.getElementById('submit-btn'),
             mainControls: document.querySelector('.main-controls')
         });
 

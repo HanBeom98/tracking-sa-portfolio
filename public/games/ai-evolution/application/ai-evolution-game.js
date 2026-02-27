@@ -18,6 +18,9 @@ export class AIEvolution2048 {
         this.undoBtn = uiElements.undoBtn;
         this.statusMsg = uiElements.statusMsg;
         this.modal = uiElements.modal;
+        this.rankList = uiElements.rankList;
+        this.nickInput = uiElements.nickInput;
+        this.submitBtn = uiElements.submitBtn;
         
         // Audio
         this.audioCtx = null;
