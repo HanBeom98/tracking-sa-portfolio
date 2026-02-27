@@ -38,105 +38,98 @@ class BoardList extends HTMLElement {
     const style = `
       @import url("/style.css");
       :host { display: block; width: 100%; }
-      .grid { 
-        display: grid; 
-        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); 
-        gap: 32px; 
-        width: 100%; 
-      }
-      .card {
-        background: white; 
-        border-radius: 24px; 
-        padding: 32px;
-        border: 1px solid oklch(92% 0.02 260); 
-        box-shadow: 0 10px 30px rgba(2, 6, 23, 0.04);
-        text-decoration: none; 
-        color: inherit; 
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-        display: flex;
-        flex-direction: column;
-        position: relative;
+      
+      .list-container {
+        width: 100%;
+        background: white;
+        border-radius: 20px;
         overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        border: 1px solid oklch(92% 0.02 260);
       }
-      .card:hover { 
-        transform: translateY(-10px); 
-        border-color: var(--p-blue); 
-        box-shadow: 0 20px 40px rgba(2, 6, 23, 0.08);
-      }
-      .card::after {
-        content: "";
-        position: absolute;
-        bottom: 0; left: 0; right: 0;
-        height: 4px;
-        background: var(--p-blue);
-        transform: scaleX(0);
-        transition: transform 0.3s ease;
-        transform-origin: left;
-      }
-      .card:hover::after {
-        transform: scaleX(1);
-      }
-      h3 {
-        font-size: 1.4rem;
-        font-weight: 850;
-        color: var(--text-main);
-        line-height: 1.4;
-        margin: 0 0 16px 0;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-      }
-      .excerpt {
-        font-size: 1.05rem;
-        line-height: 1.6;
+
+      .list-header {
+        display: grid;
+        grid-template-columns: 80px 1fr 150px 120px;
+        padding: 18px 24px;
+        background: oklch(98% 0.01 260);
+        border-bottom: 2px solid oklch(92% 0.02 260);
+        font-weight: 800;
         color: var(--text-sub);
-        margin-bottom: 24px;
-        flex: 1;
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
+        font-size: 0.95rem;
+        text-align: center;
       }
-      .meta { 
+
+      .list-item {
+        display: grid;
+        grid-template-columns: 80px 1fr 150px 120px;
+        padding: 18px 24px;
+        border-bottom: 1px solid oklch(96% 0.01 260);
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.2s ease;
+        align-items: center;
+        text-align: center;
+      }
+
+      .list-item:last-child {
+        border-bottom: none;
+      }
+
+      .list-item:hover {
+        background: oklch(99% 0.01 260);
+        transform: scale(1.002);
+      }
+
+      .item-no { color: var(--text-sub); font-family: monospace; font-size: 0.9rem; }
+      .item-title { 
+        text-align: left; 
+        font-weight: 700; 
+        color: var(--text-main);
+        padding-left: 20px;
         display: flex;
         align-items: center;
-        gap: 12px;
-        font-size: 0.9rem; 
+        gap: 8px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .item-author { color: var(--text-main); font-weight: 600; font-size: 0.9rem; }
+      .item-date { color: var(--text-sub); font-size: 0.85rem; }
+
+      .notice-row {
+        background: oklch(97% 0.02 260);
+      }
+      .notice-row .item-no {
+        color: var(--p-blue);
+        font-weight: 900;
+      }
+      .notice-badge {
+        background: var(--p-blue);
+        color: white;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-size: 0.7rem;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+
+      .empty, .loading {
+        padding: 100px 20px;
+        text-align: center;
         color: var(--text-sub);
         font-weight: 600;
-        padding-top: 20px;
-        border-top: 1px solid oklch(96% 0.01 260);
-      }
-      .author-name {
-        color: var(--text-main);
-        font-weight: 800;
-      }
-      .empty { grid-column: 1 / -1; text-align: center; padding: 120px 20px; color: var(--text-sub); font-size: 1.2rem; font-weight: 600; }
-      .loading { grid-column: 1 / -1; text-align: center; padding: 120px 20px; color: var(--text-sub); }
-      
-      .badge-notice {
-        display: inline-flex; 
-        align-items: center;
-        padding: 6px 14px; 
-        border-radius: 10px;
-        background: oklch(95% 0.05 20); 
-        color: oklch(55% 0.15 20); 
-        font-size: 0.8rem; 
-        font-weight: 900;
-        margin-bottom: 16px;
-        width: fit-content;
       }
 
       .loader {
-        width: 40px;
-        height: 40px;
-        border: 4px solid oklch(90% 0.02 260);
+        width: 30px;
+        height: 30px;
+        border: 3px solid oklch(90% 0.02 260);
         border-bottom-color: var(--p-blue);
         border-radius: 50%;
         display: inline-block;
         animation: rotation 1s linear infinite;
-        margin-bottom: 16px;
+        margin-bottom: 12px;
       }
 
       @keyframes rotation {
@@ -145,37 +138,61 @@ class BoardList extends HTMLElement {
       }
 
       @media (max-width: 768px) {
-        .grid { gap: 20px; }
-        .card { padding: 24px; }
-        h3 { font-size: 1.25rem; }
+        .list-header { display: none; }
+        .list-item {
+          grid-template-columns: 1fr auto;
+          grid-template-rows: auto auto;
+          padding: 16px;
+          text-align: left;
+          gap: 8px;
+        }
+        .item-no { display: none; }
+        .item-title { 
+          grid-column: 1 / span 2; 
+          padding-left: 0;
+          font-size: 1.1rem;
+          white-space: normal;
+        }
+        .item-author { text-align: left; color: var(--text-sub); font-size: 0.8rem; }
+        .item-date { text-align: right; color: var(--text-sub); font-size: 0.8rem; }
       }
     `;
 
-    let content = "";
+    let innerContent = "";
     if (status === "loading") {
-      content = `
+      innerContent = `
         <div class="loading">
           <div class="loader"></div>
           <p>${t("loading_post", "게시물을 불러오는 중...")}</p>
         </div>
       `;
     } else if (status === "error") {
-      content = `<p class="empty">${t("load_post_failed", "게시물을 불러오는 데 실패했습니다.")}</p>`;
+      innerContent = `<div class="empty">${t("load_post_failed", "게시물을 불러오는 데 실패했습니다.")}</div>`;
     } else if (!posts.length) {
-      content = `<p class="empty">${t("empty_post", "아직 게시물이 없습니다.")}</p>`;
+      innerContent = `<div class="empty">${t("empty_post", "아직 게시물이 없습니다.")}</div>`;
     } else {
-      content = posts.map((post) => this.renderCard(post)).join("");
+      const rows = posts.map((post, index) => this.renderRow(post, posts.length - index)).join("");
+      innerContent = `
+        <div class="list-header">
+          <div>NO</div>
+          <div style="text-align: left; padding-left: 20px;">${t("board_title_label", "제목")}</div>
+          <div>${t("board_author_label", "작성자")}</div>
+          <div>${t("board_date_label", "날짜")}</div>
+        </div>
+        ${rows}
+      `;
     }
 
     this.shadowRoot.innerHTML = `
       <style>${style}</style>
-      <div class="grid">${content}</div>
+      <div class="list-container">
+        ${innerContent}
+      </div>
     `;
   }
 
-  renderCard(post) {
+  renderRow(post, displayNo) {
     const title = post.title || "제목 없음";
-    const excerpt = this.buildExcerpt(post.content);
     const nickname = post.authorName || post.nickname || "익명";
     const date = this.formatDate(post.createdAt);
     const isNotice = post.category === "notice";
@@ -185,23 +202,13 @@ class BoardList extends HTMLElement {
         : fallback;
 
     return `
-      <a class="card" href="/board/post?id=${post.id}">
-        ${isNotice ? `<span class="badge-notice">${t("notice", "공지사항")}</span>` : ""}
-        <h3>${title}</h3>
-        <div class="excerpt">${excerpt}</div>
-        <div class="meta">
-          <span class="author-name">${nickname}</span>
-          <span style="opacity: 0.3">|</span>
-          <span>${date}</span>
-        </div>
+      <a class="list-item ${isNotice ? "notice-row" : ""}" href="/board/post?id=${post.id}">
+        <div class="item-no">${isNotice ? `<span class="notice-badge">NOTICE</span>` : displayNo}</div>
+        <div class="item-title">${title}</div>
+        <div class="item-author">${nickname}</div>
+        <div class="item-date">${date}</div>
       </a>
     `;
-  }
-
-  buildExcerpt(content) {
-    if (!content) return "";
-    const normalized = String(content).replace(/\s+/g, " ").trim();
-    return normalized;
   }
 
   formatDate(timestamp) {
@@ -209,7 +216,14 @@ class BoardList extends HTMLElement {
       return "";
     }
     const date = new Date(timestamp.seconds * 1000);
-    return date.toLocaleDateString();
+    const now = new Date();
+    const isToday = date.toDateString() === now.toLocaleDateString();
+    
+    // 오늘 작성된 글은 시간 표시, 아니면 날짜 표시
+    if (isToday) {
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+    }
+    return date.toLocaleDateString([], { month: '2-digit', day: '2-digit' });
   }
 }
 
