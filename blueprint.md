@@ -80,6 +80,13 @@ Tracking SA를 프레임워크 의존 없이 안정적으로 운영 가능한 DD
 - **DDD 프로젝트 전역 리팩토링 완결** (By Gemini CLI):
   - `Lucky-recommendation`, `Search` 등 모든 활성 도메인의 4계층 DDD(Domain-Application-Infra-UI) 구조 이관 완료.
   - `infra/` 계층 분리를 통해 데이터 접근 로직과 비즈니스 로직의 완전한 결합 해제.
+- **게임 도메인 프리미엄 디자인 및 DDD 정규화**:
+  - 테트리스, AI Evolution 2048 게임의 **동적 테마 동기화** 구현:
+    - JS 로직 내 하드코딩된 색상 박멸 및 런타임 CSS 변수 바인딩 적용.
+    - `MutationObserver`를 통한 실시간 다크/라이트 모드 감지 및 캔버스 배경색 연동.
+  - **Strict DDD 배포 경로 확립**:
+    - `public/` 내 비표준 유령 폴더 제거 및 `/games/*` 경로로 체계 일원화.
+    - `_redirects`를 통한 구형 경로 하위 호환성 확보.
 - **자동화된 RSS 피드 시스템 구축**:
   - 뉴스 도메인 내 `rss_builder.py` 추가 및 공유 빌더(`builder.py`) 연동.
   - `/rss.xml` 및 `/en/rss.xml` 자동 생성으로 검색 엔진 및 자동 배포 최적화.

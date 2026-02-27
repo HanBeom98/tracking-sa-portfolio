@@ -313,3 +313,26 @@
   - `npm run test:unit` 실행 (82개 테스트 전체 통과 확인).
   - `python3 main.py --build-only` 빌드 성공 확인.
   - `find src/domains/board` 명령으로 평탄화된 물리 구조 육안 확인.
+
+## 2026-02-27
+
+### fix(game): achieve strict DDD & dynamic theme sync for all games (8e61aed)
+- 문제/증상:
+  - 게임 페이지(테트리스, 2048)가 다크 모드 변수에 오염되어 검은 화면으로 노출됨.
+  - 빌드 산출물(public)에 DDD 구조를 벗어난 유령 폴더(/tetris-game/, /ai-evolution/)가 잔존.
+  - 네비게이션 링크가 구형 경로를 가리켜 과거 버전의 페이지가 로드됨.
+- 변경:
+  - **Strict DDD 복구**:
+    - `public/` 내 수동 생성된 유령 폴더 제거 및 `src/domains/` 기반 정규 빌드 경로(`/games/*`) 확립.
+    - `_redirects`를 통해 구형 경로를 최신 DDD 경로로 301 리다이렉트 처리.
+  - **관심사 분리(SoC) 및 동적 테마**:
+    - JS 로직 내 하드코딩된 색상값 완전 제거.
+    - `getComputedStyle` 및 CSS 변수(`--bg-main`)를 사용하여 디자인 레이어와 런타임 바인딩.
+    - `MutationObserver`를 통한 실시간 테마 전환 감지 및 캔버스 리렌더링 구현.
+  - **경로 최적화**:
+    - `header.html` 및 루트 `index.html` 내 모든 게임 링크를 최신 경로로 수정.
+- 영향 범위:
+  - 게임 도메인 전체(Tetris, AI Evolution 2048) 및 전역 네비게이션.
+- 검증:
+  - `npm run test:unit` 88개 전체 Pass 확인.
+  - `npm run build` 성공 및 `public/` 구조 정합성 육안 검증.

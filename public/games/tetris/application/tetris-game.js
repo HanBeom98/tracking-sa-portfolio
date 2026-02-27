@@ -329,10 +329,33 @@ export class TetrisGame extends HTMLElement {
         
         this.ctx.fillStyle = bgColor;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        this.drawGrid(); // 배경 그리드 추가
         this.drawGhost();
         this.drawMatrix(this.board, { x: 0, y: 0 }, this.ctx);
         this.drawMatrix(this.piece.matrix, this.piece.pos, this.ctx);
         this.drawNext();
+    }
+
+    drawGrid() {
+        const isDarkMode = document.body.classList.contains('dark-mode');
+        this.ctx.strokeStyle = isDarkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+        this.ctx.lineWidth = 1;
+        this.ctx.setLineDash([2, 4]); // 점선 효과
+        
+        for (let x = 0; x <= this.COLS; x++) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(x * this.BLOCK_SIZE, 0);
+            this.ctx.lineTo(x * this.BLOCK_SIZE, this.canvas.height);
+            this.ctx.stroke();
+        }
+        for (let y = 0; y <= this.ROWS; y++) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(0, y * this.BLOCK_SIZE);
+            this.ctx.lineTo(this.canvas.width, y * this.BLOCK_SIZE);
+            this.ctx.stroke();
+        }
+        this.ctx.setLineDash([]); // 점선 초기화
     }
 
     drawGhost() {
