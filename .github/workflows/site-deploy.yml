@@ -13,6 +13,11 @@ on:
       - "package-lock.json"
       - "firebase.json"
       - "firestore.rules"
+      - "index.html"
+      - "logo.svg"
+      - "favicon.svg"
+      - "ads.txt"
+      - "_redirects"
       - ".github/workflows/site-deploy.yml"
   workflow_dispatch:
 
