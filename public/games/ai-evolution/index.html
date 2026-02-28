@@ -330,6 +330,16 @@
             #game-board-container { padding: 10px; }
         }
     </style>
+    <script>
+        // Check if embedded in iframe (Early check)
+        if (window.self !== window.top) {
+            document.documentElement.classList.add('is-embedded');
+            // Add to body as soon as it's available
+            window.addEventListener('DOMContentLoaded', () => {
+                document.body.classList.add('is-embedded');
+            });
+        }
+    </script>
     <meta name="robots" content="index, follow">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Tracking SA">
@@ -439,7 +449,7 @@
 
     <main id="ai-evolution-game">
         <div id="game-wrapper">
-            <!-- Game UI remains same -->
+            <!-- Game UI -->
             <div class="game-top-bar">
                 <div class="game-title-area">
                     <h2 data-i18n="ai_evolution">AI 진화 2048</h2>
