@@ -71,9 +71,9 @@ service cloud.firestore {
     // Games: Public read for approved, authenticated create for pending, admin management
     match /games/{gameId} {
       allow read: if true;
-      allow create: if request.auth != null
+      allow create: if isAdmin() || (request.auth != null
         && request.resource.data.status == "pending"
-        && request.resource.data.authorUid == request.auth.uid;
+        && request.resource.data.authorUid == request.auth.uid);
       allow update: if isAdmin() 
         || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['playCount']) 
             && request.resource.data.playCount is number);
