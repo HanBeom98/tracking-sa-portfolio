@@ -19,7 +19,7 @@ export class SaRepository {
       this.apiClient.getPlayerRank(ouid)
     ]);
     
-    return new Player(basic, rank);
+    return new Player(ouid, basic, rank);
   }
 
   /**

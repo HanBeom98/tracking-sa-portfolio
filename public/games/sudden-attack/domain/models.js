@@ -1,6 +1,6 @@
 export class Player {
-  constructor(basic, rank) {
-    this.ouid = basic.ouid;
+  constructor(ouid, basic, rank) {
+    this.ouid = ouid;
     this.nickname = basic.character_name;
     this.level = basic.level;
     this.rankName = rank.rank_name || "Unknown";
