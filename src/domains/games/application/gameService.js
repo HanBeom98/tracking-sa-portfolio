@@ -118,27 +118,35 @@ export const gameService = {
     async _initializeDefaultGame(id) {
         if (typeof window === "undefined" || !window.AuthGateway) return;
 
+        // Ensure Auth is ready
+        await window.AuthGateway.waitForReady();
         const profile = window.AuthGateway.getCurrentUserProfile();
         const user = window.AuthGateway.getCurrentUser();
 
-        if (profile?.role === "admin" && user) {
+        // Critical Check: Only proceed if admin AND user UID exists
+        if (profile?.role === "admin" && user?.uid) {
             console.info(`[GameService] Self-healing: Initializing ${id} in Firestore...`);
             const all = await this.getApprovedGames();
             const g = all.find(x => x.id === id);
             
             if (g) {
-                await gameRepository.set(id, {
-                    id: g.id,
-                    title: g.title,
-                    description: g.description,
-                    url: g.url,
-                    authorName: g.authorName || 'Admin',
-                    authorUid: user.uid,
-                    playCount: 1,
-                    status: 'approved',
-                    category: g.category || 'classic',
-                    createdAt: g.createdAt || new Date().toISOString()
-                });
+                try {
+                    await gameRepository.set(id, {
+                        id: g.id,
+                        title: g.title,
+                        description: g.description,
+                        url: g.url,
+                        authorName: g.authorName || 'Admin',
+                        authorUid: user.uid,
+                        playCount: 1,
+                        status: 'approved',
+                        category: g.category || 'classic',
+                        createdAt: g.createdAt || new Date().toISOString()
+                    });
+                    console.info(`[GameService] ${id} initialized successfully.`);
+                } catch (e) {
+                    console.error(`[GameService] Failed to initialize ${id}:`, e);
+                }
             }
         }
     }
