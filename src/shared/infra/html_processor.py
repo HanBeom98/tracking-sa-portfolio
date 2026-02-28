@@ -13,6 +13,8 @@ def process_html_file_for_common_elements(filepath):
 
         is_root_homepage = os.path.abspath(filepath) == os.path.abspath(os.path.join(PUBLIC_DIR, "index.html"))
         is_en_page = os.path.abspath(filepath).startswith(os.path.abspath(os.path.join(PUBLIC_DIR, "en")) + os.sep)
+        # Check if it's the game player page
+        is_play_page = "games/play" in filepath.replace("\\", "/")
         
         # Determine relative URL for og:url
         rel_path = os.path.relpath(filepath, PUBLIC_DIR).replace("\\", "/")
