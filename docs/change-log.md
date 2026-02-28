@@ -1,6 +1,46 @@
+## 2026-02-28
+
+### feat(futures): display actual close and add result badges in prediction history
+- 문제/증상:
+  - 지수 예측 결과가 단순히 '상승/하락' 텍스트로만 표시되어 신뢰도가 낮고 구체적인 결과값 확인이 어려움.
+- 변경:
+  - **UI (`src/domains/futures-estimate/ui/futures-page.js`)**:
+    - '실제' 열에 실제 종가(`actual_close`) 수치를 괄호 안에 함께 표시 (예: `상승 (325.40)`).
+    - 결과(성공/실패/대기)에 색상 배지(Badge) 스타일 적용 (성공: 초록, 실패: 빨간, 대기: 회색).
+  - **Infra/API (`functions/api/futures-predictions.js`)**:
+    - Firestore의 `actual_close` 필드를 프론트엔드 데이터 모델로 명시적으로 매핑하도록 보강.
+  - **Test (`tests/unit/futures-api-contract.test.js`)**:
+    - 신규 필드(`actual_close`)를 포함하도록 API 스키마 검증 테스트 코드 업데이트.
+- 영향 범위: 지수 예측 페이지(`futures-estimate`) 및 관련 API.
+- 검증:
+  - `npm run test:unit` 88개 전체 Pass 확인.
+  - `npm run build` 성공 및 `public/` 산출물 동기화 확인.
+- 남은 리스크/후속 과제:
+  - 장 마감 후 GitHub Actions가 원활하게 데이터를 수집하여 Firestore에 업데이트하는지 모니터링 필요.
+
 # Change Log (AI Collaboration)
 
 이 문서는 Gemini CLI/Codex 같은 AI 에이전트가 빠르게 맥락을 파악하도록, 변경 의도와 영향 범위를 요약합니다.
+
+## 2026-02-28
+
+### feat(futures): display actual close and add result badges in prediction history
+- 문제/증상:
+  - 지수 예측 결과가 단순히 '상승/하락' 텍스트로만 표시되어 신뢰도가 낮고 구체적인 결과값 확인이 어려움.
+- 변경:
+  - **UI (`src/domains/futures-estimate/ui/futures-page.js`)**:
+    - '실제' 열에 실제 종가(`actual_close`) 수치를 괄호 안에 함께 표시 (예: `상승 (325.40)`).
+    - 결과(성공/실패/대기)에 색상 배지(Badge) 스타일 적용 (성공: 초록, 실패: 빨간, 대기: 회색).
+  - **Infra/API (`functions/api/futures-predictions.js`)**:
+    - Firestore의 `actual_close` 필드를 프론트엔드 데이터 모델로 명시적으로 매핑하도록 보강.
+  - **Test (`tests/unit/futures-api-contract.test.js`)**:
+    - 신규 필드(`actual_close`)를 포함하도록 API 스키마 검증 테스트 코드 업데이트.
+- 영향 범위: 지수 예측 페이지(`futures-estimate`) 및 관련 API.
+- 검증:
+  - `npm run test:unit` 88개 전체 Pass 확인.
+  - `npm run build` 성공 및 `public/` 산출물 동기화 확인.
+- 남은 리스크/후속 과제:
+  - 장 마감 후 GitHub Actions가 원활하게 데이터를 수집하여 Firestore에 업데이트하는지 모니터링 필요.
 
 ## 2026-02-25
 
