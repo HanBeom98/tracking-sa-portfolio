@@ -40,7 +40,10 @@ export class SaMatchList extends HTMLElement {
       <ul class="match-list">
         ${list.map(match => `
           <li class="match-item ${match.matchResult.toLowerCase()}">
-            <span class="result">${match.matchResult}</span>
+            <div class="match-info">
+              <span class="type-tag">${match.matchTypeName}</span>
+              <span class="result">${match.matchResult}</span>
+            </div>
             <span class="map">${match.mapName}</span>
             <span class="kda">${match.kill} / ${match.death} / ${match.assist}</span>
             <span class="kd">KD: ${match.kd}</span>
