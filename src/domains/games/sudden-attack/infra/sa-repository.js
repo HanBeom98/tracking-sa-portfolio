@@ -54,51 +54,67 @@ export class SaRepository {
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
     // Get Today and Yesterday in KST (YYYY-MM-DD)
-    // Current UTC time + 9 hours = KST
     const now = new Date();
-    const kstOffset = 9 * 60 * 60 * 1000;
-    const kstDate = new Date(now.getTime() + kstOffset);
-    
-    // Use toISOString and split at 'T' to get YYYY-MM-DD
-    // But be careful: toISOString() uses UTC. We need the KST date.
-    // A more robust way to get KST date string:
-    const formatDate = (date) => {
-      const d = new Date(date.getTime());
-      // No need to add offset again, d is already shifted
-      return d.toISOString().split('T')[0];
+    // Use Intl to get KST date parts regardless of local system time
+    const kstFormatter = new Intl.DateTimeFormat('ko-KR', {
+      timeZone: 'Asia/Seoul',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+
+    const formatDateParts = (date) => {
+      const parts = kstFormatter.formatToParts(date);
+      const y = parts.find(p => p.type === 'year').value;
+      const m = parts.find(p => p.type === 'month').value;
+      const d = parts.find(p => p.type === 'day').value;
+      return `${y}-${m}-${d}`;
     };
 
-    const dates = [
-      formatDate(kstDate), // Today in KST
-      formatDate(new Date(kstDate.getTime() - (24 * 60 * 60 * 1000))) // Yesterday in KST
-    ];
+    const todayKstStr = formatDateParts(now);
+    const yesterdayKstStr = formatDateParts(new Date(now.getTime() - (24 * 60 * 60 * 1000)));
+
+    // Try current date, yesterday, and also a "null" date (latest)
+    const dates = [todayKstStr, yesterdayKstStr, ""];
 
     try {
-      console.log(`[Repository] Starting deep scan for OUID: ${ouid} on Dates: ${dates.join(', ')}`);
+      console.log(`[Repository] Starting deep scan for OUID: ${ouid} on Dates: ${dates.filter(d => d).join(', ') || 'Latest'}`);
       
       for (const date of dates) {
         for (const mode of modes) {
           try {
-            await delay(1000); 
+            await delay(800); // Respect rate limits
             const data = await this.apiClient.getMatchList(ouid, mode.id, date);
             const matches = (data.match_list || []).map(m => ({ ...m, typeName: mode.name }));
-            combinedMatches.push(...matches);
+            
+            // Avoid duplicates if we search with multiple dates
+            for (const m of matches) {
+              if (!combinedMatches.find(cm => cm.match_id === m.match_id)) {
+                combinedMatches.push(m);
+              }
+            }
+
             if (matches.length > 0) {
-              console.log(`[Repository] Found ${matches.length} matches in ${mode.name} on ${date}`);
+              console.log(`[Repository] Found ${matches.length} matches in ${mode.name} on ${date || 'Latest'}`);
             }
           } catch (err) {
-            // Silence common errors
+            // Silently skip modes/dates that return 400 or have no data
+            if (!err.message.includes('400')) {
+               console.warn(`[Repository] Skipping mode ${mode.name} on ${date}:`, err.message);
+            }
           }
         }
+        // If we found enough matches, we can stop early
+        if (combinedMatches.length >= limit * 2) break;
       }
 
       // Sort by date (descending) and take top N
-      const sortedIds = combinedMatches
+      const sortedMatches = combinedMatches
         .sort((a, b) => new Date(b.match_date) - new Date(a.match_date))
         .slice(0, limit);
       
       const details = [];
-      for (const m of sortedIds) {
+      for (const m of sortedMatches) {
         try {
           await delay(100);
           const detail = await this.apiClient.getMatchDetail(m.match_id);
