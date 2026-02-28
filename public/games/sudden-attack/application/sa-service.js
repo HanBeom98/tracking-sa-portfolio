@@ -1,24 +1,20 @@
-import { Player, MatchRecord } from '../domain/models.js';
-
+/**
+ * Sudden Attack Application Service (Application Layer)
+ * Coordinates user requests and domain operations using a repository.
+ */
 export class SaService {
-  constructor(apiClient) {
-    this.apiClient = apiClient;
+  constructor(repository) {
+    this.repository = repository;
   }
 
   /**
-   * Complete player search and profile load
+   * Search and load player profile
    */
   async searchPlayer(characterName) {
     try {
-      const ouid = await this.apiClient.getOuid(characterName);
-      const [basic, rank] = await Promise.all([
-        this.apiClient.getPlayerBasic(ouid),
-        this.apiClient.getPlayerRank(ouid)
-      ]);
-      
-      return new Player(basic, rank);
+      return await this.repository.getPlayer(characterName);
     } catch (error) {
-      console.error('Failed to search player:', error);
+      console.error('[ApplicationService] Failed to search player:', error);
       throw error;
     }
   }
@@ -28,17 +24,9 @@ export class SaService {
    */
   async getRecentMatches(ouid) {
     try {
-      const matches = await this.apiClient.getMatchList(ouid);
-      // Fetch details for each match (Nexon API often requires individual detail calls)
-      // Limit to last 5 matches for initial display performance
-      const detailPromises = matches.match_list.slice(0, 5).map(m => 
-        this.apiClient.getMatchDetail(m.match_id)
-      );
-      
-      const details = await Promise.all(detailPromises);
-      return details.map(d => new MatchRecord(d));
+      return await this.repository.getRecentMatches(ouid);
     } catch (error) {
-      console.error('Failed to load match history:', error);
+      console.error('[ApplicationService] Failed to load match history:', error);
       return [];
     }
   }

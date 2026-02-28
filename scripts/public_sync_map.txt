@@ -72,8 +72,9 @@ src/domains/games/tetris/main.js|public/tetris-game/main.js
 src/domains/games/tetris/infra/firebase-runtime.js|public/tetris-game/infra/firebase-runtime.js
 src/domains/games/tetris/application/tetris-game.js|public/tetris-game/application/tetris-game.js
 src/domains/games/sudden-attack/infra/nexon-api-client.js|public/games/sudden-attack/infra/nexon-api-client.js
+src/domains/games/sudden-attack/infra/sa-repository.js|public/games/sudden-attack/infra/sa-repository.js
 src/domains/games/sudden-attack/application/sa-service.js|public/games/sudden-attack/application/sa-service.js
 src/domains/games/sudden-attack/domain/models.js|public/games/sudden-attack/domain/models.js
 src/domains/games/sudden-attack/ui/sa-components.js|public/games/sudden-attack/ui/sa-components.js
+src/domains/games/sudden-attack/ui/style.css|public/games/sudden-attack/ui/style.css
 src/domains/games/sudden-attack/main.js|public/games/sudden-attack/main.js
-src/domains/games/sudden-attack/style.css|public/games/sudden-attack/style.css
