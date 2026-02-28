@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="game_submit_title">게임 등록 | Tracking SA</title>
+    <!-- HEAD_INJECTION -->
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .submit-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+        .form-card {
+            background: white;
+            padding: 40px;
+            border-radius: 24px;
+            border: 1px solid oklch(92% 0.02 260);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.05);
+        }
+        .form-title {
+            font-size: 1.8rem;
+            font-weight: 900;
+            margin-bottom: 30px;
+            text-align: center;
+            color: var(--text-main);
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            font-weight: 800;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: var(--text-sub);
+        }
+        .input-group input, .input-group textarea {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 12px;
+            border: 2px solid oklch(92% 0.02 260);
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+        .input-group input:focus, .input-group textarea:focus {
+            outline: none;
+            border-color: var(--p-blue);
+        }
+        .submit-form-btn {
+            width: 100%;
+            background: var(--p-blue);
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 800;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 8px 20px -5px var(--p-blue);
+            margin-top: 10px;
+        }
+        .submit-form-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px -5px var(--p-blue);
+        }
+        .submit-form-btn:disabled {
+            background: oklch(90% 0.01 250);
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+        #status-msg {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 700;
+            padding: 12px;
+            border-radius: 10px;
+            display: none;
+        }
+        .msg-success { background: oklch(95% 0.05 150); color: #16a34a; display: block !important; }
+        .msg-error { background: oklch(95% 0.05 20); color: #dc2626; display: block !important; }
+    </style>
+</head>
+<body>
+    <!-- HEADER_INJECTION -->
+    <main class="submit-container">
+        <div class="form-card">
+            <h1 class="form-title" data-i18n="register_your_game">당신의 게임을 등록하세요</h1>
+            
+            <form id="game-submit-form">
+                <div class="input-group">
+                    <label for="title" data-i18n="game_title_label">게임 제목</label>
+                    <input type="text" id="title" name="title" required placeholder="예: 미니 벽돌 깨기" maxlength="30">
+                </div>
+                
+                <div class="input-group">
+                    <label for="url" data-i18n="game_url_label">게임 실행 URL (HTML 링크 또는 외부 주소)</label>
+                    <input type="url" id="url" name="url" required placeholder="https://example.com/my-game">
+                </div>
+
+                <div class="input-group">
+                    <label for="thumbnail" data-i18n="game_thumb_label">썸네일 이미지 URL</label>
+                    <input type="url" id="thumbnail" name="thumbnail" placeholder="https://example.com/thumb.jpg">
+                </div>
+
+                <div class="input-group">
+                    <label for="description" data-i18n="game_desc_label">게임 설명</label>
+                    <textarea id="description" name="description" rows="4" required placeholder="게임 방법과 특징을 간단히 적어주세요." maxlength="200"></textarea>
+                </div>
+
+                <button type="submit" id="submit-btn" class="submit-form-btn" data-i18n="submit_for_review">등록 신청하기</button>
+            </form>
+
+            <div id="status-msg"></div>
+            
+            <p style="margin-top: 25px; font-size: 0.85rem; color: var(--text-sub); line-height: 1.5; text-align: center;" data-i18n="game_review_policy">
+                ※ 등록하신 게임은 관리자의 검토 후 승인 시에만 목록에 노출됩니다. <br>
+                부적절한 콘텐츠는 반려될 수 있습니다.
+            </p>
+        </div>
+    </main>
+    <!-- FOOTER_INJECTION -->
+    <script type="module" src="main.js"></script>
+</body>
+</html>

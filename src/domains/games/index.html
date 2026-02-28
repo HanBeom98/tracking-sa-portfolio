@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="game_center_title">게임 센터 | Tracking SA</title>
+    <meta name="description" content="다양한 클래식 및 AI 게임을 즐기고 직접 등록해보세요.">
+    <!-- HEAD_INJECTION -->
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .games-hub {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        .hub-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .hub-title h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin: 0;
+            color: var(--text-main);
+        }
+        .hub-title p {
+            color: var(--text-sub);
+            margin-top: 8px;
+        }
+        .submit-btn {
+            background: var(--p-blue);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 800;
+            transition: transform 0.2s;
+            box-shadow: 0 8px 20px -5px var(--p-blue);
+        }
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+        }
+        .game-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid oklch(92% 0.02 260);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+        }
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            border-color: var(--p-blue-soft);
+        }
+        .game-thumb {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: oklch(96% 0.01 250);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        .game-thumb img {
+            width: 60px;
+            height: 60px;
+            opacity: 0.5;
+        }
+        .game-info {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .game-card-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+        .game-card-desc {
+            font-size: 0.9rem;
+            color: var(--text-sub);
+            line-height: 1.5;
+            margin-bottom: 20px;
+            flex: 1;
+        }
+        .game-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            padding-top: 15px;
+            border-top: 1px solid oklch(96% 0.01 250);
+        }
+        .play-btn {
+            color: var(--p-blue);
+            font-weight: 800;
+            text-decoration: none;
+        }
+        .play-btn:hover {
+            text-decoration: underline;
+        }
+        @media (max-width: 640px) {
+            .hub-title h1 { font-size: 1.8rem; }
+            .hub-header { flex-direction: column; align-items: flex-start; }
+            .submit-btn { width: 100%; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER_INJECTION -->
+    <main class="games-hub">
+        <section class="hub-header">
+            <div class="hub-title">
+                <h1 data-i18n="game_center_h1">Game Center</h1>
+                <p data-i18n="game_center_desc">다양한 게임을 즐기고 당신만의 게임을 공유하세요.</p>
+            </div>
+            <a href="/games/submit/" class="submit-btn" data-i18n="game_register_btn">게임 등록하기</a>
+        </section>
+
+        <section id="game-list" class="game-grid">
+            <!-- Loading skeleton or empty state -->
+            <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-sub);" data-i18n="loading_games">
+                게임을 불러오는 중...
+            </div>
+        </section>
+    </main>
+    <!-- FOOTER_INJECTION -->
+    <script type="module" src="main.js"></script>
+</body>
+</html>

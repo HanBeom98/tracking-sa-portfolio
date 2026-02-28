@@ -755,6 +755,12 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/auth/signup/" />
   </url>
   <url>
+    <loc>https://trackingsa.com/games/</loc>
+    <lastmod>2026-02-28</lastmod>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/games/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/games/" />
+  </url>
+  <url>
     <loc>https://trackingsa.com/games/ai-evolution/</loc>
     <lastmod>2026-02-28</lastmod>
     <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/games/ai-evolution/" />
@@ -765,6 +771,12 @@
     <lastmod>2026-02-28</lastmod>
     <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/games/tetris/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/games/tetris/" />
+  </url>
+  <url>
+    <loc>https://trackingsa.com/games/submit/</loc>
+    <lastmod>2026-02-28</lastmod>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/games/submit/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/games/submit/" />
   </url>
   <url>
     <loc>https://trackingsa.com/account/</loc>

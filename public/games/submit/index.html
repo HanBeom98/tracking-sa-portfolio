@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="game_submit_title">게임 등록 | Tracking SA</title>
+    <!-- HEAD_INJECTION -->
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .submit-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+        .form-card {
+            background: white;
+            padding: 40px;
+            border-radius: 24px;
+            border: 1px solid oklch(92% 0.02 260);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.05);
+        }
+        .form-title {
+            font-size: 1.8rem;
+            font-weight: 900;
+            margin-bottom: 30px;
+            text-align: center;
+            color: var(--text-main);
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            font-weight: 800;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: var(--text-sub);
+        }
+        .input-group input, .input-group textarea {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 12px;
+            border: 2px solid oklch(92% 0.02 260);
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+        .input-group input:focus, .input-group textarea:focus {
+            outline: none;
+            border-color: var(--p-blue);
+        }
+        .submit-form-btn {
+            width: 100%;
+            background: var(--p-blue);
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 800;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 8px 20px -5px var(--p-blue);
+            margin-top: 10px;
+        }
+        .submit-form-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px -5px var(--p-blue);
+        }
+        .submit-form-btn:disabled {
+            background: oklch(90% 0.01 250);
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+        #status-msg {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 700;
+            padding: 12px;
+            border-radius: 10px;
+            display: none;
+        }
+        .msg-success { background: oklch(95% 0.05 150); color: #16a34a; display: block !important; }
+        .msg-error { background: oklch(95% 0.05 20); color: #dc2626; display: block !important; }
+    </style>
+    <meta name="robots" content="index, follow">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Tracking SA">
+    <meta property="og:url" content="https://trackingsa.com/games/submit/">
+    <meta property="og:image" content="https://trackingsa.com/logo.svg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://trackingsa.com/logo.svg">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
+    <link rel="alternate" type="application/rss+xml" title="Tracking SA RSS" href="/rss.xml">
+    <meta name="description" content="AI 테스트, 게임, 마켓 인사이트를 한 곳에서 경험하세요. 최신 인공지능 트렌드를 전달합니다.">
+    <meta property="og:title" content="Tracking SA - AI Services & Hub">
+    <meta property="og:description" content="AI 테스트, 게임, 마켓 인사이트를 한 곳에서 경험하세요. 최신 인공지능 트렌드를 전달합니다.">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7263630893992216" crossorigin="anonymous"></script>
+<meta name="google-adsense-account" content="ca-pub-7263630893992216">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-TGD3WRNKPZ');
+</script>
+<meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
+<meta name="naver-site-verification" content="b15b33af838280b54d31eb3c7e5c358d2836743f" />
+<script type="text/javascript">
+(function(c,l,a,r,i,t,y){
+    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+})(window, document, "clarity", "script", "vb9q33ggpa");
+</script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<script>
+  window.FIREBASE_CONFIG = {"apiKey": "PUBLIC_FIREBASE_WEB_KEY_REMOVED", "authDomain": "tracking-sa-295db.firebaseapp.com", "projectId": "tracking-sa-295db", "storageBucket": "tracking-sa-295db.firebasestorage.app", "appId": "1:779289056217:web:cf023fc55f1a2913ffbfc8", "messagingSenderId": "779289056217"};
+</script>
+<script>
+  window.authDomainReady = window.authDomainReady || new Promise((resolve) => {
+    window.__resolveAuthDomain = resolve;
+  });
+</script>
+<script type="module" src="/auth/ui/auth-client.js"></script>
+
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="/style.css?v=1772213752">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<script src="/firebase-config.js"></script>
+<script src="/translations.js?v=1772213752"></script>
+<script src="/common.js?v=1772213752"></script>
+
+</head>
+<body>
+    <header>
+    <div class="header-inner">
+        <a href="/" class="site-logo-link">
+            <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="site-logo">
+                <circle cx="50" cy="50" r="48" stroke="currentColor" stroke-width="4" fill="transparent"/>
+                <path d="M25 70L40 55L50 65L75 35" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="70" cy="35" r="12" stroke="currentColor" stroke-width="6" fill="currentColor"/>
+                <rect x="78" y="43" width="15" height="6" rx="3" transform="rotate(45 78 43)" fill="currentColor"/>
+            </svg>
+        </a>
+        <div class="desktop-menu-container">
+            <nav>
+                <ul>
+                    <li><a href="/news/" data-i18n="news_home">인사이트</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropbtn" data-i18n="menu_board">게시판</a>
+                        <div class="dropdown-content">
+                            <a href="/board?category=notice" data-i18n="notice">공지사항</a>
+                            <a href="/board?category=free" data-i18n="free_board">자유게시판</a>
+                        </div>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropbtn" data-i18n="menu_chart">차트</a>
+                        <div class="dropdown-content">
+                            <a href="/futures-estimate/" data-i18n="futures_estimate_index">지수</a>
+                        </div>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropbtn" data-i18n="menu_test">테스트</a>
+                        <div class="dropdown-content">
+                            <a href="/animal-face/" data-i18n="animal_face_test">동물상 테스트</a>
+                            <a href="/ai-test/" data-i18n="ai_tendency_test">AI 성향 테스트</a>
+                            <a href="/fortune/" data-i18n="saju_test">AI 실시간 오늘의 운세</a>
+                            <a href="/lucky-recommendation/" data-i18n="lucky_recommendation">행운의 추천</a>
+                        </div>
+                    </li>
+                    <li class="dropdown">
+                        <a href="/games/" class="dropbtn" data-i18n="menu_game">게임</a>
+                        <div class="dropdown-content">
+                            <a href="/games/" data-i18n="game_center_menu">게임 센터</a>
+                            <a href="/games/submit/" data-i18n="game_register_menu">게임 등록</a>
+                            <a href="/games/tetris/" data-i18n="tetris_game">테트리스</a>
+                            <a href="/games/ai-evolution/" data-i18n="ai_evolution">AI 진화 2048</a>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+            <div class="utility-controls">
+                <button id="color-change">🌙</button>
+                <div id="language-switcher"></div>
+                <div id="auth-controls" class="auth-controls"></div>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <main class="submit-container">
+        <div class="form-card">
+            <h1 class="form-title" data-i18n="register_your_game">당신의 게임을 등록하세요</h1>
+            
+            <form id="game-submit-form">
+                <div class="input-group">
+                    <label for="title" data-i18n="game_title_label">게임 제목</label>
+                    <input type="text" id="title" name="title" required placeholder="예: 미니 벽돌 깨기" maxlength="30">
+                </div>
+                
+                <div class="input-group">
+                    <label for="url" data-i18n="game_url_label">게임 실행 URL (HTML 링크 또는 외부 주소)</label>
+                    <input type="url" id="url" name="url" required placeholder="https://example.com/my-game">
+                </div>
+
+                <div class="input-group">
+                    <label for="thumbnail" data-i18n="game_thumb_label">썸네일 이미지 URL</label>
+                    <input type="url" id="thumbnail" name="thumbnail" placeholder="https://example.com/thumb.jpg">
+                </div>
+
+                <div class="input-group">
+                    <label for="description" data-i18n="game_desc_label">게임 설명</label>
+                    <textarea id="description" name="description" rows="4" required placeholder="게임 방법과 특징을 간단히 적어주세요." maxlength="200"></textarea>
+                </div>
+
+                <button type="submit" id="submit-btn" class="submit-form-btn" data-i18n="submit_for_review">등록 신청하기</button>
+            </form>
+
+            <div id="status-msg"></div>
+            
+            <p style="margin-top: 25px; font-size: 0.85rem; color: var(--text-sub); line-height: 1.5; text-align: center;" data-i18n="game_review_policy">
+                ※ 등록하신 게임은 관리자의 검토 후 승인 시에만 목록에 노출됩니다. <br>
+                부적절한 콘텐츠는 반려될 수 있습니다.
+            </p>
+        </div>
+    </main>
+    <footer>
+    <p data-i18n="footer_copyright"></p>
+    <p>
+        <a href="/about" data-i18n="about_us">서비스 소개</a> |
+        <a href="/contact" data-i18n="contact">문의</a> |
+        <a href="/inquiry" data-i18n="partnership_inquiry">인사이트 제휴 문의</a> |
+        <a href="/privacy-policy" data-i18n="privacy_policy">개인정보처리방침</a> |
+        <a href="/glossary">AI 용어 사전</a> |
+        <a href="/sitemap.xml" data-i18n="sitemap">사이트맵</a> |
+        <a href="/rss.xml">RSS Feed</a>
+    </p>
+</footer>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>

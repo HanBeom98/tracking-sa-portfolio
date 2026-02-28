@@ -40,7 +40,7 @@ def generate_public_site(incremental=False):
     
     # 4. 도메인 빌드
     domains = [
-        "animal-face", "fortune", "games", "ai-test", "lucky-recommendation", 
+        "animal-face", "fortune", "games", "games/submit", "ai-test", "lucky-recommendation", 
         "games/ai-evolution", "games/tetris", "privacy-policy", "about", "contact",
         "board", "board/write", "board/edit", "board/post", "inquiry", "search",
         "auth", "auth/signup", "account", "account/domain",
