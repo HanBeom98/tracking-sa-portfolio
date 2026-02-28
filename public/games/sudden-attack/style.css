@@ -1,0 +1,108 @@
+body.dark-theme {
+  background-color: #0f111a;
+  color: #e0e0e0;
+  font-family: 'Pretendard', sans-serif;
+  margin: 0;
+  padding: 20px;
+}
+
+.sa-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.hidden { display: none !important; }
+
+/* Search Section */
+.search-section {
+  text-align: center;
+  padding: 50px 0;
+  border-bottom: 1px solid #1f2233;
+}
+
+.search-bar {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.search-bar input {
+  padding: 12px 20px;
+  width: 300px;
+  background: #1a1d2e;
+  border: 1px solid #2d3356;
+  border-radius: 8px;
+  color: white;
+  font-size: 16px;
+}
+
+.search-bar button {
+  padding: 12px 30px;
+  background: #00d2ff;
+  border: none;
+  border-radius: 8px;
+  color: #0f111a;
+  font-weight: bold;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.search-bar button:hover { opacity: 0.8; }
+
+/* Player Card */
+.sa-card {
+  background: #1a1d2e;
+  border: 1px solid #2d3356;
+  border-radius: 12px;
+  padding: 30px;
+  margin: 30px 0;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+
+.sa-header {
+  display: flex;
+  align-items: baseline;
+  gap: 15px;
+  margin-bottom: 25px;
+  border-bottom: 2px solid #2d3356;
+  padding-bottom: 15px;
+}
+
+.nickname { font-size: 28px; font-weight: bold; color: #00d2ff; }
+.level { font-size: 18px; color: #888; }
+
+.sa-body {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.stat-item label { display: block; color: #888; margin-bottom: 5px; font-size: 14px; }
+.stat-item span { font-size: 20px; font-weight: 600; }
+
+/* Match History */
+.history-section h2 { margin-top: 40px; margin-bottom: 20px; }
+
+.match-list { list-style: none; padding: 0; margin: 0; }
+.match-item {
+  display: grid;
+  grid-template-columns: 80px 1fr 150px 120px;
+  align-items: center;
+  padding: 15px 20px;
+  background: #141724;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  border-left: 5px solid transparent;
+}
+
+.match-item.win { border-left-color: #00ff88; background: rgba(0, 255, 136, 0.05); }
+.match-item.lose { border-left-color: #ff4d4d; background: rgba(255, 77, 77, 0.05); }
+
+.result { font-weight: bold; }
+.win .result { color: #00ff88; }
+.lose .result { color: #ff4d4d; }
+
+.map { color: #ccc; }
+.kda { font-family: monospace; }
+.kd { text-align: right; color: #00d2ff; font-weight: bold; }

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>Sudden Attack Statistics - TrackingSA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../../shared/assets/style.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+  <main class="sa-container">
+    <section class="search-section">
+      <h1>서든어택 전적 검색</h1>
+      <div class="search-bar">
+        <input type="text" id="characterName" placeholder="캐릭터명을 입력하세요" />
+        <button id="searchBtn">검색</button>
+      </div>
+      <div id="loading" class="hidden">데이터를 불러오는 중...</div>
+    </section>
+
+    <section id="playerProfile" class="profile-section hidden">
+      <!-- sa-player-card will be injected here -->
+    </section>
+
+    <section id="matchHistory" class="history-section hidden">
+      <h2>최근 매치 기록</h2>
+      <!-- sa-match-list will be injected here -->
+    </section>
+  </main>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>

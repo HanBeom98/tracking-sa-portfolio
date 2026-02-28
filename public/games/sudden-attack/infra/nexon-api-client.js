@@ -1,0 +1,73 @@
+/**
+ * Nexon Open API Client for Sudden Attack
+ * Handles authentication and base request logic.
+ */
+export class NexonApiClient {
+  constructor(apiKey) {
+    this.apiKey = apiKey;
+    this.baseUrl = 'https://open.api.nexon.com/suddenattack/v1';
+  }
+
+  async fetch(endpoint, params = {}) {
+    const url = new URL(`${this.baseUrl}${endpoint}`);
+    Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'x-nxopen-api-key': this.apiKey,
+        'Accept': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error?.message || `Nexon API Error: ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Get ouid from character name
+   */
+  async getOuid(characterName) {
+    const data = await this.fetch('/id', { character_name: characterName });
+    return data.ouid;
+  }
+
+  /**
+   * Get basic player info
+   */
+  async getPlayerBasic(ouid) {
+    return this.fetch('/user/basic', { ouid });
+  }
+
+  /**
+   * Get player rank/tier info
+   */
+  async getPlayerRank(ouid) {
+    return this.fetch('/user/rank', { ouid });
+  }
+
+  /**
+   * Get match list
+   */
+  async getMatchList(ouid, matchType = '') {
+    return this.fetch('/match', { ouid, match_type: matchType });
+  }
+
+  /**
+   * Get match details
+   */
+  async getMatchDetail(matchId) {
+    return this.fetch('/match-detail', { match_id: matchId });
+  }
+
+  /**
+   * Get recent stats trend
+   */
+  async getRecentInfo(ouid) {
+    return this.fetch('/user/recent-info', { ouid });
+  }
+}
