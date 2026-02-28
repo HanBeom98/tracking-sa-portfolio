@@ -4,7 +4,8 @@
 이 문서는 **Gemini CLI가 자주 놓치는 포인트를 보완하는 실행 가이드**다.
 
 ## 🎯 핵심 원칙 (Core Principles)
-- **Framework-less:** 모든 기능은 순수 HTML/CSS/JS 및 Web Components로 구현한다.
+- **Framework-less (Frontend):** 사용자에게 보여지는 UI 및 클라이언트 로직은 최상의 성능과 영속성을 위해 순수 HTML/CSS/JS 및 Web Components로 구현한다.
+- **Polyglot & Scalable (Backend/Logic):** SQL 처리, 대규모 데이터 연산, AI 엔진 등 복잡한 비즈니스 로직이 필요한 경우 Java, Python 등 최적의 성능과 안정성을 가진 언어를 적극 도입하여 최적화한다.
 - **Strict DDD Architecture:** 모든 도메인은 4계층(`domain`, `application`, `infra`, `ui`) 구조를 철저히 지키며, 레이어 간 결합도(SoC)를 최소화한다.
 - **Test-First Execution:** 아무리 사소한 수정(한 줄의 코드 변경)이라도, **반드시 단위 테스트(`npm run test:unit`)를 실행하여 회귀(Regression)가 없음을 증명한 후**에만 커밋한다.
 - **Modern Standards:** CSS :has(), Container Queries, oklch 컬러 등 최신 웹 표준을 준수한다.
