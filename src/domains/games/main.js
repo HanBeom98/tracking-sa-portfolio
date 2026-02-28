@@ -1,4 +1,4 @@
-import { fetchGames, fetchMySubmissions, fetchPendingGames } from "./application/game-hub-service.js";
+import { fetchGames, fetchMySubmissions, fetchPendingGames, deleteGame } from "./application/game-hub-service.js";
 
 let allGames = [];
 let currentCategory = sessionStorage.getItem('last_game_cat') || 'all';
@@ -58,8 +58,11 @@ function renderGameCard(game, showStatus = false) {
 
   const playUrl = `/games/play/?id=${game.id}`;
 
+  const deleteBtn = (showStatus) ? 
+    `<button class="delete-game-btn" data-id="${game.id}" style="background:none; border:none; color:oklch(60% 0.15 20); cursor:pointer; font-size:0.75rem; font-weight:800; padding:0;">[DELETE]</button>` : '';
+
   return `
-    <article class="game-card">
+    <article class="game-card" id="game-card-${game.id}">
       <div class="game-badge ${badgeClass}">${badgeText}</div>
       <div class="game-thumb">
         <img src="${thumbUrl}" alt="${game.title}" onerror="this.src='/favicon.svg'">
@@ -67,7 +70,10 @@ function renderGameCard(game, showStatus = false) {
       <div class="game-info">
         <div style="display: flex; justify-content: space-between; align-items: start;">
           <h3 class="game-card-title">${game.title}</h3>
-          ${statusHtml}
+          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:5px;">
+            ${statusHtml}
+            ${deleteBtn}
+          </div>
         </div>
         <p class="game-card-desc">${game.description}</p>
         <div class="game-meta">
@@ -80,6 +86,25 @@ function renderGameCard(game, showStatus = false) {
       </div>
     </article>
   `;
+}
+
+async function handleGameDelete(e) {
+  const btn = e.target.closest(".delete-game-btn");
+  if (!btn) return;
+
+  const gameId = btn.dataset.id;
+  if (!confirm(t('confirm_delete_game', '정말로 이 게임 제출물을 삭제하시겠습니까?'))) return;
+
+  try {
+    btn.disabled = true;
+    await deleteGame(gameId);
+    document.getElementById(`game-card-${gameId}`)?.remove();
+    alert(t('delete_success', '삭제되었습니다.'));
+  } catch (err) {
+    console.error('[DeleteGame] Failed:', err);
+    alert(t('delete_failed', '삭제에 실패했습니다.'));
+    btn.disabled = false;
+  }
 }
 
 function filterAndRender() {
@@ -197,6 +222,7 @@ async function initHub() {
       if (myGames.length > 0) {
         mySubmissionsContainer.style.display = "block";
         myListEl.innerHTML = myGames.map(g => renderGameCard(g, true)).join("");
+        myListEl.onclick = handleGameDelete;
       }
     }
     

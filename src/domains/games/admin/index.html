@@ -3,79 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="admin_game_approval_title">게임 승인 관리 | Tracking SA</title>
+    <title data-i18n="admin_game_management_title">게임 통합 관리 | Tracking SA</title>
     <!-- HEAD_INJECTION -->
     <link rel="stylesheet" href="/style.css">
     <style>
-        .admin-container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
+        .admin-container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
         .admin-header {
-            margin-bottom: 30px;
-            border-bottom: 2px solid var(--p-blue-soft);
-            padding-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            margin-bottom: 40px; border-bottom: 2px solid var(--p-blue-soft);
+            padding-bottom: 15px; display: flex; justify-content: space-between; align-items: center;
         }
-        .pending-list {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
+        .admin-section { margin-bottom: 60px; }
+        .admin-section-title { font-size: 1.25rem; font-weight: 800; margin-bottom: 20px; color: var(--text-main); border-left: 4px solid var(--p-blue); padding-left: 15px; }
+        
+        .game-list { display: flex; flex-direction: column; gap: 15px; }
+        .game-card {
+            background: white; border-radius: 16px; padding: 20px; border: 1px solid oklch(92% 0.02 260);
+            display: flex; gap: 20px; align-items: center; transition: all 0.2s;
         }
-        .pending-card {
-            background: white;
-            border-radius: 16px;
-            padding: 20px;
-            border: 1px solid oklch(92% 0.02 260);
-            display: flex;
-            gap: 20px;
-            align-items: center;
+        .game-card:hover { border-color: var(--p-blue-soft); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        
+        .game-thumb {
+            width: 100px; aspect-ratio: 16/9; background: oklch(96% 0.01 250);
+            border-radius: 8px; display: flex; justify-content: center; align-items: center; overflow: hidden;
         }
-        .pending-thumb {
-            width: 120px;
-            aspect-ratio: 16/9;
-            background: oklch(96% 0.01 250);
-            border-radius: 8px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-        .pending-thumb img { width: 40px; opacity: 0.5; }
-        .pending-info { flex: 1; }
-        .pending-info h3 { margin: 0 0 5px 0; color: var(--text-main); }
-        .pending-info p { margin: 0; font-size: 0.9rem; color: var(--text-sub); }
-        .pending-meta { margin-top: 10px; font-size: 0.8rem; color: var(--p-blue); }
-        .admin-actions { display: flex; gap: 10px; }
-        .btn {
-            padding: 8px 16px;
-            border-radius: 8px;
-            border: none;
-            font-weight: 700;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
+        .game-thumb img { width: 30px; opacity: 0.5; }
+        .game-info { flex: 1; }
+        .game-info h3 { margin: 0 0 5px 0; color: var(--text-main); font-size: 1.1rem; }
+        .game-info p { margin: 0; font-size: 0.85rem; color: var(--text-sub); }
+        .game-meta { margin-top: 8px; font-size: 0.75rem; color: var(--p-blue); font-weight: 600; }
+        
+        .admin-actions { display: flex; gap: 10px; align-items: center; }
+        .btn { padding: 8px 16px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; transition: all 0.2s; font-size: 0.85rem; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-approve { background: var(--p-blue); color: white; }
-        .btn-reject { background: oklch(60% 0.15 20); color: white; }
-        .empty-state { text-align: center; padding: 60px; color: var(--text-sub); }
+        .btn-reject { background: oklch(96% 0.01 250); color: oklch(50% 0.1 20); }
+        .btn-delete { background: oklch(90% 0.1 20); color: white; }
+        
+        .cat-select { padding: 6px 10px; border-radius: 8px; border: 1px solid var(--p-blue-soft); font-size: 0.8rem; font-weight: 700; color: var(--p-blue); cursor: pointer; }
+        .empty-state { text-align: center; padding: 40px; color: var(--text-sub); background: var(--bg-sub); border-radius: 12px; border: 1px dashed oklch(90% 0.02 260); }
     </style>
 </head>
 <body>
     <!-- HEADER_INJECTION -->
     <main class="admin-container">
         <header class="admin-header">
-            <h1 data-i18n="admin_game_approval_h1">Game Approval Management</h1>
+            <h1 data-i18n="admin_game_management_h1">Game Management Hub</h1>
             <a href="/games/" class="btn" style="background: var(--bg-sub); color: var(--text-main);" data-i18n="back_to_hub">Back to Hub</a>
         </header>
 
-        <div id="pending-list-container" class="pending-list">
-            <!-- Loading -->
-            <div class="empty-state" data-i18n="loading">Loading pending games...</div>
-        </div>
+        <section class="admin-section">
+            <h2 class="admin-section-title">Pending Approvals</h2>
+            <div id="pending-list-container" class="game-list">
+                <div class="empty-state">Loading pending games...</div>
+            </div>
+        </section>
+
+        <section class="admin-section">
+            <h2 class="admin-section-title">Approved Inventory</h2>
+            <div id="approved-list-container" class="game-list">
+                <div class="empty-state">Loading inventory...</div>
+            </div>
+        </section>
     </main>
     <!-- FOOTER_INJECTION -->
     <script type="module" src="main.js"></script>

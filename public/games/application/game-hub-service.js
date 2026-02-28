@@ -177,6 +177,37 @@ export async function updateGameStatus(gameId, status) {
 }
 
 /**
+ * [ADMIN/OWNER] Delete a game.
+ */
+export async function deleteGame(gameId) {
+  const auth = await getAuth();
+  if (!auth) throw new Error('auth_required');
+
+  const db = auth.getAuthService()?.getFirestore?.() || (typeof firebase !== 'undefined' ? firebase.firestore() : null);
+  if (!db) throw new Error('database_unavailable');
+
+  return await db.collection('games').doc(gameId).delete();
+}
+
+/**
+ * [ADMIN/OWNER] Update game category.
+ */
+export async function updateGameCategory(gameId, category) {
+  const auth = await getAuth();
+  if (!auth) throw new Error('auth_required');
+
+  const db = auth.getAuthService()?.getFirestore?.() || (typeof firebase !== 'undefined' ? firebase.firestore() : null);
+  if (!db) throw new Error('database_unavailable');
+
+  return await db.collection('games').doc(gameId).update({ 
+    category,
+    updatedAt: (typeof firebase !== 'undefined' && firebase.firestore.FieldValue) 
+      ? firebase.firestore.FieldValue.serverTimestamp() 
+      : new Date().toISOString()
+  });
+}
+
+/**
  * Fetch a single game by ID.
  */
 export async function getGameById(gameId) {
