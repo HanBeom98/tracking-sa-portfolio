@@ -1,11 +1,13 @@
 export class Player {
   constructor(ouid, basic, rank) {
     this.ouid = ouid;
-    this.nickname = basic.character_name;
-    this.level = basic.level;
-    this.rankName = rank.rank_name || "Unknown";
-    this.ranking = rank.ranking || 0;
-    this.totalExp = rank.exp || 0;
+    this.nickname = basic.user_name;
+    this.level = basic.title_name || ""; // Level alternative in SA
+    this.clanName = basic.clan_name || "None";
+    this.rankName = rank.grade || "Unknown";
+    this.ranking = rank.grade_ranking || 0;
+    this.totalExp = rank.grade_exp || 0;
+    this.seasonRank = rank.season_grade || "";
   }
 }
 

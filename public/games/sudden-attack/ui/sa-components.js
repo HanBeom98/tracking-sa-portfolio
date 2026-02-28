@@ -7,21 +7,27 @@ export class SaPlayerCard extends HTMLElement {
     this.innerHTML = `
       <div class="sa-card">
         <div class="sa-header">
-          <span class="nickname">${data.nickname}</span>
-          <span class="level">Lv.${data.level}</span>
+          <div class="profile-main">
+            <span class="nickname">${data.nickname}</span>
+            <span class="clan-name">[${data.clanName}]</span>
+          </div>
+          <div class="profile-sub">
+            <span class="rank-name">${data.rankName}</span>
+            <span class="season-rank">(${data.seasonRank})</span>
+          </div>
         </div>
         <div class="sa-body">
           <div class="stat-item">
-            <label>Rank</label>
-            <span>${data.rankName}</span>
-          </div>
-          <div class="stat-item">
-            <label>Ranking</label>
+            <label>Current Ranking</label>
             <span>#${(data.ranking || 0).toLocaleString()}</span>
           </div>
           <div class="stat-item">
-            <label>Total Exp</label>
-            <span>${(data.totalExp || 0).toLocaleString()}</span>
+            <label>Total Experience</label>
+            <span>${(data.totalExp || 0).toLocaleString()} EXP</span>
+          </div>
+          <div class="stat-item">
+            <label>Title</label>
+            <span>${data.level || 'No Title'}</span>
           </div>
         </div>
       </div>

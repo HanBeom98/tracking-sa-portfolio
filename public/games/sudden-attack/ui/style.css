@@ -62,15 +62,20 @@ body.dark-theme {
 
 .sa-header {
   display: flex;
-  align-items: baseline;
-  gap: 15px;
+  flex-direction: column;
+  gap: 8px;
   margin-bottom: 25px;
   border-bottom: 2px solid #2d3356;
   padding-bottom: 15px;
 }
 
-.nickname { font-size: 28px; font-weight: bold; color: #00d2ff; }
-.level { font-size: 18px; color: #888; }
+.profile-main { display: flex; align-items: baseline; gap: 12px; }
+.nickname { font-size: 32px; font-weight: bold; color: #00d2ff; }
+.clan-name { font-size: 18px; color: #ffcc00; font-weight: 600; }
+
+.profile-sub { display: flex; gap: 10px; color: #888; font-size: 16px; }
+.rank-name { color: #fff; font-weight: 500; }
+.season-rank { font-style: italic; }
 
 .sa-body {
   display: grid;
