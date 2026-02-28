@@ -69,8 +69,10 @@ export class NexonApiClient {
   /**
    * Get match list
    */
-  async getMatchList(ouid, matchType) {
-    return this.fetch('/match', { ouid, match_type: matchType });
+  async getMatchList(ouid, matchType, date = "") {
+    const params = { ouid, match_type: matchType };
+    if (date) params.date = date;
+    return this.fetch('/match', params);
   }
 
   /**

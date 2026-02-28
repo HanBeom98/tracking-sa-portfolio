@@ -54,14 +54,18 @@ export class SaRepository {
     const combinedMatches = [];
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
+    // Get current date in KST (YYYY-MM-DD)
+    const now = new Date();
+    const kstDate = new Date(now.getTime() + (9 * 60 * 60 * 1000)).toISOString().split('T')[0];
+
     try {
-      console.log(`[Repository] Starting sequential scan for OUID: ${ouid}`);
+      console.log(`[Repository] Starting sequential scan for OUID: ${ouid} on Date: ${kstDate}`);
       
       for (const mode of modes) {
         try {
           // Increase delay to 1000ms to respect strict Test Key limits
           await delay(1000); 
-          const data = await this.apiClient.getMatchList(ouid, mode.id);
+          const data = await this.apiClient.getMatchList(ouid, mode.id, kstDate);
           const matches = (data.match_list || []).map(m => ({ ...m, typeName: mode.name }));
           combinedMatches.push(...matches);
           console.log(`[Repository] Successfully loaded ${matches.length} matches from ${mode.name}`);
