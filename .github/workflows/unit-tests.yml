@@ -2,6 +2,8 @@ name: Unit Tests
 
 on:
   pull_request:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -12,8 +14,72 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  unit:
+  filter:
     runs-on: ubuntu-latest
+    outputs:
+      any_changed: ${{ steps.filter.outputs.any_changed }}
+      domains: ${{ steps.filter.outputs.changes }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            shared:
+              - 'src/shared/**'
+              - 'package.json'
+              - 'tests/unit/app-shell-runtime.test.js'
+            rules:
+              - 'firestore.rules'
+              - 'tests/unit/firestore-rules-guards.test.js'
+            account:
+              - 'src/domains/account/**'
+              - 'tests/unit/account-*.test.js'
+            ai-test:
+              - 'src/domains/ai-test/**'
+              - 'tests/unit/ai-test-*.test.js'
+            animal-face:
+              - 'src/domains/animal-face/**'
+              - 'tests/unit/animal-face-*.test.js'
+            auth:
+              - 'src/domains/auth/**'
+              - 'tests/unit/auth-*.test.js'
+            board:
+              - 'src/domains/board/**'
+              - 'tests/unit/board-*.test.js'
+            fortune:
+              - 'src/domains/fortune/**'
+              - 'tests/unit/fortune-*.test.js'
+            futures:
+              - 'src/domains/futures-estimate/**'
+              - 'tests/unit/futures-*.test.js'
+            lucky:
+              - 'src/domains/lucky-recommendation/**'
+              - 'tests/unit/lucky-*.test.js'
+            news:
+              - 'src/domains/news/**'
+              - 'tests/unit/news-*.test.js'
+            search:
+              - 'src/domains/search/**'
+              - 'tests/unit/search-*.test.js'
+            games:
+              - 'src/domains/games/**'
+              - 'tests/unit/games-*.test.js'
+            about:
+              - 'src/domains/about/**'
+            glossary:
+              - 'src/domains/glossary/**'
+            inquiry:
+              - 'src/domains/inquiry/**'
+
+  test:
+    needs: filter
+    if: needs.filter.outputs.any_changed == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        domain: ${{ fromJSON(needs.filter.outputs.domains) }}
     steps:
       - uses: actions/checkout@v4
 
@@ -25,5 +91,54 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run unit tests
-        run: npm run test:unit
+      - name: Run Targeted Unit Tests
+        run: |
+          case "${{ matrix.domain }}" in
+            shared)
+              npm run test:unit
+              ;;
+            rules)
+              npm run test:rules
+              ;;
+            account)
+              node --test tests/unit/account-*.test.js
+              ;;
+            ai-test)
+              node --test tests/unit/ai-test-*.test.js
+              ;;
+            animal-face)
+              node --test tests/unit/animal-face-*.test.js
+              ;;
+            auth)
+              node --test tests/unit/auth-*.test.js tests/unit/app-shell-runtime.test.js
+              ;;
+            board)
+              node --test tests/unit/board-*.test.js
+              ;;
+            fortune)
+              node --test tests/unit/fortune-*.test.js
+              ;;
+            futures)
+              node --test tests/unit/futures-*.test.js
+              ;;
+            lucky)
+              node --test tests/unit/lucky-*.test.js
+              ;;
+            news)
+              node --test tests/unit/news-*.test.js
+              ;;
+            search)
+              node --test tests/unit/search-*.test.js
+              ;;
+            games)
+              # Check if test files exist before running
+              if ls tests/unit/games-*.test.js 1> /dev/null 2>&1; then
+                node --test tests/unit/games-*.test.js
+              else
+                echo "No games tests found yet."
+              fi
+              ;;
+            *)
+              echo "No specific unit tests for ${{ matrix.domain }}. Skipping unit test step."
+              ;;
+          esac

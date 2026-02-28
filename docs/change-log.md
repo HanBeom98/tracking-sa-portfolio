@@ -1,5 +1,16 @@
 ## 2026-02-28
 
+### chore(ci): optimize CI/CD pipeline with smart selective testing
+- 문제/증상:
+  - 프로젝트 규모가 커짐에 따라 불필요한 전체 테스트 실행으로 빌드/배포 시간이 기하급수적으로 증가할 우려가 있음.
+- 변경:
+  - **영리한 테스트 필터링**: `dorny/paths-filter`를 도입하여 `src/domains/` 하위 수정 사항에 맞는 테스트만 선택적으로 실행 (`unit-tests.yml`, `site-deploy.yml`).
+  - **병렬 가속화**: GitHub Actions Matrix 전략을 활용하여 여러 도메인의 테스트를 동시에 수행하여 전체 검증 속도 향상.
+  - **배포 프로세스 가속화**: 배포 전 검증 단계를 최적화하여 변경되지 않은 도메인의 테스트를 생략하도록 개선.
+- 영향 범위: 전체 CI/CD 파이프라인 및 개발 워크플로우.
+- 검증:
+  - `unit-tests.yml` 및 `site-deploy.yml` 설정 완료 및 도메인별 필터링 로직 확인.
+
 ### feat(games): implement full-cycle operation system and premium UX
 - 문제/증상:
   - 게임 센터가 정적인 목록에 그쳐 유저 참여와 지속적인 운영 동력이 부족함.

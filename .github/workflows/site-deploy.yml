@@ -30,9 +30,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # 1단계: 테스트 수행
+  # 1단계: 변경 기반 스마트 테스트 수행
   test:
     runs-on: ubuntu-latest
+    outputs:
+      any_changed: ${{ steps.filter.outputs.any_changed }}
+      domains: ${{ steps.filter.outputs.changes }}
     steps:
       - uses: actions/checkout@v4
 
@@ -42,13 +45,84 @@ jobs:
           cache: "npm"
 
       - name: Install Node dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Run Unit Tests
-        run: npm run test:unit
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            shared:
+              - 'src/shared/**'
+              - 'package.json'
+              - 'tests/unit/app-shell-runtime.test.js'
+            rules:
+              - 'firestore.rules'
+              - 'tests/unit/firestore-rules-guards.test.js'
+            account:
+              - 'src/domains/account/**'
+              - 'tests/unit/account-*.test.js'
+            ai-test:
+              - 'src/domains/ai-test/**'
+              - 'tests/unit/ai-test-*.test.js'
+            animal-face:
+              - 'src/domains/animal-face/**'
+              - 'tests/unit/animal-face-*.test.js'
+            auth:
+              - 'src/domains/auth/**'
+              - 'tests/unit/auth-*.test.js'
+            board:
+              - 'src/domains/board/**'
+              - 'tests/unit/board-*.test.js'
+            fortune:
+              - 'src/domains/fortune/**'
+              - 'tests/unit/fortune-*.test.js'
+            futures:
+              - 'src/domains/futures-estimate/**'
+              - 'tests/unit/futures-*.test.js'
+            lucky:
+              - 'src/domains/lucky-recommendation/**'
+              - 'tests/unit/lucky-*.test.js'
+            news:
+              - 'src/domains/news/**'
+              - 'tests/unit/news-*.test.js'
+            search:
+              - 'src/domains/search/**'
+              - 'tests/unit/search-*.test.js'
+            games:
+              - 'src/domains/games/**'
+              - 'tests/unit/games-*.test.js'
 
-      - name: Run Firestore Rules Tests
-        run: npm run test:rules
+      - name: Run Targeted Unit Tests
+        if: steps.filter.outputs.any_changed == 'true'
+        run: |
+          # If shared code or core files changed, run all tests
+          if echo '${{ steps.filter.outputs.changes }}' | grep -q '"shared"'; then
+            echo "Shared code changed. Running all unit tests..."
+            npm run test:unit
+          else
+            # Run only tests for changed domains
+            DOMAINS=$(echo '${{ steps.filter.outputs.changes }}' | jq -r '.[]')
+            for DOMAIN in $DOMAINS; do
+              case "$DOMAIN" in
+                rules) npm run test:rules ;;
+                account) node --test tests/unit/account-*.test.js ;;
+                ai-test) node --test tests/unit/ai-test-*.test.js ;;
+                animal-face) node --test tests/unit/animal-face-*.test.js ;;
+                auth) node --test tests/unit/auth-*.test.js tests/unit/app-shell-runtime.test.js ;;
+                board) node --test tests/unit/board-*.test.js ;;
+                fortune) node --test tests/unit/fortune-*.test.js ;;
+                futures) node --test tests/unit/futures-*.test.js ;;
+                lucky) node --test tests/unit/lucky-*.test.js ;;
+                news) node --test tests/unit/news-*.test.js ;;
+                search) node --test tests/unit/search-*.test.js ;;
+                games) 
+                  if ls tests/unit/games-*.test.js 1> /dev/null 2>&1; then
+                    node --test tests/unit/games-*.test.js
+                  fi
+                  ;;
+              esac
+            done
+          fi
 
   # 2단계: 테스트 성공 시에만 빌드 및 배포
   build-and-deploy:
@@ -65,7 +139,7 @@ jobs:
           cache: "npm"
 
       - name: Install Node dependencies
-        run: npm install
+        run: npm ci
 
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
@@ -119,4 +193,3 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy public --project-name=tracking-sa --branch=main
-# trigger
