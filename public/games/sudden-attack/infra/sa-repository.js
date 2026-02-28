@@ -54,24 +54,32 @@ export class SaRepository {
     const combinedMatches = [];
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-    // Get current date in KST (YYYY-MM-DD)
+    // Get Today and Yesterday in KST (YYYY-MM-DD)
     const now = new Date();
-    const kstDate = new Date(now.getTime() + (9 * 60 * 60 * 1000)).toISOString().split('T')[0];
+    const kstNow = new Date(now.getTime() + (9 * 60 * 60 * 1000));
+    const kstYesterday = new Date(kstNow.getTime() - (24 * 60 * 60 * 1000));
+    
+    const dates = [
+      kstNow.toISOString().split('T')[0],
+      kstYesterday.toISOString().split('T')[0]
+    ];
 
     try {
-      console.log(`[Repository] Starting sequential scan for OUID: ${ouid} on Date: ${kstDate}`);
+      console.log(`[Repository] Starting deep scan for OUID: ${ouid} on Dates: ${dates.join(', ')}`);
       
-      for (const mode of modes) {
-        try {
-          // Increase delay to 1000ms to respect strict Test Key limits
-          await delay(1000); 
-          const data = await this.apiClient.getMatchList(ouid, mode.id, kstDate);
-          const matches = (data.match_list || []).map(m => ({ ...m, typeName: mode.name }));
-          combinedMatches.push(...matches);
-          console.log(`[Repository] Successfully loaded ${matches.length} matches from ${mode.name}`);
-        } catch (err) {
-          // Log specific error for debugging match 400
-          console.warn(`[Repository] Mode ${mode.name} (ID: ${mode.id}) failed:`, err.message);
+      for (const date of dates) {
+        for (const mode of modes) {
+          try {
+            await delay(1000); 
+            const data = await this.apiClient.getMatchList(ouid, mode.id, date);
+            const matches = (data.match_list || []).map(m => ({ ...m, typeName: mode.name }));
+            combinedMatches.push(...matches);
+            if (matches.length > 0) {
+              console.log(`[Repository] Found ${matches.length} matches in ${mode.name} on ${date}`);
+            }
+          } catch (err) {
+            // Silence common errors
+          }
         }
       }
 

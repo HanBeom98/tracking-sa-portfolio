@@ -1,7 +1,7 @@
-import { NexonApiClient } from './infra/nexon-api-client.js?v=20260228_6';
-import { SaRepository } from './infra/sa-repository.js?v=20260228_6';
-import { SaService } from './application/sa-service.js?v=20260228_6';
-import './ui/sa-components.js?v=20260228_6';
+import { NexonApiClient } from './infra/nexon-api-client.js?v=20260228_7';
+import { SaRepository } from './infra/sa-repository.js?v=20260228_7';
+import { SaService } from './application/sa-service.js?v=20260228_7';
+import './ui/sa-components.js?v=20260228_7';
 
 // TODO: In production, API key should be handled via server-side proxy or environment injection
 const TEST_API_KEY = 'test_6e6f12fbfb54d0fad8b504b3303286fb7126e128645f117de3d8cae0bd8fd503efe8d04e6d233bd35cf2fabdeb93fb0d';
