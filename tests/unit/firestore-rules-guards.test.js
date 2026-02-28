@@ -95,7 +95,7 @@ test("firestore rules: games allow public read, authenticated pending create, an
   const block = normalize(extractMatchBlock(rules, "/games/{gameId}"));
 
   assert.ok(block.includes("allow read: if true;"));
-  assert.ok(block.includes("allow create: if request.auth != null && request.resource.data.status == \"pending\" && request.resource.data.authorUid == request.auth.uid;"));
+  assert.ok(block.includes("allow create: if isAdmin() || (request.auth != null && request.resource.data.status == \"pending\" && request.resource.data.authorUid == request.auth.uid);"));
   assert.ok(block.includes("allow update: if isAdmin() || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['playCount']) && request.resource.data.playCount is number);"));
   assert.ok(block.includes("allow delete: if isAdmin();"));
 });
