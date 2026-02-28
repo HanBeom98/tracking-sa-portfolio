@@ -105,15 +105,22 @@ export const gameService = {
             if (id === 'tetris' || id === 'ai-evolution') {
                 if (typeof window !== "undefined" && window.AuthGateway) {
                     const profile = window.AuthGateway.getCurrentUserProfile();
-                    if (profile && profile.role === "admin") {
+                    const user = window.AuthGateway.getCurrentUser();
+                    if (profile && profile.role === "admin" && user) {
                         console.info(`[GameService] Auto-creating missing default game document: ${id}`);
                         const all = await this.getApprovedGames();
                         const g = all.find(x => x.id === id);
                         if (g) {
                             await gameRepository.set(id, {
-                                ...g,
-                                playCount: 1, // Start with 1 as it's being played
+                                id: g.id,
+                                title: g.title,
+                                description: g.description,
+                                url: g.url,
+                                authorName: g.authorName || 'Admin',
+                                authorUid: user.uid, // Provide valid UID
+                                playCount: 1,
                                 status: 'approved',
+                                category: g.category || 'classic',
                                 createdAt: g.createdAt || new Date().toISOString()
                             });
                         }
