@@ -114,10 +114,16 @@ function renderPredictionHistorySuccess(items) {
     const inferredPred = item.prediction_label || computePredictionLabel(item.probability_up);
     const pred = toDirectionTextWithTranslator(inferredPred, t);
     
-    // Improved Actual display: include numerical value if available
+    // Detailed Actual display: include numerical comparison if available
     const actualDir = toDirectionTextWithTranslator(item.actual_label || "-", t);
-    const actualVal = typeof item.actual_close === "number" ? ` (${formatNumber(item.actual_close)})` : "";
-    const actual = `${actualDir}${actualVal}`;
+    let actualHtml = actualDir;
+    if (typeof item.actual_close === "number") {
+      if (typeof item.actual_prev_close === "number") {
+        actualHtml = `${actualDir} <br><span style="font-size:0.7rem; color:#64748b;">(${formatNumber(item.actual_prev_close)} → ${formatNumber(item.actual_close)})</span>`;
+      } else {
+        actualHtml = `${actualDir} <span style="font-size:0.75rem;">(${formatNumber(item.actual_close)})</span>`;
+      }
+    }
 
     // Styled result badge
     const rawResult = toPredictionResultTextWithTranslator(item, t);
@@ -141,8 +147,8 @@ function renderPredictionHistorySuccess(items) {
       <tr style="border-bottom:1px solid #f1f5f9;">
         <td style="padding:8px 6px;">${date}</td>
         <td style="padding:8px 6px;">${pred}</td>
-        <td style="padding:12px 6px;">${actual}</td>
-        <td style="padding:12px 6px;">${resultHtml}</td>
+        <td style="padding:8px 6px;">${actualHtml}</td>
+        <td style="padding:8px 6px; vertical-align:middle;">${resultHtml}</td>
         <td style="padding:8px 6px;">${probabilityText}</td>
       </tr>
     `;
