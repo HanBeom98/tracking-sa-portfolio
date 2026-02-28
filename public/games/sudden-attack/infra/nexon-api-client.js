@@ -46,7 +46,7 @@ export class NexonApiClient {
    * Get ouid from character name
    */
   async getOuid(characterName) {
-    const data = await this.fetch('/id', { character_name: characterName });
+    const data = await this.fetch('/id', { user_name: characterName });
     return data.ouid;
   }
 
