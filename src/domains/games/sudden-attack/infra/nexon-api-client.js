@@ -22,7 +22,14 @@ export class NexonApiClient {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error?.message || `Nexon API Error: ${response.status}`);
+      const message = errorData.error?.message || "";
+      
+      // Nexon API returns 400 for non-existent characters with this specific message
+      if (response.status === 400 && message.includes("valid parameter")) {
+        throw new Error('PLAYER_NOT_FOUND');
+      }
+      
+      throw new Error(message || `Nexon API Error: ${response.status}`);
     }
 
     return response.json();
