@@ -524,9 +524,9 @@ export class TetrisGame extends HTMLElement {
                     padding-left: 10px;
                     padding-right: 10px;
                 }
-                .controls { min-height: 120px !important; gap: 12px !important; }
-                .side-panel { width: 80px !important; }
-                .btn { font-size: 24px !important; }
+                .controls { min-height: 120px; gap: 12px; }
+                .side-panel { width: 80px; }
+                .btn { font-size: 24px; }
             }
 
             .game-main { 
