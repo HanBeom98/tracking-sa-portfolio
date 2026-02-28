@@ -18,6 +18,9 @@ export class SaRepository {
       this.apiClient.getPlayerBasic(ouid),
       this.apiClient.getPlayerRank(ouid)
     ]);
+
+    console.log('[Repository] Player Basic Info:', JSON.stringify(basic, null, 2));
+    console.log('[Repository] Player Rank Info:', JSON.stringify(rank, null, 2));
     
     return new Player(ouid, basic, rank);
   }

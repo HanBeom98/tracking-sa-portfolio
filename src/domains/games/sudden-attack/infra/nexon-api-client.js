@@ -12,6 +12,8 @@ export class NexonApiClient {
     const url = new URL(`${this.baseUrl}${endpoint}`);
     Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
 
+    console.log(`[NexonAPI Request]: ${url.toString()}`);
+
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -22,7 +24,7 @@ export class NexonApiClient {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error('[NexonAPI Debug Full Error]:', errorData);
+      console.error(`[NexonAPI Error Response] Status: ${response.status}`, JSON.stringify(errorData, null, 2));
       
       const message = errorData.error?.message || "";
       const isTestKey = this.apiKey.startsWith('test_');
