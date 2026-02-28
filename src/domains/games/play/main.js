@@ -1,23 +1,10 @@
-import { getGameById, incrementPlayCount, fetchGames } from "../application/game-hub-service.js";
+import { gameService } from "../application/gameService.js";
+import { gameRenderer } from "../ui/gameRenderer.js";
 
 function t(key, fallback) {
   return typeof window !== "undefined" && window.getTranslation
     ? window.getTranslation(key, fallback)
     : fallback;
-}
-
-function renderMiniCard(game) {
-    return `
-        <a href="/games/play/?id=${game.id}" style="text-decoration:none; display:flex; flex-direction:column; background:white; border-radius:12px; overflow:hidden; border:1px solid oklch(92% 0.02 260); transition:transform 0.2s;">
-            <div style="width:100%; aspect-ratio:16/9; background:oklch(96% 0.01 250); display:flex; justify-content:center; align-items:center;">
-                <img src="${game.thumbnail || '/favicon.svg'}" style="width:30px; opacity:0.5;" onerror="this.src='/favicon.svg'">
-            </div>
-            <div style="padding:12px;">
-                <h4 style="margin:0; font-size:0.9rem; color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${game.title}</h4>
-                <p style="margin:4px 0 0 0; font-size:0.75rem; color:var(--text-sub);">${game.playCount || 0} plays</p>
-            </div>
-        </a>
-    `;
 }
 
 async function handleShare(game) {
@@ -44,7 +31,7 @@ async function loadRelatedGames(currentCategory, currentGameId) {
     if (!listEl) return;
 
     try {
-        const allGames = await fetchGames();
+        const allGames = await gameService.getApprovedGames();
         let related = allGames.filter(g => g.category === currentCategory && g.id !== currentGameId);
         
         if (related.length < 4) {
@@ -62,7 +49,7 @@ async function loadRelatedGames(currentCategory, currentGameId) {
             return;
         }
 
-        listEl.innerHTML = related.map(renderMiniCard).join("");
+        listEl.innerHTML = related.map(g => gameRenderer.renderMiniCard(g)).join("");
     } catch (e) {
         console.warn("[RelatedGames] Failed to load:", e);
         const sec = document.getElementById("related-section");
@@ -75,24 +62,22 @@ async function initPlayPage() {
     const gameId = params.get("id");
 
     if (!gameId) {
-        console.error("[PlayPage] No game ID provided");
         window.location.href = "/games/";
         return;
     }
 
-    // 1. Iframe & Loader elements (Crucial)
     const frame = document.getElementById("game-frame");
     const loader = document.getElementById("loading-indicator");
 
     try {
-        const game = await getGameById(gameId);
+        const game = await gameService.getGame(gameId);
         if (!game) {
             alert("게임을 찾을 수 없습니다.");
             window.location.href = "/games/";
             return;
         }
 
-        // 2. Load Game First! (To avoid black screen if UI updates fail)
+        // 1. Load Game (Priority)
         if (frame) {
             frame.src = game.url;
             frame.onload = () => {
@@ -100,7 +85,7 @@ async function initPlayPage() {
             };
         }
 
-        // 3. Update UI Safely
+        // 2. Update UI Safely
         document.title = `${game.title} | Tracking SA`;
         
         const titleEl = document.getElementById("display-title");
@@ -109,30 +94,26 @@ async function initPlayPage() {
         const shareBtn = document.getElementById("share-btn");
 
         if (titleEl) titleEl.textContent = game.title;
-        if (authorEl) authorEl.textContent = `By ${game.authorName || 'Admin'}`;
-        if (playsEl) playsEl.textContent = `${game.playCount || 0} plays`;
+        if (authorEl) authorEl.textContent = `By ${game.authorName}`;
+        if (playsEl) playsEl.textContent = `${game.playCount} plays`;
         
         if (shareBtn) {
             shareBtn.onclick = () => handleShare(game);
         }
 
-        // 4. Load Extra Data
         loadRelatedGames(game.category, gameId);
-        
-        incrementPlayCount(gameId).catch(e => console.warn("[PlayPage] Play count tracking failed", e));
+        gameService.trackPlay(gameId).catch(e => console.warn("[PlayPage] Track failed", e));
 
     } catch (err) {
-        console.error("[PlayPage] Initialization failed:", err);
-        // Fallback: if elements are missing, at least try to show the iframe if we have the ID
+        console.error("[PlayPage] Init failed:", err);
+        // Fallback for core games
         if (frame && !frame.src) {
-            // Hardcoded fallback for default games if everything else fails
             if (gameId === 'tetris') frame.src = '/games/tetris/';
             if (gameId === 'ai-evolution') frame.src = '/games/ai-evolution/';
         }
     }
 }
 
-// Start immediately and also on DOMContentLoaded just in case
 initPlayPage();
 if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initPlayPage);

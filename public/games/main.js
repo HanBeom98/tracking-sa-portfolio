@@ -1,4 +1,5 @@
-import { fetchGames, fetchMySubmissions, fetchPendingGames, deleteGame } from "./application/game-hub-service.js";
+import { gameService } from "./application/gameService.js";
+import { gameRenderer } from "./ui/gameRenderer.js";
 
 let allGames = [];
 let currentCategory = sessionStorage.getItem('last_game_cat') || 'all';
@@ -18,12 +19,13 @@ async function checkAdminAndShowBtn() {
   
   if (profile && profile.role === "admin") {
     const hubHeader = document.querySelector(".hub-header");
-    if (hubHeader) {
+    if (hubHeader && !document.getElementById("admin-manage-link")) {
       try {
-        const pending = await fetchPendingGames();
+        const pending = await gameService.getPendingGames();
         const pendingCount = pending.length;
         
         const adminBtn = document.createElement("a");
+        adminBtn.id = "admin-manage-link";
         adminBtn.href = "/games/admin/";
         adminBtn.className = "submit-btn";
         adminBtn.style.background = "oklch(60% 0.15 20)";
@@ -40,70 +42,6 @@ async function checkAdminAndShowBtn() {
         console.warn("[AdminBtn] Failed to fetch pending count:", err);
       }
     }
-  }
-}
-
-function renderGameCard(game, showStatus = false) {
-  const authorName = game.authorName || 'Admin';
-  const thumbUrl = game.thumbnail || '/favicon.svg';
-  const isOfficial = authorName === 'Admin';
-  const playCount = game.playCount || 0;
-  
-  const badgeClass = isOfficial ? 'badge-official' : 'badge-community';
-  const badgeText = isOfficial ? 'Official' : 'Community';
-  
-  const statusHtml = showStatus ? 
-    `<span class="status-chip status-${game.status}">${game.status.toUpperCase()}</span>` : 
-    '';
-
-  const playUrl = `/games/play/?id=${game.id}`;
-
-  const deleteBtn = (showStatus) ? 
-    `<button class="delete-game-btn" data-id="${game.id}" style="background:none; border:none; color:oklch(60% 0.15 20); cursor:pointer; font-size:0.75rem; font-weight:800; padding:0;">[DELETE]</button>` : '';
-
-  return `
-    <article class="game-card" id="game-card-${game.id}">
-      <div class="game-badge ${badgeClass}">${badgeText}</div>
-      <div class="game-thumb">
-        <img src="${thumbUrl}" alt="${game.title}" onerror="this.src='/favicon.svg'">
-      </div>
-      <div class="game-info">
-        <div style="display: flex; justify-content: space-between; align-items: start;">
-          <h3 class="game-card-title">${game.title}</h3>
-          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:5px;">
-            ${statusHtml}
-            ${deleteBtn}
-          </div>
-        </div>
-        <p class="game-card-desc">${game.description}</p>
-        <div class="game-meta">
-          <div style="display: flex; flex-direction: column; gap: 4px;">
-            <span>By ${authorName}</span>
-            <span style="font-size: 0.75rem; color: var(--p-blue); font-weight: 700;">${playCount} plays</span>
-          </div>
-          <a href="${playUrl}" class="play-btn" data-i18n="play_now">PLAY</a>
-        </div>
-      </div>
-    </article>
-  `;
-}
-
-async function handleGameDelete(e) {
-  const btn = e.target.closest(".delete-game-btn");
-  if (!btn) return;
-
-  const gameId = btn.dataset.id;
-  if (!confirm(t('confirm_delete_game', '정말로 이 게임 제출물을 삭제하시겠습니까?'))) return;
-
-  try {
-    btn.disabled = true;
-    await deleteGame(gameId);
-    document.getElementById(`game-card-${gameId}`)?.remove();
-    alert(t('delete_success', '삭제되었습니다.'));
-  } catch (err) {
-    console.error('[DeleteGame] Failed:', err);
-    alert(t('delete_failed', '삭제에 실패했습니다.'));
-    btn.disabled = false;
   }
 }
 
@@ -128,39 +66,52 @@ function filterAndRender() {
     return;
   }
 
-  listEl.innerHTML = items.map(g => renderGameCard(g)).join("");
+  listEl.innerHTML = items.map(g => gameRenderer.renderGameCard(g)).join("");
+}
+
+async function handleGameDelete(e) {
+  const btn = e.target.closest(".delete-game-btn");
+  if (!btn) return;
+
+  const gameId = btn.dataset.id;
+  if (!confirm(t('confirm_delete_game', '정말로 이 게임 제출물을 삭제하시겠습니까?'))) return;
+
+  try {
+    btn.disabled = true;
+    await gameService.deleteGame(gameId);
+    document.getElementById(`game-card-${gameId}`)?.remove();
+    alert(t('delete_success', '삭제되었습니다.'));
+  } catch (err) {
+    console.error('[DeleteGame] Failed:', err);
+    alert(t('delete_failed', '삭제에 실패했습니다.'));
+    btn.disabled = false;
+  }
 }
 
 function setupFilters() {
   const filterContainer = document.getElementById("category-filters");
   if (filterContainer) {
-    // Restore active state from sessionStorage
     filterContainer.querySelectorAll(".filter-chip").forEach(c => {
       if (c.dataset.cat === currentCategory) c.classList.add("active");
       else c.classList.remove("active");
     });
 
-    // Use a fresh listener to avoid multiple bindings
     filterContainer.onclick = (e) => {
       const chip = e.target.closest(".filter-chip");
       if (!chip) return;
       filterContainer.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
       chip.classList.add("active");
       currentCategory = chip.dataset.cat;
-      sessionStorage.setItem('last_game_cat', currentCategory); // Persist
+      sessionStorage.setItem('last_game_cat', currentCategory);
       filterAndRender();
     };
   }
 
-  // Sorting UI Injection - Prevent duplicate injection
+  // Sorting UI
   if (document.querySelector(".sort-container")) return;
-
   const sortContainer = document.createElement("div");
   sortContainer.className = "sort-container";
-  sortContainer.style.display = "flex";
-  sortContainer.style.gap = "15px";
-  sortContainer.style.marginBottom = "15px";
-  sortContainer.style.justifyContent = "flex-end";
+  sortContainer.style.cssText = "display:flex; gap:15px; margin-bottom:15px; justify-content:flex-end;";
   sortContainer.innerHTML = `
     <button class="sort-btn ${currentSort === 'latest' ? 'active' : ''}" data-sort="latest" style="background:none; border:none; font-weight:800; cursor:pointer; font-size:0.8rem; color:${currentSort === 'latest' ? 'var(--p-blue)' : 'var(--text-sub)'};">LATEST</button>
     <button class="sort-btn ${currentSort === 'popular' ? 'active' : ''}" data-sort="popular" style="background:none; border:none; font-weight:800; cursor:pointer; font-size:0.8rem; color:${currentSort === 'popular' ? 'var(--p-blue)' : 'var(--text-sub)'};">POPULAR</button>
@@ -170,7 +121,6 @@ function setupFilters() {
   const gameList = document.getElementById("game-list");
   if (hubWrap && gameList) {
     hubWrap.insertBefore(sortContainer, gameList);
-    
     sortContainer.onclick = (e) => {
       const btn = e.target.closest(".sort-btn");
       if (!btn) return;
@@ -185,18 +135,6 @@ function setupFilters() {
     };
   }
 }
-function renderSkeleton() {
-  return `
-    <article class="game-card loading-shimmer" style="border-color:var(--bg-sub);">
-      <div class="game-thumb" style="background:var(--bg-sub); height:160px;"></div>
-      <div class="game-info" style="padding:20px;">
-        <div style="height:20px; width:60%; background:var(--bg-sub); border-radius:4px; margin-bottom:10px;"></div>
-        <div style="height:14px; width:90%; background:var(--bg-sub); border-radius:4px; margin-bottom:5px;"></div>
-        <div style="height:14px; width:40%; background:var(--bg-sub); border-radius:4px;"></div>
-      </div>
-    </article>
-  `.repeat(6);
-}
 
 async function initHub() {
   const listEl = document.getElementById("game-list");
@@ -204,29 +142,24 @@ async function initHub() {
   const myListEl = document.getElementById("my-game-list");
   if (!listEl) return;
 
-  // Show Skeleton
-  listEl.innerHTML = renderSkeleton();
+  listEl.innerHTML = gameRenderer.renderSkeleton();
 
   try {
-    // 1. Fetch approved games
-    allGames = await fetchGames();
-
+    allGames = await gameService.getApprovedGames();
     setupFilters();
     filterAndRender();
 
-    // 2. Fetch my submissions if logged in
     await window.AuthGateway?.waitForReady();
     const user = window.AuthGateway?.getCurrentUser();
     if (user && mySubmissionsContainer && myListEl) {
-      const myGames = await fetchMySubmissions();
+      const myGames = await gameService.getMySubmissions();
       if (myGames.length > 0) {
         mySubmissionsContainer.style.display = "block";
-        myListEl.innerHTML = myGames.map(g => renderGameCard(g, true)).join("");
+        myListEl.innerHTML = myGames.map(g => gameRenderer.renderGameCard(g, { showStatus: true, onDelete: true })).join("");
         myListEl.onclick = handleGameDelete;
       }
     }
     
-    // 3. Admin Check
     await checkAdminAndShowBtn();
   } catch (error) {
     console.error('[GameHub] Init failed:', error);
@@ -234,7 +167,6 @@ async function initHub() {
   }
 }
 
-// Start initialization
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initHub);
 } else {

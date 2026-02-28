@@ -1,5 +1,22 @@
 ## 2026-02-28
 
+### refactor(games): implement strict DDD architecture and cleanup CSS hacks
+- 문제/증상:
+  - 빠르게 기능을 추가하며 `games` 도메인 내부에 비즈니스 로직, 데이터 접근, UI 렌더링이 섞여 있어 유지보수가 어려움.
+  - 빌드 도구와의 충돌을 해결하기 위해 `!important` CSS 해크를 남발하여 기술적 부채 발생.
+- 변경:
+  - **Strict DDD 레이어 분리**:
+    - **Domain**: `Game.js` 엔티티 도입으로 데이터 구조 표준화.
+    - **Infra**: `gameRepository.js`로 Firestore API 호출 캡슐화.
+    - **Application**: `gameService.js`로 비즈니스 로직 집중 (기존 `game-hub-service.js` 대체).
+    - **UI**: `gameRenderer.js`로 모든 HTML 생성 로직 분리 및 재사용성 확보.
+  - **CSS 정화**: 모든 `!important` 선언을 제거하고, `is-embedded` 클래스와 빌드 정책 수정을 통해 우아하게 레이아웃 제어.
+  - **안정성**: entry point(`main.js`, `play/main.js` 등)의 코드를 더 방어적이고 읽기 쉬운 구조로 리팩토링.
+- 영향 범위: `games` 도메인 전체 및 빌드 시스템 연동.
+- 검증:
+  - `npm run build` 및 `npm run test:unit` 전체 통과 확인.
+  - 각 페이지별 UI 겹침 현상 및 데이터 로딩 정상 작동 확인.
+
 ### chore(ci): optimize CI/CD pipeline with smart selective testing
 - 문제/증상:
   - 프로젝트 규모가 커짐에 따라 불필요한 전체 테스트 실행으로 빌드/배포 시간이 기하급수적으로 증가할 우려가 있음.

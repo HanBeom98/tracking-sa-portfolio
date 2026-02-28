@@ -1,4 +1,4 @@
-import { submitGame } from "../application/game-hub-service.js";
+import { gameService } from "../application/gameService.js";
 
 function t(key, fallback) {
   return typeof window !== "undefined" && window.getTranslation
@@ -64,7 +64,7 @@ async function handleFormSubmit(e) {
     submitBtn.textContent = t("submitting", "제출 중...");
     statusMsg.textContent = "";
     
-    await submitGame(payload);
+    await gameService.submitNewGame(payload);
 
     statusMsg.textContent = t("game_submit_success", "등록 신청이 완료되었습니다! 관리자 승인 후 목록에 표시됩니다.");
     statusMsg.className = "msg-success";

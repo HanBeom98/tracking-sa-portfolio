@@ -13,15 +13,18 @@
 - `src/shared/ui/*`: 공통 헤더/푸터/헤드 템플릿
 - `src/shared/infra/*`: 빌드/DB/뉴스 인프라
 
-### [Games 도메인] (완성형)
-- **Application**:
-  - `src/domains/games/application/game-hub-service.js`: 게임 라이프사이클 관리 (목록, 제출, 승인, 통계).
-- **Sub-Modules (UI & Logic)**:
-  - `src/domains/games/admin/`: 관리자 전용 대시보드.
-  - `src/domains/games/play/`: 내부 플레이어 및 추천 시스템.
-  - `src/domains/games/submit/`: 게임 등록 폼 및 검증 로직.
-  - `src/domains/games/tetris/`, `src/domains/games/ai-evolution/`: 개별 게임 엔진.
-- **특이사항**: `sessionStorage` 기반 상태 유지 및 하이브리드 검색 지원.
+### [Games 도메인] (Strict DDD)
+- **Domain**: `src/domains/games/domain/Game.js` (게임 엔티티 모델 및 비즈니스 규칙)
+- **Application**: `src/domains/games/application/gameService.js` (게임 라이프사이클 비즈니스 로직)
+- **Infra**: `src/domains/games/infra/gameRepository.js` (Firestore 데이터 액세스 전담)
+- **UI**: `src/domains/games/ui/gameRenderer.js` (전용 렌더링 및 UI 컴포넌트 로직)
+- **Pages**:
+  - `src/domains/games/main.js`: 허브 메인 페이지
+  - `src/domains/games/play/`: 내부 플레이어 및 추천 시스템
+  - `src/domains/games/admin/`: 관리자 전용 대시보드
+  - `src/domains/games/submit/`: 게임 등록 폼 및 검증 로직
+- **개별 엔진**: `tetris/`, `ai-evolution/` (독립된 게임 엔진 도메인)
+- **특이사항**: `!important` 제거 및 `is-embedded` 감지 로직을 통한 우아한 레이아웃 제어.
 
 ### [Search 도메인] (완성형)
 - **Infra**:
