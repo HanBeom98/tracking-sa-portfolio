@@ -13,11 +13,11 @@ export class Player {
 
 export class RecentStats {
   constructor(info) {
-    this.kd = info.kd_ratio ? parseFloat((info.kd_ratio * 100).toFixed(1)) : 0;
-    this.winRate = info.win_rate ? parseFloat((info.win_rate * 100).toFixed(1)) : 0;
-    this.totalKills = info.kill_count || 0;
-    this.totalDeaths = info.death_count || 0;
-    this.headshotRate = info.headshot_rate ? parseFloat((info.headshot_rate * 100).toFixed(1)) : 0;
+    this.kd = info.recent_kill_death_rate ? parseFloat(info.recent_kill_death_rate.toFixed(1)) : 0;
+    this.winRate = info.recent_win_rate ? parseFloat(info.recent_win_rate.toFixed(1)) : 0;
+    this.totalKills = 0; // Not directly provided in this specific API object
+    this.totalDeaths = 0;
+    this.headshotRate = info.recent_assault_rate ? parseFloat(info.recent_assault_rate.toFixed(1)) : 0; // Using assault rate as placeholder if headshot not found
   }
 }
 

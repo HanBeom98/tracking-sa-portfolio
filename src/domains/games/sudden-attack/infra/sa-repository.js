@@ -59,8 +59,8 @@ export class SaRepository {
       
       for (const mode of modes) {
         try {
-          // Add a small delay between requests to avoid 429
-          await delay(150); 
+          // Increase delay to 1000ms to respect strict Test Key limits
+          await delay(1000); 
           const data = await this.apiClient.getMatchList(ouid, mode.id);
           const matches = (data.match_list || []).map(m => ({ ...m, typeName: mode.name }));
           combinedMatches.push(...matches);
