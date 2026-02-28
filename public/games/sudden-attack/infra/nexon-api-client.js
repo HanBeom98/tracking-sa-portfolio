@@ -22,6 +22,8 @@ export class NexonApiClient {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
+      console.error('[NexonAPI Debug Full Error]:', errorData);
+      
       const message = errorData.error?.message || "";
       
       // Nexon API returns 400 for non-existent characters with this specific message
