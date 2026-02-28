@@ -68,6 +68,18 @@ service cloud.firestore {
       allow update: if false;
     }
 
+    // Games: Public read for approved, authenticated create for pending, admin management
+    match /games/{gameId} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.resource.data.status == "pending"
+        && request.resource.data.authorUid == request.auth.uid;
+      allow update: if isAdmin() 
+        || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['playCount']) 
+            && request.resource.data.playCount is number);
+      allow delete: if isAdmin();
+    }
+
     // Default deny
     match /{document=**} {
       allow read, write: if false;

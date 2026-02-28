@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="loading_game">게임 불러오는 중... | Tracking SA</title>
+    <!-- HEAD_INJECTION -->
+    <link rel="stylesheet" href="/style.css">
+...
+
+        .play-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: #000;
+            overflow: hidden;
+        }
+        .play-header {
+            background: var(--bg-main);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--p-blue-soft);
+            z-index: 10;
+        }
+        .back-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: var(--text-main);
+            font-weight: 700;
+        }
+        .game-viewport {
+            flex: 1;
+            width: 100%;
+            border: none;
+            background: #000;
+        }
+        .game-footer {
+            background: var(--bg-main);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--p-blue-soft);
+        }
+        .game-info-mini h2 { margin: 0; font-size: 1.1rem; color: var(--text-main); }
+        .game-info-mini p { margin: 2px 0 0 0; font-size: 0.85rem; color: var(--text-sub); }
+        .play-stats {
+            font-size: 0.85rem;
+            color: var(--p-blue);
+            font-weight: 700;
+        }
+        @media (max-width: 600px) {
+            .game-footer { flex-direction: column; gap: 10px; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+    <div class="play-container">
+        <header class="play-header">
+            <a href="/games/" class="back-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                <span data-i18n="back_to_hub">게임 센터로 돌아가기</span>
+            </a>
+            <div id="loading-indicator" style="color: var(--p-blue); font-size: 0.8rem; font-weight: 800;">
+                Connecting to Game...
+            </div>
+        </header>
+
+        <iframe id="game-frame" class="game-viewport" allow="autoplay; fullscreen; keyboard" title="Game Player"></iframe>
+
+        <footer class="game-footer">
+            <div class="game-info-mini">
+                <h2 id="display-title">---</h2>
+                <p id="display-author">By ---</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div class="play-stats" id="display-plays">
+                    --- plays
+                </div>
+                <button id="share-btn" class="back-link" style="background:none; border:1px solid var(--p-blue-soft); padding:5px 12px; border-radius:8px; cursor:pointer; font-size:0.8rem;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:5px;"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                    <span data-i18n="share_game">공유</span>
+                </button>
+            </div>
+        </footer>
+
+        <!-- Related Games Section -->
+        <section id="related-section" style="background: var(--bg-sub); padding: 30px 20px; border-top: 1px solid var(--p-blue-soft); overflow-y: auto;">
+            <h3 style="margin: 0 0 20px 0; font-size: 1rem; font-weight: 800; color: var(--text-main);" data-i18n="related_games">추천 게임</h3>
+            <div id="related-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
+                <!-- Recommended games here -->
+            </div>
+        </section>
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>

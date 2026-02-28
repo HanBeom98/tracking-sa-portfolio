@@ -13,13 +13,62 @@
             margin: 0 auto;
             padding: 40px 20px;
         }
+        .hub-section-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin: 40px 0 20px 0;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .hub-section-title::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 24px;
+            background: var(--p-blue);
+            border-radius: 2px;
+        }
         .hub-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 40px;
+            margin-bottom: 20px;
             flex-wrap: wrap;
             gap: 20px;
+        }
+        .filter-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 40px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .filter-container::-webkit-scrollbar { display: none; }
+        .filter-chip {
+            padding: 8px 20px;
+            border-radius: 30px;
+            background: white;
+            border: 1px solid oklch(92% 0.02 260);
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+            color: var(--text-sub);
+        }
+        .filter-chip:hover {
+            border-color: var(--p-blue-soft);
+            color: var(--p-blue);
+        }
+        .filter-chip.active {
+            background: var(--p-blue);
+            color: white;
+            border-color: var(--p-blue);
+            box-shadow: 0 8px 15px -5px var(--p-blue);
         }
         .hub-title h1 {
             font-size: 2.5rem;
@@ -57,12 +106,27 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
+            position: relative;
         }
         .game-card:hover {
             transform: translateY(-10px);
             box-shadow: 0 20px 40px rgba(0,0,0,0.08);
             border-color: var(--p-blue-soft);
         }
+        .game-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            z-index: 2;
+        }
+        .badge-official { background: var(--p-blue); color: white; }
+        .badge-community { background: oklch(96% 0.01 250); color: var(--p-blue); border: 1px solid var(--p-blue-soft); }
+        
         .game-thumb {
             width: 100%;
             aspect-ratio: 16/9;
@@ -113,6 +177,15 @@
         .play-btn:hover {
             text-decoration: underline;
         }
+        .status-chip {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+        }
+        .status-pending { background: oklch(95% 0.02 90); color: oklch(50% 0.1 90); }
+        .status-approved { background: oklch(95% 0.02 150); color: oklch(50% 0.1 150); }
+
         @media (max-width: 640px) {
             .hub-title h1 { font-size: 1.8rem; }
             .hub-header { flex-direction: column; align-items: flex-start; }
@@ -131,6 +204,24 @@
             <a href="/games/submit/" class="submit-btn" data-i18n="game_register_btn">게임 등록하기</a>
         </section>
 
+        <div class="filter-container" id="category-filters">
+            <button class="filter-chip active" data-cat="all" data-i18n="cat_all">전체</button>
+            <button class="filter-chip" data-cat="puzzle" data-i18n="cat_puzzle">퍼즐</button>
+            <button class="filter-chip" data-cat="action" data-i18n="cat_action">액션</button>
+            <button class="filter-chip" data-cat="ai" data-i18n="cat_ai">AI</button>
+            <button class="filter-chip" data-cat="classic" data-i18n="cat_classic">클래식</button>
+            <button class="filter-chip" data-cat="etc" data-i18n="cat_etc">기타</button>
+        </div>
+
+        <!-- My Submissions Section (Hidden by default) -->
+        <div id="my-submissions-container" style="display: none;">
+            <h2 class="hub-section-title" data-i18n="my_game_submissions">내 제출 현황</h2>
+            <section id="my-game-list" class="game-grid" style="margin-bottom: 60px;">
+                <!-- User games here -->
+            </section>
+        </div>
+
+        <h2 class="hub-section-title" data-i18n="all_games">모든 게임</h2>
         <section id="game-list" class="game-grid">
             <!-- Loading skeleton or empty state -->
             <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-sub);" data-i18n="loading_games">

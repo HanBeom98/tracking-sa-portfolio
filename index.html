@@ -377,6 +377,11 @@
                         <div class="card-title" data-i18n="news_home">인베스터 인사이트</div>
                         <div class="card-desc">전문가의 시각으로 돈과 기술의 흐름을 꿰뚫는 전문 칼럼</div>
                     </a>
+                    <a href="/glossary/" class="service-card">
+                        <div class="card-icon icon-purple"><i class="fas fa-book"></i></div>
+                        <div class="card-title">AI 용어사전</div>
+                        <div class="card-desc">어려운 기술 용어를 전문가의 시각으로 쉽게 풀이한 지식 창고</div>
+                    </a>
                     <a href="/futures-estimate/" class="service-card">
                         <div class="card-icon icon-navy"><i class="fas fa-chart-line"></i></div>
                         <div class="card-title" data-i18n="futures_estimate_index">코스피200</div>
@@ -406,10 +411,19 @@
 
             <!-- Category 3: Playground -->
             <section class="category-section">
-                <div class="category-header">
-                    <h2>Playground</h2>
+                <div class="category-header" style="justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <h2>Game Center</h2>
+                        <span class="badge" style="background: var(--p-blue);">HUB</span>
+                    </div>
+                    <a href="/games/submit/" style="font-size: 0.85rem; color: var(--p-blue); font-weight: 800; text-decoration: none;">+ Submit Your Game</a>
                 </div>
                 <div class="service-grid">
+                    <a href="/games/" class="service-card" style="border: 2px solid var(--p-blue-soft);">
+                        <div class="card-icon icon-blue"><i class="fas fa-gamepad"></i></div>
+                        <div class="card-title">게임 센터 홈</div>
+                        <div class="card-desc">클래식부터 AI 게임까지, 모든 게임을 한곳에서 즐기세요.</div>
+                    </a>
                     <a href="/games/tetris/" class="service-card">
                         <div class="card-icon icon-red"><i class="fas fa-shapes"></i></div>
                         <div class="card-title" data-i18n="tetris_game">테트리스</div>
@@ -419,6 +433,11 @@
                         <div class="card-icon icon-green"><i class="fas fa-dna"></i></div>
                         <div class="card-title" data-i18n="ai_evolution">AI 진화 게임</div>
                         <div class="card-desc">AI 모델을 합성하여 진화시키는 2048 스타일 게임</div>
+                    </a>
+                    <a href="/games/submit/" class="service-card" style="background: oklch(98% 0.01 250); border: 1px dashed var(--p-blue-soft);">
+                        <div class="card-icon icon-navy"><i class="fas fa-plus"></i></div>
+                        <div class="card-title">내 게임 등록</div>
+                        <div class="card-desc">직접 만든 게임이나 추천하고 싶은 게임을 공유하세요.</div>
                     </a>
                 </div>
             </section>
@@ -439,9 +458,10 @@
             <div class="footer-col">
                 <h4>서비스</h4>
                 <ul>
-                    <li><a href="/news/">AI 테크 뉴스</a></li>
+                    <li><a href="/news/">인베스터 인사이트</a></li>
+                    <li><a href="/games/">게임 센터</a></li>
+                    <li><a href="/futures-estimate/">지수 예측</a></li>
                     <li><a href="/ai-test/">AI 성향 테스트</a></li>
-                    <li><a href="/fortune/">AI 사주 운세</a></li>
                 </ul>
             </div>
             <div class="footer-col">

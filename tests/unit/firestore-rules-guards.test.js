@@ -90,6 +90,16 @@ test("firestore rules: game rankings are create-only with valid score", () => {
   assert.ok(block.includes("allow update, delete: if false;"));
 });
 
+test("firestore rules: games allow public read, authenticated pending create, and admin management", () => {
+  const rules = readRules();
+  const block = normalize(extractMatchBlock(rules, "/games/{gameId}"));
+
+  assert.ok(block.includes("allow read: if true;"));
+  assert.ok(block.includes("allow create: if request.auth != null && request.resource.data.status == \"pending\" && request.resource.data.authorUid == request.auth.uid;"));
+  assert.ok(block.includes("allow update: if isAdmin() || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['playCount']) && request.resource.data.playCount is number);"));
+  assert.ok(block.includes("allow delete: if isAdmin();"));
+});
+
 test("firestore rules: default deny exists", () => {
   const rules = readRules();
   const block = normalize(extractMatchBlock(rules, "/{document=**}"));

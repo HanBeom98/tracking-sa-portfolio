@@ -534,3 +534,27 @@ body > :not(header):not(footer):not(script):not(style):not(link):not(main):not(t
 body.home-page header { background: color-mix(in oklch, white 92%, transparent) !important; box-shadow: 0 8px 30px rgba(2, 6, 23, 0.12) !important; border-bottom: 1px solid oklch(92% 0.02 260) !important; }
 body.home-page .header-inner { justify-content: space-between; }
 /* body.home-page .site-logo-link, body.home-page nav { display: none !important; } <-- Removed to show navigation */
+
+/* --- Search Highlighting --- */
+.search-highlight {
+    background-color: oklch(90% 0.1 90);
+    color: var(--text-main);
+    padding: 0 2px;
+    border-radius: 4px;
+    font-weight: 800;
+}
+
+body.dark-mode .search-highlight {
+    background-color: oklch(40% 0.1 90);
+    color: white;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 77, 79, 0.7); }
+    70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(255, 77, 79, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 77, 79, 0); }
+}
+
+.loading-shimmer {
+    animation: shimmer 1.5s infinite ease-in-out;
+}

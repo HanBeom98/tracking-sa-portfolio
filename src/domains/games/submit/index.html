@@ -105,8 +105,20 @@
                     <input type="url" id="thumbnail" name="thumbnail" placeholder="https://example.com/thumb.jpg">
                 </div>
 
-                <div class="input-group">
+                <div class="form-group">
+                    <label for="category" data-i18n="game_category_label">카테고리</label>
+                    <select id="category" name="category" required>
+                        <option value="puzzle" data-i18n="cat_puzzle">퍼즐</option>
+                        <option value="action" data-i18n="cat_action">액션</option>
+                        <option value="ai" data-i18n="cat_ai">인공지능(AI)</option>
+                        <option value="classic" data-i18n="cat_classic">클래식</option>
+                        <option value="etc" data-i18n="cat_etc" selected>기타</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
                     <label for="description" data-i18n="game_desc_label">게임 설명</label>
+
                     <textarea id="description" name="description" rows="4" required placeholder="게임 방법과 특징을 간단히 적어주세요." maxlength="200"></textarea>
                 </div>
 

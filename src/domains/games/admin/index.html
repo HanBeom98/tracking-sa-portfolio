@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="admin_game_approval_title">게임 승인 관리 | Tracking SA</title>
+    <!-- HEAD_INJECTION -->
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .admin-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        .admin-header {
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--p-blue-soft);
+            padding-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .pending-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .pending-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid oklch(92% 0.02 260);
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        .pending-thumb {
+            width: 120px;
+            aspect-ratio: 16/9;
+            background: oklch(96% 0.01 250);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        .pending-thumb img { width: 40px; opacity: 0.5; }
+        .pending-info { flex: 1; }
+        .pending-info h3 { margin: 0 0 5px 0; color: var(--text-main); }
+        .pending-info p { margin: 0; font-size: 0.9rem; color: var(--text-sub); }
+        .pending-meta { margin-top: 10px; font-size: 0.8rem; color: var(--p-blue); }
+        .admin-actions { display: flex; gap: 10px; }
+        .btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-approve { background: var(--p-blue); color: white; }
+        .btn-reject { background: oklch(60% 0.15 20); color: white; }
+        .empty-state { text-align: center; padding: 60px; color: var(--text-sub); }
+    </style>
+</head>
+<body>
+    <!-- HEADER_INJECTION -->
+    <main class="admin-container">
+        <header class="admin-header">
+            <h1 data-i18n="admin_game_approval_h1">Game Approval Management</h1>
+            <a href="/games/" class="btn" style="background: var(--bg-sub); color: var(--text-main);" data-i18n="back_to_hub">Back to Hub</a>
+        </header>
+
+        <div id="pending-list-container" class="pending-list">
+            <!-- Loading -->
+            <div class="empty-state" data-i18n="loading">Loading pending games...</div>
+        </div>
+    </main>
+    <!-- FOOTER_INJECTION -->
+    <script type="module" src="main.js"></script>
+</body>
+</html>

@@ -91,6 +91,17 @@
   line-height: 1.4;
 }
 
+.result-desc {
+  font-size: 0.95rem;
+  color: var(--text-sub);
+  line-height: 1.6;
+  margin-bottom: 15px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .result-meta {
   font-size: 0.85rem;
   color: var(--text-sub);
@@ -121,4 +132,27 @@ body.dark-mode .result-card {
 body.dark-mode .result-empty {
   background: oklch(22% 0.02 260);
   border-color: oklch(35% 0.02 260);
+}
+
+.search-highlight {
+    background-color: oklch(90% 0.1 90);
+    color: var(--text-main);
+    padding: 0 2px;
+    border-radius: 4px;
+    font-weight: 800;
+}
+
+body.dark-mode .search-highlight {
+    background-color: oklch(40% 0.1 90);
+    color: white;
+}
+
+@keyframes shimmer {
+    0% { opacity: 0.5; }
+    50% { opacity: 1; }
+    100% { opacity: 0.5; }
+}
+
+.loading-shimmer {
+    animation: shimmer 1.5s infinite ease-in-out;
 }

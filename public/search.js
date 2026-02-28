@@ -49,7 +49,13 @@ document.addEventListener('DOMContentLoaded', function () {
         return res.json();
     }
 
-    function renderFallbackItems(items) {
+    function highlightText(text, query) {
+        if (!text || !query) return text || "";
+        const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+        return text.replace(regex, '<mark class="search-highlight">$1</mark>');
+    }
+
+    function renderFallbackItems(items, query = "") {
         if (!items.length) {
             searchResultsContainer.innerHTML = '<div class="search-no-results">검색 결과가 없습니다.</div>';
             searchResultsContainer.classList.add('active');
@@ -57,8 +63,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         const html = items.map((item) => `
             <a href="${item.href}" class="search-result-item">
-                <div class="result-title">${item.title}</div>
-                <div class="result-date">${item.date}</div>
+                <div class="result-title" style="font-weight: 800; font-size: 1rem;">${highlightText(item.title, query)}</div>
+                <div class="result-desc" style="font-size: 0.8rem; color: #64748b; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    ${item.description ? highlightText(item.description, query) : item.href}
+                </div>
             </a>
         `).join('');
         searchResultsContainer.innerHTML = html;
@@ -106,34 +114,68 @@ document.addEventListener('DOMContentLoaded', function () {
 
     async function searchPosts(searchTerm) {
         try {
-            const index = await loadSearchIndex();
             const q = searchTerm.toLowerCase();
+            
+            // Parallel: Static Index + Dynamic Games
+            const [index, dynamicGames] = await Promise.all([
+                loadSearchIndex().catch(() => ({ items: {} })),
+                searchGamesFromFirestore(searchTerm).catch(() => [])
+            ]);
+
             const primary = index?.items?.[currentLang] || [];
             const fallbackLang = currentLang === 'en' ? 'ko' : 'en';
             const secondary = index?.items?.[fallbackLang] || [];
+            
             const match = (item) => {
                 const title = (item.title || '').toLowerCase();
                 if (title.includes(q)) return true;
                 const keywords = Array.isArray(item.keywords) ? item.keywords : [];
                 return keywords.some((kw) => String(kw || '').toLowerCase().includes(q));
             };
-            let items = primary.filter(match);
-            if (!items.length && secondary.length) {
-                items = secondary.filter(match);
+
+            let staticMatches = primary.filter(match);
+            if (!staticMatches.length && secondary.length) {
+                staticMatches = secondary.filter(match);
             }
-            items = items.slice(0, 10);
-            renderFallbackItems(items);
+
+            // Merge and deduplicate by href
+            const mergedMap = new Map();
+            [...staticMatches, ...dynamicGames].forEach(item => {
+                if (!mergedMap.has(item.href)) mergedMap.set(item.href, item);
+            });
+
+            const finalItems = Array.from(mergedMap.values()).slice(0, 10);
+            renderFallbackItems(finalItems, searchTerm);
         } catch (error) {
             console.warn("Search index failed, falling back to news index:", error);
             try {
                 const items = await searchFromNewsIndex(searchTerm, 10);
-                renderFallbackItems(items);
+                renderFallbackItems(items, searchTerm);
             } catch (finalError) {
                 console.error("Search error:", finalError);
                 searchResultsContainer.innerHTML = '<div class="search-no-results">검색 중 오류가 발생했습니다.</div>';
                 searchResultsContainer.classList.add('active');
             }
         }
+    }
+
+    async function searchGamesFromFirestore(query) {
+        if (!window.db) return [];
+        const q = query.toLowerCase();
+        try {
+            const snapshot = await window.db.collection('games')
+                .where('status', '==', 'approved')
+                .get();
+            return snapshot.docs.map(doc => {
+                const data = doc.data();
+                return {
+                    href: `/games/play/?id=${doc.id}`,
+                    title: data.title,
+                    description: data.description,
+                    date: ""
+                };
+            }).filter(g => g.title.toLowerCase().includes(q) || g.description?.toLowerCase().includes(q));
+        } catch (e) { return []; }
     }
 
     function displayResults(docs, searchTerm) {

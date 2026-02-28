@@ -6,6 +6,8 @@ function t(key, fallback) {
     : fallback;
 }
 
+const URL_PATTERN = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([\/\w .-]*)*\/?$/;
+
 async function checkAuth() {
   if (typeof window === "undefined" || !window.AuthGateway) return;
 
@@ -13,7 +15,6 @@ async function checkAuth() {
   const user = window.AuthGateway.getCurrentUser();
 
   if (!user) {
-    // Show login required prompt
     const container = document.querySelector(".form-card");
     if (container && window.createLoginRequiredPrompt) {
       container.innerHTML = "";
@@ -32,15 +33,36 @@ async function handleFormSubmit(e) {
 
   const formData = new FormData(form);
   const payload = {
-    title: formData.get("title"),
-    url: formData.get("url"),
-    thumbnail: formData.get("thumbnail"),
-    description: formData.get("description")
+    title: formData.get("title").trim(),
+    url: formData.get("url").trim(),
+    thumbnail: formData.get("thumbnail").trim(),
+    category: formData.get("category"),
+    description: formData.get("description").trim()
   };
+
+  // Validation
+  if (payload.title.length < 2) {
+    statusMsg.textContent = t("error_title_too_short", "제목은 2자 이상이어야 합니다.");
+    statusMsg.className = "msg-error";
+    return;
+  }
+
+  if (!URL_PATTERN.test(payload.url)) {
+    statusMsg.textContent = t("error_invalid_url", "올바른 게임 실행 URL을 입력해주세요.");
+    statusMsg.className = "msg-error";
+    return;
+  }
+
+  if (payload.thumbnail && !URL_PATTERN.test(payload.thumbnail)) {
+    statusMsg.textContent = t("error_invalid_thumb", "올바른 이미지 URL을 입력해주세요.");
+    statusMsg.className = "msg-error";
+    return;
+  }
 
   try {
     submitBtn.disabled = true;
     submitBtn.textContent = t("submitting", "제출 중...");
+    statusMsg.textContent = "";
     
     await submitGame(payload);
 

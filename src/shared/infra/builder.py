@@ -250,15 +250,21 @@ def build_search_index():
         card_regex = re.compile(r'<a[^>]+href="([^"]+)"[^>]*class="news-card-premium"[^>]*>([\s\S]*?)</a>|<a[^>]*class="news-card-premium"[^>]+href="([^"]+)"[^>]*>([\s\S]*?)</a>', re.I)
         title_regex = re.compile(r'<h2[^>]*class="news-title-text"[^>]*>([\s\S]*?)</h2>', re.I)
         date_regex = re.compile(r'<span[^>]*class="news-date"[^>]*>([\s\S]*?)</span>', re.I)
+        desc_regex = re.compile(r'<p[^>]*class="news-desc"[^>]*>([\s\S]*?)</p>', re.I)
+        
         for match in card_regex.finditer(html):
             href = match.group(1) or match.group(3) or ""
             inner = match.group(2) or match.group(4) or ""
             title_match = title_regex.search(inner)
             date_match = date_regex.search(inner)
+            desc_match = desc_regex.search(inner)
+            
             title = re.sub(r"<[^>]*>", "", title_match.group(1)).strip() if title_match else ""
             date = re.sub(r"<[^>]*>", "", date_match.group(1)).strip() if date_match else ""
+            desc = re.sub(r"<[^>]*>", "", desc_match.group(1)).strip() if desc_match else ""
+            
             if href and title:
-                items.append({"href": href, "title": title, "date": date})
+                items.append({"href": href, "title": title, "date": date, "description": desc})
         return items
 
     def load_html(path):
@@ -271,6 +277,7 @@ def build_search_index():
         enriched = []
         for item in items:
             title = (item.get("title") or "").strip()
+            desc = (item.get("description") or "").strip()
             keywords = item.get("keywords") or []
             if title:
                 tokens = [t.strip() for t in re.split(r"\s+", title) if t.strip()]
@@ -282,38 +289,28 @@ def build_search_index():
     en_html = load_html(os.path.join(PUBLIC_DIR, "en", "news", "index.html"))
     static_items = {
         "ko": [
-            {"href": "/news/", "title": "테크 인사이트", "date": "", "keywords": ["뉴스", "인사이트"]},
-            {"href": "/board?category=notice", "title": "공지사항", "date": "", "keywords": ["공지", "게시판", "소식"]},
-            {"href": "/board?category=free", "title": "자유게시판", "date": "", "keywords": ["커뮤니티", "자유", "게시판"]},
-            {"href": "/futures-estimate/", "title": "코스피200", "date": "", "keywords": ["지수", "선물", "코스피", "K200"]},
-            {"href": "/board/", "title": "게시판", "date": "", "keywords": ["커뮤니티", "글쓰기"]},
-            {"href": "/ai-test/", "title": "AI 성향 테스트", "date": "", "keywords": ["테스트", "성향"]},
-            {"href": "/animal-face/", "title": "동물상 테스트", "date": "", "keywords": ["테스트", "동물상"]},
-            {"href": "/fortune/", "title": "AI 운세", "date": "", "keywords": ["운세", "사주"]},
-            {"href": "/lucky-recommendation/", "title": "행운의 추천", "date": "", "keywords": ["추천", "행운"]},
-            {"href": "/tetris-game/", "title": "테트리스", "date": "", "keywords": ["게임", "퍼즐"]},
-            {"href": "/ai-evolution/", "title": "AI 진화 게임", "date": "", "keywords": ["게임", "AI 진화"]},
-            {"href": "/about/", "title": "회사 소개", "date": "", "keywords": ["소개", "about"]},
-            {"href": "/contact", "title": "문의하기", "date": "", "keywords": ["문의", "contact"]},
-            {"href": "/inquiry", "title": "파트너십 문의", "date": "", "keywords": ["파트너십", "협업"]},
-            {"href": "/account/", "title": "내 정보", "date": "", "keywords": ["계정", "회원정보", "프로필"]},
+            {"href": "/news/", "title": "테크 인사이트", "description": "최신 AI 및 기술 트렌드 분석 칼럼", "keywords": ["뉴스", "인사이트"]},
+            {"href": "/board?category=notice", "title": "공지사항", "description": "Tracking SA의 새로운 소식을 전해드립니다.", "keywords": ["공지", "게시판", "소식"]},
+            {"href": "/board?category=free", "title": "자유게시판", "description": "자유롭게 의견을 나누는 커뮤니티 공간", "keywords": ["커뮤니티", "자유", "게시판"]},
+            {"href": "/futures-estimate/", "title": "코스피200 지수 예측", "description": "AI 기반 KOSPI200 지수 상승/하락 예측 데이터", "keywords": ["지수", "선물", "코스피", "K200"]},
+            {"href": "/games/", "title": "게임 센터", "description": "다양한 클래식 및 AI 게임 플레이 및 등록", "keywords": ["게임", "play", "games", "오락"]},
+            {"href": "/glossary/", "title": "AI 용어사전", "description": "어려운 IT/AI 용어를 쉽게 풀이한 백과사전", "keywords": ["사전", "용어", "백과사전", "IT용어"]},
+            {"href": "/ai-test/", "title": "AI 성향 테스트", "description": "나와 어울리는 AI 기술은 무엇일까요?", "keywords": ["테스트", "성향"]},
+            {"href": "/animal-face/", "title": "동물상 테스트", "description": "인공지능이 분석하는 나의 동물상 관상", "keywords": ["테스트", "동물상"]},
+            {"href": "/fortune/", "title": "AI 운세", "description": "Gemini AI가 들려주는 오늘의 운세", "keywords": ["운세", "사주"]},
+            {"href": "/account/", "title": "내 정보", "description": "프로필 관리 및 활동 내역 확인", "keywords": ["계정", "회원정보", "프로필"]},
         ],
         "en": [
-            {"href": "/en/news/", "title": "Tech Insights", "date": "", "keywords": ["news", "insights"]},
-            {"href": "/board?category=notice", "title": "Notice", "date": "", "keywords": ["notice", "announcement", "board"]},
-            {"href": "/board?category=free", "title": "Free Board", "date": "", "keywords": ["community", "free", "board"]},
-            {"href": "/futures-estimate/", "title": "KOSPI200", "date": "", "keywords": ["index", "futures", "K200"]},
-            {"href": "/board/", "title": "Board", "date": "", "keywords": ["community", "posts"]},
-            {"href": "/ai-test/", "title": "AI Tendency Test", "date": "", "keywords": ["test", "personality"]},
-            {"href": "/animal-face/", "title": "Animal Face Test", "date": "", "keywords": ["test", "animal face"]},
-            {"href": "/fortune/", "title": "AI Fortune", "date": "", "keywords": ["fortune", "saju"]},
-            {"href": "/lucky-recommendation/", "title": "Lucky Recommendation", "date": "", "keywords": ["recommendation", "lucky"]},
-            {"href": "/tetris-game/", "title": "Tetris", "date": "", "keywords": ["game", "puzzle"]},
-            {"href": "/ai-evolution/", "title": "AI Evolution", "date": "", "keywords": ["game", "evolution"]},
-            {"href": "/about/", "title": "About", "date": "", "keywords": ["about", "company"]},
-            {"href": "/contact", "title": "Contact", "date": "", "keywords": ["contact", "support"]},
-            {"href": "/inquiry", "title": "Partnership Inquiry", "date": "", "keywords": ["partnership", "inquiry"]},
-            {"href": "/account/", "title": "Account", "date": "", "keywords": ["account", "profile"]},
+            {"href": "/en/news/", "title": "Tech Insights", "description": "Latest AI and tech trend analysis columns", "keywords": ["news", "insights"]},
+            {"href": "/board?category=notice", "title": "Notice", "description": "Official announcements and news from Tracking SA", "keywords": ["notice", "announcement", "board"]},
+            {"href": "/board?category=free", "title": "Free Board", "description": "Community space for free discussions", "keywords": ["community", "free", "board"]},
+            {"href": "/futures-estimate/", "title": "KOSPI200 Prediction", "description": "AI-based KOSPI200 index direction forecast", "keywords": ["index", "futures", "K200"]},
+            {"href": "/games/", "title": "Game Center", "description": "Play and share various classic and AI games", "keywords": ["games", "play", "entertainment"]},
+            {"href": "/glossary/", "title": "AI Glossary", "description": "Comprehensive guide to IT and AI terminology", "keywords": ["dictionary", "terms", "glossary"]},
+            {"href": "/ai-test/", "title": "AI Tendency Test", "description": "Discover which AI tech matches your personality", "keywords": ["test", "personality"]},
+            {"href": "/animal-face/", "title": "Animal Face Test", "description": "AI analysis of your face type", "keywords": ["test", "animal face"]},
+            {"href": "/fortune/", "title": "AI Fortune", "description": "Daily fortune told by Gemini AI", "keywords": ["fortune", "saju"]},
+            {"href": "/account/", "title": "Account", "description": "Manage your profile and activity", "keywords": ["account", "profile"]},
         ],
     }
     payload = {

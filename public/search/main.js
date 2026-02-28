@@ -1,5 +1,5 @@
 import { filterSearchItems } from "./application/search-data.js";
-import { loadSearchIndex, searchFromNewsIndex } from "./infra/searchRepository.js";
+import { loadSearchIndex, searchFromNewsIndex, searchGamesFromFirestore } from "./infra/searchRepository.js";
 import * as renderer from "./ui/search-renderer.js";
 
 function qs(key) {
@@ -28,7 +28,12 @@ async function runSearch(query) {
   renderer.renderSearchLoading();
 
   try {
-    const index = await loadSearchIndex();
+    // Parallel search: Static Index + Dynamic Games
+    const [index, dynamicGames] = await Promise.all([
+      loadSearchIndex().catch(() => ({ items: {} })),
+      searchGamesFromFirestore(query).catch(() => [])
+    ]);
+
     const primary = index?.items?.[lang] || [];
     const fallbackLang = lang === "en" ? "ko" : "en";
     const secondary = index?.items?.[fallbackLang] || [];
@@ -38,14 +43,22 @@ async function runSearch(query) {
       items = filterSearchItems(secondary, query);
     }
 
-    renderer.renderSearchSummary(query, items.length);
-    renderer.renderSearchResults(items);
+    // Merge static and dynamic results (avoiding duplicates by href)
+    const mergedMap = new Map();
+    [...items, ...dynamicGames].forEach(item => {
+      if (!mergedMap.has(item.href)) mergedMap.set(item.href, item);
+    });
+    
+    const finalItems = Array.from(mergedMap.values());
+
+    renderer.renderSearchSummary(query, finalItems.length);
+    renderer.renderSearchResults(finalItems, query);
   } catch (e) {
-    console.warn("Search index failed, falling back to news-index:", e);
+    console.warn("Search failed, falling back to news-index:", e);
     try {
       const items = await searchFromNewsIndex(query, lang, 200);
       renderer.renderSearchSummary(query, items.length);
-      renderer.renderSearchResults(items);
+      renderer.renderSearchResults(items, query);
     } catch (finalError) {
       console.error("Search page error:", finalError);
       renderer.renderSearchError();

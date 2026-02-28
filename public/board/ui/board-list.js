@@ -51,6 +51,33 @@ class BoardList extends HTMLElement {
       @import url("/style.css");
       :host { display: block; width: 100%; }
       
+      .board-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        overflow-x: auto;
+        padding-bottom: 5px;
+      }
+      .tab-item {
+        padding: 8px 18px;
+        border-radius: 30px;
+        background: white;
+        border: 1px solid oklch(92% 0.02 260);
+        font-weight: 700;
+        font-size: 0.85rem;
+        cursor: pointer;
+        text-decoration: none;
+        color: var(--text-sub);
+        transition: all 0.2s;
+        white-space: nowrap;
+      }
+      .tab-item.active {
+        background: var(--p-blue);
+        color: white;
+        border-color: var(--p-blue);
+        box-shadow: 0 4px 12px rgba(0, 82, 204, 0.2);
+      }
+
       .list-container {
         width: 100%;
         background: white;
@@ -197,6 +224,11 @@ class BoardList extends HTMLElement {
 
     this.shadowRoot.innerHTML = `
       <style>${style}</style>
+      <div class="board-tabs">
+        <a href="/board/" class="tab-item ${!this.state.category || this.state.category === "" ? "active" : ""}">${t("cat_all", "전체")}</a>
+        <a href="/board/?category=notice" class="tab-item ${this.state.category === "notice" ? "active" : ""}">${t("notice", "공지사항")}</a>
+        <a href="/board/?category=free" class="tab-item ${this.state.category === "free" ? "active" : ""}">${t("free_board", "자유게시판")}</a>
+      </div>
       <div class="list-container">
         ${innerContent}
       </div>

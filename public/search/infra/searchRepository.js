@@ -17,3 +17,36 @@ export async function searchFromNewsIndex(query, lang, limit = 200) {
     .filter((item) => item.href && item.title.toLowerCase().includes(q))
     .slice(0, limit);
 }
+
+/**
+ * Dynamically search approved games from Firestore.
+ */
+export async function searchGamesFromFirestore(query) {
+  if (typeof window === "undefined" || !window.db) return [];
+  
+  const q = query.toLowerCase();
+  try {
+    const snapshot = await window.db.collection('games')
+      .where('status', '==', 'approved')
+      .get();
+
+    return snapshot.docs
+      .map(doc => {
+        const data = doc.data();
+        return {
+          href: `/games/play/?id=${doc.id}`,
+          title: data.title,
+          description: data.description,
+          date: data.createdAt?.toDate ? data.createdAt.toDate().toLocaleDateString() : data.createdAt,
+          isGame: true
+        };
+      })
+      .filter(game => 
+        game.title.toLowerCase().includes(q) || 
+        game.description?.toLowerCase().includes(q)
+      );
+  } catch (err) {
+    console.warn("[SearchRepo] Games search failed:", err);
+    return [];
+  }
+}
