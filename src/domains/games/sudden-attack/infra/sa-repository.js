@@ -23,20 +23,33 @@ export class SaRepository {
   }
 
   /**
-   * Fetch recent matches for a player (Ranked & Clan)
+   * Fetch recent matches for a player (All Modes Scan)
    */
   async getRecentMatches(ouid, limit = 5) {
-    try {
-      // Fetch both Ranked (2) and Clan (3) matches in parallel
-      const [rankedData, clanData] = await Promise.all([
-        this.apiClient.getMatchList(ouid, 2).catch(() => ({ match_list: [] })),
-        this.apiClient.getMatchList(ouid, 3).catch(() => ({ match_list: [] }))
-      ]);
+    const modes = [
+      { id: 1, name: "일반전" },
+      { id: 2, name: "랭크전" },
+      { id: 3, name: "클랜전" },
+      { id: 4, name: "생존모드" },
+      { id: 5, name: "영토전" }
+    ];
 
-      const combinedMatches = [
-        ...(rankedData.match_list || []).map(m => ({ ...m, typeName: "랭크전" })),
-        ...(clanData.match_list || []).map(m => ({ ...m, typeName: "클랜전" }))
-      ];
+    try {
+      // Parallel scan all modes, each with its own error boundary
+      const results = await Promise.all(
+        modes.map(async (mode) => {
+          try {
+            const data = await this.apiClient.getMatchList(ouid, mode.id);
+            return (data.match_list || []).map(m => ({ ...m, typeName: mode.name }));
+          } catch (err) {
+            // Silently ignore 400 errors for modes without data
+            console.warn(`[Repository] No data for mode ${mode.name} (ID: ${mode.id})`);
+            return [];
+          }
+        })
+      );
+
+      const combinedMatches = results.flat();
 
       // Sort by date (descending) and take top N
       const sortedIds = combinedMatches
@@ -45,14 +58,19 @@ export class SaRepository {
       
       const details = await Promise.all(
         sortedIds.map(async (m) => {
-          const detail = await this.apiClient.getMatchDetail(m.match_id);
-          return new MatchRecord(detail, m.typeName);
+          try {
+            const detail = await this.apiClient.getMatchDetail(m.match_id);
+            return new MatchRecord(detail, m.typeName);
+          } catch (err) {
+            console.error(`[Repository] Failed to get detail for match ${m.match_id}:`, err);
+            return null;
+          }
         })
       );
       
-      return details;
+      return details.filter(d => d !== null);
     } catch (error) {
-      console.error('[Repository] Failed to get merged matches:', error);
+      console.error('[Repository] Fatal error during match scanning:', error);
       throw error;
     }
   }
