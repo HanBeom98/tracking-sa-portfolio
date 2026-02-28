@@ -14,7 +14,7 @@
             background: #000;
             overflow: hidden;
         }
-        .play-header {
+        .play-top-bar {
             background: var(--bg-main);
             padding: 12px 20px;
             display: flex;
@@ -37,7 +37,7 @@
             border: none;
             background: #000;
         }
-        .game-footer {
+        .game-bottom-bar {
             background: var(--bg-main);
             padding: 15px 20px;
             display: flex;
@@ -53,7 +53,7 @@
             font-weight: 700;
         }
         @media (max-width: 600px) {
-            .game-footer { flex-direction: column; gap: 10px; align-items: flex-start; }
+            .game-bottom-bar { flex-direction: column; gap: 10px; align-items: flex-start; }
         }
     </style>
     <meta name="robots" content="index, follow">
@@ -112,7 +112,8 @@
 <script src="/common.js?v=1772267294"></script>
 
 </head>
-<body><header>
+<body>
+    <header>
     <div class="header-inner">
         <a href="/" class="site-logo-link">
             <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="site-logo">
@@ -161,11 +162,33 @@
 </header>
 
     <div class="play-container">
-        
+        <div class="play-top-bar">
+            <a href="/games/" class="back-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                <span data-i18n="back_to_hub">게임 센터로 돌아가기</span>
+            </a>
+            <div id="loading-indicator" style="color: var(--p-blue); font-size: 0.8rem; font-weight: 800;">
+                Connecting to Game...
+            </div>
+        </div>
 
-        <iframe id="game-frame" class="game-viewport" allow="autoplay; fullscreen; keyboard" title="Game Player"></iframe>
+        <iframe id="game-frame" class="game-viewport" allow="autoplay; fullscreen" title="Game Player"></iframe>
 
-        
+        <div class="game-bottom-bar">
+            <div class="game-info-mini">
+                <h2 id="display-title">---</h2>
+                <p id="display-author">By ---</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div class="play-stats" id="display-plays">
+                    --- plays
+                </div>
+                <button id="share-btn" class="back-link" style="background:none; border:1px solid var(--p-blue-soft); padding:5px 12px; border-radius:8px; cursor:pointer; font-size:0.8rem;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:5px;"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                    <span data-i18n="share_game">공유</span>
+                </button>
+            </div>
+        </div>
 
         <!-- Related Games Section -->
         <section id="related-section" style="background: var(--bg-sub); padding: 30px 20px; border-top: 1px solid var(--p-blue-soft); overflow-y: auto;">
@@ -175,9 +198,7 @@
             </div>
         </section>
     </div>
-
-    <script type="module" src="main.js"></script>
-<footer>
+    <footer>
     <p data-i18n="footer_copyright"></p>
     <p>
         <a href="/about" data-i18n="about_us">서비스 소개</a> |
@@ -190,5 +211,6 @@
     </p>
 </footer>
 
+    <script type="module" src="main.js"></script>
 </body>
 </html>
