@@ -11,6 +11,16 @@ export class Player {
   }
 }
 
+export class RecentStats {
+  constructor(info) {
+    this.kd = info.kd_ratio ? parseFloat((info.kd_ratio * 100).toFixed(1)) : 0;
+    this.winRate = info.win_rate ? parseFloat((info.win_rate * 100).toFixed(1)) : 0;
+    this.totalKills = info.kill_count || 0;
+    this.totalDeaths = info.death_count || 0;
+    this.headshotRate = info.headshot_rate ? parseFloat((info.headshot_rate * 100).toFixed(1)) : 0;
+  }
+}
+
 export class MatchRecord {
   constructor(detail, typeName = "") {
     this.matchId = detail.match_id;

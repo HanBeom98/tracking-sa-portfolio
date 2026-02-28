@@ -1,4 +1,4 @@
-import { Player, MatchRecord } from '../domain/models.js';
+import { Player, MatchRecord, RecentStats } from '../domain/models.js';
 
 /**
  * Sudden Attack Data Repository (Infrastructure Layer)
@@ -21,13 +21,27 @@ export class SaRepository {
 
     console.log('[Repository] Player Basic Info:', JSON.stringify(basic, null, 2));
     console.log('[Repository] Player Rank Info:', JSON.stringify(rank, null, 2));
-    
+
     return new Player(ouid, basic, rank);
   }
 
   /**
-   * Fetch recent matches for a player (Resilient Sequential Scan)
+   * Fetch recent trend stats (K/D, Win Rate)
    */
+  async getPlayerStats(ouid) {
+    try {
+      const data = await this.apiClient.getRecentInfo(ouid);
+      console.log('[Repository] Player Recent Info:', JSON.stringify(data, null, 2));
+      return new RecentStats(data);
+    } catch (error) {
+      console.warn('[Repository] Failed to get recent stats:', error.message);
+      return null;
+    }
+  }
+
+  /**
+   * Fetch recent matches for a player (Resilient Sequential Scan)
+...
   async getRecentMatches(ouid, limit = 5) {
     const modes = [
       { id: 1, name: "일반전" },

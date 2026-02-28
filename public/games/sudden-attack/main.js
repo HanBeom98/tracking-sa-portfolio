@@ -14,6 +14,7 @@ const searchInput = document.getElementById('characterName');
 const searchBtn = document.getElementById('searchBtn');
 const loading = document.getElementById('loading');
 const profileSection = document.getElementById('playerProfile');
+const statsSection = document.getElementById('statsSummary');
 const historySection = document.getElementById('matchHistory');
 
 async function handleSearch() {
@@ -23,6 +24,7 @@ async function handleSearch() {
   try {
     loading.classList.remove('hidden');
     profileSection.classList.add('hidden');
+    statsSection.classList.add('hidden');
     historySection.classList.add('hidden');
 
     const player = await service.searchPlayer(name);
@@ -31,6 +33,14 @@ async function handleSearch() {
     profileSection.innerHTML = '<sa-player-card></sa-player-card>';
     profileSection.querySelector('sa-player-card').player = player;
     profileSection.classList.remove('hidden');
+
+    // Render Stats
+    const stats = await repository.getPlayerStats(player.ouid);
+    if (stats) {
+      statsSection.innerHTML = '<sa-stats-summary></sa-stats-summary>';
+      statsSection.querySelector('sa-stats-summary').stats = stats;
+      statsSection.classList.remove('hidden');
+    }
 
     // Render Matches
     const matches = await service.getRecentMatches(player.ouid);
