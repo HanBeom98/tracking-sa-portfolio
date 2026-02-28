@@ -87,18 +87,20 @@ async function initPlayPage() {
             };
         }
 
-        // 3. Prevent global scroll when arrow keys are pressed in the wrapper page
-        window.addEventListener('keydown', (e) => {
-            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
-                // If focus is NOT in an input/textarea, prevent scroll
-                const active = document.activeElement.tagName.toLowerCase();
-                if (active !== 'input' && active !== 'textarea') {
-                    e.preventDefault();
+        // 3. Setup Controls & Event Listeners
+        if (!window._gameListenersAttached) {
+            window.addEventListener('keydown', (e) => {
+                if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
+                    const active = document.activeElement?.tagName?.toLowerCase();
+                    if (active !== 'input' && active !== 'textarea') {
+                        e.preventDefault();
+                    }
                 }
-            }
-        });
+            });
+            window._gameListenersAttached = true;
+        }
 
-        // 2. Update UI Safely
+        // 4. Update UI Safely
         document.title = `${game.title} | Tracking SA`;
         
         const titleEl = document.getElementById("display-title");

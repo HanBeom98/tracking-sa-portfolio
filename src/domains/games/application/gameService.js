@@ -97,37 +97,49 @@ export const gameService = {
         return await gameRepository.updateCategory(id, category);
     },
 
+    /**
+     * Track game play and handle initial setup for default games if missing.
+     */
     async trackPlay(id) {
         try {
-            return await gameRepository.incrementPlayCount(id);
+            await gameRepository.incrementPlayCount(id);
         } catch (err) {
-            // If failed because document doesn't exist, try to auto-create for default games
+            // Self-healing for missing default game documents
             if (id === 'tetris' || id === 'ai-evolution') {
-                if (typeof window !== "undefined" && window.AuthGateway) {
-                    const profile = window.AuthGateway.getCurrentUserProfile();
-                    const user = window.AuthGateway.getCurrentUser();
-                    if (profile && profile.role === "admin" && user) {
-                        console.info(`[GameService] Auto-creating missing default game document: ${id}`);
-                        const all = await this.getApprovedGames();
-                        const g = all.find(x => x.id === id);
-                        if (g) {
-                            await gameRepository.set(id, {
-                                id: g.id,
-                                title: g.title,
-                                description: g.description,
-                                url: g.url,
-                                authorName: g.authorName || 'Admin',
-                                authorUid: user.uid, // Provide valid UID
-                                playCount: 1,
-                                status: 'approved',
-                                category: g.category || 'classic',
-                                createdAt: g.createdAt || new Date().toISOString()
-                            });
-                        }
-                    }
-                }
+                await this._initializeDefaultGame(id);
             }
-            throw err;
+        }
+    },
+
+    /**
+     * Private helper to initialize default games in Firestore when an admin visits.
+     * @private
+     */
+    async _initializeDefaultGame(id) {
+        if (typeof window === "undefined" || !window.AuthGateway) return;
+
+        const profile = window.AuthGateway.getCurrentUserProfile();
+        const user = window.AuthGateway.getCurrentUser();
+
+        if (profile?.role === "admin" && user) {
+            console.info(`[GameService] Self-healing: Initializing ${id} in Firestore...`);
+            const all = await this.getApprovedGames();
+            const g = all.find(x => x.id === id);
+            
+            if (g) {
+                await gameRepository.set(id, {
+                    id: g.id,
+                    title: g.title,
+                    description: g.description,
+                    url: g.url,
+                    authorName: g.authorName || 'Admin',
+                    authorUid: user.uid,
+                    playCount: 1,
+                    status: 'approved',
+                    category: g.category || 'classic',
+                    createdAt: g.createdAt || new Date().toISOString()
+                });
+            }
         }
     }
 };

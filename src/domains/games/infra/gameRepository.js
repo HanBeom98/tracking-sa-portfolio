@@ -123,15 +123,14 @@ export const gameRepository = {
         const docRef = db.collection('games').doc(id);
         
         try {
-            return await docRef.update({
+            await docRef.update({
                 playCount: (typeof firebase !== 'undefined' && firebase.firestore.FieldValue) 
                     ? firebase.firestore.FieldValue.increment(1) 
                     : 1
             });
         } catch (err) {
-            // If document doesn't exist (likely default games), and we might have permission to set
-            console.warn(`[GameRepo] Update failed for ${id}, checking if we can initialize...`, err);
-            throw err; // Re-throw to be caught by application service's auto-create logic
+            // Document might not exist; propagate to application service for handling
+            throw err;
         }
     }
 };
