@@ -3,17 +3,17 @@ export class Player {
     this.ouid = basic.ouid;
     this.nickname = basic.character_name;
     this.level = basic.level;
-    this.rankName = rank.rank_name;
-    this.ranking = rank.ranking;
-    this.totalExp = rank.exp;
+    this.rankName = rank.rank_name || "Unknown";
+    this.ranking = rank.ranking || 0;
+    this.totalExp = rank.exp || 0;
   }
 }
 
 export class MatchRecord {
   constructor(detail) {
     this.matchId = detail.match_id;
-    this.mapName = detail.map_name;
-    this.matchResult = detail.match_result; // e.g., "WIN", "LOSE"
+    this.mapName = detail.map_name || "Unknown Map";
+    this.matchResult = detail.match_result || "UNKNOWN"; // e.g., "WIN", "LOSE"
     this.kill = detail.kill_count || 0;
     this.death = detail.death_count || 0;
     this.assist = detail.assist_count || 0;

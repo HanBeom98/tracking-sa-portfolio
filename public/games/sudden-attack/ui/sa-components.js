@@ -17,11 +17,11 @@ export class SaPlayerCard extends HTMLElement {
           </div>
           <div class="stat-item">
             <label>Ranking</label>
-            <span>#${data.ranking.toLocaleString()}</span>
+            <span>#${(data.ranking || 0).toLocaleString()}</span>
           </div>
           <div class="stat-item">
             <label>Total Exp</label>
-            <span>${data.totalExp.toLocaleString()}</span>
+            <span>${(data.totalExp || 0).toLocaleString()}</span>
           </div>
         </div>
       </div>
