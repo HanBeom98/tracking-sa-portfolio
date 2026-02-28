@@ -23,7 +23,7 @@ export class SaRepository {
   }
 
   /**
-   * Fetch recent matches for a player (All Modes Scan)
+   * Fetch recent matches for a player (Resilient Sequential Scan)
    */
   async getRecentMatches(ouid, limit = 5) {
     const modes = [
@@ -34,41 +34,46 @@ export class SaRepository {
       { id: 5, name: "영토전" }
     ];
 
-    try {
-      // Parallel scan all modes, each with its own error boundary
-      const results = await Promise.all(
-        modes.map(async (mode) => {
-          try {
-            const data = await this.apiClient.getMatchList(ouid, mode.id);
-            return (data.match_list || []).map(m => ({ ...m, typeName: mode.name }));
-          } catch (err) {
-            // Silently ignore 400 errors for modes without data
-            console.warn(`[Repository] No data for mode ${mode.name} (ID: ${mode.id})`);
-            return [];
-          }
-        })
-      );
+    const combinedMatches = [];
+    const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-      const combinedMatches = results.flat();
+    try {
+      console.log(`[Repository] Starting sequential scan for OUID: ${ouid}`);
+      
+      for (const mode of modes) {
+        try {
+          // Add a small delay between requests to avoid 429
+          await delay(150); 
+          const data = await this.apiClient.getMatchList(ouid, mode.id);
+          const matches = (data.match_list || []).map(m => ({ ...m, typeName: mode.name }));
+          combinedMatches.push(...matches);
+          console.log(`[Repository] Successfully loaded ${matches.length} matches from ${mode.name}`);
+        } catch (err) {
+          if (err.message === 'TEST_KEY_LIMITATION') {
+            console.warn(`[Repository] Test key scope limitation for mode ${mode.name}`);
+          } else {
+            console.warn(`[Repository] No data or error for mode ${mode.name}:`, err.message);
+          }
+        }
+      }
 
       // Sort by date (descending) and take top N
       const sortedIds = combinedMatches
         .sort((a, b) => new Date(b.match_date) - new Date(a.match_date))
         .slice(0, limit);
       
-      const details = await Promise.all(
-        sortedIds.map(async (m) => {
-          try {
-            const detail = await this.apiClient.getMatchDetail(m.match_id);
-            return new MatchRecord(detail, m.typeName);
-          } catch (err) {
-            console.error(`[Repository] Failed to get detail for match ${m.match_id}:`, err);
-            return null;
-          }
-        })
-      );
+      const details = [];
+      for (const m of sortedIds) {
+        try {
+          await delay(100);
+          const detail = await this.apiClient.getMatchDetail(m.match_id);
+          details.push(new MatchRecord(detail, m.typeName));
+        } catch (err) {
+          console.error(`[Repository] Failed to get detail for match ${m.match_id}:`, err.message);
+        }
+      }
       
-      return details.filter(d => d !== null);
+      return details;
     } catch (error) {
       console.error('[Repository] Fatal error during match scanning:', error);
       throw error;
