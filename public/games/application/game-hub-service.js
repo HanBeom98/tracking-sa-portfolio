@@ -39,7 +39,7 @@ export async function fetchGames() {
       thumbnail: '/favicon.svg',
       authorName: 'Admin',
       status: 'approved',
-      category: 'ai',
+      category: 'puzzle',
       createdAt: new Date().toISOString()
     }
   ];
