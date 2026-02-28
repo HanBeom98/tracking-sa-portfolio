@@ -185,7 +185,6 @@ async function initHub() {
   try {
     // 1. Fetch approved games
     allGames = await fetchGames();
-...
 
     setupFilters();
     filterAndRender();
