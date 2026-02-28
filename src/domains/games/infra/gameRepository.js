@@ -102,6 +102,20 @@ export const gameRepository = {
         return await db.collection('games').doc(id).delete();
     },
 
+    async set(id, data) {
+        const db = await getFirestore();
+        if (!db) throw new Error('database_unavailable');
+        
+        const updatedAt = (typeof firebase !== 'undefined' && firebase.firestore.FieldValue) 
+            ? firebase.firestore.FieldValue.serverTimestamp() 
+            : new Date().toISOString();
+
+        return await db.collection('games').doc(id).set({
+            ...data,
+            updatedAt
+        }, { merge: true });
+    },
+
     async incrementPlayCount(id) {
         const db = await getFirestore();
         if (!db) return;

@@ -14,7 +14,8 @@ export const gameService = {
                 url: '/games/tetris/',
                 authorName: 'Admin',
                 status: 'approved',
-                category: 'classic'
+                category: 'classic',
+                createdAt: '2026-01-01T00:00:00.000Z'
             }),
             new Game({
                 id: 'ai-evolution',
@@ -23,22 +24,24 @@ export const gameService = {
                 url: '/games/ai-evolution/',
                 authorName: 'Admin',
                 status: 'approved',
-                category: 'puzzle'
+                category: 'puzzle',
+                createdAt: '2026-01-01T01:00:00.000Z'
             })
         ];
 
         try {
             const userGames = await gameRepository.fetchApprovedGames();
             
-            // Merge defaults with user games
-            const merged = [...defaultGames];
+            // Map default games for easier merging
+            const mergedMap = new Map();
+            defaultGames.forEach(dg => mergedMap.set(dg.id, dg));
+            
+            // Override/Merge with DB data (Play counts, updated info)
             userGames.forEach(ug => {
-                if (!merged.find(mg => mg.id === ug.id)) {
-                    merged.push(ug);
-                }
+                mergedMap.set(ug.id, ug);
             });
 
-            return merged.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            return Array.from(mergedMap.values()).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         } catch (error) {
             console.warn('[GameService] Falling back to default games:', error);
             return defaultGames;
@@ -46,11 +49,10 @@ export const gameService = {
     },
 
     async getGame(id) {
-        // Check defaults first
-        if (id === 'tetris' || id === 'ai-evolution') {
-            const all = await this.getApprovedGames();
-            return all.find(g => g.id === id);
-        }
+        const all = await this.getApprovedGames();
+        const game = all.find(g => g.id === id);
+        if (game) return game;
+        
         return await gameRepository.getById(id);
     },
 
@@ -96,7 +98,29 @@ export const gameService = {
     },
 
     async trackPlay(id) {
-        if (id === 'tetris' || id === 'ai-evolution') return;
-        return await gameRepository.incrementPlayCount(id);
+        try {
+            return await gameRepository.incrementPlayCount(id);
+        } catch (err) {
+            // If failed because document doesn't exist, try to auto-create for default games
+            if (id === 'tetris' || id === 'ai-evolution') {
+                if (typeof window !== "undefined" && window.AuthGateway) {
+                    const profile = window.AuthGateway.getCurrentUserProfile();
+                    if (profile && profile.role === "admin") {
+                        console.info(`[GameService] Auto-creating missing default game document: ${id}`);
+                        const all = await this.getApprovedGames();
+                        const g = all.find(x => x.id === id);
+                        if (g) {
+                            await gameRepository.set(id, {
+                                ...g,
+                                playCount: 1, // Start with 1 as it's being played
+                                status: 'approved',
+                                createdAt: g.createdAt || new Date().toISOString()
+                            });
+                        }
+                    }
+                }
+            }
+            throw err;
+        }
     }
 };
