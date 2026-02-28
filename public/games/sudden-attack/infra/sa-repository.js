@@ -21,7 +21,7 @@ export class SaRepository {
 
     console.log('[Repository] Player Basic Info:', JSON.stringify(basic, null, 2));
     console.log('[Repository] Player Rank Info:', JSON.stringify(rank, null, 2));
-
+    
     return new Player(ouid, basic, rank);
   }
 
@@ -41,7 +41,7 @@ export class SaRepository {
 
   /**
    * Fetch recent matches for a player (Resilient Sequential Scan)
-...
+   */
   async getRecentMatches(ouid, limit = 5) {
     const modes = [
       { id: 1, name: "일반전" },
@@ -66,11 +66,8 @@ export class SaRepository {
           combinedMatches.push(...matches);
           console.log(`[Repository] Successfully loaded ${matches.length} matches from ${mode.name}`);
         } catch (err) {
-          if (err.message === 'TEST_KEY_LIMITATION') {
-            console.warn(`[Repository] Test key scope limitation for mode ${mode.name}`);
-          } else {
-            console.warn(`[Repository] No data or error for mode ${mode.name}:`, err.message);
-          }
+          // Log specific error for debugging match 400
+          console.warn(`[Repository] Mode ${mode.name} (ID: ${mode.id}) failed:`, err.message);
         }
       }
 
