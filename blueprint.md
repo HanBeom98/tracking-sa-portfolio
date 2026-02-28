@@ -21,6 +21,11 @@ Tracking SA를 프레임워크 의존 없이 안정적으로 운영 가능한 DD
 
 ## ✅ Completed Milestones
 ### 2026-02-28
+- **서든어택 전적 검색(Sudden Attack Stats) 모듈 신규 구축**:
+  - **넥슨 오픈 API 연동**: `ouid` 조회부터 상세 매치 정보까지 단계별 API 오케스트레이션 구현.
+  - **Strict DDD 아키텍처 적용**: `Infra(Repository/Client)`, `Domain(Models)`, `Application(Service)`, `UI(Web Components)`의 4계층을 엄격히 준수한 참조 모델 확립.
+  - **다크 테마 UI/UX**: `3rd.supply`, `suddengg.com` 등 전문 전적 사이트 수준의 고대비 다크 모드 디자인 적용.
+  - **검색 시스템 통합**: 사이트 통합 검색 엔진에 서든어택 전적 인덱싱 완료.
 - **CI/CD 파이프라인 지능형 고도화 (Smart Testing)**:
   - **영리한 테스트 필터링**: `dorny/paths-filter` 기반 도메인별 선택적 테스트 실행 체계 구축.
   - **병렬 검증 가속화**: GitHub Actions Matrix 활용으로 대규모 테스트 부하 분산 및 빌드 시간 단축.

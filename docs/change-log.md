@@ -1,5 +1,21 @@
 ## 2026-02-28
 
+### feat(games): implement Sudden Attack statistics and player search module
+- 문제/증상:
+  - 사용자들의 서든어택 전적 조회 니즈가 있으나, 공식 데이터를 쉽고 빠르게 확인할 수 있는 통합 대시보드가 부족함.
+- 변경:
+  - **Nexon Open API 연동**: 캐릭터명 기반 `ouid` 추출 및 기본 정보, 랭크, 최근 매치 기록 조회를 위한 `NexonApiClient` 구현.
+  - **Strict DDD 아키텍처 적용**:
+    - **Infra**: `SaRepository` 도입으로 API 통신과 모델 변환 로직을 캡슐화.
+    - **Domain**: `Player`, `MatchRecord` 모델 정의.
+    - **Application**: `SaService`를 통한 유스케이스 조정.
+    - **UI**: Web Components(`<sa-player-card>`, `<sa-match-list>`) 및 전용 다크 테마 스타일 적용.
+  - **홈 화면 통합**: '커뮤니티' 섹션에 서든어택 전적 바로가기 카드 추가 및 사이트 통합 검색 인덱싱 완료.
+- 영향 범위: `games/sudden-attack` 도메인 신설 및 홈 화면/검색 엔진 연동.
+- 검증:
+  - 캐릭터명 검색 시 실시간 데이터 로딩 및 렌더링 확인.
+  - `npm run build`를 통한 자산 동기화 및 `npm run test:unit` 전체 통과 확인.
+
 ### refactor(games): implement strict DDD architecture and cleanup CSS hacks
 - 문제/증상:
   - 빠르게 기능을 추가하며 `games` 도메인 내부에 비즈니스 로직, 데이터 접근, UI 렌더링이 섞여 있어 유지보수가 어려움.
