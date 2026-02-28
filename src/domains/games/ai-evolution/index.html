@@ -33,6 +33,14 @@
             font-family: 'Pretendard', sans-serif;
         }
 
+        /* If inside iframe (Game Player Wrapper), hide the injected header and adjust layout */
+        body.is-embedded {
+            padding-top: 0;
+        }
+        body.is-embedded header {
+            display: none;
+        }
+
         #ai-evolution-game {
             flex: 1;
             display: flex;

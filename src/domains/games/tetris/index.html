@@ -35,7 +35,26 @@
             width: 100%;
             height: calc(100dvh - var(--nav-height));
         }
+
+        /* If inside iframe (Game Player Wrapper), hide the injected header and adjust layout */
+        body.is-embedded {
+            padding-top: 0;
+        }
+        body.is-embedded header {
+            display: none;
+        }
+        body.is-embedded tetris-game {
+            height: 100dvh;
+        }
     </style>
+    <script>
+        // Check if embedded in iframe
+        if (window.self !== window.top) {
+            document.addEventListener('DOMContentLoaded', () => {
+                document.body.classList.add('is-embedded');
+            });
+        }
+    </script>
 </head>
 <body data-i18n="body">
     <!-- HEADER_INJECTION -->
