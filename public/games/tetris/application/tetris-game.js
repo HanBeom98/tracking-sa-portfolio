@@ -471,9 +471,10 @@ export class TetrisGame extends HTMLElement {
         };
 
         document.addEventListener('keydown', e => {
-            if (this.isGameOver) return;
             const keysToPrevent = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '];
             if (keysToPrevent.includes(e.key)) e.preventDefault();
+            
+            if (this.isGameOver) return;
             if (e.key === 'ArrowLeft') move(-1);
             if (e.key === 'ArrowRight') move(1);
             if (e.key === 'ArrowDown') { this.initAudio(); this.playerDrop(true); }

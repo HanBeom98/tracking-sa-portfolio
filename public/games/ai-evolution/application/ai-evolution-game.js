@@ -164,10 +164,10 @@ export class AIEvolution2048 {
 
     setupEvents() {
         document.addEventListener('keydown', (e) => {
-            if (this.isGameOver || this.isMoving) return;
             const map = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' };
             if (map[e.key]) {
                 e.preventDefault();
+                if (this.isGameOver || this.isMoving) return;
                 this.move(map[e.key]);
             }
         });
