@@ -118,7 +118,16 @@ async function initPlayPage() {
         }
 
         loadRelatedGames(game.category, gameId);
-        gameService.trackPlay(gameId).catch(e => console.warn("[PlayPage] Track failed", e));
+        
+        // Anti-Abuse: Only track play once per browser session for this game
+        const sessionKey = `played_${gameId}`;
+        if (!sessionStorage.getItem(sessionKey)) {
+            gameService.trackPlay(gameId)
+                .then(() => sessionStorage.setItem(sessionKey, 'true'))
+                .catch(e => console.warn("[PlayPage] Track failed", e));
+        } else {
+            console.info(`[PlayPage] Play count already tracked in this session for ${gameId}`);
+        }
 
     } catch (err) {
         console.error("[PlayPage] Init failed:", err);
