@@ -43,11 +43,13 @@ export class SaRepository {
    * Fetch recent matches for a player (Resilient Sequential Scan)
    */
   async getRecentMatches(ouid, limit = 5) {
-    const modes = [
-      { id: 7, name: "랭크전" },
-      { id: 11, name: "클랜전" },
-      { id: 12, name: "토너먼트" },
-      { id: 13, name: "공식전" }
+    // Correct combinations based on Korean string parameters
+    const combinations = [
+      { type: "클랜전", mode: "폭파미션" },
+      { type: "랭크전", mode: "폭파미션" },
+      { type: "일반전", mode: "폭파미션" },
+      { type: "일반전", mode: "팀데스매치" },
+      { type: "랭크전", mode: "팀데스매치" }
     ];
 
     const combinedMatches = [];
@@ -55,7 +57,6 @@ export class SaRepository {
 
     // Get Today and Yesterday in KST (YYYY-MM-DD)
     const now = new Date();
-    // Use Intl to get KST date parts regardless of local system time
     const kstFormatter = new Intl.DateTimeFormat('ko-KR', {
       timeZone: 'Asia/Seoul',
       year: 'numeric',
@@ -71,23 +72,24 @@ export class SaRepository {
       return `${y}-${m}-${d}`;
     };
 
-    const todayKstStr = formatDateParts(now);
-    const yesterdayKstStr = formatDateParts(new Date(now.getTime() - (24 * 60 * 60 * 1000)));
-
-    // Try current date, yesterday, and also a "null" date (latest)
-    const dates = [todayKstStr, yesterdayKstStr, ""];
+    const dates = [formatDateParts(now), ""]; // Try today then latest
 
     try {
-      console.log(`[Repository] Starting deep scan for OUID: ${ouid} on Dates: ${dates.filter(d => d).join(', ') || 'Latest'}`);
+      console.log(`[Repository] Starting deep scan for OUID: ${ouid}`);
       
       for (const date of dates) {
-        for (const mode of modes) {
+        for (const combo of combinations) {
           try {
-            await delay(800); // Respect rate limits
-            const data = await this.apiClient.getMatchList(ouid, mode.id, date);
-            const matches = (data.match_list || []).map(m => ({ ...m, typeName: mode.name }));
+            await delay(500);
+            const data = await this.apiClient.getMatchList(ouid, combo.type, combo.mode, date);
             
-            // Avoid duplicates if we search with multiple dates
+            // SA API uses 'match' as root key
+            const matches = (data.match || []).map(m => ({ 
+              ...m, 
+              typeName: `${combo.type}(${combo.mode})`,
+              match_date: m.date_match // Map to internal field name
+            }));
+            
             for (const m of matches) {
               if (!combinedMatches.find(cm => cm.match_id === m.match_id)) {
                 combinedMatches.push(m);
@@ -95,20 +97,16 @@ export class SaRepository {
             }
 
             if (matches.length > 0) {
-              console.log(`[Repository] Found ${matches.length} matches in ${mode.name} on ${date || 'Latest'}`);
+              console.log(`[Repository] Found ${matches.length} matches for ${combo.type} - ${combo.mode}`);
             }
           } catch (err) {
-            // Silently skip modes/dates that return 400 or have no data
-            if (!err.message.includes('400')) {
-               console.warn(`[Repository] Skipping mode ${mode.name} on ${date}:`, err.message);
-            }
+            // Silence common 400s
           }
         }
-        // If we found enough matches, we can stop early
-        if (combinedMatches.length >= limit * 2) break;
+        if (combinedMatches.length >= limit) break;
       }
 
-      // Sort by date (descending) and take top N
+      // Sort by date (descending)
       const sortedMatches = combinedMatches
         .sort((a, b) => new Date(b.match_date) - new Date(a.match_date))
         .slice(0, limit);
@@ -120,7 +118,15 @@ export class SaRepository {
           const detail = await this.apiClient.getMatchDetail(m.match_id);
           details.push(new MatchRecord(detail, m.typeName));
         } catch (err) {
-          console.error(`[Repository] Failed to get detail for match ${m.match_id}:`, err.message);
+          // If match-detail fails, fallback to basic data from list
+          details.push(new MatchRecord({
+            match_result: m.match_result,
+            match_date: m.match_date,
+            kill: m.kill,
+            death: m.death,
+            assist: m.assist,
+            map_name: m.match_mode // Fallback map name
+          }, m.typeName));
         }
       }
       
