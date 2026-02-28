@@ -163,14 +163,15 @@ export class AIEvolution2048 {
     }
 
     setupEvents() {
+        // Use capturing phase to block events as early as possible
         document.addEventListener('keydown', (e) => {
             const map = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' };
-            if (map[e.key]) {
+            if (map[e.key] || e.key === ' ') {
                 e.preventDefault();
                 if (this.isGameOver || this.isMoving) return;
-                this.move(map[e.key]);
+                if (map[e.key]) this.move(map[e.key]);
             }
-        });
+        }, { capture: true });
 
         let tsX, tsY;
         document.addEventListener('touchstart', (e) => {

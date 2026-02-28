@@ -472,14 +472,16 @@ export class TetrisGame extends HTMLElement {
 
         document.addEventListener('keydown', e => {
             const keysToPrevent = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '];
-            if (keysToPrevent.includes(e.key)) e.preventDefault();
+            if (keysToPrevent.includes(e.key)) {
+                e.preventDefault();
+            }
             
             if (this.isGameOver) return;
             if (e.key === 'ArrowLeft') move(-1);
             if (e.key === 'ArrowRight') move(1);
             if (e.key === 'ArrowDown') { this.initAudio(); this.playerDrop(true); }
             if (e.key === 'ArrowUp') this.shadowRoot.querySelector('#btn-up').click();
-        });
+        }, { capture: true });
     }
 
     rotate(matrix, dir) {

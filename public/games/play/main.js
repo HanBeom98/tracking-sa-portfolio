@@ -92,11 +92,12 @@ async function initPlayPage() {
             window.addEventListener('keydown', (e) => {
                 if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
                     const active = document.activeElement?.tagName?.toLowerCase();
+                    // Don't block scroll if focus is in text input
                     if (active !== 'input' && active !== 'textarea') {
                         e.preventDefault();
                     }
                 }
-            });
+            }, { capture: true }); // Block at the very start
             window._gameListenersAttached = true;
         }
 
