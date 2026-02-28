@@ -10,9 +10,9 @@
         .play-container {
             display: flex;
             flex-direction: column;
-            height: 100vh;
-            background: #000;
-            overflow: hidden;
+            min-height: 100vh;
+            background: var(--bg-main);
+            overflow-x: hidden;
         }
         .play-top-bar {
             background: var(--bg-main);
@@ -21,7 +21,9 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid var(--p-blue-soft);
-            z-index: 10;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
         .back-link {
             display: flex;
@@ -30,35 +32,54 @@
             text-decoration: none;
             color: var(--text-main);
             font-weight: 700;
+            font-size: 0.9rem;
+        }
+        .game-viewport-container {
+            background: #000;
+            width: 100%;
+            aspect-ratio: 16/9;
+            max-height: 75vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         .game-viewport {
-            flex: 1;
             width: 100%;
+            height: 100%;
             border: none;
-            background: #000;
         }
         .game-bottom-bar {
             background: var(--bg-main);
-            padding: 15px 20px;
+            padding: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-top: 1px solid var(--p-blue-soft);
+            border-bottom: 1px solid var(--p-blue-soft);
         }
-        .game-info-mini h2 { margin: 0; font-size: 1.1rem; color: var(--text-main); }
-        .game-info-mini p { margin: 2px 0 0 0; font-size: 0.85rem; color: var(--text-sub); }
+        .game-info-mini h2 { margin: 0; font-size: 1.25rem; font-weight: 950; color: var(--text-main); }
+        .game-info-mini p { margin: 4px 0 0 0; font-size: 0.9rem; color: var(--text-sub); font-weight: 600; }
+        
         .play-stats {
             font-size: 0.85rem;
             color: var(--p-blue);
-            font-weight: 700;
+            font-weight: 800;
+            background: var(--p-blue-soft);
+            padding: 4px 12px;
+            border-radius: 20px;
         }
+
+        #related-section {
+            background: var(--bg-sub);
+            padding: 50px 20px;
+        }
+        
         @media (max-width: 600px) {
-            .game-bottom-bar { flex-direction: column; gap: 10px; align-items: flex-start; }
+            .game-viewport-container { aspect-ratio: 4/3; max-height: 60vh; }
+            .game-bottom-bar { flex-direction: column; gap: 15px; align-items: flex-start; }
         }
     </style>
 </head>
 <body>
-    <!-- HEADER_INJECTION -->
     <div class="play-container">
         <div class="play-top-bar" id="game-player-top">
             <a href="/games/" class="back-link">
@@ -66,11 +87,13 @@
                 <span data-i18n="back_to_hub">게임 센터로 돌아가기</span>
             </a>
             <div id="loading-indicator" style="color: var(--p-blue); font-size: 0.8rem; font-weight: 800;">
-                Connecting to Game...
+                Connecting...
             </div>
         </div>
 
-        <iframe id="game-frame" class="game-viewport" allow="autoplay; fullscreen" title="Game Player"></iframe>
+        <div class="game-viewport-container">
+            <iframe id="game-frame" class="game-viewport" allow="autoplay; fullscreen" title="Game Player"></iframe>
+        </div>
 
         <div class="game-bottom-bar" id="game-player-bottom">
             <div class="game-info-mini">
@@ -81,7 +104,7 @@
                 <div class="play-stats" id="display-plays">
                     --- plays
                 </div>
-                <button id="share-btn" class="back-link" style="background:none; border:1px solid var(--p-blue-soft); padding:5px 12px; border-radius:8px; cursor:pointer; font-size:0.8rem;">
+                <button id="share-btn" class="back-link" style="background:white; border:1px solid var(--p-blue-soft); padding:8px 16px; border-radius:12px; cursor:pointer; font-size:0.85rem; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:5px;"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
                     <span data-i18n="share_game">공유</span>
                 </button>
@@ -89,14 +112,18 @@
         </div>
 
         <!-- Related Games Section -->
-        <div id="related-section" style="background: var(--bg-sub); padding: 30px 20px; border-top: 1px solid var(--p-blue-soft); overflow-y: auto;">
-            <h3 style="margin: 0 0 20px 0; font-size: 1rem; font-weight: 800; color: var(--text-main);" data-i18n="related_games">추천 게임</h3>
-            <div id="related-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
-                <!-- Recommended games here -->
+        <div id="related-section">
+            <div style="max-width: 1000px; margin: 0 auto;">
+                <h3 style="margin: 0 0 30px 0; font-size: 1.2rem; font-weight: 900; color: var(--text-main); display: flex; align-items: center; gap: 12px;">
+                    <span style="width:4px; height:20px; background:var(--p-blue); border-radius:2px;"></span>
+                    <span data-i18n="related_games">추천 게임</span>
+                </h3>
+                <div id="related-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px;">
+                    <!-- Recommended games here -->
+                </div>
             </div>
         </div>
     </div>
-    <!-- FOOTER_INJECTION -->
     <script type="module" src="main.js"></script>
 </body>
 </html>
