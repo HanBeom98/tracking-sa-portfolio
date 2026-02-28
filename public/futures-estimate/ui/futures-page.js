@@ -113,8 +113,20 @@ function renderPredictionHistorySuccess(items) {
     const date = item.target_date || "-";
     const inferredPred = item.prediction_label || computePredictionLabel(item.probability_up);
     const pred = toDirectionTextWithTranslator(inferredPred, t);
-    const actual = toDirectionTextWithTranslator(item.actual_label || "-", t);
-    const resultText = toPredictionResultTextWithTranslator(item, t);
+    
+    // Improved Actual display: include numerical value if available
+    const actualDir = toDirectionTextWithTranslator(item.actual_label || "-", t);
+    const actualVal = typeof item.actual_close === "number" ? ` (${formatNumber(item.actual_close)})` : "";
+    const actual = `${actualDir}${actualVal}`;
+
+    // Styled result badge
+    const rawResult = toPredictionResultTextWithTranslator(item, t);
+    let badgeBg = "#64748b"; // gray-500
+    if (item.status === "evaluated") {
+      if (item.is_hit === true) badgeBg = "#16a34a"; // green-600
+      else if (item.is_hit === false) badgeBg = "#dc2626"; // red-600
+    }
+    const resultHtml = `<span style="display:inline-block; color:white; background-color:${badgeBg}; padding:2px 8px; border-radius:12px; font-size:0.75rem; font-weight:bold; min-width:44px; text-align:center;">${rawResult}</span>`;
     
     // Calculate display probability based on predicted direction
     let displayProb = item.probability_up;
@@ -129,8 +141,8 @@ function renderPredictionHistorySuccess(items) {
       <tr style="border-bottom:1px solid #f1f5f9;">
         <td style="padding:8px 6px;">${date}</td>
         <td style="padding:8px 6px;">${pred}</td>
-        <td style="padding:8px 6px;">${actual}</td>
-        <td style="padding:8px 6px;">${resultText}</td>
+        <td style="padding:12px 6px;">${actual}</td>
+        <td style="padding:12px 6px;">${resultHtml}</td>
         <td style="padding:8px 6px;">${probabilityText}</td>
       </tr>
     `;

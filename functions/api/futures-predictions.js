@@ -118,6 +118,7 @@ function toPredictionHistoryItems(documents) {
     target_date: d.target_date || "",
     prediction_label: d.prediction_label || "-",
     actual_label: d.actual_label || "-",
+    actual_close: typeof d.actual_close === "number" ? d.actual_close : null,
     status: d.status || "predicted",
     is_hit: typeof d.is_hit === "boolean" ? d.is_hit : null,
     probability_up: typeof d.probability_up === "number" ? d.probability_up : null,

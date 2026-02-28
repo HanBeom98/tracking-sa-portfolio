@@ -90,6 +90,7 @@ test("futures-predictions document mapper returns stable history schema", () => 
         target_date: { stringValue: "2026-02-26" },
         prediction_label: { stringValue: "up" },
         actual_label: { stringValue: "down" },
+        actual_close: { doubleValue: 320.45 },
         status: { stringValue: "evaluated" },
         is_hit: { booleanValue: false },
         probability_up: { doubleValue: 61.24 },
@@ -104,6 +105,7 @@ test("futures-predictions document mapper returns stable history schema", () => 
   const items = toPredictionHistoryItems(docs);
   assert.equal(items.length, 2);
   assert.deepEqual(Object.keys(items[0]).sort(), [
+    "actual_close",
     "actual_label",
     "is_hit",
     "prediction_label",
@@ -114,11 +116,13 @@ test("futures-predictions document mapper returns stable history schema", () => 
   assert.equal(items[0].target_date, "2026-02-26");
   assert.equal(items[0].prediction_label, "up");
   assert.equal(items[0].actual_label, "down");
+  assert.equal(items[0].actual_close, 320.45);
   assert.equal(items[0].status, "evaluated");
   assert.equal(items[0].is_hit, false);
   assert.equal(items[0].probability_up, 61.24);
   assert.equal(items[1].prediction_label, "-");
   assert.equal(items[1].actual_label, "-");
+  assert.equal(items[1].actual_close, null);
   assert.equal(items[1].status, "predicted");
   assert.equal(items[1].is_hit, null);
   assert.equal(items[1].probability_up, null);
