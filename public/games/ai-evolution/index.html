@@ -34,13 +34,12 @@
         }
 
         /* If inside iframe (Game Player Wrapper), hide the injected header and adjust layout */
-        body.is-embedded header,
-        body.is-embedded .site-logo-link,
-        body.is-embedded .desktop-menu-container {
-            display: none !important;
+        body.is-embedded .site-header-container,
+        body.is-embedded .site-footer-container {
+            display: none;
         }
         body.is-embedded {
-            padding-top: 0 !important;
+            padding-top: 0;
         }
 
         #ai-evolution-game {
@@ -388,7 +387,7 @@
 
 </head>
 <body data-i18n="body">
-    <header>
+    <div class="site-header-container"><header>
     <div class="header-inner">
         <a href="/" class="site-logo-link">
             <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="site-logo">
@@ -435,7 +434,7 @@
         </div>
     </div>
 </header>
-
+</div>
     <!-- Navigation will be injected here -->
 
     <main id="ai-evolution-game">
@@ -505,7 +504,7 @@
         </div>
     </main>
 
-    <footer>
+    <div class="site-footer-container"><footer>
     <p data-i18n="footer_copyright"></p>
     <p>
         <a href="/about" data-i18n="about_us">서비스 소개</a> |
@@ -517,7 +516,7 @@
         <a href="/rss.xml">RSS Feed</a>
     </p>
 </footer>
-
+</div>
     <script type="module" src="main.js?v=20260227_premium"></script>
 </body>
 </html>

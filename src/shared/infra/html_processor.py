@@ -82,8 +82,8 @@ def process_html_file_for_common_elements(filepath):
                 content = re.sub(r'(<html)([^>]*>)', r'\1 lang="en"\2', content, count=1, flags=re.IGNORECASE)
 
         # 5. Inject Header & Footer
-        header_html = get_common_header()
-        footer_html = get_common_footer()
+        header_html = f'<div class="site-header-container">{get_common_header()}</div>'
+        footer_html = f'<div class="site-footer-container">{get_common_footer()}</div>'
 
         # Handle Header
         if "<!-- HEADER_INJECTION -->" in content:

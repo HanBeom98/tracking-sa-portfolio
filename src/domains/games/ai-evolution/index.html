@@ -34,13 +34,12 @@
         }
 
         /* If inside iframe (Game Player Wrapper), hide the injected header and adjust layout */
-        body.is-embedded header,
-        body.is-embedded .site-logo-link,
-        body.is-embedded .desktop-menu-container {
-            display: none !important;
+        body.is-embedded .site-header-container,
+        body.is-embedded .site-footer-container {
+            display: none;
         }
         body.is-embedded {
-            padding-top: 0 !important;
+            padding-top: 0;
         }
 
         #ai-evolution-game {
