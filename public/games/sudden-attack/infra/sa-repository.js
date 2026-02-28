@@ -44,24 +44,33 @@ export class SaRepository {
    */
   async getRecentMatches(ouid, limit = 5) {
     const modes = [
-      { id: 1, name: "일반전" },
-      { id: 2, name: "랭크전" },
-      { id: 3, name: "클랜전" },
-      { id: 4, name: "생존모드" },
-      { id: 5, name: "영토전" }
+      { id: 7, name: "랭크전" },
+      { id: 11, name: "클랜전" },
+      { id: 12, name: "토너먼트" },
+      { id: 13, name: "공식전" }
     ];
 
     const combinedMatches = [];
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
     // Get Today and Yesterday in KST (YYYY-MM-DD)
+    // Current UTC time + 9 hours = KST
     const now = new Date();
-    const kstNow = new Date(now.getTime() + (9 * 60 * 60 * 1000));
-    const kstYesterday = new Date(kstNow.getTime() - (24 * 60 * 60 * 1000));
+    const kstOffset = 9 * 60 * 60 * 1000;
+    const kstDate = new Date(now.getTime() + kstOffset);
     
+    // Use toISOString and split at 'T' to get YYYY-MM-DD
+    // But be careful: toISOString() uses UTC. We need the KST date.
+    // A more robust way to get KST date string:
+    const formatDate = (date) => {
+      const d = new Date(date.getTime());
+      // No need to add offset again, d is already shifted
+      return d.toISOString().split('T')[0];
+    };
+
     const dates = [
-      kstNow.toISOString().split('T')[0],
-      kstYesterday.toISOString().split('T')[0]
+      formatDate(kstDate), // Today in KST
+      formatDate(new Date(kstDate.getTime() - (24 * 60 * 60 * 1000))) // Yesterday in KST
     ];
 
     try {
