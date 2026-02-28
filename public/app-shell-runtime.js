@@ -9,6 +9,17 @@
     root.localStorage.setItem("lang", currentLang);
     root.document.documentElement.setAttribute("lang", currentLang === "en" ? "en" : "ko");
 
+    // --- Translation Merging (Domain DDD Support) ---
+    if (root.translations && root.domainTranslations) {
+      Object.keys(root.domainTranslations).forEach(lang => {
+        if (root.translations[lang]) {
+          Object.assign(root.translations[lang], root.domainTranslations[lang]);
+        } else {
+          root.translations[lang] = root.domainTranslations[lang];
+        }
+      });
+    }
+
     function getTranslation(key, defaultValue = "") {
       const dict = (root.translations && root.translations[currentLang]) || null;
       if (dict && dict[key]) return dict[key];

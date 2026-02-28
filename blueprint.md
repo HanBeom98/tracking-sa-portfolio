@@ -24,64 +24,14 @@ Tracking SA를 프레임워크 의존 없이 안정적으로 운영 가능한 DD
 ## ✅ Completed Milestones
 
 ### 2026-02-28
+- **게임 센터(Game Hub) 허브 및 등록 시스템 구축 (NEW)**:
+  - 독립적인 `/games/` 메인 페이지를 구축하여 테트리스, 2048 등 게임 콘텐츠 접근성 강화.
+  - 사용자가 직접 게임을 등록하고 공유할 수 있는 **제출 시스템**(`/games/submit/`) 구현 (DDD 구조 적용).
+  - 관리자 승인 기반의 게임 게시 워크플로우 마련 및 다국어 지원 완료.
 - **지수 예측 신뢰도 및 시각화 고도화 (NEW)**:
   - '예측 vs 실제 비교표'에 **이전 거래일 종가 → 현재 종가** 변화 과정을 노출하여 데이터 맥락 제공.
   - 결과(성공/실패)에 따른 컬러 배지(Badge) 시스템을 도입하여 시각적 직관성 강화.
   - API 및 단위 테스트를 최신 데이터 스키마(`actual_prev_close` 포함)에 맞게 업데이트하여 무결성 보장.
-
-### 2026-02-27
-
-- DDD 문서화:
-  - `docs/change-log.md`, `docs/ddd-migration-map.md` 추가
-  - `blueprint.md`에 핸드오프 문서 참조 체계 반영
-- 검색 안정화 1차:
-  - Firestore prefix query 실패 시 fallback 검색 추가
-  - `/search` 라우트 및 연관 에셋 반영
-
-### 2026-02-25
-- 뉴스 도메인 정리:
-  - 뉴스 빌드 로직 분리: `src/domains/news/infra/news_builder.py`
-  - HTML 공통 처리 분리: `src/shared/infra/html_processor.py`
-  - 빌더 오케스트레이션 정리: `src/shared/infra/builder.py`
-- 뉴스 UI/기능 보강:
-  - EN 번역 동작 정합성 수정
-  - 한/영 페이지네이션 버튼 스타일 통일
-  - 뉴스 상세 상단 “목록으로” 버튼 추가 (KO/EN 분기)
-- 동물상 테스트 복구:
-  - Teachable Machine 런타임 로딩 안정화 (`exports is not defined` 이슈 해결)
-- 네비게이션/업로드 UI:
-  - 드롭다운 hover gap 제거 및 클릭 안정화
-  - 동물상 업로드 점선 박스 크기 축소
-- 운세/행운의 추천:
-  - AI 처리 중 로딩 시각 효과 강화
-
-### 2026-02-26
-- 뉴스 도메인 DDD 완성 (By Gemini CLI):
-  - `NewsPresenter` 도입으로 데이터 매핑 로직 완벽 분리 및 `tests/unit/news-presenter.test.js` 검증.
-  - 모든 모듈 import 경로를 상대 경로로 전환하여 단위 테스트 환경과 브라우저 런타임 호환성 확보.
-  - 빌드 스크립트(`builder.py`) 수정: 뉴스 `application/` 디렉토리 전체 배포 구조 반영.
-- 보드 도메인 레이어 평탄화 및 통합 완료 (By Gemini CLI):
-  - 하위 폴더(`write`, `edit`, `post`)에 파편화된 레이어 로직을 도메인 루트(`application/`, `ui/`)로 집결.
-  - 전체 게시판 기능의 `import` 경로 수술적 최적화 및 단위 테스트 100% 통과 확인.
-- 레거시 도메인(Fortune, Animal-face) DDD 리팩토링 완료 (By Gemini CLI):
-  - `infra/` 계층 분리(API 호출, 모델 로딩) 및 유스케이스(`application/`) 추출.
-  - 마크다운 파서 버그 수정 및 도메인별 단위 테스트 보강.
-- 게임 도메인 DDD 분리 완료:
-  - 테트리스, AI Evolution 게임 로직을 `application/`, `infra/` 레이어로 물리적 분리 완료.
-- GitHub Actions 역할 고정:
-  - `daily-news-post.yml`을 예약/수동 뉴스 생성 전용으로 단순화 (push 트리거 제거).
-- 뉴스 에이전트 안정화:
-  - Gemini 호출 재시도(backoff) 및 기획(JSON) 파싱 실패 시 fallback plan 추가.
-  - `processed_articles.log` 회전 정책 및 파라미터 환경변수화.
-- 뉴스 본문 해시태그 렌더링 개선:
-  - `##HASHTAGS##`를 작은 chip 컴포넌트로 렌더링하도록 UI 개선.
-- 검색 기능 안정화 2차:
-  - Firestore unavailable 시 뉴스 인덱스 즉시 fallback.
-  - DOMParser 실패 대비 HTML 정규식 파서 fallback 구현.
-  - 메인 검색바 및 결과 페이지 동기화 반영.
-- 모바일 게임 UX 개선:
-  - 테트리스: 헤더/하단 safe-area 고려 레이아웃(`100dvh`) 및 버튼 가림 방지.
-  - 2048: 단일 `index.html` 내 상단 네비게이션 내장 및 오프셋 적용.
 
 ### 2026-02-27
 - **아키텍처 안정성 회복 및 1:1 미러링 DDD 확립**:
@@ -93,22 +43,32 @@ Tracking SA를 프레임워크 의존 없이 안정적으로 운영 가능한 DD
   - 공지사항 상단 고정 및 강조 디자인 적용.
 - **테스트 및 배포 무결성 검증**:
   - 장애 복구 후 GitHub Actions를 통해 실제 배포 사이트 대상 E2E Smoke 테스트 및 단위 테스트 88개 전원 통과 확인.
-- **애드센스 승인 최적화 및 콘텐츠 고품질화 (NEW)**:
+- **애드센스 승인 최적화 및 콘텐츠 고품질화**:
   - 멀티 에이전트 프롬프트를 강화하여 단순 요약을 넘어 기술적/경제적 배경 논증을 포함한 **1,200자 이상의 전문 칼럼** 형식을 강제.
   - 기획-집필-교열 파이프라인에서 출력 포맷(`[KO_START]` 등) 파싱 안정성 개선.
-- **검색 엔진 인덱싱 버그 해결 및 데이터 무결성 강화 (NEW)**:
+- **검색 엔진 인덱싱 버그 해결 및 데이터 무결성 강화**:
   - `builder.py` 정규식을 개선하여 HTML 속성 순서(href/class)에 상관없이 100여 건의 뉴스 기사를 `search-index.json`에 100% 정상 인덱싱.
   - 뉴스 수집 시 시스템 시간이 아닌 **RSS 원본 발행 시간(published_parsed)**을 추출해 Firestore에 저장하도록 로직을 수정하여 기사 정렬의 논리적 순서 확보.
-- **운영 도구 및 브랜딩 개선 (NEW)**:
+- **운영 도구 및 브랜딩 개선**:
   - 기존 기사들을 새로운 고품질 프롬프트로 안전하게 일괄 재생성할 수 있는 `scripts/regenerate_news.py` 개발 및 배치 완료.
   - 사이트 내 사용된 '실리콘밸리' 표현을 '글로벌 전문가'로 일괄 교체하여 독자층 확대 및 범용성 확보.
-- **AI 용어사전(Glossary) 시스템 구축 및 SEO 자동화 (NEW)**:
+- **AI 용어사전(Glossary) 시스템 구축 및 SEO 자동화**:
   - 뉴스 본문 내 핵심 용어를 자동으로 추출하고 백과사전식 설명을 생성하는 `multi-agent-system/glossary-extractor.js` 및 전용 에이전트 도입.
   - 생성된 용어사전을 기반으로 뉴스 본문에 자동으로 내부 링크를 삽입하는 SEO 최적화 파이프라인 구축.
   - 용어사전 도메인(`public/glossary/`) 신규 추가로 AdSense 승인용 고품질 정적 콘텐츠 대량 확보.
-- **FOUC(Flash of Unstyled Content) 완전 해결 및 UI 안정화 (NEW)**:
+- **FOUC(Flash of Unstyled Content) 완전 해결 및 UI 안정화**:
   - 번역 데이터 로딩 전 기본 텍스트 노출로 인한 깜빡임을 방지하기 위해 헤더/푸터 및 네비게이션 기본값을 한국어('인사이트' 등)로 동기화.
   - 모든 도메인 페이지의 `app-shell-runtime.js` 로딩 순서를 최적화하여 레이아웃 시프트와 텍스트 유실 방지.
+
+### 2026-02-26
+- 뉴스 도메인 DDD 완성
+- 보드 도메인 레이어 평탄화 및 통합 완료
+- 레거시 도메인(Fortune, Animal-face) DDD 리팩토링 완료
+- 게임 도메인 DDD 분리 완료
+
+### 2026-02-25
+- 뉴스 도메인 정리 및 UI/기능 보강
+- 동물상 테스트 복구 및 네비게이션 안정화
 
 ## 🧭 Architecture Reality Check
 - `news`, `board`, `games`, `account`, `futures-estimate`, `fortune`, `animal-face`, `lucky-recommendation`, `search` 등 전 도메인이 **안정적인 1:1 미러링 DDD 구조**를 갖춤.
