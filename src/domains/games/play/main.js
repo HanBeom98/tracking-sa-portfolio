@@ -57,14 +57,16 @@ async function loadRelatedGames(currentCategory, currentGameId) {
         }
 
         if (related.length === 0) {
-            document.getElementById("related-section").style.display = "none";
+            const sec = document.getElementById("related-section");
+            if (sec) sec.style.display = "none";
             return;
         }
 
         listEl.innerHTML = related.map(renderMiniCard).join("");
     } catch (e) {
         console.warn("[RelatedGames] Failed to load:", e);
-        document.getElementById("related-section").style.display = "none";
+        const sec = document.getElementById("related-section");
+        if (sec) sec.style.display = "none";
     }
 }
 
@@ -73,45 +75,65 @@ async function initPlayPage() {
     const gameId = params.get("id");
 
     if (!gameId) {
-        alert("게임 ID가 올바르지 않습니다.");
+        console.error("[PlayPage] No game ID provided");
         window.location.href = "/games/";
         return;
     }
 
-    const game = await getGameById(gameId);
-    if (!game) {
-        alert("게임을 찾을 수 없습니다.");
-        window.location.href = "/games/";
-        return;
-    }
-
-    // Update UI & Metadata
-    document.title = `${game.title} | Tracking SA`;
-    document.getElementById("display-title").textContent = game.title;
-    document.getElementById("display-author").textContent = `By ${game.authorName || 'Admin'}`;
-    document.getElementById("display-plays").textContent = `${game.playCount || 0} plays`;
-
-    // Bind Share Action
-    const shareBtn = document.getElementById("share-btn");
-    if (shareBtn) {
-        shareBtn.onclick = () => handleShare(game);
-    }
-
+    // 1. Iframe & Loader elements (Crucial)
     const frame = document.getElementById("game-frame");
     const loader = document.getElementById("loading-indicator");
 
-    frame.src = game.url;
-    frame.onload = () => {
-        loader.style.display = "none";
-    };
-
-    loadRelatedGames(game.category, gameId);
-
     try {
-        await incrementPlayCount(gameId);
-    } catch (e) {
-        console.warn("[PlayPage] Play count tracking failed", e);
+        const game = await getGameById(gameId);
+        if (!game) {
+            alert("게임을 찾을 수 없습니다.");
+            window.location.href = "/games/";
+            return;
+        }
+
+        // 2. Load Game First! (To avoid black screen if UI updates fail)
+        if (frame) {
+            frame.src = game.url;
+            frame.onload = () => {
+                if (loader) loader.style.display = "none";
+            };
+        }
+
+        // 3. Update UI Safely
+        document.title = `${game.title} | Tracking SA`;
+        
+        const titleEl = document.getElementById("display-title");
+        const authorEl = document.getElementById("display-author");
+        const playsEl = document.getElementById("display-plays");
+        const shareBtn = document.getElementById("share-btn");
+
+        if (titleEl) titleEl.textContent = game.title;
+        if (authorEl) authorEl.textContent = `By ${game.authorName || 'Admin'}`;
+        if (playsEl) playsEl.textContent = `${game.playCount || 0} plays`;
+        
+        if (shareBtn) {
+            shareBtn.onclick = () => handleShare(game);
+        }
+
+        // 4. Load Extra Data
+        loadRelatedGames(game.category, gameId);
+        
+        incrementPlayCount(gameId).catch(e => console.warn("[PlayPage] Play count tracking failed", e));
+
+    } catch (err) {
+        console.error("[PlayPage] Initialization failed:", err);
+        // Fallback: if elements are missing, at least try to show the iframe if we have the ID
+        if (frame && !frame.src) {
+            // Hardcoded fallback for default games if everything else fails
+            if (gameId === 'tetris') frame.src = '/games/tetris/';
+            if (gameId === 'ai-evolution') frame.src = '/games/ai-evolution/';
+        }
     }
 }
 
-document.addEventListener("DOMContentLoaded", initPlayPage);
+// Start immediately and also on DOMContentLoaded just in case
+initPlayPage();
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initPlayPage);
+}
