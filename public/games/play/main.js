@@ -82,8 +82,21 @@ async function initPlayPage() {
             frame.src = game.url;
             frame.onload = () => {
                 if (loader) loader.style.display = "none";
+                // Focus the iframe so user can start playing immediately
+                try { frame.contentWindow.focus(); } catch (e) {}
             };
         }
+
+        // 3. Prevent global scroll when arrow keys are pressed in the wrapper page
+        window.addEventListener('keydown', (e) => {
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
+                // If focus is NOT in an input/textarea, prevent scroll
+                const active = document.activeElement.tagName.toLowerCase();
+                if (active !== 'input' && active !== 'textarea') {
+                    e.preventDefault();
+                }
+            }
+        });
 
         // 2. Update UI Safely
         document.title = `${game.title} | Tracking SA`;
