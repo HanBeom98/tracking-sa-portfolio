@@ -115,7 +115,8 @@ function setupFilters() {
       else c.classList.remove("active");
     });
 
-    filterContainer.addEventListener("click", (e) => {
+    // Use a fresh listener to avoid multiple bindings
+    filterContainer.onclick = (e) => {
       const chip = e.target.closest(".filter-chip");
       if (!chip) return;
       filterContainer.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
@@ -123,10 +124,12 @@ function setupFilters() {
       currentCategory = chip.dataset.cat;
       sessionStorage.setItem('last_game_cat', currentCategory); // Persist
       filterAndRender();
-    });
+    };
   }
 
-  // Sorting UI Injection
+  // Sorting UI Injection - Prevent duplicate injection
+  if (document.querySelector(".sort-container")) return;
+
   const sortContainer = document.createElement("div");
   sortContainer.className = "sort-container";
   sortContainer.style.display = "flex";
@@ -134,8 +137,8 @@ function setupFilters() {
   sortContainer.style.marginBottom = "15px";
   sortContainer.style.justifyContent = "flex-end";
   sortContainer.innerHTML = `
-    <button class="sort-btn active" data-sort="latest" style="background:none; border:none; font-weight:800; cursor:pointer; font-size:0.8rem; color:var(--p-blue);">LATEST</button>
-    <button class="sort-btn" data-sort="popular" style="background:none; border:none; font-weight:800; cursor:pointer; font-size:0.8rem; color:var(--text-sub);">POPULAR</button>
+    <button class="sort-btn ${currentSort === 'latest' ? 'active' : ''}" data-sort="latest" style="background:none; border:none; font-weight:800; cursor:pointer; font-size:0.8rem; color:${currentSort === 'latest' ? 'var(--p-blue)' : 'var(--text-sub)'};">LATEST</button>
+    <button class="sort-btn ${currentSort === 'popular' ? 'active' : ''}" data-sort="popular" style="background:none; border:none; font-weight:800; cursor:pointer; font-size:0.8rem; color:${currentSort === 'popular' ? 'var(--p-blue)' : 'var(--text-sub)'};">POPULAR</button>
   `;
   
   const hubWrap = document.querySelector(".games-hub");
@@ -143,7 +146,7 @@ function setupFilters() {
   if (hubWrap && gameList) {
     hubWrap.insertBefore(sortContainer, gameList);
     
-    sortContainer.addEventListener("click", (e) => {
+    sortContainer.onclick = (e) => {
       const btn = e.target.closest(".sort-btn");
       if (!btn) return;
       sortContainer.querySelectorAll(".sort-btn").forEach(b => {
@@ -154,7 +157,7 @@ function setupFilters() {
       btn.style.color = "var(--p-blue)";
       currentSort = btn.dataset.sort;
       filterAndRender();
-    });
+    };
   }
 }
 function renderSkeleton() {
