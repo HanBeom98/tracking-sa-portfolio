@@ -39,7 +39,9 @@ async function handleSearch() {
     historySection.classList.remove('hidden');
 
   } catch (error) {
-    if (error.message === 'PLAYER_NOT_FOUND') {
+    if (error.message === 'TEST_KEY_LIMITATION') {
+      alert('현재 테스트 API 키를 사용 중입니다.\n\n[제약 사항]\n테스트 키는 키를 발급받은 넥슨 계정 본인의 캐릭터만 조회가 가능합니다.\n타인의 전적을 조회하려면 Production API Key가 필요합니다.');
+    } else if (error.message === 'PLAYER_NOT_FOUND') {
       alert('캐릭터를 찾을 수 없습니다.\n\n[가능한 원인]\n1. 캐릭터명이 정확하지 않음\n2. 캐릭터 생성 후 약 10분 이내 (데이터 미갱신)\n3. 2025년 1월 24일 이후 플레이 기록 없음');
     } else {
       alert('전적을 불러오는 중 오류가 발생했습니다.\n나중에 다시 시도해 주세요.');

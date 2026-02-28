@@ -25,9 +25,14 @@ export class NexonApiClient {
       console.error('[NexonAPI Debug Full Error]:', errorData);
       
       const message = errorData.error?.message || "";
+      const isTestKey = this.apiKey.startsWith('test_');
       
-      // Nexon API returns 400 for non-existent characters with this specific message
+      // Nexon API returns 400 for non-existent characters OR 
+      // characters outside the test account's scope when using a Test Key.
       if (response.status === 400 && message.includes("valid parameter")) {
+        if (isTestKey) {
+          throw new Error('TEST_KEY_LIMITATION');
+        }
         throw new Error('PLAYER_NOT_FOUND');
       }
       
