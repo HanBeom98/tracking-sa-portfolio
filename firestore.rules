@@ -2,14 +2,18 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Helper: check if user is admin or staff
+    // Helper: Global Admin/Staff (Full Site Control)
     function isStaff() {
       return request.auth != null && (
         request.auth.token.email == "hantiger24@naver.com" || 
         request.auth.token.email == "admin@trackingsa.com" ||
-        request.auth.token.email == "bjs5739@naver.com" ||
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin"
       );
+    }
+
+    // Helper: Sudden Attack Specific Staff (SA Crew Management Only)
+    function isSaStaff() {
+      return isStaff() || (request.auth != null && request.auth.token.email == "bjs5739@naver.com");
     }
 
     // Helper: check if resource owner
@@ -75,20 +79,25 @@ service cloud.firestore {
       allow delete: if isStaff();
     }
 
-    // Sudden Attack Crew Management (Updated)
+    // Sudden Attack Crew Management (Using Specialized SaStaff helper)
     match /sa_crew_members/{docId} {
       allow read: if true;
-      allow write: if isStaff();
+      allow write: if isSaStaff();
     }
 
     match /sa_crew_applications/{docId} {
       allow create: if true;
-      allow read, update, delete: if isStaff();
+      allow read, update, delete: if isSaStaff();
     }
 
     match /sa_crew_history/{docId} {
       allow read: if true;
-      allow write: if isStaff();
+      allow write: if isSaStaff();
+    }
+
+    match /sa_crew_settings/{docId} {
+      allow read: if true;
+      allow write: if isSaStaff();
     }
 
     // Default deny
