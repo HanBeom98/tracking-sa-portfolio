@@ -20,12 +20,12 @@ export class SaRepository {
   async initMeta() {
     if (this.meta.grade && this.meta.grade.length > 0) return;
     try {
-      // Fetch from local infrastructure/meta directory to bypass CORS
-      const baseUrl = './infra/meta';
+      // Use Absolute Path to ensure file is found regardless of page depth
+      const baseUrl = '/games/sudden-attack/infra/meta';
       const [grade, season, tier, logo] = await Promise.all([
-        fetch(`${baseUrl}/grade.json`).then(r => r.json()),
-        fetch(`${baseUrl}/season_grade.json`).then(r => r.json()),
-        fetch(`${baseUrl}/tier.json`).then(r => r.json()),
+        fetch(`${baseUrl}/grade.json`).then(r => { if (!r.ok) throw new Error(); return r.json(); }),
+        fetch(`${baseUrl}/season_grade.json`).then(r => { if (!r.ok) throw new Error(); return r.json(); }),
+        fetch(`${baseUrl}/tier.json`).then(r => { if (!r.ok) throw new Error(); return r.json(); }),
         fetch(`${baseUrl}/logo.json`).then(r => r.json()).catch(() => null)
       ]);
       
@@ -36,18 +36,22 @@ export class SaRepository {
 
       console.log('[Repository] Local meta data loaded successfully');
     } catch (err) {
-      console.warn('[Repository] Failed to load local meta images, trying API fallback:', err);
-      // Fallback to API if local fetch fails (unlikely after build)
+      console.warn('[Repository] Failed to load local meta, using direct API fetch (No Auth Header):', err);
+      
+      // Fallback: Fetch directly from Nexon API WITHOUT headers to avoid Preflight/CORS issues
+      // Based on investigation, Nexon Static API works via CORS ONLY if no custom headers are sent.
+      const apiBase = 'https://open.api.nexon.com/static/suddenattack/meta';
       try {
         const [grade, season, tier] = await Promise.all([
-          this.apiClient.getStaticMeta('grade'),
-          this.apiClient.getStaticMeta('season_grade'),
-          this.apiClient.getStaticMeta('tier')
+          fetch(`${apiBase}/grade`).then(r => r.json()),
+          fetch(`${apiBase}/season_grade`).then(r => r.json()),
+          fetch(`${apiBase}/tier`).then(r => r.json())
         ]);
         this.meta.grade = grade;
         this.meta.season_grade = season;
         this.meta.tier = tier;
       } catch (apiErr) {
+        console.error('[Repository] All meta load attempts failed:', apiErr);
         this.meta.grade = [];
         this.meta.season_grade = [];
         this.meta.tier = [];
