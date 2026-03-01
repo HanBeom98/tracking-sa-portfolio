@@ -78,19 +78,15 @@ export class NexonApiClient {
    * Get static metadata (grade, tier images etc)
    */
   async getStaticMeta(type) {
-    // If type is logo, it might not need .json suffix according to some documentation
-    const path = type === 'logo' 
-      ? `/static/suddenattack/meta/${type}` 
-      : `/static/suddenattack/meta/${type}.json`;
+    // Metadata endpoints do NOT use .json extension
+    const path = `/static/suddenattack/meta/${type}`;
     
     try {
       return await this.fetch(path);
     } catch (error) {
-      // Fallback for logo if it actually needs .json or vice versa
-      if (type === 'logo' && !path.endsWith('.json')) {
-        return this.fetch(`${path}.json`).catch(() => { throw error; });
-      }
-      throw error;
+      // Fallback only if absolutely necessary, but based on tests, no-extension is correct
+      console.warn(`[NexonAPI] Failed to fetch meta: ${type}, retrying with .json as fallback...`);
+      return this.fetch(`${path}.json`).catch(() => { throw error; });
     }
   }
 
