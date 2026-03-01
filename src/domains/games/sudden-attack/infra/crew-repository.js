@@ -151,10 +151,10 @@ export class CrewRepository {
 
   /**
    * Check if current user is an Admin or Moderator
+   * @param {Object} currentUser - Optional user object passed from onAuthStateChanged
    */
-  isStaff() {
-    if (typeof window === 'undefined' || !window.firebase || !window.firebase.auth) return false;
-    const user = window.firebase.auth().currentUser;
+  isStaff(currentUser) {
+    const user = currentUser || (typeof window !== 'undefined' && window.firebase && window.firebase.auth ? window.firebase.auth().currentUser : null);
     return user && this.STAFF_EMAILS.includes(user.email);
   }
 

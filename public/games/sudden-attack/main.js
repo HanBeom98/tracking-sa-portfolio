@@ -161,7 +161,8 @@ async function initCrew() {
   // 2. Auth & Admin Setup
   if (typeof window.firebase !== 'undefined' && window.firebase.auth) {
     window.firebase.auth().onAuthStateChanged(user => {
-      if (crewRepo.isStaff()) {
+      // Pass the user object explicitly to guarantee accurate staff check
+      if (crewRepo.isStaff(user)) {
         adminMenuBtn.classList.remove('hidden');
         balancerBtn.classList.remove('hidden');
         renderAdminExtraActions();
