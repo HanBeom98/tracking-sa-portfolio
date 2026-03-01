@@ -117,16 +117,24 @@ export class SaRepository {
       for (const date of dates) {
         try {
           await delay(100); 
-          // Fetch ALL modes at once by passing empty match_mode
+          // Fetch ALL matches (No string filter to avoid 400 error)
           const data = await this.apiClient.getMatchList(ouid, "", "", date);
           const matches = (data.match || []).map(m => ({ 
             ...m, 
-            typeName: m.match_mode, // Use the actual mode name returned by Nexon
+            typeName: m.match_mode,
             match_date: m.date_match
           }));
           
           for (const m of matches) {
-            if (!combinedMatches.find(cm => cm.match_id === m.match_id)) {
+            // STRICT CLAN MATCH FILTER:
+            // Nexon SA API: match_visual_type or match_type identifies the category.
+            // Usually "클랜전" matches have a specific indicator. 
+            // We'll check both the mode name and the internal type if available.
+            const isClanMatch = (m.match_mode && m.match_mode.includes("클랜")) || 
+                                (m.match_type === "클랜") || 
+                                (m.match_visual_type && m.match_visual_type.includes("클랜"));
+
+            if (isClanMatch && !combinedMatches.find(cm => cm.match_id === m.match_id)) {
               combinedMatches.push(m);
             }
           }
