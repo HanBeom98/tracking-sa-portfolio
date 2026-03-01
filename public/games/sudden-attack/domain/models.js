@@ -148,7 +148,14 @@ export class MatchRecord {
       }
     }
 
-    this.matchResult = playerStat.match_result || "UNKNOWN";
+    const rawResult = String(playerStat.match_result || "UNKNOWN");
+    if (rawResult === "1") {
+      this.matchResult = "WIN";
+    } else if (rawResult === "2") {
+      this.matchResult = "LOSE";
+    } else {
+      this.matchResult = rawResult.toUpperCase();
+    }
     this.kill = playerStat.kill !== undefined ? playerStat.kill : (playerStat.kill_count || 0);
     this.death = playerStat.death !== undefined ? playerStat.death : (playerStat.death_count || 0);
     this.assist = playerStat.assist !== undefined ? playerStat.assist : (playerStat.assist_count || 0);
