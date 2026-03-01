@@ -382,13 +382,66 @@ function renderAdminMemberList() {
           ${m.characterName} ${isRealOuid ? '' : '(구형)'}
         </span>
         <span style="font-size:0.8em; color:#888;">MMR: ${m.mmr} (${m.wins}W ${m.loses}L)</span>
-        <div style="display:flex; gap:5px; margin-top:5px;">
-          <button class="mini-btn update-name-btn" data-ouid="${m.id}" data-name="${m.characterName}" style="flex:1; font-size:0.7em; background:#333;">이름수정</button>
-          <button class="mini-btn delete-member-btn" data-ouid="${m.id}" data-name="${m.characterName}" style="flex:1; font-size:0.7em; background:#b71c1c;">삭제</button>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-top:5px;">
+          <button class="mini-btn individual-scan-btn" data-ouid="${m.id}" data-name="${m.characterName}" style="grid-column: 1 / -1; background:#0288d1; color:white;">🔍 개별 전적 스캔</button>
+          <button class="mini-btn update-name-btn" data-ouid="${m.id}" data-name="${m.characterName}" style="background:#333;">이름수정</button>
+          <button class="mini-btn delete-member-btn" data-ouid="${m.id}" data-name="${m.characterName}" style="background:#b71c1c;">삭제</button>
         </div>
       </div>
     `;
   }).join('');
+
+  // Individual Scan & Settle Event (The "Don't waste data" fix)
+  container.querySelectorAll('.individual-scan-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const { ouid, name } = btn.dataset;
+      btn.disabled = true;
+      btn.textContent = '스캔 중...';
+      
+      try {
+        let targetOuid = ouid;
+        let currentNickname = name;
+        
+        // 1. OUID Sync / Migration first
+        const isRealOuid = targetOuid.length >= 20 && /^[0-9a-f]+$/.test(targetOuid);
+        if (isRealOuid) {
+          const basic = await repository.apiClient.getPlayerBasic(targetOuid);
+          if (basic && basic.user_name && basic.user_name !== currentNickname) {
+            await crewRepo.updateNickname(targetOuid, basic.user_name);
+            currentNickname = basic.user_name;
+          }
+        } else {
+          const realOuid = await repository.apiClient.getOuid(currentNickname);
+          if (realOuid) {
+            await crewRepo.migrateToOuid(targetOuid, realOuid);
+            targetOuid = realOuid;
+          }
+        }
+
+        // 2. Fetch matches for THIS MEMBER ONLY
+        const matches = await service.getRecentMatches(targetOuid, currentNickname, 20);
+        const crewMatches = matches.filter(m => m.isCustomMatch);
+        
+        if (crewMatches.length === 0) {
+          alert(`[${currentNickname}] 님의 최근 20경기 중 새로운 내전 기록이 없습니다.`);
+        } else {
+          const settledIds = await crewRepo.settleMatches(crewMatches);
+          if (settledIds.length > 0) {
+            alert(`✅ [${currentNickname}] 스캔 완료!\n새로운 내전 ${settledIds.length}개를 찾아 정산했습니다.`);
+            initCrew();
+            renderAdminMemberList();
+          } else {
+            alert(`[${currentNickname}] 님의 내전 기록은 이미 모두 정산되어 있습니다.`);
+          }
+        }
+      } catch (err) {
+        alert('스캔 중 오류: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '🔍 개별 전적 스캔';
+      }
+    });
+  });
 
   // Delete Event
   container.querySelectorAll('.delete-member-btn').forEach(btn => {
