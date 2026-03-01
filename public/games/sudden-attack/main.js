@@ -235,7 +235,7 @@ function renderAdminExtraActions() {
         initCrew();
       } catch (e) { alert('등록 실패: ' + e.message); }
     } else {
-      alert('등록할 수 있는 유효한 OUID를 찾지 못했습니다.');
+      alert('등록할 수 있는 유효한 OUID를 찾지 못했습니다.\n(이미 닉네임이 변경되었을 수 있습니다.)');
     }
   });
 
@@ -270,7 +270,12 @@ function renderAdminExtraActions() {
         if (targetOuid.length < 20 || !/^[0-9a-f]+$/.test(targetOuid)) {
           console.warn(`[Admin] Resolving OUID for ${member.characterName}...`);
           try {
-            targetOuid = await repository.apiClient.getOuid(member.characterName);
+            const realOuid = await repository.apiClient.getOuid(member.characterName);
+            if (realOuid) {
+              // AUTO-MIGRATION: Fix Name-based ID to OUID-based ID
+              await crewRepo.migrateToOuid(member.id, realOuid);
+              targetOuid = realOuid;
+            }
           } catch (err) {
             console.error(`[Admin] Failed to resolve OUID for ${member.characterName}:`, err.message);
             continue;

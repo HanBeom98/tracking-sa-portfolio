@@ -65,6 +65,32 @@ export class CrewRepository {
     });
   }
 
+  /**
+   * Migrates a name-based document to an OUID-based document
+   */
+  async migrateToOuid(oldNameId, newOuid) {
+    if (!this.db || oldNameId === newOuid) return;
+    
+    try {
+      const oldRef = this.db.collection(this.MEMBERS_COLLECTION).doc(oldNameId);
+      const newRef = this.db.collection(this.MEMBERS_COLLECTION).doc(newOuid);
+      
+      const doc = await oldRef.get();
+      if (doc.exists) {
+        const data = doc.data();
+        await newRef.set({
+          ...data,
+          migratedFrom: oldNameId,
+          updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+        await oldRef.delete();
+        console.log(`[CrewRepo] Migrated ${oldNameId} -> ${newOuid}`);
+      }
+    } catch (err) {
+      console.error('[CrewRepo] Migration failed:', err);
+    }
+  }
+
   async getSeasonStartDate() {
     if (!this.db) return new Date(0);
     try {
