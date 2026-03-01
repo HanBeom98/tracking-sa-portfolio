@@ -252,20 +252,20 @@ export class CrewRepository {
       });
     });
 
-    // 2. Clear all settlement history (sa_crew_history)
+    // 2. Clear all settlement history (sa_crew_history) - Batch Delete
     const historySnap = await this.db.collection(this.HISTORY_COLLECTION).get();
     historySnap.docs.forEach(doc => {
       batch.delete(doc.ref);
     });
 
-    // 3. Set season start to today 00:00:00 to pick up all of today's matches
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
+    // 4. Set season start to very past date (e.g., 2026-01-01) to catch all previous matches
+    const pastDate = new Date("2026-01-01T00:00:00Z");
     
     const settingsRef = this.db.collection(this.SETTINGS_COLLECTION).doc('season');
-    batch.set(settingsRef, { startDate: todayStart }, { merge: true });
+    batch.set(settingsRef, { startDate: pastDate }, { merge: true });
 
     await batch.commit();
+    console.log('[CrewRepo] Season data repaired. All history cleared.');
   }
 
   async applyForCrew(characterName, ouid) {
