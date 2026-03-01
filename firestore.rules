@@ -82,7 +82,11 @@ service cloud.firestore {
     // Sudden Attack Crew Management (Using Specialized SaStaff helper)
     match /sa_crew_members/{docId} {
       allow read: if true;
-      allow write: if isStaff() || isSaStaff();
+      allow create, delete: if isStaff() || isSaStaff();
+      allow update: if (isStaff() || isSaStaff()) &&
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+                        'mmr', 'wins', 'loses', 'crewKills', 'crewDeaths', 'characterName', 'updatedAt'
+                      ]);
     }
 
     match /sa_crew_applications/{docId} {
