@@ -7,7 +7,13 @@ export class CrewRepository {
     this.MEMBERS_COLLECTION = 'sa_crew_members';
     this.APPLICATIONS_COLLECTION = 'sa_crew_applications';
     this.HISTORY_COLLECTION = 'sa_crew_history'; // Record of settled matches
-    this.ADMIN_EMAILS = ['admin@trackingsa.com', 'hanbeom98@gmail.com'];
+    
+    // List of Administrators and Moderators (Staff)
+    this.STAFF_EMAILS = [
+      'admin@trackingsa.com', 
+      'hanbeom98@gmail.com',
+      // 'moderator@example.com' // 추가 운영진 이메일을 여기에 입력하세요
+    ];
   }
 
   get db() {
@@ -143,9 +149,12 @@ export class CrewRepository {
     return this.db.collection(this.APPLICATIONS_COLLECTION).doc(appId).update({ status: 'REJECTED' });
   }
 
-  isAdmin() {
+  /**
+   * Check if current user is an Admin or Moderator
+   */
+  isStaff() {
     if (typeof window === 'undefined' || !window.firebase || !window.firebase.auth) return false;
     const user = window.firebase.auth().currentUser;
-    return user && this.ADMIN_EMAILS.includes(user.email);
+    return user && this.STAFF_EMAILS.includes(user.email);
   }
 }
