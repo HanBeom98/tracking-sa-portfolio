@@ -1,7 +1,30 @@
-## 2026-02-28
+## 2026-03-01
 
-### feat(games): implement Sudden Attack statistics and player search module
+### feat(sudden-attack): launch Tracking Crew ecosystem and Custom MMR engine
 - 문제/증상:
+  - 단순 전적 검색 기능만으로는 유저들 간의 경쟁과 커뮤니티 형성을 유도하기에 한계가 있음.
+  - 넥슨 정적 API의 CORS 및 Preflight 제한으로 인해 메타데이터(계급/티어) 이미지가 간헐적으로 깨지는 현상 발생.
+- 변경:
+  - **크루 및 MMR 시스템**:
+    - **Firestore 연동**: `sa_crew_members`, `sa_crew_applications`, `sa_crew_history` 컬렉션을 신설하여 멤버 데이터 영구 관리.
+    - **Elo 기반 MMR 알고리즘**: 승패뿐만 아니라 K/D 성적에 따른 가중치(ACE +5, 버스 +10, 멱살캐리 -10 등)를 반영한 점수 체계 구축.
+    - **실시간 랭킹 보드**: 크루원들의 티어(Diamond~Iron)와 MMR, 누적 전적을 보여주는 화려한 금빛 테마 랭킹 테이블 구현.
+  - **AI 스마트 팀 밸런서**:
+    - **포지션 인지 알고리즘**: 스나이퍼(🎯)와 라이플러(🔫) 포지션을 지정하여 양 팀에 공평하게 분배한 후 MMR 균형을 맞추는 지능형 팀 빌딩 로직 탑재.
+  - **기술적 안정성 확보 (CORS 0%)**:
+    - **정적 번들링**: 70여 개의 계급/티어 메타데이터 JSON을 `meta-data.js`로 번들링하여 네트워크 요청 없이 즉시 로딩되도록 개선.
+    - **보안 규칙 최적화**: 운영진(`hantiger24@naver.com`) 전용 정산 및 관리 권한 부여를 위한 정교한 Firestore 규칙 수립.
+  - **UI/UX 강화**:
+    - **상세 전광판**: 매치 클릭 시 전체 참여자의 성적을 보여주는 Scoreboard 기능 및 우리 크루원 강조 효과 추가.
+    - **공식 인증 뱃지**: 크루 멤버 검색 시 닉네임 위에 반짝이는 **[TRACKING CREW]** 뱃지 및 금빛 카드 테두리 적용.
+- 영향 범위: `games/sudden-attack` 도메인 전체 및 프로젝트 보안 규칙.
+- 검증:
+  - 전 크루원 10명 대상 Omni-Settle(일괄 정산) 기능 정상 작동 확인.
+  - 팀 밸런서의 포지션별 분배 로직 및 MMR 차이 최소화 검증 완료.
+
+## 2026-02-28
+...
+
   - 사용자들의 서든어택 전적 조회 니즈가 있으나, 공식 데이터를 쉽고 빠르게 확인할 수 있는 통합 대시보드가 부족함.
 - 변경:
   - **Nexon Open API 연동**: 캐릭터명 기반 `ouid` 추출 및 기본 정보, 랭크, 최근 매치 기록 조회를 위한 `NexonApiClient` 구현.
