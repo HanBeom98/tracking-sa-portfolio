@@ -1,17 +1,19 @@
 /**
  * UI Components for Sudden Attack Stats
  */
-
 export class SaPlayerCard extends HTMLElement {
   set player(data) {
     this.innerHTML = `
-      <div class="sa-card">
+      <div class="sa-card ${data.isCrew ? 'is-crew-card' : ''}">
         <div class="sa-header">
           <div class="profile-main">
             <div class="rank-icon-wrapper">
               ${data.rankImage ? `<img src="${data.rankImage}" alt="${data.rankName}" class="rank-icon">` : ''}
             </div>
-            <span class="nickname">${data.nickname}</span>
+            <div class="name-area">
+              ${data.isCrew ? '<span class="official-crew-badge">TRACKING CREW</span>' : ''}
+              <span class="nickname">${data.nickname}</span>
+            </div>
             <span class="clan-name">[${data.clanName}]</span>
             <span id="streakBadge" class="streak-badge hidden"></span>
           </div>
@@ -20,6 +22,8 @@ export class SaPlayerCard extends HTMLElement {
             <span class="season-rank">(${data.seasonRank})</span>
           </div>
         </div>
+...
+
         <div class="sa-body">
           <div class="tier-section">
             <div class="tier-item party">
