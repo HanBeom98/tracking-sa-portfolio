@@ -88,11 +88,15 @@ export class SaRepository {
   }
 
   /**
-   * Fetch recent matches for a player (Optimized: Single call for all modes)
+   * Fetch recent matches for a player (Optimized: Using verified Nexon API parameters)
    */
   async getRecentMatches(ouid, limit = 20, nickname = "") {
     const combinedMatches = [];
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+    // Verified working parameters from Nexon API guide tests
+    const matchTypes = ["퀵매치 클랜전", "클랜전"];
+    const matchMode = "폭파미션";
 
     const now = new Date();
     const kstFormatter = new Intl.DateTimeFormat('ko-KR', {
@@ -110,41 +114,31 @@ export class SaRepository {
       return `${y}-${m}-${d}`;
     };
 
-    // Scan today and past (empty date) to ensure we get matches
     const dates = [formatDateParts(now), ""]; 
 
     try {
       for (const date of dates) {
-        try {
-          await delay(100); 
-          // Fetch ALL matches (No string filter to avoid 400 error)
-          const data = await this.apiClient.getMatchList(ouid, "", "", date);
-          const matches = (data.match || []).map(m => ({ 
-            ...m, 
-            typeName: m.match_mode,
-            match_date: m.date_match
-          }));
-          
-          for (const m of matches) {
-            // STRICT CLAN MATCH FILTER:
-            // Nexon SA API: match_visual_type or match_type identifies the category.
-            // Usually "클랜전" matches have a specific indicator. 
-            // We'll check both the mode name and the internal type if available.
-            const isClanMatch = (m.match_mode && m.match_mode.includes("클랜")) || 
-                                (m.match_type === "클랜") || 
-                                (m.match_visual_type && m.match_visual_type.includes("클랜"));
-
-            if (isClanMatch && !combinedMatches.find(cm => cm.match_id === m.match_id)) {
-              combinedMatches.push(m);
+        for (const type of matchTypes) {
+          try {
+            await delay(150); 
+            // Fetch using verified type and mode
+            const data = await this.apiClient.getMatchList(ouid, type, matchMode, date);
+            const matches = (data.match || []).map(m => ({ 
+              ...m, 
+              typeName: m.match_type || type,
+              match_date: m.date_match
+            }));
+            
+            for (const m of matches) {
+              if (!combinedMatches.find(cm => cm.match_id === m.match_id)) {
+                combinedMatches.push(m);
+              }
             }
-          }
-        } catch (err) {}
-        
+          } catch (err) {}
+        }
         if (combinedMatches.length >= limit) break;
       }
 
-      // Filter for Clan Matches ONLY if that's what we want for settlement
-      // or keep all and let isCustomMatch logic handle it.
       const sortedMatches = combinedMatches
         .sort((a, b) => new Date(b.match_date) - new Date(a.match_date))
         .slice(0, limit);
