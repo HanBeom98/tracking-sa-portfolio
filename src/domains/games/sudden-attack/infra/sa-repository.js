@@ -88,10 +88,10 @@ export class SaRepository {
   }
 
   /**
-   * Fetch recent matches for a player (Resilient Sequential Scan)
+   * Fetch recent matches for a player (Optimized for Clan Matches ONLY)
    */
   async getRecentMatches(ouid, limit = 20, nickname = "") {
-    const modes = ["폭파미션", "데스매치", "개인전"];
+    const mode = "클랜전"; // Fixed to Clan Match for Crew Settlements
     const combinedMatches = [];
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -115,22 +115,21 @@ export class SaRepository {
 
     try {
       for (const date of dates) {
-        for (const mode of modes) {
-          try {
-            await delay(400); 
-            const data = await this.apiClient.getMatchList(ouid, "", mode, date);
-            const matches = (data.match || []).map(m => ({ 
-              ...m, 
-              typeName: mode,
-              match_date: m.date_match
-            }));
-            for (const m of matches) {
-              if (!combinedMatches.find(cm => cm.match_id === m.match_id)) {
-                combinedMatches.push(m);
-              }
+        try {
+          await delay(200); // Shorter delay since we do fewer calls
+          const data = await this.apiClient.getMatchList(ouid, "", mode, date);
+          const matches = (data.match || []).map(m => ({ 
+            ...m, 
+            typeName: mode,
+            match_date: m.date_match
+          }));
+          for (const m of matches) {
+            if (!combinedMatches.find(cm => cm.match_id === m.match_id)) {
+              combinedMatches.push(m);
             }
-          } catch (err) {}
-        }
+          }
+        } catch (err) {}
+        
         if (combinedMatches.length >= limit) break;
       }
 
@@ -146,8 +145,6 @@ export class SaRepository {
           await delay(100);
           const detail = await this.apiClient.getMatchDetail(m.match_id);
           
-          // Pass subject info (kills, deaths, result, ouid) to identify the person scanned
-          // even if their name was different in this match
           const subjectInfo = {
             ouid: ouid,
             kill: m.kill,
