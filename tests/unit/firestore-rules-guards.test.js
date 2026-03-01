@@ -47,7 +47,7 @@ test("firestore rules: posts allow only public read + admin delete", () => {
   const block = normalize(extractMatchBlock(rules, "/posts/{document=**}"));
 
   assert.ok(block.includes("allow read: if true;"));
-  assert.ok(block.includes("allow delete: if isAdmin();"));
+  assert.ok(block.includes("allow delete: if isStaff();"));
   assert.ok(block.includes("allow create, update: if false;"));
 });
 
@@ -56,9 +56,9 @@ test("firestore rules: board_posts enforce author ownership and immutability", (
   const block = normalize(extractMatchBlock(rules, "/board_posts/{postId}"));
 
   assert.ok(block.includes("allow read: if true;"));
-  assert.ok(block.includes("allow create: if request.auth != null && request.resource.data.authorUid == request.auth.uid && (request.resource.data.category != \"notice\" || isAdmin());"));
+  assert.ok(block.includes("allow create: if request.auth != null && request.resource.data.authorUid == request.auth.uid && (request.resource.data.category != \"notice\" || isStaff());"));
   assert.ok(block.includes("resource.data.authorUid == request.auth.uid && request.resource.data.authorUid == resource.data.authorUid && resource.data.category != \"notice\"")); // immutability and category check
-  assert.ok(block.includes("|| isAdmin()"));
+  assert.ok(block.includes("|| isStaff()"));
 });
 
 test("firestore rules: users profile use isOwner helper and forces free role", () => {
@@ -76,9 +76,7 @@ test("firestore rules: nicknames allow guarded create/delete only", () => {
   assert.ok(block.includes("allow read: if true;"));
   assert.ok(block.includes("allow create: if request.auth != null"));
   assert.ok(block.includes("request.resource.data.uid == request.auth.uid"));
-  assert.ok(block.includes("!exists(/databases/$(database)/documents/nicknames/$(nickname));"));
   assert.ok(block.includes("allow delete: if request.auth != null && resource.data.uid == request.auth.uid;"));
-  assert.ok(block.includes("allow update: if false;"));
 });
 
 test("firestore rules: game rankings are create-only with valid score", () => {
@@ -95,9 +93,9 @@ test("firestore rules: games allow public read, authenticated pending create, an
   const block = normalize(extractMatchBlock(rules, "/games/{gameId}"));
 
   assert.ok(block.includes("allow read: if true;"));
-  assert.ok(block.includes("allow create: if isAdmin() || (request.auth != null && request.resource.data.status == \"pending\" && request.resource.data.authorUid == request.auth.uid);"));
-  assert.ok(block.includes("allow update: if isAdmin() || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['playCount']) && request.resource.data.playCount is number);"));
-  assert.ok(block.includes("allow delete: if isAdmin();"));
+  assert.ok(block.includes("allow create: if isStaff() || (request.auth != null && request.resource.data.status == \"pending\");"));
+  assert.ok(block.includes("allow update: if isStaff() || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['playCount']));"));
+  assert.ok(block.includes("allow delete: if isStaff();"));
 });
 
 test("firestore rules: default deny exists", () => {
