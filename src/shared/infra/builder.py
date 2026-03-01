@@ -36,6 +36,7 @@ def generate_public_site(incremental=False):
     shared_ui_dir = "src/shared/ui"
     if os.path.exists(shared_ui_dir):
         dest_ui = os.path.join(PUBLIC_DIR, "ui")
+        if os.path.exists(dest_ui): shutil.rmtree(dest_ui)
         shutil.copytree(shared_ui_dir, dest_ui, dirs_exist_ok=True)
     
     # 4. 도메인 빌드
@@ -50,8 +51,13 @@ def generate_public_site(incremental=False):
         src = f"src/domains/{domain}"
         if os.path.exists(src):
             dest = os.path.join(PUBLIC_DIR, domain)
+            
+            # Ensure clean copy by removing destination first
+            if os.path.exists(dest):
+                shutil.rmtree(dest)
+            
             if os.path.isdir(src):
-                shutil.copytree(src, dest, dirs_exist_ok=True)
+                shutil.copytree(src, dest)
             else:
                 os.makedirs(os.path.dirname(dest), exist_ok=True)
                 shutil.copy2(src, dest)
