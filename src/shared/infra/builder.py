@@ -56,11 +56,15 @@ def generate_public_site(incremental=False):
                 os.makedirs(os.path.dirname(dest), exist_ok=True)
                 shutil.copy2(src, dest)
             
-            # HTML 후처리 (재귀적으로 수행)
+            # HTML/JS 후처리 (재귀적으로 수행)
             if os.path.isdir(dest):
                 for root, _, files in os.walk(dest):
                     for file in files:
-                        if file.endswith(".html"): process_html_file_for_common_elements(os.path.join(root, file))
+                        filepath = os.path.join(root, file)
+                        if file.endswith((".html", ".js")):
+                            process_file_placeholders(filepath)
+                        if file.endswith(".html"): 
+                            process_html_file_for_common_elements(filepath)
     
     # 뉴스 도메인 특수 빌드
     _, db_ok = generate_news_pages()
@@ -325,3 +329,35 @@ def build_search_index():
     out_path = os.path.join(PUBLIC_DIR, "search-index.json")
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False)
+
+
+def process_file_placeholders(filepath):
+    """
+    파일 내의 ___{{VAR}}___ 패턴을 환경 변수 값으로 치환합니다.
+    """
+    try:
+        with open(filepath, "r", encoding="utf-8") as f:
+            content = f.read()
+        
+        # ___{{VAR}}___ 패턴 찾기
+        import re
+        placeholders = re.findall(r'___\{\{(.+?)\}\}___', content)
+        if not placeholders:
+            return
+            
+        new_content = content
+        for var in placeholders:
+            val = os.getenv(var, "")
+            # os.getenv는 값이 없으면 None을 반환하므로 ""로 대체
+            if val is None: val = ""
+            
+            # Use concatenation to avoid f-string curly brace escaping issues
+            placeholder_text = "___{{" + var + "}}___"
+            new_content = new_content.replace(placeholder_text, val)
+            
+        if new_content != content:
+            with open(filepath, "w", encoding="utf-8") as f:
+                f.write(new_content)
+            print(f"✅ [ENV INJECT] {filepath}: Replaced placeholders.")
+    except Exception as e:
+        print(f"🚨 [ENV INJECT ERROR] {filepath}: {e}")
