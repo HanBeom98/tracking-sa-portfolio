@@ -43,7 +43,7 @@ async function handleSearch() {
     }
 
     // Render Matches
-    const matches = await service.getRecentMatches(player.ouid);
+    const matches = await service.getRecentMatches(player.ouid, player.nickname);
     historySection.innerHTML = '<h2>최근 매치 기록</h2><sa-match-list></sa-match-list>';
     historySection.querySelector('sa-match-list').matches = matches;
     historySection.classList.remove('hidden');

@@ -22,15 +22,28 @@ export class RecentStats {
 }
 
 export class MatchRecord {
-  constructor(detail, typeName = "") {
+  constructor(detail, typeName = "", targetUserName = "") {
     this.matchId = detail.match_id;
     this.matchTypeName = typeName;
-    this.mapName = detail.map_name || "Unknown Map";
-    this.matchResult = detail.match_result || "UNKNOWN"; // e.g., "WIN", "LOSE"
-    this.kill = detail.kill_count || 0;
-    this.death = detail.death_count || 0;
-    this.assist = detail.assist_count || 0;
+    
+    // API returns map name in 'match_map' instead of 'map_name'
+    this.mapName = detail.match_map || detail.map_name || "Unknown Map";
+    this.matchDate = detail.date_match || detail.match_date;
+
+    // If API returns a 'match_detail' array, extract the specific player's stat
+    let playerStat = detail;
+    if (detail.match_detail && Array.isArray(detail.match_detail)) {
+      if (targetUserName) {
+        playerStat = detail.match_detail.find(p => p.user_name === targetUserName) || detail.match_detail[0];
+      } else {
+        playerStat = detail.match_detail[0];
+      }
+    }
+
+    this.matchResult = playerStat.match_result || "UNKNOWN";
+    this.kill = playerStat.kill !== undefined ? playerStat.kill : (playerStat.kill_count || 0);
+    this.death = playerStat.death !== undefined ? playerStat.death : (playerStat.death_count || 0);
+    this.assist = playerStat.assist !== undefined ? playerStat.assist : (playerStat.assist_count || 0);
     this.kd = this.death === 0 ? this.kill : parseFloat((this.kill / this.death).toFixed(2));
-    this.matchDate = detail.match_date;
   }
 }

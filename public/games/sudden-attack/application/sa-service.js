@@ -22,9 +22,9 @@ export class SaService {
   /**
    * Load match history for a player
    */
-  async getRecentMatches(ouid) {
+  async getRecentMatches(ouid, nickname = "") {
     try {
-      return await this.repository.getRecentMatches(ouid);
+      return await this.repository.getRecentMatches(ouid, 5, nickname);
     } catch (error) {
       console.error('[ApplicationService] Failed to load match history:', error);
       return [];

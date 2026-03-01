@@ -42,7 +42,7 @@ export class SaRepository {
   /**
    * Fetch recent matches for a player (Resilient Sequential Scan)
    */
-  async getRecentMatches(ouid, limit = 5) {
+  async getRecentMatches(ouid, limit = 5, nickname = "") {
     // Correct combinations based on Korean string parameters
     const combinations = [
       { type: "클랜전", mode: "폭파미션" },
@@ -115,7 +115,7 @@ export class SaRepository {
         try {
           await delay(100);
           const detail = await this.apiClient.getMatchDetail(m.match_id);
-          details.push(new MatchRecord(detail, m.typeName));
+          details.push(new MatchRecord(detail, m.typeName, nickname));
         } catch (err) {
           // If match-detail fails, fallback to basic data from list
           details.push(new MatchRecord({
@@ -125,7 +125,7 @@ export class SaRepository {
             death: m.death,
             assist: m.assist,
             map_name: m.match_mode // Fallback map name
-          }, m.typeName));
+          }, m.typeName, nickname));
         }
       }
       
