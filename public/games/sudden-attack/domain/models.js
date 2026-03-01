@@ -22,7 +22,6 @@ export class Player {
 
     this.rankImage = basic.grade_image || "";
     this.seasonRankImage = basic.season_grade_image || "";
-...
 
     if (tier) {
       this.soloTier = tier.solo_rank_match_tier || "UNRANK";
