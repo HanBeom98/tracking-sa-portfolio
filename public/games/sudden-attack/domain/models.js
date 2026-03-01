@@ -156,8 +156,8 @@ export class MatchRecord {
         CREW_MEMBERS.some(crew => crew.toLowerCase() === (name || "").toLowerCase())
       );
       
-      // If 2 or more crew members are in the same match, it's a Custom Match (내전)
-      if (this.crewParticipants.length >= 2) {
+      // If 8 or more crew members are in the same match, it's a Custom Match (내전)
+      if (this.crewParticipants.length >= 8) {
         this.isCustomMatch = true;
       }
 
