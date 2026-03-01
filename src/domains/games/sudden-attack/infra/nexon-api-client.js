@@ -15,7 +15,14 @@ export class NexonApiClient {
       : `/suddenattack/v1${endpoint}`;
 
     const url = new URL(`${this.baseUrl}${path}`);
-    Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+    
+    // ONLY append parameters that have a valid value (fixes 400 error for empty strings)
+    Object.keys(params).forEach(key => {
+      const value = params[key];
+      if (value !== undefined && value !== null && value !== "") {
+        url.searchParams.append(key, value);
+      }
+    });
 
     console.log(`[NexonAPI Request]: ${url.toString()}`);
 
