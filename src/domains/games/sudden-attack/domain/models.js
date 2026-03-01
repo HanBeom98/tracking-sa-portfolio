@@ -148,7 +148,7 @@ export class RecentStats {
 }
 
 export class MatchRecord {
-  constructor(detail, typeName = "", targetUserName = "", crewData = { names: [], ouids: [] }) {
+  constructor(detail, typeName = "", targetUserName = "", crewData = { names: [], ouids: [] }, subjectInfo = null) {
     this.matchId = detail.match_id;
     this.matchTypeName = typeName;
     this.mapName = detail.match_map || detail.map_name || "Unknown Map";
@@ -166,9 +166,19 @@ export class MatchRecord {
         const nickname = p.user_name || "";
         const normalizedName = nickname.toLowerCase().trim();
         
-        // Dynamic detection using Firestore crew list + static fallback
-        const isCrew = (crewData.names || []).some(c => c.toLowerCase().trim() === normalizedName) ||
-                       CREW_MEMBERS.some(c => c.toLowerCase().trim() === normalizedName);
+        // Subject Detection: If stats match the summary of the person we are scanning, this IS the subject
+        let isSubject = false;
+        if (subjectInfo && 
+            p.kill == subjectInfo.kill && 
+            p.death == subjectInfo.death && 
+            p.match_result == subjectInfo.result) {
+          isSubject = true;
+        }
+
+        // Dynamic detection: Is Crew? (By current Name OR if it's the subject we are scanning for)
+        const isCrew = isSubject || 
+                       (crewData.names || []).some(c => (c || "").toLowerCase().trim() === normalizedName) ||
+                       CREW_MEMBERS.some(c => (c || "").toLowerCase().trim() === normalizedName);
 
         return {
           nickname: nickname,
@@ -177,7 +187,8 @@ export class MatchRecord {
           assist: p.assist || p.assist_count || 0,
           kd: p.death > 0 ? (p.kill / p.death).toFixed(2) : (p.kill > 0 ? p.kill.toFixed(2) : "0.00"),
           result: p.match_result === "1" ? "WIN" : (p.match_result === "2" ? "LOSE" : p.match_result),
-          isCrew: isCrew
+          isCrew: isCrew,
+          ouid: isSubject ? subjectInfo.ouid : null // Carry OUID if identified
         };
       });
 

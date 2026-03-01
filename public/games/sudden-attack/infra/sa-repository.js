@@ -145,7 +145,17 @@ export class SaRepository {
         try {
           await delay(100);
           const detail = await this.apiClient.getMatchDetail(m.match_id);
-          details.push(new MatchRecord(detail, m.typeName, nickname, crewData));
+          
+          // Pass subject info (kills, deaths, result, ouid) to identify the person scanned
+          // even if their name was different in this match
+          const subjectInfo = {
+            ouid: ouid,
+            kill: m.kill,
+            death: m.death,
+            result: m.match_result
+          };
+
+          details.push(new MatchRecord(detail, m.typeName, nickname, crewData, subjectInfo));
         } catch (err) {
           details.push(new MatchRecord({
             match_id: m.match_id,

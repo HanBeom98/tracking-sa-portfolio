@@ -131,7 +131,7 @@ export class CrewRepository {
     const memberCache = {};
     const membersSnap = await this.db.collection(this.MEMBERS_COLLECTION).get();
     
-    // Mapping: Nickname -> MemberData (Cache)
+    // Mapping: OUID -> MemberData & Nickname -> MemberData (Cache)
     const nameMap = {};
     membersSnap.forEach(doc => {
       const data = doc.data();
@@ -161,8 +161,14 @@ export class CrewRepository {
       for (const p of match.allPlayerStats) {
         if (!p.isCrew) continue;
         
-        // Find member by their name AT THE TIME of the match
-        const currentData = nameMap[p.nickname.toLowerCase()];
+        // Find member: Priority 1: OUID, Priority 2: Nickname
+        let currentData = null;
+        if (p.ouid && memberCache[p.ouid]) {
+          currentData = memberCache[p.ouid];
+        } else {
+          currentData = nameMap[p.nickname.toLowerCase()];
+        }
+
         if (!currentData) continue; 
 
         const isWin = p.result === 'WIN';
