@@ -251,11 +251,26 @@ function renderAdminExtraActions() {
 
       // 2. Fetch matches for all valid OUIDs
       const matchPromises = [];
-      for (let i = 0; i < ouids.length; i++) {
-        if (ouids[i]) {
+      for (let i = 0; i < currentRankings.length; i++) {
+        const member = currentRankings[i];
+        let targetOuid = member.id;
+        
+        // If the ID doesn't look like a hex OUID (contains non-hex chars or is short), try to get real OUID
+        // Sudden Attack OUIDs are typically 32-character hex strings
+        if (targetOuid.length < 20 || !/^[0-9a-f]+$/.test(targetOuid)) {
+          console.warn(`[Admin] Resolving OUID for ${member.characterName} (currently name based)...`);
+          try {
+            targetOuid = await repository.apiClient.getOuid(member.characterName);
+          } catch (err) {
+            console.error(`[Admin] Failed to resolve OUID for ${member.characterName}:`, err.message);
+            continue;
+          }
+        }
+
+        if (targetOuid) {
           await new Promise(r => setTimeout(r, 200)); 
           matchPromises.push(
-            service.getRecentMatches(ouids[i], currentRankings[i].characterName, 10).catch(() => [])
+            service.getRecentMatches(targetOuid, member.characterName, 10).catch(() => [])
           );
         }
       }
