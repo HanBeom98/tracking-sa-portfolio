@@ -127,7 +127,10 @@ async function handleSearch() {
     if (memberData) {
       stats.crewMatchCount = (memberData.wins || 0) + (memberData.loses || 0);
       stats.crewWinRate = stats.crewMatchCount > 0 ? Math.round((memberData.wins / stats.crewMatchCount) * 100) : 0;
-      stats.crewKd = memberData.mmr; 
+      
+      const ck = memberData.crewKills || 0;
+      const cd = memberData.crewDeaths || 0;
+      stats.crewKd = cd > 0 ? (ck / cd).toFixed(2) : (ck > 0 ? ck.toFixed(2) : "0.00");
     }
     
     statsSection.innerHTML = '<sa-stats-summary></sa-stats-summary>';

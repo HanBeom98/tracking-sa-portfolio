@@ -156,48 +156,47 @@ export class MatchRecord {
     this.participants = [];
     this.crewParticipants = [];
     this.isCustomMatch = false;
-    this.allPlayerStats = []; // Store full scoreboard data
+    this.allPlayerStats = []; 
 
     let playerStat = detail;
     
     if (detail.match_detail && Array.isArray(detail.match_detail)) {
-      // 1. Process Scoreboard Data
       this.allPlayerStats = detail.match_detail.map(p => {
-        const nickname = p.user_name || "";
+        const nickname = p.user_name || p.character_name || "";
         const normalizedName = nickname.toLowerCase().trim();
         
-        // Subject Detection: More resilient comparison (string vs number)
+        // Comprehensive field extraction from Nexon API (cnt_kill, cnt_death)
+        const killValue = parseInt(p.kill || p.kill_count || p.cnt_kill || 0);
+        const deathValue = parseInt(p.death || p.death_count || p.cnt_death || 0);
+        const assistValue = parseInt(p.assist || p.assist_count || p.cnt_assist || 0);
+        const resultValue = String(p.match_result || p.result || "0");
+
         let isSubject = false;
         if (subjectInfo) {
-          const pKill = parseInt(p.kill || p.kill_count || 0);
-          const pDeath = parseInt(p.death || p.death_count || 0);
-          const sKill = parseInt(subjectInfo.kill || 0);
-          const sDeath = parseInt(subjectInfo.death || 0);
-          
-          if (pKill === sKill && pDeath === sDeath && String(p.match_result) === String(subjectInfo.result)) {
+          if (killValue === parseInt(subjectInfo.kill) && 
+              deathValue === parseInt(subjectInfo.death) && 
+              String(resultValue) === String(subjectInfo.result)) {
             isSubject = true;
           }
         }
 
-        // Dynamic detection: Is Crew? (By current Name OR if it's the subject we are scanning for)
         const isCrew = isSubject || 
                        (crewData.names || []).some(c => (c || "").toLowerCase().trim() === normalizedName) ||
                        CREW_MEMBERS.some(c => (c || "").toLowerCase().trim() === normalizedName);
 
         return {
           nickname: nickname,
-          kill: p.kill || p.kill_count || 0,
-          death: p.death || p.death_count || 0,
-          assist: p.assist || p.assist_count || 0,
-          kd: p.death > 0 ? (p.kill / p.death).toFixed(2) : (p.kill > 0 ? p.kill.toFixed(2) : "0.00"),
-          result: p.match_result === "1" ? "WIN" : (p.match_result === "2" ? "LOSE" : p.match_result),
+          kill: killValue,
+          death: deathValue,
+          assist: assistValue,
+          kd: deathValue > 0 ? (killValue / deathValue).toFixed(2) : (killValue > 0 ? killValue.toFixed(2) : "0.00"),
+          result: resultValue === "1" ? "WIN" : (resultValue === "2" ? "LOSE" : "UNKNOWN"),
           isCrew: isCrew,
           ouid: isSubject ? subjectInfo.ouid : null
         };
       });
 
-      // 2. Identify Crew and Custom Match
-      this.participants = detail.match_detail.map(p => p.user_name);
+      this.participants = detail.match_detail.map(p => p.user_name || p.character_name);
       this.crewParticipants = this.allPlayerStats
         .filter(p => p.isCrew)
         .map(p => p.nickname);
@@ -206,21 +205,21 @@ export class MatchRecord {
         this.isCustomMatch = true;
       }
 
-      // 3. Set Target Player Stat
       const target = targetUserName ? targetUserName.toLowerCase().trim() : "";
       if (target) {
-        playerStat = detail.match_detail.find(p => 
-          p.user_name && p.user_name.toLowerCase().trim() === target
-        ) || detail.match_detail[0];
+        playerStat = detail.match_detail.find(p => {
+          const n = (p.user_name || p.character_name || "").toLowerCase().trim();
+          return n === target;
+        }) || detail.match_detail[0];
       } else {
         playerStat = detail.match_detail[0];
       }
     }
 
-    this.matchResult = String(playerStat.match_result) === "1" ? "WIN" : (String(playerStat.match_result) === "2" ? "LOSE" : "UNKNOWN");
-    this.kill = playerStat.kill !== undefined ? playerStat.kill : (playerStat.kill_count || 0);
-    this.death = playerStat.death !== undefined ? playerStat.death : (playerStat.death_count || 0);
-    this.assist = playerStat.assist !== undefined ? playerStat.assist : (playerStat.assist_count || 0);
+    this.matchResult = String(playerStat.match_result || playerStat.result) === "1" ? "WIN" : "LOSE";
+    this.kill = parseInt(playerStat.kill || playerStat.kill_count || playerStat.cnt_kill || 0);
+    this.death = parseInt(playerStat.death || playerStat.death_count || playerStat.cnt_death || 0);
+    this.assist = parseInt(playerStat.assist || playerStat.assist_count || playerStat.cnt_assist || 0);
     
     if (this.death === 0) {
       this.kd = this.kill > 0 ? this.kill.toFixed(2) : "0.00";
