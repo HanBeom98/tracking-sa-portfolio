@@ -127,8 +127,15 @@ async function handleSearch() {
     if (memberData) {
       stats.crewMatchCount = (memberData.wins || 0) + (memberData.loses || 0);
       stats.crewWinRate = stats.crewMatchCount > 0 ? Math.round((memberData.wins / stats.crewMatchCount) * 100) : 0;
-      stats.crewMmr = memberData.mmr; // Assign real MMR
-      stats.crewKd = 'N/A'; // Civil war K/D is not tracked yet
+      stats.crewMmr = memberData.mmr;
+
+      const crewKills = memberData.crewKills || 0;
+      const crewDeaths = memberData.crewDeaths || 0;
+      if (stats.crewMatchCount > 0) {
+        stats.crewKd = crewDeaths > 0 ? (crewKills / crewDeaths).toFixed(2) : crewKills.toFixed(2);
+      } else {
+        stats.crewKd = 'N/A';
+      }
     }
     
     statsSection.innerHTML = '<sa-stats-summary></sa-stats-summary>';
