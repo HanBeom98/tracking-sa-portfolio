@@ -7,6 +7,7 @@ export class CrewRepository {
     this.MEMBERS_COLLECTION = 'sa_crew_members';
     this.APPLICATIONS_COLLECTION = 'sa_crew_applications';
     this.HISTORY_COLLECTION = 'sa_crew_history'; // Record of settled matches
+    this.SETTINGS_COLLECTION = 'sa_crew_settings'; // Store global crew config like season start
     
     // List of Administrators and Moderators (Staff)
     this.STAFF_EMAILS = [
@@ -61,6 +62,22 @@ export class CrewRepository {
   }
 
   /**
+   * Get the current season start date
+   */
+  async getSeasonStartDate() {
+    if (!this.db) return new Date(0); // Epoch start if DB fails
+    try {
+      const doc = await this.db.collection(this.SETTINGS_COLLECTION).doc('season').get();
+      if (doc.exists && doc.data().startDate) {
+        return doc.data().startDate.toDate();
+      }
+      return new Date(0); // Default to beginning of time if not set
+    } catch (e) {
+      return new Date(0);
+    }
+  }
+
+  /**
    * Settle MMR for a list of matches
    * Prevents batch overwrite bug by accumulating stats in memory first.
    * @param {Array} matches - Array of MatchRecord objects
@@ -68,6 +85,9 @@ export class CrewRepository {
   async settleMatches(matches) {
     if (!this.db || matches.length === 0) return [];
     
+    // 0. Fetch Season Start Date to prevent settling old matches
+    const seasonStartDate = await this.getSeasonStartDate();
+
     // 1. Cache ALL current member stats to prevent overwrite in loop
     const memberCache = {};
     const membersSnap = await this.db.collection(this.MEMBERS_COLLECTION).get();
@@ -91,7 +111,11 @@ export class CrewRepository {
     const sortedMatches = [...matches].sort((a, b) => new Date(a.matchDate) - new Date(b.matchDate));
 
     for (const match of sortedMatches) {
-      if (settledSet.has(match.matchId)) continue; // Skip if already settled
+      // Security Check: Is this match from a previous season?
+      const matchDateObj = new Date(match.matchDate);
+      if (matchDateObj < seasonStartDate) continue; // Skip old season matches
+
+      if (settledSet.has(match.matchId)) continue; // Skip if already settled in current season
 
       // 4. Calculate MMR changes for participants in memory
       for (const p of match.allPlayerStats) {
@@ -121,6 +145,7 @@ export class CrewRepository {
       batch.set(historyRef, {
         settledAt: window.firebase.firestore.FieldValue.serverTimestamp(),
         map: match.mapName,
+        matchDate: match.matchDate, // Keep record of when it was played
         crewCount: match.crewParticipants.length
       });
       
@@ -149,7 +174,7 @@ export class CrewRepository {
   }
 
   /**
-   * Reset Season: Clear all MMR, Wins, Loses and History (Admin Only)
+   * Reset Season: Clear all MMR, Wins, Loses and Set new Season Boundary (Admin Only)
    */
   async resetSeason() {
     if (!this.db) throw new Error('DB 연결 실패');
@@ -167,11 +192,16 @@ export class CrewRepository {
       });
     });
 
-    // 2. Clear History Collection (Requires multiple batches if large, but crew history is usually small enough for 1 batch)
-    const historySnap = await this.db.collection(this.HISTORY_COLLECTION).get();
-    historySnap.docs.forEach(doc => {
-      batch.delete(doc.ref);
-    });
+    // 2. Set new Season Boundary Date to NOW. 
+    // This prevents any matches played before this moment from being settled again.
+    const settingsRef = this.db.collection(this.SETTINGS_COLLECTION).doc('season');
+    batch.set(settingsRef, {
+      startDate: window.firebase.firestore.FieldValue.serverTimestamp(),
+      seasonName: `Season ${new Date().getFullYear()}-${new Date().getMonth() + 1}`
+    }, { merge: true });
+
+    // NOTE: We intentionally DO NOT clear the HISTORY_COLLECTION anymore. 
+    // Keeping history is good for database integrity, and the startDate boundary protects us from re-settling.
 
     await batch.commit();
   }
