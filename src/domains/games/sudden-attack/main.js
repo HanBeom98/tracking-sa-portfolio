@@ -6,7 +6,7 @@ import { RecentStats } from './domain/models.js?v=20260228_7';
 import './ui/sa-components.js?v=20260228_7';
 
 // NOTE: Using Live API Key from environment (.env)
-const NEXON_API_KEY = 'live_6e6f12fbfb54d0fad8b504b3303286fb1ce29b5a4e2f456d883cc44b2af445e6efe8d04e6d233bd35cf2fabdeb93fb0d';
+const NEXON_API_KEY = '___{{NEXON_API_KEY}}___';
 
 const client = new NexonApiClient(NEXON_API_KEY);
 const repository = new SaRepository(client);
