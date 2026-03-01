@@ -128,7 +128,7 @@ async function handleSearch() {
       stats.crewMatchCount = (memberData.wins || 0) + (memberData.loses || 0);
       stats.crewWinRate = stats.crewMatchCount > 0 ? Math.round((memberData.wins / stats.crewMatchCount) * 100) : 0;
       stats.crewMmr = memberData.mmr; // Assign real MMR
-      stats.crewKd = (stats.kd / 100).toFixed(2); // Use official KD for now
+      stats.crewKd = 'N/A'; // Civil war K/D is not tracked yet
     }
     
     statsSection.innerHTML = '<sa-stats-summary></sa-stats-summary>';

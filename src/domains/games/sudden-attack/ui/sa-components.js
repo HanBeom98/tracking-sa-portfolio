@@ -156,7 +156,7 @@ export class SaStatsSummary extends HTMLElement {
             </div>
             <div class="stat-box golden">
               <label>내전 K/D</label>
-              <span class="value ${this.getKdColor(data.crewKd)}">${data.crewKd}</span>
+              <span class="value ${data.crewKd !== 'N/A' ? this.getKdColor(data.crewKd) : ''}">${data.crewKd === 'N/A' ? '기록 없음' : data.crewKd}</span>
             </div>
             <div class="stat-box golden">
               <label>내전 승률</label>
