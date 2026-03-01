@@ -187,10 +187,10 @@ function renderAdminExtraActions() {
   const actionBar = document.createElement('div');
   actionBar.className = 'admin-actions-bar';
   actionBar.innerHTML = `
-    <button id="settleMMRBtn" class="settle-btn">⚡ 최근 내전 MMR 정산하기</button>
+    <button id="settleMMRBtn" class="settle-btn">⚡ 크루 전체 매치 스캔 & 일괄 정산</button>
     <button id="seedMembersBtn" class="sub-btn" style="border-color:#ffcc00; color:#ffcc00;">🌱 초기 멤버 10명 강제 등록</button>
     <button id="resetSeasonBtn" class="sub-btn" style="border-color:#ff4d4d; color:#ff4d4d; margin-left: auto;">🔥 시즌 초기화</button>
-    <p class="admin-hint" style="width:100%;">※ 검색한 캐릭터의 최근 20경기를 스캔하여 정산되지 않은 내전을 자동 처리합니다.</p>
+    <p class="admin-hint" style="width:100%;">※ 모든 크루원의 최근 경기를 병렬로 긁어와 누락된 내전을 찾아 한 방에 정산합니다. (특정 캐릭터 검색 불필요)</p>
   `;
   actionBar.style.flexWrap = "wrap";
   adminPanel.appendChild(actionBar);
@@ -220,25 +220,70 @@ function renderAdminExtraActions() {
     } catch (e) { alert('초기화 실패: ' + e.message); }
   });
 
-  // Settlement Logic
+  // Omni-Settlement Logic (Scan all crew members)
   actionBar.querySelector('#settleMMRBtn').addEventListener('click', async () => {
     const settleBtn = actionBar.querySelector('#settleMMRBtn');
     settleBtn.disabled = true;
-    settleBtn.textContent = '정산 분석 중...';
+    settleBtn.textContent = '크루 전체 스캔 중... (최대 10초 소요)';
+
     try {
-      const nickname = searchInput.value.trim();
-      if (!nickname) { alert('정산 기준이 될 캐릭터를 먼저 검색해주세요.'); return; }
-      const player = await service.searchPlayer(nickname);
-      const matches = await service.getRecentMatches(player.ouid, player.nickname); // Scans 20 matches now
-      const crewMatches = matches.filter(m => m.isCustomMatch);
-      if (crewMatches.length === 0) { alert('정산할 새로운 내전 기록이 없습니다.'); return; }
+      if (currentRankings.length === 0) {
+        alert('등록된 크루 멤버가 없습니다.');
+        return;
+      }
+
+      // 1. Fetch OUIDs for all crew members
+      const ouidPromises = currentRankings.map(m => 
+        repository.apiClient.getOuid(m.characterName).catch(() => null)
+      );
+      const ouids = await Promise.all(ouidPromises);
+
+      // 2. Fetch matches for all valid OUIDs (Limit 10 per person to avoid rate limits, total 100+ matches scanned)
+      const matchPromises = [];
+      for (let i = 0; i < ouids.length; i++) {
+        if (ouids[i]) {
+          // Add a small delay between batches to prevent Nexon API 429 Too Many Requests
+          await new Promise(r => setTimeout(r, 200)); 
+          matchPromises.push(
+            service.getRecentMatches(ouids[i], currentRankings[i].characterName, 10).catch(() => [])
+          );
+        }
+      }
+      
+      const allMatchesArrays = await Promise.all(matchPromises);
+      
+      // 3. Flatten and deduplicate matches
+      const uniqueMatches = new Map();
+      allMatchesArrays.flat().forEach(match => {
+        if (!uniqueMatches.has(match.matchId)) {
+          uniqueMatches.set(match.matchId, match);
+        }
+      });
+
+      // 4. Filter only Custom Matches (Crew >= 8)
+      const crewMatches = Array.from(uniqueMatches.values()).filter(m => m.isCustomMatch);
+      
+      if (crewMatches.length === 0) { 
+        alert('전체 크루의 최근 경기를 스캔했으나, 새로운 내전 기록이 없습니다.'); 
+        return; 
+      }
+
+      // 5. Settle the discovered matches
+      settleBtn.textContent = `발견된 ${crewMatches.length}개 내전 정산 중...`;
       const settledIds = await crewRepo.settleMatches(crewMatches);
+      
       if (settledIds.length > 0) {
-        alert(`${settledIds.length}개의 매치가 정산되었습니다! 랭킹을 갱신합니다.`);
-        initCrew();
-      } else { alert('최근 20경기 내의 모든 매치가 이미 정산되어 있습니다.'); }
-    } catch (err) { alert('정산 처리 중 오류 발생: ' + err.message); }
-    finally { settleBtn.disabled = false; settleBtn.textContent = '⚡ 최근 내전 MMR 정산하기'; }
+        alert(`🎉 일괄 스캔 완료!\n총 ${settledIds.length}개의 누락된 내전이 한 번에 정산되었습니다.`);
+        initCrew(); // Refresh ranking board
+      } else { 
+        alert('발견된 모든 매치가 이미 정산되어 있습니다.'); 
+      }
+    } catch (err) { 
+      alert('일괄 정산 처리 중 오류 발생: ' + err.message); 
+    } finally { 
+      settleBtn.disabled = false; 
+      settleBtn.textContent = '⚡ 크루 전체 매치 스캔 & 일괄 정산'; 
+    }
   });
 }
 
