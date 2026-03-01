@@ -253,7 +253,7 @@ function renderAdminExtraActions() {
   actionBar.querySelector('#settleMMRBtn').addEventListener('click', async () => {
     const settleBtn = actionBar.querySelector('#settleMMRBtn');
     settleBtn.disabled = true;
-    settleBtn.textContent = '크루 전체 스캔 중... (최대 10초 소요)';
+    settleBtn.textContent = '크루 닉네임 동기화 및 스캔 중...';
 
     try {
       if (currentRankings.length === 0) {
@@ -265,27 +265,47 @@ function renderAdminExtraActions() {
       for (let i = 0; i < currentRankings.length; i++) {
         const member = currentRankings[i];
         let targetOuid = member.id;
+        let currentNickname = member.characterName;
         
-        // If the ID doesn't look like a hex OUID, try to get real OUID
-        if (targetOuid.length < 20 || !/^[0-9a-f]+$/.test(targetOuid)) {
-          console.warn(`[Admin] Resolving OUID for ${member.characterName}...`);
+        // 1. Check if ID is OUID or Name-based
+        const isRealOuid = targetOuid.length >= 20 && /^[0-9a-f]+$/.test(targetOuid);
+
+        if (isRealOuid) {
+          // PROACTIVE SYNC: Get current nickname via OUID
           try {
-            const realOuid = await repository.apiClient.getOuid(member.characterName);
-            if (realOuid) {
-              // AUTO-MIGRATION: Fix Name-based ID to OUID-based ID
-              await crewRepo.migrateToOuid(member.id, realOuid);
-              targetOuid = realOuid;
+            await new Promise(r => setTimeout(r, 150)); // Rate limit protection
+            const basic = await repository.apiClient.getPlayerBasic(targetOuid);
+            if (basic && basic.user_name && basic.user_name !== currentNickname) {
+              console.log(`[Admin] Syncing nickname: ${currentNickname} -> ${basic.user_name}`);
+              await crewRepo.updateNickname(targetOuid, basic.user_name);
+              currentNickname = basic.user_name; // Use latest for scan
             }
           } catch (err) {
-            console.error(`[Admin] Failed to resolve OUID for ${member.characterName}:`, err.message);
+            console.warn(`[Admin] Failed to sync nickname for ${currentNickname}, using stored name.`);
+          }
+        } else {
+          // MIGRATION: docId is a Name, try to find real OUID
+          console.warn(`[Admin] Resolving OUID for ${currentNickname}...`);
+          try {
+            const realOuid = await repository.apiClient.getOuid(currentNickname);
+            if (realOuid) {
+              await crewRepo.migrateToOuid(member.id, realOuid);
+              targetOuid = realOuid;
+              // Also sync current name just in case
+              const basic = await repository.apiClient.getPlayerBasic(realOuid);
+              if (basic && basic.user_name) currentNickname = basic.user_name;
+            }
+          } catch (err) {
+            console.error(`[Admin] Could not find ${currentNickname} - likely changed name before migration.`);
             continue;
           }
         }
 
+        // 2. Queue Match Scanning
         if (targetOuid) {
-          await new Promise(r => setTimeout(r, 250)); 
+          await new Promise(r => setTimeout(r, 200)); 
           matchPromises.push(
-            service.getRecentMatches(targetOuid, member.characterName, 10).catch(() => [])
+            service.getRecentMatches(targetOuid, currentNickname, 10).catch(() => [])
           );
         }
       }
@@ -309,10 +329,10 @@ function renderAdminExtraActions() {
       const settledIds = await crewRepo.settleMatches(crewMatches);
       
       if (settledIds.length > 0) {
-        alert(`🎉 일괄 스캔 완료!\n총 ${settledIds.length}개의 누락된 내전이 한 번에 정산되었습니다.`);
+        alert(`🎉 동기화 및 일괄 스캔 완료!\n총 ${settledIds.length}개의 누락된 내전이 정산되었습니다.`);
         initCrew(); 
       } else { 
-        alert('발견된 모든 매치가 이미 정산되어 있습니다.'); 
+        alert('모든 매치가 이미 정산되어 있습니다.'); 
       }
     } catch (err) { 
       alert('일괄 정산 처리 중 오류 발생: ' + err.message); 
