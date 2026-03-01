@@ -165,10 +165,22 @@ export class CrewRepository {
   }
 
   async resetSeason() {
-    if (!this.db) throw new Error('DB 연결 실패');
+    console.log('🚨 [resetSeason] Function called.');
+    if (!this.db) {
+      console.error('🚨 [resetSeason] DB 연결 실패');
+      throw new Error('DB 연결 실패');
+    }
+
     const membersSnap = await this.db.collection(this.MEMBERS_COLLECTION).get();
+    console.log(`🚨 [resetSeason] Found ${membersSnap.docs.length} members.`);
+
+    if (membersSnap.docs.length === 0) {
+      console.log('🚨 [resetSeason] No members to reset. Only updating season start date.');
+    }
+
     const batch = this.db.batch();
     membersSnap.docs.forEach(doc => {
+      console.log(`🚨 [resetSeason] Updating member: ${doc.id} with data: ${JSON.stringify(doc.data())}`);
       batch.update(doc.ref, { 
         mmr: 1200, 
         wins: 0, 
@@ -178,9 +190,18 @@ export class CrewRepository {
         updatedAt: window.firebase.firestore.FieldValue.serverTimestamp() 
       });
     });
+
     const settingsRef = this.db.collection(this.SETTINGS_COLLECTION).doc('season');
     batch.set(settingsRef, { startDate: window.firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
-    await batch.commit();
+    console.log('🚨 [resetSeason] Batch prepared. Committing...');
+
+    try {
+      await batch.commit();
+      console.log('✅ [resetSeason] Batch commit successful.');
+    } catch (e) {
+      console.error('🚨 [resetSeason] Batch commit failed:', e);
+      throw e; // Re-throw to propagate the error
+    }
   }
 
   async applyForCrew(characterName, ouid) {
