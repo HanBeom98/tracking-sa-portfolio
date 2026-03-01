@@ -1,3 +1,9 @@
+// Official Crew Members for Custom Match Detection
+export const CREW_MEMBERS = [
+  'Tracking', '결승', 'alt', '마미', '공대누비', 
+  'xion', '김성식', '이쪼룽', '맞고사망한대성', 'SinYang'
+];
+
 export class Player {
   constructor(ouid, basic, rank, tier) {
     this.ouid = ouid;
@@ -135,9 +141,26 @@ export class MatchRecord {
     this.matchTypeName = typeName;
     this.mapName = detail.match_map || detail.map_name || "Unknown Map";
     this.matchDate = detail.date_match || detail.match_date;
+    this.participants = [];
+    this.crewParticipants = [];
+    this.isCustomMatch = false;
 
     let playerStat = detail;
+    
+    // Analyze Match Detail for Crew Members
     if (detail.match_detail && Array.isArray(detail.match_detail)) {
+      this.participants = detail.match_detail.map(p => p.user_name);
+      
+      // Filter crew members who participated in this match
+      this.crewParticipants = this.participants.filter(name => 
+        CREW_MEMBERS.some(crew => crew.toLowerCase() === (name || "").toLowerCase())
+      );
+      
+      // If 2 or more crew members are in the same match, it's a Custom Match (내전)
+      if (this.crewParticipants.length >= 2) {
+        this.isCustomMatch = true;
+      }
+
       const target = targetUserName ? targetUserName.toLowerCase().trim() : "";
       if (target) {
         playerStat = detail.match_detail.find(p => 

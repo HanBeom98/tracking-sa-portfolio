@@ -199,14 +199,23 @@ export class SaMatchList extends HTMLElement {
     this.innerHTML = `
       <ul class="match-list">
         ${list.map(match => `
-          <li class="match-item ${match.matchResult.toLowerCase()}">
+          <li class="match-item ${match.matchResult.toLowerCase()} ${match.isCustomMatch ? 'is-custom' : ''}">
             <div class="match-info">
-              <span class="type-tag">${match.matchTypeName}</span>
+              <div class="match-type-row">
+                <span class="type-tag">${match.matchTypeName}</span>
+                ${match.isCustomMatch ? '<span class="custom-badge">⚔️ 크루 내전</span>' : ''}
+              </div>
               <span class="result-badge">${match.matchResult}</span>
             </div>
             <div class="match-map-info">
               <span class="map">${match.mapName}</span>
               <span class="match-date">${new Date(match.matchDate).toLocaleDateString()}</span>
+              ${match.isCustomMatch ? `
+                <div class="crew-participants">
+                  <label>참여 크루:</label>
+                  <span class="names">${match.crewParticipants.join(', ')}</span>
+                </div>
+              ` : ''}
             </div>
             <span class="kda">${match.kill} / ${match.death} / ${match.assist}</span>
             <span class="kd ${this.getKdClass(match.kd)}">KD: ${match.kd}</span>
