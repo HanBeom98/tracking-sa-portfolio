@@ -17,17 +17,27 @@ export class SaPlayerCard extends HTMLElement {
           </div>
         </div>
         <div class="sa-body">
-          <div class="stat-item">
-            <label>Current Ranking</label>
-            <span>#${(data.ranking || 0).toLocaleString()}</span>
+          <div class="tier-section">
+            <div class="tier-item party">
+              <label>파티 랭크</label>
+              <span class="tier-value">${data.partyTier}</span>
+              <span class="tier-score">${data.partyScore.toLocaleString()} RP</span>
+            </div>
+            <div class="tier-item solo">
+              <label>개인 랭크</label>
+              <span class="tier-value">${data.soloTier}</span>
+              <span class="tier-score">${data.soloScore.toLocaleString()} RP</span>
+            </div>
           </div>
-          <div class="stat-item">
-            <label>Total Experience</label>
-            <span>${(data.totalExp || 0).toLocaleString()} EXP</span>
-          </div>
-          <div class="stat-item">
-            <label>Title</label>
-            <span>${data.level || 'No Title'}</span>
+          <div class="stat-row">
+            <div class="stat-item">
+              <label>Current Ranking</label>
+              <span>#${(data.ranking || 0).toLocaleString()}</span>
+            </div>
+            <div class="stat-item">
+              <label>Total Experience</label>
+              <span>${(data.totalExp || 0).toLocaleString()} EXP</span>
+            </div>
           </div>
         </div>
       </div>

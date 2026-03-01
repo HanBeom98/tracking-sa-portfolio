@@ -67,6 +67,13 @@ export class NexonApiClient {
   }
 
   /**
+   * Get player competitive tier info
+   */
+  async getPlayerTier(ouid) {
+    return this.fetch('/user/tier', { ouid });
+  }
+
+  /**
    * Get match list
    */
   async getMatchList(ouid, matchType, matchMode, date = "") {

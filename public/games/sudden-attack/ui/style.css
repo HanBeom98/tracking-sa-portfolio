@@ -78,6 +78,37 @@ body.dark-theme {
 .season-rank { font-style: italic; }
 
 .sa-body {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.tier-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 15px;
+  border-radius: 12px;
+}
+
+.tier-item {
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+  border-radius: 8px;
+  background: #141724;
+  border: 1px solid #2d3356;
+}
+
+.tier-item.party { border-top: 3px solid #ffcc00; }
+.tier-item.solo { border-top: 3px solid #00d2ff; }
+
+.tier-item label { font-size: 12px; color: #888; margin-bottom: 5px; }
+.tier-value { font-size: 20px; font-weight: 800; color: #fff; }
+.tier-score { font-size: 14px; color: #00d2ff; margin-top: 5px; }
+
+.stat-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;

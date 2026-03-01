@@ -14,15 +14,17 @@ export class SaRepository {
    */
   async getPlayer(characterName) {
     const ouid = await this.apiClient.getOuid(characterName);
-    const [basic, rank] = await Promise.all([
+    const [basic, rank, tier] = await Promise.all([
       this.apiClient.getPlayerBasic(ouid),
-      this.apiClient.getPlayerRank(ouid)
+      this.apiClient.getPlayerRank(ouid),
+      this.apiClient.getPlayerTier(ouid)
     ]);
 
     console.log('[Repository] Player Basic Info:', JSON.stringify(basic, null, 2));
     console.log('[Repository] Player Rank Info:', JSON.stringify(rank, null, 2));
+    console.log('[Repository] Player Tier Info:', JSON.stringify(tier, null, 2));
     
-    return new Player(ouid, basic, rank);
+    return new Player(ouid, basic, rank, tier);
   }
 
   /**
