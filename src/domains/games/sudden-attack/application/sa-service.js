@@ -24,7 +24,7 @@ export class SaService {
    */
   async getRecentMatches(ouid, nickname = "") {
     try {
-      return await this.repository.getRecentMatches(ouid, 5, nickname);
+      return await this.repository.getRecentMatches(ouid, 20, nickname);
     } catch (error) {
       console.error('[ApplicationService] Failed to load match history:', error);
       return [];
