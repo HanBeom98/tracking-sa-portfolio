@@ -6,8 +6,8 @@ export class CrewRepository {
   constructor() {
     this.MEMBERS_COLLECTION = 'sa_crew_members';
     this.APPLICATIONS_COLLECTION = 'sa_crew_applications';
-    this.HISTORY_COLLECTION = 'sa_crew_history'; // Record of settled matches
-    this.SETTINGS_COLLECTION = 'sa_crew_settings'; // Store global crew config like season start
+    this.HISTORY_COLLECTION = 'sa_crew_history'; 
+    this.SETTINGS_COLLECTION = 'sa_crew_settings';
     
     // List of Administrators and Moderators (Staff)
     this.STAFF_EMAILS = [
@@ -32,9 +32,8 @@ export class CrewRepository {
         .orderBy('mmr', 'desc')
         .get();
       return snapshot.docs.map(doc => ({
-        id: doc.id,
+        id: doc.id, // This is the OUID
         ...doc.data(),
-        // Ensure default values if new
         mmr: doc.data().mmr || 1200,
         wins: doc.data().wins || 0,
         loses: doc.data().loses || 0
@@ -45,201 +44,160 @@ export class CrewRepository {
     }
   }
 
-  async getCrewMembers() {
-    const list = await this.getRankings();
-    return list.map(m => m.characterName);
+  /**
+   * Find a member by their OUID
+   */
+  async findMemberByOuid(ouid) {
+    if (!this.db || !ouid) return null;
+    const doc = await this.db.collection(this.MEMBERS_COLLECTION).doc(ouid).get();
+    return doc.exists ? { id: doc.id, ...doc.data() } : null;
   }
 
   /**
-   * Get specific crew member data for accumulating stats
+   * Update nickname for a member when a name change is detected
    */
-  async getMemberStats(characterName) {
-    if (!this.db || !characterName) return null;
-    try {
-      const doc = await this.db.collection(this.MEMBERS_COLLECTION).doc(characterName.toLowerCase()).get();
-      if (doc.exists) return doc.data();
-      return null;
-    } catch (e) { return null; }
+  async updateNickname(ouid, newNickname) {
+    if (!this.db || !ouid) return;
+    return this.db.collection(this.MEMBERS_COLLECTION).doc(ouid).update({
+      characterName: newNickname,
+      updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+    });
   }
 
-  /**
-   * Get the current season start date
-   */
   async getSeasonStartDate() {
-    if (!this.db) return new Date(0); // Epoch start if DB fails
+    if (!this.db) return new Date(0);
     try {
       const doc = await this.db.collection(this.SETTINGS_COLLECTION).doc('season').get();
       if (doc.exists && doc.data().startDate) {
         return doc.data().startDate.toDate();
       }
-      return new Date(0); // Default to beginning of time if not set
-    } catch (e) {
       return new Date(0);
-    }
+    } catch (e) { return new Date(0); }
   }
 
   /**
    * Settle MMR for a list of matches
-   * Prevents batch overwrite bug by accumulating stats in memory first.
-   * @param {Array} matches - Array of MatchRecord objects
    */
   async settleMatches(matches) {
     if (!this.db || matches.length === 0) return [];
     
-    // 0. Fetch Season Start Date to prevent settling old matches
     const seasonStartDate = await this.getSeasonStartDate();
-
-    // 1. Cache ALL current member stats to prevent overwrite in loop
     const memberCache = {};
     const membersSnap = await this.db.collection(this.MEMBERS_COLLECTION).get();
+    
+    // Mapping: Nickname -> MemberData (Cache)
+    const nameMap = {};
     membersSnap.forEach(doc => {
-      memberCache[doc.id] = {
-        mmr: doc.data().mmr || 1200,
-        wins: doc.data().wins || 0,
-        loses: doc.data().loses || 0,
+      const data = doc.data();
+      const cacheObj = {
+        ouid: doc.id,
+        mmr: data.mmr || 1200,
+        wins: data.wins || 0,
+        loses: data.loses || 0,
         isDirty: false
       };
+      memberCache[doc.id] = cacheObj;
+      nameMap[data.characterName.toLowerCase()] = cacheObj;
     });
 
-    // 2. Get history to avoid double processing
     const historySnap = await this.db.collection(this.HISTORY_COLLECTION).get();
     const settledSet = new Set(historySnap.docs.map(d => d.id));
-
     const batch = this.db.batch();
     const processedMatchIds = [];
-
-    // 3. Sort matches chronologically (oldest first) to ensure accurate MMR progression
     const sortedMatches = [...matches].sort((a, b) => new Date(a.matchDate) - new Date(b.matchDate));
 
     for (const match of sortedMatches) {
-      // Security Check: Is this match from a previous season?
-      const matchDateObj = new Date(match.matchDate);
-      if (matchDateObj < seasonStartDate) continue; // Skip old season matches
+      if (new Date(match.matchDate) < seasonStartDate) continue;
+      if (settledSet.has(match.matchId)) continue;
 
-      if (settledSet.has(match.matchId)) continue; // Skip if already settled in current season
-
-      // 4. Calculate MMR changes for participants in memory
       for (const p of match.allPlayerStats) {
         if (!p.isCrew) continue;
+        
+        // Find member by their name AT THE TIME of the match
+        const currentData = nameMap[p.nickname.toLowerCase()];
+        if (!currentData) continue; 
 
-        const memberId = p.nickname.toLowerCase();
-        if (!memberCache[memberId]) continue; // Member not in DB
-
-        const currentData = memberCache[memberId];
-
-        // --- ELO LOGIC ---
         const isWin = p.result === 'WIN';
         const kd = parseFloat(p.kd);
         let change = isWin ? 20 : -20;
-
-        // Weightings
-        if (isWin && kd < 0.5) change = 10; // Bus rider
-        if (!isWin && kd >= 1.5) change = -10; // Hard carry but lost
+        if (isWin && kd < 0.5) change = 10;
+        if (!isWin && kd >= 1.5) change = -10;
 
         currentData.mmr += change;
         if (isWin) currentData.wins += 1; else currentData.loses += 1;
         currentData.isDirty = true;
       }
 
-      // 5. Mark match as settled in batch
       const historyRef = this.db.collection(this.HISTORY_COLLECTION).doc(match.matchId);
       batch.set(historyRef, {
         settledAt: window.firebase.firestore.FieldValue.serverTimestamp(),
         map: match.mapName,
-        matchDate: match.matchDate, // Keep record of when it was played
+        matchDate: match.matchDate,
         crewCount: match.crewParticipants.length
       });
-      
       processedMatchIds.push(match.matchId);
-      settledSet.add(match.matchId); // Add to local set to prevent dupes in same run
+      settledSet.add(match.matchId);
     }
 
-    // 6. Commit accumulated member updates to batch
-    for (const memberId in memberCache) {
-      if (memberCache[memberId].isDirty) {
-        const memberRef = this.db.collection(this.MEMBERS_COLLECTION).doc(memberId);
+    for (const ouid in memberCache) {
+      if (memberCache[ouid].isDirty) {
+        const memberRef = this.db.collection(this.MEMBERS_COLLECTION).doc(ouid);
         batch.update(memberRef, {
-          mmr: memberCache[memberId].mmr,
-          wins: memberCache[memberId].wins,
-          loses: memberCache[memberId].loses,
+          mmr: memberCache[ouid].mmr,
+          wins: memberCache[ouid].wins,
+          loses: memberCache[ouid].loses,
           updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
         });
       }
     }
 
-    if (processedMatchIds.length > 0) {
-      await batch.commit();
-    }
-    
+    if (processedMatchIds.length > 0) await batch.commit();
     return processedMatchIds;
   }
 
-  /**
-   * Reset Season: Clear all MMR, Wins, Loses and Set new Season Boundary (Admin Only)
-   */
   async resetSeason() {
     if (!this.db) throw new Error('DB 연결 실패');
-    
-    // 1. Reset Members
     const membersSnap = await this.db.collection(this.MEMBERS_COLLECTION).get();
     const batch = this.db.batch();
-    
     membersSnap.docs.forEach(doc => {
-      batch.update(doc.ref, {
-        mmr: 1200,
-        wins: 0,
-        loses: 0,
-        updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
-      });
+      batch.update(doc.ref, { mmr: 1200, wins: 0, loses: 0, updatedAt: window.firebase.firestore.FieldValue.serverTimestamp() });
     });
-
-    // 2. Set new Season Boundary Date to NOW. 
-    // This prevents any matches played before this moment from being settled again.
     const settingsRef = this.db.collection(this.SETTINGS_COLLECTION).doc('season');
-    batch.set(settingsRef, {
-      startDate: window.firebase.firestore.FieldValue.serverTimestamp(),
-      seasonName: `Season ${new Date().getFullYear()}-${new Date().getMonth() + 1}`
-    }, { merge: true });
-
-    // NOTE: We intentionally DO NOT clear the HISTORY_COLLECTION anymore. 
-    // Keeping history is good for database integrity, and the startDate boundary protects us from re-settling.
-
+    batch.set(settingsRef, { startDate: window.firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
     await batch.commit();
   }
 
-  async applyForCrew(characterName) {
+  async applyForCrew(characterName, ouid) {
     if (!this.db) throw new Error('데이터베이스 연결 실패');
-    const memberRef = this.db.collection(this.MEMBERS_COLLECTION).doc(characterName.toLowerCase());
+    const memberRef = this.db.collection(this.MEMBERS_COLLECTION).doc(ouid);
     const memberDoc = await memberRef.get();
     if (memberDoc.exists) throw new Error('이미 등록된 멤버입니다.');
 
-    try {
-      await this.db.collection(this.APPLICATIONS_COLLECTION).add({
-        characterName,
-        status: 'PENDING',
-        appliedAt: window.firebase.firestore.FieldValue.serverTimestamp()
-      });
-    } catch (error) { throw new Error('신청 실패'); }
+    return this.db.collection(this.APPLICATIONS_COLLECTION).add({
+      characterName,
+      ouid,
+      status: 'PENDING',
+      appliedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+    });
   }
 
   async getPendingApplications() {
     if (!this.db) return [];
-    const snapshot = await this.db.collection(this.APPLICATIONS_COLLECTION)
-      .where('status', '==', 'PENDING').get();
+    const snapshot = await this.db.collection(this.APPLICATIONS_COLLECTION).where('status', '==', 'PENDING').get();
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   }
 
-  async approveApplication(appId, characterName) {
+  async approveApplication(appId, characterName, ouid) {
     const batch = this.db.batch();
     const appRef = this.db.collection(this.APPLICATIONS_COLLECTION).doc(appId);
-    const memberRef = this.db.collection(this.MEMBERS_COLLECTION).doc(characterName.toLowerCase());
+    const memberRef = this.db.collection(this.MEMBERS_COLLECTION).doc(ouid);
 
     batch.update(appRef, { status: 'APPROVED' });
     batch.set(memberRef, { 
       characterName, 
       mmr: 1200, wins: 0, loses: 0,
       approvedAt: window.firebase.firestore.FieldValue.serverTimestamp() 
-    });
+    }, { merge: true });
     return batch.commit();
   }
 
@@ -247,33 +205,18 @@ export class CrewRepository {
     return this.db.collection(this.APPLICATIONS_COLLECTION).doc(appId).update({ status: 'REJECTED' });
   }
 
-  /**
-   * Check if current user is an Admin or Moderator
-   * @param {Object} [currentUser] - Optional user object passed from onAuthStateChanged
-   */
   isStaff(currentUser = null) {
     const user = currentUser || (typeof window !== 'undefined' && window.firebase && window.firebase.auth ? window.firebase.auth().currentUser : null);
     return user && this.STAFF_EMAILS.includes(user.email);
   }
 
-  /**
-   * Smart Team Balancer Algorithm - Position Aware
-   * Distributes snipers evenly first, then balances total MMR.
-   * @param {Array} selectedMembers - Array of { characterName, mmr, position }
-   */
   balanceTeams(selectedMembers) {
     if (selectedMembers.length < 2) return null;
-
     const snipers = selectedMembers.filter(m => m.position === 'sniper');
     const riflers = selectedMembers.filter(m => m.position === 'rifler');
-    
-    // Total team size target
-    const totalN = selectedMembers.length;
-    const teamSize = Math.floor(totalN / 2);
-
+    const teamSize = Math.floor(selectedMembers.length / 2);
     let bestSplit = { red: [], blue: [], diff: Infinity };
 
-    // Helper for combinations
     const combinations = (array, size) => {
       if (size === 0) return [[]];
       const results = [];
@@ -288,47 +231,30 @@ export class CrewRepository {
       return results;
     };
 
-    // 1. Split snipers as evenly as possible
     const redSniperCount = Math.floor(snipers.length / 2);
     const sniperCombos = combinations(snipers, redSniperCount);
 
-    // 2. For each sniper combination, balance the remaining riflers
     for (const redSnipers of sniperCombos) {
       const blueSnipers = snipers.filter(s => !redSnipers.includes(s));
-      
-      // How many riflers does Red team need?
       const riflersNeededForRed = teamSize - redSnipers.length;
-      
       if (riflersNeededForRed < 0 || riflersNeededForRed > riflers.length) continue;
-
       const riflerCombos = combinations(riflers, riflersNeededForRed);
-      
       for (const redRiflers of riflerCombos) {
         const blueRiflers = riflers.filter(r => !redRiflers.includes(r));
-        
         const redTeam = [...redSnipers, ...redRiflers];
         const blueTeam = [...blueSnipers, ...blueRiflers];
-
-        // Ensure leftover players go to Blue if odd number
-        if (blueTeam.length + redTeam.length < totalN) {
+        if (blueTeam.length + redTeam.length < selectedMembers.length) {
           const leftovers = riflers.filter(r => !redRiflers.includes(r) && !blueRiflers.includes(r));
           blueTeam.push(...leftovers);
         }
-
         const redMMR = redTeam.reduce((sum, m) => sum + (m.mmr || 1200), 0);
         const blueMMR = blueTeam.reduce((sum, m) => sum + (m.mmr || 1200), 0);
         const diff = Math.abs(redMMR - blueMMR);
-
         if (diff < bestSplit.diff) {
-          bestSplit = { 
-            red: redTeam, blue: blueTeam, diff, 
-            redAvg: redMMR / redTeam.length, 
-            blueAvg: blueMMR / blueTeam.length 
-          };
+          bestSplit = { red: redTeam, blue: blueTeam, diff, redAvg: redMMR / redTeam.length, blueAvg: blueMMR / blueTeam.length };
         }
       }
     }
-
     return bestSplit;
   }
 }

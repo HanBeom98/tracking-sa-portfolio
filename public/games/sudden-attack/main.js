@@ -99,6 +99,14 @@ async function handleSearch() {
 
     const player = await service.searchPlayer(name);
     saveSearch(player.nickname);
+
+    // --- AUTO NICKNAME SYNC LOGIC ---
+    const existingMember = await crewRepo.findMemberByOuid(player.ouid);
+    if (existingMember && existingMember.characterName !== player.nickname) {
+      console.log(`[Crew] Nickname change detected: ${existingMember.characterName} -> ${player.nickname}. Syncing...`);
+      await crewRepo.updateNickname(player.ouid, player.nickname);
+      currentRankings = await crewRepo.getRankings();
+    }
     
     // Render Profile
     profileSection.innerHTML = '<sa-player-card></sa-player-card>';
@@ -115,11 +123,11 @@ async function handleSearch() {
     const stats = new RecentStats(rawStats, matches);
 
     // Overwrite crew stats with real accumulated data from Firestore if they are a crew member
-    const memberData = currentRankings.find(m => m.characterName.toLowerCase() === player.nickname.toLowerCase());
+    const memberData = currentRankings.find(m => m.id === player.ouid);
     if (memberData) {
-      stats.crewMatchCount = memberData.wins + memberData.loses;
+      stats.crewMatchCount = (memberData.wins || 0) + (memberData.loses || 0);
       stats.crewWinRate = stats.crewMatchCount > 0 ? Math.round((memberData.wins / stats.crewMatchCount) * 100) : 0;
-      stats.crewKd = memberData.mmr; // Repurpose crewKd field to show MMR in the UI
+      stats.crewKd = memberData.mmr; 
     }
     
     statsSection.innerHTML = '<sa-stats-summary></sa-stats-summary>';
@@ -133,11 +141,11 @@ async function handleSearch() {
 
   } catch (error) {
     if (error.message === 'TEST_KEY_LIMITATION') {
-      alert('현재 테스트 API 키를 사용 중입니다.\\n\\n[제약 사항]\\n테스트 키는 키를 발급받은 넥슨 계정 본인의 캐릭터만 조회가 가능합니다.\\n타인의 전적을 조회하려면 Production API Key가 필요합니다.');
+      alert('현재 테스트 API 키를 사용 중입니다.\n\n[제약 사항]\n테스트 키는 키를 발급받은 넥슨 계정 본인의 캐릭터만 조회가 가능합니다.\n타인의 전적을 조회하려면 Production API Key가 필요합니다.');
     } else if (error.message === 'PLAYER_NOT_FOUND') {
-      alert('캐릭터를 찾을 수 없습니다.\\n\\n[가능한 원인]\\n1. 캐릭터명이 정확하지 않음\\n2. 캐릭터 생성 후 약 10분 이내 (데이터 미갱신)\\n3. 2025년 1월 24일 이후 플레이 기록 없음');
+      alert('캐릭터를 찾을 수 없습니다.\n\n[가능한 원인]\n1. 캐릭터명이 정확하지 않음\n2. 캐릭터 생성 후 약 10분 이내 (데이터 미갱신)\n3. 2025년 1월 24일 이후 플레이 기록 없음');
     } else {
-      alert('전적을 불러오는 중 오류가 발생했습니다.\\n나중에 다시 시도해 주세요.');
+      alert('전적을 불러오는 중 오류가 발생했습니다.\n나중에 다시 시도해 주세요.');
     }
     console.error('[SuddenAttack] Search Error:', error);
   } finally {
@@ -201,8 +209,11 @@ function renderAdminExtraActions() {
     const INITIAL_MEMBERS = ['Tracking', '결승', 'alt', '마미', '공대누비', 'xion', '김성식', '이쪼룽', '맞고사망한대성', 'SinYang'];
     const batch = window.db.batch();
     for (const name of INITIAL_MEMBERS) {
-      const ref = window.db.collection('sa_crew_members').doc(name.toLowerCase());
-      batch.set(ref, { characterName: name, mmr: 1200, wins: 0, loses: 0, approvedAt: window.firebase.firestore.FieldValue.serverTimestamp() });
+      try {
+        const ouid = await repository.apiClient.getOuid(name);
+        const ref = window.db.collection('sa_crew_members').doc(ouid);
+        batch.set(ref, { characterName: name, mmr: 1200, wins: 0, loses: 0, approvedAt: window.firebase.firestore.FieldValue.serverTimestamp() });
+      } catch (err) { console.error(`Seed failed for ${name}:`, err); }
     }
     try {
       await batch.commit();
@@ -212,7 +223,7 @@ function renderAdminExtraActions() {
 
   // Season Reset Logic
   actionBar.querySelector('#resetSeasonBtn').addEventListener('click', async () => {
-    if (!confirm('정말 모든 크루원의 MMR과 전적, 정산 기록을 초기화하시겠습니까?\\n새로운 시즌을 시작할 때만 사용하세요. 이 작업은 되돌릴 수 없습니다!')) return;
+    if (!confirm('정말 모든 크루원의 MMR과 전적, 정산 기록을 초기화하시겠습니까?\n새로운 시즌을 시작할 때만 사용하세요. 이 작업은 되돌릴 수 없습니다!')) return;
     try {
       await crewRepo.resetSeason();
       alert('시즌이 성공적으로 초기화되었습니다! (MMR 1200 복구)');
@@ -232,17 +243,13 @@ function renderAdminExtraActions() {
         return;
       }
 
-      // 1. Fetch OUIDs for all crew members
-      const ouidPromises = currentRankings.map(m => 
-        repository.apiClient.getOuid(m.characterName).catch(() => null)
-      );
-      const ouids = await Promise.all(ouidPromises);
+      // 1. Use OUIDs already in currentRankings
+      const ouids = currentRankings.map(m => m.id);
 
-      // 2. Fetch matches for all valid OUIDs (Limit 10 per person to avoid rate limits, total 100+ matches scanned)
+      // 2. Fetch matches for all valid OUIDs
       const matchPromises = [];
       for (let i = 0; i < ouids.length; i++) {
         if (ouids[i]) {
-          // Add a small delay between batches to prevent Nexon API 429 Too Many Requests
           await new Promise(r => setTimeout(r, 200)); 
           matchPromises.push(
             service.getRecentMatches(ouids[i], currentRankings[i].characterName, 10).catch(() => [])
@@ -251,8 +258,6 @@ function renderAdminExtraActions() {
       }
       
       const allMatchesArrays = await Promise.all(matchPromises);
-      
-      // 3. Flatten and deduplicate matches
       const uniqueMatches = new Map();
       allMatchesArrays.flat().forEach(match => {
         if (!uniqueMatches.has(match.matchId)) {
@@ -260,7 +265,6 @@ function renderAdminExtraActions() {
         }
       });
 
-      // 4. Filter only Custom Matches (Crew >= 8)
       const crewMatches = Array.from(uniqueMatches.values()).filter(m => m.isCustomMatch);
       
       if (crewMatches.length === 0) { 
@@ -268,13 +272,12 @@ function renderAdminExtraActions() {
         return; 
       }
 
-      // 5. Settle the discovered matches
       settleBtn.textContent = `발견된 ${crewMatches.length}개 내전 정산 중...`;
       const settledIds = await crewRepo.settleMatches(crewMatches);
       
       if (settledIds.length > 0) {
         alert(`🎉 일괄 스캔 완료!\n총 ${settledIds.length}개의 누락된 내전이 한 번에 정산되었습니다.`);
-        initCrew(); // Refresh ranking board
+        initCrew(); 
       } else { 
         alert('발견된 모든 매치가 이미 정산되어 있습니다.'); 
       }
@@ -303,7 +306,7 @@ closeBalancerBtn.addEventListener('click', () => {
 function renderBalancerMemberList() {
   balancerMemberList.innerHTML = currentRankings.map((m, i) => `
     <div class="balancer-item">
-      <input type="checkbox" id="m-${i}" value="${m.characterName}" data-mmr="${m.mmr}">
+      <input type="checkbox" id="m-${i}" value="${m.characterName}" data-mmr="${m.mmr}" data-ouid="${m.id}">
       <label for="m-${i}">${m.characterName}</label>
       <span class="m-mmr">${m.mmr}</span>
       <div class="pos-select">
@@ -357,9 +360,10 @@ submitApplyBtn.addEventListener('click', async () => {
   const name = applyCharacterName.value.trim();
   if (!name) return;
   submitApplyBtn.disabled = true;
-  submitApplyBtn.textContent = '신청 중...';
+  submitApplyBtn.textContent = 'OUID 조회 중...';
   try {
-    await crewRepo.applyForCrew(name);
+    const player = await service.searchPlayer(name);
+    await crewRepo.applyForCrew(player.nickname, player.ouid);
     alert('신청이 완료되었습니다! 관리자 승인 후 반영됩니다.');
     crewModal.classList.add('hidden');
     applyCharacterName.value = '';
@@ -385,16 +389,16 @@ async function renderApplications() {
     <div class="app-item">
       <span class="app-name">${app.characterName}</span>
       <div class="app-actions">
-        <button class="approve-btn" data-id="${app.id}" data-name="${app.characterName}">승인</button>
+        <button class="approve-btn" data-id="${app.id}" data-name="${app.characterName}" data-ouid="${app.ouid}">승인</button>
         <button class="reject-btn" data-id="${app.id}">거절</button>
       </div>
     </div>
   `).join('');
   applicationList.querySelectorAll('.approve-btn').forEach(btn => {
     btn.addEventListener('click', async (e) => {
-      const { id, name } = e.currentTarget.dataset;
+      const { id, name, ouid } = e.currentTarget.dataset;
       try {
-        await crewRepo.approveApplication(id, name);
+        await crewRepo.approveApplication(id, name, ouid);
         alert(`${name} 승인 완료!`);
         renderApplications();
         initCrew();
