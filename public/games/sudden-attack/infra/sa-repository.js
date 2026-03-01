@@ -43,8 +43,8 @@ export class SaRepository {
    * Fetch recent matches for a player (Resilient Sequential Scan)
    */
   async getRecentMatches(ouid, limit = 5, nickname = "") {
-    // We use ANY match_type to catch all records in one go for each mode
-    const modes = ["폭파미션", "데스매치", "개인전", "점령전", "생존모드"];
+    // Verified working modes that cover most player activities
+    const modes = ["폭파미션", "데스매치", "개인전"];
 
     const combinedMatches = [];
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
