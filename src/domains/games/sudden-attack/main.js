@@ -1,6 +1,7 @@
 import { NexonApiClient } from './infra/nexon-api-client.js?v=20260228_7';
 import { SaRepository } from './infra/sa-repository.js?v=20260228_7';
 import { SaService } from './application/sa-service.js?v=20260228_7';
+import { RecentStats } from './domain/models.js?v=20260228_7';
 import './ui/sa-components.js?v=20260228_7';
 
 // NOTE: Using Live API Key from environment (.env)
@@ -13,9 +14,46 @@ const service = new SaService(repository);
 const searchInput = document.getElementById('characterName');
 const searchBtn = document.getElementById('searchBtn');
 const loading = document.getElementById('loading');
+const loadingText = document.getElementById('loadingText');
+const recentSearchesContainer = document.getElementById('recentSearches');
 const profileSection = document.getElementById('playerProfile');
 const statsSection = document.getElementById('statsSummary');
 const historySection = document.getElementById('matchHistory');
+
+// Recent Searches Management
+const STORAGE_KEY = 'sa_recent_searches';
+
+function getRecentSearches() {
+  const data = localStorage.getItem(STORAGE_KEY);
+  return data ? JSON.parse(data) : [];
+}
+
+function saveSearch(name) {
+  let searches = getRecentSearches();
+  searches = [name, ...searches.filter(s => s !== name)].slice(0, 5);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(searches));
+  renderRecentSearches();
+}
+
+function renderRecentSearches() {
+  const searches = getRecentSearches();
+  if (searches.length === 0) {
+    recentSearchesContainer.innerHTML = '';
+    return;
+  }
+  
+  recentSearchesContainer.innerHTML = `
+    <span>최근 검색:</span>
+    ${searches.map(s => `<button class="search-chip">${s}</button>`).join('')}
+  `;
+
+  recentSearchesContainer.querySelectorAll('.search-chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      searchInput.value = btn.textContent;
+      handleSearch();
+    });
+  });
+}
 
 async function handleSearch() {
   const name = searchInput.value.trim();
@@ -23,21 +61,25 @@ async function handleSearch() {
 
   try {
     loading.classList.remove('hidden');
+    loadingText.textContent = `${name} 님의 정보를 찾는 중...`;
     profileSection.classList.add('hidden');
     statsSection.classList.add('hidden');
     historySection.classList.add('hidden');
 
     const player = await service.searchPlayer(name);
+    saveSearch(player.nickname);
     
     // Render Profile
     profileSection.innerHTML = '<sa-player-card></sa-player-card>';
     profileSection.querySelector('sa-player-card').player = player;
     profileSection.classList.remove('hidden');
 
-    // Load Matches First to calculate real stats
+    // Load Matches
+    loadingText.textContent = '최근 매치 기록을 분석 중입니다...';
     const matches = await service.getRecentMatches(player.ouid, player.nickname);
 
     // Render Stats with Match Data
+    loadingText.textContent = '데이터 동기화 완료!';
     const rawStats = await repository.apiClient.getRecentInfo(player.ouid);
     const stats = new RecentStats(rawStats, matches);
     
@@ -68,3 +110,6 @@ searchBtn.addEventListener('click', handleSearch);
 searchInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') handleSearch();
 });
+
+// Initial Render
+renderRecentSearches();

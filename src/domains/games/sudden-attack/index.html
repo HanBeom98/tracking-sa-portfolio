@@ -16,7 +16,13 @@
         <input type="text" id="characterName" placeholder="캐릭터명을 입력하세요" />
         <button id="searchBtn">검색</button>
       </div>
-      <div id="loading" class="hidden">데이터를 불러오는 중...</div>
+      <div id="recentSearches" class="recent-searches">
+        <!-- Search chips will be here -->
+      </div>
+      <div id="loading" class="hidden">
+        <div class="spinner"></div>
+        <p id="loadingText">데이터를 불러오는 중...</p>
+      </div>
     </section>
 
     <section id="playerProfile" class="profile-section hidden">
