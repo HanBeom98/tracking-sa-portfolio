@@ -88,10 +88,9 @@ export class SaRepository {
   }
 
   /**
-   * Fetch recent matches for a player (Optimized for Clan Matches ONLY)
+   * Fetch recent matches for a player (Optimized: Single call for all modes)
    */
   async getRecentMatches(ouid, limit = 20, nickname = "") {
-    const mode = "클랜전"; // Fixed to Clan Match for Crew Settlements
     const combinedMatches = [];
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -111,18 +110,21 @@ export class SaRepository {
       return `${y}-${m}-${d}`;
     };
 
+    // Scan today and past (empty date) to ensure we get matches
     const dates = [formatDateParts(now), ""]; 
 
     try {
       for (const date of dates) {
         try {
-          await delay(200); // Shorter delay since we do fewer calls
-          const data = await this.apiClient.getMatchList(ouid, "", mode, date);
+          await delay(100); 
+          // Fetch ALL modes at once by passing empty match_mode
+          const data = await this.apiClient.getMatchList(ouid, "", "", date);
           const matches = (data.match || []).map(m => ({ 
             ...m, 
-            typeName: mode,
+            typeName: m.match_mode, // Use the actual mode name returned by Nexon
             match_date: m.date_match
           }));
+          
           for (const m of matches) {
             if (!combinedMatches.find(cm => cm.match_id === m.match_id)) {
               combinedMatches.push(m);
@@ -133,6 +135,8 @@ export class SaRepository {
         if (combinedMatches.length >= limit) break;
       }
 
+      // Filter for Clan Matches ONLY if that's what we want for settlement
+      // or keep all and let isCustomMatch logic handle it.
       const sortedMatches = combinedMatches
         .sort((a, b) => new Date(b.match_date) - new Date(a.match_date))
         .slice(0, limit);
@@ -142,7 +146,7 @@ export class SaRepository {
 
       for (const m of sortedMatches) {
         try {
-          await delay(100);
+          await delay(50);
           const detail = await this.apiClient.getMatchDetail(m.match_id);
           
           const subjectInfo = {
