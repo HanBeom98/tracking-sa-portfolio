@@ -149,17 +149,21 @@ export class SaStatsSummary extends HTMLElement {
             <h3>⚔️ 우리 크루 내전 기록 분석</h3>
             <span class="match-count">누적 내전 참여: <strong>${data.crewMatchCount}회</strong></span>
           </div>
-          <div class="stats-grid crew-grid">
+          <div class="stats-grid crew-grid-4">
             <div class="stat-box golden">
-              <label>내전 현재 MMR</label>
-              <span class="value gold-highlight">${data.crewKd}</span>
+              <label>내전 MMR</label>
+              <span class="value gold-highlight">${Math.round(data.crewMmr)}</span>
             </div>
             <div class="stat-box golden">
-              <label>내전 누적 승률</label>
+              <label>내전 K/D</label>
+              <span class="value ${this.getKdColor(data.crewKd)}">${data.crewKd}</span>
+            </div>
+            <div class="stat-box golden">
+              <label>내전 승률</label>
               <span class="value gold-highlight">${data.crewWinRate}%</span>
             </div>
             <div class="stat-box golden">
-              <label>크루내 위상</label>
+              <label>크루 내 위상</label>
               <span class="value">${data.crewWinRate >= 70 ? '핵심 에이스' : (data.crewWinRate >= 50 ? '든든한 국밥' : '열정적인 크루원')}</span>
             </div>
           </div>

@@ -127,7 +127,8 @@ async function handleSearch() {
     if (memberData) {
       stats.crewMatchCount = (memberData.wins || 0) + (memberData.loses || 0);
       stats.crewWinRate = stats.crewMatchCount > 0 ? Math.round((memberData.wins / stats.crewMatchCount) * 100) : 0;
-      stats.crewKd = memberData.mmr; 
+      stats.crewMmr = memberData.mmr; // Assign real MMR
+      stats.crewKd = (stats.kd / 100).toFixed(2); // Use official KD for now
     }
     
     statsSection.innerHTML = '<sa-stats-summary></sa-stats-summary>';
