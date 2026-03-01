@@ -62,31 +62,45 @@ export class CrewRepository {
 
   /**
    * Settle MMR for a list of matches
+   * Prevents batch overwrite bug by accumulating stats in memory first.
    * @param {Array} matches - Array of MatchRecord objects
    */
   async settleMatches(matches) {
-    if (!this.db) return;
+    if (!this.db || matches.length === 0) return [];
+    
+    // 1. Cache ALL current member stats to prevent overwrite in loop
+    const memberCache = {};
+    const membersSnap = await this.db.collection(this.MEMBERS_COLLECTION).get();
+    membersSnap.forEach(doc => {
+      memberCache[doc.id] = {
+        mmr: doc.data().mmr || 1200,
+        wins: doc.data().wins || 0,
+        loses: doc.data().loses || 0,
+        isDirty: false
+      };
+    });
+
+    // 2. Get history to avoid double processing
+    const historySnap = await this.db.collection(this.HISTORY_COLLECTION).get();
+    const settledSet = new Set(historySnap.docs.map(d => d.id));
+
     const batch = this.db.batch();
     const processedMatchIds = [];
 
-    for (const match of matches) {
-      // 1. Check if already settled
-      const historyRef = this.db.collection(this.HISTORY_COLLECTION).doc(match.matchId);
-      const historyDoc = await historyRef.get();
-      if (historyDoc.exists) continue;
+    // 3. Sort matches chronologically (oldest first) to ensure accurate MMR progression
+    const sortedMatches = [...matches].sort((a, b) => new Date(a.matchDate) - new Date(b.matchDate));
 
-      // 2. Calculate MMR changes for participants
+    for (const match of sortedMatches) {
+      if (settledSet.has(match.matchId)) continue; // Skip if already settled
+
+      // 4. Calculate MMR changes for participants in memory
       for (const p of match.allPlayerStats) {
         if (!p.isCrew) continue;
 
-        const memberRef = this.db.collection(this.MEMBERS_COLLECTION).doc(p.nickname.toLowerCase());
-        const memberDoc = await memberRef.get();
-        if (!memberDoc.exists) continue;
+        const memberId = p.nickname.toLowerCase();
+        if (!memberCache[memberId]) continue; // Member not in DB
 
-        const currentData = memberDoc.data();
-        let mmr = currentData.mmr || 1200;
-        let wins = currentData.wins || 0;
-        let loses = currentData.loses || 0;
+        const currentData = memberCache[memberId];
 
         // --- ELO LOGIC ---
         const isWin = p.result === 'WIN';
@@ -97,26 +111,40 @@ export class CrewRepository {
         if (isWin && kd < 0.5) change = 10; // Bus rider
         if (!isWin && kd >= 1.5) change = -10; // Hard carry but lost
 
-        mmr += change;
-        if (isWin) wins++; else loses++;
-
-        batch.update(memberRef, { 
-          mmr, wins, loses, 
-          lastMatchId: match.matchId,
-          updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
-        });
+        currentData.mmr += change;
+        if (isWin) currentData.wins += 1; else currentData.loses += 1;
+        currentData.isDirty = true;
       }
 
-      // 3. Mark match as settled
+      // 5. Mark match as settled in batch
+      const historyRef = this.db.collection(this.HISTORY_COLLECTION).doc(match.matchId);
       batch.set(historyRef, {
         settledAt: window.firebase.firestore.FieldValue.serverTimestamp(),
         map: match.mapName,
         crewCount: match.crewParticipants.length
       });
+      
       processedMatchIds.push(match.matchId);
+      settledSet.add(match.matchId); // Add to local set to prevent dupes in same run
     }
 
-    await batch.commit();
+    // 6. Commit accumulated member updates to batch
+    for (const memberId in memberCache) {
+      if (memberCache[memberId].isDirty) {
+        const memberRef = this.db.collection(this.MEMBERS_COLLECTION).doc(memberId);
+        batch.update(memberRef, {
+          mmr: memberCache[memberId].mmr,
+          wins: memberCache[memberId].wins,
+          loses: memberCache[memberId].loses,
+          updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }
+    }
+
+    if (processedMatchIds.length > 0) {
+      await batch.commit();
+    }
+    
     return processedMatchIds;
   }
 
@@ -190,9 +218,9 @@ export class CrewRepository {
 
   /**
    * Check if current user is an Admin or Moderator
-   * @param {Object} currentUser - Optional user object passed from onAuthStateChanged
+   * @param {Object} [currentUser] - Optional user object passed from onAuthStateChanged
    */
-  isStaff(currentUser) {
+  isStaff(currentUser = null) {
     const user = currentUser || (typeof window !== 'undefined' && window.firebase && window.firebase.auth ? window.firebase.auth().currentUser : null);
     return user && this.STAFF_EMAILS.includes(user.email);
   }
