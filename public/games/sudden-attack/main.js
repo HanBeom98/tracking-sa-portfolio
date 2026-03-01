@@ -180,9 +180,25 @@ function renderAdminExtraActions() {
   actionBar.className = 'admin-actions-bar';
   actionBar.innerHTML = `
     <button id="settleMMRBtn" class="settle-btn">⚡ 최근 내전 MMR 정산하기</button>
+    <button id="seedMembersBtn" class="sub-btn" style="border-color:#ffcc00; color:#ffcc00;">🌱 초기 멤버 10명 강제 등록</button>
     <p class="admin-hint">※ 검색한 캐릭터의 최근 5경기를 스캔하여 정산되지 않은 내전을 자동 처리합니다.</p>
   `;
   adminPanel.appendChild(actionBar);
+
+  // Temporary Seed Logic
+  actionBar.querySelector('#seedMembersBtn').addEventListener('click', async () => {
+    if (!confirm('초기 10명의 멤버를 DB에 등록하시겠습니까?')) return;
+    const INITIAL_MEMBERS = ['Tracking', '결승', 'alt', '마미', '공대누비', 'xion', '김성식', '이쪼룽', '맞고사망한대성', 'SinYang'];
+    const batch = window.db.batch();
+    for (const name of INITIAL_MEMBERS) {
+      const ref = window.db.collection('sa_crew_members').doc(name.toLowerCase());
+      batch.set(ref, { characterName: name, mmr: 1200, wins: 0, loses: 0, approvedAt: window.firebase.firestore.FieldValue.serverTimestamp() });
+    }
+    try {
+      await batch.commit();
+      alert('초기 멤버 10명 등록 완료! 새로고침 해주세요.');
+    } catch (e) { alert('등록 실패: ' + e.message); }
+  });
 
   actionBar.querySelector('#settleMMRBtn').addEventListener('click', async () => {
     const settleBtn = actionBar.querySelector('#settleMMRBtn');
