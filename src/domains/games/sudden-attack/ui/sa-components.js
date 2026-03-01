@@ -59,6 +59,14 @@ export class SaPlayerCard extends HTMLElement {
 }
 
 export class SaStatsSummary extends HTMLElement {
+  getKdColor(kd) {
+    const val = parseFloat(kd);
+    if (val >= 2.0) return 'kd-god';
+    if (val >= 1.5) return 'kd-pro';
+    if (val >= 1.0) return 'kd-high';
+    return 'kd-normal';
+  }
+
   set stats(data) {
     if (!data) {
       this.innerHTML = '<p class="no-data">최근 통계 정보를 불러올 수 없습니다.</p>';
@@ -67,23 +75,26 @@ export class SaStatsSummary extends HTMLElement {
 
     this.innerHTML = `
       <div class="stats-summary-card">
-        <h3>최근 7일 동향</h3>
+        <div class="stats-summary-header">
+          <h3>최근 5경기 정밀 분석</h3>
+          <span class="most-played-map">선호 맵: <strong>${data.mostPlayedMap}</strong></span>
+        </div>
         <div class="stats-grid">
           <div class="stat-box">
-            <label>K/D</label>
-            <span class="value highlight">${data.kd}%</span>
+            <label>종합 K/D</label>
+            <span class="value highlight ${this.getKdColor(data.kd/100)}">${data.kd}%</span>
           </div>
           <div class="stat-box">
-            <label>승률</label>
+            <label>최근 승률</label>
             <span class="value highlight">${data.winRate}%</span>
           </div>
           <div class="stat-box">
-            <label>헤드샷</label>
-            <span class="value">${data.headshotRate}%</span>
+            <label>평균 KDA</label>
+            <span class="value">${data.avgK} / ${data.avgD} / ${data.totalAssists / 5}</span>
           </div>
           <div class="stat-box">
-            <label>킬 / 데스</label>
-            <span class="value">${data.totalKills} / ${data.totalDeaths}</span>
+            <label>5경기 합계</label>
+            <span class="value">${data.totalKills}K ${data.totalDeaths}D</span>
           </div>
         </div>
       </div>
@@ -92,6 +103,14 @@ export class SaStatsSummary extends HTMLElement {
 }
 
 export class SaMatchList extends HTMLElement {
+  getKdClass(kd) {
+    const val = parseFloat(kd);
+    if (val >= 2.0) return 'kd-god';
+    if (val >= 1.5) return 'kd-pro';
+    if (val >= 1.0) return 'kd-high';
+    return '';
+  }
+
   set matches(list) {
     if (!list || list.length === 0) {
       this.innerHTML = '<p class="no-data">최근 상세 매치 기록이 없습니다.</p>';
@@ -104,11 +123,14 @@ export class SaMatchList extends HTMLElement {
           <li class="match-item ${match.matchResult.toLowerCase()}">
             <div class="match-info">
               <span class="type-tag">${match.matchTypeName}</span>
-              <span class="result">${match.matchResult}</span>
+              <span class="result-badge">${match.matchResult}</span>
             </div>
-            <span class="map">${match.mapName}</span>
+            <div class="match-map-info">
+              <span class="map">${match.mapName}</span>
+              <span class="match-date">${new Date(match.matchDate).toLocaleDateString()}</span>
+            </div>
             <span class="kda">${match.kill} / ${match.death} / ${match.assist}</span>
-            <span class="kd">KD: ${match.kd}</span>
+            <span class="kd ${this.getKdClass(match.kd)}">KD: ${match.kd}</span>
           </li>
         `).join('')}
       </ul>

@@ -34,16 +34,18 @@ async function handleSearch() {
     profileSection.querySelector('sa-player-card').player = player;
     profileSection.classList.remove('hidden');
 
-    // Render Stats
-    const stats = await repository.getPlayerStats(player.ouid);
-    if (stats) {
-      statsSection.innerHTML = '<sa-stats-summary></sa-stats-summary>';
-      statsSection.querySelector('sa-stats-summary').stats = stats;
-      statsSection.classList.remove('hidden');
-    }
+    // Load Matches First to calculate real stats
+    const matches = await service.getRecentMatches(player.ouid, player.nickname);
+
+    // Render Stats with Match Data
+    const rawStats = await repository.apiClient.getRecentInfo(player.ouid);
+    const stats = new RecentStats(rawStats, matches);
+    
+    statsSection.innerHTML = '<sa-stats-summary></sa-stats-summary>';
+    statsSection.querySelector('sa-stats-summary').stats = stats;
+    statsSection.classList.remove('hidden');
 
     // Render Matches
-    const matches = await service.getRecentMatches(player.ouid, player.nickname);
     historySection.innerHTML = '<h2>최근 매치 기록</h2><sa-match-list></sa-match-list>';
     historySection.querySelector('sa-match-list').matches = matches;
     historySection.classList.remove('hidden');

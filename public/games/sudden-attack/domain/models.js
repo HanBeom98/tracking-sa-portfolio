@@ -2,18 +2,16 @@ export class Player {
   constructor(ouid, basic, rank, tier) {
     this.ouid = ouid;
     this.nickname = basic.user_name;
-    this.level = basic.title_name || ""; // Level alternative in SA
+    this.level = basic.title_name || ""; 
     this.clanName = basic.clan_name || "None";
     this.rankName = rank.grade || "Unknown";
     this.ranking = rank.grade_ranking || 0;
     this.totalExp = rank.grade_exp || 0;
     this.seasonRank = rank.season_grade || "";
     
-    // Image URLs from Meta API
     this.rankImage = basic.grade_image || "";
     this.seasonRankImage = basic.season_grade_image || "";
     
-    // Competitive Tier Info
     if (tier) {
       this.soloTier = tier.solo_rank_match_tier || "UNRANK";
       this.soloScore = tier.solo_rank_match_score || 0;
@@ -33,14 +31,37 @@ export class Player {
 }
 
 export class RecentStats {
-  constructor(info) {
+  constructor(info, matches = []) {
+    // Basic API stats
     this.kd = info.recent_kill_death_rate ? parseFloat(info.recent_kill_death_rate.toFixed(1)) : 0;
     this.winRate = info.recent_win_rate ? parseFloat(info.recent_win_rate.toFixed(1)) : 0;
-    
-    this.totalKills = info.recent_kill_death_rate ? info.recent_kill_death_rate.toFixed(0) : "0";
-    this.totalDeaths = "100"; 
-    
     this.headshotRate = info.recent_assault_rate ? parseFloat(info.recent_assault_rate.toFixed(1)) : 0;
+
+    // Calculate real stats from the last 5 matches
+    if (matches.length > 0) {
+      const totalK = matches.reduce((sum, m) => sum + m.kill, 0);
+      const totalD = matches.reduce((sum, m) => sum + m.death, 0);
+      const totalA = matches.reduce((sum, m) => sum + m.assist, 0);
+      
+      this.avgK = (totalK / matches.length).toFixed(1);
+      this.avgD = (totalD / matches.length).toFixed(1);
+      this.totalKills = totalK;
+      this.totalDeaths = totalD;
+      this.totalAssists = totalA;
+      
+      // Calculate Most Played Map
+      const maps = matches.map(m => m.mapName);
+      this.mostPlayedMap = maps.sort((a,b) =>
+          maps.filter(v => v===a).length - maps.filter(v => v===b).length
+      ).pop();
+    } else {
+      this.avgK = 0;
+      this.avgD = 0;
+      this.totalKills = 0;
+      this.totalDeaths = 0;
+      this.totalAssists = 0;
+      this.mostPlayedMap = "데이터 없음";
+    }
   }
 }
 
