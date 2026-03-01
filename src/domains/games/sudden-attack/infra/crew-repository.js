@@ -37,9 +37,7 @@ export class CrewRepository {
         ...doc.data(),
         mmr: doc.data().mmr || 1200,
         wins: doc.data().wins || 0,
-        loses: doc.data().loses || 0,
-        crewKills: doc.data().crewKills || 0,
-        crewDeaths: doc.data().crewDeaths || 0,
+        loses: doc.data().loses || 0
       }));
     } catch (error) {
       console.error('[CrewRepo] Failed to fetch rankings:', error);
@@ -97,8 +95,6 @@ export class CrewRepository {
         mmr: data.mmr || 1200,
         wins: data.wins || 0,
         loses: data.loses || 0,
-        crewKills: data.crewKills || 0,
-        crewDeaths: data.crewDeaths || 0,
         isDirty: false
       };
       memberCache[doc.id] = cacheObj;
@@ -130,8 +126,6 @@ export class CrewRepository {
 
         currentData.mmr += change;
         if (isWin) currentData.wins += 1; else currentData.loses += 1;
-        currentData.crewKills += parseInt(p.kill, 10);
-        currentData.crewDeaths += parseInt(p.death, 10);
         currentData.isDirty = true;
       }
 
@@ -153,8 +147,6 @@ export class CrewRepository {
           mmr: memberCache[ouid].mmr,
           wins: memberCache[ouid].wins,
           loses: memberCache[ouid].loses,
-          crewKills: memberCache[ouid].crewKills,
-          crewDeaths: memberCache[ouid].crewDeaths,
           updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
         });
       }
@@ -165,43 +157,15 @@ export class CrewRepository {
   }
 
   async resetSeason() {
-    console.log('🚨 [resetSeason] Function called.');
-    if (!this.db) {
-      console.error('🚨 [resetSeason] DB 연결 실패');
-      throw new Error('DB 연결 실패');
-    }
-
+    if (!this.db) throw new Error('DB 연결 실패');
     const membersSnap = await this.db.collection(this.MEMBERS_COLLECTION).get();
-    console.log(`🚨 [resetSeason] Found ${membersSnap.docs.length} members.`);
-
-    if (membersSnap.docs.length === 0) {
-      console.log('🚨 [resetSeason] No members to reset. Only updating season start date.');
-    }
-
     const batch = this.db.batch();
     membersSnap.docs.forEach(doc => {
-      console.log(`🚨 [resetSeason] Updating member: ${doc.id} with data: ${JSON.stringify(doc.data())}`);
-      batch.update(doc.ref, { 
-        mmr: 1200, 
-        wins: 0, 
-        loses: 0, 
-        crewKills: 0,
-        crewDeaths: 0,
-        updatedAt: window.firebase.firestore.FieldValue.serverTimestamp() 
-      });
+      batch.update(doc.ref, { mmr: 1200, wins: 0, loses: 0, updatedAt: window.firebase.firestore.FieldValue.serverTimestamp() });
     });
-
     const settingsRef = this.db.collection(this.SETTINGS_COLLECTION).doc('season');
     batch.set(settingsRef, { startDate: window.firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
-    console.log('🚨 [resetSeason] Batch prepared. Committing...');
-
-    try {
-      await batch.commit();
-      console.log('✅ [resetSeason] Batch commit successful.');
-    } catch (e) {
-      console.error('🚨 [resetSeason] Batch commit failed:', e);
-      throw e; // Re-throw to propagate the error
-    }
+    await batch.commit();
   }
 
   async applyForCrew(characterName, ouid) {
@@ -232,7 +196,7 @@ export class CrewRepository {
     batch.update(appRef, { status: 'APPROVED' });
     batch.set(memberRef, { 
       characterName, 
-      mmr: 1200, wins: 0, loses: 0, crewKills: 0, crewDeaths: 0,
+      mmr: 1200, wins: 0, loses: 0,
       approvedAt: window.firebase.firestore.FieldValue.serverTimestamp() 
     }, { merge: true });
     return batch.commit();

@@ -127,15 +127,7 @@ async function handleSearch() {
     if (memberData) {
       stats.crewMatchCount = (memberData.wins || 0) + (memberData.loses || 0);
       stats.crewWinRate = stats.crewMatchCount > 0 ? Math.round((memberData.wins / stats.crewMatchCount) * 100) : 0;
-      stats.crewMmr = memberData.mmr;
-
-      const crewKills = memberData.crewKills || 0;
-      const crewDeaths = memberData.crewDeaths || 0;
-      if (stats.crewMatchCount > 0) {
-        stats.crewKd = crewDeaths > 0 ? (crewKills / crewDeaths).toFixed(2) : crewKills.toFixed(2);
-      } else {
-        stats.crewKd = 'N/A';
-      }
+      stats.crewKd = memberData.mmr; 
     }
     
     statsSection.innerHTML = '<sa-stats-summary></sa-stats-summary>';
@@ -234,16 +226,12 @@ function renderAdminExtraActions() {
 
   // Season Reset Logic
   actionBar.querySelector('#resetSeasonBtn').addEventListener('click', async () => {
-    if (!confirm('정말 모든 크루원의 MMR과 전적, 정산 기록을 초기화하시겠습니까?\\n새로운 시즌을 시작할 때만 사용하세요. 이 작업은 되돌릴 수 없습니다!')) return;
+    if (!confirm('정말 모든 크루원의 MMR과 전적, 정산 기록을 초기화하시겠습니까?\n새로운 시즌을 시작할 때만 사용하세요. 이 작업은 되돌릴 수 없습니다!')) return;
     try {
       await crewRepo.resetSeason();
       alert('시즌이 성공적으로 초기화되었습니다! (MMR 1200 복구)');
-      // Add a delay and force a hard reload to prevent race conditions
-      setTimeout(() => location.reload(true), 500);
-    } catch (e) { 
-      console.error('시즌 초기화 실패:', e);
-      alert('초기화 실패: ' + e.message); 
-    }
+      initCrew();
+    } catch (e) { alert('초기화 실패: ' + e.message); }
   });
 
   // Omni-Settlement Logic (Scan all crew members)
