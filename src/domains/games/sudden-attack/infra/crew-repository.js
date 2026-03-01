@@ -11,8 +11,7 @@ export class CrewRepository {
     // List of Administrators and Moderators (Staff)
     this.STAFF_EMAILS = [
       'admin@trackingsa.com', 
-      'hanbeom98@gmail.com',
-      // 'moderator@example.com' // 추가 운영진 이메일을 여기에 입력하세요
+      'hantiger24@naver.com' 
     ];
   }
 
