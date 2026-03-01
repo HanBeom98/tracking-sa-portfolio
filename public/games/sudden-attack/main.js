@@ -124,13 +124,23 @@ async function handleSearch() {
  * Crew & Admin Logic
  */
 async function initCrew() {
+  // Wait for window.db to be initialized by the global layout (up to 3 seconds)
+  let retries = 30;
+  while (typeof window === 'undefined' || !window.db) {
+    if (retries-- <= 0) {
+      console.warn('[Main] window.db timeout. Crew features disabled.');
+      return;
+    }
+    await new Promise(r => setTimeout(r, 100));
+  }
+
   // 1. Fetch Approved Members
   const members = await crewRepo.getCrewMembers();
   repository.setCrewMembers(members);
 
   // 2. Auth & Admin Setup
-  if (typeof firebase !== 'undefined') {
-    firebase.auth().onAuthStateChanged(user => {
+  if (typeof window.firebase !== 'undefined' && window.firebase.auth) {
+    window.firebase.auth().onAuthStateChanged(user => {
       if (crewRepo.isAdmin()) {
         adminMenuBtn.classList.remove('hidden');
       } else {

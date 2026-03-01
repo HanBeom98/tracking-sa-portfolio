@@ -4,16 +4,24 @@
  */
 export class CrewRepository {
   constructor() {
-    this.db = window.db; // From firebase-config.js
     this.MEMBERS_COLLECTION = 'sa_crew_members';
     this.APPLICATIONS_COLLECTION = 'sa_crew_applications';
-    this.ADMIN_EMAILS = ['admin@trackingsa.com', 'your-email@example.com']; // 관리자 이메일 목록
+    this.ADMIN_EMAILS = ['admin@trackingsa.com', 'hanbeom98@gmail.com'];
+  }
+
+  get db() {
+    if (typeof window !== 'undefined' && window.db) {
+      return window.db;
+    }
+    console.warn('[CrewRepo] window.db is not initialized yet.');
+    return null;
   }
 
   /**
    * Get all approved crew members
    */
   async getCrewMembers() {
+    if (!this.db) return [];
     try {
       const snapshot = await this.db.collection(this.MEMBERS_COLLECTION).get();
       return snapshot.docs.map(doc => doc.data().characterName);
@@ -27,6 +35,7 @@ export class CrewRepository {
    * Submit a new application
    */
   async applyForCrew(characterName) {
+    if (!this.db) throw new Error('데이터베이스 연결에 실패했습니다.');
     if (!characterName) throw new Error('캐릭터명을 입력해주세요.');
     
     // Check if already a member
@@ -39,7 +48,7 @@ export class CrewRepository {
       await this.db.collection(this.APPLICATIONS_COLLECTION).add({
         characterName,
         status: 'PENDING',
-        appliedAt: firebase.firestore.FieldValue.serverTimestamp()
+        appliedAt: window.firebase.firestore.FieldValue.serverTimestamp()
       });
     } catch (error) {
       console.error('[CrewRepo] Failed to submit application:', error);
@@ -51,6 +60,7 @@ export class CrewRepository {
    * (Admin) Get pending applications
    */
   async getPendingApplications() {
+    if (!this.db) return [];
     try {
       const snapshot = await this.db.collection(this.APPLICATIONS_COLLECTION)
         .where('status', '==', 'PENDING')
@@ -67,6 +77,7 @@ export class CrewRepository {
    * (Admin) Approve application
    */
   async approveApplication(appId, characterName) {
+    if (!this.db) throw new Error('데이터베이스 연결 실패');
     const batch = this.db.batch();
     
     const appRef = this.db.collection(this.APPLICATIONS_COLLECTION).doc(appId);
@@ -75,7 +86,7 @@ export class CrewRepository {
     batch.update(appRef, { status: 'APPROVED' });
     batch.set(memberRef, { 
       characterName, 
-      approvedAt: firebase.firestore.FieldValue.serverTimestamp() 
+      approvedAt: window.firebase.firestore.FieldValue.serverTimestamp() 
     });
 
     return batch.commit();
@@ -85,6 +96,7 @@ export class CrewRepository {
    * (Admin) Reject application
    */
   async rejectApplication(appId) {
+    if (!this.db) throw new Error('데이터베이스 연결 실패');
     return this.db.collection(this.APPLICATIONS_COLLECTION).doc(appId).update({
       status: 'REJECTED'
     });
@@ -94,7 +106,9 @@ export class CrewRepository {
    * Check if current user is admin
    */
   isAdmin() {
-    const user = firebase.auth().currentUser;
-    return user && (this.ADMIN_EMAILS.includes(user.email) || user.email === 'hanbeom98@gmail.com'); // 사용자 계정 추가
+    if (typeof window === 'undefined' || !window.firebase || !window.firebase.auth) return false;
+    
+    const user = window.firebase.auth().currentUser;
+    return user && this.ADMIN_EMAILS.includes(user.email);
   }
 }
