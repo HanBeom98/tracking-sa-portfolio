@@ -8,7 +8,8 @@ import { SA_META } from './meta-data.js';
 export class SaRepository {
   constructor(apiClient) {
     this.apiClient = apiClient;
-    this.crewMembers = []; // Dynamic crew members list
+    this.crewMembers = []; 
+    this.crewOuids = [];   
     this.meta = {
       grade: [],
       season_grade: [],
@@ -17,8 +18,9 @@ export class SaRepository {
     };
   }
 
-  setCrewMembers(list) {
-    this.crewMembers = list || [];
+  setCrewMembers(names, ouids = []) {
+    this.crewMembers = names || [];
+    this.crewOuids = ouids || [];
   }
 
   /**
@@ -28,7 +30,6 @@ export class SaRepository {
   async initMeta() {
     if (this.meta.grade && this.meta.grade.length > 0) return;
     
-    // Use the bundled metadata (0ms latency, zero CORS/Path errors)
     this.meta.grade = SA_META.grade || [];
     this.meta.season_grade = SA_META.season_grade || [];
     this.meta.tier = SA_META.tier || [];
@@ -69,7 +70,8 @@ export class SaRepository {
       tier.party_image = this._getTierImage(tier.party_rank_match_tier);
     }
     
-    return new Player(ouid, basic, rank, tier);
+    // Pass both lists to Player model
+    return new Player(ouid, basic, rank, tier, { names: this.crewMembers, ouids: this.crewOuids });
   }
 
   /**
@@ -78,7 +80,6 @@ export class SaRepository {
   async getPlayerStats(ouid) {
     try {
       const data = await this.apiClient.getRecentInfo(ouid);
-      console.log('[Repository] Player Recent Info:', JSON.stringify(data, null, 2));
       return new RecentStats(data);
     } catch (error) {
       console.warn('[Repository] Failed to get recent stats:', error.message);
@@ -90,13 +91,10 @@ export class SaRepository {
    * Fetch recent matches for a player (Resilient Sequential Scan)
    */
   async getRecentMatches(ouid, limit = 20, nickname = "") {
-    // Verified working modes that cover most player activities
     const modes = ["폭파미션", "데스매치", "개인전"];
-
     const combinedMatches = [];
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-    // Get Today and Yesterday in KST (YYYY-MM-DD)
     const now = new Date();
     const kstFormatter = new Intl.DateTimeFormat('ko-KR', {
       timeZone: 'Asia/Seoul',
@@ -113,41 +111,29 @@ export class SaRepository {
       return `${y}-${m}-${d}`;
     };
 
-    const dates = [formatDateParts(now), ""]; // Try today then latest
+    const dates = [formatDateParts(now), ""]; 
 
     try {
-      console.log(`[Repository] Starting deep scan for OUID: ${ouid}`);
-      
       for (const date of dates) {
         for (const mode of modes) {
           try {
-            await delay(400); // 0.4s delay
-            // We omit match_type to get all (Rank, Clan, General)
+            await delay(400); 
             const data = await this.apiClient.getMatchList(ouid, "", mode, date);
-            
             const matches = (data.match || []).map(m => ({ 
               ...m, 
-              typeName: mode, // Just mode name
+              typeName: mode,
               match_date: m.date_match
             }));
-            
             for (const m of matches) {
               if (!combinedMatches.find(cm => cm.match_id === m.match_id)) {
                 combinedMatches.push(m);
               }
             }
-
-            if (matches.length > 0) {
-              console.log(`[Repository] Found ${matches.length} matches for mode: ${mode}`);
-            }
-          } catch (err) {
-            // Silence common 400s
-          }
+          } catch (err) {}
         }
         if (combinedMatches.length >= limit) break;
       }
 
-      // Sort by date (descending)
       const sortedMatches = combinedMatches
         .sort((a, b) => new Date(b.match_date) - new Date(a.match_date))
         .slice(0, limit);
@@ -159,18 +145,16 @@ export class SaRepository {
           const detail = await this.apiClient.getMatchDetail(m.match_id);
           details.push(new MatchRecord(detail, m.typeName, nickname));
         } catch (err) {
-          // If match-detail fails, fallback to basic data from list
           details.push(new MatchRecord({
             match_result: m.match_result,
             match_date: m.match_date,
             kill: m.kill,
             death: m.death,
             assist: m.assist,
-            map_name: m.match_mode // Fallback map name
+            map_name: m.match_mode 
           }, m.typeName, nickname));
         }
       }
-      
       return details;
     } catch (error) {
       console.error('[Repository] Fatal error during match scanning:', error);

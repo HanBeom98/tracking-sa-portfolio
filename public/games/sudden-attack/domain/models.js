@@ -5,7 +5,7 @@ export const CREW_MEMBERS = [
 ];
 
 export class Player {
-  constructor(ouid, basic, rank, tier, crewList = []) {
+  constructor(ouid, basic, rank, tier, crewData = { names: [], ouids: [] }) {
     this.ouid = ouid;
     this.nickname = basic.user_name;
     this.level = basic.title_name || ""; 
@@ -15,9 +15,10 @@ export class Player {
     this.totalExp = rank.grade_exp || 0;
     this.seasonRank = rank.season_grade || "";
 
-    // Check if this player is part of the crew (Dynamic or static)
+    // Check if this player is part of the crew (Priority: OUID, Fallback: Name)
     const normalizedName = (this.nickname || "").toLowerCase().trim();
-    this.isCrew = crewList.some(c => c.toLowerCase().trim() === normalizedName) || 
+    this.isCrew = (crewData.ouids || []).includes(this.ouid) || 
+                  (crewData.names || []).some(c => c.toLowerCase().trim() === normalizedName) ||
                   CREW_MEMBERS.some(c => c.toLowerCase().trim() === normalizedName);
 
     this.rankImage = basic.grade_image || "";

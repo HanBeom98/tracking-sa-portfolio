@@ -167,7 +167,10 @@ async function initCrew() {
   // 1. Fetch & Render Rankings
   currentRankings = await crewRepo.getRankings();
   const members = currentRankings.map(r => r.characterName);
-  repository.setCrewMembers(members);
+  const ouids = currentRankings.map(r => r.id); // Firestore IDs are OUIDs
+  
+  // Pass both to repository for accurate 'isCrew' checks
+  repository.setCrewMembers(members, ouids);
 
   const rankingComp = document.createElement('sa-crew-ranking');
   rankingComp.rankings = currentRankings;
