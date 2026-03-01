@@ -18,18 +18,28 @@ export class SaRepository {
    * Pre-load metadata for image mapping
    */
   async initMeta() {
-    if (this.meta.grade.length > 0) return;
+    if (this.meta.grade && this.meta.grade.length > 0) return;
     try {
-      const [grade, season, tier] = await Promise.all([
-        fetch('https://open.api.nexon.com/static/suddenattack/meta/grade.json').then(r => r.json()),
-        fetch('https://open.api.nexon.com/static/suddenattack/meta/season_grade.json').then(r => r.json()),
-        fetch('https://open.api.nexon.com/static/suddenattack/meta/tier.json').then(r => r.json())
+      // Use apiClient to include API Key and handle base URL
+      const [grade, season, tier, logo] = await Promise.all([
+        this.apiClient.getStaticMeta('grade'),
+        this.apiClient.getStaticMeta('season_grade'),
+        this.apiClient.getStaticMeta('tier'),
+        this.apiClient.getStaticMeta('logo').catch(() => null) // logo might not have .json extension or fail
       ]);
+      
       this.meta.grade = grade;
       this.meta.season_grade = season;
       this.meta.tier = tier;
+      this.meta.logo = logo;
+
+      console.log('[Repository] Meta data loaded successfully');
     } catch (err) {
-      console.warn('[Repository] Failed to load meta images:', err);
+      console.warn('[Repository] Failed to load meta images via API, using fallback:', err);
+      // Fallback or empty arrays to prevent further errors
+      this.meta.grade = this.meta.grade || [];
+      this.meta.season_grade = this.meta.season_grade || [];
+      this.meta.tier = this.meta.tier || [];
     }
   }
 

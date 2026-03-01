@@ -5,11 +5,16 @@
 export class NexonApiClient {
   constructor(apiKey) {
     this.apiKey = apiKey;
-    this.baseUrl = 'https://open.api.nexon.com/suddenattack/v1';
+    this.baseUrl = 'https://open.api.nexon.com'; // Base domain only
   }
 
   async fetch(endpoint, params = {}) {
-    const url = new URL(`${this.baseUrl}${endpoint}`);
+    // If endpoint doesn't start with /static or /suddenattack, prepend the SA API prefix
+    const path = (endpoint.startsWith('/static') || endpoint.startsWith('/suddenattack')) 
+      ? endpoint 
+      : `/suddenattack/v1${endpoint}`;
+
+    const url = new URL(`${this.baseUrl}${path}`);
     Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
 
     console.log(`[NexonAPI Request]: ${url.toString()}`);
@@ -29,12 +34,8 @@ export class NexonApiClient {
       const message = errorData.error?.message || "";
       const isTestKey = this.apiKey.startsWith('test_');
       
-      // Nexon API returns 400 for non-existent characters OR 
-      // characters outside the test account's scope when using a Test Key.
       if (response.status === 400 && message.includes("valid parameter")) {
-        if (isTestKey) {
-          throw new Error('TEST_KEY_LIMITATION');
-        }
+        if (isTestKey) throw new Error('TEST_KEY_LIMITATION');
         throw new Error('PLAYER_NOT_FOUND');
       }
       
@@ -71,6 +72,26 @@ export class NexonApiClient {
    */
   async getPlayerTier(ouid) {
     return this.fetch('/user/tier', { ouid });
+  }
+
+  /**
+   * Get static metadata (grade, tier images etc)
+   */
+  async getStaticMeta(type) {
+    // If type is logo, it might not need .json suffix according to some documentation
+    const path = type === 'logo' 
+      ? `/static/suddenattack/meta/${type}` 
+      : `/static/suddenattack/meta/${type}.json`;
+    
+    try {
+      return await this.fetch(path);
+    } catch (error) {
+      // Fallback for logo if it actually needs .json or vice versa
+      if (type === 'logo' && !path.endsWith('.json')) {
+        return this.fetch(`${path}.json`).catch(() => { throw error; });
+      }
+      throw error;
+    }
   }
 
   /**
