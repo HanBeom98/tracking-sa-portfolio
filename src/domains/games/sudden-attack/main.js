@@ -226,11 +226,11 @@ function renderAdminExtraActions() {
 
   // Season Reset Logic
   actionBar.querySelector('#resetSeasonBtn').addEventListener('click', async () => {
-    if (!confirm('정말 모든 크루원의 MMR과 전적, 정산 기록을 초기화하시겠습니까?\n새로운 시즌을 시작할 때만 사용하세요. 이 작업은 되돌릴 수 없습니다!')) return;
+    if (!confirm('정말 모든 크루원의 MMR과 전적, 정산 기록을 초기화하시겠습니까?\\n새로운 시즌을 시작할 때만 사용하세요. 이 작업은 되돌릴 수 없습니다!')) return;
     try {
       await crewRepo.resetSeason();
       alert('시즌이 성공적으로 초기화되었습니다! (MMR 1200 복구)');
-      initCrew();
+      location.reload();
     } catch (e) { alert('초기화 실패: ' + e.message); }
   });
 
