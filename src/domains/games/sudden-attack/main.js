@@ -205,6 +205,7 @@ function renderAdminExtraActions() {
     </div>
     <div class="admin-sub-btns" style="display:flex; gap:10px; width:100%; margin-bottom:15px;">
       <button id="seedMembersBtn" class="sub-btn" style="border-color:#ffcc00; color:#ffcc00;">🌱 초기 멤버 강제 등록</button>
+      <button id="repairDataBtn" class="sub-btn" style="border-color:#00bcd4; color:#00bcd4;">♻️ 전적 데이터 재정산 (킬/데스 복구)</button>
     </div>
     <div id="crewMemberListAdmin" class="crew-manage-list" style="width:100%; border-top:1px solid #333; padding-top:15px;">
       <h4>👥 크루 멤버 관리</h4>
@@ -218,6 +219,17 @@ function renderAdminExtraActions() {
   adminPanel.appendChild(actionBar);
 
   renderAdminMemberList();
+
+  // Repair Data Logic
+  actionBar.querySelector('#repairDataBtn').addEventListener('click', async () => {
+    if (!confirm('이미 정산된 기록을 모두 삭제하고, 오늘 전적을 처음부터 다시 계산하시겠습니까?\n(누락된 킬/데스 데이터를 복구할 때 사용합니다.)')) return;
+    try {
+      await crewRepo.repairSeasonData();
+      alert('데이터 초기화 완료! 이제 [일괄 정산] 버튼을 눌러 다시 전적을 불러오세요.');
+      initCrew();
+      renderAdminMemberList();
+    } catch (e) { alert('복구 실패: ' + e.message); }
+  });
 
   // Temporary Seed Logic
   actionBar.querySelector('#seedMembersBtn').addEventListener('click', async () => {

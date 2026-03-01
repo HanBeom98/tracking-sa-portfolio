@@ -218,10 +218,47 @@ export class CrewRepository {
     const membersSnap = await this.db.collection(this.MEMBERS_COLLECTION).get();
     const batch = this.db.batch();
     membersSnap.docs.forEach(doc => {
-      batch.update(doc.ref, { mmr: 1200, wins: 0, loses: 0, updatedAt: window.firebase.firestore.FieldValue.serverTimestamp() });
+      batch.update(doc.ref, { 
+        mmr: 1200, wins: 0, loses: 0, 
+        crewKills: 0, crewDeaths: 0,
+        updatedAt: window.firebase.firestore.FieldValue.serverTimestamp() 
+      });
     });
     const settingsRef = this.db.collection(this.SETTINGS_COLLECTION).doc('season');
     batch.set(settingsRef, { startDate: window.firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+    await batch.commit();
+  }
+
+  /**
+   * REPAIR LOGIC: Resets stats and clears history to allow re-settlement of existing matches
+   */
+  async repairSeasonData() {
+    if (!this.db) throw new Error('DB 연결 실패');
+    
+    // 1. Reset all members stats to zero/default
+    const membersSnap = await this.db.collection(this.MEMBERS_COLLECTION).get();
+    const batch = this.db.batch();
+    membersSnap.docs.forEach(doc => {
+      batch.update(doc.ref, { 
+        mmr: 1200, wins: 0, loses: 0, 
+        crewKills: 0, crewDeaths: 0,
+        updatedAt: window.firebase.firestore.FieldValue.serverTimestamp() 
+      });
+    });
+
+    // 2. Clear all settlement history (sa_crew_history)
+    const historySnap = await this.db.collection(this.HISTORY_COLLECTION).get();
+    historySnap.docs.forEach(doc => {
+      batch.delete(doc.ref);
+    });
+
+    // 3. Set season start to today 00:00:00 to pick up all of today's matches
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    
+    const settingsRef = this.db.collection(this.SETTINGS_COLLECTION).doc('season');
+    batch.set(settingsRef, { startDate: todayStart }, { merge: true });
+
     await batch.commit();
   }
 
