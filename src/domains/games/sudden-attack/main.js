@@ -21,6 +21,7 @@ const loadingText = document.getElementById('loadingText');
 const recentSearchesContainer = document.getElementById('recentSearches');
 const profileSection = document.getElementById('playerProfile');
 const statsSection = document.getElementById('statsSummary');
+const crewRankingSection = document.getElementById('crewRanking');
 const historySection = document.getElementById('matchHistory');
 
 // Crew DOM Elements
@@ -124,30 +125,81 @@ async function handleSearch() {
  * Crew & Admin Logic
  */
 async function initCrew() {
-  // Wait for window.db to be initialized by the global layout (up to 3 seconds)
+  // Wait for window.db
   let retries = 30;
   while (typeof window === 'undefined' || !window.db) {
-    if (retries-- <= 0) {
-      console.warn('[Main] window.db timeout. Crew features disabled.');
-      return;
-    }
+    if (retries-- <= 0) return;
     await new Promise(r => setTimeout(r, 100));
   }
 
-  // 1. Fetch Approved Members
-  const members = await crewRepo.getCrewMembers();
+  // 1. Fetch & Render Rankings
+  const rankings = await crewRepo.getRankings();
+  const members = rankings.map(r => r.characterName);
   repository.setCrewMembers(members);
+
+  const rankingComp = document.createElement('sa-crew-ranking');
+  rankingComp.rankings = rankings;
+  crewRankingSection.innerHTML = '';
+  crewRankingSection.appendChild(rankingComp);
 
   // 2. Auth & Admin Setup
   if (typeof window.firebase !== 'undefined' && window.firebase.auth) {
     window.firebase.auth().onAuthStateChanged(user => {
       if (crewRepo.isAdmin()) {
         adminMenuBtn.classList.remove('hidden');
-      } else {
-        adminMenuBtn.classList.add('hidden');
+        renderAdminExtraActions();
       }
     });
   }
+}
+
+function renderAdminExtraActions() {
+  // Add Settle Button to admin panel if not exists
+  if (adminPanel.querySelector('.settle-btn')) return;
+  
+  const actionBar = document.createElement('div');
+  actionBar.className = 'admin-actions-bar';
+  actionBar.innerHTML = `
+    <button id="settleMMRBtn" class="settle-btn">⚡ 최근 내전 MMR 정산하기</button>
+    <p class="admin-hint">※ 검색한 캐릭터의 최근 5경기를 스캔하여 정산되지 않은 내전을 자동 처리합니다.</p>
+  `;
+  adminPanel.appendChild(actionBar);
+
+  actionBar.querySelector('#settleMMRBtn').addEventListener('click', async () => {
+    const settleBtn = actionBar.querySelector('#settleMMRBtn');
+    settleBtn.disabled = true;
+    settleBtn.textContent = '정산 분석 중...';
+
+    try {
+      const nickname = searchInput.value.trim();
+      if (!nickname) {
+        alert('정산 기준이 될 캐릭터를 먼저 검색해주세요.');
+        return;
+      }
+
+      const player = await service.searchPlayer(nickname);
+      const matches = await service.getRecentMatches(player.ouid, player.nickname);
+      const crewMatches = matches.filter(m => m.isCustomMatch);
+
+      if (crewMatches.length === 0) {
+        alert('정산할 새로운 내전 기록이 없습니다.');
+        return;
+      }
+
+      const settledIds = await crewRepo.settleMatches(crewMatches);
+      if (settledIds.length > 0) {
+        alert(`${settledIds.length}개의 매치가 정산되었습니다! 랭킹을 갱신합니다.`);
+        initCrew(); // Refresh ranking board
+      } else {
+        alert('모든 매치가 이미 정산되어 있습니다.');
+      }
+    } catch (err) {
+      alert('정산 처리 중 오류 발생: ' + err.message);
+    } finally {
+      settleBtn.disabled = false;
+      settleBtn.textContent = '⚡ 최근 내전 MMR 정산하기';
+    }
+  });
 }
 
 applyCrewBtn.addEventListener('click', () => crewModal.classList.remove('hidden'));
@@ -159,18 +211,13 @@ submitApplyBtn.addEventListener('click', async () => {
   
   submitApplyBtn.disabled = true;
   submitApplyBtn.textContent = '신청 중...';
-  
   try {
     await crewRepo.applyForCrew(name);
     alert('신청이 완료되었습니다! 관리자 승인 후 반영됩니다.');
     crewModal.classList.add('hidden');
     applyCharacterName.value = '';
-  } catch (err) {
-    alert(err.message);
-  } finally {
-    submitApplyBtn.disabled = false;
-    submitApplyBtn.textContent = '신청하기';
-  }
+  } catch (err) { alert(err.message); }
+  finally { submitApplyBtn.disabled = false; submitApplyBtn.textContent = '신청하기'; }
 });
 
 adminMenuBtn.addEventListener('click', () => {
@@ -222,11 +269,8 @@ async function renderApplications() {
   });
 }
 
-// Event Listeners
 searchBtn.addEventListener('click', handleSearch);
-searchInput.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') handleSearch();
-});
+searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSearch(); });
 
 // Start
 initCrew();

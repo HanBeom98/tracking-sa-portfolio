@@ -359,8 +359,8 @@ body.dark-theme {
 .streak-badge { padding: 4px 10px; border-radius: 20px; font-size: 14px; font-weight: 900; color: #fff; display: inline-flex; align-items: center; gap: 5px; margin-left: 10px; }
 .win-streak { background: linear-gradient(90deg, #ff416c, #ff4b2b); animation: fire-glow 1.5s infinite alternate; }
 .lose-streak { background: linear-gradient(90deg, #00d2ff, #3a7bd5); animation: ice-glow 2s infinite alternate; }
-@keyframes fire-glow { 0% { box-shadow: 0 0 5px #ff416c; transform: scale(1); } 100% { box-shadow: 0 0 15px #ff4b2b; transform: scale(1.05); } }
-@keyframes ice-glow { 0% { box-shadow: 0 0 5px #00d2ff; } 100% { box-shadow: 0 0 15px #3a7bd5; } }
+@keyframes fire-glow { 0% { box-shadow: 0 0 5px #ff416c; transform: scale(1); } 100% { box-shadow: 0 0 15px #ff4b2b, 0 0 25px #ff416c; transform: scale(1.05); } }
+@keyframes ice-glow { 0% { box-shadow: 0 0 5px #00d2ff; } 100% { box-shadow: 0 0 15px #3a7bd5, 0 0 25px #00d2ff; } }
 
 .stats-content-flex { display: flex; gap: 30px; align-items: center; }
 .text-stats-section { flex: 1; }
@@ -572,3 +572,41 @@ body.dark-theme {
 .crew-stats-card.no-crew {
   text-align: center; color: #555; font-size: 14px; padding: 30px; border-style: dashed;
 }
+
+/* ====== RANKING BOARD ====== */
+.ranking-card {
+  background: #1a1d2e;
+  border: 1px solid #2d3356;
+  border-radius: 12px;
+  padding: 25px;
+  margin: 40px 0;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.ranking-header { margin-bottom: 25px; border-bottom: 1px solid #2d3356; padding-bottom: 15px; }
+.ranking-header h3 { margin: 0; font-size: 24px; color: #00d2ff; }
+.ranking-header .sub { font-size: 12px; color: #666; }
+
+.ranking-table { width: 100%; border-collapse: collapse; }
+.ranking-table th { text-align: left; padding: 12px; color: #666; font-size: 13px; border-bottom: 2px solid #2d3356; }
+.ranking-table td { padding: 15px 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+.rank-row.top-rank { background: rgba(0, 210, 255, 0.03); }
+.rank-row.top-rank .pos { font-size: 20px; font-weight: 900; color: #ffcc00; }
+
+.mmr-val { font-weight: 800; color: #00d2ff; font-size: 18px; }
+.stats { color: #888; font-size: 13px; }
+
+/* Tier Classes */
+.tier.t-dia { color: #00ffff; text-shadow: 0 0 10px #00ffff; font-weight: bold; }
+.tier.t-pla { color: #00d2ff; font-weight: bold; }
+.tier.t-gold { color: #ffcc00; font-weight: bold; }
+.tier.t-sil { color: #e0e0e0; }
+.tier.t-bro { color: #cd7f32; }
+
+/* Admin Extra Actions */
+.admin-actions-bar {
+  display: flex; gap: 10px; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,204,0,0.2);
+}
+.settle-btn { background: #ffcc00; color: #000; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+.settle-btn:disabled { opacity: 0.5; cursor: not-allowed; }
