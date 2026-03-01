@@ -205,19 +205,19 @@ function renderAdminExtraActions() {
 
   // Temporary Seed Logic
   actionBar.querySelector('#seedMembersBtn').addEventListener('click', async () => {
-    if (!confirm('초기 10명의 멤버를 DB에 등록하시겠습니까?')) return;
-    const INITIAL_MEMBERS = ['Tracking', '결승', 'alt', '마미', '공대누비', 'xion', '김성식', '이쪼룽', '맞고사망한대성', 'SinYang'];
+    if (!confirm('초기 멤버들을 DB에 등록하시겠습니까? (닉네임 변경 대응 OUID 기반)')) return;
+    const INITIAL_MEMBERS = ['Tracking', '결승', 'alt', '마미', '공대누비', 'xion', '김성식', '이쪼룽', '맞고사망한대성', 'SinYang', 'heel'];
     const batch = window.db.batch();
     for (const name of INITIAL_MEMBERS) {
       try {
         const ouid = await repository.apiClient.getOuid(name);
         const ref = window.db.collection('sa_crew_members').doc(ouid);
-        batch.set(ref, { characterName: name, mmr: 1200, wins: 0, loses: 0, approvedAt: window.firebase.firestore.FieldValue.serverTimestamp() });
+        batch.set(ref, { characterName: name, mmr: 1200, wins: 0, loses: 0, approvedAt: window.firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
       } catch (err) { console.error(`Seed failed for ${name}:`, err); }
     }
     try {
       await batch.commit();
-      alert('초기 멤버 10명 등록 완료! 새로고침 해주세요.');
+      alert('멤버 등록/동기화 완료! 이제 정상적으로 뱃지가 표시됩니다.');
     } catch (e) { alert('등록 실패: ' + e.message); }
   });
 
