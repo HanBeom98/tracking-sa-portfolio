@@ -80,6 +80,21 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // Sudden Attack Crew Management
+    match /sa_crew_members/{docId} {
+      // Anyone can read the approved members list to detect custom matches
+      allow read: if true;
+      // Only admins (defined by code, but let's restrict write to admins here too)
+      allow write: if isAdmin();
+    }
+
+    match /sa_crew_applications/{docId} {
+      // Anyone can submit an application
+      allow create: if true;
+      // Only admins can read or modify applications
+      allow read, update, delete: if isAdmin();
+    }
+
     // Default deny
     match /{document=**} {
       allow read, write: if false;

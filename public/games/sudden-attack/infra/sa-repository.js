@@ -25,13 +25,25 @@ export class SaRepository {
   async initMeta() {
     if (this.meta.grade && this.meta.grade.length > 0) return;
     try {
-      // Use Absolute Path to ensure file is found regardless of page depth
-      const baseUrl = '/games/sudden-attack/infra/meta';
+      // Use full absolute URL to avoid any routing / trailing slash issues
+      const baseUrl = `${window.location.origin}/games/sudden-attack/infra/meta`;
       const [grade, season, tier, logo] = await Promise.all([
-        fetch(`${baseUrl}/grade.json`).then(r => { if (!r.ok) throw new Error(); return r.json(); }),
-        fetch(`${baseUrl}/season_grade.json`).then(r => { if (!r.ok) throw new Error(); return r.json(); }),
-        fetch(`${baseUrl}/tier.json`).then(r => { if (!r.ok) throw new Error(); return r.json(); }),
-        fetch(`${baseUrl}/logo.json`).then(r => r.json()).catch(() => null)
+        fetch(`${baseUrl}/grade.json`).then(r => {
+          if (!r.ok || r.headers.get('content-type')?.includes('text/html')) throw new Error('Not JSON'); 
+          return r.json(); 
+        }),
+        fetch(`${baseUrl}/season_grade.json`).then(r => {
+          if (!r.ok || r.headers.get('content-type')?.includes('text/html')) throw new Error('Not JSON'); 
+          return r.json(); 
+        }),
+        fetch(`${baseUrl}/tier.json`).then(r => {
+          if (!r.ok || r.headers.get('content-type')?.includes('text/html')) throw new Error('Not JSON'); 
+          return r.json(); 
+        }),
+        fetch(`${baseUrl}/logo.json`).then(r => {
+          if (!r.ok || r.headers.get('content-type')?.includes('text/html')) return null; 
+          return r.json(); 
+        }).catch(() => null)
       ]);
       
       this.meta.grade = grade;
