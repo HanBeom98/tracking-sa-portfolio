@@ -18,8 +18,8 @@ export class Player {
     // Check if this player is part of the crew (Priority: OUID, Fallback: Name)
     const normalizedName = (this.nickname || "").toLowerCase().trim();
     this.isCrew = (crewData.ouids || []).includes(this.ouid) || 
-                  (crewData.names || []).some(c => c.toLowerCase().trim() === normalizedName) ||
-                  CREW_MEMBERS.some(c => c.toLowerCase().trim() === normalizedName);
+                  (crewData.names || []).some(c => (c || "").toLowerCase().trim() === normalizedName) ||
+                  CREW_MEMBERS.some(c => (c || "").toLowerCase().trim() === normalizedName);
 
     this.rankImage = basic.grade_image || "";
     this.seasonRankImage = basic.season_grade_image || "";
