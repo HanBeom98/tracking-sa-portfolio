@@ -2,9 +2,13 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Helper: check if user is admin
-    function isAdmin() {
-      return request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";
+    // Helper: check if user is admin or staff
+    function isStaff() {
+      return request.auth != null && (
+        request.auth.token.email == "hantiger24@naver.com" || 
+        request.auth.token.email == "admin@trackingsa.com" ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin"
+      );
     }
 
     // Helper: check if resource owner
@@ -12,7 +16,7 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == userId;
     }
 
-    // Game rankings: Only allow adding new records, prevent modification of existing ones
+    // Game rankings
     match /tetris_rankings/{docId} {
       allow read: if true;
       allow create: if request.resource.data.score is number;
@@ -25,74 +29,65 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
-    // News/search: Public read, admin-only management
+    // News/search
     match /posts/{document=**} {
       allow read: if true;
-      allow delete: if isAdmin();
-      allow create, update: if false; // Managed via Admin SDK / MAS
+      allow delete: if isStaff();
+      allow create, update: if false;
     }
 
-    // Board posts: Public read, authenticated write, owner-only edit/delete
+    // Board posts
     match /board_posts/{postId} {
       allow read: if true;
       allow create: if request.auth != null 
         && request.resource.data.authorUid == request.auth.uid
-        && (request.resource.data.category != "notice" || isAdmin());
+        && (request.resource.data.category != "notice" || isStaff());
       allow update: if request.auth != null 
         && (
           (resource.data.authorUid == request.auth.uid && request.resource.data.authorUid == resource.data.authorUid && resource.data.category != "notice")
-          || isAdmin()
+          || isStaff()
         );
       allow delete: if request.auth != null 
-        && (resource.data.authorUid == request.auth.uid || isAdmin());
+        && (resource.data.authorUid == request.auth.uid || isStaff());
     }
 
-    // Users profile: Self read/write, role controlled
+    // Users profile
     match /users/{userId} {
-      allow read: if isOwner(userId) || isAdmin();
-      allow create: if isOwner(userId) 
-        && request.resource.data.role == "free"; // Default role forced
-      allow update: if isOwner(userId) 
-        && request.resource.data.role == resource.data.role; // Prevent self-elevation to admin
+      allow read: if isOwner(userId) || isStaff();
+      allow create: if isOwner(userId) && request.resource.data.role == "free";
+      allow update: if isOwner(userId) && request.resource.data.role == resource.data.role;
       allow delete: if isOwner(userId);
     }
 
-    // Nickname availability index
+    // Nickname index
     match /nicknames/{nickname} {
       allow read: if true;
-      allow create: if request.auth != null
-        && request.resource.data.uid == request.auth.uid
-        && !exists(/databases/$(database)/documents/nicknames/$(nickname));
-      allow delete: if request.auth != null
-        && resource.data.uid == request.auth.uid;
-      allow update: if false;
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
     }
 
-    // Games: Public read for approved, authenticated create for pending, admin management
+    // Games
     match /games/{gameId} {
       allow read: if true;
-      allow create: if isAdmin() || (request.auth != null
-        && request.resource.data.status == "pending"
-        && request.resource.data.authorUid == request.auth.uid);
-      allow update: if isAdmin() 
-        || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['playCount']) 
-            && request.resource.data.playCount is number);
-      allow delete: if isAdmin();
+      allow create: if isStaff() || (request.auth != null && request.resource.data.status == "pending");
+      allow update: if isStaff() || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['playCount']));
+      allow delete: if isStaff();
     }
 
-    // Sudden Attack Crew Management
+    // Sudden Attack Crew Management (Updated)
     match /sa_crew_members/{docId} {
-      // Anyone can read the approved members list to detect custom matches
       allow read: if true;
-      // Only admins (defined by code, but let's restrict write to admins here too)
-      allow write: if isAdmin();
+      allow write: if isStaff();
     }
 
     match /sa_crew_applications/{docId} {
-      // Anyone can submit an application
       allow create: if true;
-      // Only admins can read or modify applications
-      allow read, update, delete: if isAdmin();
+      allow read, update, delete: if isStaff();
+    }
+
+    match /sa_crew_history/{docId} {
+      allow read: if true;
+      allow write: if isStaff();
     }
 
     // Default deny
