@@ -13,7 +13,7 @@ service cloud.firestore {
 
     // Helper: Sudden Attack Specific Staff (SA Crew Management Only)
     function isSaStaff() {
-      return isStaff() || (request.auth != null && request.auth.token.email == "bjs5739@naver.com");
+      return isStaff() || (request.auth != null && (request.auth.token.email == "bjs5739@naver.com" || request.auth.token.email == "jungsion98@naver.com"));
     }
 
     // Helper: check if resource owner

@@ -13,7 +13,8 @@ export class CrewRepository {
     this.STAFF_EMAILS = [
       'admin@trackingsa.com', 
       'hantiger24@naver.com',
-      'bjs5739@naver.com'
+      'bjs5739@naver.com',
+      'jungsion98@naver.com'
     ];
   }
 
