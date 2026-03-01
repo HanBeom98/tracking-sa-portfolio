@@ -166,13 +166,17 @@ export class MatchRecord {
         const nickname = p.user_name || "";
         const normalizedName = nickname.toLowerCase().trim();
         
-        // Subject Detection: If stats match the summary of the person we are scanning, this IS the subject
+        // Subject Detection: More resilient comparison (string vs number)
         let isSubject = false;
-        if (subjectInfo && 
-            p.kill == subjectInfo.kill && 
-            p.death == subjectInfo.death && 
-            p.match_result == subjectInfo.result) {
-          isSubject = true;
+        if (subjectInfo) {
+          const pKill = parseInt(p.kill || p.kill_count || 0);
+          const pDeath = parseInt(p.death || p.death_count || 0);
+          const sKill = parseInt(subjectInfo.kill || 0);
+          const sDeath = parseInt(subjectInfo.death || 0);
+          
+          if (pKill === sKill && pDeath === sDeath && String(p.match_result) === String(subjectInfo.result)) {
+            isSubject = true;
+          }
         }
 
         // Dynamic detection: Is Crew? (By current Name OR if it's the subject we are scanning for)
@@ -188,7 +192,7 @@ export class MatchRecord {
           kd: p.death > 0 ? (p.kill / p.death).toFixed(2) : (p.kill > 0 ? p.kill.toFixed(2) : "0.00"),
           result: p.match_result === "1" ? "WIN" : (p.match_result === "2" ? "LOSE" : p.match_result),
           isCrew: isCrew,
-          ouid: isSubject ? subjectInfo.ouid : null // Carry OUID if identified
+          ouid: isSubject ? subjectInfo.ouid : null
         };
       });
 
