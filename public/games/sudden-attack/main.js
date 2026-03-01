@@ -1,6 +1,7 @@
 import { NexonApiClient } from './infra/nexon-api-client.js?v=20260228_7';
 import { SaRepository } from './infra/sa-repository.js?v=20260228_7';
 import { SaService } from './application/sa-service.js?v=20260228_7';
+import { CrewRepository } from './infra/crew-repository.js?v=20260228_7';
 import { RecentStats } from './domain/models.js?v=20260228_7';
 import './ui/sa-components.js?v=20260228_7';
 
@@ -10,7 +11,9 @@ const NEXON_API_KEY = 'live_6e6f12fbfb54d0fad8b504b3303286fb1ce29b5a4e2f456d883c
 const client = new NexonApiClient(NEXON_API_KEY);
 const repository = new SaRepository(client);
 const service = new SaService(repository);
+const crewRepo = new CrewRepository();
 
+// DOM Elements
 const searchInput = document.getElementById('characterName');
 const searchBtn = document.getElementById('searchBtn');
 const loading = document.getElementById('loading');
@@ -19,6 +22,17 @@ const recentSearchesContainer = document.getElementById('recentSearches');
 const profileSection = document.getElementById('playerProfile');
 const statsSection = document.getElementById('statsSummary');
 const historySection = document.getElementById('matchHistory');
+
+// Crew DOM Elements
+const applyCrewBtn = document.getElementById('applyCrewBtn');
+const adminMenuBtn = document.getElementById('adminMenuBtn');
+const crewModal = document.getElementById('crewModal');
+const closeModalBtn = document.getElementById('closeModalBtn');
+const submitApplyBtn = document.getElementById('submitApplyBtn');
+const applyCharacterName = document.getElementById('applyCharacterName');
+const adminPanel = document.getElementById('adminPanel');
+const applicationList = document.getElementById('applicationList');
+const closeAdminBtn = document.getElementById('closeAdminBtn');
 
 // Recent Searches Management
 const STORAGE_KEY = 'sa_recent_searches';
@@ -94,11 +108,11 @@ async function handleSearch() {
 
   } catch (error) {
     if (error.message === 'TEST_KEY_LIMITATION') {
-      alert('현재 테스트 API 키를 사용 중입니다.\n\n[제약 사항]\n테스트 키는 키를 발급받은 넥슨 계정 본인의 캐릭터만 조회가 가능합니다.\n타인의 전적을 조회하려면 Production API Key가 필요합니다.');
+      alert('현재 테스트 API 키를 사용 중입니다.\\n\\n[제약 사항]\\n테스트 키는 키를 발급받은 넥슨 계정 본인의 캐릭터만 조회가 가능합니다.\\n타인의 전적을 조회하려면 Production API Key가 필요합니다.');
     } else if (error.message === 'PLAYER_NOT_FOUND') {
-      alert('캐릭터를 찾을 수 없습니다.\n\n[가능한 원인]\n1. 캐릭터명이 정확하지 않음\n2. 캐릭터 생성 후 약 10분 이내 (데이터 미갱신)\n3. 2025년 1월 24일 이후 플레이 기록 없음');
+      alert('캐릭터를 찾을 수 없습니다.\\n\\n[가능한 원인]\\n1. 캐릭터명이 정확하지 않음\\n2. 캐릭터 생성 후 약 10분 이내 (데이터 미갱신)\\n3. 2025년 1월 24일 이후 플레이 기록 없음');
     } else {
-      alert('전적을 불러오는 중 오류가 발생했습니다.\n나중에 다시 시도해 주세요.');
+      alert('전적을 불러오는 중 오류가 발생했습니다.\\n나중에 다시 시도해 주세요.');
     }
     console.error('[SuddenAttack] Search Error:', error);
   } finally {
@@ -106,10 +120,104 @@ async function handleSearch() {
   }
 }
 
+/**
+ * Crew & Admin Logic
+ */
+async function initCrew() {
+  // 1. Fetch Approved Members
+  const members = await crewRepo.getCrewMembers();
+  repository.setCrewMembers(members);
+
+  // 2. Auth & Admin Setup
+  if (typeof firebase !== 'undefined') {
+    firebase.auth().onAuthStateChanged(user => {
+      if (crewRepo.isAdmin()) {
+        adminMenuBtn.classList.remove('hidden');
+      } else {
+        adminMenuBtn.classList.add('hidden');
+      }
+    });
+  }
+}
+
+applyCrewBtn.addEventListener('click', () => crewModal.classList.remove('hidden'));
+closeModalBtn.addEventListener('click', () => crewModal.classList.add('hidden'));
+
+submitApplyBtn.addEventListener('click', async () => {
+  const name = applyCharacterName.value.trim();
+  if (!name) return;
+  
+  submitApplyBtn.disabled = true;
+  submitApplyBtn.textContent = '신청 중...';
+  
+  try {
+    await crewRepo.applyForCrew(name);
+    alert('신청이 완료되었습니다! 관리자 승인 후 반영됩니다.');
+    crewModal.classList.add('hidden');
+    applyCharacterName.value = '';
+  } catch (err) {
+    alert(err.message);
+  } finally {
+    submitApplyBtn.disabled = false;
+    submitApplyBtn.textContent = '신청하기';
+  }
+});
+
+adminMenuBtn.addEventListener('click', () => {
+  adminPanel.classList.remove('hidden');
+  renderApplications();
+});
+
+closeAdminBtn.addEventListener('click', () => adminPanel.classList.add('hidden'));
+
+async function renderApplications() {
+  applicationList.innerHTML = '<p>신청 목록을 불러오는 중...</p>';
+  const apps = await crewRepo.getPendingApplications();
+  
+  if (apps.length === 0) {
+    applicationList.innerHTML = '<p class="no-data">대기 중인 신청이 없습니다.</p>';
+    return;
+  }
+
+  applicationList.innerHTML = apps.map(app => `
+    <div class="app-item">
+      <span class="app-name">${app.characterName}</span>
+      <div class="app-actions">
+        <button class="approve-btn" data-id="${app.id}" data-name="${app.characterName}">승인</button>
+        <button class="reject-btn" data-id="${app.id}">거절</button>
+      </div>
+    </div>
+  `).join('');
+
+  applicationList.querySelectorAll('.approve-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const { id, name } = e.currentTarget.dataset;
+      try {
+        await crewRepo.approveApplication(id, name);
+        alert(`${name} 승인 완료!`);
+        renderApplications();
+        initCrew(); // Refresh list
+      } catch (err) { alert('승인 처리 중 오류 발생'); }
+    });
+  });
+
+  applicationList.querySelectorAll('.reject-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const { id } = e.currentTarget.dataset;
+      try {
+        await crewRepo.rejectApplication(id);
+        renderApplications();
+      } catch (err) { alert('거절 처리 중 오류 발생'); }
+    });
+  });
+}
+
+// Event Listeners
 searchBtn.addEventListener('click', handleSearch);
 searchInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') handleSearch();
 });
 
-// Initial Render
+// Start
+initCrew();
 renderRecentSearches();

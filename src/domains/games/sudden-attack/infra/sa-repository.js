@@ -7,11 +7,16 @@ import { Player, MatchRecord, RecentStats } from '../domain/models.js';
 export class SaRepository {
   constructor(apiClient) {
     this.apiClient = apiClient;
+    this.crewMembers = []; // Dynamic crew members list
     this.meta = {
       grade: [],
       season_grade: [],
       tier: []
     };
+  }
+
+  setCrewMembers(list) {
+    this.crewMembers = list || [];
   }
 
   /**
