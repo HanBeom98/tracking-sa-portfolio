@@ -92,7 +92,7 @@ async function handleSearch() {
 
   try {
     loading.classList.remove('hidden');
-    loadingText.textContent = `${name} 님의 정보를 찾는 중...`;
+    loadingText.textContent = `${name} 님의 정보를 찾는 중... (최근 20경기)`;
     profileSection.classList.add('hidden');
     statsSection.classList.add('hidden');
     historySection.classList.add('hidden');
@@ -105,7 +105,7 @@ async function handleSearch() {
     profileSection.querySelector('sa-player-card').player = player;
     profileSection.classList.remove('hidden');
 
-    // Load Matches
+    // Load Matches (20 matches)
     loadingText.textContent = '최근 매치 기록을 분석 중입니다...';
     const matches = await service.getRecentMatches(player.ouid, player.nickname);
 
@@ -113,13 +113,21 @@ async function handleSearch() {
     loadingText.textContent = '데이터 동기화 완료!';
     const rawStats = await repository.apiClient.getRecentInfo(player.ouid);
     const stats = new RecentStats(rawStats, matches);
+
+    // Overwrite crew stats with real accumulated data from Firestore if they are a crew member
+    const memberData = currentRankings.find(m => m.characterName.toLowerCase() === player.nickname.toLowerCase());
+    if (memberData) {
+      stats.crewMatchCount = memberData.wins + memberData.loses;
+      stats.crewWinRate = stats.crewMatchCount > 0 ? Math.round((memberData.wins / stats.crewMatchCount) * 100) : 0;
+      stats.crewKd = memberData.mmr; // Repurpose crewKd field to show MMR in the UI
+    }
     
     statsSection.innerHTML = '<sa-stats-summary></sa-stats-summary>';
     statsSection.querySelector('sa-stats-summary').stats = stats;
     statsSection.classList.remove('hidden');
 
     // Render Matches
-    historySection.innerHTML = '<h2>최근 매치 기록</h2><sa-match-list></sa-match-list>';
+    historySection.innerHTML = '<h2>최근 20경기 매치 기록</h2><sa-match-list></sa-match-list>';
     historySection.querySelector('sa-match-list').matches = matches;
     historySection.classList.remove('hidden');
 
@@ -181,8 +189,10 @@ function renderAdminExtraActions() {
   actionBar.innerHTML = `
     <button id="settleMMRBtn" class="settle-btn">⚡ 최근 내전 MMR 정산하기</button>
     <button id="seedMembersBtn" class="sub-btn" style="border-color:#ffcc00; color:#ffcc00;">🌱 초기 멤버 10명 강제 등록</button>
-    <p class="admin-hint">※ 검색한 캐릭터의 최근 5경기를 스캔하여 정산되지 않은 내전을 자동 처리합니다.</p>
+    <button id="resetSeasonBtn" class="sub-btn" style="border-color:#ff4d4d; color:#ff4d4d; margin-left: auto;">🔥 시즌 초기화</button>
+    <p class="admin-hint" style="width:100%;">※ 검색한 캐릭터의 최근 20경기를 스캔하여 정산되지 않은 내전을 자동 처리합니다.</p>
   `;
+  actionBar.style.flexWrap = "wrap";
   adminPanel.appendChild(actionBar);
 
   // Temporary Seed Logic
@@ -200,6 +210,17 @@ function renderAdminExtraActions() {
     } catch (e) { alert('등록 실패: ' + e.message); }
   });
 
+  // Season Reset Logic
+  actionBar.querySelector('#resetSeasonBtn').addEventListener('click', async () => {
+    if (!confirm('정말 모든 크루원의 MMR과 전적, 정산 기록을 초기화하시겠습니까?\\n새로운 시즌을 시작할 때만 사용하세요. 이 작업은 되돌릴 수 없습니다!')) return;
+    try {
+      await crewRepo.resetSeason();
+      alert('시즌이 성공적으로 초기화되었습니다! (MMR 1200 복구)');
+      initCrew();
+    } catch (e) { alert('초기화 실패: ' + e.message); }
+  });
+
+  // Settlement Logic
   actionBar.querySelector('#settleMMRBtn').addEventListener('click', async () => {
     const settleBtn = actionBar.querySelector('#settleMMRBtn');
     settleBtn.disabled = true;
@@ -208,14 +229,14 @@ function renderAdminExtraActions() {
       const nickname = searchInput.value.trim();
       if (!nickname) { alert('정산 기준이 될 캐릭터를 먼저 검색해주세요.'); return; }
       const player = await service.searchPlayer(nickname);
-      const matches = await service.getRecentMatches(player.ouid, player.nickname);
+      const matches = await service.getRecentMatches(player.ouid, player.nickname); // Scans 20 matches now
       const crewMatches = matches.filter(m => m.isCustomMatch);
       if (crewMatches.length === 0) { alert('정산할 새로운 내전 기록이 없습니다.'); return; }
       const settledIds = await crewRepo.settleMatches(crewMatches);
       if (settledIds.length > 0) {
         alert(`${settledIds.length}개의 매치가 정산되었습니다! 랭킹을 갱신합니다.`);
         initCrew();
-      } else { alert('모든 매치가 이미 정산되어 있습니다.'); }
+      } else { alert('최근 20경기 내의 모든 매치가 이미 정산되어 있습니다.'); }
     } catch (err) { alert('정산 처리 중 오류 발생: ' + err.message); }
     finally { settleBtn.disabled = false; settleBtn.textContent = '⚡ 최근 내전 MMR 정산하기'; }
   });

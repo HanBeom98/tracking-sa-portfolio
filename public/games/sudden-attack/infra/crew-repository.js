@@ -49,6 +49,18 @@ export class CrewRepository {
   }
 
   /**
+   * Get specific crew member data for accumulating stats
+   */
+  async getMemberStats(characterName) {
+    if (!this.db || !characterName) return null;
+    try {
+      const doc = await this.db.collection(this.MEMBERS_COLLECTION).doc(characterName.toLowerCase()).get();
+      if (doc.exists) return doc.data();
+      return null;
+    } catch (e) { return null; }
+  }
+
+  /**
    * Settle MMR for a list of matches
    * @param {Array} matches - Array of MatchRecord objects
    */
@@ -106,6 +118,34 @@ export class CrewRepository {
 
     await batch.commit();
     return processedMatchIds;
+  }
+
+  /**
+   * Reset Season: Clear all MMR, Wins, Loses and History (Admin Only)
+   */
+  async resetSeason() {
+    if (!this.db) throw new Error('DB 연결 실패');
+    
+    // 1. Reset Members
+    const membersSnap = await this.db.collection(this.MEMBERS_COLLECTION).get();
+    const batch = this.db.batch();
+    
+    membersSnap.docs.forEach(doc => {
+      batch.update(doc.ref, {
+        mmr: 1200,
+        wins: 0,
+        loses: 0,
+        updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+      });
+    });
+
+    // 2. Clear History Collection (Requires multiple batches if large, but crew history is usually small enough for 1 batch)
+    const historySnap = await this.db.collection(this.HISTORY_COLLECTION).get();
+    historySnap.docs.forEach(doc => {
+      batch.delete(doc.ref);
+    });
+
+    await batch.commit();
   }
 
   async applyForCrew(characterName) {

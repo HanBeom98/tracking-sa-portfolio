@@ -89,7 +89,7 @@ export class SaRepository {
   /**
    * Fetch recent matches for a player (Resilient Sequential Scan)
    */
-  async getRecentMatches(ouid, limit = 5, nickname = "") {
+  async getRecentMatches(ouid, limit = 20, nickname = "") {
     // Verified working modes that cover most player activities
     const modes = ["폭파미션", "데스매치", "개인전"];
 
