@@ -247,6 +247,7 @@ export class SaCrewRanking extends HTMLElement {
               <th>티어</th>
               <th>캐릭터명</th>
               <th>MMR</th>
+              <th>내전 K/D</th>
               <th>승률 (전적)</th>
             </tr>
           </thead>
@@ -256,12 +257,19 @@ export class SaCrewRanking extends HTMLElement {
               const totalGames = (m.wins || 0) + (m.loses || 0);
               const winRate = totalGames > 0 
                 ? Math.round((m.wins / totalGames) * 100) : 0;
+              
+              // Calculate Crew K/D from Firestore data
+              const ck = m.crewKills || 0;
+              const cd = m.crewDeaths || 0;
+              const crewKd = cd > 0 ? (ck / cd).toFixed(2) : (ck > 0 ? ck.toFixed(2) : "0.00");
+
               return `
                 <tr class="rank-row ${idx < 3 ? 'top-rank' : ''}">
                   <td class="pos">#${idx + 1}</td>
                   <td class="tier ${tier.class}">${tier.icon} ${tier.name}</td>
                   <td class="name">${m.characterName}</td>
                   <td class="mmr-val">${m.mmr}</td>
+                  <td class="kd-val">${crewKd}</td>
                   <td class="stats">${winRate}% (${m.wins}승 ${m.loses}패)</td>
                 </tr>
               `;

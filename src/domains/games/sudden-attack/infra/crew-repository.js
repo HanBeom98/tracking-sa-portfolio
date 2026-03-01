@@ -140,6 +140,8 @@ export class CrewRepository {
         mmr: data.mmr || 1200,
         wins: data.wins || 0,
         loses: data.loses || 0,
+        crewKills: data.crewKills || 0,
+        crewDeaths: data.crewDeaths || 0,
         isDirty: false
       };
       memberCache[doc.id] = cacheObj;
@@ -164,13 +166,21 @@ export class CrewRepository {
         if (!currentData) continue; 
 
         const isWin = p.result === 'WIN';
+        const kill = parseInt(p.kill || 0);
+        const death = parseInt(p.death || 0);
         const kd = parseFloat(p.kd);
+        
         let change = isWin ? 20 : -20;
         if (isWin && kd < 0.5) change = 10;
         if (!isWin && kd >= 1.5) change = -10;
 
         currentData.mmr += change;
         if (isWin) currentData.wins += 1; else currentData.loses += 1;
+        
+        // ACCUMULATE KILLS AND DEATHS
+        currentData.crewKills += kill;
+        currentData.crewDeaths += death;
+        
         currentData.isDirty = true;
       }
 
@@ -192,6 +202,8 @@ export class CrewRepository {
           mmr: memberCache[ouid].mmr,
           wins: memberCache[ouid].wins,
           loses: memberCache[ouid].loses,
+          crewKills: memberCache[ouid].crewKills,
+          crewDeaths: memberCache[ouid].crewDeaths,
           updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
         });
       }
