@@ -24,55 +24,53 @@ export class SaRepository {
    */
   async initMeta() {
     if (this.meta.grade && this.meta.grade.length > 0) return;
-    try {
-      // Use full absolute URL to avoid any routing / trailing slash issues
-      const baseUrl = `${window.location.origin}/games/sudden-attack/infra/meta`;
-      const [grade, season, tier, logo] = await Promise.all([
-        fetch(`${baseUrl}/grade.json`).then(r => {
-          if (!r.ok || r.headers.get('content-type')?.includes('text/html')) throw new Error('Not JSON'); 
-          return r.json(); 
-        }),
-        fetch(`${baseUrl}/season_grade.json`).then(r => {
-          if (!r.ok || r.headers.get('content-type')?.includes('text/html')) throw new Error('Not JSON'); 
-          return r.json(); 
-        }),
-        fetch(`${baseUrl}/tier.json`).then(r => {
-          if (!r.ok || r.headers.get('content-type')?.includes('text/html')) throw new Error('Not JSON'); 
-          return r.json(); 
-        }),
-        fetch(`${baseUrl}/logo.json`).then(r => {
-          if (!r.ok || r.headers.get('content-type')?.includes('text/html')) return null; 
-          return r.json(); 
-        }).catch(() => null)
-      ]);
-      
-      this.meta.grade = grade;
-      this.meta.season_grade = season;
-      this.meta.tier = tier;
-      this.meta.logo = logo;
+    
+    // List of potential paths to find the JSON files (Relative to sa-repository.js)
+    const pathsToTry = [
+      './meta', // Default (Same infra folder)
+      '../infra/meta', // One level up
+      '/games/sudden-attack/infra/meta' // Absolute root
+    ];
 
-      console.log('[Repository] Local meta data loaded successfully');
-    } catch (err) {
-      console.warn('[Repository] Failed to load local meta, using direct API fetch (No Auth Header):', err);
-      
-      // Fallback: Fetch directly from Nexon API WITHOUT headers to avoid Preflight/CORS issues
-      // Based on investigation, Nexon Static API works via CORS ONLY if no custom headers are sent.
-      const apiBase = 'https://open.api.nexon.com/static/suddenattack/meta';
+    for (const baseUrl of pathsToTry) {
       try {
-        const [grade, season, tier] = await Promise.all([
-          fetch(`${apiBase}/grade`).then(r => r.json()),
-          fetch(`${apiBase}/season_grade`).then(r => r.json()),
-          fetch(`${apiBase}/tier`).then(r => r.json())
+        console.log(`[Repository] Attempting to load meta from: ${baseUrl}`);
+        const [grade, season, tier, logo] = await Promise.all([
+          fetch(`${baseUrl}/grade.json`).then(r => { if (!r.ok || r.headers.get('content-type')?.includes('text/html')) throw new Error(); return r.json(); }),
+          fetch(`${baseUrl}/season_grade.json`).then(r => { if (!r.ok || r.headers.get('content-type')?.includes('text/html')) throw new Error(); return r.json(); }),
+          fetch(`${baseUrl}/tier.json`).then(r => { if (!r.ok || r.headers.get('content-type')?.includes('text/html')) throw new Error(); return r.json(); }),
+          fetch(`${baseUrl}/logo.json`).then(r => r.json()).catch(() => null)
         ]);
+        
         this.meta.grade = grade;
         this.meta.season_grade = season;
         this.meta.tier = tier;
-      } catch (apiErr) {
-        console.error('[Repository] All meta load attempts failed:', apiErr);
-        this.meta.grade = [];
-        this.meta.season_grade = [];
-        this.meta.tier = [];
+        this.meta.logo = logo;
+
+        console.log(`[Repository] Meta data loaded successfully from ${baseUrl}`);
+        return; // Success!
+      } catch (err) {
+        // Continue to next path
       }
+    }
+
+    // Final Fallback: Direct API fetch WITHOUT headers (CORS compliant)
+    console.warn('[Repository] Local meta not found, using direct API fetch (No Auth Header)');
+    const apiBase = 'https://open.api.nexon.com/static/suddenattack/meta';
+    try {
+      const [grade, season, tier] = await Promise.all([
+        fetch(`${apiBase}/grade`).then(r => r.json()),
+        fetch(`${apiBase}/season_grade`).then(r => r.json()),
+        fetch(`${apiBase}/tier`).then(r => r.json())
+      ]);
+      this.meta.grade = grade;
+      this.meta.season_grade = season;
+      this.meta.tier = tier;
+    } catch (apiErr) {
+      console.error('[Repository] All meta load attempts failed:', apiErr);
+      this.meta.grade = [];
+      this.meta.season_grade = [];
+      this.meta.tier = [];
     }
   }
 
