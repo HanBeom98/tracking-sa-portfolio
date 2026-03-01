@@ -190,6 +190,35 @@ export class SaMatchList extends HTMLElement {
     return '';
   }
 
+  drawScoreboard(players) {
+    if (!players || players.length === 0) return '<p class="no-detail">매치 상세 정보가 없습니다.</p>';
+
+    return `
+      <div class="scoreboard-wrapper">
+        <table class="scoreboard-table">
+          <thead>
+            <tr>
+              <th>결과</th>
+              <th>닉네임</th>
+              <th>K / D / A</th>
+              <th>K/D</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${players.map(p => `
+              <tr class="${p.isCrew ? 'crew-row' : ''}">
+                <td class="res ${p.result.toLowerCase()}">${p.result}</td>
+                <td class="name">${p.nickname} ${p.isCrew ? '<span class="crew-tag">CREW</span>' : ''}</td>
+                <td class="kda">${p.kill} / ${p.death} / ${p.assist}</td>
+                <td class="kd-val ${this.getKdClass(p.kd)}">${p.kd}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
   set matches(list) {
     if (!list || list.length === 0) {
       this.innerHTML = '<p class="no-data">최근 상세 매치 기록이 없습니다.</p>';
@@ -198,31 +227,59 @@ export class SaMatchList extends HTMLElement {
 
     this.innerHTML = `
       <ul class="match-list">
-        ${list.map(match => `
-          <li class="match-item ${match.matchResult.toLowerCase()} ${match.isCustomMatch ? 'is-custom' : ''}">
-            <div class="match-info">
-              <div class="match-type-row">
-                <span class="type-tag">${match.matchTypeName}</span>
-                ${match.isCustomMatch ? '<span class="custom-badge">⚔️ 크루 내전</span>' : ''}
-              </div>
-              <span class="result-badge">${match.matchResult}</span>
-            </div>
-            <div class="match-map-info">
-              <span class="map">${match.mapName}</span>
-              <span class="match-date">${new Date(match.matchDate).toLocaleDateString()}</span>
-              ${match.isCustomMatch ? `
-                <div class="crew-participants">
-                  <label>참여 크루:</label>
-                  <span class="names">${match.crewParticipants.join(', ')}</span>
+        ${list.map((match, idx) => `
+          <li class="match-container">
+            <div class="match-item ${match.matchResult.toLowerCase()} ${match.isCustomMatch ? 'is-custom' : ''}" data-idx="${idx}">
+              <div class="match-info">
+                <div class="match-type-row">
+                  <span class="type-tag">${match.matchTypeName}</span>
+                  ${match.isCustomMatch ? '<span class="custom-badge">⚔️ 크루 내전</span>' : ''}
                 </div>
-              ` : ''}
+                <span class="result-badge">${match.matchResult}</span>
+              </div>
+              <div class="match-map-info">
+                <span class="map">${match.mapName}</span>
+                <span class="match-date">${new Date(match.matchDate).toLocaleDateString()}</span>
+                ${match.isCustomMatch ? `
+                  <div class="crew-participants">
+                    <label>참여 크루:</label>
+                    <span class="names">${match.crewParticipants.join(', ')}</span>
+                  </div>
+                ` : ''}
+              </div>
+              <span class="kda">${match.kill} / ${match.death} / ${match.assist}</span>
+              <div class="kd-expand-box">
+                <span class="kd ${this.getKdClass(match.kd)}">KD: ${match.kd}</span>
+                <span class="expand-arrow">▼</span>
+              </div>
             </div>
-            <span class="kda">${match.kill} / ${match.death} / ${match.assist}</span>
-            <span class="kd ${this.getKdClass(match.kd)}">KD: ${match.kd}</span>
+            <div class="match-detail-view hidden" id="detail-${idx}">
+              ${this.drawScoreboard(match.allPlayerStats)}
+            </div>
           </li>
         `).join('')}
       </ul>
     `;
+
+    // Add click events for expanding details
+    this.querySelectorAll('.match-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const idx = item.dataset.idx;
+        const detail = this.querySelector(`#detail-${idx}`);
+        const arrow = item.querySelector('.expand-arrow');
+        
+        const isHidden = detail.classList.contains('hidden');
+        
+        // Toggle
+        if (isHidden) {
+          detail.classList.remove('hidden');
+          arrow.style.transform = 'rotate(180deg)';
+        } else {
+          detail.classList.add('hidden');
+          arrow.style.transform = 'rotate(0deg)';
+        }
+      });
+    });
   }
 }
 

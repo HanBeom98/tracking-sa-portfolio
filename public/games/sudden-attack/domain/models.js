@@ -144,23 +144,33 @@ export class MatchRecord {
     this.participants = [];
     this.crewParticipants = [];
     this.isCustomMatch = false;
+    this.allPlayerStats = []; // Store full scoreboard data
 
     let playerStat = detail;
     
-    // Analyze Match Detail for Crew Members
     if (detail.match_detail && Array.isArray(detail.match_detail)) {
+      // 1. Process Scoreboard Data
+      this.allPlayerStats = detail.match_detail.map(p => ({
+        nickname: p.user_name,
+        kill: p.kill || p.kill_count || 0,
+        death: p.death || p.death_count || 0,
+        assist: p.assist || p.assist_count || 0,
+        kd: p.death > 0 ? (p.kill / p.death).toFixed(2) : (p.kill > 0 ? p.kill.toFixed(2) : "0.00"),
+        result: p.match_result === "1" ? "WIN" : (p.match_result === "2" ? "LOSE" : p.match_result),
+        isCrew: CREW_MEMBERS.some(crew => crew.toLowerCase() === (p.user_name || "").toLowerCase())
+      }));
+
+      // 2. Identify Crew and Custom Match
       this.participants = detail.match_detail.map(p => p.user_name);
+      this.crewParticipants = this.allPlayerStats
+        .filter(p => p.isCrew)
+        .map(p => p.nickname);
       
-      // Filter crew members who participated in this match
-      this.crewParticipants = this.participants.filter(name => 
-        CREW_MEMBERS.some(crew => crew.toLowerCase() === (name || "").toLowerCase())
-      );
-      
-      // If 8 or more crew members are in the same match, it's a Custom Match (내전)
       if (this.crewParticipants.length >= 8) {
         this.isCustomMatch = true;
       }
 
+      // 3. Set Target Player Stat
       const target = targetUserName ? targetUserName.toLowerCase().trim() : "";
       if (target) {
         playerStat = detail.match_detail.find(p => 
@@ -171,14 +181,7 @@ export class MatchRecord {
       }
     }
 
-    const rawResult = String(playerStat.match_result || "UNKNOWN");
-    if (rawResult === "1") {
-      this.matchResult = "WIN";
-    } else if (rawResult === "2") {
-      this.matchResult = "LOSE";
-    } else {
-      this.matchResult = rawResult.toUpperCase();
-    }
+    this.matchResult = String(playerStat.match_result) === "1" ? "WIN" : (String(playerStat.match_result) === "2" ? "LOSE" : "UNKNOWN");
     this.kill = playerStat.kill !== undefined ? playerStat.kill : (playerStat.kill_count || 0);
     this.death = playerStat.death !== undefined ? playerStat.death : (playerStat.death_count || 0);
     this.assist = playerStat.assist !== undefined ? playerStat.assist : (playerStat.assist_count || 0);
