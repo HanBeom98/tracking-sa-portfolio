@@ -20,12 +20,13 @@ export class SaRepository {
   async initMeta() {
     if (this.meta.grade && this.meta.grade.length > 0) return;
     try {
-      // Use apiClient to include API Key and handle base URL
+      // Fetch from local infrastructure/meta directory to bypass CORS
+      const baseUrl = './infra/meta';
       const [grade, season, tier, logo] = await Promise.all([
-        this.apiClient.getStaticMeta('grade'),
-        this.apiClient.getStaticMeta('season_grade'),
-        this.apiClient.getStaticMeta('tier'),
-        this.apiClient.getStaticMeta('logo').catch(() => null) // logo might not have .json extension or fail
+        fetch(`${baseUrl}/grade.json`).then(r => r.json()),
+        fetch(`${baseUrl}/season_grade.json`).then(r => r.json()),
+        fetch(`${baseUrl}/tier.json`).then(r => r.json()),
+        fetch(`${baseUrl}/logo.json`).then(r => r.json()).catch(() => null)
       ]);
       
       this.meta.grade = grade;
@@ -33,13 +34,24 @@ export class SaRepository {
       this.meta.tier = tier;
       this.meta.logo = logo;
 
-      console.log('[Repository] Meta data loaded successfully');
+      console.log('[Repository] Local meta data loaded successfully');
     } catch (err) {
-      console.warn('[Repository] Failed to load meta images via API, using fallback:', err);
-      // Fallback or empty arrays to prevent further errors
-      this.meta.grade = this.meta.grade || [];
-      this.meta.season_grade = this.meta.season_grade || [];
-      this.meta.tier = this.meta.tier || [];
+      console.warn('[Repository] Failed to load local meta images, trying API fallback:', err);
+      // Fallback to API if local fetch fails (unlikely after build)
+      try {
+        const [grade, season, tier] = await Promise.all([
+          this.apiClient.getStaticMeta('grade'),
+          this.apiClient.getStaticMeta('season_grade'),
+          this.apiClient.getStaticMeta('tier')
+        ]);
+        this.meta.grade = grade;
+        this.meta.season_grade = season;
+        this.meta.tier = tier;
+      } catch (apiErr) {
+        this.meta.grade = [];
+        this.meta.season_grade = [];
+        this.meta.tier = [];
+      }
     }
   }
 
