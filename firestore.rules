@@ -7,6 +7,7 @@ service cloud.firestore {
       return request.auth != null && (
         request.auth.token.email == "hantiger24@naver.com" || 
         request.auth.token.email == "admin@trackingsa.com" ||
+        request.auth.token.email == "bjs5739@naver.com" ||
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin"
       );
     }

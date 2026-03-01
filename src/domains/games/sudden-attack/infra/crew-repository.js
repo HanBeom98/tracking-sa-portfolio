@@ -12,7 +12,8 @@ export class CrewRepository {
     // List of Administrators and Moderators (Staff)
     this.STAFF_EMAILS = [
       'admin@trackingsa.com', 
-      'hantiger24@naver.com' 
+      'hantiger24@naver.com',
+      'bjs5739@naver.com'
     ];
   }
 
