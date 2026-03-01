@@ -159,19 +159,25 @@ export class CrewRepository {
   }
 
   /**
-   * Smart Team Balancer Algorithm
-   * Splits selected members into two teams with the closest total MMR possible.
-   * @param {Array} selectedMembers - Array of member objects { characterName, mmr }
+   * Smart Team Balancer Algorithm - Position Aware
+   * Distributes snipers evenly first, then balances total MMR.
+   * @param {Array} selectedMembers - Array of { characterName, mmr, position }
    */
   balanceTeams(selectedMembers) {
     if (selectedMembers.length < 2) return null;
-    const n = selectedMembers.length;
-    const teamSize = Math.floor(n / 2);
+
+    const snipers = selectedMembers.filter(m => m.position === 'sniper');
+    const riflers = selectedMembers.filter(m => m.position === 'rifler');
     
+    // Total team size target
+    const totalN = selectedMembers.length;
+    const teamSize = Math.floor(totalN / 2);
+
     let bestSplit = { red: [], blue: [], diff: Infinity };
 
-    // Simple Combinatorial Optimization (For small sets like 10-16 players)
+    // Helper for combinations
     const combinations = (array, size) => {
+      if (size === 0) return [[]];
       const results = [];
       const f = (prefix, chars) => {
         for (let i = 0; i < chars.length; i++) {
@@ -184,17 +190,44 @@ export class CrewRepository {
       return results;
     };
 
-    const redTeamCombos = combinations(selectedMembers, teamSize);
-    
-    for (const redTeam of redTeamCombos) {
-      const blueTeam = selectedMembers.filter(m => !redTeam.includes(m));
-      
-      const redMMR = redTeam.reduce((sum, m) => sum + (m.mmr || 1200), 0);
-      const blueMMR = blueTeam.reduce((sum, m) => sum + (m.mmr || 1200), 0);
-      const diff = Math.abs(redMMR - blueMMR);
+    // 1. Split snipers as evenly as possible
+    const redSniperCount = Math.floor(snipers.length / 2);
+    const sniperCombos = combinations(snipers, redSniperCount);
 
-      if (diff < bestSplit.diff) {
-        bestSplit = { red: redTeam, blue: blueTeam, diff, redAvg: redMMR / teamSize, blueAvg: blueMMR / blueTeam.length };
+    // 2. For each sniper combination, balance the remaining riflers
+    for (const redSnipers of sniperCombos) {
+      const blueSnipers = snipers.filter(s => !redSnipers.includes(s));
+      
+      // How many riflers does Red team need?
+      const riflersNeededForRed = teamSize - redSnipers.length;
+      
+      if (riflersNeededForRed < 0 || riflersNeededForRed > riflers.length) continue;
+
+      const riflerCombos = combinations(riflers, riflersNeededForRed);
+      
+      for (const redRiflers of riflerCombos) {
+        const blueRiflers = riflers.filter(r => !redRiflers.includes(r));
+        
+        const redTeam = [...redSnipers, ...redRiflers];
+        const blueTeam = [...blueSnipers, ...blueRiflers];
+
+        // Ensure leftover players go to Blue if odd number
+        if (blueTeam.length + redTeam.length < totalN) {
+          const leftovers = riflers.filter(r => !redRiflers.includes(r) && !blueRiflers.includes(r));
+          blueTeam.push(...leftovers);
+        }
+
+        const redMMR = redTeam.reduce((sum, m) => sum + (m.mmr || 1200), 0);
+        const blueMMR = blueTeam.reduce((sum, m) => sum + (m.mmr || 1200), 0);
+        const diff = Math.abs(redMMR - blueMMR);
+
+        if (diff < bestSplit.diff) {
+          bestSplit = { 
+            red: redTeam, blue: blueTeam, diff, 
+            redAvg: redMMR / redTeam.length, 
+            blueAvg: blueMMR / blueTeam.length 
+          };
+        }
       }
     }
 

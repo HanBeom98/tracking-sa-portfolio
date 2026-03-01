@@ -218,22 +218,33 @@ closeBalancerBtn.addEventListener('click', () => {
 });
 
 function renderBalancerMemberList() {
-  balancerMemberList.innerHTML = currentRankings.map(m => `
-    <label class="balancer-item">
-      <input type="checkbox" value="${m.characterName}" data-mmr="${m.mmr}">
-      <span>${m.characterName}</span>
+  balancerMemberList.innerHTML = currentRankings.map((m, i) => `
+    <div class="balancer-item">
+      <input type="checkbox" id="m-${i}" value="${m.characterName}" data-mmr="${m.mmr}">
+      <label for="m-${i}">${m.characterName}</label>
       <span class="m-mmr">${m.mmr}</span>
-    </label>
+      <div class="pos-select">
+        <input type="radio" name="pos-${i}" value="rifler" id="r-${i}" checked>
+        <label for="r-${i}">🔫</label>
+        <input type="radio" name="pos-${i}" value="sniper" id="s-${i}">
+        <label for="s-${i}">🎯</label>
+      </div>
+    </div>
   `).join('');
 }
 
 calculateBalanceBtn.addEventListener('click', () => {
   const selected = [];
-  balancerMemberList.querySelectorAll('input:checked').forEach(cb => {
-    selected.push({
-      characterName: cb.value,
-      mmr: parseInt(cb.dataset.mmr)
-    });
+  balancerMemberList.querySelectorAll('.balancer-item').forEach(item => {
+    const cb = item.querySelector('input[type="checkbox"]');
+    if (cb.checked) {
+      const pos = item.querySelector('input[type="radio"]:checked').value;
+      selected.push({
+        characterName: cb.value,
+        mmr: parseInt(cb.dataset.mmr),
+        position: pos
+      });
+    }
   });
 
   if (selected.length < 2) {
@@ -243,8 +254,12 @@ calculateBalanceBtn.addEventListener('click', () => {
 
   const result = crewRepo.balanceTeams(selected);
   if (result) {
-    redTeamList.innerHTML = result.red.map(m => `<li>${m.characterName} (${m.mmr})</li>`).join('');
-    blueTeamList.innerHTML = result.blue.map(m => `<li>${m.characterName} (${m.mmr})</li>`).join('');
+    redTeamList.innerHTML = result.red.map(m => `
+      <li>${m.position === 'sniper' ? '🎯' : '🔫'} ${m.characterName} (${m.mmr})</li>
+    `).join('');
+    blueTeamList.innerHTML = result.blue.map(m => `
+      <li>${m.position === 'sniper' ? '🎯' : '🔫'} ${m.characterName} (${m.mmr})</li>
+    `).join('');
     redAvgMMR.textContent = `평균 MMR: ${Math.round(result.redAvg)}`;
     blueAvgMMR.textContent = `평균 MMR: ${Math.round(result.blueAvg)}`;
     balanceDiff.textContent = `팀 간 MMR 점수 차이: ${result.diff}점`;
