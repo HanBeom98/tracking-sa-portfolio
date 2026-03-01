@@ -157,4 +157,47 @@ export class CrewRepository {
     const user = window.firebase.auth().currentUser;
     return user && this.STAFF_EMAILS.includes(user.email);
   }
+
+  /**
+   * Smart Team Balancer Algorithm
+   * Splits selected members into two teams with the closest total MMR possible.
+   * @param {Array} selectedMembers - Array of member objects { characterName, mmr }
+   */
+  balanceTeams(selectedMembers) {
+    if (selectedMembers.length < 2) return null;
+    const n = selectedMembers.length;
+    const teamSize = Math.floor(n / 2);
+    
+    let bestSplit = { red: [], blue: [], diff: Infinity };
+
+    // Simple Combinatorial Optimization (For small sets like 10-16 players)
+    const combinations = (array, size) => {
+      const results = [];
+      const f = (prefix, chars) => {
+        for (let i = 0; i < chars.length; i++) {
+          const nextPrefix = prefix.concat([chars[i]]);
+          if (nextPrefix.length === size) results.push(nextPrefix);
+          else f(nextPrefix, chars.slice(i + 1));
+        }
+      };
+      f([], array);
+      return results;
+    };
+
+    const redTeamCombos = combinations(selectedMembers, teamSize);
+    
+    for (const redTeam of redTeamCombos) {
+      const blueTeam = selectedMembers.filter(m => !redTeam.includes(m));
+      
+      const redMMR = redTeam.reduce((sum, m) => sum + (m.mmr || 1200), 0);
+      const blueMMR = blueTeam.reduce((sum, m) => sum + (m.mmr || 1200), 0);
+      const diff = Math.abs(redMMR - blueMMR);
+
+      if (diff < bestSplit.diff) {
+        bestSplit = { red: redTeam, blue: blueTeam, diff, redAvg: redMMR / teamSize, blueAvg: blueMMR / blueTeam.length };
+      }
+    }
+
+    return bestSplit;
+  }
 }

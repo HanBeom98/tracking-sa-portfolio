@@ -35,6 +35,22 @@ const adminPanel = document.getElementById('adminPanel');
 const applicationList = document.getElementById('applicationList');
 const closeAdminBtn = document.getElementById('closeAdminBtn');
 
+// Balancer DOM Elements
+const balancerBtn = document.getElementById('balancerBtn');
+const balancerModal = document.getElementById('balancerModal');
+const closeBalancerBtn = document.getElementById('closeBalancerBtn');
+const balancerMemberList = document.getElementById('balancerMemberList');
+const calculateBalanceBtn = document.getElementById('calculateBalanceBtn');
+const balancerResult = document.getElementById('balancerResult');
+const redTeamList = document.getElementById('redTeamList');
+const blueTeamList = document.getElementById('blueTeamList');
+const redAvgMMR = document.getElementById('redAvgMMR');
+const blueAvgMMR = document.getElementById('blueAvgMMR');
+const balanceDiff = document.getElementById('balanceDiff');
+
+// State
+let currentRankings = [];
+
 // Recent Searches Management
 const STORAGE_KEY = 'sa_recent_searches';
 
@@ -133,30 +149,32 @@ async function initCrew() {
   }
 
   // 1. Fetch & Render Rankings
-  const rankings = await crewRepo.getRankings();
-  const members = rankings.map(r => r.characterName);
+  currentRankings = await crewRepo.getRankings();
+  const members = currentRankings.map(r => r.characterName);
   repository.setCrewMembers(members);
 
   const rankingComp = document.createElement('sa-crew-ranking');
-  rankingComp.rankings = rankings;
+  rankingComp.rankings = currentRankings;
   crewRankingSection.innerHTML = '';
   crewRankingSection.appendChild(rankingComp);
 
   // 2. Auth & Admin Setup
   if (typeof window.firebase !== 'undefined' && window.firebase.auth) {
     window.firebase.auth().onAuthStateChanged(user => {
-      if (crewRepo.isAdmin()) {
+      if (crewRepo.isStaff()) {
         adminMenuBtn.classList.remove('hidden');
+        balancerBtn.classList.remove('hidden');
         renderAdminExtraActions();
+      } else {
+        adminMenuBtn.classList.add('hidden');
+        balancerBtn.classList.add('hidden');
       }
     });
   }
 }
 
 function renderAdminExtraActions() {
-  // Add Settle Button to admin panel if not exists
   if (adminPanel.querySelector('.settle-btn')) return;
-  
   const actionBar = document.createElement('div');
   actionBar.className = 'admin-actions-bar';
   actionBar.innerHTML = `
@@ -169,38 +187,70 @@ function renderAdminExtraActions() {
     const settleBtn = actionBar.querySelector('#settleMMRBtn');
     settleBtn.disabled = true;
     settleBtn.textContent = '정산 분석 중...';
-
     try {
       const nickname = searchInput.value.trim();
-      if (!nickname) {
-        alert('정산 기준이 될 캐릭터를 먼저 검색해주세요.');
-        return;
-      }
-
+      if (!nickname) { alert('정산 기준이 될 캐릭터를 먼저 검색해주세요.'); return; }
       const player = await service.searchPlayer(nickname);
       const matches = await service.getRecentMatches(player.ouid, player.nickname);
       const crewMatches = matches.filter(m => m.isCustomMatch);
-
-      if (crewMatches.length === 0) {
-        alert('정산할 새로운 내전 기록이 없습니다.');
-        return;
-      }
-
+      if (crewMatches.length === 0) { alert('정산할 새로운 내전 기록이 없습니다.'); return; }
       const settledIds = await crewRepo.settleMatches(crewMatches);
       if (settledIds.length > 0) {
         alert(`${settledIds.length}개의 매치가 정산되었습니다! 랭킹을 갱신합니다.`);
-        initCrew(); // Refresh ranking board
-      } else {
-        alert('모든 매치가 이미 정산되어 있습니다.');
-      }
-    } catch (err) {
-      alert('정산 처리 중 오류 발생: ' + err.message);
-    } finally {
-      settleBtn.disabled = false;
-      settleBtn.textContent = '⚡ 최근 내전 MMR 정산하기';
-    }
+        initCrew();
+      } else { alert('모든 매치가 이미 정산되어 있습니다.'); }
+    } catch (err) { alert('정산 처리 중 오류 발생: ' + err.message); }
+    finally { settleBtn.disabled = false; settleBtn.textContent = '⚡ 최근 내전 MMR 정산하기'; }
   });
 }
+
+/**
+ * Team Balancer Logic
+ */
+balancerBtn.addEventListener('click', () => {
+  balancerModal.classList.remove('hidden');
+  renderBalancerMemberList();
+});
+
+closeBalancerBtn.addEventListener('click', () => {
+  balancerModal.classList.add('hidden');
+  balancerResult.classList.add('hidden');
+});
+
+function renderBalancerMemberList() {
+  balancerMemberList.innerHTML = currentRankings.map(m => `
+    <label class="balancer-item">
+      <input type="checkbox" value="${m.characterName}" data-mmr="${m.mmr}">
+      <span>${m.characterName}</span>
+      <span class="m-mmr">${m.mmr}</span>
+    </label>
+  `).join('');
+}
+
+calculateBalanceBtn.addEventListener('click', () => {
+  const selected = [];
+  balancerMemberList.querySelectorAll('input:checked').forEach(cb => {
+    selected.push({
+      characterName: cb.value,
+      mmr: parseInt(cb.dataset.mmr)
+    });
+  });
+
+  if (selected.length < 2) {
+    alert('최소 2명 이상의 멤버를 선택해주세요.');
+    return;
+  }
+
+  const result = crewRepo.balanceTeams(selected);
+  if (result) {
+    redTeamList.innerHTML = result.red.map(m => `<li>${m.characterName} (${m.mmr})</li>`).join('');
+    blueTeamList.innerHTML = result.blue.map(m => `<li>${m.characterName} (${m.mmr})</li>`).join('');
+    redAvgMMR.textContent = `평균 MMR: ${Math.round(result.redAvg)}`;
+    blueAvgMMR.textContent = `평균 MMR: ${Math.round(result.blueAvg)}`;
+    balanceDiff.textContent = `팀 간 MMR 점수 차이: ${result.diff}점`;
+    balancerResult.classList.remove('hidden');
+  }
+});
 
 applyCrewBtn.addEventListener('click', () => crewModal.classList.remove('hidden'));
 closeModalBtn.addEventListener('click', () => crewModal.classList.add('hidden'));
@@ -208,7 +258,6 @@ closeModalBtn.addEventListener('click', () => crewModal.classList.add('hidden'))
 submitApplyBtn.addEventListener('click', async () => {
   const name = applyCharacterName.value.trim();
   if (!name) return;
-  
   submitApplyBtn.disabled = true;
   submitApplyBtn.textContent = '신청 중...';
   try {
@@ -230,12 +279,10 @@ closeAdminBtn.addEventListener('click', () => adminPanel.classList.add('hidden')
 async function renderApplications() {
   applicationList.innerHTML = '<p>신청 목록을 불러오는 중...</p>';
   const apps = await crewRepo.getPendingApplications();
-  
   if (apps.length === 0) {
     applicationList.innerHTML = '<p class="no-data">대기 중인 신청이 없습니다.</p>';
     return;
   }
-
   applicationList.innerHTML = apps.map(app => `
     <div class="app-item">
       <span class="app-name">${app.characterName}</span>
@@ -245,7 +292,6 @@ async function renderApplications() {
       </div>
     </div>
   `).join('');
-
   applicationList.querySelectorAll('.approve-btn').forEach(btn => {
     btn.addEventListener('click', async (e) => {
       const { id, name } = e.currentTarget.dataset;
@@ -253,11 +299,10 @@ async function renderApplications() {
         await crewRepo.approveApplication(id, name);
         alert(`${name} 승인 완료!`);
         renderApplications();
-        initCrew(); // Refresh list
+        initCrew();
       } catch (err) { alert('승인 처리 중 오류 발생'); }
     });
   });
-
   applicationList.querySelectorAll('.reject-btn').forEach(btn => {
     btn.addEventListener('click', async (e) => {
       const { id } = e.currentTarget.dataset;

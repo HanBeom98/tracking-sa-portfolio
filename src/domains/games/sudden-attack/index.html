@@ -18,11 +18,43 @@
       </div>
       <div id="recentSearches" class="recent-searches">
         <!-- Search chips will be here -->
-      </div>
       <div class="crew-actions">
         <button id="applyCrewBtn" class="sub-btn">⚔️ 내전 크루 신청</button>
         <button id="adminMenuBtn" class="sub-btn admin-only hidden">⚙️ 크루 관리</button>
+        <button id="balancerBtn" class="sub-btn staff-only hidden">⚖️ 팀 밸런서</button>
       </div>
+      ...
+      <!-- Team Balancer Modal -->
+      <div id="balancerModal" class="modal hidden">
+      <div class="modal-content balancer-modal">
+        <h3>⚖️ AI 스마트 팀 밸런서</h3>
+        <p>오늘 내전에 참여할 멤버들을 선택하세요 (짝수 인원 권장)</p>
+        <div id="balancerMemberList" class="balancer-member-grid">
+          <!-- Crew members with checkboxes will be here -->
+        </div>
+        <div id="balancerResult" class="balancer-result hidden">
+          <div class="team-split">
+            <div class="team red">
+              <h4>TEAM RED</h4>
+              <ul id="redTeamList"></ul>
+              <span class="avg" id="redAvgMMR"></span>
+            </div>
+            <div class="vs-circle">VS</div>
+            <div class="team blue">
+              <h4>TEAM BLUE</h4>
+              <ul id="blueTeamList"></ul>
+              <span class="avg" id="blueAvgMMR"></span>
+            </div>
+          </div>
+          <p class="balance-info" id="balanceDiff"></p>
+        </div>
+        <div class="modal-btns">
+          <button id="calculateBalanceBtn" class="primary">밸런스 맞추기</button>
+          <button id="closeBalancerBtn">닫기</button>
+        </div>
+      </div>
+      </div>
+
       <div id="loading" class="hidden">
         <div class="spinner"></div>
         <p id="loadingText">데이터를 불러오는 중...</p>
