@@ -194,17 +194,30 @@ async function initCrew() {
 }
 
 function renderAdminExtraActions() {
-  if (adminPanel.querySelector('.settle-btn')) return;
+  if (adminPanel.querySelector('.admin-actions-bar')) return;
+  
   const actionBar = document.createElement('div');
   actionBar.className = 'admin-actions-bar';
   actionBar.innerHTML = `
-    <button id="settleMMRBtn" class="settle-btn">⚡ 크루 전체 매치 스캔 & 일괄 정산</button>
-    <button id="seedMembersBtn" class="sub-btn" style="border-color:#ffcc00; color:#ffcc00;">🌱 초기 멤버 10명 강제 등록</button>
-    <button id="resetSeasonBtn" class="sub-btn" style="border-color:#ff4d4d; color:#ff4d4d; margin-left: auto;">🔥 시즌 초기화</button>
-    <p class="admin-hint" style="width:100%;">※ 모든 크루원의 최근 경기를 병렬로 긁어와 누락된 내전을 찾아 한 방에 정산합니다. (특정 캐릭터 검색 불필요)</p>
+    <div class="admin-main-btns" style="display:flex; gap:10px; width:100%; margin-bottom:15px;">
+      <button id="settleMMRBtn" class="settle-btn">⚡ 크루 전체 매치 스캔 & 일괄 정산</button>
+      <button id="resetSeasonBtn" class="sub-btn" style="border-color:#ff4d4d; color:#ff4d4d; margin-left: auto;">🔥 시즌 초기화</button>
+    </div>
+    <div class="admin-sub-btns" style="display:flex; gap:10px; width:100%; margin-bottom:15px;">
+      <button id="seedMembersBtn" class="sub-btn" style="border-color:#ffcc00; color:#ffcc00;">🌱 초기 멤버 강제 등록</button>
+    </div>
+    <div id="crewMemberListAdmin" class="crew-manage-list" style="width:100%; border-top:1px solid #333; padding-top:15px;">
+      <h4>👥 크루 멤버 관리</h4>
+      <div class="admin-member-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:10px; margin-top:10px;">
+        <!-- Member items will be injected here -->
+      </div>
+    </div>
+    <p class="admin-hint" style="width:100%; margin-top:10px;">※ 일괄 정산은 5명씩 병렬로 빠르게 진행됩니다. 닉네임이 바뀐 멤버는 자동으로 최신화됩니다.</p>
   `;
   actionBar.style.flexWrap = "wrap";
   adminPanel.appendChild(actionBar);
+
+  renderAdminMemberList();
 
   // Temporary Seed Logic
   actionBar.querySelector('#seedMembersBtn').addEventListener('click', async () => {
@@ -233,6 +246,7 @@ function renderAdminExtraActions() {
         await batch.commit();
         alert(`${successCount}명의 멤버 등록/동기화 완료!`);
         initCrew();
+        renderAdminMemberList();
       } catch (e) { alert('등록 실패: ' + e.message); }
     } else {
       alert('등록할 수 있는 유효한 OUID를 찾지 못했습니다.\n(이미 닉네임이 변경되었을 수 있습니다.)');
@@ -246,14 +260,15 @@ function renderAdminExtraActions() {
       await crewRepo.resetSeason();
       alert('시즌이 성공적으로 초기화되었습니다! (MMR 1200 복구)');
       initCrew();
+      renderAdminMemberList();
     } catch (e) { alert('초기화 실패: ' + e.message); }
   });
 
-  // Omni-Settlement Logic (Scan all crew members)
+  // Omni-Settlement Logic (Optimized Parallel Scan)
   actionBar.querySelector('#settleMMRBtn').addEventListener('click', async () => {
     const settleBtn = actionBar.querySelector('#settleMMRBtn');
     settleBtn.disabled = true;
-    settleBtn.textContent = '크루 닉네임 동기화 및 스캔 중...';
+    settleBtn.textContent = '닉네임 동기화 및 병렬 스캔 중...';
 
     try {
       if (currentRankings.length === 0) {
@@ -261,76 +276,71 @@ function renderAdminExtraActions() {
         return;
       }
 
-      const matchPromises = [];
-      for (let i = 0; i < currentRankings.length; i++) {
-        const member = currentRankings[i];
-        let targetOuid = member.id;
-        let currentNickname = member.characterName;
-        
-        // 1. Check if ID is OUID or Name-based
-        const isRealOuid = targetOuid.length >= 20 && /^[0-9a-f]+$/.test(targetOuid);
+      // CHUNK-BASED PARALLEL SCAN (Speed Booster)
+      const chunkSize = 5;
+      const allCrewMatches = [];
+      const uniqueMatchIds = new Set();
 
-        if (isRealOuid) {
-          // PROACTIVE SYNC: Get current nickname via OUID
-          try {
-            await new Promise(r => setTimeout(r, 150)); // Rate limit protection
-            const basic = await repository.apiClient.getPlayerBasic(targetOuid);
-            if (basic && basic.user_name && basic.user_name !== currentNickname) {
-              console.log(`[Admin] Syncing nickname: ${currentNickname} -> ${basic.user_name}`);
-              await crewRepo.updateNickname(targetOuid, basic.user_name);
-              currentNickname = basic.user_name; // Use latest for scan
-            }
-          } catch (err) {
-            console.warn(`[Admin] Failed to sync nickname for ${currentNickname}, using stored name.`);
-          }
-        } else {
-          // MIGRATION: docId is a Name, try to find real OUID
-          console.warn(`[Admin] Resolving OUID for ${currentNickname}...`);
-          try {
-            const realOuid = await repository.apiClient.getOuid(currentNickname);
-            if (realOuid) {
-              await crewRepo.migrateToOuid(member.id, realOuid);
-              targetOuid = realOuid;
-              // Also sync current name just in case
-              const basic = await repository.apiClient.getPlayerBasic(realOuid);
-              if (basic && basic.user_name) currentNickname = basic.user_name;
-            }
-          } catch (err) {
-            console.error(`[Admin] Could not find ${currentNickname} - likely changed name before migration.`);
-            continue;
-          }
-        }
+      for (let i = 0; i < currentRankings.length; i += chunkSize) {
+        const chunk = currentRankings.slice(i, i + chunkSize);
+        settleBtn.textContent = `스캔 중... (${i + chunk.length}/${currentRankings.length})`;
 
-        // 2. Queue Match Scanning
-        if (targetOuid) {
-          await new Promise(r => setTimeout(r, 200)); 
-          matchPromises.push(
-            service.getRecentMatches(targetOuid, currentNickname, 10).catch(() => [])
-          );
-        }
+        const chunkPromises = chunk.map(async (member) => {
+          let targetOuid = member.id;
+          let currentNickname = member.characterName;
+          
+          const isRealOuid = targetOuid.length >= 20 && /^[0-9a-f]+$/.test(targetOuid);
+
+          if (isRealOuid) {
+            try {
+              const basic = await repository.apiClient.getPlayerBasic(targetOuid);
+              if (basic && basic.user_name && basic.user_name !== currentNickname) {
+                console.log(`[Admin] Syncing nickname: ${currentNickname} -> ${basic.user_name}`);
+                await crewRepo.updateNickname(targetOuid, basic.user_name);
+                currentNickname = basic.user_name;
+              }
+            } catch (err) {}
+          } else {
+            try {
+              const realOuid = await repository.apiClient.getOuid(currentNickname);
+              if (realOuid) {
+                await crewRepo.migrateToOuid(member.id, realOuid);
+                targetOuid = realOuid;
+                const basic = await repository.apiClient.getPlayerBasic(realOuid);
+                if (basic && basic.user_name) currentNickname = basic.user_name;
+              }
+            } catch (err) { return []; }
+          }
+
+          if (targetOuid) {
+            return service.getRecentMatches(targetOuid, currentNickname, 10).catch(() => []);
+          }
+          return [];
+        });
+
+        const chunkResults = await Promise.all(chunkPromises);
+        chunkResults.flat().forEach(m => {
+          if (m.isCustomMatch && !uniqueMatchIds.has(m.matchId)) {
+            uniqueMatchIds.add(m.matchId);
+            allCrewMatches.push(m);
+          }
+        });
+
+        await new Promise(r => setTimeout(r, 300)); // Rate limit safety between chunks
       }
       
-      const allMatchesArrays = await Promise.all(matchPromises);
-      const uniqueMatches = new Map();
-      allMatchesArrays.flat().forEach(match => {
-        if (!uniqueMatches.has(match.matchId)) {
-          uniqueMatches.set(match.matchId, match);
-        }
-      });
-
-      const crewMatches = Array.from(uniqueMatches.values()).filter(m => m.isCustomMatch);
-      
-      if (crewMatches.length === 0) { 
-        alert('전체 크루의 최근 경기를 스캔했으나, 새로운 내전 기록이 없습니다.'); 
+      if (allCrewMatches.length === 0) { 
+        alert('전체 크루 스캔 결과, 새로운 내전 기록이 없습니다.'); 
         return; 
       }
 
-      settleBtn.textContent = `발견된 ${crewMatches.length}개 내전 정산 중...`;
-      const settledIds = await crewRepo.settleMatches(crewMatches);
+      settleBtn.textContent = `발견된 ${allCrewMatches.length}개 내전 정산 중...`;
+      const settledIds = await crewRepo.settleMatches(allCrewMatches);
       
       if (settledIds.length > 0) {
-        alert(`🎉 동기화 및 일괄 스캔 완료!\n총 ${settledIds.length}개의 누락된 내전이 정산되었습니다.`);
+        alert(`🎉 병렬 스캔 완료!\n총 ${settledIds.length}개의 새로운 내전이 정산되었습니다.`);
         initCrew(); 
+        renderAdminMemberList();
       } else { 
         alert('모든 매치가 이미 정산되어 있습니다.'); 
       }
@@ -340,6 +350,61 @@ function renderAdminExtraActions() {
       settleBtn.disabled = false; 
       settleBtn.textContent = '⚡ 크루 전체 매치 스캔 & 일괄 정산'; 
     }
+  });
+}
+
+function renderAdminMemberList() {
+  const container = adminPanel.querySelector('.admin-member-grid');
+  if (!container) return;
+
+  if (currentRankings.length === 0) {
+    container.innerHTML = '<p style="grid-column:1/-1;">멤버가 없습니다.</p>';
+    return;
+  }
+
+  container.innerHTML = currentRankings.map(m => {
+    const isRealOuid = m.id.length >= 20 && /^[0-9a-f]+$/.test(m.id);
+    return `
+      <div class="admin-member-item" style="background:#222; padding:10px; border-radius:5px; display:flex; flex-direction:column; gap:5px;">
+        <span style="font-weight:bold; color:${isRealOuid ? '#4caf50' : '#ff9800'};">
+          ${m.characterName} ${isRealOuid ? '' : '(구형)'}
+        </span>
+        <span style="font-size:0.8em; color:#888;">MMR: ${m.mmr} (${m.wins}W ${m.loses}L)</span>
+        <div style="display:flex; gap:5px; margin-top:5px;">
+          <button class="mini-btn update-name-btn" data-ouid="${m.id}" data-name="${m.characterName}" style="flex:1; font-size:0.7em; background:#333;">이름수정</button>
+          <button class="mini-btn delete-member-btn" data-ouid="${m.id}" data-name="${m.characterName}" style="flex:1; font-size:0.7em; background:#b71c1c;">삭제</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Delete Event
+  container.querySelectorAll('.delete-member-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const { ouid, name } = btn.dataset;
+      if (!confirm(`[${name}] 멤버를 크루에서 삭제하시겠습니까?\n이 작업은 MMR 기록을 모두 삭제하며 되돌릴 수 없습니다.`)) return;
+      try {
+        await crewRepo.deleteMember(ouid);
+        alert('삭제 완료');
+        initCrew();
+        renderAdminMemberList();
+      } catch (err) { alert('삭제 실패: ' + err.message); }
+    });
+  });
+
+  // Manual Update Name Event (For fixing PLAYER_NOT_FOUND)
+  container.querySelectorAll('.update-name-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const { ouid, name } = btn.dataset;
+      const newName = prompt(`[${name}] 님의 새로운 닉네임을 입력하세요.\n(PLAYER_NOT_FOUND 에러 해결용)`, name);
+      if (!newName || newName === name) return;
+      try {
+        await crewRepo.updateNicknameManually(ouid, newName);
+        alert('닉네임 업데이트 완료. 이제 일괄 정산을 돌려보세요.');
+        initCrew();
+        renderAdminMemberList();
+      } catch (err) { alert('업데이트 실패: ' + err.message); }
+    });
   });
 }
 
@@ -455,6 +520,7 @@ async function renderApplications() {
         alert(`${name} 승인 완료!`);
         renderApplications();
         initCrew();
+        renderAdminMemberList();
       } catch (err) { alert('승인 처리 중 오류 발생'); }
     });
   });

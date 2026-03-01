@@ -66,6 +66,25 @@ export class CrewRepository {
   }
 
   /**
+   * Delete a member from the crew
+   */
+  async deleteMember(ouid) {
+    if (!this.db || !ouid) return;
+    return this.db.collection(this.MEMBERS_COLLECTION).doc(ouid).delete();
+  }
+
+  /**
+   * Manually update a member's nickname (for fixing PLAYER_NOT_FOUND issues)
+   */
+  async updateNicknameManually(ouid, newNickname) {
+    if (!this.db || !ouid || !newNickname) return;
+    return this.db.collection(this.MEMBERS_COLLECTION).doc(ouid).update({
+      characterName: newNickname,
+      updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+    });
+  }
+
+  /**
    * Migrates a name-based document to an OUID-based document
    */
   async migrateToOuid(oldNameId, newOuid) {
