@@ -545,3 +545,30 @@ body.dark-theme {
 .close-panel {
   background: none; border: 1px solid #444; color: #888; padding: 8px 20px; border-radius: 6px; cursor: pointer;
 }
+
+/* ====== CREW STATS ANALYSIS ====== */
+.crew-stats-card {
+  margin-top: 30px;
+  background: linear-gradient(135deg, rgba(255, 204, 0, 0.05) 0%, rgba(20, 23, 36, 1) 100%);
+  border: 1px solid rgba(255, 204, 0, 0.2);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.crew-stats-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  border-bottom: 1px solid rgba(255, 204, 0, 0.1);
+  padding-bottom: 10px;
+}
+
+.crew-stats-header h3 { margin: 0; font-size: 16px; color: #ffcc00; text-transform: uppercase; letter-spacing: 0.5px; }
+.crew-grid { margin-top: 10px; }
+.stat-box.golden { border: 1px solid rgba(255, 204, 0, 0.1); }
+.gold-highlight { color: #ffcc00; text-shadow: 0 0 8px rgba(255, 204, 0, 0.4); }
+
+.crew-stats-card.no-crew {
+  text-align: center; color: #555; font-size: 14px; padding: 30px; border-style: dashed;
+}

@@ -135,6 +135,34 @@ export class SaStatsSummary extends HTMLElement {
       ? `<div class="troll-warning">🚨 최근 5경기 중 <strong>${data.trollMatches}번</strong>의 치명적인 트롤링이 감지되었습니다. (K/D 0.5 미만 & 5데스 이상)</div>`
       : '';
 
+    const crewAnalysis = data.crewMatchCount > 0
+      ? `
+        <div class="crew-stats-card">
+          <div class="crew-stats-header">
+            <h3>⚔️ 우리 크루 내전 기록 분석</h3>
+            <span class="match-count">최근 내전 참여: <strong>${data.crewMatchCount}회</strong></span>
+          </div>
+          <div class="stats-grid crew-grid">
+            <div class="stat-box golden">
+              <label>내전 전용 K/D</label>
+              <span class="value gold-highlight">${data.crewKd}</span>
+            </div>
+            <div class="stat-box golden">
+              <label>내전 승률</label>
+              <span class="value gold-highlight">${data.crewWinRate}%</span>
+            </div>
+            <div class="stat-box golden">
+              <label>크루내 위상</label>
+              <span class="value">${data.crewWinRate >= 70 ? '핵심 에이스' : (data.crewWinRate >= 50 ? '든든한 국밥' : '열정적인 크루원')}</span>
+            </div>
+          </div>
+        </div>
+      ` : `
+        <div class="crew-stats-card no-crew">
+          <p>최근 5경기 중 우리 크루(8인 이상) 내전 기록이 없습니다.</p>
+        </div>
+      `;
+
     this.innerHTML = `
       <div class="stats-summary-card">
         ${trollWarning}
@@ -176,6 +204,8 @@ export class SaStatsSummary extends HTMLElement {
             </div>
           </div>
         </div>
+
+        ${crewAnalysis}
       </div>
     `;
   }

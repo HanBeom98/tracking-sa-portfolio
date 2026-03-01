@@ -51,6 +51,11 @@ export class RecentStats {
     this.playstyleTitle = "데이터 수집 중";
     this.playstyleIcon = "🕵️";
 
+    // Crew Match (내전) Stats
+    this.crewMatchCount = 0;
+    this.crewKd = "0.00";
+    this.crewWinRate = 0;
+
     // Calculate real stats from the last matches
     if (matches.length > 0) {
       const totalK = matches.reduce((sum, m) => sum + m.kill, 0);
@@ -73,7 +78,6 @@ export class RecentStats {
       let currentStreak = 0;
       let isWinStreak = null;
       for (const m of matches) {
-        // Assume matches are sorted by date descending (latest first)
         const isWin = m.matchResult.toUpperCase() === 'WIN';
         if (isWinStreak === null) {
           isWinStreak = isWin;
@@ -89,27 +93,32 @@ export class RecentStats {
         this.streakCount = currentStreak;
       }
 
-      // 2. Troll Meter (Matches with < 0.5 KD & > 5 Deaths)
+      // 2. Troll Meter
       this.trollMatches = matches.filter(m => {
         const kd = parseFloat(m.kd);
         return kd < 0.5 && m.death >= 5;
       }).length;
 
-      // 3. Radar Chart Scaling (0-100)
-      // Combat: K/D 2.0+ is 100
+      // 3. Crew Specific Stats (Filtering only isCustomMatch)
+      const crewMatches = matches.filter(m => m.isCustomMatch);
+      this.crewMatchCount = crewMatches.length;
+      if (this.crewMatchCount > 0) {
+        const ck = crewMatches.reduce((s, m) => s + m.kill, 0);
+        const cd = crewMatches.reduce((s, m) => s + m.death, 0);
+        const cw = crewMatches.filter(m => m.matchResult === 'WIN').length;
+        this.crewKd = cd > 0 ? (ck / cd).toFixed(2) : ck.toFixed(2);
+        this.crewWinRate = Math.round((cw / this.crewMatchCount) * 100);
+      }
+
+      // 4. Radar Chart Scaling
       this.radar.combat = Math.min(100, Math.max(0, (this.kd / 2.0) * 100));
-      // Survival: 0 avg deaths is 100, 10 avg deaths is 0
       this.radar.survival = Math.min(100, Math.max(0, 100 - (this.avgD * 10)));
-      // Teamwork: 3 avg assists is 100
       this.radar.teamwork = Math.min(100, Math.max(0, (this.totalAssists / matches.length) / 3 * 100));
-      // Precision: Headshot rate 50%+ is 100
       this.radar.precision = Math.min(100, Math.max(0, (this.headshotRate / 50) * 100));
-      // Victory: Win rate 100% is 100
       this.radar.victory = this.winRate;
 
-      // 4. Determine Playstyle Title
+      // 5. Determine Playstyle Title
       const maxStat = Object.keys(this.radar).reduce((a, b) => this.radar[a] > this.radar[b] ? a : b);
-      
       if (this.trollMatches >= Math.ceil(matches.length / 2)) {
         this.playstyleTitle = "아낌없이 주는 나무 (상대팀 국밥)";
         this.playstyleIcon = "🚨";
@@ -125,12 +134,8 @@ export class RecentStats {
         this.playstyleIcon = titles[maxStat].i;
       }
     } else {
-      this.avgK = 0;
-      this.avgD = 0;
-      this.totalKills = 0;
-      this.totalDeaths = 0;
-      this.totalAssists = 0;
-      this.mostPlayedMap = "데이터 없음";
+      this.avgK = 0; this.avgD = 0; this.totalKills = 0; this.totalDeaths = 0;
+      this.totalAssists = 0; this.mostPlayedMap = "데이터 없음";
     }
   }
 }
