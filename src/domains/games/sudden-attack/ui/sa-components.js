@@ -22,7 +22,6 @@ export class SaPlayerCard extends HTMLElement {
             <span class="season-rank">(${data.seasonRank})</span>
           </div>
         </div>
-...
 
         <div class="sa-body">
           <div class="tier-section">
@@ -121,6 +120,10 @@ export class SaStatsSummary extends HTMLElement {
       return;
     }
 
+    // Try to determine the actual number of matches used for calculation
+    const matchCount = data.totalKills > 0 ? Math.round(data.totalKills / (data.avgK || 1)) : 0;
+    const displayCount = Math.max(matchCount, 0);
+
     // Update Player Card Streak Badge if it exists on the page
     const streakBadge = document.getElementById('streakBadge');
     if (streakBadge) {
@@ -136,7 +139,7 @@ export class SaStatsSummary extends HTMLElement {
     }
 
     const trollWarning = data.trollMatches > 0 
-      ? `<div class="troll-warning">🚨 최근 5경기 중 <strong>${data.trollMatches}번</strong>의 치명적인 트롤링이 감지되었습니다. (K/D 0.5 미만 & 5데스 이상)</div>`
+      ? `<div class="troll-warning">🚨 최근 ${displayCount}경기 중 <strong>${data.trollMatches}번</strong>의 치명적인 트롤링이 감지되었습니다. (K/D 0.5 미만 & 5데스 이상)</div>`
       : '';
 
     const crewAnalysis = data.crewMatchCount > 0
@@ -144,15 +147,15 @@ export class SaStatsSummary extends HTMLElement {
         <div class="crew-stats-card">
           <div class="crew-stats-header">
             <h3>⚔️ 우리 크루 내전 기록 분석</h3>
-            <span class="match-count">최근 내전 참여: <strong>${data.crewMatchCount}회</strong></span>
+            <span class="match-count">누적 내전 참여: <strong>${data.crewMatchCount}회</strong></span>
           </div>
           <div class="stats-grid crew-grid">
             <div class="stat-box golden">
-              <label>내전 전용 K/D</label>
+              <label>내전 현재 MMR</label>
               <span class="value gold-highlight">${data.crewKd}</span>
             </div>
             <div class="stat-box golden">
-              <label>내전 승률</label>
+              <label>내전 누적 승률</label>
               <span class="value gold-highlight">${data.crewWinRate}%</span>
             </div>
             <div class="stat-box golden">
@@ -163,7 +166,7 @@ export class SaStatsSummary extends HTMLElement {
         </div>
       ` : `
         <div class="crew-stats-card no-crew">
-          <p>최근 5경기 중 우리 크루(8인 이상) 내전 기록이 없습니다.</p>
+          <p>최근 경기 중 우리 크루(8인 이상) 내전 기록이 없습니다.</p>
         </div>
       `;
 
@@ -185,7 +188,7 @@ export class SaStatsSummary extends HTMLElement {
           
           <div class="text-stats-section">
             <div class="stats-summary-header">
-              <h3>최근 5경기 정밀 분석</h3>
+              <h3>최근 ${displayCount}경기 정밀 분석</h3>
               <span class="most-played-map">선호 맵: <strong>${data.mostPlayedMap}</strong></span>
             </div>
             <div class="stats-grid">
@@ -198,11 +201,11 @@ export class SaStatsSummary extends HTMLElement {
                 <span class="value highlight">${data.winRate}%</span>
               </div>
               <div class="stat-box">
-                <label>평균 KDA</label>
-                <span class="value">${data.avgK} / ${data.avgD} / ${data.totalAssists / 5}</span>
+                <label>평균 K/D/A</label>
+                <span class="value">${data.avgK} / ${data.avgD} / ${(data.totalAssists / (displayCount || 1)).toFixed(1)}</span>
               </div>
               <div class="stat-box">
-                <label>5경기 합계</label>
+                <label>${displayCount}경기 합계</label>
                 <span class="value">${data.totalKills}K ${data.totalDeaths}D</span>
               </div>
             </div>
