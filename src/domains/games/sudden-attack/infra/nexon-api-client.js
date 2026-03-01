@@ -29,12 +29,17 @@ export class NexonApiClient {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error(`[NexonAPI Error Response] Status: ${response.status}`, JSON.stringify(errorData, null, 2));
-      
       const message = errorData.error?.message || "";
       const isTestKey = this.apiKey.startsWith('test_');
       
-      if (response.status === 400 && message.includes("valid parameter")) {
+      // Quiet down logging for character not found (400 + valid parameter)
+      const isNotFound = response.status === 400 && message.includes("valid parameter");
+      
+      if (!isNotFound) {
+        console.error(`[NexonAPI Error Response] Status: ${response.status}`, JSON.stringify(errorData, null, 2));
+      }
+      
+      if (isNotFound) {
         if (isTestKey) throw new Error('TEST_KEY_LIMITATION');
         throw new Error('PLAYER_NOT_FOUND');
       }
