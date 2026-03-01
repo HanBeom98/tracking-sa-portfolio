@@ -238,8 +238,12 @@ function renderAdminExtraActions() {
     try {
       await crewRepo.resetSeason();
       alert('시즌이 성공적으로 초기화되었습니다! (MMR 1200 복구)');
-      location.reload();
-    } catch (e) { alert('초기화 실패: ' + e.message); }
+      // Add a delay and force a hard reload to prevent race conditions
+      setTimeout(() => location.reload(true), 500);
+    } catch (e) { 
+      console.error('시즌 초기화 실패:', e);
+      alert('초기화 실패: ' + e.message); 
+    }
   });
 
   // Omni-Settlement Logic (Scan all crew members)
