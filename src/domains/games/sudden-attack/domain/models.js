@@ -9,17 +9,25 @@ export class Player {
     this.totalExp = rank.grade_exp || 0;
     this.seasonRank = rank.season_grade || "";
     
+    // Image URLs from Meta API
+    this.rankImage = basic.grade_image || "";
+    this.seasonRankImage = basic.season_grade_image || "";
+    
     // Competitive Tier Info
     if (tier) {
       this.soloTier = tier.solo_rank_match_tier || "UNRANK";
       this.soloScore = tier.solo_rank_match_score || 0;
+      this.soloImage = tier.solo_image || "";
       this.partyTier = tier.party_rank_match_tier || "UNRANK";
       this.partyScore = tier.party_rank_match_score || 0;
+      this.partyImage = tier.party_image || "";
     } else {
       this.soloTier = "UNRANK";
       this.soloScore = 0;
+      this.soloImage = "";
       this.partyTier = "UNRANK";
       this.partyScore = 0;
+      this.partyImage = "";
     }
   }
 }

@@ -69,11 +69,13 @@ body.dark-theme {
   padding-bottom: 15px;
 }
 
-.profile-main { display: flex; align-items: baseline; gap: 12px; }
+.profile-main { display: flex; align-items: center; gap: 12px; }
+.rank-icon-wrapper { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
+.rank-icon { max-width: 100%; max-height: 100%; object-fit: contain; }
 .nickname { font-size: 32px; font-weight: bold; color: #00d2ff; }
 .clan-name { font-size: 18px; color: #ffcc00; font-weight: 600; }
 
-.profile-sub { display: flex; gap: 10px; color: #888; font-size: 16px; }
+.profile-sub { display: flex; gap: 10px; color: #888; font-size: 16px; padding-left: 44px; }
 .rank-name { color: #fff; font-weight: 500; }
 .season-rank { font-style: italic; }
 
@@ -104,14 +106,33 @@ body.dark-theme {
 .tier-item.party { border-top: 3px solid #ffcc00; }
 .tier-item.solo { border-top: 3px solid #00d2ff; }
 
-.tier-item label { font-size: 12px; color: #888; margin-bottom: 5px; }
-.tier-value { font-size: 20px; font-weight: 800; color: #fff; }
-.tier-score { font-size: 14px; color: #00d2ff; margin-top: 5px; }
+.tier-item label { font-size: 12px; color: #888; margin-bottom: 10px; }
+
+.tier-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.tier-medal {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+}
+
+.tier-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.tier-value { font-size: 18px; font-weight: 800; color: #fff; }
+.tier-score { font-size: 14px; color: #00d2ff; margin-top: 2px; }
 
 .stat-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
+  padding-left: 10px;
 }
 
 .stat-item label { display: block; color: #888; margin-bottom: 5px; font-size: 14px; }

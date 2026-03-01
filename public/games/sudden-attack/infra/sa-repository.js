@@ -7,12 +7,49 @@ import { Player, MatchRecord, RecentStats } from '../domain/models.js';
 export class SaRepository {
   constructor(apiClient) {
     this.apiClient = apiClient;
+    this.meta = {
+      grade: [],
+      season_grade: [],
+      tier: []
+    };
+  }
+
+  /**
+   * Pre-load metadata for image mapping
+   */
+  async initMeta() {
+    if (this.meta.grade.length > 0) return;
+    try {
+      const [grade, season, tier] = await Promise.all([
+        fetch('https://open.api.nexon.com/static/suddenattack/meta/grade.json').then(r => r.json()),
+        fetch('https://open.api.nexon.com/static/suddenattack/meta/season_grade.json').then(r => r.json()),
+        fetch('https://open.api.nexon.com/static/suddenattack/meta/tier.json').then(r => r.json())
+      ]);
+      this.meta.grade = grade;
+      this.meta.season_grade = season;
+      this.meta.tier = tier;
+    } catch (err) {
+      console.warn('[Repository] Failed to load meta images:', err);
+    }
+  }
+
+  _getGradeImage(name) {
+    return this.meta.grade.find(m => m.grade === name)?.grade_image || "";
+  }
+
+  _getSeasonGradeImage(name) {
+    return this.meta.season_grade.find(m => m.season_grade === name)?.season_grade_image || "";
+  }
+
+  _getTierImage(name) {
+    return this.meta.tier.find(m => m.tier === name)?.tier_image || "";
   }
 
   /**
    * Resolve a player by character name
    */
   async getPlayer(characterName) {
+    await this.initMeta();
     const ouid = await this.apiClient.getOuid(characterName);
     const [basic, rank, tier] = await Promise.all([
       this.apiClient.getPlayerBasic(ouid),
@@ -20,9 +57,13 @@ export class SaRepository {
       this.apiClient.getPlayerTier(ouid)
     ]);
 
-    console.log('[Repository] Player Basic Info:', JSON.stringify(basic, null, 2));
-    console.log('[Repository] Player Rank Info:', JSON.stringify(rank, null, 2));
-    console.log('[Repository] Player Tier Info:', JSON.stringify(tier, null, 2));
+    // Map Images
+    basic.grade_image = this._getGradeImage(rank.grade);
+    basic.season_grade_image = this._getSeasonGradeImage(rank.season_grade);
+    if (tier) {
+      tier.solo_image = this._getTierImage(tier.solo_rank_match_tier);
+      tier.party_image = this._getTierImage(tier.party_rank_match_tier);
+    }
     
     return new Player(ouid, basic, rank, tier);
   }
