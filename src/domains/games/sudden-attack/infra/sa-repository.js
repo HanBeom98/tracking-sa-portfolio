@@ -48,8 +48,7 @@ export class SaRepository {
       { type: "클랜전", mode: "폭파미션" },
       { type: "랭크전", mode: "폭파미션" },
       { type: "일반전", mode: "폭파미션" },
-      { type: "일반전", mode: "팀데스매치" },
-      { type: "랭크전", mode: "팀데스매치" }
+      { type: "일반전", mode: "데스매치" }
     ];
 
     const combinedMatches = [];
