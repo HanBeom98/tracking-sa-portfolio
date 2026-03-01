@@ -43,13 +43,8 @@ export class SaRepository {
    * Fetch recent matches for a player (Resilient Sequential Scan)
    */
   async getRecentMatches(ouid, limit = 5, nickname = "") {
-    // Correct combinations based on Korean string parameters
-    const combinations = [
-      { type: "클랜전", mode: "폭파미션" },
-      { type: "랭크전", mode: "폭파미션" },
-      { type: "일반전", mode: "폭파미션" },
-      { type: "일반전", mode: "데스매치" }
-    ];
+    // We use ANY match_type to catch all records in one go for each mode
+    const modes = ["폭파미션", "데스매치", "개인전", "점령전", "생존모드"];
 
     const combinedMatches = [];
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -77,16 +72,16 @@ export class SaRepository {
       console.log(`[Repository] Starting deep scan for OUID: ${ouid}`);
       
       for (const date of dates) {
-        for (const combo of combinations) {
+        for (const mode of modes) {
           try {
-            await delay(500);
-            const data = await this.apiClient.getMatchList(ouid, combo.type, combo.mode, date);
+            await delay(400); // 0.4s delay
+            // We omit match_type to get all (Rank, Clan, General)
+            const data = await this.apiClient.getMatchList(ouid, "", mode, date);
             
-            // SA API uses 'match' as root key
             const matches = (data.match || []).map(m => ({ 
               ...m, 
-              typeName: `${combo.type}(${combo.mode})`,
-              match_date: m.date_match // Map to internal field name
+              typeName: mode, // Just mode name
+              match_date: m.date_match
             }));
             
             for (const m of matches) {
@@ -96,7 +91,7 @@ export class SaRepository {
             }
 
             if (matches.length > 0) {
-              console.log(`[Repository] Found ${matches.length} matches for ${combo.type} - ${combo.mode}`);
+              console.log(`[Repository] Found ${matches.length} matches for mode: ${mode}`);
             }
           } catch (err) {
             // Silence common 400s
