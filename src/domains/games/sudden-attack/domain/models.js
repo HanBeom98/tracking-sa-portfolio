@@ -148,7 +148,7 @@ export class RecentStats {
 }
 
 export class MatchRecord {
-  constructor(detail, typeName = "", targetUserName = "") {
+  constructor(detail, typeName = "", targetUserName = "", crewData = { names: [], ouids: [] }) {
     this.matchId = detail.match_id;
     this.matchTypeName = typeName;
     this.mapName = detail.match_map || detail.map_name || "Unknown Map";
@@ -162,15 +162,24 @@ export class MatchRecord {
     
     if (detail.match_detail && Array.isArray(detail.match_detail)) {
       // 1. Process Scoreboard Data
-      this.allPlayerStats = detail.match_detail.map(p => ({
-        nickname: p.user_name,
-        kill: p.kill || p.kill_count || 0,
-        death: p.death || p.death_count || 0,
-        assist: p.assist || p.assist_count || 0,
-        kd: p.death > 0 ? (p.kill / p.death).toFixed(2) : (p.kill > 0 ? p.kill.toFixed(2) : "0.00"),
-        result: p.match_result === "1" ? "WIN" : (p.match_result === "2" ? "LOSE" : p.match_result),
-        isCrew: CREW_MEMBERS.some(crew => crew.toLowerCase() === (p.user_name || "").toLowerCase())
-      }));
+      this.allPlayerStats = detail.match_detail.map(p => {
+        const nickname = p.user_name || "";
+        const normalizedName = nickname.toLowerCase().trim();
+        
+        // Dynamic detection using Firestore crew list + static fallback
+        const isCrew = (crewData.names || []).some(c => c.toLowerCase().trim() === normalizedName) ||
+                       CREW_MEMBERS.some(c => c.toLowerCase().trim() === normalizedName);
+
+        return {
+          nickname: nickname,
+          kill: p.kill || p.kill_count || 0,
+          death: p.death || p.death_count || 0,
+          assist: p.assist || p.assist_count || 0,
+          kd: p.death > 0 ? (p.kill / p.death).toFixed(2) : (p.kill > 0 ? p.kill.toFixed(2) : "0.00"),
+          result: p.match_result === "1" ? "WIN" : (p.match_result === "2" ? "LOSE" : p.match_result),
+          isCrew: isCrew
+        };
+      });
 
       // 2. Identify Crew and Custom Match
       this.participants = detail.match_detail.map(p => p.user_name);

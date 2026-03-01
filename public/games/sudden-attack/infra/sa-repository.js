@@ -139,20 +139,23 @@ export class SaRepository {
         .slice(0, limit);
       
       const details = [];
+      const crewData = { names: this.crewMembers, ouids: this.crewOuids };
+
       for (const m of sortedMatches) {
         try {
           await delay(100);
           const detail = await this.apiClient.getMatchDetail(m.match_id);
-          details.push(new MatchRecord(detail, m.typeName, nickname));
+          details.push(new MatchRecord(detail, m.typeName, nickname, crewData));
         } catch (err) {
           details.push(new MatchRecord({
+            match_id: m.match_id,
             match_result: m.match_result,
             match_date: m.match_date,
             kill: m.kill,
             death: m.death,
             assist: m.assist,
-            map_name: m.match_mode 
-          }, m.typeName, nickname));
+            map_name: m.match_mode || "알 수 없음"
+          }, m.typeName, nickname, crewData));
         }
       }
       return details;
