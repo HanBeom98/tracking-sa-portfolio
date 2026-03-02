@@ -129,14 +129,31 @@ export class CrewRepository {
   }
 
   /**
-   * Explicitly add a nickname to a player's history (for Auto-Discovery)
+   * Explicitly add a nickname to a player's history (Robust version)
    */
   async addNicknameToHistory(ouid, nicknameToAdd) {
     if (!this.db || !ouid || !nicknameToAdd) return;
     try {
-      const docRef = this.db.collection(this.MEMBERS_COLLECTION).doc(ouid);
-      const doc = await docRef.get();
-      if (!doc.exists) return;
+      // 1. Try finding by OUID first (Standard)
+      let docRef = this.db.collection(this.MEMBERS_COLLECTION).doc(ouid);
+      let doc = await docRef.get();
+
+      // 2. If not found by OUID, search by characterName field
+      if (!doc.exists) {
+        const snapshot = await this.db.collection(this.MEMBERS_COLLECTION)
+          .where('characterName', '==', nicknameToAdd) // It might be under an old name ID
+          .limit(1)
+          .get();
+        
+        if (!snapshot.empty) {
+          docRef = snapshot.docs[0].ref;
+          doc = snapshot.docs[0];
+        } else {
+          // Final attempt: Search for ANY doc that has this OUID in a field (if any)
+          // For now, if we can't find the doc, we can't update history
+          return;
+        }
+      }
 
       const data = doc.data();
       const currentName = data.characterName;
@@ -146,7 +163,8 @@ export class CrewRepository {
       if (currentName === nicknameToAdd || previousNames.includes(nicknameToAdd)) return;
 
       previousNames.push(nicknameToAdd);
-      console.log(`[CrewRepo] Historical name linked: ${ouid} -> ${nicknameToAdd}`);
+      console.log(`[CrewRepo] Successfully linked ${nicknameToAdd} to member history.`);
+      
       return docRef.update({
         previousNames: previousNames,
         updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
