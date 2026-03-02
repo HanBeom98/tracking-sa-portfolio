@@ -179,7 +179,10 @@ export class SaRepository {
       if (discoveredNames.size > 0 && this.crewRepository) {
         for (const oldName of discoveredNames) {
           console.log(`[Repository] Auto-discovered previous name: ${oldName} for OUID: ${ouid}`);
+          // 1. First trigger the general update (current name sync)
           await this.crewRepository.updateNickname(ouid, nickname); 
+          // 2. Then explicitly add the discovered old name to history
+          await this.crewRepository.addNicknameToHistory(ouid, oldName);
         }
       }
 

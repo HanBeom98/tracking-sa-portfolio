@@ -129,6 +129,34 @@ export class CrewRepository {
   }
 
   /**
+   * Explicitly add a nickname to a player's history (for Auto-Discovery)
+   */
+  async addNicknameToHistory(ouid, nicknameToAdd) {
+    if (!this.db || !ouid || !nicknameToAdd) return;
+    try {
+      const docRef = this.db.collection(this.MEMBERS_COLLECTION).doc(ouid);
+      const doc = await docRef.get();
+      if (!doc.exists) return;
+
+      const data = doc.data();
+      const currentName = data.characterName;
+      const previousNames = data.previousNames || [];
+
+      // Don't add if it's the current name or already in history
+      if (currentName === nicknameToAdd || previousNames.includes(nicknameToAdd)) return;
+
+      previousNames.push(nicknameToAdd);
+      console.log(`[CrewRepo] Historical name linked: ${ouid} -> ${nicknameToAdd}`);
+      return docRef.update({
+        previousNames: previousNames,
+        updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+      });
+    } catch (error) {
+      console.error('[CrewRepo] addNicknameToHistory failed:', error);
+    }
+  }
+
+  /**
    * Delete a member from the crew
    * Enhanced: Deletes by OUID and also attempts to delete legacy name-based doc
    */
