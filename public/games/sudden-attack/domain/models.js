@@ -1,9 +1,3 @@
-// Official Crew Members for Custom Match Detection
-export const CREW_MEMBERS = [
-  'Tracking', '결승', 'alt', '마미', '공대누비', 
-  'xion', '김성식', '이쪼룽', '맞고사망한대성', 'SinYang'
-];
-
 export class Player {
   constructor(ouid, basic, rank, tier, crewData = { names: [], ouids: [] }) {
     this.ouid = ouid;
@@ -18,8 +12,7 @@ export class Player {
     // Check if this player is part of the crew (Priority: OUID, Fallback: Name)
     const normalizedName = (this.nickname || "").toLowerCase().trim();
     this.isCrew = (crewData.ouids || []).includes(this.ouid) || 
-                  (crewData.names || []).some(c => (c || "").toLowerCase().trim() === normalizedName) ||
-                  CREW_MEMBERS.some(c => (c || "").toLowerCase().trim() === normalizedName);
+                  (crewData.names || []).some(c => (c || "").toLowerCase().trim() === normalizedName);
 
     this.rankImage = basic.grade_image || "";
     this.seasonRankImage = basic.season_grade_image || "";
@@ -117,7 +110,7 @@ export class RecentStats {
         this.crewWinRate = Math.round((cw / this.crewMatchCount) * 100);
       }
 
-      // 4. Radar Chart Scaling
+      // 4. Radar Chart Scaling (Mastery Curve Applied)
       const kd = this.kd;
       let combatScore = 0;
       if (kd <= 100) {
@@ -196,7 +189,6 @@ export class MatchRecord {
         const nickname = p.user_name || p.character_name || "";
         const normalizedName = nickname.toLowerCase().trim();
         
-        // Comprehensive field extraction from Nexon API (cnt_kill, cnt_death)
         const killValue = parseInt(p.kill || p.kill_count || p.cnt_kill || 0);
         const deathValue = parseInt(p.death || p.death_count || p.cnt_death || 0);
         const assistValue = parseInt(p.assist || p.assist_count || p.cnt_assist || 0);
@@ -211,9 +203,9 @@ export class MatchRecord {
           }
         }
 
+        // isCrew판별 시 하드코딩 명단(CREW_MEMBERS) 제거
         const isCrew = isSubject || 
-                       (crewData.names || []).some(c => (c || "").toLowerCase().trim() === normalizedName) ||
-                       CREW_MEMBERS.some(c => (c || "").toLowerCase().trim() === normalizedName);
+                       (crewData.names || []).some(c => (c || "").toLowerCase().trim() === normalizedName);
 
         return {
           nickname: nickname,
