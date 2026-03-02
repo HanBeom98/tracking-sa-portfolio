@@ -128,6 +128,7 @@ async function handleSearch() {
     if (memberData) {
       stats.crewMatchCount = (memberData.wins || 0) + (memberData.loses || 0);
       stats.crewWinRate = stats.crewMatchCount > 0 ? Math.round((memberData.wins / stats.crewMatchCount) * 100) : 0;
+      stats.crewMmr = memberData.mmr || 1200;
       
       const ck = memberData.crewKills || 0;
       const cd = memberData.crewDeaths || 0;

@@ -152,6 +152,10 @@ export class SaStatsSummary extends HTMLElement {
           <div class="stats-grid crew-grid">
             <div class="stat-box golden">
               <label>내전 현재 MMR</label>
+              <span class="value gold-highlight">${data.crewMmr}</span>
+            </div>
+            <div class="stat-box golden">
+              <label>내전 K/D</label>
               <span class="value gold-highlight">${data.crewKd}</span>
             </div>
             <div class="stat-box golden">
