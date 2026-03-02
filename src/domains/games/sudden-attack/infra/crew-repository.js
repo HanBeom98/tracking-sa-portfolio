@@ -3,7 +3,8 @@
  * Manages Crew member lists, applications, and MMR Rating System.
  */
 export class CrewRepository {
-  constructor() {
+  constructor(apiClient) {
+    this.apiClient = apiClient;
     this.MEMBERS_COLLECTION = 'sa_crew_members';
     this.APPLICATIONS_COLLECTION = 'sa_crew_applications';
     this.HISTORY_COLLECTION = 'sa_crew_history'; 
@@ -168,6 +169,23 @@ export class CrewRepository {
         } else {
           currentData = nameMap[p.nickname.toLowerCase()];
         }
+
+        // --- FIX STARTS HERE ---
+        if (!currentData && this.apiClient) {
+            try {
+                console.warn(`[settleMatches] Cache miss for ${p.nickname}. Attempting live OUID lookup.`);
+                const liveOuid = await this.apiClient.getOuid(p.nickname);
+                if (liveOuid && memberCache[liveOuid]) {
+                    console.log(`[settleMatches] Found ${p.nickname} via live OUID lookup: ${liveOuid}`);
+                    currentData = memberCache[liveOuid];
+                    // Also update the nameMap for this session to avoid repeated lookups
+                    nameMap[p.nickname.toLowerCase()] = currentData;
+                }
+            } catch (lookupError) {
+                console.error(`[settleMatches] Live OUID lookup failed for ${p.nickname}`, lookupError);
+            }
+        }
+        // --- FIX ENDS HERE ---
 
         if (!currentData) continue; 
 

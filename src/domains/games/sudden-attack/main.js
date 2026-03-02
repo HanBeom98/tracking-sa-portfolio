@@ -11,7 +11,7 @@ const NEXON_API_KEY = 'live_6e6f12fbfb54d0fad8b504b3303286fb1ce29b5a4e2f456d883c
 const client = new NexonApiClient(NEXON_API_KEY);
 const repository = new SaRepository(client);
 const service = new SaService(repository);
-const crewRepo = new CrewRepository();
+const crewRepo = new CrewRepository(client);
 
 // DOM Elements
 const searchInput = document.getElementById('characterName');
