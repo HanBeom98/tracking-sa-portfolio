@@ -19,11 +19,7 @@ export function createFirebaseAuthRepository({ firebaseApp = window.firebase, db
   }
 
   async function signInWithProvider(providerId) {
-    if (providerId === "google") {
-      const provider = new firebaseApp.auth.GoogleAuthProvider();
-      return auth.signInWithPopup(provider);
-    }
-    throw new Error(`Unsupported provider: ${providerId}`);
+    throw new Error(`Social login is no longer supported. Please use email login.`);
   }
 
   function signInWithEmail(email, password) {
@@ -144,9 +140,6 @@ export function createFirebaseAuthRepository({ firebaseApp = window.firebase, db
         password
       );
       await user.reauthenticateWithCredential(credential);
-    } else if (providerIds.includes("google.com")) {
-      const provider = new firebaseApp.auth.GoogleAuthProvider();
-      await user.reauthenticateWithPopup(provider);
     }
 
     try {

@@ -21,7 +21,6 @@
         <div class="inline-login-dialog">
           <h2 class="inline-login-title">${t("login", "로그인")}</h2>
           <button type="button" class="auth-button inline-login-close" id="inline-login-close">${t("close", "닫기")}</button>
-          <button type="button" class="auth-button" id="inline-login-google">${t("auth_google_login", "Google로 로그인")}</button>
           <div class="inline-login-row">
             <input id="inline-login-email" class="inline-login-input" type="email" placeholder="${t("email", "이메일")}" autocomplete="email">
             <input id="inline-login-password" class="inline-login-input" type="password" placeholder="${t("password", "비밀번호")}" autocomplete="current-password">
@@ -70,24 +69,8 @@
       openUI();
       setError("");
 
-      const googleBtn = modal.querySelector("#inline-login-google");
       const emailBtn = modal.querySelector("#inline-login-email-submit");
       const signupBtn = modal.querySelector("#inline-login-signup");
-
-      if (googleBtn) {
-        googleBtn.onclick = async () => {
-          if (!actionHandlers) return;
-          await actionHandlers.signInWithProvider("google", {
-            onSuccess() {
-              modal.classList.remove("open");
-              document.body.style.overflow = "";
-            },
-            onError(message) {
-              setError(message);
-            },
-          });
-        };
-      }
 
       if (emailBtn) {
         emailBtn.onclick = async () => {

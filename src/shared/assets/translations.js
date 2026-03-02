@@ -21,7 +21,6 @@ const translations = {
         'signup': '회원가입',
         'close': '닫기',
         'logged_in': '로그인됨',
-        'auth_google_login': 'Google로 로그인',
         'auth_email_login': '로그인',
         'account_title': '내 정보',
         'footer_copyright': '&copy; 2026 TrackingSA. 전문 기술 인사이트 & AI 서비스 허브.',

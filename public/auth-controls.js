@@ -19,7 +19,6 @@
       <button id="auth-logout" class="auth-button" style="display:none;">${t("logout", "로그아웃")}</button>
       <span id="auth-user" class="auth-user" style="display:none;"></span>
       <div id="auth-menu" class="auth-menu">
-        <button type="button" data-provider="google">${t("auth_google_login", "Google로 로그인")}</button>
         <div class="auth-form">
           <input id="auth-email" type="email" placeholder="${t("email", "이메일")}" autocomplete="email">
           <input id="auth-password" type="password" placeholder="${t("password", "비밀번호")}" autocomplete="current-password">
@@ -63,21 +62,6 @@
     loginButton.addEventListener("click", (event) => {
       event.preventDefault();
       openAuthPrompt();
-    });
-
-    menu.addEventListener("click", (event) => {
-      const button = event.target.closest("button");
-      if (!button) return;
-      const provider = button.dataset.provider;
-      if (!provider) return;
-      container.classList.remove("open");
-      if (actionHandlers) {
-        actionHandlers.signInWithProvider(provider, {
-          onError(message) {
-            alert(message);
-          },
-        });
-      }
     });
 
     emailLoginBtn.addEventListener("click", async () => {
