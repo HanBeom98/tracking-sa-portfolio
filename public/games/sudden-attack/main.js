@@ -96,6 +96,7 @@ async function handleSearch() {
     profileSection.classList.add('hidden');
     statsSection.classList.add('hidden');
     historySection.classList.add('hidden');
+    crewRankingSection.classList.add('hidden');
 
     const player = await service.searchPlayer(name);
     saveSearch(player.nickname);
