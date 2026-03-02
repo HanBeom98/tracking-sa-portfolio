@@ -462,12 +462,30 @@ balancerSearchInput.style.cssText = `
   font-size: 14px;
 `;
 
+const selectedCountDisplay = document.createElement('div');
+selectedCountDisplay.id = 'selectedCountDisplay';
+selectedCountDisplay.style.cssText = `
+  color: #ffcc00;
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  text-align: right;
+  padding-right: 10px;
+`;
+selectedCountDisplay.textContent = '선택된 인원: 0명';
+
+// 현재 선택된 멤버들을 추적하기 위한 Set (OUID 기준)
+let selectedMemberOuids = new Set();
+
 balancerBtn.addEventListener('click', () => {
   balancerModal.classList.remove('hidden');
   const modalContent = balancerModal.querySelector('.modal-content');
   if (modalContent && !modalContent.querySelector('#balancerSearchInput')) {
+    modalContent.prepend(selectedCountDisplay);
     modalContent.prepend(balancerSearchInput);
   }
+  selectedMemberOuids.clear();
+  updateSelectedCount();
   renderBalancerMemberList();
 });
 
@@ -482,6 +500,10 @@ balancerSearchInput.addEventListener('input', (e) => {
   renderBalancerMemberList(e.target.value);
 });
 
+function updateSelectedCount() {
+  selectedCountDisplay.textContent = `선택된 인원: ${selectedMemberOuids.size}명`;
+}
+
 function renderBalancerMemberList(filterText = '') {
   const filteredRankings = currentRankings.filter(m => 
     m.characterName.toLowerCase().includes(filterText.toLowerCase())
@@ -489,7 +511,7 @@ function renderBalancerMemberList(filterText = '') {
 
   balancerMemberList.innerHTML = filteredRankings.map((m, i) => `
     <div class="balancer-item">
-      <input type="checkbox" id="m-${i}" value="${m.characterName}" data-mmr="${m.mmr}" data-ouid="${m.id}">
+      <input type="checkbox" id="m-${i}" value="${m.characterName}" data-mmr="${m.mmr}" data-ouid="${m.id}" ${selectedMemberOuids.has(m.id) ? 'checked' : ''}>
       <label for="m-${i}">${m.characterName}</label>
       <span class="m-mmr">${m.mmr}</span>
       <div class="pos-select">
@@ -500,6 +522,19 @@ function renderBalancerMemberList(filterText = '') {
       </div>
     </div>
   `).join('');
+
+  // 체크박스 이벤트 리스너 추가
+  balancerMemberList.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', (e) => {
+      const ouid = e.target.dataset.ouid;
+      if (e.target.checked) {
+        selectedMemberOuids.add(ouid);
+      } else {
+        selectedMemberOuids.delete(ouid);
+      }
+      updateSelectedCount();
+    });
+  });
 }
 
 calculateBalanceBtn.addEventListener('click', () => {
