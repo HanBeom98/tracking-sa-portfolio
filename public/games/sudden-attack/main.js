@@ -209,7 +209,6 @@ function renderAdminExtraActions() {
       <button id="resetSeasonBtn" class="sub-btn" style="border-color:#ff4d4d; color:#ff4d4d; margin-left: auto;">🔥 시즌 초기화</button>
     </div>
     <div class="admin-sub-btns" style="display:flex; gap:10px; width:100%; margin-bottom:15px;">
-      <button id="seedMembersBtn" class="sub-btn" style="border-color:#ffcc00; color:#ffcc00;">🌱 초기 멤버 강제 등록</button>
       <button id="repairDataBtn" class="sub-btn" style="border-color:#00bcd4; color:#00bcd4;">♻️ 전적 데이터 재정산 (킬/데스 복구)</button>
     </div>
     <div id="crewMemberListAdmin" class="crew-manage-list" style="width:100%; border-top:1px solid #333; padding-top:15px;">
@@ -234,40 +233,6 @@ function renderAdminExtraActions() {
       initCrew();
       renderAdminMemberList();
     } catch (e) { alert('복구 실패: ' + e.message); }
-  });
-
-  // Temporary Seed Logic
-  actionBar.querySelector('#seedMembersBtn').addEventListener('click', async () => {
-    if (!confirm('초기 멤버들을 DB에 등록하시겠습니까? (닉네임 변경 대응 OUID 기반)')) return;
-    const INITIAL_MEMBERS = ['Tracking', '결승', 'alt', '마미', '공대누비', 'xion', '김성식', '이쪼룽', '맞고사망한대성', 'SinYang', 'heel'];
-    const batch = window.db.batch();
-    let successCount = 0;
-    
-    for (const name of INITIAL_MEMBERS) {
-      try {
-        const ouid = await repository.apiClient.getOuid(name);
-        if (ouid) {
-          const ref = window.db.collection('sa_crew_members').doc(ouid);
-          batch.set(ref, { 
-            characterName: name, 
-            mmr: 1200, wins: 0, loses: 0, 
-            approvedAt: window.firebase.firestore.FieldValue.serverTimestamp() 
-          }, { merge: true });
-          successCount++;
-        }
-      } catch (err) { console.error(`Seed failed for ${name}:`, err); }
-    }
-    
-    if (successCount > 0) {
-      try {
-        await batch.commit();
-        alert(`${successCount}명의 멤버 등록/동기화 완료!`);
-        initCrew();
-        renderAdminMemberList();
-      } catch (e) { alert('등록 실패: ' + e.message); }
-    } else {
-      alert('등록할 수 있는 유효한 OUID를 찾지 못했습니다.\n(이미 닉네임이 변경되었을 수 있습니다.)');
-    }
   });
 
   // Season Reset Logic
