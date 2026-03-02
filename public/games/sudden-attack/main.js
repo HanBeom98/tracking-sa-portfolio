@@ -48,6 +48,22 @@ const redAvgMMR = document.getElementById('redAvgMMR');
 const blueAvgMMR = document.getElementById('blueAvgMMR');
 const balanceDiff = document.getElementById('balanceDiff');
 
+// Balancer Search Input (New Element)
+const balancerSearchInput = document.createElement('input');
+balancerSearchInput.id = 'balancerSearchInput';
+balancerSearchInput.type = 'text';
+balancerSearchInput.placeholder = '닉네임 검색...';
+balancerSearchInput.style.cssText = `
+  width: calc(100% - 20px);
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #2d3356;
+  border-radius: 8px;
+  background: #1a1d2e;
+  color: #e0e0e0;
+  font-size: 14px;
+`;
+
 // State
 let currentRankings = [];
 
@@ -446,27 +462,56 @@ function renderAdminMemberList() {
 /**
  * Team Balancer Logic
  */
+const balancerSearchInput = document.createElement('input');
+balancerSearchInput.id = 'balancerSearchInput';
+balancerSearchInput.type = 'text';
+balancerSearchInput.placeholder = '닉네임 검색...';
+balancerSearchInput.style.cssText = `
+  width: calc(100% - 20px);
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #2d3356;
+  border-radius: 8px;
+  background: #1a1d2e;
+  color: #e0e0e0;
+  font-size: 14px;
+`;
+
 balancerBtn.addEventListener('click', () => {
   balancerModal.classList.remove('hidden');
+  const modalContent = balancerModal.querySelector('.modal-content');
+  if (modalContent && !modalContent.querySelector('#balancerSearchInput')) {
+    modalContent.prepend(balancerSearchInput);
+  }
   renderBalancerMemberList();
 });
 
 closeBalancerBtn.addEventListener('click', () => {
   balancerModal.classList.add('hidden');
   balancerResult.classList.add('hidden');
+  balancerSearchInput.value = '';
 });
 
-function renderBalancerMemberList() {
-  balancerMemberList.innerHTML = currentRankings.map((m, i) => `
+// 실시간 검색 이벤트 추가
+balancerSearchInput.addEventListener('input', (e) => {
+  renderBalancerMemberList(e.target.value);
+});
+
+function renderBalancerMemberList(filterText = '') {
+  const filteredRankings = currentRankings.filter(m => 
+    m.characterName.toLowerCase().includes(filterText.toLowerCase())
+  );
+
+  balancerMemberList.innerHTML = filteredRankings.map((m, i) => `
     <div class="balancer-item">
       <input type="checkbox" id="m-${i}" value="${m.characterName}" data-mmr="${m.mmr}" data-ouid="${m.id}">
       <label for="m-${i}">${m.characterName}</label>
       <span class="m-mmr">${m.mmr}</span>
       <div class="pos-select">
         <input type="radio" name="pos-${i}" value="rifler" id="r-${i}" checked>
-        <label for="r-${i}">🔫</label>
+        <label for="r-${i}">RL</label>
         <input type="radio" name="pos-${i}" value="sniper" id="s-${i}">
-        <label for="s-${i}">🎯</label>
+        <label for="s-${i}">SR</label>
       </div>
     </div>
   `).join('');
@@ -494,10 +539,10 @@ calculateBalanceBtn.addEventListener('click', () => {
   const result = crewRepo.balanceTeams(selected);
   if (result) {
     redTeamList.innerHTML = result.red.map(m => `
-      <li>${m.position === 'sniper' ? '🎯' : '🔫'} ${m.characterName} (${m.mmr})</li>
+      <li>${m.position === 'sniper' ? 'SR' : 'RL'} ${m.characterName} (${m.mmr})</li>
     `).join('');
     blueTeamList.innerHTML = result.blue.map(m => `
-      <li>${m.position === 'sniper' ? '🎯' : '🔫'} ${m.characterName} (${m.mmr})</li>
+      <li>${m.position === 'sniper' ? 'SR' : 'RL'} ${m.characterName} (${m.mmr})</li>
     `).join('');
     redAvgMMR.textContent = `평균 MMR: ${Math.round(result.redAvg)}`;
     blueAvgMMR.textContent = `평균 MMR: ${Math.round(result.blueAvg)}`;
