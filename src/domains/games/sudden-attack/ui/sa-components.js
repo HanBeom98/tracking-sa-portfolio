@@ -482,6 +482,29 @@ export class SaMatchList extends HTMLElement {
     }
 
     this.innerHTML = `
+      <style>
+        .laundry-warning {
+          background: rgba(255, 77, 77, 0.1);
+          border: 1px solid #ff4d4d;
+          color: #ff4d4d;
+          padding: 8px 12px;
+          border-radius: 6px;
+          font-size: 0.85em;
+          margin-top: 10px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .washing-badge {
+          background: #ff4d4d;
+          color: white;
+          padding: 2px 6px;
+          border-radius: 4px;
+          font-size: 0.75em;
+          font-weight: bold;
+          margin-left: 8px;
+        }
+      </style>
       <ul class="match-list">
         ${list.map((match, idx) => `
           <li class="match-container">
@@ -490,6 +513,7 @@ export class SaMatchList extends HTMLElement {
                 <div class="match-type-row">
                   <span class="type-tag">${match.matchTypeName}</span>
                   ${match.isCustomMatch ? '<span class="custom-badge">⚔️ 크루 내전</span>' : ''}
+                  ${match.laundryInfo.isWashed ? '<span class="washing-badge">⚠️ 세탁 의심</span>' : ''}
                 </div>
                 <span class="result-badge">${match.matchResult}</span>
               </div>
@@ -510,6 +534,11 @@ export class SaMatchList extends HTMLElement {
               </div>
             </div>
             <div class="match-detail-view hidden" id="detail-${idx}">
+              ${match.laundryInfo.isWashed ? `
+                <div class="laundry-warning">
+                  <span>⚠️ <strong>데이터 불일치 감지:</strong> 상대 팀 킬 수보다 우리 팀 데스 합계가 <strong>${match.laundryInfo.totalMissing}회</strong> 부족합니다. (리조인 세탁 의심)</span>
+                </div>
+              ` : ''}
               ${this.drawScoreboard(match.allPlayerStats)}
             </div>
           </li>

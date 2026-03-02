@@ -309,5 +309,27 @@ export class MatchRecord {
     } else {
       this.kd = (this.kill / this.death).toFixed(2);
     }
+
+    // --- LAUNDRY (REJOIN) DETECTION LOGIC ---
+    // Mechanism: Sum up Team A kills and compare with Team B deaths.
+    // If Opponent Kills > My Team Deaths, someone rejoined to wipe their deaths.
+    const winTeam = this.allPlayerStats.filter(p => p.result === 'WIN');
+    const loseTeam = this.allPlayerStats.filter(p => p.result === 'LOSE');
+
+    const winTeamTotalKills = winTeam.reduce((s, p) => s + p.kill, 0);
+    const winTeamTotalDeaths = winTeam.reduce((s, p) => s + p.death, 0);
+    const loseTeamTotalKills = loseTeam.reduce((s, p) => s + p.kill, 0);
+    const loseTeamTotalDeaths = loseTeam.reduce((s, p) => s + p.death, 0);
+
+    // Missing deaths: If enemy kills more than our recorded deaths
+    const winTeamMissing = Math.max(0, loseTeamTotalKills - winTeamTotalDeaths);
+    const loseTeamMissing = Math.max(0, winTeamTotalKills - loseTeamTotalDeaths);
+
+    this.laundryInfo = {
+      isWashed: winTeamMissing > 0 || loseTeamMissing > 0,
+      totalMissing: winTeamMissing + loseTeamMissing,
+      winTeamMissing,
+      loseTeamMissing
+    };
   }
 }
