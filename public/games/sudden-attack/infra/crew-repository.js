@@ -56,14 +56,76 @@ export class CrewRepository {
   }
 
   /**
-   * Update nickname for a member when a name change is detected
+   * Find a member's OUID by their current nickname or any previous nicknames
+   */
+  async findOuidByNickname(nickname) {
+    if (!this.db || !nickname) return null;
+    const searchName = nickname.toLowerCase();
+    try {
+      // 1. Check current names
+      let snapshot = await this.db.collection(this.MEMBERS_COLLECTION)
+        .where('characterName', '==', nickname)
+        .limit(1)
+        .get();
+      
+      if (!snapshot.empty) return snapshot.docs[0].id;
+
+      // 2. Check previousNames array (Firestore 'array-contains' is very efficient)
+      snapshot = await this.db.collection(this.MEMBERS_COLLECTION)
+        .where('previousNames', 'array-contains', nickname)
+        .limit(1)
+        .get();
+
+      if (!snapshot.empty) return snapshot.docs[0].id;
+
+      // 3. Last resort: Case-insensitive scan
+      const allSnapshot = await this.db.collection(this.MEMBERS_COLLECTION).get();
+      const match = allSnapshot.docs.find(doc => {
+        const data = doc.data();
+        const currentMatch = data.characterName && data.characterName.toLowerCase() === searchName;
+        const previousMatch = (data.previousNames || []).some(n => n.toLowerCase() === searchName);
+        return currentMatch || previousMatch;
+      });
+
+      return match ? match.id : null;
+    } catch (error) {
+      console.error('[CrewRepo] findOuidByNickname failed:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Update nickname for a member and keep track of name history
    */
   async updateNickname(ouid, newNickname) {
-    if (!this.db || !ouid) return;
-    return this.db.collection(this.MEMBERS_COLLECTION).doc(ouid).update({
-      characterName: newNickname,
-      updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
-    });
+    if (!this.db || !ouid || !newNickname) return;
+    
+    try {
+      const docRef = this.db.collection(this.MEMBERS_COLLECTION).doc(ouid);
+      const doc = await docRef.get();
+      
+      if (!doc.exists) return;
+      
+      const data = doc.data();
+      const oldName = data.characterName;
+      
+      // If name is actually different, update it and push to history
+      if (oldName && oldName !== newNickname) {
+        const previousNames = data.previousNames || [];
+        if (!previousNames.includes(oldName)) {
+          previousNames.push(oldName);
+        }
+        
+        console.log(`[CrewRepo] Updating name history for ${ouid}: ${oldName} -> ${newNickname}`);
+        return docRef.update({
+          characterName: newNickname,
+          previousNames: previousNames,
+          updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }
+    } catch (error) {
+      console.error('[CrewRepo] updateNickname failed:', error);
+    }
   }
 
   /**
@@ -170,7 +232,18 @@ export class CrewRepository {
         isDirty: false
       };
       memberCache[doc.id] = cacheObj;
-      nameMap[data.characterName.toLowerCase()] = cacheObj;
+      
+      // Index current name
+      if (data.characterName) {
+        nameMap[data.characterName.toLowerCase()] = cacheObj;
+      }
+      
+      // Index all previous names for historical matching
+      if (data.previousNames && Array.isArray(data.previousNames)) {
+        data.previousNames.forEach(prevName => {
+          nameMap[prevName.toLowerCase()] = cacheObj;
+        });
+      }
     });
 
     const historySnap = await this.db.collection(this.HISTORY_COLLECTION).get();
