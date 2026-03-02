@@ -267,12 +267,16 @@ export class CrewRepository {
   }
 
   /**
-   * REPAIR LOGIC: Resets stats and clears history to allow re-settlement of existing matches
+   * REPAIR LOGIC: Resets stats and clears history to allow re-settlement
+   * Enhanced: Now respects the current season start date.
    */
   async repairSeasonData() {
     if (!this.db) throw new Error('DB 연결 실패');
     
-    // 1. Reset all members stats to zero/default
+    // 1. Get current season start date first
+    const seasonStartDate = await this.getSeasonStartDate();
+    
+    // 2. Reset all members stats to zero/default
     const membersSnap = await this.db.collection(this.MEMBERS_COLLECTION).get();
     const batch = this.db.batch();
     membersSnap.docs.forEach(doc => {
@@ -283,20 +287,20 @@ export class CrewRepository {
       });
     });
 
-    // 2. Clear all settlement history (sa_crew_history) - Batch Delete
+    // 3. Clear only history entries that belong to the current season
     const historySnap = await this.db.collection(this.HISTORY_COLLECTION).get();
     historySnap.docs.forEach(doc => {
-      batch.delete(doc.ref);
+      const data = doc.data();
+      // If no matchDate exists, or if it's after the current season start, delete it
+      if (!data.matchDate || new Date(data.matchDate) >= seasonStartDate) {
+        batch.delete(doc.ref);
+      }
     });
 
-    // 4. Set season start to very past date (e.g., 2026-01-01) to catch all previous matches
-    const pastDate = new Date("2026-01-01T00:00:00Z");
-    
-    const settingsRef = this.db.collection(this.SETTINGS_COLLECTION).doc('season');
-    batch.set(settingsRef, { startDate: pastDate }, { merge: true });
+    // 4. Do NOT change the settings/season/startDate. Keep it as is.
 
     await batch.commit();
-    console.log('[CrewRepo] Season data repaired. All history cleared.');
+    console.log(`[CrewRepo] Season data repaired. Respected start date: ${seasonStartDate}`);
   }
 
   async applyForCrew(characterName, ouid) {
