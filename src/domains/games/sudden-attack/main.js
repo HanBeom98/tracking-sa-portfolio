@@ -163,10 +163,20 @@ async function refreshRankings() {
   const startDate = await crewRepo.getSeasonStartDate();
   const formattedDate = startDate.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
 
-  const members = currentRankings.map(r => r.characterName);
-  const ouids = currentRankings.map(r => r.id);
+  // EXTRACT ALL NAMES: Current + All Historical Nicknames
+  const membersSet = new Set();
+  const ouids = [];
+
+  currentRankings.forEach(r => {
+    if (r.characterName) membersSet.add(r.characterName);
+    if (r.previousNames && Array.isArray(r.previousNames)) {
+      r.previousNames.forEach(name => membersSet.add(name));
+    }
+    ouids.push(r.id);
+  });
   
-  repository.setCrewMembers(members, ouids);
+  const allKnownNames = Array.from(membersSet);
+  repository.setCrewMembers(allKnownNames, ouids);
 
   const rankingComp = document.createElement('sa-crew-ranking');
   rankingComp.setAttribute('season-start', formattedDate);
