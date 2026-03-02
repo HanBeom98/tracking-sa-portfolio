@@ -118,9 +118,29 @@ export class RecentStats {
       }
 
       // 4. Radar Chart Scaling
-      this.radar.combat = Math.min(100, Math.max(0, this.kd / 2.0));
+      const kd = this.kd;
+      let combatScore = 0;
+      if (kd <= 100) {
+          combatScore = kd * 0.5;
+      } else if (kd <= 160) {
+          combatScore = 50 + (kd - 100) * 0.583;
+      } else {
+          combatScore = 85 + (kd - 160) * 0.375;
+      }
+      this.radar.combat = Math.min(100, Math.max(0, combatScore));
+
       this.radar.survival = Math.min(100, Math.max(0, 100 - (this.avgD * 15)));
-      this.radar.teamwork = Math.min(100, Math.max(0, (this.totalAssists / matches.length) / 3 * 100));
+      
+      const avgAssists = this.totalAssists / matches.length;
+      let teamworkScore = 0;
+      if (avgAssists <= 1) {
+          teamworkScore = avgAssists * 50;
+      } else if (avgAssists <= 2) {
+          teamworkScore = 50 + (avgAssists - 1) * 35;
+      } else {
+          teamworkScore = 85 + (avgAssists - 2) * 15;
+      }
+      this.radar.teamwork = Math.min(100, Math.max(0, teamworkScore));
 
       const hsr = this.headshotRate;
       let precisionScore = 0;
