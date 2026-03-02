@@ -640,6 +640,16 @@ body.dark-theme {
 .mmr-val { font-weight: 800; color: #00d2ff; font-size: 18px; }
 .stats { color: #888; font-size: 13px; }
 
+.clickable-name {
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.clickable-name:hover {
+  color: #00d2ff;
+  text-decoration: underline;
+}
+
 /* Tier Classes */
 .tier.t-dia { color: #00ffff; text-shadow: 0 0 10px #00ffff; font-weight: bold; }
 .tier.t-pla { color: #00d2ff; font-weight: bold; }

@@ -277,19 +277,31 @@ export class SaCrewRanking extends HTMLElement {
                 <tr class="rank-row ${idx < 3 ? 'top-rank' : ''}">
                   <td class="pos">#${idx + 1}</td>
                   <td class="tier ${tier.class}">${tier.icon} ${tier.name}</td>
-                  <td class="name">${m.characterName}</td>
+                  <td class="name clickable-name" data-name="${m.characterName}">${m.characterName}</td>
                   <td class="mmr-val">${m.mmr}</td>
-                  <td class="kd-val">${crewKd}</td>
-                  <td class="stats">${winRate}% (${m.wins}승 ${m.loses}패)</td>
+                  <td class="stats">${crewKd}</td>
+                  <td class="stats">${winRate}% (${m.wins}W ${m.loses}L)</td>
                 </tr>
               `;
-            }).join('')}
-          </tbody>
-        </table>
-      </div>
-    `;
-  }
-}
+              }).join('')}
+              </tbody>
+              </table>
+              </div>
+              `;
+
+              // Add click events for names
+              this.querySelectorAll('.clickable-name').forEach(el => {
+              el.addEventListener('click', () => {
+              const name = el.dataset.name;
+              this.dispatchEvent(new CustomEvent('sa-request-search', {
+              detail: { name },
+              bubbles: true,
+              composed: true
+              }));
+              });
+              });
+              }
+              }
 
 export class SaMatchList extends HTMLElement {
   getKdClass(kd) {

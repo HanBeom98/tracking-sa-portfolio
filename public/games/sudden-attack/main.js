@@ -44,9 +44,13 @@ const STORAGE_KEY = 'sa_recent_searches';
 /**
  * Core Search Logic
  */
-async function handleSearch() {
-  const name = searchInput.value.trim();
+async function handleSearch(nameOverride = null) {
+  const name = nameOverride || searchInput.value.trim();
   if (!name) return;
+
+  if (nameOverride) {
+    searchInput.value = name;
+  }
 
   try {
     loading.classList.remove('hidden');
@@ -98,6 +102,7 @@ async function handleSearch() {
     statsSection.querySelector('sa-stats-summary').stats = stats;
     statsSection.classList.remove('hidden');
 
+    // Render Matches
     historySection.innerHTML = '<h2>최근 20경기 매치 기록</h2><sa-match-list></sa-match-list>';
     historySection.querySelector('sa-match-list').matches = matches;
     historySection.classList.remove('hidden');
@@ -193,7 +198,7 @@ async function initCrew() {
 }
 
 // Global Event Listeners
-searchBtn.addEventListener('click', handleSearch);
+searchBtn.addEventListener('click', () => handleSearch());
 searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSearch(); });
 
 applyCrewBtn.addEventListener('click', () => crewModal.classList.remove('hidden'));
@@ -216,6 +221,12 @@ submitApplyBtn.addEventListener('click', async () => {
 
 // Sync rankings when sub-managers trigger an update
 window.addEventListener('sa-rankings-updated', () => refreshRankings());
+
+// Listen for nickname clicks from the ranking board
+crewRankingSection.addEventListener('sa-request-search', (e) => {
+  handleSearch(e.detail.name);
+  window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top to see results
+});
 
 // Start
 initCrew();
