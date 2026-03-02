@@ -160,12 +160,16 @@ function renderRecentSearches() {
  */
 async function refreshRankings() {
   currentRankings = await crewRepo.getRankings();
+  const startDate = await crewRepo.getSeasonStartDate();
+  const formattedDate = startDate.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
+
   const members = currentRankings.map(r => r.characterName);
   const ouids = currentRankings.map(r => r.id);
   
   repository.setCrewMembers(members, ouids);
 
   const rankingComp = document.createElement('sa-crew-ranking');
+  rankingComp.setAttribute('season-start', formattedDate);
   rankingComp.rankings = currentRankings;
   crewRankingSection.innerHTML = '';
   crewRankingSection.appendChild(rankingComp);

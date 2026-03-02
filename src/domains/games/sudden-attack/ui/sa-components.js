@@ -232,20 +232,25 @@ export class SaCrewRanking extends HTMLElement {
     if (mmr >= 1000) return { name: 'Bronze', icon: '🥉', class: 't-bro' };
     return { name: 'Iron', icon: '💩', class: 't-iron' };
   }
+set rankings(list) {
+  if (!list || list.length === 0) {
+    this.innerHTML = '<p class="no-data">등록된 크루 멤버가 없습니다.</p>';
+    return;
+  }
 
-  set rankings(list) {
-    if (!list || list.length === 0) {
-      this.innerHTML = '<p class="no-data">등록된 크루 멤버가 없습니다.</p>';
-      return;
-    }
+  const startDateStr = this.getAttribute('season-start') || '알 수 없음';
 
-    this.innerHTML = `
-      <div class="ranking-card">
-        <div class="ranking-header">
-          <h3>🔥 TRACKING CREW 실시간 랭킹</h3>
+  this.innerHTML = `
+    <div class="ranking-card">
+      <div class="ranking-header">
+        <h3>🔥 TRACKING CREW 실시간 랭킹</h3>
+        <div style="display:flex; justify-content: space-between; align-items: flex-end;">
           <span class="sub">내전(8인↑) 결과 기반 MMR</span>
+          <span class="sub" style="color: #ffcc00; font-weight: bold;">시즌 시작: ${startDateStr}</span>
         </div>
-        <table class="ranking-table">
+      </div>
+      <table class="ranking-table">
+...
           <thead>
             <tr>
               <th>순위</th>
