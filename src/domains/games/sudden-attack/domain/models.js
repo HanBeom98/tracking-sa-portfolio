@@ -119,7 +119,7 @@ export class RecentStats {
 
       // 4. Radar Chart Scaling
       this.radar.combat = Math.min(100, Math.max(0, this.kd / 2.0));
-      this.radar.survival = Math.min(100, Math.max(0, 100 - (this.avgD * 10)));
+      this.radar.survival = Math.min(100, Math.max(0, 100 - (this.avgD * 15)));
       this.radar.teamwork = Math.min(100, Math.max(0, (this.totalAssists / matches.length) / 3 * 100));
 
       this.radar.precision = Math.min(100, Math.max(0, (this.headshotRate / 50) * 100));
