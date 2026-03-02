@@ -110,28 +110,34 @@ export class RecentStats {
         this.crewWinRate = Math.round((cw / this.crewMatchCount) * 100);
       }
 
-      // 4. Radar Chart Scaling (Mastery Curve Applied)
-      const kdScore = this.kd;
+      // 4. Radar Chart Scaling (Mastery Curve - Hardcore Edition)
+      
+      // COMBAT (K/D): More demanding for higher scores
+      const kdVal = this.kd;
       let combatScore = 0;
-      if (kdScore <= 100) { combatScore = kdScore * 0.5; } 
-      else if (kdScore <= 160) { combatScore = 50 + (kdScore - 100) * 0.583; } 
-      else { combatScore = 85 + (kdScore - 160) * 0.375; }
+      if (kdVal <= 100) { combatScore = kdVal * 0.4; } // 100% -> 40점
+      else if (kdVal <= 150) { combatScore = 40 + (kdVal - 100) * 0.6; } // 150% -> 70점
+      else if (kdVal <= 200) { combatScore = 70 + (kdVal - 150) * 0.4; } // 200% -> 90점
+      else { combatScore = 90 + (kdVal - 200) * 0.1; }
       this.radar.combat = Math.min(100, Math.max(0, combatScore));
 
-      this.radar.survival = Math.min(100, Math.max(0, 100 - (this.avgD * 15)));
+      // SURVIVAL: Harder to stay near 100
+      this.radar.survival = Math.min(100, Math.max(0, 100 - (this.avgD * 18))); // Penalty increased from 15 to 18
       
+      // TEAMWORK (Avg Assists): Extremely hard to max
       const avgAssists = this.totalAssists / matches.length;
       let teamworkScore = 0;
-      if (avgAssists <= 1) { teamworkScore = avgAssists * 50; } 
-      else if (avgAssists <= 2) { teamworkScore = 50 + (avgAssists - 1) * 35; } 
-      else { teamworkScore = 85 + (avgAssists - 2) * 15; }
+      if (avgAssists <= 2.5) { teamworkScore = avgAssists * 28; } // 2.5개 -> 70점
+      else if (avgAssists <= 4.0) { teamworkScore = 70 + (avgAssists - 2.5) * 10; } // 4.0개 -> 85점
+      else { teamworkScore = 85 + (avgAssists - 4.0) * 10; } // 5.0개 -> 95점
       this.radar.teamwork = Math.min(100, Math.max(0, teamworkScore));
 
+      // PRECISION (Headshot %): Only true snipers/aimbots get 90+
       const hsr = this.headshotRate;
       let precisionScore = 0;
-      if (hsr <= 20) { precisionScore = hsr * 2.5; } 
-      else if (hsr <= 35) { precisionScore = 50 + (hsr - 20) * 2.33; } 
-      else { precisionScore = 85 + (hsr - 35) * 1; }
+      if (hsr <= 30) { precisionScore = hsr * 1.67; } // 30% -> 50점
+      else if (hsr <= 50) { precisionScore = 50 + (hsr - 30) * 1.75; } // 50% -> 85점
+      else { precisionScore = 85 + (hsr - 50) * 1; } // 65% -> 100점
       this.radar.precision = Math.min(100, Math.max(0, precisionScore));
       
       this.radar.victory = this.winRate;
@@ -158,8 +164,8 @@ export class RecentStats {
         this.playstyleTitle = "승리 요정 (팀의 수호신)";
         this.playstyleIcon = "🛡️";
       } else if (r.teamwork >= 90) {
-        this.playstyleTitle = "전장의 조율자 (빛과 소금)";
-        this.playstyleIcon = "🎼";
+        this.playstyleTitle = "전장의 조율자 (살림꾼)";
+        this.playstyleIcon = "🤝";
       } else if (r.combat >= 92) {
         this.playstyleTitle = "무자비한 정복자 (여포)";
         this.playstyleIcon = "👑";
