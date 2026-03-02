@@ -136,6 +136,147 @@ export class SaCrewMvps extends HTMLElement {
 customElements.define('sa-crew-mvps', SaCrewMvps);
 
 /**
+ * Interactive Team Draft Board Component
+ */
+export class SaTeamBoard extends HTMLElement {
+  set data(result) {
+    if (!result) {
+      this.innerHTML = '';
+      return;
+    }
+    this.render(result);
+  }
+
+  render(res) {
+    const renderCard = (m) => `
+      <div class="draft-card">
+        <div class="card-top">
+          <span class="pos-icon">${m.position === 'sniper' ? '🎯' : '🔫'}</span>
+          <span class="name">${m.characterName}</span>
+        </div>
+        <div class="card-bottom">
+          <span class="mmr">${m.mmr} pts</span>
+        </div>
+      </div>
+    `;
+
+    this.innerHTML = `
+      <style>
+        .draft-board {
+          display: flex;
+          gap: 20px;
+          margin-top: 25px;
+          animation: slideUp 0.5s ease-out;
+        }
+        .team-column {
+          flex: 1;
+          border-radius: 12px;
+          padding: 15px;
+          position: relative;
+        }
+        .team-column.red {
+          background: rgba(255, 77, 77, 0.05);
+          border: 1px solid rgba(255, 77, 77, 0.2);
+        }
+        .team-column.blue {
+          background: rgba(0, 188, 212, 0.05);
+          border: 1px solid rgba(0, 188, 212, 0.2);
+        }
+        .team-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 15px;
+          padding-bottom: 10px;
+          border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .team-header h4 { margin: 0; font-size: 1.2em; }
+        .red .team-header h4 { color: #ff4d4d; }
+        .blue .team-header h4 { color: #00bcd4; }
+        
+        .avg-mmr { font-size: 0.9em; color: #888; }
+        .avg-mmr b { color: white; }
+
+        .card-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+        }
+        .draft-card {
+          background: #1e2235;
+          border: 1px solid #333;
+          border-radius: 8px;
+          padding: 10px;
+          transition: transform 0.2s;
+        }
+        .draft-card:hover { transform: scale(1.05); border-color: #555; }
+        .card-top { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+        .pos-icon { font-size: 1.1em; }
+        .name { color: white; font-weight: bold; font-size: 0.95em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .mmr { color: #aaa; font-size: 0.85em; }
+
+        .vs-divider {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-style: italic;
+          font-weight: 900;
+          color: #444;
+          font-size: 2em;
+        }
+
+        .balance-summary {
+          width: 100%;
+          margin-top: 20px;
+          background: #141724;
+          border-radius: 8px;
+          padding: 12px;
+          text-align: center;
+          border: 1px dashed #333;
+        }
+        .diff-tag {
+          color: #ffcc00;
+          font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+          .draft-board { flex-direction: column; }
+          .vs-divider { padding: 10px 0; transform: rotate(90deg); }
+        }
+      </style>
+      <div class="draft-board">
+        <div class="team-column red">
+          <div class="team-header">
+            <h4>🔴 RED TEAM</h4>
+            <span class="avg-mmr">평균: <b>${Math.round(res.redAvg)}</b></span>
+          </div>
+          <div class="card-grid">
+            ${res.red.map(renderCard).join('')}
+          </div>
+        </div>
+
+        <div class="vs-divider">VS</div>
+
+        <div class="team-column blue">
+          <div class="team-header">
+            <h4>🔵 BLUE TEAM</h4>
+            <span class="avg-mmr">평균: <b>${Math.round(res.blueAvg)}</b></span>
+          </div>
+          <div class="card-grid">
+            ${res.blue.map(renderCard).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="balance-summary">
+        ⚖️ 팀간 MMR 격차: <span class="diff-tag">${res.diff} pts</span>
+        <p style="font-size:0.8em; color:#666; margin-top:5px;">※ MMR 합산 및 포지션 분포를 최적으로 고려하여 생성된 팀입니다.</p>
+      </div>
+    `;
+  }
+}
+customElements.define('sa-team-board', SaTeamBoard);
+
+/**
  * UI Components for Sudden Attack Stats
  */
 export class SaPlayerCard extends HTMLElement {

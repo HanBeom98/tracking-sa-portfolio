@@ -14,33 +14,29 @@ export class BalancerManager {
     this.balancerMemberList = document.getElementById('balancerMemberList');
     this.calculateBalanceBtn = document.getElementById('calculateBalanceBtn');
     this.balancerResult = document.getElementById('balancerResult');
-    this.redTeamList = document.getElementById('redTeamList');
-    this.blueTeamList = document.getElementById('blueTeamList');
-    this.redAvgMMR = document.getElementById('redAvgMMR');
-    this.blueAvgMMR = document.getElementById('blueAvgMMR');
-    this.balanceDiff = document.getElementById('balanceDiff');
 
     this.searchInput = this.createSearchInput();
     this.countDisplay = this.createCountDisplay();
 
     this.initEvents();
-    this.balancerBtn.classList.remove('hidden'); // 모든 유저에게 공개
+    this.balancerBtn.classList.remove('hidden'); // Available to everyone
   }
 
   createSearchInput() {
     const input = document.createElement('input');
     input.id = 'balancerSearchInput';
     input.type = 'text';
-    input.placeholder = '닉네임 검색...';
+    input.placeholder = '팀 짤 인원 검색... (닉네임)';
     input.style.cssText = `
       width: calc(100% - 20px);
-      padding: 10px;
+      padding: 12px;
       margin-bottom: 15px;
       border: 1px solid #2d3356;
       border-radius: 8px;
       background: #1a1d2e;
       color: #e0e0e0;
       font-size: 14px;
+      outline: none;
     `;
     return input;
   }
@@ -72,9 +68,8 @@ export class BalancerManager {
         modalContent.prepend(this.countDisplay);
         modalContent.prepend(this.searchInput);
       }
-      this.selectedMemberOuids.clear();
-      this.updateSelectedCount();
-      this.renderMemberList();
+      // Keep selection when re-opening
+      this.renderMemberList(this.searchInput.value);
     });
 
     this.closeBalancerBtn.addEventListener('click', () => {
@@ -99,27 +94,33 @@ export class BalancerManager {
       m.characterName.toLowerCase().includes(filterText.toLowerCase())
     );
 
-    this.balancerMemberList.innerHTML = filtered.map((m, i) => `
-      <div class="balancer-item">
-        <input type="checkbox" id="m-${i}" value="${m.characterName}" data-mmr="${m.mmr}" data-ouid="${m.id}" ${this.selectedMemberOuids.has(m.id) ? 'checked' : ''}>
-        <label for="m-${i}">${m.characterName}</label>
-        <span class="m-mmr">${m.mmr}</span>
-        <div class="pos-select">
-          <input type="radio" name="pos-${i}" value="rifler" id="r-${i}" checked>
-          <label for="r-${i}">RL</label>
-          <input type="radio" name="pos-${i}" value="sniper" id="s-${i}">
-          <label for="s-${i}">SR</label>
+    this.balancerMemberList.innerHTML = filtered.map((m, i) => {
+      const isChecked = this.selectedMemberOuids.has(m.id);
+      return `
+        <div class="balancer-item ${isChecked ? 'selected' : ''}">
+          <input type="checkbox" id="m-${m.id}" value="${m.characterName}" data-mmr="${m.mmr}" data-ouid="${m.id}" ${isChecked ? 'checked' : ''}>
+          <label for="m-${m.id}" class="m-name">${m.characterName}</label>
+          <span class="m-mmr">${m.mmr} pts</span>
+          <div class="pos-select">
+            <input type="radio" name="pos-${m.id}" value="rifler" id="r-${m.id}" checked>
+            <label for="r-${m.id}" title="라이플">🔫</label>
+            <input type="radio" name="pos-${m.id}" value="sniper" id="s-${m.id}">
+            <label for="s-${m.id}" title="스나이퍼">🎯</label>
+          </div>
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
 
     this.balancerMemberList.querySelectorAll('input[type="checkbox"]').forEach(cb => {
       cb.addEventListener('change', (e) => {
         const ouid = e.target.dataset.ouid;
+        const item = e.target.closest('.balancer-item');
         if (e.target.checked) {
           this.selectedMemberOuids.add(ouid);
+          item.classList.add('selected');
         } else {
           this.selectedMemberOuids.delete(ouid);
+          item.classList.remove('selected');
         }
         this.updateSelectedCount();
       });
@@ -128,13 +129,14 @@ export class BalancerManager {
 
   calculateBalance() {
     const selected = [];
-    this.balancerMemberList.querySelectorAll('.balancer-item').forEach(item => {
-      const cb = item.querySelector('input[type="checkbox"]');
-      if (cb.checked) {
-        const pos = item.querySelector('input[type="radio"]:checked').value;
+    // We need to look through ALL currentRankings to check which OUIDs are in our selected Set
+    this.currentRankings.forEach(m => {
+      if (this.selectedMemberOuids.has(m.id)) {
+        const radioR = document.getElementById(`r-${m.id}`);
+        const pos = (radioR && radioR.checked) ? 'rifler' : 'sniper';
         selected.push({
-          characterName: cb.value,
-          mmr: parseInt(cb.dataset.mmr),
+          characterName: m.characterName,
+          mmr: m.mmr,
           position: pos
         });
       }
@@ -147,16 +149,13 @@ export class BalancerManager {
 
     const result = this.crewRepo.balanceTeams(selected);
     if (result) {
-      this.redTeamList.innerHTML = result.red.map(m => `
-        <li>${m.position === 'sniper' ? 'SR' : 'RL'} ${m.characterName} (${m.mmr})</li>
-      `).join('');
-      this.blueTeamList.innerHTML = result.blue.map(m => `
-        <li>${m.position === 'sniper' ? 'SR' : 'RL'} ${m.characterName} (${m.mmr})</li>
-      `).join('');
-      this.redAvgMMR.textContent = `평균 MMR: ${Math.round(result.redAvg)}`;
-      this.blueAvgMMR.textContent = `평균 MMR: ${Math.round(result.blueAvg)}`;
-      this.balanceDiff.textContent = `팀 간 MMR 점수 차이: ${result.diff}점`;
+      // Clear legacy text UI
+      this.balancerResult.innerHTML = '<h3>⚖️ 추천 팀 구성 (MMR 밸런스)</h3><sa-team-board></sa-team-board>';
+      this.balancerResult.querySelector('sa-team-board').data = result;
       this.balancerResult.classList.remove('hidden');
+      
+      // Scroll result into view
+      this.balancerResult.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
   }
 }
