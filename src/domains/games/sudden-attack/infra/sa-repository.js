@@ -111,7 +111,7 @@ export class SaRepository {
   /**
    * Fetch recent matches and AUTO-DISCOVER previous nicknames (like 'altt')
    */
-  async getRecentMatches(ouid, nickname = "", limit = 20) {
+  async getRecentMatches(ouid, limit = 20, nickname = "") {
     const combinedMatches = [];
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
     const discoveredNames = new Set();
