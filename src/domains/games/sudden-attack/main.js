@@ -198,17 +198,18 @@ async function initCrew() {
   crewRankingSection.innerHTML = '';
   crewRankingSection.appendChild(rankingComp);
 
+  // 팀 밸런서는 모든 유저가 사용할 수 있도록 항상 표시
+  balancerBtn.classList.remove('hidden');
+
   // 2. Auth & Admin Setup
   if (typeof window.firebase !== 'undefined' && window.firebase.auth) {
     window.firebase.auth().onAuthStateChanged(user => {
       // Pass the user object explicitly to guarantee accurate staff check
       if (crewRepo.isStaff(user)) {
         adminMenuBtn.classList.remove('hidden');
-        balancerBtn.classList.remove('hidden');
         renderAdminExtraActions();
       } else {
         adminMenuBtn.classList.add('hidden');
-        balancerBtn.classList.add('hidden');
       }
     });
   }
