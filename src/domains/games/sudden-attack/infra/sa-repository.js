@@ -11,6 +11,7 @@ export class SaRepository {
     this.crewRepository = crewRepository;
     this.crewMembers = []; 
     this.crewOuids = [];   
+    this.discoveredNicknames = {}; // Session cache for name history sync: { ouid: Set<names> }
     this.meta = {
       grade: [],
       season_grade: [],
@@ -52,7 +53,6 @@ export class SaRepository {
 
   /**
    * Resolve a player by character name
-   * Enhanced: If Nexon API fails, tries to recover OUID from Firestore (CrewRepo).
    */
   async getPlayer(characterName) {
     await this.initMeta();
@@ -109,7 +109,7 @@ export class SaRepository {
   }
 
   /**
-   * Fetch recent matches and AUTO-DISCOVER previous nicknames (like 'altt')
+   * Fetch recent matches and AUTO-DISCOVER previous nicknames
    */
   async getRecentMatches(ouid, limit = 20, nickname = "") {
     const combinedMatches = [];
@@ -175,14 +175,16 @@ export class SaRepository {
         }
       }
 
-      // If we found any old names (like 'altt'), sync them to DB history
-      if (discoveredNames.size > 0 && this.crewRepository) {
-        for (const oldName of discoveredNames) {
-          console.log(`[Repository] Auto-discovered previous name: ${oldName} for OUID: ${ouid}`);
-          // 1. First trigger the general update (current name sync)
-          await this.crewRepository.updateNickname(ouid, nickname); 
-          // 2. Then explicitly add the discovered old name to history
-          await this.crewRepository.addNicknameToHistory(ouid, oldName);
+      // Sync discovered names to database via session cache
+      if (discoveredNames.size > 0) {
+        if (!this.discoveredNicknames[ouid]) this.discoveredNicknames[ouid] = new Set();
+        discoveredNames.forEach(name => this.discoveredNicknames[ouid].add(name));
+        
+        // Attempt immediate sync (may fail due to permissions, which is fine)
+        if (this.crewRepository) {
+          for (const oldName of discoveredNames) {
+            this.crewRepository.addNicknameToHistory(ouid, oldName).catch(() => {});
+          }
         }
       }
 

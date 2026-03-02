@@ -149,8 +149,6 @@ export class CrewRepository {
           docRef = snapshot.docs[0].ref;
           doc = snapshot.docs[0];
         } else {
-          // Final attempt: Search for ANY doc that has this OUID in a field (if any)
-          // For now, if we can't find the doc, we can't update history
           return;
         }
       }
@@ -159,7 +157,6 @@ export class CrewRepository {
       const currentName = data.characterName;
       const previousNames = data.previousNames || [];
 
-      // Don't add if it's the current name or already in history
       if (currentName === nicknameToAdd || previousNames.includes(nicknameToAdd)) return;
 
       previousNames.push(nicknameToAdd);
@@ -171,6 +168,21 @@ export class CrewRepository {
       });
     } catch (error) {
       console.error('[CrewRepo] addNicknameToHistory failed:', error);
+    }
+  }
+
+  /**
+   * Batch sync discovered nicknames (Used during settlement to overcome permissions)
+   */
+  async syncHistoricalNicknames(discoveredMap) {
+    if (!this.db || !discoveredMap) return;
+    console.log('[CrewRepo] Starting batch nickname sync...');
+    
+    for (const ouid in discoveredMap) {
+      const names = Array.from(discoveredMap[ouid]);
+      for (const name of names) {
+        await this.addNicknameToHistory(ouid, name);
+      }
     }
   }
 

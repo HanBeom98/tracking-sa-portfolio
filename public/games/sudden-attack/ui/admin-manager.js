@@ -192,6 +192,12 @@ export class AdminManager {
         return;
       }
 
+      // SYNC DISCOVERED NAMES FIRST (Overcome permission issues)
+      if (this.repository.discoveredNicknames) {
+        await this.crewRepo.syncHistoricalNicknames(this.repository.discoveredNicknames);
+        this.repository.discoveredNicknames = {}; // Clear after sync
+      }
+
       const chunkSize = 5;
       const allFoundMatches = new Map(); // matchId -> MatchRecord
       const matchToOuids = new Map(); // matchId -> Set of OUIDs
