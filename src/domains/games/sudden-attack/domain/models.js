@@ -238,6 +238,10 @@ export class MatchRecord {
     
     if (detail.match_detail && Array.isArray(detail.match_detail)) {
       let subjectFound = false;
+      
+      // Pre-normalize crew names for faster lookup
+      const crewNamesSet = new Set((crewData.names || []).map(n => (n || "").toLowerCase().trim()));
+
       this.allPlayerStats = detail.match_detail.map(p => {
         const nickname = p.user_name || p.character_name || "";
         const normalizedName = nickname.toLowerCase().trim();
@@ -248,22 +252,20 @@ export class MatchRecord {
 
         let isSubject = false;
         if (subjectInfo && !subjectFound) {
-          // Priority 1: Match by nickname if provided and matches
           const nameMatches = targetUserName && normalizedName === targetUserName.toLowerCase().trim();
-          
-          // Priority 2: Match by stats
           const statsMatch = killValue === parseInt(subjectInfo.kill) && 
                             deathValue === parseInt(subjectInfo.death) && 
                             String(resultValue) === String(subjectInfo.result);
 
           if (nameMatches || statsMatch) {
             isSubject = true;
-            subjectFound = true; // Only one player can be the subject
+            subjectFound = true;
           }
         }
 
+        // IMPROVED CREW DETECTION: Check OUID OR Any Historical/Current Nickname
         const isCrew = isSubject || 
-                       (crewData.names || []).some(c => (c || "").toLowerCase().trim() === normalizedName) ||
+                       crewNamesSet.has(normalizedName) ||
                        (p.ouid && (crewData.ouids || []).includes(p.ouid));
 
         return {
@@ -281,6 +283,7 @@ export class MatchRecord {
       this.participants = detail.match_detail.map(p => p.user_name || p.character_name);
       this.crewParticipants = this.allPlayerStats.filter(p => p.isCrew).map(p => p.nickname);
       
+      // CUSTOM MATCH DETECTION: Now recognizes even with historical names
       if (this.crewParticipants.length >= 8) {
         this.isCustomMatch = true;
       }

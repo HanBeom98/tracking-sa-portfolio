@@ -160,7 +160,6 @@ export class SaRepository {
           const detail = await this.apiClient.getMatchDetail(m.match_id);
           
           // --- AUTO-DISCOVERY LOGIC ---
-          // Find this player in the match detail to see what name they were using
           const playerInMatch = detail.match_member?.find(mm => mm.ouid === ouid);
           if (playerInMatch && playerInMatch.character_name !== nickname) {
             discoveredNames.add(playerInMatch.character_name);
@@ -180,7 +179,6 @@ export class SaRepository {
       if (discoveredNames.size > 0 && this.crewRepository) {
         for (const oldName of discoveredNames) {
           console.log(`[Repository] Auto-discovered previous name: ${oldName} for OUID: ${ouid}`);
-          // Trigger a sync that stores this discovered name in previousNames
           await this.crewRepository.updateNickname(ouid, nickname); 
         }
       }
