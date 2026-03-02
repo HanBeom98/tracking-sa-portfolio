@@ -193,8 +193,8 @@ export class AdminManager {
       }
 
       const chunkSize = 5;
-      const allCrewMatches = [];
-      const uniqueMatchIds = new Set();
+      const allFoundMatches = new Map(); // matchId -> MatchRecord
+      const matchToOuids = new Map(); // matchId -> Set of OUIDs
 
       for (let i = 0; i < this.currentRankings.length; i += chunkSize) {
         const chunk = this.currentRankings.slice(i, i + chunkSize);
@@ -230,13 +230,41 @@ export class AdminManager {
         });
 
         const chunkResults = await Promise.all(chunkPromises);
+        
+        // Phase 1: Discovery (Collect all matches and track OUIDs)
         chunkResults.flat().forEach(m => {
-          if (m.isCustomMatch && !uniqueMatchIds.has(m.matchId)) {
-            uniqueMatchIds.add(m.matchId);
-            allCrewMatches.push(m);
+          if (!allFoundMatches.has(m.matchId)) {
+            allFoundMatches.set(m.matchId, m);
+            matchToOuids.set(m.matchId, new Set());
+          }
+          
+          // Find the subject in this match and add their OUID to the set
+          const subject = m.allPlayerStats.find(p => p.ouid);
+          if (subject) {
+            matchToOuids.get(m.matchId).add(subject.ouid);
           }
         });
+        
         await new Promise(r => setTimeout(r, 300));
+      }
+
+      // Phase 2: Re-evaluation (Identify matches with >= 8 crew OUIDs)
+      const allCrewMatches = [];
+      for (const [matchId, ouids] of matchToOuids.entries()) {
+        const m = allFoundMatches.get(matchId);
+        
+        // If we found at least 8 distinct crew OUIDs, it's definitely a crew match
+        if (ouids.size >= 8) {
+          m.isCustomMatch = true;
+          // Update crewParticipants for UI display based on detected OUIDs
+          m.crewParticipants = m.allPlayerStats
+            .filter(p => p.isCrew || (p.ouid && ouids.has(p.ouid)))
+            .map(p => p.nickname);
+          allCrewMatches.push(m);
+        } else if (m.isCustomMatch) {
+          // Keep matches that were already identified as custom matches via nicknames
+          allCrewMatches.push(m);
+        }
       }
 
       if (allCrewMatches.length === 0) {

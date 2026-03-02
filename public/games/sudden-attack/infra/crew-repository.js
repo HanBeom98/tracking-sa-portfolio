@@ -194,22 +194,21 @@ export class CrewRepository {
           currentData = nameMap[p.nickname.toLowerCase()];
         }
 
-        // --- FIX STARTS HERE ---
+        // --- FINAL DEFENSE: Live OUID Lookup if Nickname mismatch ---
         if (!currentData && this.apiClient) {
             try {
-                console.warn(`[settleMatches] Cache miss for ${p.nickname}. Attempting live OUID lookup.`);
+                // If we don't have the OUID for this participant yet, look it up
                 const liveOuid = await this.apiClient.getOuid(p.nickname);
                 if (liveOuid && memberCache[liveOuid]) {
-                    console.log(`[settleMatches] Found ${p.nickname} via live OUID lookup: ${liveOuid}`);
+                    console.log(`[settleMatches] Recovered disguised member ${p.nickname} via live OUID: ${liveOuid}`);
                     currentData = memberCache[liveOuid];
-                    // Also update the nameMap for this session to avoid repeated lookups
+                    // Cache the nickname mapping to avoid repeated API calls for this name in the same session
                     nameMap[p.nickname.toLowerCase()] = currentData;
                 }
             } catch (lookupError) {
-                console.error(`[settleMatches] Live OUID lookup failed for ${p.nickname}`, lookupError);
+                // Ignore errors (e.g. 404), they are just not crew members or not found
             }
         }
-        // --- FIX ENDS HERE ---
 
         if (!currentData) continue; 
 

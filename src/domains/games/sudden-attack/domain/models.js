@@ -237,6 +237,7 @@ export class MatchRecord {
     let playerStat = detail;
     
     if (detail.match_detail && Array.isArray(detail.match_detail)) {
+      let subjectFound = false;
       this.allPlayerStats = detail.match_detail.map(p => {
         const nickname = p.user_name || p.character_name || "";
         const normalizedName = nickname.toLowerCase().trim();
@@ -246,16 +247,24 @@ export class MatchRecord {
         const resultValue = String(p.match_result || p.result || "0");
 
         let isSubject = false;
-        if (subjectInfo) {
-          if (killValue === parseInt(subjectInfo.kill) && 
-              deathValue === parseInt(subjectInfo.death) && 
-              String(resultValue) === String(subjectInfo.result)) {
+        if (subjectInfo && !subjectFound) {
+          // Priority 1: Match by nickname if provided and matches
+          const nameMatches = targetUserName && normalizedName === targetUserName.toLowerCase().trim();
+          
+          // Priority 2: Match by stats
+          const statsMatch = killValue === parseInt(subjectInfo.kill) && 
+                            deathValue === parseInt(subjectInfo.death) && 
+                            String(resultValue) === String(subjectInfo.result);
+
+          if (nameMatches || statsMatch) {
             isSubject = true;
+            subjectFound = true; // Only one player can be the subject
           }
         }
 
         const isCrew = isSubject || 
-                       (crewData.names || []).some(c => (c || "").toLowerCase().trim() === normalizedName);
+                       (crewData.names || []).some(c => (c || "").toLowerCase().trim() === normalizedName) ||
+                       (p.ouid && (crewData.ouids || []).includes(p.ouid));
 
         return {
           nickname: nickname,
@@ -265,7 +274,7 @@ export class MatchRecord {
           kd: deathValue > 0 ? (killValue / deathValue).toFixed(2) : (killValue > 0 ? killValue.toFixed(2) : "0.00"),
           result: resultValue === "1" ? "WIN" : (resultValue === "2" ? "LOSE" : "UNKNOWN"),
           isCrew: isCrew,
-          ouid: isSubject ? subjectInfo.ouid : null
+          ouid: isSubject ? subjectInfo.ouid : (p.ouid || null)
         };
       });
 
