@@ -80,8 +80,15 @@ export class AdminManager {
     const actionBar = document.createElement('div');
     actionBar.className = 'admin-actions-bar';
     actionBar.innerHTML = `
-      <div class="admin-main-btns" style="display:flex; gap:10px; width:100%; margin-bottom:15px;">
+      <div class="admin-main-btns" style="display:flex; gap:10px; width:100%; margin-bottom:15px; flex-wrap: wrap; align-items: center;">
         <button id="settleMMRBtn" class="settle-btn">⚡ 크루 전체 매치 스캔 & 일괄 정산</button>
+        
+        <div class="season-date-setter" style="display:flex; gap:5px; align-items:center; background:rgba(255,204,0,0.1); padding:5px 10px; border-radius:6px; border:1px solid rgba(255,204,0,0.3);">
+          <label style="font-size:12px; color:#ffcc00; font-weight:bold;">시즌 시작일:</label>
+          <input type="date" id="seasonStartDateInput" style="padding:5px; background:#141724; border:1px solid #333; color:white; border-radius:4px; font-size:12px; margin:0; width:auto;">
+          <button id="updateSeasonDateBtn" class="sub-btn" style="padding:5px 10px; font-size:11px; background:#ffcc00; color:black; border:none; font-weight:bold; cursor:pointer;">변경</button>
+        </div>
+
         <button id="resetSeasonBtn" class="sub-btn" style="border-color:#ff4d4d; color:#ff4d4d; margin-left: auto;">🔥 시즌 초기화</button>
       </div>
       <div class="admin-sub-btns" style="display:flex; gap:10px; width:100%; margin-bottom:15px;">
@@ -102,6 +109,20 @@ export class AdminManager {
     actionBar.querySelector('#repairDataBtn').addEventListener('click', () => this.handleRepairData());
     actionBar.querySelector('#resetSeasonBtn').addEventListener('click', () => this.handleResetSeason());
     actionBar.querySelector('#settleMMRBtn').addEventListener('click', (e) => this.handleSettleMMR(e.currentTarget));
+
+    // Update Season Date Logic
+    const dateInput = actionBar.querySelector('#seasonStartDateInput');
+    actionBar.querySelector('#updateSeasonDateBtn').addEventListener('click', async () => {
+      const date = dateInput.value;
+      if (!date) return alert('날짜를 선택해주세요.');
+      if (!confirm(`${date}일로 시즌 시작일을 변경하시겠습니까?\n(변경 후 [전적 데이터 재정산]을 눌러야 실제 데이터에 반영됩니다.)`)) return;
+      
+      try {
+        await this.crewRepo.setSeasonStartDate(date);
+        alert('시즌 시작일 변경 완료!');
+        window.dispatchEvent(new CustomEvent('sa-rankings-updated'));
+      } catch (e) { alert('변경 실패: ' + e.message); }
+    });
   }
 
   renderAdminMemberList() {
@@ -270,7 +291,7 @@ export class AdminManager {
       if (crewMatches.length === 0) {
         alert(`[${currentNickname}] 님의 최근 20경기 중 새로운 내전 기록이 없습니다.`);
       } else {
-        const settledIds = await this.crewRepo.settleMatches(crewMatches);
+        const settledIds = await crewRepo.settleMatches(crewMatches);
         if (settledIds.length > 0) {
           alert(`✅ [${currentNickname}] 스캔 완료!\n새로운 내전 ${settledIds.length}개를 찾아 정산했습니다.`);
           window.dispatchEvent(new CustomEvent('sa-rankings-updated'));

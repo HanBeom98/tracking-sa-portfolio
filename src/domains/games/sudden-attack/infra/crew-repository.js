@@ -136,6 +136,17 @@ export class CrewRepository {
   }
 
   /**
+   * Manually set the season start date
+   */
+  async setSeasonStartDate(date) {
+    if (!this.db) throw new Error('DB 연결 실패');
+    const settingsRef = this.db.collection(this.SETTINGS_COLLECTION).doc('season');
+    return settingsRef.set({ 
+      startDate: window.firebase.firestore.Timestamp.fromDate(new Date(date)) 
+    }, { merge: true });
+  }
+
+  /**
    * Settle MMR for a list of matches
    */
   async settleMatches(matches) {
