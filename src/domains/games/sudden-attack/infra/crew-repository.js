@@ -26,20 +26,41 @@ export class CrewRepository {
 
   /**
    * Get crew members sorted by MMR
+   * Enhanced: Active players (played at least 1 match) always come first.
    */
   async getRankings() {
     if (!this.db) return [];
     try {
-      const snapshot = await this.db.collection(this.MEMBERS_COLLECTION)
-        .orderBy('mmr', 'desc')
-        .get();
-      return snapshot.docs.map(doc => ({
-        id: doc.id, // This is the OUID
-        ...doc.data(),
-        mmr: doc.data().mmr || 1200,
-        wins: doc.data().wins || 0,
-        loses: doc.data().loses || 0
-      }));
+      const snapshot = await this.db.collection(this.MEMBERS_COLLECTION).get();
+      
+      const members = snapshot.docs.map(doc => {
+        const data = doc.data();
+        const wins = data.wins || 0;
+        const loses = data.loses || 0;
+        const totalMatches = wins + loses;
+        return {
+          id: doc.id,
+          ...data,
+          mmr: data.mmr || 1200,
+          wins,
+          loses,
+          totalMatches
+        };
+      });
+
+      // Sort logic: 
+      // 1. If both are active or both are inactive, sort by MMR (desc)
+      // 2. If one is active and the other is not, active one comes first
+      return members.sort((a, b) => {
+        if (a.totalMatches > 0 && b.totalMatches === 0) return -1;
+        if (a.totalMatches === 0 && b.totalMatches > 0) return 1;
+        
+        // If match status is same, sort by MMR
+        if (b.mmr !== a.mmr) return b.mmr - a.mmr;
+        
+        // If MMR is same, sort by total matches
+        return b.totalMatches - a.totalMatches;
+      });
     } catch (error) {
       console.error('[CrewRepo] Failed to fetch rankings:', error);
       return [];
