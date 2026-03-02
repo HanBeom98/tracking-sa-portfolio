@@ -24,6 +24,7 @@ export class BalancerManager {
     this.countDisplay = this.createCountDisplay();
 
     this.initEvents();
+    this.balancerBtn.classList.remove('hidden'); // 모든 유저에게 공개
   }
 
   createSearchInput() {

@@ -193,12 +193,12 @@ export class AdminManager {
               }
             } catch (err) {}
           } else {
-            try {
-              const realOuid = await this.repository.apiClient.getOuid(currentNickname);
-              if (realOuid) {
-                await this.crewRepo.migrateToOuid(targetOuid, realOuid);
-                targetOuid = realOuid;
-              }
+            const realOuid = await this.repository.apiClient.getOuid(currentNickname);
+            if (realOuid) {
+              await this.crewRepo.migrateToOuid(targetOuid, realOuid);
+              targetOuid = realOuid;
+            }
+          }
             } catch (err) { return []; }
           }
 
