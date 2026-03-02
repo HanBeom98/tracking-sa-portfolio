@@ -1,22 +1,26 @@
 /**
- * Nexon Open API Client for Sudden Attack
- * Handles authentication and base request logic.
+ * Nexon Open API Client for Sudden Attack (Proxy Version)
+ * Now routes all requests through our secure /api/sa-proxy to hide the API Key.
  */
 export class NexonApiClient {
-  constructor(apiKey) {
+  constructor(apiKey = "") {
+    // API Key is no longer strictly needed here as it's handled by the proxy,
+    // but we keep the parameter for compatibility.
     this.apiKey = apiKey;
-    this.baseUrl = 'https://open.api.nexon.com'; // Base domain only
+    this.proxyUrl = '/api/sa-proxy'; 
   }
 
   async fetch(endpoint, params = {}) {
     // If endpoint doesn't start with /static or /suddenattack, prepend the SA API prefix
-    const path = (endpoint.startsWith('/static') || endpoint.startsWith('/suddenattack')) 
+    const nexonPath = (endpoint.startsWith('/static') || endpoint.startsWith('/suddenattack')) 
       ? endpoint 
       : `/suddenattack/v1${endpoint}`;
 
-    const url = new URL(`${this.baseUrl}${path}`);
+    // Build URL pointing to OUR proxy
+    const url = new URL(this.proxyUrl, window.location.origin);
+    url.searchParams.append('path', nexonPath);
     
-    // ONLY append parameters that have a valid value (fixes 400 error for empty strings)
+    // Append additional parameters
     Object.keys(params).forEach(key => {
       const value = params[key];
       if (value !== undefined && value !== null && value !== "") {
@@ -24,12 +28,11 @@ export class NexonApiClient {
       }
     });
 
-    console.log(`[NexonAPI Request]: ${url.toString()}`);
+    console.log(`[Proxy Request]: ${url.toString()}`);
 
-    const response = await fetch(url, {
+    const response = await fetch(url.toString(), {
       method: 'GET',
       headers: {
-        'x-nxopen-api-key': this.apiKey,
         'Accept': 'application/json'
       }
     });
@@ -37,21 +40,20 @@ export class NexonApiClient {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       const message = errorData.error?.message || "";
-      const isTestKey = this.apiKey.startsWith('test_');
       
-      // Quiet down logging for character not found (400 + valid parameter)
       const isNotFound = response.status === 400 && message.includes("valid parameter");
       
       if (!isNotFound) {
-        console.error(`[NexonAPI Error Response] Status: ${response.status}`, JSON.stringify(errorData, null, 2));
+        console.error(`[Proxy Error] Status: ${response.status}`, JSON.stringify(errorData, null, 2));
       }
       
       if (isNotFound) {
-        if (isTestKey) throw new Error('TEST_KEY_LIMITATION');
+        // Since we don't know if the key is test or live at the client level now,
+        // we'll check the error message or default to PLAYER_NOT_FOUND.
         throw new Error('PLAYER_NOT_FOUND');
       }
       
-      throw new Error(message || `Nexon API Error: ${response.status}`);
+      throw new Error(message || `Proxy/Nexon Error: ${response.status}`);
     }
 
     return response.json();
@@ -87,19 +89,11 @@ export class NexonApiClient {
   }
 
   /**
-   * Get static metadata (grade, tier images etc)
+   * Get static metadata
    */
   async getStaticMeta(type) {
-    // Metadata endpoints do NOT use .json extension
     const path = `/static/suddenattack/meta/${type}`;
-    
-    try {
-      return await this.fetch(path);
-    } catch (error) {
-      // Fallback only if absolutely necessary, but based on tests, no-extension is correct
-      console.warn(`[NexonAPI] Failed to fetch meta: ${type}, retrying with .json as fallback...`);
-      return this.fetch(`${path}.json`).catch(() => { throw error; });
-    }
+    return this.fetch(path);
   }
 
   /**
