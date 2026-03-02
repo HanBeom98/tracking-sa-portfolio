@@ -48,22 +48,6 @@ const redAvgMMR = document.getElementById('redAvgMMR');
 const blueAvgMMR = document.getElementById('blueAvgMMR');
 const balanceDiff = document.getElementById('balanceDiff');
 
-// Balancer Search Input (New Element)
-const balancerSearchInput = document.createElement('input');
-balancerSearchInput.id = 'balancerSearchInput';
-balancerSearchInput.type = 'text';
-balancerSearchInput.placeholder = '닉네임 검색...';
-balancerSearchInput.style.cssText = `
-  width: calc(100% - 20px);
-  padding: 10px;
-  margin-bottom: 15px;
-  border: 1px solid #2d3356;
-  border-radius: 8px;
-  background: #1a1d2e;
-  color: #e0e0e0;
-  font-size: 14px;
-`;
-
 // State
 let currentRankings = [];
 
