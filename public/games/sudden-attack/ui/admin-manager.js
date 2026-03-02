@@ -193,12 +193,12 @@ export class AdminManager {
               }
             } catch (err) {}
           } else {
-            const realOuid = await this.repository.apiClient.getOuid(currentNickname);
-            if (realOuid) {
-              await this.crewRepo.migrateToOuid(targetOuid, realOuid);
-              targetOuid = realOuid;
-            }
-          }
+            try {
+              const realOuid = await this.repository.apiClient.getOuid(currentNickname);
+              if (realOuid) {
+                await this.crewRepo.migrateToOuid(targetOuid, realOuid);
+                targetOuid = realOuid;
+              }
             } catch (err) { return []; }
           }
 
@@ -270,7 +270,7 @@ export class AdminManager {
       if (crewMatches.length === 0) {
         alert(`[${currentNickname}] 님의 최근 20경기 중 새로운 내전 기록이 없습니다.`);
       } else {
-        const settledIds = await crewRepo.settleMatches(crewMatches);
+        const settledIds = await this.crewRepo.settleMatches(crewMatches);
         if (settledIds.length > 0) {
           alert(`✅ [${currentNickname}] 스캔 완료!\n새로운 내전 ${settledIds.length}개를 찾아 정산했습니다.`);
           window.dispatchEvent(new CustomEvent('sa-rankings-updated'));
