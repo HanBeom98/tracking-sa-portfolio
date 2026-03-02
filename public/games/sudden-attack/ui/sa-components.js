@@ -138,10 +138,6 @@ export class SaStatsSummary extends HTMLElement {
       }
     }
 
-    const trollWarning = data.trollMatches > 0 
-      ? `<div class="troll-warning">🚨 최근 ${displayCount}경기 중 <strong>${data.trollMatches}번</strong>의 치명적인 트롤링이 감지되었습니다. (K/D 0.5 미만 & 5데스 이상)</div>`
-      : '';
-
     const crewAnalysis = data.crewMatchCount > 0
       ? `
         <div class="crew-stats-card">
@@ -164,7 +160,7 @@ export class SaStatsSummary extends HTMLElement {
             </div>
             <div class="stat-box golden">
               <label>크루내 위상</label>
-              <span class="value">${data.crewWinRate >= 70 ? '핵심 에이스' : (data.crewWinRate >= 50 ? '든든한 국밥' : '열정적인 크루원')}</span>
+              <span class="value">${data.crewStatusTitle}</span>
             </div>
           </div>
         </div>
@@ -191,7 +187,6 @@ export class SaStatsSummary extends HTMLElement {
         </div>
 
         <div class="stats-summary-header">
-    ...
           <div class="radar-section">
             ${this.drawRadar(data.radar)}
           </div>
@@ -267,8 +262,6 @@ export class SaCrewRanking extends HTMLElement {
               const totalGames = (m.wins || 0) + (m.loses || 0);
               const winRate = totalGames > 0 
                 ? Math.round((m.wins / totalGames) * 100) : 0;
-              
-              // Calculate Crew K/D from Firestore data
               const ck = m.crewKills || 0;
               const cd = m.crewDeaths || 0;
               const crewKd = cd > 0 ? (ck / cd).toFixed(2) : (ck > 0 ? ck.toFixed(2) : "0.00");
@@ -283,25 +276,24 @@ export class SaCrewRanking extends HTMLElement {
                   <td class="stats">${winRate}% (${m.wins}W ${m.loses}L)</td>
                 </tr>
               `;
-              }).join('')}
-              </tbody>
-              </table>
-              </div>
-              `;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
 
-              // Add click events for names
-              this.querySelectorAll('.clickable-name').forEach(el => {
-              el.addEventListener('click', () => {
-              const name = el.dataset.name;
-              this.dispatchEvent(new CustomEvent('sa-request-search', {
-              detail: { name },
-              bubbles: true,
-              composed: true
-              }));
-              });
-              });
-              }
-              }
+    this.querySelectorAll('.clickable-name').forEach(el => {
+      el.addEventListener('click', () => {
+        const name = el.dataset.name;
+        this.dispatchEvent(new CustomEvent('sa-request-search', {
+          detail: { name },
+          bubbles: true,
+          composed: true
+        }));
+      });
+    });
+  }
+}
 
 export class SaMatchList extends HTMLElement {
   getKdClass(kd) {
@@ -330,7 +322,7 @@ export class SaMatchList extends HTMLElement {
             ${players.map(p => `
               <tr class="${p.isCrew ? 'crew-row' : ''}">
                 <td class="res ${p.result.toLowerCase()}">${p.result}</td>
-                <td class="name">${p.nickname} ${p.isCrew ? '<span class="crew-tag">CREW</span>' : ''}</td>
+                <td class="name clickable-name" data-name="${p.nickname}">${p.nickname} ${p.isCrew ? '<span class="crew-tag">CREW</span>' : ''}</td>
                 <td class="kda">${p.kill} / ${p.death} / ${p.assist}</td>
                 <td class="kd-val ${this.getKdClass(p.kd)}">${p.kd}</td>
               </tr>
@@ -383,16 +375,16 @@ export class SaMatchList extends HTMLElement {
       </ul>
     `;
 
-    // Add click events for expanding details
     this.querySelectorAll('.match-item').forEach(item => {
-      item.addEventListener('click', () => {
+      item.addEventListener('click', (e) => {
+        // Only toggle if the click is NOT on a clickable-name
+        if (e.target.classList.contains('clickable-name')) return;
+
         const idx = item.dataset.idx;
         const detail = this.querySelector(`#detail-${idx}`);
         const arrow = item.querySelector('.expand-arrow');
-        
         const isHidden = detail.classList.contains('hidden');
         
-        // Toggle
         if (isHidden) {
           detail.classList.remove('hidden');
           arrow.style.transform = 'rotate(180deg)';
@@ -400,6 +392,19 @@ export class SaMatchList extends HTMLElement {
           detail.classList.add('hidden');
           arrow.style.transform = 'rotate(0deg)';
         }
+      });
+    });
+
+    // Add click events for names in scoreboards
+    this.querySelectorAll('.clickable-name').forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation(); 
+        const name = el.dataset.name;
+        this.dispatchEvent(new CustomEvent('sa-request-search', {
+          detail: { name },
+          bubbles: true,
+          composed: true
+        }));
       });
     });
   }
