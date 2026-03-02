@@ -68,6 +68,7 @@ async function handleSearch(nameOverride = null) {
     if (existingMember && existingMember.characterName !== player.nickname) {
       console.log(`[Crew] Nickname sync: ${existingMember.characterName} -> ${player.nickname}`);
       await crewRepo.updateNickname(player.ouid, player.nickname);
+      // REFRESH FULL LIST IMMEDIATELY to include newly discovered/synced names
       await refreshRankings();
     }
     
@@ -106,6 +107,10 @@ async function handleSearch(nameOverride = null) {
     historySection.innerHTML = '<h2>최근 20경기 매치 기록</h2><sa-match-list></sa-match-list>';
     historySection.querySelector('sa-match-list').matches = matches;
     historySection.classList.remove('hidden');
+
+    // FINAL CHECK: If any matches had different names, refreshRankings was already updated inside getRecentMatches via repo
+    // But we need to ensure the LOCAL main.js state is also fresh
+    await refreshRankings();
 
   } catch (error) {
     handleSearchError(error);
