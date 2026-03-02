@@ -295,6 +295,19 @@ body.dark-theme {
 .match-item.win { border-left-color: #00ff88; }
 .match-item.lose { border-left-color: #ff4d4d; }
 
+.match-item .result-badge {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.match-item.win .result-badge {
+  color: #00ff88;
+}
+
+.match-item.lose .result-badge {
+  color: #ff4d4d;
+}
+
 .kd-expand-box {
   display: flex;
   align-items: center;
