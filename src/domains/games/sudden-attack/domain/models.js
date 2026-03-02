@@ -111,55 +111,73 @@ export class RecentStats {
       }
 
       // 4. Radar Chart Scaling (Mastery Curve Applied)
-      const kd = this.kd;
+      const kdScore = this.kd;
       let combatScore = 0;
-      if (kd <= 100) {
-          combatScore = kd * 0.5;
-      } else if (kd <= 160) {
-          combatScore = 50 + (kd - 100) * 0.583;
-      } else {
-          combatScore = 85 + (kd - 160) * 0.375;
-      }
+      if (kdScore <= 100) { combatScore = kdScore * 0.5; } 
+      else if (kdScore <= 160) { combatScore = 50 + (kdScore - 100) * 0.583; } 
+      else { combatScore = 85 + (kdScore - 160) * 0.375; }
       this.radar.combat = Math.min(100, Math.max(0, combatScore));
 
       this.radar.survival = Math.min(100, Math.max(0, 100 - (this.avgD * 15)));
       
       const avgAssists = this.totalAssists / matches.length;
       let teamworkScore = 0;
-      if (avgAssists <= 1) {
-          teamworkScore = avgAssists * 50;
-      } else if (avgAssists <= 2) {
-          teamworkScore = 50 + (avgAssists - 1) * 35;
-      } else {
-          teamworkScore = 85 + (avgAssists - 2) * 15;
-      }
+      if (avgAssists <= 1) { teamworkScore = avgAssists * 50; } 
+      else if (avgAssists <= 2) { teamworkScore = 50 + (avgAssists - 1) * 35; } 
+      else { teamworkScore = 85 + (avgAssists - 2) * 15; }
       this.radar.teamwork = Math.min(100, Math.max(0, teamworkScore));
 
       const hsr = this.headshotRate;
       let precisionScore = 0;
-      if (hsr <= 20) {
-          precisionScore = hsr * 2.5;
-      } else if (hsr <= 35) {
-          precisionScore = 50 + (hsr - 20) * 2.33;
-      } else {
-          precisionScore = 85 + (hsr - 35) * 1;
-      }
+      if (hsr <= 20) { precisionScore = hsr * 2.5; } 
+      else if (hsr <= 35) { precisionScore = 50 + (hsr - 20) * 2.33; } 
+      else { precisionScore = 85 + (hsr - 35) * 1; }
       this.radar.precision = Math.min(100, Math.max(0, precisionScore));
       
       this.radar.victory = this.winRate;
 
-      // 5. Determine Playstyle Title
-      const maxStat = Object.keys(this.radar).reduce((a, b) => this.radar[a] > this.radar[b] ? a : b);
-      if (this.trollMatches >= Math.ceil(matches.length / 2)) {
-        this.playstyleTitle = "아낌없이 주는 나무 (상대팀 국밥)";
+      // 5. Advanced Playstyle Analysis (Multi-factor)
+      const r = this.radar;
+      
+      if (this.trollMatches >= Math.ceil(matches.length * 0.6)) {
+        this.playstyleTitle = "아낌없이 주는 나무 (우리팀의 재앙)";
         this.playstyleIcon = "🚨";
+      } else if (r.combat >= 85 && r.precision >= 85) {
+        this.playstyleTitle = "전술 핵병기 (압도적 무력)";
+        this.playstyleIcon = "☢️";
+      } else if (r.combat >= 85 && r.survival <= 35) {
+        this.playstyleTitle = "광전사 (너 죽고 나 죽자)";
+        this.playstyleIcon = "🪓";
+      } else if (r.precision >= 92) {
+        this.playstyleTitle = "인간 에임봇 (헤드헌터)";
+        this.playstyleIcon = "🤖";
+      } else if (r.survival >= 90 && r.teamwork >= 70) {
+        this.playstyleTitle = "전장의 유령 (은둔 고수)";
+        this.playstyleIcon = "👻";
+      } else if (r.victory >= 80 && r.survival >= 80) {
+        this.playstyleTitle = "승리 요정 (팀의 수호신)";
+        this.playstyleIcon = "🛡️";
+      } else if (r.teamwork >= 90) {
+        this.playstyleTitle = "전장의 조율자 (빛과 소금)";
+        this.playstyleIcon = "🎼";
+      } else if (r.combat >= 92) {
+        this.playstyleTitle = "무자비한 정복자 (여포)";
+        this.playstyleIcon = "👑";
+      } else if (r.survival >= 92) {
+        this.playstyleTitle = "불사신 (생존 끝판왕)";
+        this.playstyleIcon = "🧘";
+      } else if (r.combat >= 60 && r.survival >= 60 && r.teamwork >= 60 && r.precision >= 60 && r.victory >= 60) {
+        this.playstyleTitle = "다재다능한 육각형 전사";
+        this.playstyleIcon = "💠";
       } else {
+        // Fallback to highest stat if no special combo is met
+        const maxStat = Object.keys(r).reduce((a, b) => r[a] > r[b] ? a : b);
         const titles = {
-          combat: { t: "여포 (전장의 지배자)", i: "⚔️" },
-          survival: { t: "불사신 (생존왕)", i: "🥷" },
-          teamwork: { t: "빛과 소금 (어시스트 마스터)", i: "🤝" },
-          precision: { t: "헤드헌터 (인간 에임봇)", i: "🎯" },
-          victory: { t: "승리 요정 (캐리 머신)", i: "🧚" }
+          combat: { t: "전장의 지배자 (여포)", i: "⚔️" },
+          survival: { t: "생존 마스터", i: "🥷" },
+          teamwork: { t: "어시스트 장인", i: "🤝" },
+          precision: { t: "정밀 사격수", i: "🎯" },
+          victory: { t: "승리 견인차", i: "🧚" }
         };
         this.playstyleTitle = titles[maxStat].t;
         this.playstyleIcon = titles[maxStat].i;
