@@ -168,12 +168,13 @@ async function refreshRankings() {
   const startDate = await crewRepo.getSeasonStartDate();
   const formattedDate = startDate.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
 
-  // EXTRACT ALL NAMES: Current + All Historical Nicknames
+  // EXTRACT ALL NAMES: Current + All Historical Nicknames + Migrated Names
   const membersSet = new Set();
   const ouids = [];
 
   currentRankings.forEach(r => {
     if (r.characterName) membersSet.add(r.characterName);
+    if (r.migratedFrom) membersSet.add(r.migratedFrom);
     if (r.previousNames && Array.isArray(r.previousNames)) {
       r.previousNames.forEach(name => membersSet.add(name));
     }
@@ -183,11 +184,18 @@ async function refreshRankings() {
   const allKnownNames = Array.from(membersSet);
   repository.setCrewMembers(allKnownNames, ouids);
 
+  // Render MVP Section
+  const mvpComp = document.createElement('sa-crew-mvps');
+  mvpComp.data = currentRankings;
+
+  // Render Ranking Table
   const rankingComp = document.createElement('sa-crew-ranking');
   rankingComp.setAttribute('season-start', formattedDate);
   rankingComp.rankings = currentRankings;
+  
   crewRankingSection.innerHTML = '';
-  crewRankingSection.appendChild(rankingComp);
+  crewRankingSection.appendChild(mvpComp); // MVP Cards first
+  crewRankingSection.appendChild(rankingComp); // Ranking table second
 
   // Update Sub-Managers
   balancerManager.updateRankings(currentRankings);
