@@ -55,6 +55,8 @@ export class RecentStats {
     this.crewKd = "0.00";
     this.crewWinRate = 0;
     this.crewMmr = 1200;
+    this.crewStatusTitle = "일반 유저";
+    this.crewStatusIcon = "👤";
 
     // Calculate real stats from the last matches
     if (matches.length > 0) {
@@ -111,40 +113,34 @@ export class RecentStats {
       }
 
       // 4. Radar Chart Scaling (Mastery Curve - Hardcore Edition)
-      
-      // COMBAT (K/D): More demanding for higher scores
       const kdVal = this.kd;
       let combatScore = 0;
-      if (kdVal <= 100) { combatScore = kdVal * 0.4; } // 100% -> 40점
-      else if (kdVal <= 150) { combatScore = 40 + (kdVal - 100) * 0.6; } // 150% -> 70점
-      else if (kdVal <= 200) { combatScore = 70 + (kdVal - 150) * 0.4; } // 200% -> 90점
+      if (kdVal <= 100) { combatScore = kdVal * 0.4; } 
+      else if (kdVal <= 150) { combatScore = 40 + (kdVal - 100) * 0.6; } 
+      else if (kdVal <= 200) { combatScore = 70 + (kdVal - 150) * 0.4; } 
       else { combatScore = 90 + (kdVal - 200) * 0.1; }
       this.radar.combat = Math.min(100, Math.max(0, combatScore));
 
-      // SURVIVAL: Harder to stay near 100
-      this.radar.survival = Math.min(100, Math.max(0, 100 - (this.avgD * 18))); // Penalty increased from 15 to 18
+      this.radar.survival = Math.min(100, Math.max(0, 100 - (this.avgD * 18)));
       
-      // TEAMWORK (Avg Assists): Extremely hard to max
       const avgAssists = this.totalAssists / matches.length;
       let teamworkScore = 0;
-      if (avgAssists <= 2.5) { teamworkScore = avgAssists * 28; } // 2.5개 -> 70점
-      else if (avgAssists <= 4.0) { teamworkScore = 70 + (avgAssists - 2.5) * 10; } // 4.0개 -> 85점
-      else { teamworkScore = 85 + (avgAssists - 4.0) * 10; } // 5.0개 -> 95점
+      if (avgAssists <= 2.5) { teamworkScore = avgAssists * 28; } 
+      else if (avgAssists <= 4.0) { teamworkScore = 70 + (avgAssists - 2.5) * 10; } 
+      else { teamworkScore = 85 + (avgAssists - 4.0) * 10; }
       this.radar.teamwork = Math.min(100, Math.max(0, teamworkScore));
 
-      // PRECISION (Headshot %): Only true snipers/aimbots get 90+
       const hsr = this.headshotRate;
       let precisionScore = 0;
-      if (hsr <= 30) { precisionScore = hsr * 1.67; } // 30% -> 50점
-      else if (hsr <= 50) { precisionScore = 50 + (hsr - 30) * 1.75; } // 50% -> 85점
-      else { precisionScore = 85 + (hsr - 50) * 1; } // 65% -> 100점
+      if (hsr <= 30) { precisionScore = hsr * 1.67; } 
+      else if (hsr <= 50) { precisionScore = 50 + (hsr - 30) * 1.75; } 
+      else { precisionScore = 85 + (hsr - 50) * 1; }
       this.radar.precision = Math.min(100, Math.max(0, precisionScore));
       
       this.radar.victory = this.winRate;
 
-      // 5. Advanced Playstyle Analysis (Multi-factor)
+      // 5. Advanced Playstyle Analysis
       const r = this.radar;
-      
       if (this.trollMatches >= Math.ceil(matches.length * 0.6)) {
         this.playstyleTitle = "아낌없이 주는 나무 (우리팀의 재앙)";
         this.playstyleIcon = "🚨";
@@ -176,7 +172,6 @@ export class RecentStats {
         this.playstyleTitle = "다재다능한 육각형 전사";
         this.playstyleIcon = "💠";
       } else {
-        // Fallback to highest stat if no special combo is met
         const maxStat = Object.keys(r).reduce((a, b) => r[a] > r[b] ? a : b);
         const titles = {
           combat: { t: "전장의 지배자 (여포)", i: "⚔️" },
@@ -191,6 +186,39 @@ export class RecentStats {
     } else {
       this.avgK = 0; this.avgD = 0; this.totalKills = 0; this.totalDeaths = 0;
       this.totalAssists = 0; this.mostPlayedMap = "데이터 없음";
+    }
+  }
+
+  /**
+   * Determine Crew Standing (Phase 2 Analysis)
+   * This is called after Firestore data is injected in main.js
+   */
+  calculateCrewStatus() {
+    const mmr = this.crewMmr;
+    const count = this.crewMatchCount;
+    const wr = this.crewWinRate;
+
+    if (mmr >= 1800) {
+      this.crewStatusTitle = "크루의 전설 (Legend)";
+      this.crewStatusIcon = "👑";
+    } else if (mmr >= 1500) {
+      this.crewStatusTitle = "팀의 에이스 (Ace)";
+      this.crewStatusIcon = "💎";
+    } else if (count >= 20 && wr >= 65) {
+      this.crewStatusTitle = "무적의 지휘관";
+      this.crewStatusIcon = "🎖️";
+    } else if (count >= 50) {
+      this.crewStatusTitle = "노련한 베테랑";
+      this.crewStatusIcon = "⚔️";
+    } else if (count < 15 && wr >= 60) {
+      this.crewStatusTitle = "무서운 라이징 스타";
+      this.crewStatusIcon = "✨";
+    } else if (count < 5) {
+      this.crewStatusTitle = "설레는 뉴페이스";
+      this.crewStatusIcon = "🌱";
+    } else {
+      this.crewStatusTitle = "믿음직한 정회원";
+      this.crewStatusIcon = "👤";
     }
   }
 }
@@ -212,7 +240,6 @@ export class MatchRecord {
       this.allPlayerStats = detail.match_detail.map(p => {
         const nickname = p.user_name || p.character_name || "";
         const normalizedName = nickname.toLowerCase().trim();
-        
         const killValue = parseInt(p.kill || p.kill_count || p.cnt_kill || 0);
         const deathValue = parseInt(p.death || p.death_count || p.cnt_death || 0);
         const assistValue = parseInt(p.assist || p.assist_count || p.cnt_assist || 0);
@@ -227,7 +254,6 @@ export class MatchRecord {
           }
         }
 
-        // isCrew판별 시 하드코딩 명단(CREW_MEMBERS) 제거
         const isCrew = isSubject || 
                        (crewData.names || []).some(c => (c || "").toLowerCase().trim() === normalizedName);
 
@@ -244,9 +270,7 @@ export class MatchRecord {
       });
 
       this.participants = detail.match_detail.map(p => p.user_name || p.character_name);
-      this.crewParticipants = this.allPlayerStats
-        .filter(p => p.isCrew)
-        .map(p => p.nickname);
+      this.crewParticipants = this.allPlayerStats.filter(p => p.isCrew).map(p => p.nickname);
       
       if (this.crewParticipants.length >= 8) {
         this.isCustomMatch = true;

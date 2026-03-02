@@ -91,6 +91,9 @@ async function handleSearch() {
       stats.crewKd = cd > 0 ? (ck / cd).toFixed(2) : (ck > 0 ? ck.toFixed(2) : "0.00");
     }
     
+    // Calculate Crew Status based on injected data
+    stats.calculateCrewStatus();
+    
     statsSection.innerHTML = '<sa-stats-summary></sa-stats-summary>';
     statsSection.querySelector('sa-stats-summary').stats = stats;
     statsSection.classList.remove('hidden');

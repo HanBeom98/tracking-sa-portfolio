@@ -176,16 +176,22 @@ export class SaStatsSummary extends HTMLElement {
 
     this.innerHTML = `
       <div class="stats-summary-card">
-        ${trollWarning}
         <div class="playstyle-banner">
-          <div class="playstyle-icon">${data.playstyleIcon}</div>
+          <div class="playstyle-icon">${stats.playstyleIcon}</div>
           <div class="playstyle-info">
             <span class="playstyle-label">AI 분석 플레이 스타일</span>
-            <span class="playstyle-title">${data.playstyleTitle}</span>
+            <span class="playstyle-title">${stats.playstyleTitle}</span>
+          </div>
+          <div class="status-divider" style="width:1px; height:40px; background:rgba(255,255,255,0.1); margin:0 15px;"></div>
+          <div class="status-icon" style="font-size:36px;">${stats.crewStatusIcon}</div>
+          <div class="status-info">
+            <span class="playstyle-label" style="color:#ffcc00;">크루 내 위상</span>
+            <span class="playstyle-title" style="color:#ffcc00;">${stats.crewStatusTitle}</span>
           </div>
         </div>
 
-        <div class="stats-content-flex">
+        <div class="stats-summary-header">
+    ...
           <div class="radar-section">
             ${this.drawRadar(data.radar)}
           </div>
