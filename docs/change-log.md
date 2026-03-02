@@ -1,3 +1,17 @@
+## 2026-03-02
+
+### fix(sa): 서든어택 전적 검색 UX 개선 (SA Stats UX Improvements)
+- **문제/증상**:
+  - 매치 리스트의 승패(WIN/LOSE) 결과가 텍스트로만 표시되어 가독성이 떨어짐.
+  - 유저 전적 검색 결과 화면에서도 크루 랭킹 보드가 계속 표시되어 불필요한 정보가 노출되고 화면이 복잡해 보임.
+- **변경**:
+  - **승/패 가독성 향상**: 매치 리스트의 'WIN'/'LOSE' 텍스트에 각각 고유 색상(승리: `#00ff88`, 패배: `#ff4d4d`)을 적용하여 결과를 한눈에 파악하기 쉽게 개선함. (`ui/style.css`)
+  - **랭킹 보드 노출 로직 수정**: 특정 유저를 검색하면 'TRACKING CREW 실시간 랭킹' 보드가 자동으로 숨김 처리되도록 변경하여, 검색 결과에 집중할 수 있도록 UI를 정리함. (`main.js`)
+- **영향 범위**: `games/sudden-attack` 도메인의 `main.js`, `ui/style.css`.
+- **검증**:
+  - 유저 검색 시 랭킹 보드가 사라지는 것 확인.
+  - `npm run build`를 통해 `public/` 디렉토리에 변경사항이 정상적으로 반영됨을 확인.
+
 ## 2026-03-01
 
 ### feat(sudden-attack): launch Tracking Crew ecosystem and Custom MMR engine
