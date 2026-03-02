@@ -68,10 +68,23 @@ export class CrewRepository {
 
   /**
    * Delete a member from the crew
+   * Enhanced: Deletes by OUID and also attempts to delete legacy name-based doc
    */
-  async deleteMember(ouid) {
+  async deleteMember(ouid, nickname = null) {
     if (!this.db || !ouid) return;
-    return this.db.collection(this.MEMBERS_COLLECTION).doc(ouid).delete();
+    const batch = this.db.batch();
+    
+    // 1. Delete OUID-based document
+    const ouidRef = this.db.collection(this.MEMBERS_COLLECTION).doc(ouid);
+    batch.delete(ouidRef);
+
+    // 2. Delete legacy name-based document if nickname provided
+    if (nickname) {
+      const nameRef = this.db.collection(this.MEMBERS_COLLECTION).doc(nickname);
+      batch.delete(nameRef);
+    }
+
+    return batch.commit();
   }
 
   /**

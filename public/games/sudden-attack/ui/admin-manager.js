@@ -290,7 +290,7 @@ export class AdminManager {
     const { ouid, name } = data;
     if (!confirm(`[${name}] 멤버를 크루에서 삭제하시겠습니까?\n이 작업은 MMR 기록을 모두 삭제하며 되돌릴 수 없습니다.`)) return;
     try {
-      await this.crewRepo.deleteMember(ouid);
+      await this.crewRepo.deleteMember(ouid, name);
       alert('삭제 완료');
       window.dispatchEvent(new CustomEvent('sa-rankings-updated'));
     } catch (err) { alert('삭제 실패: ' + err.message); }
