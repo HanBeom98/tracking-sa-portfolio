@@ -169,6 +169,16 @@ jobs:
           set -euo pipefail
           python main.py --build-only
 
+      - name: Verify Build Artifacts
+        run: |
+          echo "Checking public directory..."
+          ls -R public/ | head -n 20
+          du -sh public/
+          if [ ! -d "public" ] || [ ! -f "public/index.html" ]; then
+            echo "Error: Build failed to generate public/index.html"
+            exit 1
+          fi
+
       - name: Deploy Firestore Rules and Indexes
         env:
           FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
@@ -188,4 +198,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy public --project-name=tracking-sa --branch=main
+          command: pages deploy public --project-name=tracking-sa --branch=main --commit-dirty=true
