@@ -61,6 +61,7 @@ export class RecentStats {
     this.crewMatchCount = 0;
     this.crewKd = "0.00";
     this.crewWinRate = 0;
+    this.crewMmr = 1200;
 
     // Calculate real stats from the last matches
     if (matches.length > 0) {
@@ -117,7 +118,7 @@ export class RecentStats {
       }
 
       // 4. Radar Chart Scaling
-      this.radar.combat = Math.min(100, Math.max(0, (this.kd / 2.0) * 100));
+      this.radar.combat = Math.min(100, Math.max(0, this.kd / 2.0));
       this.radar.survival = Math.min(100, Math.max(0, 100 - (this.avgD * 10)));
       this.radar.teamwork = Math.min(100, Math.max(0, (this.totalAssists / matches.length) / 3 * 100));
 
