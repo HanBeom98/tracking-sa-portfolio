@@ -6,8 +6,9 @@ import { SA_META } from './meta-data.js';
  * Bridges the gap between the Nexon API and the Domain models.
  */
 export class SaRepository {
-  constructor(apiClient) {
+  constructor(apiClient, crewRepository = null) {
     this.apiClient = apiClient;
+    this.crewRepository = crewRepository;
     this.crewMembers = []; 
     this.crewOuids = [];   
     this.meta = {
@@ -25,7 +26,6 @@ export class SaRepository {
 
   /**
    * Pre-load metadata for image mapping
-   * Refactored to use static JS import instead of network fetch for 100% reliability.
    */
   async initMeta() {
     if (this.meta.grade && this.meta.grade.length > 0) return;
@@ -52,15 +52,37 @@ export class SaRepository {
 
   /**
    * Resolve a player by character name
+   * Enhanced: If Nexon API fails, tries to recover OUID from Firestore (CrewRepo).
    */
   async getPlayer(characterName) {
     await this.initMeta();
-    const ouid = await this.apiClient.getOuid(characterName);
+    let ouid = null;
+
+    try {
+      ouid = await this.apiClient.getOuid(characterName);
+    } catch (error) {
+      if (error.message === 'PLAYER_NOT_FOUND' && this.crewRepository) {
+        console.warn(`[Repository] ${characterName} not found in Nexon. Searching in DB...`);
+        ouid = await this.crewRepository.findOuidByNickname(characterName);
+        if (ouid) {
+          console.log(`[Repository] Recovered OUID from DB: ${ouid}`);
+        }
+      }
+      
+      if (!ouid) throw error;
+    }
+
     const [basic, rank, tier] = await Promise.all([
       this.apiClient.getPlayerBasic(ouid),
       this.apiClient.getPlayerRank(ouid),
       this.apiClient.getPlayerTier(ouid)
     ]);
+
+    // AUTO-SYNC NICKNAME: If name in Nexon differs from DB, update DB and store old name in history
+    if (this.crewRepository && basic.character_name !== characterName) {
+      console.log(`[Repository] Nickname sync detected: ${characterName} -> ${basic.character_name}`);
+      this.crewRepository.updateNickname(ouid, basic.character_name).catch(() => {});
+    }
 
     // Map Images
     basic.grade_image = this._getGradeImage(rank.grade);
@@ -70,7 +92,6 @@ export class SaRepository {
       tier.party_image = this._getTierImage(tier.party_rank_match_tier);
     }
     
-    // Pass both lists to Player model
     return new Player(ouid, basic, rank, tier, { names: this.crewMembers, ouids: this.crewOuids });
   }
 
@@ -88,30 +109,23 @@ export class SaRepository {
   }
 
   /**
-   * Fetch recent matches for a player (Optimized: Using verified Nexon API parameters)
+   * Fetch recent matches and AUTO-DISCOVER previous nicknames (like 'altt')
    */
-  async getRecentMatches(ouid, limit = 20, nickname = "") {
+  async getRecentMatches(ouid, nickname = "", limit = 20) {
     const combinedMatches = [];
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+    const discoveredNames = new Set();
 
-    // Verified working parameters from Nexon API guide tests
+    // Verified working parameters
     const matchTypes = ["퀵매치 클랜전", "클랜전"];
     const matchMode = "폭파미션";
-
     const now = new Date();
     const kstFormatter = new Intl.DateTimeFormat('ko-KR', {
-      timeZone: 'Asia/Seoul',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
+      timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit'
     });
-
     const formatDateParts = (date) => {
       const parts = kstFormatter.formatToParts(date);
-      const y = parts.find(p => p.type === 'year').value;
-      const m = parts.find(p => p.type === 'month').value;
-      const d = parts.find(p => p.type === 'day').value;
-      return `${y}-${m}-${d}`;
+      return `${parts.find(p => p.type === 'year').value}-${parts.find(p => p.type === 'month').value}-${parts.find(p => p.type === 'day').value}`;
     };
 
     const dates = [formatDateParts(now), ""]; 
@@ -121,18 +135,12 @@ export class SaRepository {
         for (const type of matchTypes) {
           try {
             await delay(150); 
-            // Fetch using verified type and mode
             const data = await this.apiClient.getMatchList(ouid, type, matchMode, date);
             const matches = (data.match || []).map(m => ({ 
-              ...m, 
-              typeName: m.match_type || type,
-              match_date: m.date_match
+              ...m, typeName: m.match_type || type, match_date: m.date_match
             }));
-            
             for (const m of matches) {
-              if (!combinedMatches.find(cm => cm.match_id === m.match_id)) {
-                combinedMatches.push(m);
-              }
+              if (!combinedMatches.find(cm => cm.match_id === m.match_id)) combinedMatches.push(m);
             }
           } catch (err) {}
         }
@@ -151,30 +159,37 @@ export class SaRepository {
           await delay(50);
           const detail = await this.apiClient.getMatchDetail(m.match_id);
           
-          const subjectInfo = {
-            ouid: ouid,
-            kill: m.kill,
-            death: m.death,
-            result: m.match_result
-          };
+          // --- AUTO-DISCOVERY LOGIC ---
+          // Find this player in the match detail to see what name they were using
+          const playerInMatch = detail.match_member?.find(mm => mm.ouid === ouid);
+          if (playerInMatch && playerInMatch.character_name !== nickname) {
+            discoveredNames.add(playerInMatch.character_name);
+          }
 
+          const subjectInfo = { ouid: ouid, kill: m.kill, death: m.death, result: m.match_result };
           details.push(new MatchRecord(detail, m.typeName, nickname, crewData, subjectInfo));
         } catch (err) {
           details.push(new MatchRecord({
-            match_id: m.match_id,
-            match_result: m.match_result,
-            match_date: m.match_date,
-            kill: m.kill,
-            death: m.death,
-            assist: m.assist,
-            map_name: m.match_mode || "알 수 없음"
+            match_id: m.match_id, match_result: m.match_result, match_date: m.match_date,
+            kill: m.kill, death: m.death, assist: m.assist, map_name: m.match_mode || "알 수 없음"
           }, m.typeName, nickname, crewData));
         }
       }
+
+      // If we found any old names (like 'altt'), sync them to DB history
+      if (discoveredNames.size > 0 && this.crewRepository) {
+        for (const oldName of discoveredNames) {
+          console.log(`[Repository] Auto-discovered previous name: ${oldName} for OUID: ${ouid}`);
+          // Trigger a sync that stores this discovered name in previousNames
+          await this.crewRepository.updateNickname(ouid, nickname); 
+        }
+      }
+
       return details;
     } catch (error) {
       console.error('[Repository] Fatal error during match scanning:', error);
       throw error;
     }
   }
+}
 }
