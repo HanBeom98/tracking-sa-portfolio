@@ -122,7 +122,17 @@ export class RecentStats {
       this.radar.survival = Math.min(100, Math.max(0, 100 - (this.avgD * 15)));
       this.radar.teamwork = Math.min(100, Math.max(0, (this.totalAssists / matches.length) / 3 * 100));
 
-      this.radar.precision = Math.min(100, Math.max(0, (this.headshotRate / 50) * 100));
+      const hsr = this.headshotRate;
+      let precisionScore = 0;
+      if (hsr <= 20) {
+          precisionScore = hsr * 2.5;
+      } else if (hsr <= 35) {
+          precisionScore = 50 + (hsr - 20) * 2.33;
+      } else {
+          precisionScore = 85 + (hsr - 35) * 1;
+      }
+      this.radar.precision = Math.min(100, Math.max(0, precisionScore));
+      
       this.radar.victory = this.winRate;
 
       // 5. Determine Playstyle Title
