@@ -222,8 +222,8 @@ submitApplyBtn.addEventListener('click', async () => {
 // Sync rankings when sub-managers trigger an update
 window.addEventListener('sa-rankings-updated', () => refreshRankings());
 
-// Listen for nickname clicks from the ranking board
-crewRankingSection.addEventListener('sa-request-search', (e) => {
+// Listen for nickname clicks from anywhere on the page (Ranking, Match History, etc.)
+document.addEventListener('sa-request-search', (e) => {
   handleSearch(e.detail.name);
   window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top to see results
 });
