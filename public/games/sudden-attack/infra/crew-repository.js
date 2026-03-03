@@ -414,12 +414,16 @@ export class CrewRepository {
     for (const ouid in memberCache) {
       if (memberCache[ouid].isDirty) {
         const memberRef = this.db.collection(this.MEMBERS_COLLECTION).doc(ouid);
+        
+        // Update member stats and append to mmrHistory
         batch.update(memberRef, {
           mmr: memberCache[ouid].mmr,
           wins: memberCache[ouid].wins,
           loses: memberCache[ouid].loses,
           crewKills: memberCache[ouid].crewKills,
           crewDeaths: memberCache[ouid].crewDeaths,
+          // Atomic array push for history
+          mmrHistory: window.firebase.firestore.FieldValue.arrayUnion(memberCache[ouid].mmr),
           updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
         });
       }
