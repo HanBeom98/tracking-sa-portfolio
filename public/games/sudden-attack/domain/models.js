@@ -50,6 +50,7 @@ export class RecentStats {
 
     this.bestPartner = null;
     this.worstPartner = null;
+    this.mapStats = [];
 
     this.crewMatchCount = 0;
     this.crewKd = "0.00";
@@ -73,6 +74,24 @@ export class RecentStats {
       this.mostPlayedMap = maps.sort((a,b) =>
           maps.filter(v => v===a).length - maps.filter(v => v===b).length
       ).pop();
+
+      // Aggregate Map Statistics
+      const mapCounts = {};
+      matches.forEach(m => {
+        const name = m.mapName;
+        if (!mapCounts[name]) mapCounts[name] = { wins: 0, total: 0 };
+        mapCounts[name].total++;
+        if (m.matchResult.toUpperCase() === 'WIN') mapCounts[name].wins++;
+      });
+
+      this.mapStats = Object.entries(mapCounts)
+        .map(([name, s]) => ({
+          name,
+          wins: s.wins,
+          total: s.total,
+          winRate: Math.round((s.wins / s.total) * 100)
+        }))
+        .sort((a, b) => b.total - a.total);
 
       let currentStreak = 0;
       let isWinStreak = null;
