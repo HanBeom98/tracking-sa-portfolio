@@ -9,6 +9,7 @@ export class CrewRepository {
     this.APPLICATIONS_COLLECTION = 'sa_crew_applications';
     this.HISTORY_COLLECTION = 'sa_crew_history'; 
     this.SETTINGS_COLLECTION = 'sa_crew_settings';
+    this.HISTORY_LIMIT = 50; // Max match history points to store for trend
     
     // List of Administrators and Moderators (Staff)
     this.STAFF_EMAILS = [
@@ -325,7 +326,8 @@ export class CrewRepository {
         loses: data.loses || 0,
         crewKills: data.crewKills || 0,
         crewDeaths: data.crewDeaths || 0,
-        mmrHistoryToAppend: [], // Temporary storage for batch processing
+        mmrHistory: data.mmrHistory || [], // Load existing history
+        mmrHistoryToAppend: [], 
         isDirty: false
       };
       memberCache[doc.id] = cacheObj;
@@ -356,28 +358,16 @@ export class CrewRepository {
       for (const p of match.allPlayerStats) {
         if (!p.isCrew) continue;
         
-        // Find member: Priority 1: OUID, Priority 2: Nickname
-        let currentData = null;
-        if (p.ouid && memberCache[p.ouid]) {
-          currentData = memberCache[p.ouid];
-        } else {
-          currentData = nameMap[p.nickname.toLowerCase()];
-        }
+        let currentData = p.ouid && memberCache[p.ouid] ? memberCache[p.ouid] : nameMap[p.nickname.toLowerCase()];
 
-        // --- FINAL DEFENSE: Live OUID Lookup if Nickname mismatch ---
         if (!currentData && this.apiClient) {
             try {
-                // If we don't have the OUID for this participant yet, look it up
                 const liveOuid = await this.apiClient.getOuid(p.nickname);
                 if (liveOuid && memberCache[liveOuid]) {
-                    console.log(`[settleMatches] Recovered disguised member ${p.nickname} via live OUID: ${liveOuid}`);
                     currentData = memberCache[liveOuid];
-                    // Cache the nickname mapping to avoid repeated API calls for this name in the same session
                     nameMap[p.nickname.toLowerCase()] = currentData;
                 }
-            } catch (lookupError) {
-                // Ignore errors (e.g. 404), they are just not crew members or not found
-            }
+            } catch (e) {}
         }
 
         if (!currentData) continue; 
@@ -393,13 +383,11 @@ export class CrewRepository {
 
         currentData.mmr += change;
         if (isWin) currentData.wins += 1; else currentData.loses += 1;
-        
-        // ACCUMULATE KILLS AND DEATHS
         currentData.crewKills += kill;
         currentData.crewDeaths += death;
         
-        // Accumulate history point for this specific match
-        currentData.mmrHistoryToAppend.push({
+        // Append point to history
+        currentData.mmrHistory.push({
           mmr: currentData.mmr,
           date: match.matchDate
         });
@@ -422,15 +410,16 @@ export class CrewRepository {
       if (memberCache[ouid].isDirty) {
         const memberRef = this.db.collection(this.MEMBERS_COLLECTION).doc(ouid);
         
-        // Update member stats and append all history points collected in this batch
+        // Final trim before saving
+        const finalHistory = memberCache[ouid].mmrHistory.slice(-this.HISTORY_LIMIT);
+
         batch.update(memberRef, {
           mmr: memberCache[ouid].mmr,
           wins: memberCache[ouid].wins,
           loses: memberCache[ouid].loses,
           crewKills: memberCache[ouid].crewKills,
           crewDeaths: memberCache[ouid].crewDeaths,
-          // Atomic array push for all new history objects
-          mmrHistory: window.firebase.firestore.FieldValue.arrayUnion(...memberCache[ouid].mmrHistoryToAppend),
+          mmrHistory: finalHistory, // Save trimmed history
           updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
         });
       }
@@ -448,7 +437,7 @@ export class CrewRepository {
       batch.update(doc.ref, { 
         mmr: 1200, wins: 0, loses: 0, 
         crewKills: 0, crewDeaths: 0,
-        mmrHistory: [], // Clear history on reset
+        mmrHistory: [], 
         updatedAt: window.firebase.firestore.FieldValue.serverTimestamp() 
       });
     });
