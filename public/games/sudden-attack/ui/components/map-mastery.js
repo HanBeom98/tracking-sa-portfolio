@@ -10,7 +10,7 @@ export class SaMapMastery extends HTMLElement {
 
     this.innerHTML = `
       <div class="map-mastery-section">
-        <div class="synergy-header"><h3>🗺️ 맵별 숙련도 (Map Mastery)</h3></div>
+        <div class="synergy-header"><h3>🗺️ 내전 전용 맵 숙련도 (Map Mastery)</h3></div>
         <div class="map-stats-list">
           ${list.map(m => {
             let colorClass = 'normal';

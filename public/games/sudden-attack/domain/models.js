@@ -75,9 +75,11 @@ export class RecentStats {
           maps.filter(v => v===a).length - maps.filter(v => v===b).length
       ).pop();
 
-      // Aggregate Map Statistics
+      // Aggregate Map Statistics (Custom Matches Only)
       const mapCounts = {};
-      matches.forEach(m => {
+      const crewMatches = matches.filter(m => m.isCustomMatch);
+      
+      crewMatches.forEach(m => {
         const name = m.mapName;
         if (!mapCounts[name]) mapCounts[name] = { wins: 0, total: 0 };
         mapCounts[name].total++;
