@@ -120,7 +120,7 @@ export class RecentStats {
         return kd < 0.5 && m.death >= 5;
       }).length;
 
-      const crewMatches = matches.filter(m => m.isCustomMatch);
+      // Reuse crewMatches defined above for MMR/Stats calculation
       this.crewMatchCount = crewMatches.length;
       if (this.crewMatchCount > 0) {
         const ck = crewMatches.reduce((s, m) => s + m.kill, 0);
