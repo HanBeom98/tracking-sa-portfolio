@@ -18,8 +18,26 @@ export class SaRadarChart extends HTMLElement {
   }
 
   set data(d) {
-    if (!d) return;
+    if (!d || !d.radar) return;
     const { radar, vsTargetRadar } = d;
+
+    // Check if all radar values are zero
+    const isEmpty = Object.values(radar).every(v => v === 0);
+
+    if (isEmpty && !vsTargetRadar) {
+      this.innerHTML = `
+        <div class="radar-container empty">
+          <div class="empty-overlay">
+            <span class="icon">📊</span>
+            <p>최근 경기 데이터가<br>충분하지 않습니다.</p>
+          </div>
+          <svg viewBox="0 0 100 100" class="radar-chart muted">
+            <polygon points="50,10 88,38 73,82 27,82 12,38" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.05)"/>
+          </svg>
+        </div>
+      `;
+      return;
+    }
 
     this.innerHTML = `
       <div class="radar-container ${vsTargetRadar ? 'vs-radar' : ''}">

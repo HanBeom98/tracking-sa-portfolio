@@ -6,7 +6,21 @@ export class SaMmrTrendChart extends HTMLElement {
     if (!isCrew) return `<div class="non-crew-banner"><div class="banner-content"><span class="icon">ℹ️</span><div class="text"><p>이 유저는 <strong>TRACKING CREW</strong> 멤버가 아닙니다.</p><span>크루 전용 실시간 MMR 성장 그래프를 보려면 크루에 가입하세요.</span></div></div></div>`;
     
     const normalizedTrend = (mmrTrend || []).map(v => (typeof v === 'object' && v !== null) ? v : { mmr: v, date: null });
-    if (normalizedTrend.length < 2 && !vsTargetData) return `<div class="trend-chart-wrapper empty"><div class="trend-header"><h4>🏆 내전 MMR 성장 추이</h4></div><div class="empty-state"><p>충분한 내전 기록이 쌓이면 성장 그래프가 나타납니다.</p><span class="current">현재 점수: <strong>${currentMmr}</strong></span></div></div>`;
+    
+    if (normalizedTrend.length < 2 && !vsTargetData) {
+      return `
+        <div class="trend-chart-wrapper empty">
+          <div class="trend-header"><h4>🏆 내전 MMR 성장 추이</h4></div>
+          <div class="empty-state">
+            <div class="empty-visual">
+              <svg viewBox="0 0 100 40" class="muted-line"><path d="M10,30 L30,25 L50,28 L70,20 L90,22" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1" /></svg>
+            </div>
+            <p>충분한 내전 기록이 쌓이면<br>성장 그래프가 나타납니다.</p>
+            <div class="current-badge gold">현재 점수: <strong>${currentMmr} MMR</strong></div>
+          </div>
+        </div>
+      `;
+    }
 
     const width = 1000, height = 180, padding = 40;
     const chartWidth = width - (padding * 2), chartHeight = height - (padding * 2);

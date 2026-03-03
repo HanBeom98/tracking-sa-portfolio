@@ -10,6 +10,34 @@ export class SaTeamBoard extends HTMLElement {
     this.render(result);
   }
 
+  copyToClipboard(res) {
+    const text = `
+[⚖️ TRACKING SA 팀 밸런스 결과]
+
+🔴 RED TEAM (Avg: ${Math.round(res.redAvg)})
+${res.red.map(m => `- ${m.characterName} (${m.position === 'sniper' ? '스나' : '라플'})`).join('\n')}
+
+🔵 BLUE TEAM (Avg: ${Math.round(res.blueAvg)})
+${res.blue.map(m => `- ${m.characterName} (${m.position === 'sniper' ? '스나' : '라플'})`).join('\n')}
+
+✨ 격차: ${res.diff} pts (HSR 기반)
+    `.trim();
+
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = this.querySelector('.copy-btn');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '✅ 복사 완료!';
+      btn.classList.add('success');
+      setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.classList.remove('success');
+      }, 2000);
+    }).catch(err => {
+      console.error('Copy failed:', err);
+      alert('복사 실패! 브라우저 권한을 확인해주세요.');
+    });
+  }
+
   render(res) {
     const renderCard = (m) => `
       <div class="draft-card">
@@ -96,11 +124,29 @@ export class SaTeamBoard extends HTMLElement {
           padding: 12px;
           text-align: center;
           border: 1px dashed #333;
+          position: relative;
         }
         .diff-tag {
           color: #ffcc00;
           font-weight: bold;
         }
+
+        .copy-btn {
+          margin-top: 15px;
+          padding: 10px 20px;
+          background: #2d3356;
+          border: 1px solid #444;
+          color: white;
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 0.9em;
+          transition: all 0.2s;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .copy-btn:hover { background: #3d446a; border-color: #ffcc00; }
+        .copy-btn.success { background: #2e7d32; border-color: #4caf50; }
 
         @media (max-width: 768px) {
           .draft-board { flex-direction: column; }
@@ -131,10 +177,15 @@ export class SaTeamBoard extends HTMLElement {
         </div>
       </div>
       <div class="balance-summary">
-        ⚖️ 팀간 HSR 격차: <span class="diff-tag">${res.diff} pts</span>
-        <p style="font-size:0.8em; color:#666; margin-top:5px;">※ HSR(Hidden Skill Rating) 합산 및 포지션 분포를 최적으로 고려하여 생성된 팀입니다.</p>
+        <div>
+          ⚖️ 팀간 HSR 격차: <span class="diff-tag">${res.diff} pts</span>
+          <p style="font-size:0.8em; color:#666; margin-top:5px;">※ HSR(Hidden Skill Rating) 합산 및 포지션 분포를 최적으로 고려하여 생성된 팀입니다.</p>
+        </div>
+        <button class="copy-btn">📋 텍스트 결과 복사</button>
       </div>
     `;
+
+    this.querySelector('.copy-btn').addEventListener('click', () => this.copyToClipboard(res));
   }
 }
 customElements.define('sa-team-board', SaTeamBoard);

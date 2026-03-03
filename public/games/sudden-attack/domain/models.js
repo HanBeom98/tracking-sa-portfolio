@@ -152,7 +152,7 @@ export class RecentStats {
         total: stats.total,
         winRate: Math.round((stats.wins / stats.total) * 100)
       }))
-      .filter(s => s.total >= 2) 
+      .filter(s => s.total >= 3) 
       .sort((a, b) => b.winRate - a.winRate || b.total - a.total);
 
     if (synergyList.length > 0) {
