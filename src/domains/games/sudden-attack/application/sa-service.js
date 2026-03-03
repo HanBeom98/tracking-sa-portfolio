@@ -8,12 +8,46 @@ export class SaService {
   constructor(repository, crewRepository = null) {
     this.repository = repository;
     this.crewRepository = crewRepository;
+    this.CACHE_PREFIX = 'sa_cache_';
+    this.CACHE_TTL = 5 * 60 * 1000; // 5 minutes in milliseconds
   }
 
   /**
-   * Search and load full player profile with stats and matches
+   * Search and load full player profile with SWR Caching
+   * @param {string} characterName 
+   * @param {Array} currentRankings 
+   * @param {Function} onUpdate Callback for background fresh data update
    */
-  async getFullPlayerProfile(characterName, currentRankings = []) {
+  async getFullPlayerProfile(characterName, currentRankings = [], onUpdate = null) {
+    const cacheKey = `${this.CACHE_PREFIX}${characterName.toLowerCase()}`;
+    const cached = this.getCache(cacheKey);
+
+    // 1. If cache exists, return it immediately and trigger background update
+    if (cached) {
+      console.log(`[SaService] Cache hit for ${characterName}. Returning stale data.`);
+      
+      // Background revalidation
+      this.fetchFreshData(characterName, currentRankings).then(freshData => {
+        if (onUpdate && JSON.stringify(freshData) !== JSON.stringify(cached)) {
+          console.log(`[SaService] Background update ready for ${characterName}.`);
+          this.setCache(cacheKey, freshData);
+          onUpdate(freshData);
+        }
+      }).catch(err => console.warn('[SaService] Background revalidation failed:', err));
+
+      return { ...cached, isStale: true };
+    }
+
+    // 2. No cache, fetch from server normally
+    const freshData = await this.fetchFreshData(characterName, currentRankings);
+    this.setCache(cacheKey, freshData);
+    return { ...freshData, isStale: false };
+  }
+
+  /**
+   * Helper: Core data fetching logic (No cache logic here)
+   */
+  async fetchFreshData(characterName, currentRankings = []) {
     try {
       // 1. Search Player
       const player = await this.repository.getPlayer(characterName);
@@ -38,7 +72,6 @@ export class SaService {
         const cd = memberData.crewDeaths || 0;
         stats.crewKd = cd > 0 ? (ck / cd).toFixed(2) : (ck > 0 ? ck.toFixed(2) : "0.00");
 
-        // Fetch MMR History for chart
         if (this.crewRepository) {
           stats.mmrTrend = await this.crewRepository.getMemberMmrHistory(player.ouid);
         }
@@ -48,7 +81,7 @@ export class SaService {
 
       return { player, matches, stats };
     } catch (error) {
-      console.error('[ApplicationService] Failed to get full profile:', error);
+      console.error('[ApplicationService] Fetch failed:', error);
       throw error;
     }
   }
@@ -84,5 +117,23 @@ export class SaService {
    */
   async getRecentMatches(ouid, nickname = "", limit = 20) {
     return await this.repository.getRecentMatches(ouid, limit, nickname);
+  }
+
+  // --- Caching Utilities ---
+  getCache(key) {
+    const str = localStorage.getItem(key);
+    if (!str) return null;
+    try {
+      const item = JSON.parse(str);
+      // Check if data is too old (Optional: Even old data can be returned as SWR)
+      return item.data;
+    } catch (e) { return null; }
+  }
+
+  setCache(key, data) {
+    try {
+      const item = { data, timestamp: Date.now() };
+      localStorage.setItem(key, JSON.stringify(item));
+    } catch (e) { console.warn('[SaService] Cache save failed:', e); }
   }
 }

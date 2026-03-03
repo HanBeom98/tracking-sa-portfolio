@@ -61,17 +61,40 @@ async function handleSearch(nameOverride = null) {
 
   try {
     showLoading(name);
-    const { player, matches, stats } = await service.getFullPlayerProfile(name, currentRankings);
-    primaryUserData = { player, matches, stats };
-    saveSearch(player.nickname);
-    renderUI(player, matches, stats);
+    
+    // Callback for background updates (SWR)
+    const onFreshData = (fresh) => {
+      console.log(`[Main] Refreshing UI with fresh data for ${fresh.player.nickname}`);
+      primaryUserData = fresh;
+      renderUI(fresh.player, fresh.matches, fresh.stats);
+      loading.classList.add('hidden'); // Hide loading if it was still showing
+    };
+
+    // 1. Get Profile (May return cached data immediately)
+    const result = await service.getFullPlayerProfile(name, currentRankings, onFreshData);
+    
+    primaryUserData = result;
+    saveSearch(result.player.nickname);
+    renderUI(result.player, result.matches, result.stats);
+
+    // If result is stale (from cache), keep loading indicator or show refresh status
+    if (result.isStale) {
+      loadingText.textContent = '최신 데이터로 업데이트 중...';
+    } else {
+      loading.classList.add('hidden');
+    }
+
     await refreshRankings();
-  } catch (error) { handleSearchError(error); } 
-  finally { loading.classList.add('hidden'); }
+  } catch (error) { 
+    handleSearchError(error); 
+    loading.classList.add('hidden');
+  } 
 }
 
 async function handleRefresh() {
   if (!primaryUserData) return;
+  // Clear cache for this user to force a fresh fetch
+  localStorage.removeItem(`${service.CACHE_PREFIX}${primaryUserData.player.nickname.toLowerCase()}`);
   await handleSearch(primaryUserData.player.nickname);
 }
 
