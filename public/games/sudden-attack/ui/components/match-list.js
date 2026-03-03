@@ -21,15 +21,25 @@ export class SaMatchList extends HTMLElement {
               <th>결과</th>
               <th>닉네임</th>
               <th>K / D / A</th>
+              <th>미션</th>
               <th>K/D</th>
             </tr>
           </thead>
           <tbody>
             ${players.map(p => `
-              <tr class="${p.isCrew ? 'crew-row' : ''}">
+              <tr class="${p.isCrew ? 'crew-row' : ''} ${p.isMvp ? 'mvp-row' : ''}">
                 <td class="res ${p.result.toLowerCase()}">${p.result}</td>
-                <td class="name clickable-name" data-name="${p.nickname}">${p.nickname} ${p.isCrew ? '<span class="crew-tag">CREW</span>' : ''}</td>
+                <td class="name clickable-name" data-name="${p.nickname}">
+                  ${p.isMvp ? '<span class="mvp-crown" title="매치 MVP">👑</span>' : ''}
+                  ${p.nickname} 
+                  ${p.isCrew ? '<span class="crew-tag">CREW</span>' : ''}
+                </td>
                 <td class="kda">${p.kill} / ${p.death} / ${p.assist}</td>
+                <td class="mission-cell">
+                  ${p.bombInstall > 0 ? `<span class="m-tag plant" title="폭탄 설치">💣 ${p.bombInstall}</span>` : ''}
+                  ${p.bombDefuse > 0 ? `<span class="m-tag defuse" title="폭탄 해제">🛡️ ${p.bombDefuse}</span>` : ''}
+                  ${(!p.bombInstall && !p.bombDefuse) ? '-' : ''}
+                </td>
                 <td class="kd-val ${this.getKdClass(p.kdPercent)}">${p.kdPercent}%</td>
               </tr>
             `).join('')}

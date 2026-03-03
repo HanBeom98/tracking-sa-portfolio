@@ -36,10 +36,9 @@ export class Player {
 
 export class RecentStats {
   constructor(info, matches = []) {
-    // Nexon API's recent_kill_death_rate is already a percentage (e.g., 52.0)
     const rawKd = info.recent_kill_death_rate || 0;
     this.kd = parseFloat(rawKd.toFixed(1));
-    this.kdPercent = Math.round(rawKd); // Use direct value
+    this.kdPercent = Math.round(rawKd);
     
     this.winRate = info.recent_win_rate ? parseFloat(info.recent_win_rate.toFixed(1)) : 0;
 
@@ -78,7 +77,6 @@ export class RecentStats {
           maps.filter(v => v===a).length - maps.filter(v => v===b).length
       ).pop();
 
-      // Aggregate Map Statistics (Custom Matches Only)
       const mapCounts = {};
       const crewMatches = matches.filter(m => m.isCustomMatch);
       
@@ -123,7 +121,6 @@ export class RecentStats {
         return kd < 0.5 && m.death >= 5;
       }).length;
 
-      // Reuse crewMatches defined above for MMR/Stats calculation
       this.crewMatchCount = crewMatches.length;
       if (this.crewMatchCount > 0) {
         const ck = crewMatches.reduce((s, m) => s + m.kill, 0);
@@ -287,13 +284,30 @@ export class MatchRecord {
         const kdPercent = totalEngagements > 0 ? Math.round((killValue / totalEngagements) * 100) : 0;
         
         return {
-          nickname: nickname, kill: killValue, death: deathValue, assist: assistValue,
+          nickname: nickname, 
+          kill: killValue, 
+          death: deathValue, 
+          assist: assistValue,
+          bombInstall: parseInt(p.bomb_installation_count || 0),
+          bombDefuse: parseInt(p.bomb_removal_count || 0),
           kd: deathValue > 0 ? (killValue / deathValue).toFixed(2) : (killValue > 0 ? killValue.toFixed(2) : "0.00"),
           kdPercent: kdPercent,
           result: resultValue === "1" ? "WIN" : (resultValue === "2" ? "LOSE" : "UNKNOWN"),
           isCrew: isCrew, ouid: isSubject ? subjectInfo.ouid : (p.ouid || null)
         };
       });
+
+      let bestKd = -1;
+      let mvp = null;
+      this.allPlayerStats.forEach(p => {
+        const kdVal = parseFloat(p.kd);
+        if (p.kill >= 5 && kdVal > bestKd) {
+          bestKd = kdVal;
+          mvp = p.nickname;
+        }
+      });
+      this.allPlayerStats.forEach(p => { if (p.nickname === mvp) p.isMvp = true; });
+
       this.participants = detail.match_detail.map(p => p.user_name || p.character_name);
       this.crewParticipants = this.allPlayerStats.filter(p => p.isCrew).map(p => p.nickname);
       if (this.crewParticipants.length >= 8) this.isCustomMatch = true;
@@ -313,6 +327,9 @@ export class MatchRecord {
     this.assist = parseInt(playerStat.assist || playerStat.assist_count || playerStat.cnt_assist || 0);
     this.kd = this.death === 0 ? (this.kill > 0 ? this.kill.toFixed(2) : "0.00") : (this.kill / this.death).toFixed(2);
     this.kdPercent = (this.kill + this.death > 0) ? Math.round((this.kill / (this.kill + this.death)) * 100) : 0;
+    this.bombInstall = parseInt(playerStat.bomb_installation_count || 0);
+    this.bombDefuse = parseInt(playerStat.bomb_removal_count || 0);
+    
     const winTeam = this.allPlayerStats.filter(p => p.result === 'WIN');
     const loseTeam = this.allPlayerStats.filter(p => p.result === 'LOSE');
     const winTeamMissing = Math.max(0, loseTeam.reduce((s, p) => s + p.kill, 0) - winTeam.reduce((s, p) => s + p.death, 0));

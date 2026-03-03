@@ -394,6 +394,21 @@ export class CrewRepository {
         performanceAdj = Math.max(-15, Math.min(15, performanceAdj)); // 캡 제한
 
         hsrChange += performanceAdj;
+
+        // --- 가산점 로직 추가 ---
+        // 1. 미션 보너스 (설치/해제 성공 시마다 +2점)
+        const missionCount = (p.bombInstall || 0) + (p.bombDefuse || 0);
+        if (missionCount > 0) {
+          hsrChange += (missionCount * 2);
+          console.log(`[CrewRepo] ${p.nickname} mission bonus: +${missionCount * 2}`);
+        }
+
+        // 2. MVP 보너스 (매치 MVP 선정 시 +5점)
+        if (p.isMvp) {
+          hsrChange += 5;
+          console.log(`[CrewRepo] ${p.nickname} MVP bonus: +5`);
+        }
+
         currentData.hsr += hsrChange;
 
         if (isWin) currentData.wins += 1; else currentData.loses += 1;
