@@ -68,9 +68,8 @@ export class SaService {
         stats.crewMatchCount = (memberData.wins || 0) + (memberData.loses || 0);
         stats.crewWinRate = stats.crewMatchCount > 0 ? Math.round((memberData.wins / stats.crewMatchCount) * 100) : 0;
         stats.crewMmr = memberData.mmr || 1200;
-        const ck = memberData.crewKills || 0;
-        const cd = memberData.crewDeaths || 0;
-        stats.crewKd = cd > 0 ? (ck / cd).toFixed(2) : (ck > 0 ? ck.toFixed(2) : "0.00");
+        stats.crewKills = memberData.crewKills || 0;
+        stats.crewDeaths = memberData.crewDeaths || 0;
 
         if (this.crewRepository) {
           stats.mmrTrend = await this.crewRepository.getMemberMmrHistory(player.ouid);
