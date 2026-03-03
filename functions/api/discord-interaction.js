@@ -173,10 +173,11 @@ export async function onRequest(context) {
     const interaction = JSON.parse(body);
     if (interaction.type === 1) return new Response(JSON.stringify({ type: 1 }), { headers: { 'Content-Type': 'application/json' } });
 
+    const guildId = interaction.guild_id || "global";
+
     // 2. Slash Command (Type 2)
     if (interaction.type === 2) {
       const commandName = interaction.data.name;
-      const guildId = interaction.guild_id || "global"; // Use guild_id for independent sessions
 
       if (commandName === '대내모집') {
         const hostId = interaction.member?.user?.id || interaction.user?.id;
@@ -246,7 +247,7 @@ export async function onRequest(context) {
     if (interaction.type === 3) {
       const customId = interaction.data.custom_id;
       const discordId = interaction.member?.user?.id || interaction.user?.id;
-      const session = await getDoc(PROJECT_ID, 'match_sessions', 'current');
+      const session = await getDoc(PROJECT_ID, 'match_sessions', guildId);
 
       if (!session || session.status !== 'RECRUITING') {
         return new Response(JSON.stringify({ type: 4, data: { content: "❌ 활성화된 내전 모집이 없습니다.", flags: 64 } }), { headers: { 'Content-Type': 'application/json' } });
@@ -281,7 +282,7 @@ export async function onRequest(context) {
         if (userIndex === -1) return new Response(JSON.stringify({ type: 4, data: { content: "⚠️ 신청 내역이 없습니다.", flags: 64 } }), { headers: { 'Content-Type': 'application/json' } });
         
         participants.splice(userIndex, 1);
-        await setDoc(PROJECT_ID, 'match_sessions', 'current', { ...session, participants });
+        await setDoc(PROJECT_ID, 'match_sessions', guildId, { ...session, participants });
 
         return new Response(JSON.stringify({
           type: 7,
@@ -299,7 +300,7 @@ export async function onRequest(context) {
         }
 
         if (customId === 'cancel_match') {
-          await setDoc(PROJECT_ID, 'match_sessions', 'current', { ...session, status: 'CANCELLED' });
+          await setDoc(PROJECT_ID, 'match_sessions', guildId, { ...session, status: 'CANCELLED' });
           return new Response(JSON.stringify({ type: 7, data: { content: "🚫 **내전 모집이 호스트에 의해 취소되었습니다.**", components: [] } }), { headers: { 'Content-Type': 'application/json' } });
         }
 
@@ -307,7 +308,7 @@ export async function onRequest(context) {
         if (participants.length < 10) return new Response(JSON.stringify({ type: 4, data: { content: "❌ 최소 10명이 모여야 팀을 나눌 수 있습니다.", flags: 64 } }), { headers: { 'Content-Type': 'application/json' } });
 
         // Close session
-        await setDoc(PROJECT_ID, 'match_sessions', 'current', { ...session, status: 'CLOSED' });
+        await setDoc(PROJECT_ID, 'match_sessions', guildId, { ...session, status: 'CLOSED' });
 
         // Fetch MMR & Balancing
         const playerData = await Promise.all(participants.map(async (p) => {
@@ -340,7 +341,7 @@ export async function onRequest(context) {
     if (interaction.type === 5 && interaction.data.custom_id === 'match_entry_modal') {
       const nickname = interaction.data.components[0].components[0].value.trim();
       const discordId = interaction.member?.user?.id || interaction.user?.id;
-      const session = await getDoc(PROJECT_ID, 'match_sessions', 'current');
+      const session = await getDoc(PROJECT_ID, 'match_sessions', guildId);
 
       if (!session || session.status !== 'RECRUITING') return new Response(JSON.stringify({ type: 4, data: { content: "❌ 모집이 종료되었습니다.", flags: 64 } }), { headers: { 'Content-Type': 'application/json' } });
 
@@ -349,7 +350,7 @@ export async function onRequest(context) {
       if (participants.length >= 12) return new Response(JSON.stringify({ type: 4, data: { content: "❌ 이미 12명 모집이 완료되었습니다.", flags: 64 } }), { headers: { 'Content-Type': 'application/json' } });
 
       participants.push({ nickname, discordId });
-      await setDoc(PROJECT_ID, 'match_sessions', 'current', { ...session, participants });
+      await setDoc(PROJECT_ID, 'match_sessions', guildId, { ...session, participants });
 
       return new Response(JSON.stringify({
         type: 7,
