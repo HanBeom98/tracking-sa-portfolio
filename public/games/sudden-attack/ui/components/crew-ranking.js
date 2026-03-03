@@ -35,7 +35,7 @@ export class SaCrewRanking extends HTMLElement {
               <th>티어</th>
               <th>캐릭터명</th>
               <th>MMR</th>
-              <th>내전 K/D</th>
+              <th>내전 K/D (%)</th>
               <th>승률 (전적)</th>
             </tr>
           </thead>
@@ -47,7 +47,7 @@ export class SaCrewRanking extends HTMLElement {
                 ? Math.round((m.wins / totalGames) * 100) : 0;
               const ck = m.crewKills || 0;
               const cd = m.crewDeaths || 0;
-              const crewKd = cd > 0 ? (ck / cd).toFixed(2) : (ck > 0 ? ck.toFixed(2) : "0.00");
+              const crewKdPercent = (ck + cd > 0) ? Math.round((ck / (ck + cd)) * 100) : 0;
 
               return `
                 <tr class="rank-row ${idx < 3 ? 'top-rank' : ''}">
@@ -55,7 +55,7 @@ export class SaCrewRanking extends HTMLElement {
                   <td class="tier ${tier.class}">${tier.icon} ${tier.name}</td>
                   <td class="name clickable-name" data-name="${m.characterName}">${m.characterName}</td>
                   <td class="mmr-val">${m.mmr}</td>
-                  <td class="stats">${crewKd}</td>
+                  <td class="stats">${crewKdPercent}%</td>
                   <td class="stats">${winRate}% (${m.wins}W ${m.loses}L)</td>
                 </tr>
               `;

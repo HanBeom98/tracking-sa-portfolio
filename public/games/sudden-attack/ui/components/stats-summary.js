@@ -8,11 +8,11 @@ import './synergy-view.js?v=20260228_7';
 import './map-mastery.js?v=20260228_7';
 
 export class SaStatsSummary extends HTMLElement {
-  getKdColor(kd) {
-    const val = parseFloat(kd);
-    if (val >= 2.0) return 'kd-god';
-    if (val >= 1.5) return 'kd-pro';
-    if (val >= 1.0) return 'kd-high';
+  getKdColor(kdPercent) {
+    const val = parseInt(kdPercent);
+    if (val >= 67) return 'kd-god'; // 2.0 ratio
+    if (val >= 60) return 'kd-pro'; // 1.5 ratio
+    if (val >= 50) return 'kd-high'; // 1.0 ratio
     return 'kd-normal';
   }
 
@@ -57,7 +57,7 @@ export class SaStatsSummary extends HTMLElement {
           <div class="text-stats-section">
             <div class="stats-summary-header"><h3>최근 ${displayCount}경기 정밀 분석</h3><span class="most-played-map">선호 맵: <strong>${data.mostPlayedMap}</strong></span></div>
             <div class="stats-grid">
-              <div class="stat-box"><label>종합 K/D</label><span class="value highlight ${this.getKdColor(data.kd/100)}">${data.kd}%</span></div>
+              <div class="stat-box"><label>종합 K/D</label><span class="value highlight ${this.getKdColor(data.kdPercent)}">${data.kdPercent}%</span></div>
               <div class="stat-box"><label>최근 승률</label><span class="value highlight">${data.winRate}%</span></div>
               <div class="stat-box"><label>평균 K/D/A</label><span class="value">${data.avgK} / ${data.avgD} / ${(data.totalAssists / (displayCount || 1)).toFixed(1)}</span></div>
               <div class="stat-box"><label>${displayCount}경기 합계</label><span class="value">${data.totalKills}K ${data.totalDeaths}D</span></div>
@@ -108,7 +108,7 @@ export class SaStatsSummary extends HTMLElement {
             <table class="vs-comparison-table">
               <thead><tr><th class="p-name">본인</th><th>항목</th><th class="t-name">상대</th></tr></thead>
               <tbody>
-                <tr><td class="${primary.kd > target.kd ? 'winner' : ''}">${primary.kd}%</td><td class="lbl">종합 K/D</td><td class="${target.kd > primary.kd ? 'winner' : ''}">${target.kd}%</td></tr>
+                <tr><td class="${primary.kdPercent > target.kdPercent ? 'winner' : ''}">${primary.kdPercent}%</td><td class="lbl">종합 K/D</td><td class="${target.kdPercent > primary.kdPercent ? 'winner' : ''}">${target.kdPercent}%</td></tr>
                 <tr><td class="${primary.winRate > target.winRate ? 'winner' : ''}">${primary.winRate}%</td><td class="lbl">최근 승률</td><td class="${target.winRate > primary.winRate ? 'winner' : ''}">${target.winRate}%</td></tr>
                 <tr><td class="${primary.crewMmr > target.crewMmr ? 'winner' : ''}">${primary.crewMmr}</td><td class="lbl">내전 MMR</td><td class="${target.crewMmr > primary.crewMmr ? 'winner' : ''}">${target.crewMmr}</td></tr>
                 <tr><td>${primary.avgK} / ${primary.avgD}</td><td class="lbl">평균 K/D</td><td>${target.avgK} / ${target.avgD}</td></tr>
@@ -131,12 +131,18 @@ export class SaStatsSummary extends HTMLElement {
 
   renderCrewAnalysis(data) {
     if (data.crewMatchCount <= 0) return `<div class="crew-stats-card no-crew"><p>최근 경기 중 우리 크루(8인 이상) 내전 기록이 없습니다.</p></div>`;
+    
+    // Calculate Crew K/D percentage from total kills and deaths
+    const ck = parseInt(data.totalKills || 0);
+    const cd = parseInt(data.totalDeaths || 0);
+    const crewKdPercent = (ck + cd > 0) ? Math.round((ck / (ck + cd)) * 100) : 0;
+
     return `
       <div class="crew-stats-card">
         <div class="crew-stats-header"><h3>⚔️ 우리 크루 내전 기록 분석</h3><span class="match-count">누적 내전 참여: <strong>${data.crewMatchCount}회</strong></span></div>
         <div class="stats-grid crew-grid">
           <div class="stat-box golden"><label>내전 현재 MMR</label><span class="value gold-highlight">${data.crewMmr}</span></div>
-          <div class="stat-box golden"><label>내전 K/D</label><span class="value gold-highlight">${data.crewKd}</span></div>
+          <div class="stat-box golden"><label>내전 K/D</label><span class="value gold-highlight">${crewKdPercent}%</span></div>
           <div class="stat-box golden"><label>내전 누적 승률</label><span class="value gold-highlight">${data.crewWinRate}%</span></div>
           <div class="stat-box golden"><label>크루내 위상</label><span class="value">${data.crewStatusTitle}</span></div>
         </div>

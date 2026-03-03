@@ -2,11 +2,11 @@
  * UI Component for Match History List
  */
 export class SaMatchList extends HTMLElement {
-  getKdClass(kd) {
-    const val = parseFloat(kd);
-    if (val >= 2.0) return 'kd-god';
-    if (val >= 1.5) return 'kd-pro';
-    if (val >= 1.0) return 'kd-high';
+  getKdClass(kdPercent) {
+    const val = parseInt(kdPercent);
+    if (val >= 67) return 'kd-god'; // 2.0 ratio
+    if (val >= 60) return 'kd-pro'; // 1.5 ratio
+    if (val >= 50) return 'kd-high'; // 1.0 ratio
     return '';
   }
 
@@ -30,7 +30,7 @@ export class SaMatchList extends HTMLElement {
                 <td class="res ${p.result.toLowerCase()}">${p.result}</td>
                 <td class="name clickable-name" data-name="${p.nickname}">${p.nickname} ${p.isCrew ? '<span class="crew-tag">CREW</span>' : ''}</td>
                 <td class="kda">${p.kill} / ${p.death} / ${p.assist}</td>
-                <td class="kd-val ${this.getKdClass(p.kd)}">${p.kd}</td>
+                <td class="kd-val ${this.getKdClass(p.kdPercent)}">${p.kdPercent}%</td>
               </tr>
             `).join('')}
           </tbody>
@@ -104,7 +104,7 @@ export class SaMatchList extends HTMLElement {
               </div>
               <span class="kda">${match.kill} / ${match.death} / ${match.assist}</span>
               <div class="kd-expand-box">
-                <span class="kd ${this.getKdClass(match.kd)}">KD: ${match.kd}</span>
+                <span class="kd ${this.getKdClass(match.kdPercent)}">KD: ${match.kdPercent}%</span>
                 <span class="expand-arrow">▼</span>
               </div>
             </div>

@@ -40,6 +40,12 @@ export class RecentStats {
     this.winRate = info.recent_win_rate ? parseFloat(info.recent_win_rate.toFixed(1)) : 0;
     this.headshotRate = info.recent_assault_rate ? parseFloat(info.recent_assault_rate.toFixed(1)) : 0;
 
+    // Convert traditional ratio to FPS percentage (K / (K+D) * 100)
+    // If we only have ratio, we can derive: ratio / (ratio + 1) * 100
+    // Example: 1.0 ratio -> 1 / (1+1) * 100 = 50%
+    const kdRatio = info.recent_kill_death_rate || 0;
+    this.kdPercent = kdRatio > 0 ? Math.round((kdRatio / (kdRatio + 1)) * 100) : 0;
+
     this.radar = { combat: 0, survival: 0, teamwork: 0, precision: 0, victory: 0 };
     this.streakCount = 0;
     this.streakType = "NONE"; 
@@ -280,9 +286,13 @@ export class MatchRecord {
           if (nameMatches || statsMatch) { isSubject = true; subjectFound = true; }
         }
         const isCrew = isSubject || crewNamesSet.has(normalizedName) || (p.ouid && (crewData.ouids || []).includes(p.ouid));
+        const totalEngagements = killValue + deathValue;
+        const kdPercent = totalEngagements > 0 ? Math.round((killValue / totalEngagements) * 100) : 0;
+        
         return {
           nickname: nickname, kill: killValue, death: deathValue, assist: assistValue,
           kd: deathValue > 0 ? (killValue / deathValue).toFixed(2) : (killValue > 0 ? killValue.toFixed(2) : "0.00"),
+          kdPercent: kdPercent,
           result: resultValue === "1" ? "WIN" : (resultValue === "2" ? "LOSE" : "UNKNOWN"),
           isCrew: isCrew, ouid: isSubject ? subjectInfo.ouid : (p.ouid || null)
         };
@@ -305,6 +315,7 @@ export class MatchRecord {
     this.death = parseInt(playerStat.death || playerStat.death_count || playerStat.cnt_death || 0);
     this.assist = parseInt(playerStat.assist || playerStat.assist_count || playerStat.cnt_assist || 0);
     this.kd = this.death === 0 ? (this.kill > 0 ? this.kill.toFixed(2) : "0.00") : (this.kill / this.death).toFixed(2);
+    this.kdPercent = (this.kill + this.death > 0) ? Math.round((this.kill / (this.kill + this.death)) * 100) : 0;
     const winTeam = this.allPlayerStats.filter(p => p.result === 'WIN');
     const loseTeam = this.allPlayerStats.filter(p => p.result === 'LOSE');
     const winTeamMissing = Math.max(0, loseTeam.reduce((s, p) => s + p.kill, 0) - winTeam.reduce((s, p) => s + p.death, 0));
