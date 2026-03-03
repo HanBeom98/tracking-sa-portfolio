@@ -10,7 +10,7 @@ export class SaStatsSummary extends HTMLElement {
     return 'kd-normal';
   }
 
-  drawRadar(radar) {
+  drawRadar(radar, color = '#00d2ff', fill = 'rgba(0, 210, 255, 0.4)') {
     if (!radar) return '';
     const stats = [radar.combat, radar.survival, radar.teamwork, radar.precision, radar.victory];
     const center = 50;
@@ -23,8 +23,18 @@ export class SaStatsSummary extends HTMLElement {
     }).join(' ');
 
     return `
-      <div class="radar-container">
+      <polygon points="${points}" fill="${fill}" stroke="${color}" stroke-width="2" class="radar-data-polygon" />
+    `;
+  }
+
+  /**
+   * VS Mode Radar Chart (Overlayed)
+   */
+  drawVsRadar(primaryRadar, targetRadar) {
+    return `
+      <div class="radar-container vs-radar">
         <svg viewBox="0 0 100 100" class="radar-chart">
+          <!-- Background Grids -->
           <polygon points="50,10 88,38 73,82 27,82 12,38" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.1)"/>
           <polygon points="50,30 69,44 62,66 38,66 31,44" fill="transparent" stroke="rgba(255,255,255,0.1)"/>
           <line x1="50" y1="50" x2="50" y2="10" stroke="rgba(255,255,255,0.1)" />
@@ -32,22 +42,133 @@ export class SaStatsSummary extends HTMLElement {
           <line x1="50" y1="50" x2="73" y2="82" stroke="rgba(255,255,255,0.1)" />
           <line x1="50" y1="50" x2="27" y2="82" stroke="rgba(255,255,255,0.1)" />
           <line x1="50" y1="50" x2="12" y2="38" stroke="rgba(255,255,255,0.1)" />
-          <polygon points="${points}" class="radar-data-polygon" />
+          
+          <!-- Primary Player (Blue) -->
+          ${this.drawRadar(primaryRadar, '#00d2ff', 'rgba(0, 210, 255, 0.3)')}
+          
+          <!-- Target Player (Purple) -->
+          ${this.drawRadar(targetRadar, '#bc00ff', 'rgba(188, 0, 255, 0.3)')}
         </svg>
         <div class="radar-labels">
-          <span class="r-lbl r-top">여포력<br>${Math.round(radar.combat)}</span>
-          <span class="r-lbl r-right-t">생존력<br>${Math.round(radar.survival)}</span>
-          <span class="r-lbl r-right-b">팀워크<br>${Math.round(radar.teamwork)}</span>
-          <span class="r-lbl r-left-b">정밀도<br>${Math.round(radar.precision)}</span>
-          <span class="r-lbl r-left-t">승률<br>${Math.round(radar.victory)}</span>
+          <span class="r-lbl r-top">여포력</span>
+          <span class="r-lbl r-right-t">생존력</span>
+          <span class="r-lbl r-right-b">팀워크</span>
+          <span class="r-lbl r-left-b">정밀도</span>
+          <span class="r-lbl r-left-t">승률</span>
         </div>
       </div>
     `;
   }
 
   /**
-   * Draw MMR Growth Chart using Pure SVG
+   * VS Mode MMR Chart (Overlayed)
    */
+  drawVsMmrChart(primaryTrend, targetTrend, primaryMmr, targetMmr) {
+    const width = 1000;
+    const height = 220;
+    const padding = 40;
+    const chartWidth = width - (padding * 2);
+    const chartHeight = height - (padding * 2);
+
+    const allValues = [
+      ...primaryTrend.map(v => typeof v === 'object' ? v.mmr : v),
+      ...targetTrend.map(v => typeof v === 'object' ? v.mmr : v),
+      primaryMmr, targetMmr
+    ];
+
+    const maxMmr = Math.max(...allValues) + 50; 
+    const minMmr = Math.min(...allValues) - 50;
+    const range = (maxMmr - minMmr) || 1;
+
+    const getX = (i, total) => padding + (i * (chartWidth / (total - 1 || 1)));
+    const getY = (val) => height - padding - ((val - minMmr) / range * chartHeight);
+
+    const buildPath = (trend) => {
+      if (!trend || trend.length < 2) return '';
+      const pts = trend.map((v, i) => `${getX(i, trend.length)},${getY(typeof v === 'object' ? v.mmr : v)}`);
+      return `M ${pts.join(' L ')}`;
+    };
+
+    return `
+      <div class="trend-chart-wrapper mmr-chart vs-overlay">
+        <div class="trend-header">
+          <h4>🏆 MMR 성장 곡선 비교</h4>
+          <div class="vs-legend">
+            <span class="leg-item p-color">● 본인 (${primaryMmr})</span>
+            <span class="leg-item t-color">● 상대 (${targetMmr})</span>
+          </div>
+        </div>
+        <svg viewBox="0 0 ${width} ${height}" class="trend-svg">
+          <!-- Grid Lines -->
+          <line x1="${padding}" y1="${getY(minMmr)}" x2="${width-padding}" y2="${getY(minMmr)}" stroke="rgba(255,255,255,0.05)" />
+          <line x1="${padding}" y1="${getY(maxMmr)}" x2="${width-padding}" y2="${getY(maxMmr)}" stroke="rgba(255,255,255,0.05)" />
+          
+          <!-- Primary Line (Blue) -->
+          <path d="${buildPath(primaryTrend)}" fill="none" stroke="#00d2ff" stroke-width="3" stroke-dasharray="0" />
+          
+          <!-- Target Line (Purple) -->
+          <path d="${buildPath(targetTrend)}" fill="none" stroke="#bc00ff" stroke-width="3" />
+
+          <!-- Points for latest state -->
+          <circle cx="${getX(primaryTrend.length-1, primaryTrend.length)}" cy="${getY(primaryMmr)}" r="6" fill="#00d2ff" />
+          <circle cx="${getX(targetTrend.length-1, targetTrend.length)}" cy="${getY(targetMmr)}" r="6" fill="#bc00ff" />
+        </svg>
+      </div>
+    `;
+  }
+
+  set vsModeData({ primary, target }) {
+    this.innerHTML = `
+      <div class="stats-summary-card vs-mode-card">
+        <div class="vs-header-row">
+          <h3>📊 전적 상세 비교 (VS)</h3>
+        </div>
+
+        <div class="stats-content-flex">
+          <div class="radar-section">
+            ${this.drawVsRadar(primary.radar, target.radar)}
+          </div>
+          
+          <div class="text-stats-section">
+            <table class="vs-comparison-table">
+              <thead>
+                <tr>
+                  <th class="p-name">본인</th>
+                  <th>항목</th>
+                  <th class="t-name">상대</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="${primary.kd > target.kd ? 'winner' : ''}">${primary.kd}%</td>
+                  <td class="lbl">종합 K/D</td>
+                  <td class="${target.kd > primary.kd ? 'winner' : ''}">${target.kd}%</td>
+                </tr>
+                <tr>
+                  <td class="${primary.winRate > target.winRate ? 'winner' : ''}">${primary.winRate}%</td>
+                  <td class="lbl">최근 승률</td>
+                  <td class="${target.winRate > primary.winRate ? 'winner' : ''}">${target.winRate}%</td>
+                </tr>
+                <tr>
+                  <td class="${primary.crewMmr > target.crewMmr ? 'winner' : ''}">${primary.crewMmr}</td>
+                  <td class="lbl">내전 MMR</td>
+                  <td class="${target.crewMmr > primary.crewMmr ? 'winner' : ''}">${target.crewMmr}</td>
+                </tr>
+                <tr>
+                  <td>${primary.avgK} / ${primary.avgD}</td>
+                  <td class="lbl">평균 K/D</td>
+                  <td>${target.avgK} / ${target.avgD}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        ${this.drawVsMmrChart(primary.mmrTrend, target.mmrTrend, primary.crewMmr, target.crewMmr)}
+      </div>
+    `;
+  }
+
   drawMmrChart(mmrTrend, currentMmr, isCrew) {
     if (!isCrew) {
       return `
@@ -209,7 +330,7 @@ export class SaStatsSummary extends HTMLElement {
             <div class="stat-box golden">
               <label>내전 누적 승률</label>
               <span class="value gold-highlight">${data.crewWinRate}%</span>
-            </div>
+            </tr>
             <div class="stat-box golden">
               <label>크루내 위상</label>
               <span class="value">${data.crewStatusTitle}</span>
@@ -240,7 +361,25 @@ export class SaStatsSummary extends HTMLElement {
 
         <div class="stats-summary-header">
           <div class="radar-section">
-            ${this.drawRadar(data.radar)}
+            <div class="radar-container">
+              <svg viewBox="0 0 100 100" class="radar-chart">
+                <polygon points="50,10 88,38 73,82 27,82 12,38" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.1)"/>
+                <polygon points="50,30 69,44 62,66 38,66 31,44" fill="transparent" stroke="rgba(255,255,255,0.1)"/>
+                <line x1="50" y1="50" x2="50" y2="10" stroke="rgba(255,255,255,0.1)" />
+                <line x1="50" y1="50" x2="88" y2="38" stroke="rgba(255,255,255,0.1)" />
+                <line x1="50" y1="50" x2="73" y2="82" stroke="rgba(255,255,255,0.1)" />
+                <line x1="50" y1="50" x2="27" y2="82" stroke="rgba(255,255,255,0.1)" />
+                <line x1="50" y1="50" x2="12" y2="38" stroke="rgba(255,255,255,0.1)" />
+                ${this.drawRadar(data.radar)}
+              </svg>
+              <div class="radar-labels">
+                <span class="r-lbl r-top">여포력<br>${Math.round(data.radar.combat)}</span>
+                <span class="r-lbl r-right-t">생존력<br>${Math.round(data.radar.survival)}</span>
+                <span class="r-lbl r-right-b">팀워크<br>${Math.round(data.radar.teamwork)}</span>
+                <span class="r-lbl r-left-b">정밀도<br>${Math.round(data.radar.precision)}</span>
+                <span class="r-lbl r-left-t">승률<br>${Math.round(data.radar.victory)}</span>
+              </div>
+            </div>
           </div>
           
           <div class="text-stats-section">

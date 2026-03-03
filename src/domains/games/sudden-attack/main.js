@@ -28,6 +28,7 @@ const adminManager = new AdminManager(crewRepo, repository, service);
 // Core DOM Elements
 const searchInput = document.getElementById('characterName');
 const searchBtn = document.getElementById('searchBtn');
+const compareBtn = document.getElementById('compareBtn');
 const loading = document.getElementById('loading');
 const loadingText = document.getElementById('loadingText');
 const recentSearchesContainer = document.getElementById('recentSearches');
@@ -45,6 +46,7 @@ const closeModalBtn = document.getElementById('closeModalBtn');
 
 // State
 let currentRankings = [];
+let primaryUserData = null; // Original searched user
 const STORAGE_KEY = 'sa_recent_searches';
 
 /**
@@ -64,11 +66,42 @@ async function handleSearch(nameOverride = null) {
     // Core Logic Delegated to Service
     const { player, matches, stats } = await service.getFullPlayerProfile(name, currentRankings);
     
+    primaryUserData = { player, matches, stats };
     saveSearch(player.nickname);
     renderUI(player, matches, stats);
     
     // Always refresh rankings in background to catch any nickname syncs
     await refreshRankings();
+
+  } catch (error) {
+    handleSearchError(error);
+  } finally {
+    loading.classList.add('hidden');
+  }
+}
+
+/**
+ * VS Mode Comparison Logic
+ */
+async function handleCompare() {
+  const targetName = searchInput.value.trim();
+  if (!targetName) return;
+  if (!primaryUserData) {
+    alert('먼저 기준이 될 유저를 검색해 주세요!');
+    return;
+  }
+  if (primaryUserData.player.nickname === targetName) {
+    alert('자기 자신과는 비교할 수 없습니다.');
+    return;
+  }
+
+  try {
+    loading.classList.remove('hidden');
+    loadingText.textContent = `${primaryUserData.player.nickname} vs ${targetName} 비교 중...`;
+
+    const targetData = await service.getFullPlayerProfile(targetName, currentRankings);
+    
+    renderVSMode(primaryUserData, targetData);
 
   } catch (error) {
     handleSearchError(error);
@@ -83,35 +116,61 @@ function showLoading(name) {
   
   // Render Skeletons
   profileSection.innerHTML = '<sa-player-card></sa-player-card>';
-  profileSection.querySelector('sa-player-card').player = null; // Trigger skeleton
+  profileSection.querySelector('sa-player-card').player = null; 
   profileSection.classList.remove('hidden');
 
   statsSection.innerHTML = '<sa-stats-summary></sa-stats-summary>';
-  statsSection.querySelector('sa-stats-summary').stats = null; // Trigger skeleton
+  statsSection.querySelector('sa-stats-summary').stats = null; 
   statsSection.classList.remove('hidden');
 
   historySection.innerHTML = '<h2>최근 20경기 매치 기록</h2><sa-match-list></sa-match-list>';
-  historySection.querySelector('sa-match-list').matches = null; // Trigger skeleton
+  historySection.querySelector('sa-match-list').matches = null; 
   historySection.classList.remove('hidden');
 
   crewRankingSection.classList.add('hidden');
 }
 
 function renderUI(player, matches, stats) {
-  // 1. Player Profile
   profileSection.innerHTML = '<sa-player-card></sa-player-card>';
   profileSection.querySelector('sa-player-card').player = player;
   profileSection.classList.remove('hidden');
 
-  // 2. Stats Summary
   statsSection.innerHTML = '<sa-stats-summary></sa-stats-summary>';
   statsSection.querySelector('sa-stats-summary').stats = stats;
   statsSection.classList.remove('hidden');
 
-  // 3. Match History
   historySection.innerHTML = '<h2>최근 20경기 매치 기록</h2><sa-match-list></sa-match-list>';
   historySection.querySelector('sa-match-list').matches = matches;
   historySection.classList.remove('hidden');
+  
+  crewRankingSection.classList.remove('hidden');
+}
+
+/**
+ * Render Two Players side by side or overlayed
+ */
+function renderVSMode(primary, target) {
+  // 1. VS Header
+  profileSection.innerHTML = `
+    <div class="vs-header-banner">⚔️ VS MODE: ${primary.player.nickname} vs ${target.player.nickname} ⚔️</div>
+    <div class="vs-container">
+      <sa-player-card id="primaryCard"></sa-player-card>
+      <sa-player-card id="targetCard"></sa-player-card>
+    </div>
+  `;
+  profileSection.querySelector('#primaryCard').player = primary.player;
+  profileSection.querySelector('#targetCard').player = target.player;
+
+  // 2. Combined Stats Summary
+  statsSection.innerHTML = '<sa-stats-summary id="vsStats"></sa-stats-summary>';
+  const vsComp = statsSection.querySelector('#vsStats');
+  
+  // Custom property for VS mode
+  vsComp.vsModeData = { primary: primary.stats, target: target.stats };
+  
+  statsSection.classList.remove('hidden');
+  historySection.classList.add('hidden'); // Hide match history in VS mode for clarity
+  crewRankingSection.classList.add('hidden');
 }
 
 function handleSearchError(error) {
@@ -163,7 +222,6 @@ async function refreshRankings() {
   const startDate = await crewRepo.getSeasonStartDate();
   const formattedDate = startDate.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
 
-  // Update repository's crew membership context
   const membersSet = new Set();
   const ouids = [];
   currentRankings.forEach(r => {
@@ -174,7 +232,6 @@ async function refreshRankings() {
   });
   repository.setCrewMembers(Array.from(membersSet), ouids);
 
-  // Render MVP & Rankings
   const mvpComp = document.createElement('sa-crew-mvps');
   mvpComp.data = currentRankings;
   const rankingComp = document.createElement('sa-crew-ranking');
@@ -210,6 +267,7 @@ async function initCrew() {
 
 // Event Listeners
 searchBtn.addEventListener('click', () => handleSearch());
+compareBtn.addEventListener('click', () => handleCompare());
 searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSearch(); });
 applyCrewBtn.addEventListener('click', () => crewModal.classList.remove('hidden'));
 closeModalBtn.addEventListener('click', () => crewModal.classList.add('hidden'));
