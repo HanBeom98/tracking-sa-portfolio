@@ -27,32 +27,102 @@ export class SaStatsSummary extends HTMLElement {
 
     const matchCount = data.totalMatchesCount || 0; 
 
-    // Update Streak Badge
-    const streakBadge = document.getElementById('streakBadge');
-    if (streakBadge) {
-      if (data.streakType === 'WIN') { streakBadge.innerHTML = `🔥 ${data.streakCount}연승 중!`; streakBadge.className = 'streak-badge win-streak'; } 
-      else if (data.streakType === 'LOSE') { streakBadge.innerHTML = `❄️ ${data.streakCount}연패 늪...`; streakBadge.className = 'streak-badge lose-streak'; } 
-      else { streakBadge.className = 'streak-badge hidden'; }
-    }
-
     this.innerHTML = `
+      <style>
+        .stats-summary-card {
+          background: #1a1d2e;
+          border: 1px solid #2d3356;
+          border-radius: 12px;
+          padding: 25px;
+          margin-bottom: 30px;
+        }
+        .playstyle-banner {
+          display: flex;
+          align-items: center;
+          background: rgba(0, 210, 255, 0.05);
+          border: 1px solid rgba(0, 210, 255, 0.1);
+          border-radius: 10px;
+          padding: 15px 20px;
+          margin-bottom: 25px;
+        }
+        .playstyle-icon { font-size: 32px; margin-right: 15px; }
+        .playstyle-label { font-size: 11px; color: #666; display: block; }
+        .playstyle-title { font-size: 18px; font-weight: bold; color: #fff; }
+        
+        .stats-summary-header {
+          display: flex;
+          gap: 30px;
+          margin-bottom: 30px;
+        }
+        .radar-section { flex: 0 0 250px; }
+        .text-stats-section { flex: 1; }
+        
+        .header-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 15px;
+          border-bottom: 1px solid #2d3356;
+          padding-bottom: 10px;
+        }
+        .header-row h3 { margin: 0; font-size: 18px; color: #fff; }
+        .most-played-map { font-size: 13px; color: #888; }
+        .most-played-map strong { color: #ffcc00; }
+
+        .stats-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 15px;
+        }
+        .stat-box {
+          background: #141724;
+          padding: 15px;
+          border-radius: 8px;
+          border: 1px solid #23283d;
+        }
+        .stat-box label { font-size: 12px; color: #666; display: block; margin-bottom: 5px; }
+        .stat-box .value { font-size: 20px; font-weight: bold; color: #fff; font-family: 'Roboto Mono', monospace; }
+        .value.highlight { color: #00d2ff; }
+        
+        /* Crew Stats Card */
+        .crew-stats-card {
+          margin-top: 30px;
+          background: rgba(255, 204, 0, 0.03);
+          border: 1px solid rgba(255, 204, 0, 0.1);
+          border-radius: 12px;
+          padding: 20px;
+        }
+        .crew-stats-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .crew-stats-header h3 { margin: 0; font-size: 16px; color: #ffcc00; }
+        .match-count { font-size: 12px; color: #888; }
+        
+        .crew-grid .stat-box { border-color: rgba(255, 204, 0, 0.1); }
+        .gold-highlight { color: #ffcc00 !important; }
+
+        @media (max-width: 768px) {
+          .stats-summary-header { flex-direction: column; }
+          .radar-section { margin: 0 auto; }
+        }
+      </style>
       <div class="stats-summary-card">
-        <!-- 1. AI Playstyle Banner -->
         <div class="playstyle-banner">
           <div class="playstyle-icon">${data.playstyleIcon}</div>
-          <div class="playstyle-info"><span class="playstyle-label">AI 분석 플레이 스타일</span><span class="playstyle-title">${data.playstyleTitle}</span></div>
-          <div class="status-divider" style="width:1px; height:40px; background:rgba(255,255,255,0.1); margin:0 15px;"></div>
-          <div class="status-icon" style="font-size:36px;">${data.crewStatusIcon || '👤'}</div>
-          <div class="status-info"><span class="playstyle-label" style="color:#ffcc00;">크루 내 위상</span><span class="playstyle-title" style="color:#ffcc00;">${data.crewStatusTitle || '일반 유저'}</span></div>
+          <div class="playstyle-info">
+            <span class="playstyle-label">AI 분석 플레이 스타일</span>
+            <span class="playstyle-title">${data.playstyleTitle}</span>
+          </div>
+          <div class="status-divider" style="width:1px; height:40px; background:rgba(255,255,255,0.1); margin:0 20px;"></div>
+          <div class="status-info">
+            <span class="playstyle-label" style="color:#ffcc00;">크루 내 위상</span>
+            <span class="playstyle-title" style="color:#ffcc00;">${data.crewStatusTitle || '일반 유저'}</span>
+          </div>
         </div>
 
         <div class="stats-summary-header">
-          <!-- 2. Radar Chart -->
           <div class="radar-section">
             <sa-radar-chart id="radarChart"></sa-radar-chart>
           </div>
           
-          <!-- 3. Text Stats Grid -->
           <div class="text-stats-section">
             <div class="header-row">
               <h3>최근 ${matchCount}경기 정밀 분석</h3>
@@ -67,16 +137,10 @@ export class SaStatsSummary extends HTMLElement {
           </div>
         </div>
 
-        <!-- 4. MMR Trend Chart -->
         <sa-mmr-trend-chart id="trendChart"></sa-mmr-trend-chart>
-
-        <!-- 5. Synergy View -->
         <sa-synergy-view id="synergyView"></sa-synergy-view>
-
-        <!-- 6. Map Mastery -->
         <sa-map-mastery id="mapMastery"></sa-map-mastery>
 
-        <!-- 7. Crew Analysis Board -->
         ${this.renderCrewAnalysis(data)}
       </div>
     `;
@@ -85,7 +149,7 @@ export class SaStatsSummary extends HTMLElement {
     if (radarComp) radarComp.data = { radar: data.radar };
 
     const trendComp = this.querySelector('#trendChart');
-    if (trendComp) trendComp.params = { mmrTrend: data.mmrTrend || [], currentMmr: data.crewMmr || 1200, isCrew: data.crewMatchCount > 0 };
+    if (trendComp) trendComp.params = { mmrTrend: data.mmrTrend || [], currentMmr: data.crewMmr || 1200, isCrew: (data.crewMatchCount || 0) > 0 };
 
     const synergyComp = this.querySelector('#synergyView');
     if (synergyComp) synergyComp.data = data;
@@ -95,21 +159,27 @@ export class SaStatsSummary extends HTMLElement {
   }
 
   set vsModeData({ primary, target }) {
+    // VS Mode styles are typically handled by global CSS or similar structure
     this.innerHTML = `
       <div class="stats-summary-card vs-mode-card">
-        <div class="vs-header-row"><h3>📊 전적 상세 비교 (VS)</h3></div>
-        <div class="stats-content-flex">
+        <div class="header-row"><h3>📊 전적 상세 비교 (VS)</h3></div>
+        <div class="stats-summary-header">
           <div class="radar-section">
             <sa-radar-chart id="vsRadar"></sa-radar-chart>
           </div>
           <div class="text-stats-section">
-            <table class="vs-comparison-table">
-              <thead><tr><th class="p-name">본인</th><th>항목</th><th class="t-name">상대</th></tr></thead>
+            <table class="vs-comparison-table" style="width:100%; border-collapse:collapse;">
+              <thead>
+                <tr style="border-bottom:1px solid #2d3356;">
+                  <th style="padding:10px; color:#00d2ff;">본인</th>
+                  <th style="padding:10px; color:#666;">항목</th>
+                  <th style="padding:10px; color:#bc00ff;">상대</th>
+                </tr>
+              </thead>
               <tbody>
-                <tr><td class="${primary.kdPercent > target.kdPercent ? 'winner' : ''}">${primary.kdPercent}%</td><td class="lbl">종합 K/D</td><td class="${target.kdPercent > primary.kdPercent ? 'winner' : ''}">${target.kdPercent}%</td></tr>
-                <tr><td class="${primary.winRate > target.winRate ? 'winner' : ''}">${primary.winRate}%</td><td class="lbl">최근 승률</td><td class="${target.winRate > primary.winRate ? 'winner' : ''}">${target.winRate}%</td></tr>
-                <tr><td class="${primary.crewMmr > target.crewMmr ? 'winner' : ''}">${primary.crewMmr}</td><td class="lbl">내전 MMR</td><td class="${target.crewMmr > primary.crewMmr ? 'winner' : ''}">${target.crewMmr}</td></tr>
-                <tr><td>${primary.avgK} / ${primary.avgD}</td><td class="lbl">평균 K/D</td><td>${target.avgK} / ${target.avgD}</td></tr>
+                <tr><td style="text-align:center; padding:12px; font-size:18px; font-weight:bold;">${primary.kdPercent}%</td><td style="text-align:center; color:#888;">종합 K/D</td><td style="text-align:center; padding:12px; font-size:18px; font-weight:bold;">${target.kdPercent}%</td></tr>
+                <tr><td style="text-align:center; padding:12px; font-size:18px; font-weight:bold;">${primary.winRate}%</td><td style="text-align:center; color:#888;">최근 승률</td><td style="text-align:center; padding:12px; font-size:18px; font-weight:bold;">${target.winRate}%</td></tr>
+                <tr><td style="text-align:center; padding:12px; font-size:18px; font-weight:bold; color:#ffcc00;">${primary.crewMmr}</td><td style="text-align:center; color:#888;">내전 MMR</td><td style="text-align:center; padding:12px; font-size:18px; font-weight:bold; color:#ffcc00;">${target.crewMmr}</td></tr>
               </tbody>
             </table>
           </div>
@@ -128,9 +198,8 @@ export class SaStatsSummary extends HTMLElement {
   }
 
   renderCrewAnalysis(data) {
-    if (!data || (data.crewMatchCount || 0) <= 0) return `<div class="crew-stats-card no-crew"><p>최근 경기 중 우리 크루(8인 이상) 내전 기록이 없습니다.</p></div>`;
+    if (!data || (data.crewMatchCount || 0) <= 0) return `<div class="crew-stats-card no-crew"><p style="text-align:center; color:#666; padding:20px;">최근 경기 중 우리 크루(8인 이상) 내전 기록이 없습니다.</p></div>`;
     
-    // Explicitly convert to Number to prevent 0% due to string or null data
     const ck = Number(data.crewKills || 0);
     const cd = Number(data.crewDeaths || 0);
     const crewKdPercent = (ck + cd > 0) ? Math.round((ck / (ck + cd)) * 100) : 0;
@@ -142,10 +211,10 @@ export class SaStatsSummary extends HTMLElement {
           <span class="match-count">누적 내전 참여: <strong>${data.crewMatchCount}회</strong></span>
         </div>
         <div class="stats-grid crew-grid">
-          <div class="stat-box golden"><label>내전 현재 MMR</label><span class="value gold-highlight">${data.crewMmr || 1200}</span></div>
-          <div class="stat-box golden"><label>내전 K/D</label><span class="value gold-highlight">${crewKdPercent}%</span></div>
-          <div class="stat-box golden"><label>내전 누적 승률</label><span class="value gold-highlight">${data.crewWinRate || 0}%</span></div>
-          <div class="stat-box golden"><label>크루내 위상</label><span class="value">${data.crewStatusTitle || '일반 유저'}</span></div>
+          <div class="stat-box"><label>내전 현재 MMR</label><span class="value gold-highlight">${data.crewMmr || 1200}</span></div>
+          <div class="stat-box"><label>내전 K/D</label><span class="value gold-highlight">${crewKdPercent}%</span></div>
+          <div class="stat-box"><label>내전 누적 승률</label><span class="value gold-highlight">${data.crewWinRate || 0}%</span></div>
+          <div class="stat-box"><label>크루내 위상</label><span class="value gold-highlight">${data.crewStatusTitle || '일반 유저'}</span></div>
         </div>
       </div>
     `;
