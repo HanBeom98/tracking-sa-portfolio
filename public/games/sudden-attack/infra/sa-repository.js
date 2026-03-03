@@ -97,11 +97,18 @@ export class SaRepository {
 
   /**
    * Fetch recent trend stats (K/D, Win Rate)
+   * Enhanced: Merges Nexon API stats with Firestore Crew stats.
    */
   async getPlayerStats(ouid) {
     try {
-      const data = await this.apiClient.getRecentInfo(ouid);
-      return new RecentStats(data);
+      const nxData = await this.apiClient.getRecentInfo(ouid);
+      let dbData = null;
+
+      if (this.crewRepository) {
+        dbData = await this.crewRepository.findMemberByOuid(ouid);
+      }
+
+      return new RecentStats(nxData, [], dbData);
     } catch (error) {
       console.warn('[Repository] Failed to get recent stats:', error.message);
       return null;

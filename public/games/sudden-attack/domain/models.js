@@ -35,8 +35,7 @@ export class Player {
 }
 
 export class RecentStats {
-  constructor(info, matches = []) {
-    // Nexon API's recent_kill_death_rate is already a percentage (e.g., 52.0)
+  constructor(info, matches = [], crewData = null) {
     const rawKd = info.recent_kill_death_rate || 0;
     this.kd = parseFloat(rawKd.toFixed(1));
     this.kdPercent = Math.round(rawKd);
@@ -55,23 +54,39 @@ export class RecentStats {
     this.worstPartner = null;
     this.mapStats = [];
 
-    this.crewMatchCount = 0;
-    this.crewKd = "0.00";
-    this.crewWinRate = 0;
-    this.crewMmr = 1200;
-    this.crewStatusTitle = "일반 유저";
-    this.crewStatusIcon = "👤";
+    // --- Firestore 내전 정보 주입 ---
+    if (crewData) {
+      this.crewMatchCount = (crewData.wins || 0) + (crewData.loses || 0);
+      this.totalKills = crewData.crewKills || 0; // 내전 킬
+      this.totalDeaths = crewData.crewDeaths || 0; // 내전 데스
+      this.crewKills = crewData.crewKills || 0;
+      this.crewDeaths = crewData.crewDeaths || 0;
+      this.crewWinRate = this.crewMatchCount > 0 ? Math.round((crewData.wins / this.crewMatchCount) * 100) : 0;
+      this.crewMmr = crewData.mmr || 1200;
+      this.crewHsr = crewData.hsr || this.crewMmr;
+      this.mmrHistory = crewData.mmrHistory || [];
+      this.mmrTrend = this.mmrHistory; // 차트용 데이터
+      this.calculateCrewStatus(); // 칭호 계산
+    } else {
+      this.crewMatchCount = 0;
+      this.crewKd = "0.00";
+      this.crewWinRate = 0;
+      this.crewMmr = 1200;
+      this.crewStatusTitle = "일반 유저";
+      this.crewStatusIcon = "👤";
+    }
 
     if (matches.length > 0) {
-      const totalK = matches.reduce((sum, m) => sum + m.kill, 0);
-      const totalD = matches.reduce((sum, m) => sum + m.death, 0);
-      const totalA = matches.reduce((sum, m) => sum + m.assist, 0);
+      // 넥슨 최근 20경기 요약 (공방 데이터)
+      const nxTotalK = matches.reduce((sum, m) => sum + m.kill, 0);
+      const nxTotalD = matches.reduce((sum, m) => sum + m.death, 0);
+      const nxTotalA = matches.reduce((sum, m) => sum + m.assist, 0);
       
-      this.avgK = (totalK / matches.length).toFixed(1);
-      this.avgD = (totalD / matches.length).toFixed(1);
-      this.totalKills = totalK;
-      this.totalDeaths = totalD;
-      this.totalAssists = totalA;
+      this.avgK = (nxTotalK / matches.length).toFixed(1);
+      this.avgD = (nxTotalD / matches.length).toFixed(1);
+      this.nxTotalKills = nxTotalK;
+      nxTotalD;
+      this.totalAssists = nxTotalA;
       
       const maps = matches.map(m => m.mapName);
       this.mostPlayedMap = maps.sort((a,b) =>
@@ -118,19 +133,11 @@ export class RecentStats {
       this.calculateSynergy(matches, info.user_name);
 
       this.trollMatches = matches.filter(m => {
-        const kd = parseFloat(m.kd);
-        return kd < 0.5 && m.death >= 5;
+        const kdVal = parseFloat(m.kd);
+        return kdVal < 0.5 && m.death >= 5;
       }).length;
 
-      this.crewMatchCount = crewMatches.length;
-      if (this.crewMatchCount > 0) {
-        const ck = crewMatches.reduce((s, m) => s + m.kill, 0);
-        const cd = crewMatches.reduce((s, m) => s + m.death, 0);
-        const cw = crewMatches.filter(m => m.matchResult === 'WIN').length;
-        this.crewKd = cd > 0 ? (ck / cd).toFixed(2) : ck.toFixed(2);
-        this.crewWinRate = Math.round((cw / this.crewMatchCount) * 100);
-      }
-
+      // Radar 계산 (공방 지표 기준)
       const kdVal = this.kd;
       let combatScore = 0;
       if (kdVal <= 100) { combatScore = kdVal * 0.4; } 
@@ -147,7 +154,7 @@ export class RecentStats {
       else { teamworkScore = 85 + (avgAssists - 4.0) * 10; }
       this.radar.teamwork = Math.min(100, Math.max(0, teamworkScore));
 
-      const hsr = this.headshotRate;
+      const hsr = info.recent_assault_rate || 0;
       let precisionScore = 0;
       if (hsr <= 30) { precisionScore = hsr * 1.67; } 
       else if (hsr <= 50) { precisionScore = 50 + (hsr - 30) * 1.75; } 
@@ -199,8 +206,7 @@ export class RecentStats {
         this.playstyleIcon = titles[maxStat].i;
       }
     } else {
-      this.avgK = 0; this.avgD = 0; this.totalKills = 0; this.totalDeaths = 0;
-      this.totalAssists = 0; this.mostPlayedMap = "데이터 없음";
+      this.avgK = 0; this.avgD = 0; this.nxTotalKills = 0; this.totalAssists = 0; this.mostPlayedMap = "데이터 없음";
     }
   }
 
