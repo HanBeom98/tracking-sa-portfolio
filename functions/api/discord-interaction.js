@@ -2,7 +2,7 @@
 import nacl from 'tweetnacl';
 
 function hexToUint8Array(hex) {
-  return new Uint8Array(hex.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+  return new Uint8Array(hex.match(/.{1,2}/g).map(byte => parseInt(hex, 16)));
 }
 
 async function getDoc(projectId, collection, docId) {
@@ -126,7 +126,7 @@ export async function onRequest(context) {
   if (interaction.type === 2) {
     if (interaction.data.name === '대내모집') {
       const hostId = interaction.member?.user?.id || interaction.user?.id;
-      context.waitUntil(setDoc(PROJECT_ID, 'match_sessions', guildId, { status: 'RECRUITING', participants: [], hostId, createdAt: new Date().toISOString() }));
+      context.waitUntil(setDoc(PROJECT_ID, 'match_sessions', guildId, { status: 'RECRUITING', participants: [], hostId, createdAt: new Date().toISOString(), lastRefreshedAt: 0 }));
       return new Response(JSON.stringify({ type: 4, data: { content: "🎮 **TRACKING SA 내전 모집 시작!** (0/12)\n최소 10명부터 팀 나누기가 가능합니다.", components: getActionButtons(0) } }), { headers: { 'Content-Type': 'application/json' } });
     }
 
@@ -139,19 +139,16 @@ export async function onRequest(context) {
         const res = await qResp.json();
         if (!res?.[0]?.document) return patchInteraction(APP_ID, token, { content: `❌ **${nick}**님은 등록되어 있지 않습니다.` });
         const d = fromFirestore(res[0].document.fields);
+        
         const mmr = d.mmr || 1200;
         const hsrScore = d.hsr || 1200;
-        const wins = Number(d.wins || 0);
-        const loses = Number(d.loses || 0);
-        const kills = Number(d.crewKills || 0);
-        const deaths = Number(d.crewDeaths || 0);
-
+        const wins = Number(d.wins || 0), loses = Number(d.loses || 0);
+        const kills = Number(d.crewKills || 0), deaths = Number(d.crewDeaths || 0);
         const winRate = (wins + loses) > 0 ? ((wins / (wins + loses)) * 100).toFixed(1) + '%' : '0%';
         const kdPercent = (kills + deaths) > 0 ? ((kills / (kills + deaths)) * 100).toFixed(1) + '%' : '0%';
 
         const c = `📊 **[${nick}] 크루원 전적 리포트**\n\n🔹 **MMR:** ${mmr}\n🔹 **HSR 점수:** ${hsrScore}\n🔹 **내전 킬뎃:** ${kdPercent}\n🔹 **내전 승률:** ${winRate}\n\n*TRACKING SA 공식 데이터베이스 기준*`;
         await patchInteraction(APP_ID, token, { content: c });
-
       })());
       return new Response(JSON.stringify({ type: 5 }), { headers: { 'Content-Type': 'application/json' } });
     }
@@ -167,6 +164,19 @@ export async function onRequest(context) {
       const session = await getDoc(PROJECT_ID, 'match_sessions', guildId);
       if (!session || session.status !== 'RECRUITING') return;
 
+      if (cid === 'refresh_list') {
+        const now = Date.now();
+        const last = Number(session.lastRefreshedAt || 0);
+        if (now - last < 10000) {
+          return patchInteraction(APP_ID, token, { content: "⚠️ 새로고침은 10초에 한 번만 가능합니다.", flags: 64 });
+        }
+        session.lastRefreshedAt = now;
+        await setDoc(PROJECT_ID, 'match_sessions', guildId, session);
+        const list = (session.participants || []).map(p => `${p.nickname}(${p.position === 'sniper' ? '🎯' : '🔫'})`).join(', ');
+        await patchInteraction(APP_ID, token, { content: `🎮 **TRACKING SA 내전 모집 시작!** (${session.participants.length}/12)\n**신청자:** ${list || '없음'}`, components: getActionButtons(session.participants.length) });
+        return;
+      }
+
       if (cid === 'leave_match') {
         const idx = (session.participants || []).findIndex(p => p.discordId === uid);
         if (idx !== -1) {
@@ -179,25 +189,11 @@ export async function onRequest(context) {
       if (cid.startsWith('set_pos_')) {
         const parts = cid.split('_');
         const pos = parts[2], nick = parts.slice(3).join('_');
-        
-        const session = await getDoc(PROJECT_ID, 'match_sessions', guildId);
-        if (session && !session.participants.some(p => p.discordId === uid)) {
+        if (!session.participants.some(p => p.discordId === uid)) {
           session.participants.push({ nickname: nick, discordId: uid, position: pos });
           await setDoc(PROJECT_ID, 'match_sessions', guildId, session);
-          
-          // Now we update the main recruitment message.
-          // Since the user is interacting with an ephemeral message, 
-          // we need to find a way to update the original.
-          // For simplicity and 100% reliability, let's inform the user 
-          // and they can see the update on the next participant's action.
-          // BUT, to satisfy the requirement of "immediate visibility", 
-          // we'll try to patch the session and send a new status if possible.
-          
           const list = session.participants.map(p => `${p.nickname}(${p.position === 'sniper' ? '🎯' : '🔫'})`).join(', ');
-          await patchInteraction(APP_ID, token, { 
-            content: `✅ **${nick}**님 등록 완료! (${session.participants.length}/12)\n**신청자:** ${list}`,
-            components: [] // Remove position buttons from ephemeral
-          });
+          await patchInteraction(APP_ID, token, { content: `✅ **${nick}**님 등록 완료! (${session.participants.length}/12)\n**신청자:** ${list}`, components: [] });
         }
       }
 
@@ -212,7 +208,7 @@ export async function onRequest(context) {
         const players = await Promise.all(session.participants.map(async (p) => {
           const qUrl = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents:runQuery`;
           const qBody = { structuredQuery: { from: [{ collectionId: 'sa_crew_members' }], where: { fieldFilter: { field: { fieldPath: 'characterName' }, op: 'EQUAL', value: { stringValue: p.nickname } } }, limit: 1 } };
-          const qResp = await fetch(qUrl, { method: 'POST', body: JSON.stringify(qBody), headers: { 'Content-Type': 'application/json' } });
+          const qResp = await fetch(queryUrl, { method: 'POST', body: JSON.stringify(queryBody), headers: { 'Content-Type': 'application/json' } });
           const res = await qResp.json(), d = res?.[0]?.document ? fromFirestore(res[0].document.fields) : {};
           return { nickname: p.nickname, mmr: d.mmr || 1200, position: p.position, discordId: p.discordId };
         }));
