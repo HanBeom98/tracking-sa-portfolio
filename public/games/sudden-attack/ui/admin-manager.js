@@ -368,7 +368,7 @@ export class AdminManager {
     const newName = prompt(`[${name}] 님의 새로운 닉네임을 입력하세요.\n(PLAYER_NOT_FOUND 에러 해결용)`, name);
     if (!newName || newName === name) return;
     try {
-      await crewRepo.updateNicknameManually(ouid, newName);
+      await this.crewRepo.updateNicknameManually(ouid, newName);
       alert('닉네임 업데이트 완료. 이제 일괄 정산을 돌려보세요.');
       window.dispatchEvent(new CustomEvent('sa-rankings-updated'));
     } catch (err) { alert('업데이트 실패: ' + err.message); }
