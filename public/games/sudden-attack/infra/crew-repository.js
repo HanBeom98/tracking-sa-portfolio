@@ -325,6 +325,7 @@ export class CrewRepository {
         loses: data.loses || 0,
         crewKills: data.crewKills || 0,
         crewDeaths: data.crewDeaths || 0,
+        mmrHistoryToAppend: [], // Temporary storage for batch processing
         isDirty: false
       };
       memberCache[doc.id] = cacheObj;
@@ -397,8 +398,12 @@ export class CrewRepository {
         currentData.crewKills += kill;
         currentData.crewDeaths += death;
         
-        // Track this specific match for history
-        currentData.lastMatchDate = match.matchDate;
+        // Accumulate history point for this specific match
+        currentData.mmrHistoryToAppend.push({
+          mmr: currentData.mmr,
+          date: match.matchDate
+        });
+
         currentData.isDirty = true;
       }
 
@@ -417,18 +422,15 @@ export class CrewRepository {
       if (memberCache[ouid].isDirty) {
         const memberRef = this.db.collection(this.MEMBERS_COLLECTION).doc(ouid);
         
-        // Update member stats and append to mmrHistory with date
+        // Update member stats and append all history points collected in this batch
         batch.update(memberRef, {
           mmr: memberCache[ouid].mmr,
           wins: memberCache[ouid].wins,
           loses: memberCache[ouid].loses,
           crewKills: memberCache[ouid].crewKills,
           crewDeaths: memberCache[ouid].crewDeaths,
-          // Store object {mmr, date} instead of just number
-          mmrHistory: window.firebase.firestore.FieldValue.arrayUnion({
-            mmr: memberCache[ouid].mmr,
-            date: memberCache[ouid].lastMatchDate
-          }),
+          // Atomic array push for all new history objects
+          mmrHistory: window.firebase.firestore.FieldValue.arrayUnion(...memberCache[ouid].mmrHistoryToAppend),
           updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
         });
       }
