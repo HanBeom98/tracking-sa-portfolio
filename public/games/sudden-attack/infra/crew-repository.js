@@ -379,8 +379,18 @@ export class CrewRepository {
         const death = parseInt(p.death || 0);
         const kd = parseFloat(p.kd || 0);
         
-        // 1. Public MMR: 승패 기반 (±20)
+        // 1. Public MMR: 승패 기반 (±20) + 성취 보너스
         let mmrChange = isWin ? 20 : -20;
+        
+        // --- MMR 성취 보너스 로직 (최대 +5점) ---
+        let mmrBonus = 0;
+        if (p.isMvp) mmrBonus += 3; // MVP 보너스
+        if (p.damage >= 2000) mmrBonus += 2; // 고화력 보너스
+        if (p.headshot >= 10) mmrBonus += 2; // 정밀 샷 보너스
+        
+        mmrBonus = Math.min(5, mmrBonus); // 보너스 캡 제한
+        mmrChange += mmrBonus; // 승리 시 더 많이 받고, 패배 시 덜 깎임
+        
         currentData.mmr += mmrChange;
 
         // 2. Hidden Skill Rating (HSR): 퍼포먼스 기반
