@@ -176,10 +176,11 @@ export async function onRequest(context) {
     // 2. Slash Command (Type 2)
     if (interaction.type === 2) {
       const commandName = interaction.data.name;
+      const guildId = interaction.guild_id || "global"; // Use guild_id for independent sessions
 
       if (commandName === '대내모집') {
         const hostId = interaction.member?.user?.id || interaction.user?.id;
-        await setDoc(PROJECT_ID, 'match_sessions', 'current', {
+        await setDoc(PROJECT_ID, 'match_sessions', guildId, {
           status: 'RECRUITING',
           participants: [],
           hostId,
