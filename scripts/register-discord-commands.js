@@ -6,10 +6,10 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const APP_ID = "1478495458900054300";
-const BOT_TOKEN = process.env.SA_DISCORD_BOT;
+const BOT_TOKEN = process.env.DISCORD_TOKEN;
 
 if (!BOT_TOKEN) {
-  console.error('❌ 에러: .env 파일에 SA_DISCORD_BOT 토큰이 없습니다.');
+  console.error('❌ 에러: .env 파일에 DISCORD_TOKEN 이 없습니다.');
   process.exit(1);
 }
 
@@ -18,6 +18,19 @@ const commands = [
     name: "대내모집",
     description: "서든어택 대내 인원을 모집합니다 (참여하기 버튼 생성)",
     type: 1
+  },
+  {
+    name: "전적검색",
+    description: "크루원의 전적(MMR, 승률 등)을 검색합니다",
+    type: 1,
+    options: [
+      {
+        name: "닉네임",
+        description: "검색할 유저의 인게임 닉네임",
+        type: 3, // STRING
+        required: true
+      }
+    ]
   }
 ];
 
