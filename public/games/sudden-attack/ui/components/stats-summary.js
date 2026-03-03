@@ -130,9 +130,9 @@ export class SaStatsSummary extends HTMLElement {
   renderCrewAnalysis(data) {
     if (!data || (data.crewMatchCount || 0) <= 0) return `<div class="crew-stats-card no-crew"><p>최근 경기 중 우리 크루(8인 이상) 내전 기록이 없습니다.</p></div>`;
     
-    // Use crewKills and crewDeaths for accurate internal stats
-    const ck = parseInt(data.crewKills || 0);
-    const cd = parseInt(data.crewDeaths || 0);
+    // Explicitly convert to Number to prevent 0% due to string or null data
+    const ck = Number(data.crewKills || 0);
+    const cd = Number(data.crewDeaths || 0);
     const crewKdPercent = (ck + cd > 0) ? Math.round((ck / (ck + cd)) * 100) : 0;
 
     return `

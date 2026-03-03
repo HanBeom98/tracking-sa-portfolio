@@ -53,25 +53,25 @@ export class RecentStats {
     this.worstPartner = null;
     this.mapStats = [];
 
-    // --- 내전 데이터 (Firestore) ---
+    // --- 내전 데이터 초기화 (항상 존재하도록 보장) ---
+    this.crewMatchCount = 0;
+    this.crewKills = 0;
+    this.crewDeaths = 0;
+    this.crewWinRate = 0;
+    this.crewMmr = 1200;
+    this.crewStatusTitle = "일반 유저";
+    this.crewStatusIcon = "👤";
+
     if (crewData) {
-      this.crewMatchCount = (crewData.wins || 0) + (crewData.loses || 0);
-      this.crewKills = crewData.crewKills || 0;
-      this.crewDeaths = crewData.crewDeaths || 0;
-      this.crewWinRate = this.crewMatchCount > 0 ? Math.round((crewData.wins / this.crewMatchCount) * 100) : 0;
-      this.crewMmr = crewData.mmr || 1200;
-      this.crewHsr = crewData.hsr || this.crewMmr;
+      this.crewMatchCount = (Number(crewData.wins || 0)) + (Number(crewData.loses || 0));
+      this.crewKills = Number(crewData.crewKills || 0);
+      this.crewDeaths = Number(crewData.crewDeaths || 0);
+      this.crewWinRate = this.crewMatchCount > 0 ? Math.round((Number(crewData.wins || 0) / this.crewMatchCount) * 100) : 0;
+      this.crewMmr = Number(crewData.mmr || 1200);
+      this.crewHsr = Number(crewData.hsr || this.crewMmr);
       this.mmrHistory = crewData.mmrHistory || [];
       this.mmrTrend = this.mmrHistory;
-      this.calculateCrewStatus(); // 여기서 위상과 아이콘이 설정됨
-    } else {
-      this.crewMatchCount = 0;
-      this.crewKills = 0;
-      this.crewDeaths = 0;
-      this.crewWinRate = 0;
-      this.crewMmr = 1200;
-      this.crewStatusTitle = "일반 유저";
-      this.crewStatusIcon = "👤";
+      this.calculateCrewStatus();
     }
 
     if (matches.length > 0) {
@@ -84,7 +84,6 @@ export class RecentStats {
       this.avgD = (totalD / matches.length).toFixed(1);
       this.avgA = (totalA / matches.length).toFixed(1);
       
-      // UI 표시용 변수명 통일 (Nexon 데이터)
       this.totalKills = totalK; 
       this.totalDeaths = totalD;
       this.totalAssists = totalA;
@@ -101,7 +100,6 @@ export class RecentStats {
         return kdVal < 0.5 && m.death >= 5;
       }).length;
 
-      // Radar 계산
       const radarKd = this.kdPercent;
       let combatScore = 0;
       if (radarKd <= 40) { combatScore = radarKd * 1.0; } 
