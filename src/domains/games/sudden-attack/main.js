@@ -147,6 +147,10 @@ function showLoading(name) {
 }
 
 function renderUI(player, matches, stats) {
+  // Reveal action buttons
+  refreshBtn.classList.remove('hidden');
+  compareBtn.classList.remove('hidden');
+
   profileSection.innerHTML = '<sa-player-card></sa-player-card>';
   profileSection.querySelector('sa-player-card').player = player;
   profileSection.classList.remove('hidden');
