@@ -160,7 +160,9 @@ function renderUI(player, matches, stats) {
   historySection.innerHTML = '<h2>최근 20경기 매치 기록</h2><sa-match-list></sa-match-list>';
   historySection.querySelector('sa-match-list').matches = matches;
   historySection.classList.remove('hidden');
-  crewRankingSection.classList.remove('hidden');
+  
+  // Hide global ranking when viewing individual stats
+  crewRankingSection.classList.add('hidden');
 }
 
 function renderVSMode(primary, target) {
