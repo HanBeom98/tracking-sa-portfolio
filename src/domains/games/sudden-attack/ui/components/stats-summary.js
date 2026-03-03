@@ -11,6 +11,7 @@ export class SaStatsSummary extends HTMLElement {
   }
 
   drawRadar(radar) {
+    if (!radar) return '';
     const stats = [radar.combat, radar.survival, radar.teamwork, radar.precision, radar.victory];
     const center = 50;
     const radius = 40;
@@ -46,7 +47,24 @@ export class SaStatsSummary extends HTMLElement {
 
   set stats(data) {
     if (!data) {
-      this.innerHTML = '<p class="no-data">최근 통계 정보를 불러올 수 없습니다.</p>';
+      this.innerHTML = `
+        <div class="stats-summary-card loading-shimmer" style="border: 1px solid var(--bg-sub);">
+          <div style="height: 80px; background: var(--bg-sub); border-radius: 12px; margin-bottom: 20px;"></div>
+          <div style="display: flex; gap: 30px; margin-bottom: 30px;">
+            <div style="height: 150px; width: 150px; background: var(--bg-sub); border-radius: 50%;"></div>
+            <div style="flex: 1;">
+              <div style="height: 24px; width: 40%; background: var(--bg-sub); border-radius: 4px; margin-bottom: 15px;"></div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div style="height: 60px; background: var(--bg-sub); border-radius: 8px;"></div>
+                <div style="height: 60px; background: var(--bg-sub); border-radius: 8px;"></div>
+                <div style="height: 60px; background: var(--bg-sub); border-radius: 8px;"></div>
+                <div style="height: 60px; background: var(--bg-sub); border-radius: 8px;"></div>
+              </div>
+            </div>
+          </div>
+          <div style="height: 120px; background: var(--bg-sub); border-radius: 12px;"></div>
+        </div>
+      `;
       return;
     }
 

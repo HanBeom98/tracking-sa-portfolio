@@ -80,9 +80,20 @@ async function handleSearch(nameOverride = null) {
 function showLoading(name) {
   loading.classList.remove('hidden');
   loadingText.textContent = `${name} 님의 정보를 분석 중... (최근 20경기)`;
-  profileSection.classList.add('hidden');
-  statsSection.classList.add('hidden');
-  historySection.classList.add('hidden');
+  
+  // Render Skeletons
+  profileSection.innerHTML = '<sa-player-card></sa-player-card>';
+  profileSection.querySelector('sa-player-card').player = null; // Trigger skeleton
+  profileSection.classList.remove('hidden');
+
+  statsSection.innerHTML = '<sa-stats-summary></sa-stats-summary>';
+  statsSection.querySelector('sa-stats-summary').stats = null; // Trigger skeleton
+  statsSection.classList.remove('hidden');
+
+  historySection.innerHTML = '<h2>최근 20경기 매치 기록</h2><sa-match-list></sa-match-list>';
+  historySection.querySelector('sa-match-list').matches = null; // Trigger skeleton
+  historySection.classList.remove('hidden');
+
   crewRankingSection.classList.add('hidden');
 }
 

@@ -40,7 +40,18 @@ export class SaMatchList extends HTMLElement {
   }
 
   set matches(list) {
-    if (!list || list.length === 0) {
+    if (!list) {
+      this.innerHTML = `
+        <div class="match-list loading-shimmer">
+          ${Array(5).fill(0).map(() => `
+            <div style="height: 80px; background: var(--bg-sub); border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--bg-sub);"></div>
+          `).join('')}
+        </div>
+      `;
+      return;
+    }
+
+    if (list.length === 0) {
       this.innerHTML = '<p class="no-data">최근 상세 매치 기록이 없습니다.</p>';
       return;
     }

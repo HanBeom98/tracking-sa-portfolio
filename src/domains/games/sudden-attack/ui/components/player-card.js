@@ -3,6 +3,22 @@
  */
 export class SaPlayerCard extends HTMLElement {
   set player(data) {
+    if (!data) {
+      this.innerHTML = `
+        <div class="sa-card loading-shimmer" style="height: 180px; border: 1px solid var(--bg-sub);">
+          <div style="padding: 20px;">
+            <div style="height: 24px; width: 40%; background: var(--bg-sub); border-radius: 4px; margin-bottom: 15px;"></div>
+            <div style="height: 18px; width: 60%; background: var(--bg-sub); border-radius: 4px; margin-bottom: 25px;"></div>
+            <div style="display: flex; gap: 15px;">
+              <div style="height: 50px; width: 100px; background: var(--bg-sub); border-radius: 8px;"></div>
+              <div style="height: 50px; width: 100px; background: var(--bg-sub); border-radius: 8px;"></div>
+            </div>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
     this.innerHTML = `
       <div class="sa-card ${data.isCrew ? 'is-crew-card' : ''}">
         <div class="sa-header">
