@@ -173,24 +173,73 @@ export async function onRequest(context) {
     const interaction = JSON.parse(body);
     if (interaction.type === 1) return new Response(JSON.stringify({ type: 1 }), { headers: { 'Content-Type': 'application/json' } });
 
-    // 2. Slash Command
-    if (interaction.type === 2 && interaction.data.name === '대내모집') {
-      const hostId = interaction.member?.user?.id || interaction.user?.id;
-      await setDoc(PROJECT_ID, 'match_sessions', 'current', {
-        status: 'RECRUITING',
-        participants: [],
-        hostId,
-        createdAt: new Date().toISOString()
-      });
+    // 2. Slash Command (Type 2)
+    if (interaction.type === 2) {
+      const commandName = interaction.data.name;
 
-      return new Response(JSON.stringify({
-        type: 4,
-        data: {
-          content: "🎮 **TRACKING SA 내전 인원 모집 시작!** (0/12)\n최소 10명부터 팀 나누기가 가능하며, 최대 12명까지 신청 가능합니다.",
-          components: getActionButtons(0)
+      if (commandName === '대내모집') {
+        const hostId = interaction.member?.user?.id || interaction.user?.id;
+        await setDoc(PROJECT_ID, 'match_sessions', 'current', {
+          status: 'RECRUITING',
+          participants: [],
+          hostId,
+          createdAt: new Date().toISOString()
+        });
+
+        return new Response(JSON.stringify({
+          type: 4,
+          data: {
+            content: "🎮 **TRACKING SA 내전 인원 모집 시작!** (0/12)\n최소 10명부터 팀 나누기가 가능하며, 최대 12명까지 신청 가능합니다.",
+            components: getActionButtons(0)
+          }
+        }), { headers: { 'Content-Type': 'application/json' } });
+      }
+
+      if (commandName === '전적검색') {
+        const nicknameOption = interaction.data.options.find(opt => opt.name === '닉네임');
+        const nickname = nicknameOption?.value?.trim();
+
+        if (!nickname) {
+          return new Response(JSON.stringify({
+            type: 4,
+            data: { content: "⚠️ 검색할 닉네임을 입력해주세요.", flags: 64 }
+          }), { headers: { 'Content-Type': 'application/json' } });
         }
-      }), { headers: { 'Content-Type': 'application/json' } });
+
+        // Fetch from sa_crew_members Firestore (or proxy if needed)
+        const queryUrl = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents:runQuery`;
+        const queryBody = { 
+          structuredQuery: { 
+            from: [{ collectionId: 'sa_crew_members' }], 
+            where: { fieldFilter: { field: { fieldPath: 'characterName' }, op: 'EQUAL', value: { stringValue: nickname } } }, 
+            limit: 1 
+          } 
+        };
+        const queryResp = await fetch(queryUrl, { method: 'POST', body: JSON.stringify(queryBody), headers: { 'Content-Type': 'application/json' } });
+        const queryResult = await queryResp.json();
+
+        if (!queryResult || !queryResult[0] || !queryResult[0].document) {
+          return new Response(JSON.stringify({
+            type: 4,
+            data: { content: `❌ **${nickname}** 님은 크루원 데이터베이스에 등록되어 있지 않습니다.`, flags: 64 }
+          }), { headers: { 'Content-Type': 'application/json' } });
+        }
+
+        const data = fromFirestore(queryResult[0].document.fields);
+        const mmr = data.mmr || 1200;
+        const hsr = data.hsr || 0;
+        const position = data.position || 'rifler';
+        const winRate = data.winRate || '0%';
+
+        return new Response(JSON.stringify({
+          type: 4,
+          data: {
+            content: `🔍 **[${nickname}]** 님의 전적 정보\n\n🔹 **MMR:** ${mmr}\n🔹 **헤드샷율:** ${hsr}%\n🔹 **포지션:** ${position.toUpperCase()}\n🔹 **최근 승률:** ${winRate}\n\n*데이터는 정기적으로 넥슨 API와 동기화됩니다.*`
+          }
+        }), { headers: { 'Content-Type': 'application/json' } });
+      }
     }
+
 
     // 3. Button Clicks
     if (interaction.type === 3) {
