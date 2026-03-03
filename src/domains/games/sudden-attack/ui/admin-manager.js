@@ -1,3 +1,5 @@
+import { SaDiscordClient } from '../infra/discord-client.js?v=20260228_7';
+
 /**
  * Manages Admin Panel and Actions
  */
@@ -6,6 +8,7 @@ export class AdminManager {
     this.crewRepo = crewRepo;
     this.repository = saRepository;
     this.service = saService;
+    this.discordClient = new SaDiscordClient();
     this.currentRankings = [];
 
     // DOM Elements
@@ -101,7 +104,6 @@ export class AdminManager {
       </div>
       <p class="admin-hint" style="width:100%; margin-top:10px;">※ 일괄 정산은 5명씩 병렬로 빠르게 진행됩니다. 닉네임이 바뀐 멤버는 자동으로 최신화됩니다.</p>
     `;
-    actionBar.style.flexWrap = "wrap";
     this.adminPanel.appendChild(actionBar);
 
     this.renderAdminMemberList();
@@ -110,13 +112,11 @@ export class AdminManager {
     actionBar.querySelector('#resetSeasonBtn').addEventListener('click', () => this.handleResetSeason());
     actionBar.querySelector('#settleMMRBtn').addEventListener('click', (e) => this.handleSettleMMR(e.currentTarget));
 
-    // Update Season Date Logic
     const dateInput = actionBar.querySelector('#seasonStartDateInput');
     actionBar.querySelector('#updateSeasonDateBtn').addEventListener('click', async () => {
       const date = dateInput.value;
       if (!date) return alert('날짜를 선택해주세요.');
       if (!confirm(`${date}일로 시즌 시작일을 변경하시겠습니까?\n(변경 후 [전적 데이터 재정산]을 눌러야 실제 데이터에 반영됩니다.)`)) return;
-      
       try {
         await this.crewRepo.setSeasonStartDate(date);
         alert('시즌 시작일 변경 완료!');
@@ -129,19 +129,15 @@ export class AdminManager {
     if (!this.adminPanel) return;
     const container = this.adminPanel.querySelector('.admin-member-grid');
     if (!container) return;
-
     if (this.currentRankings.length === 0) {
       container.innerHTML = '<p style="grid-column:1/-1;">멤버가 없습니다.</p>';
       return;
     }
-
     container.innerHTML = this.currentRankings.map(m => {
       const isRealOuid = m.id.length >= 20 && /^[0-9a-f]+$/.test(m.id);
       return `
         <div class="admin-member-item" style="background:#222; padding:10px; border-radius:5px; display:flex; flex-direction:column; gap:5px;">
-          <span style="font-weight:bold; color:${isRealOuid ? '#4caf50' : '#ff9800'};">
-            ${m.characterName} ${isRealOuid ? '' : '(구형)'}
-          </span>
+          <span style="font-weight:bold; color:${isRealOuid ? '#4caf50' : '#ff9800'};">${m.characterName} ${isRealOuid ? '' : '(구형)'}</span>
           <span style="font-size:0.8em; color:#888;">MMR: ${m.mmr} (${m.wins}W ${m.loses}L)</span>
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-top:5px;">
             <button class="mini-btn individual-scan-btn" data-ouid="${m.id}" data-name="${m.characterName}" style="grid-column: 1 / -1; background:#0288d1; color:white;">🔍 개별 전적 스캔</button>
@@ -151,32 +147,25 @@ export class AdminManager {
         </div>
       `;
     }).join('');
-
-    container.querySelectorAll('.individual-scan-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => this.handleIndividualScan(e.currentTarget));
-    });
-    container.querySelectorAll('.delete-member-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => this.handleDeleteMember(e.currentTarget.dataset));
-    });
-    container.querySelectorAll('.update-name-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => this.handleUpdateName(e.currentTarget.dataset));
-    });
+    container.querySelectorAll('.individual-scan-btn').forEach(btn => btn.addEventListener('click', (e) => this.handleIndividualScan(e.currentTarget)));
+    container.querySelectorAll('.delete-member-btn').forEach(btn => btn.addEventListener('click', (e) => this.handleDeleteMember(e.currentTarget.dataset)));
+    container.querySelectorAll('.update-name-btn').forEach(btn => btn.addEventListener('click', (e) => this.handleUpdateName(e.currentTarget.dataset)));
   }
 
   async handleRepairData() {
-    if (!confirm('이미 정산된 기록을 모두 삭제하고, 오늘 전적을 처음부터 다시 계산하시겠습니까?\n(누락된 킬/데스 데이터를 복구할 때 사용합니다.)')) return;
+    if (!confirm('이미 정산된 기록을 모두 삭제하고 처음부터 다시 계산하시겠습니까?')) return;
     try {
       await this.crewRepo.repairSeasonData();
-      alert('데이터 초기화 완료! 이제 [일괄 정산] 버튼을 눌러 다시 전적을 불러오세요.');
+      alert('데이터 초기화 완료! 이제 [일괄 정산] 버튼을 누르세요.');
       window.dispatchEvent(new CustomEvent('sa-rankings-updated'));
     } catch (e) { alert('복구 실패: ' + e.message); }
   }
 
   async handleResetSeason() {
-    if (!confirm('정말 모든 크루원의 MMR과 전적, 정산 기록을 초기화하시겠습니까?\n새로운 시즌을 시작할 때만 사용하세요. 이 작업은 되돌릴 수 없습니다!')) return;
+    if (!confirm('정말 모든 전적을 초기화하시겠습니까?')) return;
     try {
       await this.crewRepo.resetSeason();
-      alert('시즌이 성공적으로 초기화되었습니다! (MMR 1200 복구)');
+      alert('시즌 초기화 완료!');
       window.dispatchEvent(new CustomEvent('sa-rankings-updated'));
     } catch (e) { alert('초기화 실패: ' + e.message); }
   }
@@ -184,115 +173,61 @@ export class AdminManager {
   async handleSettleMMR(btn) {
     btn.disabled = true;
     const originalText = btn.textContent;
-    btn.textContent = '닉네임 동기화 및 병렬 스캔 중...';
-
+    btn.textContent = '스캔 및 정산 중...';
     try {
-      if (this.currentRankings.length === 0) {
-        alert('등록된 크루 멤버가 없습니다.');
-        return;
-      }
-
-      // SYNC DISCOVERED NAMES FIRST (Overcome permission issues)
+      if (this.currentRankings.length === 0) return alert('등록된 멤버가 없습니다.');
       if (this.repository.discoveredNicknames) {
         await this.crewRepo.syncHistoricalNicknames(this.repository.discoveredNicknames);
-        this.repository.discoveredNicknames = {}; // Clear after sync
+        this.repository.discoveredNicknames = {};
       }
-
       const chunkSize = 5;
-      const allFoundMatches = new Map(); // matchId -> MatchRecord
-      const matchToOuids = new Map(); // matchId -> Set of OUIDs
-
+      const allFoundMatches = new Map();
+      const matchToOuids = new Map();
       for (let i = 0; i < this.currentRankings.length; i += chunkSize) {
         const chunk = this.currentRankings.slice(i, i + chunkSize);
         btn.textContent = `스캔 중... (${i + chunk.length}/${this.currentRankings.length})`;
-
-        const chunkPromises = chunk.map(async (member) => {
+        const chunkResults = await Promise.all(chunk.map(async (member) => {
           let targetOuid = member.id;
           let currentNickname = member.characterName;
           const isRealOuid = targetOuid.length >= 20 && /^[0-9a-f]+$/.test(targetOuid);
-
           if (isRealOuid) {
-            try {
-              const basic = await this.repository.apiClient.getPlayerBasic(targetOuid);
-              if (basic && basic.user_name && basic.user_name !== currentNickname) {
-                await this.crewRepo.updateNickname(targetOuid, basic.user_name);
-                currentNickname = basic.user_name;
-              }
-            } catch (err) {}
+            const basic = await this.repository.apiClient.getPlayerBasic(targetOuid);
+            if (basic && basic.user_name && basic.user_name !== currentNickname) {
+              await this.crewRepo.updateNickname(targetOuid, basic.user_name);
+              currentNickname = basic.user_name;
+            }
           } else {
-            try {
-              const realOuid = await this.repository.apiClient.getOuid(currentNickname);
-              if (realOuid) {
-                await this.crewRepo.migrateToOuid(targetOuid, realOuid);
-                targetOuid = realOuid;
-              }
-            } catch (err) { return []; }
+            const realOuid = await this.repository.apiClient.getOuid(currentNickname);
+            if (realOuid) { await this.crewRepo.migrateToOuid(targetOuid, realOuid); targetOuid = realOuid; }
+            else return [];
           }
-
-          if (targetOuid) {
-            return this.service.getRecentMatches(targetOuid, currentNickname, 10).catch(() => []);
-          }
-          return [];
-        });
-
-        const chunkResults = await Promise.all(chunkPromises);
-        
-        // Phase 1: Discovery (Collect all matches and track OUIDs)
+          return this.service.getRecentMatches(targetOuid, currentNickname, 10).catch(() => []);
+        }));
         chunkResults.flat().forEach(m => {
-          if (!allFoundMatches.has(m.matchId)) {
-            allFoundMatches.set(m.matchId, m);
-            matchToOuids.set(m.matchId, new Set());
-          }
-          
-          // Find the subject in this match and add their OUID to the set
+          if (!allFoundMatches.has(m.matchId)) { allFoundMatches.set(m.matchId, m); matchToOuids.set(m.matchId, new Set()); }
           const subject = m.allPlayerStats.find(p => p.ouid);
-          if (subject) {
-            matchToOuids.get(m.matchId).add(subject.ouid);
-          }
+          if (subject) matchToOuids.get(m.matchId).add(subject.ouid);
         });
-        
         await new Promise(r => setTimeout(r, 300));
       }
-
-      // Phase 2: Re-evaluation (Identify matches with >= 8 crew OUIDs)
       const allCrewMatches = [];
       for (const [matchId, ouids] of matchToOuids.entries()) {
         const m = allFoundMatches.get(matchId);
-        
-        // If we found at least 8 distinct crew OUIDs, it's definitely a crew match
-        if (ouids.size >= 8) {
-          m.isCustomMatch = true;
-          // Update crewParticipants for UI display based on detected OUIDs
-          m.crewParticipants = m.allPlayerStats
-            .filter(p => p.isCrew || (p.ouid && ouids.has(p.ouid)))
-            .map(p => p.nickname);
-          allCrewMatches.push(m);
-        } else if (m.isCustomMatch) {
-          // Keep matches that were already identified as custom matches via nicknames
+        if (ouids.size >= 8 || m.isCustomMatch) {
+          if (ouids.size >= 8) m.crewParticipants = m.allPlayerStats.filter(p => p.isCrew || (p.ouid && ouids.has(p.ouid))).map(p => p.nickname);
           allCrewMatches.push(m);
         }
       }
-
-      if (allCrewMatches.length === 0) {
-        alert('전체 크루 스캔 결과, 새로운 내전 기록이 없습니다.');
-        return;
-      }
-
-      btn.textContent = `발견된 ${allCrewMatches.length}개 내전 정산 중...`;
-      const settledIds = await this.crewRepo.settleMatches(allCrewMatches);
-
-      if (settledIds.length > 0) {
-        alert(`🎉 병렬 스캔 완료!\n총 ${settledIds.length}개의 새로운 내전이 정산되었습니다.`);
+      if (allCrewMatches.length === 0) return alert('새로운 내전 기록이 없습니다.');
+      btn.textContent = `정산 및 디스코드 전송 중...`;
+      const settlementReports = await this.crewRepo.settleMatches(allCrewMatches);
+      if (settlementReports.length > 0) {
+        alert(`🎉 ${settlementReports.length}개의 내전 정산 완료!`);
+        for (const report of settlementReports) { await this.discordClient.notifyMatchSettled(report.match, report.playerChanges); }
         window.dispatchEvent(new CustomEvent('sa-rankings-updated'));
-      } else {
-        alert('모든 매치가 이미 정산되어 있습니다.');
-      }
-    } catch (err) {
-      alert('일괄 정산 처리 중 오류 발생: ' + err.message);
-    } finally {
-      btn.disabled = false;
-      btn.textContent = originalText;
-    }
+      } else alert('이미 정산된 매치입니다.');
+    } catch (err) { alert('오류: ' + err.message); }
+    finally { btn.disabled = false; btn.textContent = originalText; }
   }
 
   async handleIndividualScan(btn) {
@@ -300,77 +235,49 @@ export class AdminManager {
     btn.disabled = true;
     const originalText = btn.textContent;
     btn.textContent = '스캔 중...';
-
     let logMessages = [];
-
     try {
       let targetOuid = ouid;
       let currentNickname = name;
       const isRealOuid = targetOuid.length >= 20 && /^[0-9a-f]+$/.test(targetOuid);
-      
       if (isRealOuid) {
         const basic = await this.repository.apiClient.getPlayerBasic(targetOuid);
         if (basic && basic.user_name && basic.user_name !== currentNickname) {
           await this.crewRepo.updateNickname(targetOuid, basic.user_name);
-          logMessages.push(`📝 닉네임 변경 감지: ${currentNickname} -> ${basic.user_name}`);
+          logMessages.push(`📝 닉네임 변경: ${currentNickname} -> ${basic.user_name}`);
           currentNickname = basic.user_name;
         }
       } else {
         const realOuid = await this.repository.apiClient.getOuid(currentNickname);
-        if (realOuid) {
-          await this.crewRepo.migrateToOuid(targetOuid, realOuid);
-          logMessages.push(`🚀 구형 데이터 OUID 마이그레이션 완료!`);
-          targetOuid = realOuid;
-        }
+        if (realOuid) { await this.crewRepo.migrateToOuid(targetOuid, realOuid); targetOuid = realOuid; }
       }
-
       const matches = await this.service.getRecentMatches(targetOuid, currentNickname, 20);
       const crewMatches = matches.filter(m => m.isCustomMatch);
-
-      if (crewMatches.length === 0) {
-        const finalMsg = logMessages.length > 0 
-          ? `${logMessages.join('\n')}\n\n최근 20경기 중 새로운 내전 기록은 없습니다.`
-          : `[${currentNickname}] 님의 최근 20경기 중 새로운 내전 기록이 없습니다.`;
-        alert(finalMsg);
-      } else {
-        const settledIds = await this.crewRepo.settleMatches(crewMatches);
-        if (settledIds.length > 0) {
-          logMessages.push(`✅ 새로운 내전 ${settledIds.length}개 정산 완료!`);
-          alert(`[${currentNickname}] 스캔 결과:\n\n${logMessages.join('\n')}`);
+      if (crewMatches.length === 0) alert('새로운 내전 기록이 없습니다.');
+      else {
+        const settlementReports = await this.crewRepo.settleMatches(crewMatches);
+        if (settlementReports.length > 0) {
+          for (const report of settlementReports) { await this.discordClient.notifyMatchSettled(report.match, report.playerChanges); }
+          alert('✅ 정산 및 알림 전송 완료!');
           window.dispatchEvent(new CustomEvent('sa-rankings-updated'));
-        } else {
-          const finalMsg = logMessages.length > 0
-            ? `${logMessages.join('\n')}\n\n모든 내전 기록이 이미 정산되어 있습니다.`
-            : `[${currentNickname}] 님의 내전 기록은 이미 모두 정산되어 있습니다.`;
-          alert(finalMsg);
-        }
+        } else alert('이미 정산된 기록입니다.');
       }
-    } catch (err) {
-      alert('스캔 중 오류: ' + err.message);
-    } finally {
-      btn.disabled = false;
-      btn.textContent = originalText;
-    }
+    } catch (err) { alert('오류: ' + err.message); }
+    finally { btn.disabled = false; btn.textContent = originalText; }
   }
 
   async handleDeleteMember(data) {
     const { ouid, name } = data;
-    if (!confirm(`[${name}] 멤버를 크루에서 삭제하시겠습니까?\n이 작업은 MMR 기록을 모두 삭제하며 되돌릴 수 없습니다.`)) return;
-    try {
-      await this.crewRepo.deleteMember(ouid, name);
-      alert('삭제 완료');
-      window.dispatchEvent(new CustomEvent('sa-rankings-updated'));
-    } catch (err) { alert('삭제 실패: ' + err.message); }
+    if (!confirm(`[${name}] 삭제하시겠습니까?`)) return;
+    try { await this.crewRepo.deleteMember(ouid, name); window.dispatchEvent(new CustomEvent('sa-rankings-updated')); }
+    catch (err) { alert('실패: ' + err.message); }
   }
 
   async handleUpdateName(data) {
     const { ouid, name } = data;
-    const newName = prompt(`[${name}] 님의 새로운 닉네임을 입력하세요.\n(PLAYER_NOT_FOUND 에러 해결용)`, name);
+    const newName = prompt('새 닉네임:', name);
     if (!newName || newName === name) return;
-    try {
-      await this.crewRepo.updateNicknameManually(ouid, newName);
-      alert('닉네임 업데이트 완료. 이제 일괄 정산을 돌려보세요.');
-      window.dispatchEvent(new CustomEvent('sa-rankings-updated'));
-    } catch (err) { alert('업데이트 실패: ' + err.message); }
+    try { await this.crewRepo.updateNicknameManually(ouid, newName); window.dispatchEvent(new CustomEvent('sa-rankings-updated')); }
+    catch (err) { alert('실패: ' + err.message); }
   }
 }

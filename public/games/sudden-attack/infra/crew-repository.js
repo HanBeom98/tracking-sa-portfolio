@@ -50,17 +50,10 @@ export class CrewRepository {
         };
       });
 
-      // Sort logic: 
-      // 1. If both are active or both are inactive, sort by MMR (desc)
-      // 2. If one is active and the other is not, active one comes first
       return members.sort((a, b) => {
         if (a.totalMatches > 0 && b.totalMatches === 0) return -1;
         if (a.totalMatches === 0 && b.totalMatches > 0) return 1;
-        
-        // If match status is same, sort by MMR
         if (b.mmr !== a.mmr) return b.mmr - a.mmr;
-        
-        // If MMR is same, sort by total matches
         return b.totalMatches - a.totalMatches;
       });
     } catch (error) {
@@ -69,18 +62,12 @@ export class CrewRepository {
     }
   }
 
-  /**
-   * Find a member by their OUID
-   */
   async findMemberByOuid(ouid) {
     if (!this.db || !ouid) return null;
     const doc = await this.db.collection(this.MEMBERS_COLLECTION).doc(ouid).get();
     return doc.exists ? { id: doc.id, ...doc.data() } : null;
   }
 
-  /**
-   * Get MMR History for a specific member
-   */
   async getMemberMmrHistory(ouid) {
     if (!this.db || !ouid) return [];
     try {
@@ -95,30 +82,22 @@ export class CrewRepository {
     }
   }
 
-  /**
-   * Find a member's OUID by their current nickname or any previous nicknames
-   */
   async findOuidByNickname(nickname) {
     if (!this.db || !nickname) return null;
     const searchName = nickname.toLowerCase();
     try {
-      // 1. Check current names
       let snapshot = await this.db.collection(this.MEMBERS_COLLECTION)
         .where('characterName', '==', nickname)
         .limit(1)
         .get();
-      
       if (!snapshot.empty) return snapshot.docs[0].id;
 
-      // 2. Check previousNames array (Firestore 'array-contains' is very efficient)
       snapshot = await this.db.collection(this.MEMBERS_COLLECTION)
         .where('previousNames', 'array-contains', nickname)
         .limit(1)
         .get();
-
       if (!snapshot.empty) return snapshot.docs[0].id;
 
-      // 3. Last resort: Case-insensitive scan
       const allSnapshot = await this.db.collection(this.MEMBERS_COLLECTION).get();
       const match = allSnapshot.docs.find(doc => {
         const data = doc.data();
@@ -126,7 +105,6 @@ export class CrewRepository {
         const previousMatch = (data.previousNames || []).some(n => n.toLowerCase() === searchName);
         return currentMatch || previousMatch;
       });
-
       return match ? match.id : null;
     } catch (error) {
       console.error('[CrewRepo] findOuidByNickname failed:', error);
@@ -134,122 +112,70 @@ export class CrewRepository {
     }
   }
 
-  /**
-   * Update nickname for a member and keep track of name history
-   */
   async updateNickname(ouid, newNickname) {
     if (!this.db || !ouid || !newNickname) return;
-    
     try {
       const docRef = this.db.collection(this.MEMBERS_COLLECTION).doc(ouid);
       const doc = await docRef.get();
-      
       if (!doc.exists) return;
-      
       const data = doc.data();
       const oldName = data.characterName;
-      
-      // If name is actually different, update it and push to history
       if (oldName && oldName !== newNickname) {
         const previousNames = data.previousNames || [];
-        if (!previousNames.includes(oldName)) {
-          previousNames.push(oldName);
-        }
-        
-        console.log(`[CrewRepo] Updating name history for ${ouid}: ${oldName} -> ${newNickname}`);
+        if (!previousNames.includes(oldName)) previousNames.push(oldName);
         return docRef.update({
           characterName: newNickname,
           previousNames: previousNames,
           updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
         });
       }
-    } catch (error) {
-      console.error('[CrewRepo] updateNickname failed:', error);
-    }
+    } catch (error) { console.error('[CrewRepo] updateNickname failed:', error); }
   }
 
-  /**
-   * Explicitly add a nickname to a player's history (Robust version)
-   */
   async addNicknameToHistory(ouid, nicknameToAdd) {
     if (!this.db || !ouid || !nicknameToAdd) return;
     try {
-      // 1. Try finding by OUID first (Standard)
       let docRef = this.db.collection(this.MEMBERS_COLLECTION).doc(ouid);
       let doc = await docRef.get();
-
-      // 2. If not found by OUID, search by characterName field
       if (!doc.exists) {
         const snapshot = await this.db.collection(this.MEMBERS_COLLECTION)
-          .where('characterName', '==', nicknameToAdd) // It might be under an old name ID
-          .limit(1)
-          .get();
-        
-        if (!snapshot.empty) {
-          docRef = snapshot.docs[0].ref;
-          doc = snapshot.docs[0];
-        } else {
-          return;
-        }
+          .where('characterName', '==', nicknameToAdd)
+          .limit(1).get();
+        if (!snapshot.empty) { docRef = snapshot.docs[0].ref; doc = snapshot.docs[0]; }
+        else return;
       }
-
       const data = doc.data();
       const currentName = data.characterName;
       const previousNames = data.previousNames || [];
-
       if (currentName === nicknameToAdd || previousNames.includes(nicknameToAdd)) return;
-
       previousNames.push(nicknameToAdd);
-      console.log(`[CrewRepo] Successfully linked ${nicknameToAdd} to member history.`);
-      
       return docRef.update({
         previousNames: previousNames,
         updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
       });
-    } catch (error) {
-      console.error('[CrewRepo] addNicknameToHistory failed:', error);
-    }
+    } catch (error) { console.error('[CrewRepo] addNicknameToHistory failed:', error); }
   }
 
-  /**
-   * Batch sync discovered nicknames (Used during settlement to overcome permissions)
-   */
   async syncHistoricalNicknames(discoveredMap) {
     if (!this.db || !discoveredMap) return;
-    console.log('[CrewRepo] Starting batch nickname sync...');
-    
     for (const ouid in discoveredMap) {
       const names = Array.from(discoveredMap[ouid]);
-      for (const name of names) {
-        await this.addNicknameToHistory(ouid, name);
-      }
+      for (const name of names) { await this.addNicknameToHistory(ouid, name); }
     }
   }
 
-  /**
-   * Delete a member from the crew
-   * Enhanced: Deletes by OUID and also attempts to delete legacy name-based doc
-   */
   async deleteMember(ouid, nickname = null) {
     if (!this.db || !ouid) return;
     const batch = this.db.batch();
-    
-    // 1. Delete OUID-based document
     const ouidRef = this.db.collection(this.MEMBERS_COLLECTION).doc(ouid);
     batch.delete(ouidRef);
-
-    // 2. Delete legacy name-based document if nickname provided
     if (nickname) {
       const nameRef = this.db.collection(this.MEMBERS_COLLECTION).doc(nickname);
       batch.delete(nameRef);
     }
-
     return batch.commit();
   }
 
-  /**
-   * Manually update a member's nickname (for fixing PLAYER_NOT_FOUND issues)
-   */
   async updateNicknameManually(ouid, newNickname) {
     if (!this.db || !ouid || !newNickname) return;
     return this.db.collection(this.MEMBERS_COLLECTION).doc(ouid).update({
@@ -258,56 +184,38 @@ export class CrewRepository {
     });
   }
 
-  /**
-   * Migrates a name-based document to an OUID-based document
-   */
   async migrateToOuid(oldNameId, newOuid) {
     if (!this.db || oldNameId === newOuid) return;
-    
     try {
       const oldRef = this.db.collection(this.MEMBERS_COLLECTION).doc(oldNameId);
       const newRef = this.db.collection(this.MEMBERS_COLLECTION).doc(newOuid);
-      
       const doc = await oldRef.get();
       if (doc.exists) {
         const data = doc.data();
-        await newRef.set({
-          ...data,
-          migratedFrom: oldNameId,
-          updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true });
+        await newRef.set({ ...data, migratedFrom: oldNameId, updatedAt: window.firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
         await oldRef.delete();
-        console.log(`[CrewRepo] Migrated ${oldNameId} -> ${newOuid}`);
       }
-    } catch (err) {
-      console.error('[CrewRepo] Migration failed:', err);
-    }
+    } catch (err) { console.error('[CrewRepo] Migration failed:', err); }
   }
 
   async getSeasonStartDate() {
     if (!this.db) return new Date(0);
     try {
       const doc = await this.db.collection(this.SETTINGS_COLLECTION).doc('season').get();
-      if (doc.exists && doc.data().startDate) {
-        return doc.data().startDate.toDate();
-      }
+      if (doc.exists && doc.data().startDate) return doc.data().startDate.toDate();
       return new Date(0);
     } catch (e) { return new Date(0); }
   }
 
-  /**
-   * Manually set the season start date
-   */
   async setSeasonStartDate(date) {
     if (!this.db) throw new Error('DB 연결 실패');
     const settingsRef = this.db.collection(this.SETTINGS_COLLECTION).doc('season');
-    return settingsRef.set({ 
-      startDate: window.firebase.firestore.Timestamp.fromDate(new Date(date)) 
-    }, { merge: true });
+    return settingsRef.set({ startDate: window.firebase.firestore.Timestamp.fromDate(new Date(date)) }, { merge: true });
   }
 
   /**
    * Settle MMR for a list of matches
+   * Returns reports for Discord notifications
    */
   async settleMatches(matches) {
     if (!this.db || matches.length === 0) return [];
@@ -316,7 +224,6 @@ export class CrewRepository {
     const memberCache = {};
     const membersSnap = await this.db.collection(this.MEMBERS_COLLECTION).get();
     
-    // Mapping: OUID -> MemberData & Nickname -> MemberData (Cache)
     const nameMap = {};
     membersSnap.forEach(doc => {
       const data = doc.data();
@@ -328,50 +235,30 @@ export class CrewRepository {
         loses: data.loses || 0,
         crewKills: data.crewKills || 0,
         crewDeaths: data.crewDeaths || 0,
-        mmrHistory: data.mmrHistory || [], // Load existing history
-        mmrHistoryToAppend: [], 
+        mmrHistory: data.mmrHistory || [],
         isDirty: false
       };
       memberCache[doc.id] = cacheObj;
-      
-      // Index current name
-      if (data.characterName) {
-        nameMap[data.characterName.toLowerCase()] = cacheObj;
-      }
-      
-      // Index all previous names for historical matching
-      if (data.previousNames && Array.isArray(data.previousNames)) {
-        data.previousNames.forEach(prevName => {
-          nameMap[prevName.toLowerCase()] = cacheObj;
-        });
-      }
+      if (data.characterName) nameMap[data.characterName.toLowerCase()] = cacheObj;
+      if (data.previousNames) data.previousNames.forEach(n => nameMap[n.toLowerCase()] = cacheObj);
     });
 
     const historySnap = await this.db.collection(this.HISTORY_COLLECTION).get();
     const settledSet = new Set(historySnap.docs.map(d => d.id));
     const batch = this.db.batch();
-    const processedMatchIds = [];
+    const settlementReports = [];
     const sortedMatches = [...matches].sort((a, b) => new Date(a.matchDate) - new Date(b.matchDate));
 
     for (const match of sortedMatches) {
       if (new Date(match.matchDate) < seasonStartDate) continue;
       if (settledSet.has(match.matchId)) continue;
 
+      const playerChanges = [];
+
       for (const p of match.allPlayerStats) {
         if (!p.isCrew) continue;
         
         let currentData = p.ouid && memberCache[p.ouid] ? memberCache[p.ouid] : nameMap[p.nickname.toLowerCase()];
-
-        if (!currentData && this.apiClient) {
-            try {
-                const liveOuid = await this.apiClient.getOuid(p.nickname);
-                if (liveOuid && memberCache[liveOuid]) {
-                    currentData = memberCache[liveOuid];
-                    nameMap[p.nickname.toLowerCase()] = currentData;
-                }
-            } catch (e) {}
-        }
-
         if (!currentData) continue; 
 
         const isWin = p.result === 'WIN';
@@ -379,82 +266,62 @@ export class CrewRepository {
         const death = parseInt(p.death || 0);
         const kd = parseFloat(p.kd || 0);
         
-        // --- [듀얼 트랙 정산 시스템: 옵션 A (성취감 + 정교한 밸런스)] ---
-        
-        // 1. MMR (Public Rating): 승패 중심의 시즌 랭크 점수 (보너스 포함)
+        // 1. MMR 정산
         let mmrChange = isWin ? 20 : -20;
         let mmrBonus = 0;
         if (p.isMvp) mmrBonus += 3;
-        if (p.damage >= 1500) mmrBonus += 2; // 서든 환경에 맞춰 1500으로 하향
-        if (p.headshot >= 7) mmrBonus += 2; // 서든 환경에 맞춰 7회로 하향
-        
-        mmrBonus = Math.min(5, mmrBonus); // 성취 보너스 최대 +5 제한
-        currentData.mmr += (mmrChange + mmrBonus);
+        if (p.damage >= 1500) mmrBonus += 2;
+        if (p.headshot >= 7) mmrBonus += 2;
+        mmrBonus = Math.min(5, mmrBonus);
+        const finalMmrDiff = mmrChange + mmrBonus;
+        currentData.mmr += finalMmrDiff;
 
-        // 2. HSR (Hidden Skill Rating): 진짜 실력 중심의 보정 점수 (사용자 가이드 반영)
+        // 2. HSR 정산
         let hsrChange = isWin ? 10 : -10;
         let hsrBonus = 0;
-
         if (isWin) {
-          // [승리 시] 버스 방지 로직 (K/D 0.3 이하: 승리해도 HSR 변동 없음)
-          if (kd <= 0.3) {
-            hsrBonus = -10; 
-          } else if (kd >= 1.0) {
-            // 성적이 좋을수록 실력 점수 추가 상승 (최대 +15)
-            hsrBonus = Math.min(15, Math.round((kd - 1.0) * 10));
-          }
+          if (kd <= 0.3) hsrBonus = -10;
+          else if (kd >= 1.0) hsrBonus = Math.min(15, Math.round((kd - 1.0) * 10));
         } else {
-          // [패배 시] 억까 방지 로직 (K/D 1.7 이상: 패배했어도 실력 인정되어 HSR 상승)
-          if (kd >= 1.7) {
-            hsrBonus = 15; // 최종 결과: -10 + 15 = +5점 상승
-          } else if (kd <= 1.0) {
-            // 성적이 낮을수록 실력 점수 추가 하락 (최대 -15)
-            hsrBonus = Math.max(-15, Math.round((kd - 1.0) * 15));
-          }
+          if (kd >= 1.7) hsrBonus = 15;
+          else if (kd <= 1.0) hsrBonus = Math.max(-15, Math.round((kd - 1.0) * 15));
         }
+        if ((kill + death) >= 8 && kd >= 0.8) hsrBonus += 2;
+        const finalHsrDiff = hsrChange + hsrBonus;
+        currentData.hsr += finalHsrDiff;
 
-        // [서든어택 최적화 교전 보너스] 
-        // 6-0 압승/압패 판을 고려하여 '킬+데스' 합계가 8회 이상이면 적극적 교전으로 인정
-        if ((kill + death) >= 8 && kd >= 0.8) {
-          hsrBonus += 2;
-        }
-
-        currentData.hsr += (hsrChange + hsrBonus);
-
-        // --- 데이터 기록 ---
         if (isWin) currentData.wins += 1; else currentData.loses += 1;
         currentData.crewKills += kill;
         currentData.crewDeaths += death;
-        
-        // 히스토리에 MMR과 HSR을 함께 기록하여 성장 추이 분석 가능케 함
-        currentData.mmrHistory.push({
-          mmr: currentData.mmr,
-          hsr: currentData.hsr,
-          date: match.matchDate
-        });
-
+        currentData.mmrHistory.push({ mmr: currentData.mmr, hsr: currentData.hsr, date: match.matchDate });
         currentData.isDirty = true;
+
+        playerChanges.push({
+          nickname: p.nickname,
+          originalResult: p.result,
+          mmrDiff: finalMmrDiff,
+          hsrDiff: finalHsrDiff,
+          newMmr: currentData.mmr,
+          newHsr: currentData.hsr
+        });
       }
 
-      const historyRef = this.db.collection(this.HISTORY_COLLECTION).doc(match.matchId);
-      batch.set(historyRef, {
+      batch.set(this.db.collection(this.HISTORY_COLLECTION).doc(match.matchId), {
         settledAt: window.firebase.firestore.FieldValue.serverTimestamp(),
         map: match.mapName,
         matchDate: match.matchDate,
         crewCount: match.crewParticipants.length
       });
-      processedMatchIds.push(match.matchId);
+      settlementReports.push({ match, playerChanges });
       settledSet.add(match.matchId);
     }
 
     for (const ouid in memberCache) {
       if (memberCache[ouid].isDirty) {
-        const memberRef = this.db.collection(this.MEMBERS_COLLECTION).doc(ouid);
         const finalHistory = memberCache[ouid].mmrHistory.slice(-this.HISTORY_LIMIT);
-
-        batch.update(memberRef, {
+        batch.update(this.db.collection(this.MEMBERS_COLLECTION).doc(ouid), {
           mmr: memberCache[ouid].mmr,
-          hsr: memberCache[ouid].hsr, // HSR 값 저장
+          hsr: memberCache[ouid].hsr,
           wins: memberCache[ouid].wins,
           loses: memberCache[ouid].loses,
           crewKills: memberCache[ouid].crewKills,
@@ -465,77 +332,42 @@ export class CrewRepository {
       }
     }
 
-    if (processedMatchIds.length > 0) await batch.commit();
-    return processedMatchIds;
+    if (settlementReports.length > 0) await batch.commit();
+    return settlementReports;
   }
 
   async resetSeason() {
     if (!this.db) throw new Error('DB 연결 실패');
-    const membersSnap = await this.db.collection(this.MEMBERS_COLLECTION).get();
+    const snapshot = await this.db.collection(this.MEMBERS_COLLECTION).get();
     const batch = this.db.batch();
-    membersSnap.docs.forEach(doc => {
-      batch.update(doc.ref, { 
-        mmr: 1200, hsr: 1200, wins: 0, loses: 0, 
-        crewKills: 0, crewDeaths: 0,
-        mmrHistory: [], 
-        updatedAt: window.firebase.firestore.FieldValue.serverTimestamp() 
-      });
+    snapshot.docs.forEach(doc => {
+      batch.update(doc.ref, { mmr: 1200, hsr: 1200, wins: 0, loses: 0, crewKills: 0, crewDeaths: 0, mmrHistory: [], updatedAt: window.firebase.firestore.FieldValue.serverTimestamp() });
     });
-    const settingsRef = this.db.collection(this.SETTINGS_COLLECTION).doc('season');
-    batch.set(settingsRef, { startDate: window.firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+    batch.set(this.db.collection(this.SETTINGS_COLLECTION).doc('season'), { startDate: window.firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
     await batch.commit();
   }
 
-  /**
-   * REPAIR LOGIC: Resets stats and clears history to allow re-settlement
-   * Enhanced: Now respects the current season start date.
-   */
   async repairSeasonData() {
     if (!this.db) throw new Error('DB 연결 실패');
-    
-    // 1. Get current season start date first
     const seasonStartDate = await this.getSeasonStartDate();
-    
-    // 2. Reset all members stats to zero/default
     const membersSnap = await this.db.collection(this.MEMBERS_COLLECTION).get();
     const batch = this.db.batch();
     membersSnap.docs.forEach(doc => {
-      batch.update(doc.ref, { 
-        mmr: 1200, wins: 0, loses: 0, 
-        crewKills: 0, crewDeaths: 0,
-        mmrHistory: [],
-        updatedAt: window.firebase.firestore.FieldValue.serverTimestamp() 
-      });
+      batch.update(doc.ref, { mmr: 1200, hsr: 1200, wins: 0, loses: 0, crewKills: 0, crewDeaths: 0, mmrHistory: [], updatedAt: window.firebase.firestore.FieldValue.serverTimestamp() });
     });
-
-    // 3. Clear only history entries that belong to the current season
     const historySnap = await this.db.collection(this.HISTORY_COLLECTION).get();
     historySnap.docs.forEach(doc => {
       const data = doc.data();
-      // If no matchDate exists, or if it's after the current season start, delete it
-      if (!data.matchDate || new Date(data.matchDate) >= seasonStartDate) {
-        batch.delete(doc.ref);
-      }
+      if (!data.matchDate || new Date(data.matchDate) >= seasonStartDate) batch.delete(doc.ref);
     });
-
-    // 4. Do NOT change the settings/season/startDate. Keep it as is.
-
     await batch.commit();
-    console.log(`[CrewRepo] Season data repaired. Respected start date: ${seasonStartDate}`);
   }
 
   async applyForCrew(characterName, ouid) {
     if (!this.db) throw new Error('데이터베이스 연결 실패');
-    const memberRef = this.db.collection(this.MEMBERS_COLLECTION).doc(ouid);
-    const memberDoc = await memberRef.get();
-    if (memberDoc.exists) throw new Error('이미 등록된 멤버입니다.');
-
-    return this.db.collection(this.APPLICATIONS_COLLECTION).add({
-      characterName,
-      ouid,
-      status: 'PENDING',
-      appliedAt: window.firebase.firestore.FieldValue.serverTimestamp()
-    });
+    const doc = await this.db.collection(this.MEMBERS_COLLECTION).doc(ouid).get();
+    if (doc.exists) throw new Error('이미 등록된 멤버입니다.');
+    return this.db.collection(this.APPLICATIONS_COLLECTION).add({ characterName, ouid, status: 'PENDING', appliedAt: window.firebase.firestore.FieldValue.serverTimestamp() });
   }
 
   async getPendingApplications() {
@@ -546,22 +378,12 @@ export class CrewRepository {
 
   async approveApplication(appId, characterName, ouid) {
     const batch = this.db.batch();
-    const appRef = this.db.collection(this.APPLICATIONS_COLLECTION).doc(appId);
-    const memberRef = this.db.collection(this.MEMBERS_COLLECTION).doc(ouid);
-
-    batch.update(appRef, { status: 'APPROVED' });
-    batch.set(memberRef, { 
-      characterName, 
-      mmr: 1200, wins: 0, loses: 0,
-      mmrHistory: [],
-      approvedAt: window.firebase.firestore.FieldValue.serverTimestamp() 
-    }, { merge: true });
+    batch.update(this.db.collection(this.APPLICATIONS_COLLECTION).doc(appId), { status: 'APPROVED' });
+    batch.set(this.db.collection(this.MEMBERS_COLLECTION).doc(ouid), { characterName, mmr: 1200, hsr: 1200, wins: 0, loses: 0, mmrHistory: [], approvedAt: window.firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
     return batch.commit();
   }
 
-  async rejectApplication(appId) {
-    return this.db.collection(this.APPLICATIONS_COLLECTION).doc(appId).update({ status: 'REJECTED' });
-  }
+  async rejectApplication(appId) { return this.db.collection(this.APPLICATIONS_COLLECTION).doc(appId).update({ status: 'REJECTED' }); }
 
   isStaff(currentUser = null) {
     const user = currentUser || (typeof window !== 'undefined' && window.firebase && window.firebase.auth ? window.firebase.auth().currentUser : null);
@@ -596,34 +418,17 @@ export class CrewRepository {
       const blueSnipers = snipers.filter(s => !redSnipers.includes(s));
       const riflersNeededForRed = teamSize - redSnipers.length;
       if (riflersNeededForRed < 0 || riflersNeededForRed > riflers.length) continue;
-      const riflerCombos = combinations(riflers, riflersNeededForRed);
-      for (const redRiflers of riflerCombos) {
+      for (const redRiflers of combinations(riflers, riflersNeededForRed)) {
         const blueRiflers = riflers.filter(r => !redRiflers.includes(r));
         const redTeam = [...redSnipers, ...redRiflers];
         const blueTeam = [...blueSnipers, ...blueRiflers];
-        if (blueTeam.length + redTeam.length < selectedMembers.length) {
-          const leftovers = riflers.filter(r => !redRiflers.includes(r) && !blueRiflers.includes(r));
-          blueTeam.push(...leftovers);
-        }
-        // HSR 기준으로 팀간 격차 계산
         const redHSR = redTeam.reduce((sum, m) => sum + (m.hsr || m.mmr || 1200), 0);
         const blueHSR = blueTeam.reduce((sum, m) => sum + (m.hsr || m.mmr || 1200), 0);
         const diff = Math.abs(redHSR - blueHSR);
-        
-        // UI 출력을 위해 Public MMR 평균도 별도 계산
         const redMMR = redTeam.reduce((sum, m) => sum + (m.mmr || 1200), 0);
         const blueMMR = blueTeam.reduce((sum, m) => sum + (m.mmr || 1200), 0);
-        
         if (diff < bestSplit.diff) {
-          bestSplit = { 
-            red: redTeam, 
-            blue: blueTeam, 
-            diff: diff, // HSR 격차
-            redAvg: redMMR / redTeam.length, 
-            blueAvg: blueMMR / blueTeam.length,
-            redHsrAvg: redHSR / redTeam.length,
-            blueHsrAvg: blueHSR / blueTeam.length
-          };
+          bestSplit = { red: redTeam, blue: blueTeam, diff, redAvg: redMMR / redTeam.length, blueAvg: blueMMR / blueTeam.length, redHsrAvg: redHSR / redTeam.length, blueHsrAvg: blueHSR / blueTeam.length };
         }
       }
     }
