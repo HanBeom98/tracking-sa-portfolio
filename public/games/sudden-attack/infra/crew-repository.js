@@ -395,15 +395,17 @@ export class CrewRepository {
 
         hsrChange += performanceAdj;
 
-        // --- 가산점 로직 추가 ---
-        // 1. 미션 보너스 (설치/해제 성공 시마다 +2점)
-        const missionCount = (p.bombInstall || 0) + (p.bombDefuse || 0);
-        if (missionCount > 0) {
-          hsrChange += (missionCount * 2);
-          console.log(`[CrewRepo] ${p.nickname} mission bonus: +${missionCount * 2}`);
+        // --- PERFORMANCE BONUS UPGRADE (Damage-centric) ---
+        // 1. Damage Bonus (+1 per 1000 damage)
+        if (p.damage > 0) {
+          const damageBonus = Math.floor(p.damage / 1000);
+          if (damageBonus > 0) {
+            hsrChange += damageBonus;
+            console.log(`[CrewRepo] ${p.nickname} high damage bonus: +${damageBonus}`);
+          }
         }
 
-        // 2. MVP 보너스 (매치 MVP 선정 시 +5점)
+        // 2. MVP Bonus (+5 pts)
         if (p.isMvp) {
           hsrChange += 5;
           console.log(`[CrewRepo] ${p.nickname} MVP bonus: +5`);

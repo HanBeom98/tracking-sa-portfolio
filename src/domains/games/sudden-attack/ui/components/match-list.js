@@ -21,7 +21,7 @@ export class SaMatchList extends HTMLElement {
               <th>결과</th>
               <th>닉네임</th>
               <th>K / D / A</th>
-              <th>미션</th>
+              <th>딜량 / 헤드</th>
               <th>K/D</th>
             </tr>
           </thead>
@@ -36,9 +36,8 @@ export class SaMatchList extends HTMLElement {
                 </td>
                 <td class="kda">${p.kill} / ${p.death} / ${p.assist}</td>
                 <td class="mission-cell">
-                  ${p.bombInstall > 0 ? `<span class="m-tag plant" title="폭탄 설치">💣 ${p.bombInstall}</span>` : ''}
-                  ${p.bombDefuse > 0 ? `<span class="m-tag defuse" title="폭탄 해제">🛡️ ${p.bombDefuse}</span>` : ''}
-                  ${(!p.bombInstall && !p.bombDefuse) ? '-' : ''}
+                  <span class="dmg-val">${(p.damage || 0).toLocaleString()}</span>
+                  <span class="hs-val">/ ${p.hsPercent}%</span>
                 </td>
                 <td class="kd-val ${this.getKdClass(p.kdPercent)}">${p.kdPercent}%</td>
               </tr>
@@ -99,19 +98,10 @@ export class SaMatchList extends HTMLElement {
         .mission-cell {
           text-align: center;
           color: #888;
+          font-size: 0.9em;
         }
-        .m-tag {
-          padding: 2px 6px;
-          border-radius: 4px;
-          font-size: 0.75em;
-          font-weight: bold;
-          margin-right: 4px;
-          display: inline-flex;
-          align-items: center;
-          gap: 3px;
-        }
-        .m-tag.plant { background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border: 1px solid rgba(255, 77, 77, 0.2); }
-        .m-tag.defuse { background: rgba(0, 210, 255, 0.1); color: #00d2ff; border: 1px solid rgba(0, 210, 255, 0.2); }
+        .dmg-val { color: #e0e0e0; font-weight: 500; }
+        .hs-val { color: #888; margin-left: 2px; }
         
         .scoreboard-table tr.mvp-row .name {
           color: #ffcc00;

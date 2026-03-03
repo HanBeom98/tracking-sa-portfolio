@@ -54,19 +54,16 @@ export class RecentStats {
     this.worstPartner = null;
     this.mapStats = [];
 
-    // --- Firestore 내전 정보 주입 ---
     if (crewData) {
       this.crewMatchCount = (crewData.wins || 0) + (crewData.loses || 0);
-      this.totalKills = crewData.crewKills || 0; // 내전 킬
-      this.totalDeaths = crewData.crewDeaths || 0; // 내전 데스
       this.crewKills = crewData.crewKills || 0;
       this.crewDeaths = crewData.crewDeaths || 0;
       this.crewWinRate = this.crewMatchCount > 0 ? Math.round((crewData.wins / this.crewMatchCount) * 100) : 0;
       this.crewMmr = crewData.mmr || 1200;
       this.crewHsr = crewData.hsr || this.crewMmr;
       this.mmrHistory = crewData.mmrHistory || [];
-      this.mmrTrend = this.mmrHistory; // 차트용 데이터
-      this.calculateCrewStatus(); // 칭호 계산
+      this.mmrTrend = this.mmrHistory;
+      this.calculateCrewStatus();
     } else {
       this.crewMatchCount = 0;
       this.crewKd = "0.00";
@@ -77,7 +74,6 @@ export class RecentStats {
     }
 
     if (matches.length > 0) {
-      // 넥슨 최근 20경기 요약 (공방 데이터)
       const nxTotalK = matches.reduce((sum, m) => sum + m.kill, 0);
       const nxTotalD = matches.reduce((sum, m) => sum + m.death, 0);
       const nxTotalA = matches.reduce((sum, m) => sum + m.assist, 0);
@@ -85,50 +81,12 @@ export class RecentStats {
       this.avgK = (nxTotalK / matches.length).toFixed(1);
       this.avgD = (nxTotalD / matches.length).toFixed(1);
       this.nxTotalKills = nxTotalK;
-      nxTotalD;
       this.totalAssists = nxTotalA;
       
       const maps = matches.map(m => m.mapName);
       this.mostPlayedMap = maps.sort((a,b) =>
           maps.filter(v => v===a).length - maps.filter(v => v===b).length
       ).pop();
-
-      const mapCounts = {};
-      const crewMatches = matches.filter(m => m.isCustomMatch);
-      
-      crewMatches.forEach(m => {
-        const name = m.mapName;
-        if (!mapCounts[name]) mapCounts[name] = { wins: 0, total: 0 };
-        mapCounts[name].total++;
-        if (m.matchResult.toUpperCase() === 'WIN') mapCounts[name].wins++;
-      });
-
-      this.mapStats = Object.entries(mapCounts)
-        .map(([name, s]) => ({
-          name,
-          wins: s.wins,
-          total: s.total,
-          winRate: Math.round((s.wins / s.total) * 100)
-        }))
-        .sort((a, b) => b.total - a.total);
-
-      let currentStreak = 0;
-      let isWinStreak = null;
-      for (const m of matches) {
-        const isWin = m.matchResult.toUpperCase() === 'WIN';
-        if (isWinStreak === null) {
-          isWinStreak = isWin;
-          currentStreak = 1;
-        } else if (isWinStreak === isWin) {
-          currentStreak++;
-        } else {
-          break;
-        }
-      }
-      if (currentStreak >= 2) {
-        this.streakType = isWinStreak ? "WIN" : "LOSE";
-        this.streakCount = currentStreak;
-      }
 
       this.calculateSynergy(matches, info.user_name);
 
@@ -137,7 +95,6 @@ export class RecentStats {
         return kdVal < 0.5 && m.death >= 5;
       }).length;
 
-      // Radar 계산 (공방 지표 기준)
       const kdVal = this.kd;
       let combatScore = 0;
       if (kdVal <= 100) { combatScore = kdVal * 0.4; } 
@@ -269,11 +226,13 @@ export class MatchRecord {
     this.isCustomMatch = false;
     this.allPlayerStats = []; 
 
-    let playerStat = detail;
-    if (detail.match_detail && Array.isArray(detail.match_detail)) {
+    const statsArray = detail.match_detail || detail.match_member || [];
+
+    if (Array.isArray(statsArray)) {
       let subjectFound = false;
       const crewNamesSet = new Set((crewData.names || []).map(n => (n || "").toLowerCase().trim()));
-      this.allPlayerStats = detail.match_detail.map(p => {
+      
+      this.allPlayerStats = statsArray.map(p => {
         const nickname = p.user_name || p.character_name || "";
         const normalizedName = nickname.toLowerCase().trim();
         const killValue = parseInt(p.kill || p.kill_count || p.cnt_kill || 0);
@@ -281,9 +240,9 @@ export class MatchRecord {
         const assistValue = parseInt(p.assist || p.assist_count || p.cnt_assist || 0);
         const resultValue = String(p.match_result || p.result || "0");
         
-        // Bomb fallbacks: bomb_installation_count, bomb_removal_count, cnt_bomb_install, cnt_bomb_remove
-        const installValue = parseInt(p.bomb_installation_count || p.cnt_bomb_install || p.bomb_install_count || 0);
-        const defuseValue = parseInt(p.bomb_removal_count || p.cnt_bomb_remove || p.bomb_defuse_count || 0);
+        // --- PERFORMANCE DATA EXTRACTION ---
+        const damageValue = parseInt(p.damage || p.cnt_damage || 0);
+        const headshotValue = parseInt(p.headshot || p.cnt_headshot || 0);
 
         let isSubject = false;
         if (subjectInfo && !subjectFound) {
@@ -294,14 +253,16 @@ export class MatchRecord {
         const isCrew = isSubject || crewNamesSet.has(normalizedName) || (p.ouid && (crewData.ouids || []).includes(p.ouid));
         const totalEngagements = killValue + deathValue;
         const kdPercent = totalEngagements > 0 ? Math.round((killValue / totalEngagements) * 100) : 0;
+        const hsPercent = killValue > 0 ? Math.round((headshotValue / killValue) * 100) : 0;
         
         return {
           nickname: nickname, 
           kill: killValue, 
           death: deathValue, 
           assist: assistValue,
-          bombInstall: installValue,
-          bombDefuse: defuseValue,
+          damage: damageValue,
+          headshot: headshotValue,
+          hsPercent: hsPercent,
           kd: deathValue > 0 ? (killValue / deathValue).toFixed(2) : (killValue > 0 ? killValue.toFixed(2) : "0.00"),
           kdPercent: kdPercent,
           result: resultValue === "1" ? "WIN" : (resultValue === "2" ? "LOSE" : "UNKNOWN"),
@@ -309,40 +270,36 @@ export class MatchRecord {
         };
       });
 
-      let bestKd = -1;
+      // MVP 선정 로직: (킬 * 100) + 데미지 합산 점수 기준
+      let bestScore = -1;
       let mvp = null;
       this.allPlayerStats.forEach(p => {
-        const kdVal = parseFloat(p.kd);
-        if (p.kill >= 5 && kdVal > bestKd) {
-          bestKd = kdVal;
+        const score = (p.kill * 100) + p.damage;
+        if (p.kill >= 5 && score > bestScore) {
+          bestScore = score;
           mvp = p.nickname;
         }
       });
       this.allPlayerStats.forEach(p => { if (p.nickname === mvp) p.isMvp = true; });
 
-      this.participants = detail.match_detail.map(p => p.user_name || p.character_name);
+      this.participants = statsArray.map(p => p.user_name || p.character_name);
       this.crewParticipants = this.allPlayerStats.filter(p => p.isCrew).map(p => p.nickname);
       if (this.crewParticipants.length >= 8) this.isCustomMatch = true;
+      
       const target = targetUserName ? targetUserName.toLowerCase().trim() : "";
-      if (target) {
-        playerStat = detail.match_detail.find(p => {
-          const n = (p.user_name || p.character_name || "").toLowerCase().trim();
-          return n === target;
-        }) || detail.match_detail[0];
-      } else {
-        playerStat = detail.match_detail[0];
-      }
+      const playerStat = target 
+        ? (statsArray.find(p => (p.user_name || p.character_name || "").toLowerCase().trim() === target) || statsArray[0])
+        : statsArray[0];
+
+      this.matchResult = String(playerStat.match_result || playerStat.result) === "1" ? "WIN" : "LOSE";
+      this.kill = parseInt(playerStat.kill || 0);
+      this.death = parseInt(playerStat.death || 0);
+      this.assist = parseInt(playerStat.assist || 0);
+      this.damage = parseInt(playerStat.damage || 0);
+      this.headshot = parseInt(playerStat.headshot || 0);
+      this.kdPercent = (this.kill + this.death > 0) ? Math.round((this.kill / (this.kill + this.death)) * 100) : 0;
     }
-    this.matchResult = String(playerStat.match_result || playerStat.result) === "1" ? "WIN" : "LOSE";
-    this.kill = parseInt(playerStat.kill || playerStat.kill_count || playerStat.cnt_kill || 0);
-    this.death = parseInt(playerStat.death || playerStat.death_count || playerStat.cnt_death || 0);
-    this.assist = parseInt(playerStat.assist || playerStat.assist_count || playerStat.cnt_assist || 0);
-    this.kd = this.death === 0 ? (this.kill > 0 ? this.kill.toFixed(2) : "0.00") : (this.kill / this.death).toFixed(2);
-    this.kdPercent = (this.kill + this.death > 0) ? Math.round((this.kill / (this.kill + this.death)) * 100) : 0;
-    
-    this.bombInstall = parseInt(playerStat.bomb_installation_count || playerStat.cnt_bomb_install || 0);
-    this.bombDefuse = parseInt(playerStat.bomb_removal_count || playerStat.cnt_bomb_remove || 0);
-    
+
     const winTeam = this.allPlayerStats.filter(p => p.result === 'WIN');
     const loseTeam = this.allPlayerStats.filter(p => p.result === 'LOSE');
     const winTeamMissing = Math.max(0, loseTeam.reduce((s, p) => s + p.kill, 0) - winTeam.reduce((s, p) => s + p.death, 0));
