@@ -48,6 +48,7 @@ Tracking SA를 프레임워크 의존 없이 안정적으로 운영 가능한 DD
 - 실시간 데이터(Firestore)와 정적 자산(Build Artifacts)이 조화롭게 작동하는 하이브리드 모델 확립.
 
 ## Telescope Current Focus
+- [ ] 서든어택 전적 상세 페이지 KD 트렌드 차트(SVG) 구현 (진행 중)
 - [x] 서든어택 도메인 리팩토링 및 Skeleton UI 적용 완료
 - [ ] (Future) 유저 별점 및 리뷰 시스템 도입 검토
 - [ ] (Future) 검색 결과 가상 스크롤(Virtual Scroll) 도입 (데이터 1,000건 이상 대비)

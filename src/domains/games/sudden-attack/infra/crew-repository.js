@@ -77,6 +77,23 @@ export class CrewRepository {
   }
 
   /**
+   * Get MMR History for a specific member
+   */
+  async getMemberMmrHistory(ouid) {
+    if (!this.db || !ouid) return [];
+    try {
+      const doc = await this.db.collection(this.MEMBERS_COLLECTION).doc(ouid).get();
+      if (doc.exists) {
+        return doc.data().mmrHistory || [];
+      }
+      return [];
+    } catch (err) {
+      console.error('[CrewRepo] Failed to get MMR history:', err);
+      return [];
+    }
+  }
+
+  /**
    * Find a member's OUID by their current nickname or any previous nicknames
    */
   async findOuidByNickname(nickname) {

@@ -49,6 +49,9 @@ export class RecentStats {
     this.trollMatches = 0;
     this.playstyleTitle = "데이터 수집 중";
     this.playstyleIcon = "🕵️";
+    
+    // MMR Trend Data (Chronological order: Oldest to Newest)
+    this.mmrTrend = []; 
 
     // Crew Match (내전) Stats
     this.crewMatchCount = 0;

@@ -28,7 +28,7 @@ export class SaService {
       const rawStats = await this.repository.apiClient.getRecentInfo(player.ouid);
       const stats = new RecentStats(rawStats, matches);
 
-      // 5. Inject Crew Data into Stats
+      // 5. Inject Crew Data and MMR Trend
       const memberData = currentRankings.find(m => m.id === player.ouid);
       if (memberData) {
         stats.crewMatchCount = (memberData.wins || 0) + (memberData.loses || 0);
@@ -37,6 +37,11 @@ export class SaService {
         const ck = memberData.crewKills || 0;
         const cd = memberData.crewDeaths || 0;
         stats.crewKd = cd > 0 ? (ck / cd).toFixed(2) : (ck > 0 ? ck.toFixed(2) : "0.00");
+
+        // Fetch MMR History for chart
+        if (this.crewRepository) {
+          stats.mmrTrend = await this.crewRepository.getMemberMmrHistory(player.ouid);
+        }
       }
       
       stats.calculateCrewStatus();

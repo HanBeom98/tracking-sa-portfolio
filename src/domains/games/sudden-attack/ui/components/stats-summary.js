@@ -45,6 +45,101 @@ export class SaStatsSummary extends HTMLElement {
     `;
   }
 
+  /**
+   * Draw MMR Growth Chart using Pure SVG
+   */
+  drawMmrChart(mmrTrend, currentMmr, isCrew) {
+    if (!isCrew) {
+      return `
+        <div class="non-crew-banner">
+          <div class="banner-content">
+            <span class="icon">ℹ️</span>
+            <div class="text">
+              <p>이 유저는 <strong>TRACKING CREW</strong> 멤버가 아닙니다.</p>
+              <span>크루 전용 실시간 MMR 성장 그래프를 보려면 크루에 가입하세요.</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    if (!mmrTrend || mmrTrend.length < 2) {
+      return `
+        <div class="trend-chart-wrapper empty">
+          <div class="trend-header">
+            <h4>🏆 내전 MMR 성장 추이</h4>
+          </div>
+          <div class="empty-state">
+            <p>충분한 내전 기록이 쌓이면 성장 그래프가 나타납니다.</p>
+            <span class="current">현재 점수: <strong>${currentMmr}</strong></span>
+          </div>
+        </div>
+      `;
+    }
+
+    const width = 1000;
+    const height = 180;
+    const padding = 40;
+    const chartWidth = width - (padding * 2);
+    const chartHeight = height - (padding * 2);
+
+    // Scaling
+    const maxMmr = Math.max(...mmrTrend, currentMmr) + 50; 
+    const minMmr = Math.min(...mmrTrend, currentMmr) - 50;
+    const range = (maxMmr - minMmr) || 1;
+
+    const getX = (i) => padding + (i * (chartWidth / (mmrTrend.length - 1 || 1)));
+    const getY = (val) => height - padding - ((val - minMmr) / range * chartHeight);
+
+    // Build SVG Path
+    const points = mmrTrend.map((v, i) => `${getX(i)},${getY(v)}`);
+    const pathData = `M ${points.join(' L ')}`;
+
+    return `
+      <div class="trend-chart-wrapper mmr-chart">
+        <div class="trend-header">
+          <h4>🏆 내전 MMR 성장 추이 (최근 ${mmrTrend.length}경기)</h4>
+          <span class="current-badge">현재: <strong>${currentMmr}</strong></span>
+        </div>
+        <svg viewBox="0 0 ${width} ${height}" class="trend-svg">
+          <defs>
+            <linearGradient id="mmrGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:#ffcc00;stop-opacity:0.2" />
+              <stop offset="100%" style="stop-color:#ffcc00;stop-opacity:0" />
+            </linearGradient>
+          </defs>
+          
+          <!-- Area Fill -->
+          <path d="${pathData} L ${getX(mmrTrend.length-1)},${height-padding} L ${getX(0)},${height-padding} Z" fill="url(#mmrGradient)" />
+
+          <!-- Grid Lines -->
+          <line x1="${padding}" y1="${getY(minMmr)}" x2="${width-padding}" y2="${getY(minMmr)}" stroke="rgba(255,255,255,0.05)" />
+          <line x1="${padding}" y1="${getY(maxMmr)}" x2="${width-padding}" y2="${getY(maxMmr)}" stroke="rgba(255,255,255,0.05)" />
+          
+          <!-- Base Line (1200) -->
+          ${minMmr < 1200 && maxMmr > 1200 ? `
+            <line x1="${padding}" y1="${getY(1200)}" x2="${width-padding}" y2="${getY(1200)}" stroke="rgba(255,255,255,0.1)" stroke-dasharray="4,4" />
+            <text x="${width-padding + 5}" y="${getY(1200) + 4}" fill="rgba(255,255,255,0.2)" font-size="10">BASE</text>
+          ` : ''}
+
+          <!-- Trend Line -->
+          <path d="${pathData}" fill="none" stroke="#ffcc00" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 8px rgba(255,204,0,0.4));" />
+          
+          <!-- Data Points -->
+          ${mmrTrend.map((v, i) => `
+            <circle cx="${getX(i)}" cy="${getY(v)}" r="5" fill="var(--bg-card)" stroke="#ffcc00" stroke-width="2">
+              <title>MMR: ${v}</title>
+            </circle>
+          `).join('')}
+        </svg>
+        <div class="trend-labels">
+          <span>과거</span>
+          <span>현재</span>
+        </div>
+      </div>
+    `;
+  }
+
   set stats(data) {
     if (!data) {
       this.innerHTML = `
@@ -162,6 +257,8 @@ export class SaStatsSummary extends HTMLElement {
             </div>
           </div>
         </div>
+
+        ${this.drawMmrChart(data.mmrTrend, data.crewMmr, data.crewMatchCount > 0)}
 
         ${crewAnalysis}
       </div>
