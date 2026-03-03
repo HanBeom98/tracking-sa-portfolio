@@ -133,8 +133,8 @@ export class SaStatsSummary extends HTMLElement {
     if (data.crewMatchCount <= 0) return `<div class="crew-stats-card no-crew"><p>최근 경기 중 우리 크루(8인 이상) 내전 기록이 없습니다.</p></div>`;
     
     // Calculate Crew K/D percentage from total kills and deaths
-    const ck = parseInt(data.totalKills || 0);
-    const cd = parseInt(data.totalDeaths || 0);
+    const ck = parseInt(data.crewKills || 0);
+    const cd = parseInt(data.crewDeaths || 0);
     const crewKdPercent = (ck + cd > 0) ? Math.round((ck / (ck + cd)) * 100) : 0;
 
     return `

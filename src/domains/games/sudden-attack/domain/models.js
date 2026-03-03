@@ -36,15 +36,12 @@ export class Player {
 
 export class RecentStats {
   constructor(info, matches = []) {
-    this.kd = info.recent_kill_death_rate ? parseFloat(info.recent_kill_death_rate.toFixed(1)) : 0;
+    // Nexon API's recent_kill_death_rate is already a percentage (e.g., 52.0)
+    const rawKd = info.recent_kill_death_rate || 0;
+    this.kd = parseFloat(rawKd.toFixed(1));
+    this.kdPercent = Math.round(rawKd); // Use direct value
+    
     this.winRate = info.recent_win_rate ? parseFloat(info.recent_win_rate.toFixed(1)) : 0;
-    this.headshotRate = info.recent_assault_rate ? parseFloat(info.recent_assault_rate.toFixed(1)) : 0;
-
-    // Convert traditional ratio to FPS percentage (K / (K+D) * 100)
-    // If we only have ratio, we can derive: ratio / (ratio + 1) * 100
-    // Example: 1.0 ratio -> 1 / (1+1) * 100 = 50%
-    const kdRatio = info.recent_kill_death_rate || 0;
-    this.kdPercent = kdRatio > 0 ? Math.round((kdRatio / (kdRatio + 1)) * 100) : 0;
 
     this.radar = { combat: 0, survival: 0, teamwork: 0, precision: 0, victory: 0 };
     this.streakCount = 0;
