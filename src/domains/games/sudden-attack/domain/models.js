@@ -94,6 +94,7 @@ export class RecentStats {
       ).pop();
 
       this.calculateSynergy(matches, info.user_name);
+      this.calculateMapStats(matches);
 
       this.trollMatches = matches.filter(m => {
         const kdVal = parseFloat(m.kd);
@@ -126,6 +127,38 @@ export class RecentStats {
     else if (r.precision >= 90) { this.playstyleTitle = "인간 에임봇"; this.playstyleIcon = "🤖"; }
     else if (r.survival >= 90) { this.playstyleTitle = "불사신"; this.playstyleIcon = "🧘"; }
     else { this.playstyleTitle = "정밀 사격수"; this.playstyleIcon = "🎯"; }
+  }
+
+  calculateMapStats(matches) {
+    const stats = {};
+    matches.forEach(m => {
+      if (!stats[m.mapName]) stats[m.mapName] = { name: m.mapName, total: 0, wins: 0, loses: 0 };
+      stats[m.mapName].total += 1;
+      if (m.matchResult === 'WIN') stats[m.mapName].wins += 1;
+      else stats[m.mapName].loses += 1;
+    });
+
+    // 사용자 정의 선호 순서 (드래곤로드, 프로방스, 시티캣, 크로스포트, 올드타운)
+    const PREFERRED_ORDER = ['드래곤로드', '프로방스', '시티캣', '크로스포트', '올드타운'];
+
+    this.mapStats = Object.values(stats)
+      .map(s => ({
+        ...s,
+        winRate: Math.round((s.wins / s.total) * 100)
+      }))
+      .sort((a, b) => {
+        const idxA = PREFERRED_ORDER.indexOf(a.name);
+        const idxB = PREFERRED_ORDER.indexOf(b.name);
+
+        // 둘 다 선호 리스트에 있는 경우
+        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+        // 하나만 선호 리스트에 있는 경우 (선호 맵을 앞으로)
+        if (idxA !== -1) return -1;
+        if (idxB !== -1) return 1;
+
+        // 리스트에 없는 맵들은 기존처럼 승률 내림차순 정렬
+        return b.winRate - a.winRate || b.total - a.total;
+      });
   }
 
   calculateSynergy(matches, myNickname) {
