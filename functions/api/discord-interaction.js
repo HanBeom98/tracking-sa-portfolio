@@ -87,7 +87,12 @@ function balanceTeams(players) {
 }
 
 function getActionButtons(count) {
-  const btns = [{ type: 2, label: "참가 신청", style: 1, custom_id: "join_match" }, { type: 2, label: "참가 취소", style: 2, custom_id: "leave_match" }, { type: 2, label: "모집 취소", style: 4, custom_id: "cancel_match" }];
+  const btns = [
+    { type: 2, label: "참가 신청", style: 1, custom_id: "join_match" },
+    { type: 2, label: "참가 취소", style: 2, custom_id: "leave_match" },
+    { type: 2, label: "새로고침 🔄", style: 2, custom_id: "refresh_list" },
+    { type: 2, label: "모집 취소", style: 4, custom_id: "cancel_match" }
+  ];
   if (count >= 10) btns.push({ type: 2, label: "팀 나누기 (시작)", style: 3, custom_id: "start_balance" });
   return [{ type: 1, components: btns }];
 }
