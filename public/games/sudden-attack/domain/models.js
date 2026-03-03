@@ -9,7 +9,6 @@ export class Player {
     this.totalExp = rank.grade_exp || 0;
     this.seasonRank = rank.season_grade || "";
 
-    // Check if this player is part of the crew (Priority: OUID, Fallback: Name)
     const normalizedName = (this.nickname || "").toLowerCase().trim();
     this.isCrew = (crewData.ouids || []).includes(this.ouid) || 
                   (crewData.names || []).some(c => (c || "").toLowerCase().trim() === normalizedName);
@@ -37,23 +36,21 @@ export class Player {
 
 export class RecentStats {
   constructor(info, matches = []) {
-    // Basic API stats
     this.kd = info.recent_kill_death_rate ? parseFloat(info.recent_kill_death_rate.toFixed(1)) : 0;
     this.winRate = info.recent_win_rate ? parseFloat(info.recent_win_rate.toFixed(1)) : 0;
     this.headshotRate = info.recent_assault_rate ? parseFloat(info.recent_assault_rate.toFixed(1)) : 0;
 
-    // Advanced Stats for Radar Chart (0-100 scale)
     this.radar = { combat: 0, survival: 0, teamwork: 0, precision: 0, victory: 0 };
     this.streakCount = 0;
-    this.streakType = "NONE"; // WIN, LOSE, NONE
+    this.streakType = "NONE"; 
     this.trollMatches = 0;
     this.playstyleTitle = "데이터 수집 중";
     this.playstyleIcon = "🕵️";
-    
-    // MMR Trend Data (Chronological order: Oldest to Newest)
     this.mmrTrend = []; 
 
-    // Crew Match (내전) Stats
+    this.bestPartner = null;
+    this.worstPartner = null;
+
     this.crewMatchCount = 0;
     this.crewKd = "0.00";
     this.crewWinRate = 0;
@@ -61,7 +58,6 @@ export class RecentStats {
     this.crewStatusTitle = "일반 유저";
     this.crewStatusIcon = "👤";
 
-    // Calculate real stats from the last matches
     if (matches.length > 0) {
       const totalK = matches.reduce((sum, m) => sum + m.kill, 0);
       const totalD = matches.reduce((sum, m) => sum + m.death, 0);
@@ -73,13 +69,11 @@ export class RecentStats {
       this.totalDeaths = totalD;
       this.totalAssists = totalA;
       
-      // Calculate Most Played Map
       const maps = matches.map(m => m.mapName);
       this.mostPlayedMap = maps.sort((a,b) =>
           maps.filter(v => v===a).length - maps.filter(v => v===b).length
       ).pop();
 
-      // 1. Calculate Streak
       let currentStreak = 0;
       let isWinStreak = null;
       for (const m of matches) {
@@ -98,13 +92,13 @@ export class RecentStats {
         this.streakCount = currentStreak;
       }
 
-      // 2. Troll Meter
+      this.calculateSynergy(matches, info.user_name);
+
       this.trollMatches = matches.filter(m => {
         const kd = parseFloat(m.kd);
         return kd < 0.5 && m.death >= 5;
       }).length;
 
-      // 3. Crew Specific Stats (Filtering only isCustomMatch)
       const crewMatches = matches.filter(m => m.isCustomMatch);
       this.crewMatchCount = crewMatches.length;
       if (this.crewMatchCount > 0) {
@@ -115,7 +109,6 @@ export class RecentStats {
         this.crewWinRate = Math.round((cw / this.crewMatchCount) * 100);
       }
 
-      // 4. Radar Chart Scaling (Mastery Curve - Hardcore Edition)
       const kdVal = this.kd;
       let combatScore = 0;
       if (kdVal <= 100) { combatScore = kdVal * 0.4; } 
@@ -123,7 +116,6 @@ export class RecentStats {
       else if (kdVal <= 200) { combatScore = 70 + (kdVal - 150) * 0.4; } 
       else { combatScore = 90 + (kdVal - 200) * 0.1; }
       this.radar.combat = Math.min(100, Math.max(0, combatScore));
-
       this.radar.survival = Math.min(100, Math.max(0, 100 - (this.avgD * 18)));
       
       const avgAssists = this.totalAssists / matches.length;
@@ -139,10 +131,8 @@ export class RecentStats {
       else if (hsr <= 50) { precisionScore = 50 + (hsr - 30) * 1.75; } 
       else { precisionScore = 85 + (hsr - 50) * 1; }
       this.radar.precision = Math.min(100, Math.max(0, precisionScore));
-      
       this.radar.victory = this.winRate;
 
-      // 5. Advanced Playstyle Analysis
       const r = this.radar;
       if (this.trollMatches >= Math.ceil(matches.length * 0.6)) {
         this.playstyleTitle = "아낌없이 주는 나무 (우리팀의 재앙)";
@@ -192,37 +182,51 @@ export class RecentStats {
     }
   }
 
-  /**
-   * Determine Crew Standing (Phase 2 Analysis)
-   * This is called after Firestore data is injected in main.js
-   */
+  calculateSynergy(matches, myNickname) {
+    const teammates = {}; 
+    const normalizedMe = (myNickname || "").toLowerCase().trim();
+
+    matches.forEach(match => {
+      if (!match.allPlayerStats) return;
+      const isWin = match.matchResult === 'WIN';
+      match.allPlayerStats.forEach(p => {
+        const normalizedName = p.nickname.toLowerCase().trim();
+        if (normalizedName === normalizedMe) return; 
+        if (p.result === match.matchResult) {
+          if (!teammates[p.nickname]) teammates[p.nickname] = { total: 0, wins: 0 };
+          teammates[p.nickname].total += 1;
+          if (isWin) teammates[p.nickname].wins += 1;
+        }
+      });
+    });
+
+    const synergyList = Object.entries(teammates)
+      .map(([nickname, stats]) => ({
+        nickname,
+        total: stats.total,
+        winRate: Math.round((stats.wins / stats.total) * 100)
+      }))
+      .filter(s => s.total >= 2) 
+      .sort((a, b) => b.winRate - a.winRate || b.total - a.total);
+
+    if (synergyList.length > 0) {
+      this.bestPartner = synergyList[0];
+      const reversed = [...synergyList].sort((a, b) => a.winRate - b.winRate || b.total - a.total);
+      if (reversed[0].winRate < 50) this.worstPartner = reversed[0];
+    }
+  }
+
   calculateCrewStatus() {
     const mmr = this.crewMmr;
     const count = this.crewMatchCount;
     const wr = this.crewWinRate;
-
-    if (mmr >= 1800) {
-      this.crewStatusTitle = "크루의 전설 (Legend)";
-      this.crewStatusIcon = "👑";
-    } else if (mmr >= 1500) {
-      this.crewStatusTitle = "팀의 에이스 (Ace)";
-      this.crewStatusIcon = "💎";
-    } else if (count >= 20 && wr >= 65) {
-      this.crewStatusTitle = "무적의 지휘관";
-      this.crewStatusIcon = "🎖️";
-    } else if (count >= 50) {
-      this.crewStatusTitle = "노련한 베테랑";
-      this.crewStatusIcon = "⚔️";
-    } else if (count < 15 && wr >= 60) {
-      this.crewStatusTitle = "무서운 라이징 스타";
-      this.crewStatusIcon = "✨";
-    } else if (count < 5) {
-      this.crewStatusTitle = "설레는 뉴페이스";
-      this.crewStatusIcon = "🌱";
-    } else {
-      this.crewStatusTitle = "믿음직한 정회원";
-      this.crewStatusIcon = "👤";
-    }
+    if (mmr >= 1800) { this.crewStatusTitle = "크루의 전설 (Legend)"; this.crewStatusIcon = "👑"; } 
+    else if (mmr >= 1500) { this.crewStatusTitle = "팀의 에이스 (Ace)"; this.crewStatusIcon = "💎"; } 
+    else if (count >= 20 && wr >= 65) { this.crewStatusTitle = "무적의 지휘관"; this.crewStatusIcon = "🎖️"; } 
+    else if (count >= 50) { this.crewStatusTitle = "노련한 베테랑"; this.crewStatusIcon = "⚔️"; } 
+    else if (count < 15 && wr >= 60) { this.crewStatusTitle = "무서운 라이징 스타"; this.crewStatusIcon = "✨"; } 
+    else if (count < 5) { this.crewStatusTitle = "설레는 뉴페이스"; this.crewStatusIcon = "🌱"; } 
+    else { this.crewStatusTitle = "믿음직한 정회원"; this.crewStatusIcon = "👤"; }
   }
 }
 
@@ -238,13 +242,9 @@ export class MatchRecord {
     this.allPlayerStats = []; 
 
     let playerStat = detail;
-    
     if (detail.match_detail && Array.isArray(detail.match_detail)) {
       let subjectFound = false;
-      
-      // Pre-normalize crew names for faster lookup
       const crewNamesSet = new Set((crewData.names || []).map(n => (n || "").toLowerCase().trim()));
-
       this.allPlayerStats = detail.match_detail.map(p => {
         const nickname = p.user_name || p.character_name || "";
         const normalizedName = nickname.toLowerCase().trim();
@@ -252,45 +252,23 @@ export class MatchRecord {
         const deathValue = parseInt(p.death || p.death_count || p.cnt_death || 0);
         const assistValue = parseInt(p.assist || p.assist_count || p.cnt_assist || 0);
         const resultValue = String(p.match_result || p.result || "0");
-
         let isSubject = false;
         if (subjectInfo && !subjectFound) {
           const nameMatches = targetUserName && normalizedName === targetUserName.toLowerCase().trim();
-          const statsMatch = killValue === parseInt(subjectInfo.kill) && 
-                            deathValue === parseInt(subjectInfo.death) && 
-                            String(resultValue) === String(subjectInfo.result);
-
-          if (nameMatches || statsMatch) {
-            isSubject = true;
-            subjectFound = true;
-          }
+          const statsMatch = killValue === parseInt(subjectInfo.kill) && deathValue === parseInt(subjectInfo.death) && String(resultValue) === String(subjectInfo.result);
+          if (nameMatches || statsMatch) { isSubject = true; subjectFound = true; }
         }
-
-        // IMPROVED CREW DETECTION: Check OUID OR Any Historical/Current Nickname
-        const isCrew = isSubject || 
-                       crewNamesSet.has(normalizedName) ||
-                       (p.ouid && (crewData.ouids || []).includes(p.ouid));
-
+        const isCrew = isSubject || crewNamesSet.has(normalizedName) || (p.ouid && (crewData.ouids || []).includes(p.ouid));
         return {
-          nickname: nickname,
-          kill: killValue,
-          death: deathValue,
-          assist: assistValue,
+          nickname: nickname, kill: killValue, death: deathValue, assist: assistValue,
           kd: deathValue > 0 ? (killValue / deathValue).toFixed(2) : (killValue > 0 ? killValue.toFixed(2) : "0.00"),
           result: resultValue === "1" ? "WIN" : (resultValue === "2" ? "LOSE" : "UNKNOWN"),
-          isCrew: isCrew,
-          ouid: isSubject ? subjectInfo.ouid : (p.ouid || null)
+          isCrew: isCrew, ouid: isSubject ? subjectInfo.ouid : (p.ouid || null)
         };
       });
-
       this.participants = detail.match_detail.map(p => p.user_name || p.character_name);
       this.crewParticipants = this.allPlayerStats.filter(p => p.isCrew).map(p => p.nickname);
-      
-      // CUSTOM MATCH DETECTION: Now recognizes even with historical names
-      if (this.crewParticipants.length >= 8) {
-        this.isCustomMatch = true;
-      }
-
+      if (this.crewParticipants.length >= 8) this.isCustomMatch = true;
       const target = targetUserName ? targetUserName.toLowerCase().trim() : "";
       if (target) {
         playerStat = detail.match_detail.find(p => {
@@ -301,38 +279,15 @@ export class MatchRecord {
         playerStat = detail.match_detail[0];
       }
     }
-
     this.matchResult = String(playerStat.match_result || playerStat.result) === "1" ? "WIN" : "LOSE";
     this.kill = parseInt(playerStat.kill || playerStat.kill_count || playerStat.cnt_kill || 0);
     this.death = parseInt(playerStat.death || playerStat.death_count || playerStat.cnt_death || 0);
     this.assist = parseInt(playerStat.assist || playerStat.assist_count || playerStat.cnt_assist || 0);
-    
-    if (this.death === 0) {
-      this.kd = this.kill > 0 ? this.kill.toFixed(2) : "0.00";
-    } else {
-      this.kd = (this.kill / this.death).toFixed(2);
-    }
-
-    // --- LAUNDRY (REJOIN) DETECTION LOGIC ---
-    // Mechanism: Sum up Team A kills and compare with Team B deaths.
-    // If Opponent Kills > My Team Deaths, someone rejoined to wipe their deaths.
+    this.kd = this.death === 0 ? (this.kill > 0 ? this.kill.toFixed(2) : "0.00") : (this.kill / this.death).toFixed(2);
     const winTeam = this.allPlayerStats.filter(p => p.result === 'WIN');
     const loseTeam = this.allPlayerStats.filter(p => p.result === 'LOSE');
-
-    const winTeamTotalKills = winTeam.reduce((s, p) => s + p.kill, 0);
-    const winTeamTotalDeaths = winTeam.reduce((s, p) => s + p.death, 0);
-    const loseTeamTotalKills = loseTeam.reduce((s, p) => s + p.kill, 0);
-    const loseTeamTotalDeaths = loseTeam.reduce((s, p) => s + p.death, 0);
-
-    // Missing deaths: If enemy kills more than our recorded deaths
-    const winTeamMissing = Math.max(0, loseTeamTotalKills - winTeamTotalDeaths);
-    const loseTeamMissing = Math.max(0, winTeamTotalKills - loseTeamTotalDeaths);
-
-    this.laundryInfo = {
-      isWashed: winTeamMissing > 0 || loseTeamMissing > 0,
-      totalMissing: winTeamMissing + loseTeamMissing,
-      winTeamMissing,
-      loseTeamMissing
-    };
+    const winTeamMissing = Math.max(0, loseTeam.reduce((s, p) => s + p.kill, 0) - winTeam.reduce((s, p) => s + p.death, 0));
+    const loseTeamMissing = Math.max(0, winTeam.reduce((s, p) => s + p.kill, 0) - loseTeam.reduce((s, p) => s + p.death, 0));
+    this.laundryInfo = { isWashed: winTeamMissing > 0 || loseTeamMissing > 0, totalMissing: winTeamMissing + loseTeamMissing, winTeamMissing, loseTeamMissing };
   }
 }
