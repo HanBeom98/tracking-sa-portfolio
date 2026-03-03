@@ -283,7 +283,8 @@ export async function onRequest(context) {
         }));
 
         const result = balanceTeams(playerData);
-        let content = `🔥 **팀 밸런싱 결과 (${participants.length}인)**\n\n🔴 **RED** (Avg: ${Math.round(result.redAvg)})\n${result.red.map(p => `• ${p.nickname} (${p.position === 'sniper' ? '🎯' : '🔫'})`).join('\n')}\n\n🔵 **BLUE** (Avg: ${Math.round(result.blueAvg)})\n${result.blue.map(p => `• ${p.nickname} (${p.position === 'sniper' ? '🎯' : '🔫'})`).join('\n')}`;
+        const mentions = participants.map(p => `<@${p.discordId}>`).join(' ');
+        let content = `📢 **팀 구성이 완료되었습니다! 확인해 주세요.**\n${mentions}\n\n🔥 **팀 밸런싱 결과 (${participants.length}인)**\n\n🔴 **RED** (Avg: ${Math.round(result.redAvg)})\n${result.red.map(p => `• ${p.nickname} (${p.position === 'sniper' ? '🎯' : '🔫'})`).join('\n')}\n\n🔵 **BLUE** (Avg: ${Math.round(result.blueAvg)})\n${result.blue.map(p => `• ${p.nickname} (${p.position === 'sniper' ? '🎯' : '🔫'})`).join('\n')}`;
         if (result.standby?.length > 0) content += `\n\n⌛ **STANDBY**\n${result.standby.map(p => `• ${p.nickname}`).join('\n')}`;
         return new Response(JSON.stringify({ type: 7, data: { content: content + "\n\n즐거운 내전 되세요!", components: [] } }), { headers: { 'Content-Type': 'application/json' } });
       }
