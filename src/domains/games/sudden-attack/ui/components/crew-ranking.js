@@ -68,7 +68,7 @@ export class SaCrewRanking extends HTMLElement {
     this.querySelectorAll('.clickable-name').forEach(el => {
       el.addEventListener('click', () => {
         const name = el.dataset.name;
-        this.dispatchEvent(new CustomEvent('sa-request-search', {
+        window.dispatchEvent(new CustomEvent('sa-request-search', {
           detail: { name },
           bubbles: true,
           composed: true

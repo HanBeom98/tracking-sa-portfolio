@@ -131,7 +131,7 @@ export class SaMatchList extends HTMLElement {
       el.addEventListener('click', (e) => {
         e.stopPropagation(); 
         const name = el.dataset.name;
-        this.dispatchEvent(new CustomEvent('sa-request-search', {
+        window.dispatchEvent(new CustomEvent('sa-request-search', {
           detail: { name },
           bubbles: true,
           composed: true

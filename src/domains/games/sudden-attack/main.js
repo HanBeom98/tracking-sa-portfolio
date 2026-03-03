@@ -257,9 +257,11 @@ submitApplyBtn.addEventListener('click', async () => {
 window.addEventListener('sa-rankings-updated', () => refreshRankings());
 
 // Listen for nickname clicks from anywhere on the page (Ranking, Match History, etc.)
-document.addEventListener('sa-request-search', (e) => {
-  handleSearch(e.detail.name);
-  window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top to see results
+window.addEventListener('sa-request-search', (e) => {
+  if (e.detail && e.detail.name) {
+    handleSearch(e.detail.name);
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top to see results
+  }
 });
 
 // Start

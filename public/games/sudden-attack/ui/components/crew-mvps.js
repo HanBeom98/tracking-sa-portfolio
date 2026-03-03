@@ -128,7 +128,11 @@ export class SaCrewMvps extends HTMLElement {
 
     this.querySelectorAll('.mvp-name').forEach(el => {
       el.addEventListener('click', () => {
-        window.dispatchEvent(new CustomEvent('sa-request-search', { detail: { name: el.dataset.name } }));
+        window.dispatchEvent(new CustomEvent('sa-request-search', { 
+          detail: { name: el.dataset.name },
+          bubbles: true,
+          composed: true
+        }));
       });
     });
   }
