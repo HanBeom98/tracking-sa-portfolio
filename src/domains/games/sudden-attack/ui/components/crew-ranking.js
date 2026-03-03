@@ -20,6 +20,24 @@ export class SaCrewRanking extends HTMLElement {
     const startDateStr = this.getAttribute('season-start') || '알 수 없음';
 
     this.innerHTML = `
+      <style>
+        .ranking-table th, .ranking-table td {
+          text-align: center;
+          padding: 12px 8px;
+        }
+        .ranking-table th:nth-child(3), .ranking-table td:nth-child(3) {
+          text-align: left; /* 캐릭터명은 좌측 정렬 */
+          padding-left: 20px;
+        }
+        .ranking-table .mmr-val {
+          font-weight: bold;
+          color: #00d2ff;
+        }
+        .ranking-table .stats-cell {
+          font-family: 'Roboto Mono', monospace;
+          width: 120px;
+        }
+      </style>
       <div class="ranking-card">
         <div class="ranking-header">
           <h3>🔥 TRACKING CREW 실시간 랭킹</h3>
@@ -31,12 +49,12 @@ export class SaCrewRanking extends HTMLElement {
         <table class="ranking-table">
           <thead>
             <tr>
-              <th>순위</th>
-              <th>티어</th>
+              <th style="width: 60px;">순위</th>
+              <th style="width: 120px;">티어</th>
               <th>캐릭터명</th>
-              <th>MMR</th>
-              <th>내전 K/D (%)</th>
-              <th>승률 (전적)</th>
+              <th style="width: 100px;">MMR</th>
+              <th style="width: 120px;">내전 K/D (%)</th>
+              <th style="width: 150px;">승률 (전적)</th>
             </tr>
           </thead>
           <tbody>
@@ -55,8 +73,8 @@ export class SaCrewRanking extends HTMLElement {
                   <td class="tier ${tier.class}">${tier.icon} ${tier.name}</td>
                   <td class="name clickable-name" data-name="${m.characterName}">${m.characterName}</td>
                   <td class="mmr-val">${m.mmr}</td>
-                  <td class="stats">${crewKdPercent}%</td>
-                  <td class="stats">${winRate}% (${m.wins}W ${m.loses}L)</td>
+                  <td class="stats-cell">${crewKdPercent}%</td>
+                  <td class="stats-cell">${winRate}% (${m.wins}W ${m.loses}L)</td>
                 </tr>
               `;
             }).join('')}

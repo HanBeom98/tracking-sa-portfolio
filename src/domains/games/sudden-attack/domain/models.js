@@ -39,7 +39,6 @@ export class RecentStats {
     const rawKd = info.recent_kill_death_rate || 0;
     this.kd = parseFloat(rawKd.toFixed(1));
     this.kdPercent = Math.round(rawKd);
-    
     this.winRate = info.recent_win_rate ? parseFloat(info.recent_win_rate.toFixed(1)) : 0;
 
     this.radar = { combat: 0, survival: 0, teamwork: 0, precision: 0, victory: 0 };
@@ -54,6 +53,7 @@ export class RecentStats {
     this.worstPartner = null;
     this.mapStats = [];
 
+    // --- 내전 데이터 주입 (UI와 이름 일치) ---
     if (crewData) {
       this.crewMatchCount = (crewData.wins || 0) + (crewData.loses || 0);
       this.crewKills = crewData.crewKills || 0;
@@ -66,7 +66,8 @@ export class RecentStats {
       this.calculateCrewStatus();
     } else {
       this.crewMatchCount = 0;
-      this.crewKd = "0.00";
+      this.crewKills = 0;
+      this.crewDeaths = 0;
       this.crewWinRate = 0;
       this.crewMmr = 1200;
       this.crewStatusTitle = "일반 유저";
@@ -74,14 +75,17 @@ export class RecentStats {
     }
 
     if (matches.length > 0) {
-      const nxTotalK = matches.reduce((sum, m) => sum + m.kill, 0);
-      const nxTotalD = matches.reduce((sum, m) => sum + m.death, 0);
-      const nxTotalA = matches.reduce((sum, m) => sum + m.assist, 0);
+      this.totalMatchesCount = matches.length; // UI에서 표시할 실제 경기 수
+      const totalK = matches.reduce((sum, m) => sum + m.kill, 0);
+      const totalD = matches.reduce((sum, m) => sum + m.death, 0);
+      const totalA = matches.reduce((sum, m) => sum + m.assist, 0);
       
-      this.avgK = (nxTotalK / matches.length).toFixed(1);
-      this.avgD = (nxTotalD / matches.length).toFixed(1);
-      this.nxTotalKills = nxTotalK;
-      this.totalAssists = nxTotalA;
+      this.avgK = (totalK / matches.length).toFixed(1);
+      this.avgD = (totalD / matches.length).toFixed(1);
+      this.avgA = (totalA / matches.length).toFixed(1);
+      this.totalKills = totalK;
+      this.totalDeaths = totalD;
+      this.totalAssists = totalA;
       
       const maps = matches.map(m => m.mapName);
       this.mostPlayedMap = maps.sort((a,b) =>
@@ -95,76 +99,33 @@ export class RecentStats {
         return kdVal < 0.5 && m.death >= 5;
       }).length;
 
-      const kdVal = this.kd;
+      // Radar 계산 (공방 지표 기준)
+      const radarKd = this.kdPercent;
       let combatScore = 0;
-      if (kdVal <= 100) { combatScore = kdVal * 0.4; } 
-      else if (kdVal <= 150) { combatScore = 40 + (kdVal - 100) * 0.6; } 
-      else if (kdVal <= 200) { combatScore = 70 + (kdVal - 150) * 0.4; } 
-      else { combatScore = 90 + (kdVal - 200) * 0.1; }
+      if (radarKd <= 40) { combatScore = radarKd * 1.0; } 
+      else if (radarKd <= 55) { combatScore = 40 + (radarKd - 40) * 2.0; } 
+      else { combatScore = 70 + (radarKd - 55) * 1.5; }
       this.radar.combat = Math.min(100, Math.max(0, combatScore));
-      this.radar.survival = Math.min(100, Math.max(0, 100 - (this.avgD * 18)));
-      
-      const avgAssists = this.totalAssists / matches.length;
-      let teamworkScore = 0;
-      if (avgAssists <= 2.5) { teamworkScore = avgAssists * 28; } 
-      else if (avgAssists <= 4.0) { teamworkScore = 70 + (avgAssists - 2.5) * 10; } 
-      else { teamworkScore = 85 + (avgAssists - 4.0) * 10; }
-      this.radar.teamwork = Math.min(100, Math.max(0, teamworkScore));
-
-      const hsr = info.recent_assault_rate || 0;
-      let precisionScore = 0;
-      if (hsr <= 30) { precisionScore = hsr * 1.67; } 
-      else if (hsr <= 50) { precisionScore = 50 + (hsr - 30) * 1.75; } 
-      else { precisionScore = 85 + (hsr - 50) * 1; }
-      this.radar.precision = Math.min(100, Math.max(0, precisionScore));
+      this.radar.survival = Math.min(100, Math.max(0, 100 - (parseFloat(this.avgD) * 12)));
+      this.radar.teamwork = Math.min(100, Math.max(0, parseFloat(this.avgA) * 15));
+      this.radar.precision = Math.min(100, Math.max(0, (info.recent_assault_rate || 0) * 1.5));
       this.radar.victory = this.winRate;
 
-      const r = this.radar;
-      if (this.trollMatches >= Math.ceil(matches.length * 0.6)) {
-        this.playstyleTitle = "아낌없이 주는 나무 (우리팀의 재앙)";
-        this.playstyleIcon = "🚨";
-      } else if (r.combat >= 85 && r.precision >= 85) {
-        this.playstyleTitle = "전술 핵병기 (압도적 무력)";
-        this.playstyleIcon = "☢️";
-      } else if (r.combat >= 85 && r.survival <= 35) {
-        this.playstyleTitle = "광전사 (너 죽고 나 죽자)";
-        this.playstyleIcon = "🪓";
-      } else if (r.precision >= 92) {
-        this.playstyleTitle = "인간 에임봇 (헤드헌터)";
-        this.playstyleIcon = "🤖";
-      } else if (r.survival >= 90 && r.teamwork >= 70) {
-        this.playstyleTitle = "전장의 유령 (은둔 고수)";
-        this.playstyleIcon = "👻";
-      } else if (r.victory >= 80 && r.survival >= 80) {
-        this.playstyleTitle = "승리 요정 (팀의 수호신)";
-        this.playstyleIcon = "🛡️";
-      } else if (r.teamwork >= 90) {
-        this.playstyleTitle = "전장의 조율자 (살림꾼)";
-        this.playstyleIcon = "🤝";
-      } else if (r.combat >= 92) {
-        this.playstyleTitle = "무자비한 정복자 (여포)";
-        this.playstyleIcon = "👑";
-      } else if (r.survival >= 92) {
-        this.playstyleTitle = "불사신 (생존 끝판왕)";
-        this.playstyleIcon = "🧘";
-      } else if (r.combat >= 60 && r.survival >= 60 && r.teamwork >= 60 && r.precision >= 60 && r.victory >= 60) {
-        this.playstyleTitle = "다재다능한 육각형 전사";
-        this.playstyleIcon = "💠";
-      } else {
-        const maxStat = Object.keys(r).reduce((a, b) => r[a] > r[b] ? a : b);
-        const titles = {
-          combat: { t: "전장의 지배자 (여포)", i: "⚔️" },
-          survival: { t: "생존 마스터", i: "🥷" },
-          teamwork: { t: "어시스트 장인", i: "🤝" },
-          precision: { t: "정밀 사격수", i: "🎯" },
-          victory: { t: "승리 견인차", i: "🧚" }
-        };
-        this.playstyleTitle = titles[maxStat].t;
-        this.playstyleIcon = titles[maxStat].i;
-      }
+      this.assignPlaystyle();
     } else {
-      this.avgK = 0; this.avgD = 0; this.nxTotalKills = 0; this.totalAssists = 0; this.mostPlayedMap = "데이터 없음";
+      this.totalMatchesCount = 0;
+      this.avgK = 0; this.avgD = 0; this.avgA = 0; 
+      this.totalKills = 0; this.totalDeaths = 0; this.totalAssists = 0; 
+      this.mostPlayedMap = "데이터 없음";
     }
+  }
+
+  assignPlaystyle() {
+    const r = this.radar;
+    if (r.combat >= 85 && r.precision >= 85) { this.playstyleTitle = "전술 핵병기"; this.playstyleIcon = "☢️"; }
+    else if (r.precision >= 90) { this.playstyleTitle = "인간 에임봇"; this.playstyleIcon = "🤖"; }
+    else if (r.survival >= 90) { this.playstyleTitle = "불사신"; this.playstyleIcon = "🧘"; }
+    else { this.playstyleTitle = "정밀 사격수"; this.playstyleIcon = "🎯"; }
   }
 
   calculateSynergy(matches, myNickname) {
@@ -269,15 +230,12 @@ export class MatchRecord {
         };
       });
 
-      // --- MVP 선정 로직 고도화 (헤드샷 가중치 부여) ---
       let bestScore = -1;
       let mvp = null;
       this.allPlayerStats.forEach(p => {
-        // MVP 점수 = (킬 * 100) + 데미지 + (헤드샷 * 150)
-        // 헤드샷 1방의 가치를 약 1.5킬 정도로 높게 평가하여 라이플러 우대
-        const performanceScore = (p.kill * 100) + p.damage + (p.headshot * 150);
-        if (p.kill >= 5 && performanceScore > bestScore) {
-          bestScore = performanceScore;
+        const score = (p.kill * 100) + p.damage + (p.headshot * 150);
+        if (p.kill >= 5 && score > bestScore) {
+          bestScore = score;
           mvp = p.nickname;
         }
       });

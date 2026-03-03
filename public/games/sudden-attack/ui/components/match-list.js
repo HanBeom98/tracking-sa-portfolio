@@ -18,11 +18,11 @@ export class SaMatchList extends HTMLElement {
         <table class="scoreboard-table">
           <thead>
             <tr>
-              <th>결과</th>
+              <th style="width: 80px;">결과</th>
               <th>닉네임</th>
-              <th>K / D / A</th>
-              <th>딜량 / 헤드</th>
-              <th>K/D</th>
+              <th style="width: 120px;">K / D / A</th>
+              <th style="width: 140px;">딜량 / 헤드</th>
+              <th style="width: 80px;">K/D</th>
             </tr>
           </thead>
           <tbody>
@@ -95,10 +95,19 @@ export class SaMatchList extends HTMLElement {
           margin-right: 4px;
           filter: drop-shadow(0 0 2px rgba(255, 204, 0, 0.5));
         }
+        .scoreboard-table th, .scoreboard-table td {
+          text-align: center !important;
+          padding: 10px 5px;
+        }
+        .scoreboard-table td.name {
+          text-align: left !important;
+          padding-left: 15px;
+        }
         .mission-cell {
-          text-align: center;
+          font-family: 'Roboto Mono', monospace;
           color: #888;
           font-size: 0.9em;
+          white-space: nowrap;
         }
         .dmg-val { color: #e0e0e0; font-weight: 500; }
         .hs-val { color: #888; margin-left: 2px; }

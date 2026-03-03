@@ -25,10 +25,10 @@ export class SaStatsSummary extends HTMLElement {
       return;
     }
 
-    const matchCount = data.totalKills > 0 ? Math.round(data.totalKills / (data.avgK || 1)) : 0;
-    const displayCount = Math.max(matchCount, 0);
+    // Fix for "0 matches" issue: Ensure we use the correct count
+    const matchCount = data.totalMatchesCount || 20; 
 
-    // Update Streak Badge in external DOM (Optional side effect from main.js flow)
+    // Update Streak Badge in external DOM
     const streakBadge = document.getElementById('streakBadge');
     if (streakBadge) {
       if (data.streakType === 'WIN') { streakBadge.innerHTML = `🔥 ${data.streakCount}연승 중!`; streakBadge.className = 'streak-badge win-streak'; } 
@@ -43,8 +43,8 @@ export class SaStatsSummary extends HTMLElement {
           <div class="playstyle-icon">${data.playstyleIcon}</div>
           <div class="playstyle-info"><span class="playstyle-label">AI 분석 플레이 스타일</span><span class="playstyle-title">${data.playstyleTitle}</span></div>
           <div class="status-divider" style="width:1px; height:40px; background:rgba(255,255,255,0.1); margin:0 15px;"></div>
-          <div class="status-icon" style="font-size:36px;">${data.crewStatusIcon}</div>
-          <div class="status-info"><span class="playstyle-label" style="color:#ffcc00;">크루 내 위상</span><span class="playstyle-title" style="color:#ffcc00;">${data.crewStatusTitle}</span></div>
+          <div class="status-icon" style="font-size:36px;">${data.crewStatusIcon || '👤'}</div>
+          <div class="status-info"><span class="playstyle-label" style="color:#ffcc00;">크루 내 위상</span><span class="playstyle-title" style="color:#ffcc00;">${data.crewStatusTitle || '일반 유저'}</span></div>
         </div>
 
         <div class="stats-summary-header">
@@ -55,12 +55,15 @@ export class SaStatsSummary extends HTMLElement {
           
           <!-- 3. Text Stats Grid -->
           <div class="text-stats-section">
-            <div class="stats-summary-header"><h3>최근 ${displayCount}경기 정밀 분석</h3><span class="most-played-map">선호 맵: <strong>${data.mostPlayedMap}</strong></span></div>
+            <div class="header-row">
+              <h3>최근 ${matchCount}경기 정밀 분석</h3>
+              <span class="most-played-map">선호 맵: <strong>${data.mostPlayedMap || '정보 없음'}</strong></span>
+            </div>
             <div class="stats-grid">
               <div class="stat-box"><label>종합 K/D</label><span class="value highlight ${this.getKdColor(data.kdPercent)}">${data.kdPercent}%</span></div>
               <div class="stat-box"><label>최근 승률</label><span class="value highlight">${data.winRate}%</span></div>
-              <div class="stat-box"><label>평균 K/D/A</label><span class="value">${data.avgK} / ${data.avgD} / ${(data.totalAssists / (displayCount || 1)).toFixed(1)}</span></div>
-              <div class="stat-box"><label>${displayCount}경기 합계</label><span class="value">${data.totalKills}K ${data.totalDeaths}D</span></div>
+              <div class="stat-box"><label>평균 K/D/A</label><span class="value">${data.avgK || 0} / ${data.avgD || 0} / ${data.avgA || 0}</span></div>
+              <div class="stat-box"><label>${matchCount}경기 합계</label><span class="value">${data.totalKills || 0}K ${data.totalDeaths || 0}D</span></div>
             </div>
           </div>
         </div>
@@ -79,18 +82,18 @@ export class SaStatsSummary extends HTMLElement {
       </div>
     `;
 
-    // Inject data into sub-components with explicit checks
+    // Inject data into sub-components
     const radarComp = this.querySelector('#radarChart');
     if (radarComp) radarComp.data = { radar: data.radar };
 
     const trendComp = this.querySelector('#trendChart');
-    if (trendComp) trendComp.params = { mmrTrend: data.mmrTrend, currentMmr: data.crewMmr, isCrew: data.crewMatchCount > 0 };
+    if (trendComp) trendComp.params = { mmrTrend: data.mmrTrend || [], currentMmr: data.crewMmr || 1200, isCrew: data.crewMatchCount > 0 };
 
     const synergyComp = this.querySelector('#synergyView');
     if (synergyComp) synergyComp.data = data;
 
     const mapComp = this.querySelector('#mapMastery');
-    if (mapComp) mapComp.mapStats = data.mapStats;
+    if (mapComp) mapComp.mapStats = data.mapStats || [];
   }
 
   /**
@@ -130,21 +133,24 @@ export class SaStatsSummary extends HTMLElement {
   }
 
   renderCrewAnalysis(data) {
-    if (data.crewMatchCount <= 0) return `<div class="crew-stats-card no-crew"><p>최근 경기 중 우리 크루(8인 이상) 내전 기록이 없습니다.</p></div>`;
+    if (!data || (data.crewMatchCount || 0) <= 0) return `<div class="crew-stats-card no-crew"><p>최근 경기 중 우리 크루(8인 이상) 내전 기록이 없습니다.</p></div>`;
     
-    // Calculate Crew K/D percentage from total kills and deaths
+    // Fix: Using the correct field names passed from RecentStats constructor
     const ck = parseInt(data.crewKills || 0);
     const cd = parseInt(data.crewDeaths || 0);
     const crewKdPercent = (ck + cd > 0) ? Math.round((ck / (ck + cd)) * 100) : 0;
 
     return `
       <div class="crew-stats-card">
-        <div class="crew-stats-header"><h3>⚔️ 우리 크루 내전 기록 분석</h3><span class="match-count">누적 내전 참여: <strong>${data.crewMatchCount}회</strong></span></div>
+        <div class="crew-stats-header">
+          <h3>⚔️ 우리 크루 내전 기록 분석</h3>
+          <span class="match-count">누적 내전 참여: <strong>${data.crewMatchCount}회</strong></span>
+        </div>
         <div class="stats-grid crew-grid">
-          <div class="stat-box golden"><label>내전 현재 MMR</label><span class="value gold-highlight">${data.crewMmr}</span></div>
+          <div class="stat-box golden"><label>내전 현재 MMR</label><span class="value gold-highlight">${data.crewMmr || 1200}</span></div>
           <div class="stat-box golden"><label>내전 K/D</label><span class="value gold-highlight">${crewKdPercent}%</span></div>
-          <div class="stat-box golden"><label>내전 누적 승률</label><span class="value gold-highlight">${data.crewWinRate}%</span></div>
-          <div class="stat-box golden"><label>크루내 위상</label><span class="value">${data.crewStatusTitle}</span></div>
+          <div class="stat-box golden"><label>내전 누적 승률</label><span class="value gold-highlight">${data.crewWinRate || 0}%</span></div>
+          <div class="stat-box golden"><label>크루내 위상</label><span class="value">${data.crewStatusTitle || '일반 유저'}</span></div>
         </div>
       </div>
     `;
