@@ -5,7 +5,14 @@ import { CrewRepository } from './infra/crew-repository.js?v=20260228_7';
 import { RecentStats } from './domain/models.js?v=20260228_7';
 import { BalancerManager } from './ui/balancer-manager.js?v=20260228_7';
 import { AdminManager } from './ui/admin-manager.js?v=20260228_7';
-import './ui/sa-components.js?v=20260228_7';
+
+// Import Modular UI Components
+import './ui/components/player-card.js?v=20260228_7';
+import './ui/components/stats-summary.js?v=20260228_7';
+import './ui/components/crew-ranking.js?v=20260228_7';
+import './ui/components/match-list.js?v=20260228_7';
+import './ui/components/crew-mvps.js?v=20260228_7';
+import './ui/components/team-board.js?v=20260228_7';
 
 // NOTE: Nexon API Key is now handled securely by the server-side proxy (/api/sa-proxy)
 const NEXON_API_KEY = ''; 
