@@ -240,7 +240,6 @@ export class MatchRecord {
         const assistValue = parseInt(p.assist || p.assist_count || p.cnt_assist || 0);
         const resultValue = String(p.match_result || p.result || "0");
         
-        // --- PERFORMANCE DATA EXTRACTION ---
         const damageValue = parseInt(p.damage || p.cnt_damage || 0);
         const headshotValue = parseInt(p.headshot || p.cnt_headshot || 0);
 
@@ -270,13 +269,15 @@ export class MatchRecord {
         };
       });
 
-      // MVP 선정 로직: (킬 * 100) + 데미지 합산 점수 기준
+      // --- MVP 선정 로직 고도화 (헤드샷 가중치 부여) ---
       let bestScore = -1;
       let mvp = null;
       this.allPlayerStats.forEach(p => {
-        const score = (p.kill * 100) + p.damage;
-        if (p.kill >= 5 && score > bestScore) {
-          bestScore = score;
+        // MVP 점수 = (킬 * 100) + 데미지 + (헤드샷 * 150)
+        // 헤드샷 1방의 가치를 약 1.5킬 정도로 높게 평가하여 라이플러 우대
+        const performanceScore = (p.kill * 100) + p.damage + (p.headshot * 150);
+        if (p.kill >= 5 && performanceScore > bestScore) {
+          bestScore = performanceScore;
           mvp = p.nickname;
         }
       });

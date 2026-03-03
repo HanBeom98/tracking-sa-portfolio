@@ -395,8 +395,8 @@ export class CrewRepository {
 
         hsrChange += performanceAdj;
 
-        // --- PERFORMANCE BONUS UPGRADE (Damage-centric) ---
-        // 1. Damage Bonus (+1 per 1000 damage)
+        // --- PERFORMANCE BONUS UPGRADE (Balanced for Rifle/Sniper) ---
+        // 1. Damage Bonus (+1 per 1000 damage) - Snipers favor this
         if (p.damage > 0) {
           const damageBonus = Math.floor(p.damage / 1000);
           if (damageBonus > 0) {
@@ -405,7 +405,16 @@ export class CrewRepository {
           }
         }
 
-        // 2. MVP Bonus (+5 pts)
+        // 2. Headshot Bonus (+1 per 3 headshots) - Riflers favor this
+        if (p.headshot > 0) {
+          const hsBonus = Math.floor(p.headshot / 3);
+          if (hsBonus > 0) {
+            hsrChange += hsBonus;
+            console.log(`[CrewRepo] ${p.nickname} headshot expert bonus: +${hsBonus}`);
+          }
+        }
+
+        // 3. MVP Bonus (+5 pts)
         if (p.isMvp) {
           hsrChange += 5;
           console.log(`[CrewRepo] ${p.nickname} MVP bonus: +5`);
