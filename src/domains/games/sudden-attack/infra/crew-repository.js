@@ -379,66 +379,57 @@ export class CrewRepository {
         const death = parseInt(p.death || 0);
         const kd = parseFloat(p.kd || 0);
         
-        // 1. Public MMR: 승패 기반 (±20) + 성취 보너스
+        // --- [듀얼 트랙 정산 시스템: 옵션 A (성취감 + 정교한 밸런스)] ---
+        
+        // 1. MMR (Public Rating): 승패 중심의 시즌 랭크 점수 (보너스 포함)
         let mmrChange = isWin ? 20 : -20;
-        
-        // --- MMR 성취 보너스 로직 (최대 +5점) ---
         let mmrBonus = 0;
-        if (p.isMvp) mmrBonus += 3; // MVP 보너스
-        if (p.damage >= 2000) mmrBonus += 2; // 고화력 보너스
-        if (p.headshot >= 10) mmrBonus += 2; // 정밀 샷 보너스
+        if (p.isMvp) mmrBonus += 3;
+        if (p.damage >= 1500) mmrBonus += 2; // 서든 환경에 맞춰 1500으로 하향
+        if (p.headshot >= 7) mmrBonus += 2; // 서든 환경에 맞춰 7회로 하향
         
-        mmrBonus = Math.min(5, mmrBonus); // 보너스 캡 제한
-        mmrChange += mmrBonus; // 승리 시 더 많이 받고, 패배 시 덜 깎임
-        
-        currentData.mmr += mmrChange;
+        mmrBonus = Math.min(5, mmrBonus); // 성취 보너스 최대 +5 제한
+        currentData.mmr += (mmrChange + mmrBonus);
 
-        // 2. Hidden Skill Rating (HSR): 퍼포먼스 기반
-        // 기본 승패 점수 축소 (±10), K/D 편차에 따른 점수 확대 (최대 ±15)
+        // 2. HSR (Hidden Skill Rating): 진짜 실력 중심의 보정 점수 (사용자 가이드 반영)
         let hsrChange = isWin ? 10 : -10;
-        
-        // 기준 K/D 1.0 대비 편차 계산
-        const kdDeviance = kd - 1.0;
-        // 편차 0.1당 1.5점 가감 (K/D 2.0이면 +15점, K/D 0.0이면 -15점)
-        let performanceAdj = Math.round(kdDeviance * 15);
-        performanceAdj = Math.max(-15, Math.min(15, performanceAdj)); // 캡 제한
+        let hsrBonus = 0;
 
-        hsrChange += performanceAdj;
-
-        // --- PERFORMANCE BONUS UPGRADE (Balanced for Rifle/Sniper) ---
-        // 1. Damage Bonus (+1 per 1000 damage) - Snipers favor this
-        if (p.damage > 0) {
-          const damageBonus = Math.floor(p.damage / 1000);
-          if (damageBonus > 0) {
-            hsrChange += damageBonus;
-            console.log(`[CrewRepo] ${p.nickname} high damage bonus: +${damageBonus}`);
+        if (isWin) {
+          // [승리 시] 버스 방지 로직 (K/D 0.3 이하: 승리해도 HSR 변동 없음)
+          if (kd <= 0.3) {
+            hsrBonus = -10; 
+          } else if (kd >= 1.0) {
+            // 성적이 좋을수록 실력 점수 추가 상승 (최대 +15)
+            hsrBonus = Math.min(15, Math.round((kd - 1.0) * 10));
+          }
+        } else {
+          // [패배 시] 억까 방지 로직 (K/D 1.7 이상: 패배했어도 실력 인정되어 HSR 상승)
+          if (kd >= 1.7) {
+            hsrBonus = 15; // 최종 결과: -10 + 15 = +5점 상승
+          } else if (kd <= 1.0) {
+            // 성적이 낮을수록 실력 점수 추가 하락 (최대 -15)
+            hsrBonus = Math.max(-15, Math.round((kd - 1.0) * 15));
           }
         }
 
-        // 2. Headshot Bonus (+1 per 3 headshots) - Riflers favor this
-        if (p.headshot > 0) {
-          const hsBonus = Math.floor(p.headshot / 3);
-          if (hsBonus > 0) {
-            hsrChange += hsBonus;
-            console.log(`[CrewRepo] ${p.nickname} headshot expert bonus: +${hsBonus}`);
-          }
+        // [서든어택 최적화 교전 보너스] 
+        // 6-0 압승/압패 판을 고려하여 '킬+데스' 합계가 8회 이상이면 적극적 교전으로 인정
+        if ((kill + death) >= 8 && kd >= 0.8) {
+          hsrBonus += 2;
         }
 
-        // 3. MVP Bonus (+5 pts)
-        if (p.isMvp) {
-          hsrChange += 5;
-          console.log(`[CrewRepo] ${p.nickname} MVP bonus: +5`);
-        }
+        currentData.hsr += (hsrChange + hsrBonus);
 
-        currentData.hsr += hsrChange;
-
+        // --- 데이터 기록 ---
         if (isWin) currentData.wins += 1; else currentData.loses += 1;
         currentData.crewKills += kill;
         currentData.crewDeaths += death;
         
-        // Append point to history
+        // 히스토리에 MMR과 HSR을 함께 기록하여 성장 추이 분석 가능케 함
         currentData.mmrHistory.push({
           mmr: currentData.mmr,
+          hsr: currentData.hsr,
           date: match.matchDate
         });
 
@@ -459,17 +450,16 @@ export class CrewRepository {
     for (const ouid in memberCache) {
       if (memberCache[ouid].isDirty) {
         const memberRef = this.db.collection(this.MEMBERS_COLLECTION).doc(ouid);
-        
-        // Final trim before saving
         const finalHistory = memberCache[ouid].mmrHistory.slice(-this.HISTORY_LIMIT);
 
         batch.update(memberRef, {
           mmr: memberCache[ouid].mmr,
+          hsr: memberCache[ouid].hsr, // HSR 값 저장
           wins: memberCache[ouid].wins,
           loses: memberCache[ouid].loses,
           crewKills: memberCache[ouid].crewKills,
           crewDeaths: memberCache[ouid].crewDeaths,
-          mmrHistory: finalHistory, // Save trimmed history
+          mmrHistory: finalHistory,
           updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
         });
       }
