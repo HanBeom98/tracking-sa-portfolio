@@ -134,8 +134,19 @@ export async function onRequest(context) {
         const res = await qResp.json();
         if (!res?.[0]?.document) return patchInteraction(APP_ID, token, { content: `❌ **${nick}**님은 등록되어 있지 않습니다.` });
         const d = fromFirestore(res[0].document.fields);
-        const c = `📊 **[${nick}] 크루원 전적 리포트**\n\n🔹 **MMR:** ${d.mmr || 1200}\n🔹 **HSR:** ${d.hsr || 0}%\n🔹 **내전 킬뎃:** ${d.kd || '0.00'}\n🔹 **내전 승률:** ${d.winRate || '0%'}\n\n*TRACKING SA 공식 데이터베이스 기준*`;
+        const mmr = d.mmr || 1200;
+        const hsrScore = d.hsr || 1200;
+        const wins = Number(d.wins || 0);
+        const loses = Number(d.loses || 0);
+        const kills = Number(d.crewKills || 0);
+        const deaths = Number(d.crewDeaths || 0);
+
+        const winRate = (wins + loses) > 0 ? ((wins / (wins + loses)) * 100).toFixed(1) + '%' : '0%';
+        const kd = deaths > 0 ? (kills / deaths).toFixed(2) : kills.toFixed(2);
+
+        const c = `📊 **[${nick}] 크루원 전적 리포트**\n\n🔹 **MMR:** ${mmr}\n🔹 **HSR 점수:** ${hsrScore}\n🔹 **내전 킬뎃:** ${kd}\n🔹 **내전 승률:** ${winRate}\n\n*TRACKING SA 공식 데이터베이스 기준*`;
         await patchInteraction(APP_ID, token, { content: c });
+
       })());
       return new Response(JSON.stringify({ type: 5 }), { headers: { 'Content-Type': 'application/json' } });
     }
