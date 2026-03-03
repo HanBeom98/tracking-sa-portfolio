@@ -2,6 +2,13 @@
 import nacl from 'tweetnacl';
 
 /**
+ * Helper to convert hex string to Uint8Array
+ */
+function hexToUint8Array(hex) {
+  return new Uint8Array(hex.match(/.{1,2}/g).map(byte => parseInt(hex, 16)));
+}
+
+/**
  * Firestore REST API Helper: Get Document
  */
 async function getDoc(projectId, collection, docId) {
@@ -157,8 +164,8 @@ export async function onRequest(context) {
   try {
     const isVerified = nacl.sign.detached.verify(
       new TextEncoder().encode(timestamp + body),
-      new Uint8Array(signature.match(/.{1,2}/g).map(byte => parseInt(byte, 16))),
-      new Uint8Array(PUBLIC_KEY.match(/.{1,2}/g).map(byte => parseInt(byte, 16)))
+      hexToUint8Array(signature),
+      hexToUint8Array(PUBLIC_KEY)
     );
     if (!isVerified) return new Response('invalid request signature', { status: 401 });
   } catch (err) { return new Response('Verification failed', { status: 401 }); }
@@ -167,7 +174,7 @@ export async function onRequest(context) {
     const interaction = JSON.parse(body);
     if (interaction.type === 1) return new Response(JSON.stringify({ type: 1 }), { headers: { 'Content-Type': 'application/json' } });
 
-    // Move guildId declaration here so all types can access it
+    // Ensure guildId is captured robustly
     const guildId = interaction.guild_id || "global";
 
     // 2. Slash Command (Type 2)
@@ -193,7 +200,7 @@ export async function onRequest(context) {
       }
 
       if (commandName === '전적검색') {
-        const nicknameOption = interaction.data.options.find(opt => opt.name === '닉네임');
+        const nicknameOption = (interaction.data.options || []).find(opt => opt.name === '닉네임');
         const nickname = nicknameOption?.value?.trim();
         if (!nickname) return new Response(JSON.stringify({ type: 4, data: { content: "⚠️ 닉네임을 입력해주세요.", flags: 64 } }), { headers: { 'Content-Type': 'application/json' } });
 
@@ -245,7 +252,9 @@ export async function onRequest(context) {
       }
 
       if (customId.startsWith('set_pos_')) {
-        const [_, __, position, nickname] = customId.split('_'); // set_pos_rifler_NICKNAME
+        const parts = customId.split('_');
+        const position = parts[2];
+        const nickname = parts.slice(3).join('_'); // Handle nicknames with underscores
         const participants = session.participants || [];
         if (participants.some(p => p.discordId === discordId)) return new Response(JSON.stringify({ type: 4, data: { content: "⚠️ 이미 신청되었습니다.", flags: 64 } }), { headers: { 'Content-Type': 'application/json' } });
         if (participants.length >= 12) return new Response(JSON.stringify({ type: 4, data: { content: "❌ 모집 완료.", flags: 64 } }), { headers: { 'Content-Type': 'application/json' } });
@@ -254,7 +263,7 @@ export async function onRequest(context) {
         await setDoc(PROJECT_ID, 'match_sessions', guildId, { ...session, participants });
 
         return new Response(JSON.stringify({
-          type: 4, // 7 (UPDATE_MESSAGE) works only on the original message, but here we update the recruit msg
+          type: 4,
           data: { content: `✅ **${nickname}**님, **${position === 'sniper' ? '스나이퍼' : '라이플러'}**로 신청 완료!`, flags: 64 }
         }), { headers: { 'Content-Type': 'application/json' } });
       }
@@ -277,7 +286,7 @@ export async function onRequest(context) {
             const queryResult = await queryResp.json();
             if (queryResult && queryResult[0] && queryResult[0].document) {
               const data = fromFirestore(queryResult[0].document.fields);
-              return { nickname: p.nickname, mmr: data.mmr || 1200, position: p.position }; // Use selected position
+              return { nickname: p.nickname, mmr: data.mmr || 1200, position: p.position };
             }
           } catch (e) {}
           return { nickname: p.nickname, mmr: 1200, position: p.position };
@@ -300,12 +309,11 @@ export async function onRequest(context) {
       if (!session || session.status !== 'RECRUITING') return new Response(JSON.stringify({ type: 4, data: { content: "❌ 종료된 모집입니다.", flags: 64 } }), { headers: { 'Content-Type': 'application/json' } });
       if (session.participants?.some(p => p.discordId === discordId)) return new Response(JSON.stringify({ type: 4, data: { content: "⚠️ 이미 신청됨.", flags: 64 } }), { headers: { 'Content-Type': 'application/json' } });
 
-      // Ask for position after nickname submission
       return new Response(JSON.stringify({
         type: 4,
         data: {
           content: `👋 **${nickname}**님, 주 포지션을 선택해주세요!`,
-          flags: 64, // Ephemeral
+          flags: 64,
           components: [{
             type: 1,
             components: [
