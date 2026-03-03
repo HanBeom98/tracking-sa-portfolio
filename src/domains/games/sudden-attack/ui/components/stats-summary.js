@@ -48,7 +48,7 @@ export class SaStatsSummary extends HTMLElement {
         </div>
 
         <div class="stats-summary-header">
-          <!-- 2. Radar Chart (Sub-Component) -->
+          <!-- 2. Radar Chart -->
           <div class="radar-section">
             <sa-radar-chart id="radarChart"></sa-radar-chart>
           </div>
@@ -65,25 +65,32 @@ export class SaStatsSummary extends HTMLElement {
           </div>
         </div>
 
-        <!-- 4. MMR Trend Chart (Sub-Component) -->
+        <!-- 4. MMR Trend Chart -->
         <sa-mmr-trend-chart id="trendChart"></sa-mmr-trend-chart>
 
-        <!-- 5. Map Mastery (Sub-Component) -->
-        <sa-map-mastery id="mapMastery"></sa-map-mastery>
-
-        <!-- 6. Synergy View (Sub-Component) -->
+        <!-- 5. Synergy View -->
         <sa-synergy-view id="synergyView"></sa-synergy-view>
+
+        <!-- 6. Map Mastery -->
+        <sa-map-mastery id="mapMastery"></sa-map-mastery>
 
         <!-- 7. Crew Analysis Board -->
         ${this.renderCrewAnalysis(data)}
       </div>
     `;
 
-    // Inject data into sub-components
-    this.querySelector('#radarChart').data = { radar: data.radar };
-    this.querySelector('#trendChart').params = { mmrTrend: data.mmrTrend, currentMmr: data.crewMmr, isCrew: data.crewMatchCount > 0 };
-    this.querySelector('#mapMastery').mapStats = data.mapStats;
-    this.querySelector('#synergyView').data = data;
+    // Inject data into sub-components with explicit checks
+    const radarComp = this.querySelector('#radarChart');
+    if (radarComp) radarComp.data = { radar: data.radar };
+
+    const trendComp = this.querySelector('#trendChart');
+    if (trendComp) trendComp.params = { mmrTrend: data.mmrTrend, currentMmr: data.crewMmr, isCrew: data.crewMatchCount > 0 };
+
+    const synergyComp = this.querySelector('#synergyView');
+    if (synergyComp) synergyComp.data = data;
+
+    const mapComp = this.querySelector('#mapMastery');
+    if (mapComp) mapComp.mapStats = data.mapStats;
   }
 
   /**
