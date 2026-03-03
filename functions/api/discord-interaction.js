@@ -169,9 +169,23 @@ export async function onRequest(context) {
         const queryBody = { structuredQuery: { from: [{ collectionId: 'sa_crew_members' }], where: { fieldFilter: { field: { fieldPath: 'characterName' }, op: 'EQUAL', value: { stringValue: nick } } }, limit: 1 } };
         const queryResp = await fetch(queryUrl, { method: 'POST', body: JSON.stringify(queryBody), headers: { 'Content-Type': 'application/json' } });
         const result = await queryResp.json();
-        if (!result?.[0]?.document) return new Response(JSON.stringify({ type: 4, data: { content: `❌ **${nick}**님 정보를 찾을 수 없습니다.`, flags: 64 } }), { headers: { 'Content-Type': 'application/json' } });
+        
+        if (!result?.[0]?.document) {
+          return new Response(JSON.stringify({ type: 4, data: { content: `❌ **${nick}**님은 크루 명단에 없습니다.`, flags: 64 } }), { headers: { 'Content-Type': 'application/json' } });
+        }
+
         const d = fromFirestore(result[0].document.fields);
-        return new Response(JSON.stringify({ type: 4, data: { content: `🔍 **[${nick}]** 전적\n🔹 MMR: ${d.mmr || 1200}\n🔹 헤드샷: ${d.hsr || 0}%\n🔹 포지션: ${(d.position || 'rifler').toUpperCase()}\n🔹 승률: ${d.winRate || '0%'}` } }), { headers: { 'Content-Type': 'application/json' } });
+        const mmr = d.mmr || 1200;
+        const hsr = d.hsr || 0;
+        const kd = d.kd || '0.00';
+        const winRate = d.winRate || '0%';
+
+        return new Response(JSON.stringify({
+          type: 4,
+          data: { 
+            content: `📊 **[${nick}] 크루원 전적 리포트**\n\n🔹 **MMR:** ${mmr}\n🔹 **HSR:** ${hsr}%\n🔹 **내전 킬뎃:** ${kd}\n🔹 **내전 승률:** ${winRate}\n\n*TRACKING SA 공식 데이터베이스 기준*` 
+          }
+        }), { headers: { 'Content-Type': 'application/json' } });
       }
     }
 
