@@ -142,9 +142,9 @@ export async function onRequest(context) {
         const deaths = Number(d.crewDeaths || 0);
 
         const winRate = (wins + loses) > 0 ? ((wins / (wins + loses)) * 100).toFixed(1) + '%' : '0%';
-        const kd = deaths > 0 ? (kills / deaths).toFixed(2) : kills.toFixed(2);
+        const kdPercent = (kills + deaths) > 0 ? ((kills / (kills + deaths)) * 100).toFixed(1) + '%' : '0%';
 
-        const c = `📊 **[${nick}] 크루원 전적 리포트**\n\n🔹 **MMR:** ${mmr}\n🔹 **HSR 점수:** ${hsrScore}\n🔹 **내전 킬뎃:** ${kd}\n🔹 **내전 승률:** ${winRate}\n\n*TRACKING SA 공식 데이터베이스 기준*`;
+        const c = `📊 **[${nick}] 크루원 전적 리포트**\n\n🔹 **MMR:** ${mmr}\n🔹 **HSR 점수:** ${hsrScore}\n🔹 **내전 킬뎃:** ${kdPercent}\n🔹 **내전 승률:** ${winRate}\n\n*TRACKING SA 공식 데이터베이스 기준*`;
         await patchInteraction(APP_ID, token, { content: c });
 
       })());
