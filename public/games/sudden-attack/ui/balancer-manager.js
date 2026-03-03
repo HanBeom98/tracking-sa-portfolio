@@ -98,9 +98,9 @@ export class BalancerManager {
       const isChecked = this.selectedMemberOuids.has(m.id);
       return `
         <div class="balancer-item ${isChecked ? 'selected' : ''}">
-          <input type="checkbox" id="m-${m.id}" value="${m.characterName}" data-mmr="${m.mmr}" data-ouid="${m.id}" ${isChecked ? 'checked' : ''}>
+          <input type="checkbox" id="m-${m.id}" value="${m.characterName}" data-mmr="${m.mmr}" data-hsr="${m.hsr || m.mmr}" data-ouid="${m.id}" ${isChecked ? 'checked' : ''}>
           <label for="m-${m.id}" class="m-name">${m.characterName}</label>
-          <span class="m-mmr">${m.mmr} pts</span>
+          <span class="m-mmr">${m.mmr} pts <small style="font-size:0.8em;color:#888;">(HSR: ${m.hsr || m.mmr})</small></span>
           <div class="pos-select">
             <input type="radio" name="pos-${m.id}" value="rifler" id="r-${m.id}" checked>
             <label for="r-${m.id}" title="라이플">🔫</label>
