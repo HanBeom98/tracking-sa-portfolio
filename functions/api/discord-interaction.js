@@ -167,6 +167,7 @@ export async function onRequest(context) {
     const interaction = JSON.parse(body);
     if (interaction.type === 1) return new Response(JSON.stringify({ type: 1 }), { headers: { 'Content-Type': 'application/json' } });
 
+    // Move guildId declaration here so all types can access it
     const guildId = interaction.guild_id || "global";
 
     // 2. Slash Command (Type 2)
