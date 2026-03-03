@@ -89,6 +89,34 @@ export class SaMatchList extends HTMLElement {
           font-weight: bold;
           margin-left: 8px;
         }
+        .mvp-row {
+          background: rgba(255, 204, 0, 0.05) !important;
+        }
+        .mvp-crown {
+          margin-right: 4px;
+          filter: drop-shadow(0 0 2px rgba(255, 204, 0, 0.5));
+        }
+        .mission-cell {
+          text-align: center;
+          color: #888;
+        }
+        .m-tag {
+          padding: 2px 6px;
+          border-radius: 4px;
+          font-size: 0.75em;
+          font-weight: bold;
+          margin-right: 4px;
+          display: inline-flex;
+          align-items: center;
+          gap: 3px;
+        }
+        .m-tag.plant { background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border: 1px solid rgba(255, 77, 77, 0.2); }
+        .m-tag.defuse { background: rgba(0, 210, 255, 0.1); color: #00d2ff; border: 1px solid rgba(0, 210, 255, 0.2); }
+        
+        .scoreboard-table tr.mvp-row .name {
+          color: #ffcc00;
+          font-weight: bold;
+        }
       </style>
       <ul class="match-list">
         ${list.map((match, idx) => `

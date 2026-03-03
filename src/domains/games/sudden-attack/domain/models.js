@@ -36,6 +36,7 @@ export class Player {
 
 export class RecentStats {
   constructor(info, matches = []) {
+    // Nexon API's recent_kill_death_rate is already a percentage (e.g., 52.0)
     const rawKd = info.recent_kill_death_rate || 0;
     this.kd = parseFloat(rawKd.toFixed(1));
     this.kdPercent = Math.round(rawKd);
@@ -273,6 +274,11 @@ export class MatchRecord {
         const deathValue = parseInt(p.death || p.death_count || p.cnt_death || 0);
         const assistValue = parseInt(p.assist || p.assist_count || p.cnt_assist || 0);
         const resultValue = String(p.match_result || p.result || "0");
+        
+        // Bomb fallbacks: bomb_installation_count, bomb_removal_count, cnt_bomb_install, cnt_bomb_remove
+        const installValue = parseInt(p.bomb_installation_count || p.cnt_bomb_install || p.bomb_install_count || 0);
+        const defuseValue = parseInt(p.bomb_removal_count || p.cnt_bomb_remove || p.bomb_defuse_count || 0);
+
         let isSubject = false;
         if (subjectInfo && !subjectFound) {
           const nameMatches = targetUserName && normalizedName === targetUserName.toLowerCase().trim();
@@ -288,8 +294,8 @@ export class MatchRecord {
           kill: killValue, 
           death: deathValue, 
           assist: assistValue,
-          bombInstall: parseInt(p.bomb_installation_count || 0),
-          bombDefuse: parseInt(p.bomb_removal_count || 0),
+          bombInstall: installValue,
+          bombDefuse: defuseValue,
           kd: deathValue > 0 ? (killValue / deathValue).toFixed(2) : (killValue > 0 ? killValue.toFixed(2) : "0.00"),
           kdPercent: kdPercent,
           result: resultValue === "1" ? "WIN" : (resultValue === "2" ? "LOSE" : "UNKNOWN"),
@@ -327,8 +333,9 @@ export class MatchRecord {
     this.assist = parseInt(playerStat.assist || playerStat.assist_count || playerStat.cnt_assist || 0);
     this.kd = this.death === 0 ? (this.kill > 0 ? this.kill.toFixed(2) : "0.00") : (this.kill / this.death).toFixed(2);
     this.kdPercent = (this.kill + this.death > 0) ? Math.round((this.kill / (this.kill + this.death)) * 100) : 0;
-    this.bombInstall = parseInt(playerStat.bomb_installation_count || 0);
-    this.bombDefuse = parseInt(playerStat.bomb_removal_count || 0);
+    
+    this.bombInstall = parseInt(playerStat.bomb_installation_count || playerStat.cnt_bomb_install || 0);
+    this.bombDefuse = parseInt(playerStat.bomb_removal_count || playerStat.cnt_bomb_remove || 0);
     
     const winTeam = this.allPlayerStats.filter(p => p.result === 'WIN');
     const loseTeam = this.allPlayerStats.filter(p => p.result === 'LOSE');
