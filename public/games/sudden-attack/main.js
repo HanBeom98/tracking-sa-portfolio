@@ -4,13 +4,18 @@ import { SaService } from './application/sa-service.js?v=20260228_7';
 import { CrewRepository } from './infra/crew-repository.js?v=20260228_7';
 import { BalancerManager } from './ui/balancer-manager.js?v=20260228_7';
 import { AdminManager } from './ui/admin-manager.js?v=20260228_7';
-
+// Import Modular UI Components
 import './ui/components/player-card.js?v=20260228_7';
 import './ui/components/stats-summary.js?v=20260228_7';
+import './ui/components/radar-chart.js?v=20260228_7';
+import './ui/components/mmr-trend-chart.js?v=20260228_7';
+import './ui/components/synergy-view.js?v=20260228_7';
+import './ui/components/map-mastery.js?v=20260228_7';
 import './ui/components/crew-ranking.js?v=20260228_7';
 import './ui/components/match-list.js?v=20260228_7';
 import './ui/components/crew-mvps.js?v=20260228_7';
 import './ui/components/team-board.js?v=20260228_7';
+
 
 const NEXON_API_KEY = ''; 
 const client = new NexonApiClient(NEXON_API_KEY);
