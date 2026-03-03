@@ -72,13 +72,12 @@ function balanceTeams(selectedMembers) {
   const count = selectedMembers.length;
   if (count < 2) return null;
   
-  const teamSize = Math.floor(count / 2); // 10->5, 11->5, 12->6
+  const teamSize = Math.floor(count / 2);
   const snipers = selectedMembers.filter(m => (m.position || 'rifler').toLowerCase() === 'sniper');
   const riflers = selectedMembers.filter(m => (m.position || 'rifler').toLowerCase() !== 'sniper');
   
   let bestSplit = { red: [], blue: [], standby: [], diff: Infinity };
 
-  // Simplified combination for larger sets
   const combinations = (array, size) => {
     if (size === 0) return [[]];
     const results = [];
@@ -97,11 +96,7 @@ function balanceTeams(selectedMembers) {
   const sniperCombos = combinations(snipers, redSniperCount);
 
   for (const redSnipers of sniperCombos) {
-    const blueSnipersAll = snipers.filter(s => !redSnipers.some(rs => rs.nickname === s.nickname));
-    // For 11 people, we might have leftover snipers. 
-    // We only need teamSize - redSnipers.length more players for Red.
     const riflersNeededForRed = teamSize - redSnipers.length;
-    
     if (riflersNeededForRed < 0 || riflersNeededForRed > riflers.length) continue;
     
     const riflerCombos = combinations(riflers, riflersNeededForRed);
@@ -109,14 +104,13 @@ function balanceTeams(selectedMembers) {
       const redTeam = [...redSnipers, ...redRiflers];
       const remainingPlayers = selectedMembers.filter(p => !redTeam.some(rt => rt.nickname === p.nickname));
       
-      // Blue team should also be teamSize
       const blueTeamCombos = combinations(remainingPlayers, teamSize);
       for (const blueTeam of blueTeamCombos) {
         const standby = remainingPlayers.filter(p => !blueTeam.some(bt => bt.nickname === p.nickname));
         
-        const redHSR = redTeam.reduce((sum, m) => sum + (m.hsr || m.mmr || 1200), 0);
-        const blueHSR = blueTeam.reduce((sum, m) => sum + (m.hsr || m.mmr || 1200), 0);
-        const diff = Math.abs(redHSR - blueHSR);
+        const redScore = redTeam.reduce((sum, m) => sum + (m.mmr || 1200), 0);
+        const blueScore = blueTeam.reduce((sum, m) => sum + (m.mmr || 1200), 0);
+        const diff = Math.abs(redScore - blueScore);
         
         if (diff < bestSplit.diff) {
           bestSplit = {
@@ -124,8 +118,8 @@ function balanceTeams(selectedMembers) {
             blue: blueTeam,
             standby,
             diff,
-            redAvg: redTeam.reduce((s, m) => s + (m.mmr || 1200), 0) / redTeam.length,
-            blueAvg: blueTeam.reduce((s, m) => s + (m.mmr || 1200), 0) / blueTeam.length
+            redAvg: redScore / redTeam.length,
+            blueAvg: blueScore / blueTeam.length
           };
         }
       }
@@ -200,57 +194,33 @@ export async function onRequest(context) {
       if (commandName === '전적검색') {
         const nicknameOption = interaction.data.options.find(opt => opt.name === '닉네임');
         const nickname = nicknameOption?.value?.trim();
+        if (!nickname) return new Response(JSON.stringify({ type: 4, data: { content: "⚠️ 닉네임을 입력해주세요.", flags: 64 } }), { headers: { 'Content-Type': 'application/json' } });
 
-        if (!nickname) {
-          return new Response(JSON.stringify({
-            type: 4,
-            data: { content: "⚠️ 검색할 닉네임을 입력해주세요.", flags: 64 }
-          }), { headers: { 'Content-Type': 'application/json' } });
-        }
-
-        // Fetch from sa_crew_members Firestore (or proxy if needed)
         const queryUrl = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents:runQuery`;
-        const queryBody = { 
-          structuredQuery: { 
-            from: [{ collectionId: 'sa_crew_members' }], 
-            where: { fieldFilter: { field: { fieldPath: 'characterName' }, op: 'EQUAL', value: { stringValue: nickname } } }, 
-            limit: 1 
-          } 
-        };
+        const queryBody = { structuredQuery: { from: [{ collectionId: 'sa_crew_members' }], where: { fieldFilter: { field: { fieldPath: 'characterName' }, op: 'EQUAL', value: { stringValue: nickname } } }, limit: 1 } };
         const queryResp = await fetch(queryUrl, { method: 'POST', body: JSON.stringify(queryBody), headers: { 'Content-Type': 'application/json' } });
         const queryResult = await queryResp.json();
 
         if (!queryResult || !queryResult[0] || !queryResult[0].document) {
-          return new Response(JSON.stringify({
-            type: 4,
-            data: { content: `❌ **${nickname}** 님은 크루원 데이터베이스에 등록되어 있지 않습니다.`, flags: 64 }
-          }), { headers: { 'Content-Type': 'application/json' } });
+          return new Response(JSON.stringify({ type: 4, data: { content: `❌ **${nickname}** 님은 등록되어 있지 않습니다.`, flags: 64 } }), { headers: { 'Content-Type': 'application/json' } });
         }
 
         const data = fromFirestore(queryResult[0].document.fields);
-        const mmr = data.mmr || 1200;
-        const hsr = data.hsr || 0;
-        const position = data.position || 'rifler';
-        const winRate = data.winRate || '0%';
-
         return new Response(JSON.stringify({
           type: 4,
-          data: {
-            content: `🔍 **[${nickname}]** 님의 전적 정보\n\n🔹 **MMR:** ${mmr}\n🔹 **헤드샷율:** ${hsr}%\n🔹 **포지션:** ${position.toUpperCase()}\n🔹 **최근 승률:** ${winRate}\n\n*데이터는 정기적으로 넥슨 API와 동기화됩니다.*`
-          }
+          data: { content: `🔍 **[${nickname}]** 전적 정보\n\n🔹 MMR: ${data.mmr || 1200}\n🔹 헤드샷: ${data.hsr || 0}%\n🔹 포지션: ${(data.position || 'rifler').toUpperCase()}\n🔹 승률: ${data.winRate || '0%'}` }
         }), { headers: { 'Content-Type': 'application/json' } });
       }
     }
 
-
-    // 3. Button Clicks
+    // 3. Button Clicks (Type 3)
     if (interaction.type === 3) {
       const customId = interaction.data.custom_id;
       const discordId = interaction.member?.user?.id || interaction.user?.id;
       const session = await getDoc(PROJECT_ID, 'match_sessions', guildId);
 
       if (!session || session.status !== 'RECRUITING') {
-        return new Response(JSON.stringify({ type: 4, data: { content: "❌ 활성화된 내전 모집이 없습니다.", flags: 64 } }), { headers: { 'Content-Type': 'application/json' } });
+        return new Response(JSON.stringify({ type: 4, data: { content: "❌ 활성화된 모집이 없습니다.", flags: 64 } }), { headers: { 'Content-Type': 'application/json' } });
       }
 
       if (customId === 'join_match') {
@@ -259,19 +229,7 @@ export async function onRequest(context) {
           data: {
             title: "대내 참가 신청",
             custom_id: "match_entry_modal",
-            components: [{
-              type: 1,
-              components: [{
-                type: 4,
-                custom_id: "user_nickname",
-                label: "서든어택 닉네임",
-                style: 1,
-                min_length: 2,
-                max_length: 16,
-                placeholder: "본인의 인게임 닉네임을 정확히 입력하세요.",
-                required: true
-              }]
-            }]
+            components: [{ type: 1, components: [{ type: 4, custom_id: "user_nickname", label: "서든어택 닉네임", style: 1, min_length: 2, max_length: 16, placeholder: "정확한 닉네임을 입력하세요.", required: true }] }]
           }
         }), { headers: { 'Content-Type': 'application/json' } });
       }
@@ -280,37 +238,36 @@ export async function onRequest(context) {
         const participants = session.participants || [];
         const userIndex = participants.findIndex(p => p.discordId === discordId);
         if (userIndex === -1) return new Response(JSON.stringify({ type: 4, data: { content: "⚠️ 신청 내역이 없습니다.", flags: 64 } }), { headers: { 'Content-Type': 'application/json' } });
-        
         participants.splice(userIndex, 1);
+        await setDoc(PROJECT_ID, 'match_sessions', guildId, { ...session, participants });
+        return new Response(JSON.stringify({ type: 7, data: { content: `🎮 **TRACKING SA 내전 인원 모집 시작!** (${participants.length}/12)\n**현재 신청자:** ${participants.map(p => p.nickname).join(', ')}`, components: getActionButtons(participants.length) } }), { headers: { 'Content-Type': 'application/json' } });
+      }
+
+      if (customId.startsWith('set_pos_')) {
+        const [_, __, position, nickname] = customId.split('_'); // set_pos_rifler_NICKNAME
+        const participants = session.participants || [];
+        if (participants.some(p => p.discordId === discordId)) return new Response(JSON.stringify({ type: 4, data: { content: "⚠️ 이미 신청되었습니다.", flags: 64 } }), { headers: { 'Content-Type': 'application/json' } });
+        if (participants.length >= 12) return new Response(JSON.stringify({ type: 4, data: { content: "❌ 모집 완료.", flags: 64 } }), { headers: { 'Content-Type': 'application/json' } });
+
+        participants.push({ nickname, discordId, position });
         await setDoc(PROJECT_ID, 'match_sessions', guildId, { ...session, participants });
 
         return new Response(JSON.stringify({
-          type: 7,
-          data: {
-            content: `🎮 **TRACKING SA 내전 인원 모집 시작!** (${participants.length}/12)\n**현재 신청자:** ${participants.map(p => p.nickname).join(', ')}`,
-            components: getActionButtons(participants.length)
-          }
+          type: 4, // 7 (UPDATE_MESSAGE) works only on the original message, but here we update the recruit msg
+          data: { content: `✅ **${nickname}**님, **${position === 'sniper' ? '스나이퍼' : '라이플러'}**로 신청 완료!`, flags: 64 }
         }), { headers: { 'Content-Type': 'application/json' } });
       }
 
-      // ADMIN ACTIONS (Host Only)
       if (customId === 'start_balance' || customId === 'cancel_match') {
-        if (session.hostId && session.hostId !== discordId) {
-          return new Response(JSON.stringify({ type: 4, data: { content: "❌ 모집을 시작한 사람만 이 작업을 수행할 수 있습니다.", flags: 64 } }), { headers: { 'Content-Type': 'application/json' } });
-        }
-
+        if (session.hostId && session.hostId !== discordId) return new Response(JSON.stringify({ type: 4, data: { content: "❌ 호스트 권한이 없습니다.", flags: 64 } }), { headers: { 'Content-Type': 'application/json' } });
         if (customId === 'cancel_match') {
           await setDoc(PROJECT_ID, 'match_sessions', guildId, { ...session, status: 'CANCELLED' });
-          return new Response(JSON.stringify({ type: 7, data: { content: "🚫 **내전 모집이 호스트에 의해 취소되었습니다.**", components: [] } }), { headers: { 'Content-Type': 'application/json' } });
+          return new Response(JSON.stringify({ type: 7, data: { content: "🚫 **내전 모집이 취소되었습니다.**", components: [] } }), { headers: { 'Content-Type': 'application/json' } });
         }
-
         const participants = session.participants || [];
-        if (participants.length < 10) return new Response(JSON.stringify({ type: 4, data: { content: "❌ 최소 10명이 모여야 팀을 나눌 수 있습니다.", flags: 64 } }), { headers: { 'Content-Type': 'application/json' } });
+        if (participants.length < 10) return new Response(JSON.stringify({ type: 4, data: { content: "❌ 최소 10명이 필요합니다.", flags: 64 } }), { headers: { 'Content-Type': 'application/json' } });
 
-        // Close session
         await setDoc(PROJECT_ID, 'match_sessions', guildId, { ...session, status: 'CLOSED' });
-
-        // Fetch MMR & Balancing
         const playerData = await Promise.all(participants.map(async (p) => {
           try {
             const queryUrl = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents:runQuery`;
@@ -319,44 +276,41 @@ export async function onRequest(context) {
             const queryResult = await queryResp.json();
             if (queryResult && queryResult[0] && queryResult[0].document) {
               const data = fromFirestore(queryResult[0].document.fields);
-              return { nickname: p.nickname, mmr: data.mmr || 1200, hsr: data.hsr || data.mmr || 1200, position: data.position || 'rifler' };
+              return { nickname: p.nickname, mmr: data.mmr || 1200, position: p.position }; // Use selected position
             }
           } catch (e) {}
-          return { nickname: p.nickname, mmr: 1200, hsr: 1200, position: 'rifler' };
+          return { nickname: p.nickname, mmr: 1200, position: p.position };
         }));
 
         const result = balanceTeams(playerData);
-        let content = `🔥 **내전 팀 밸런싱 결과 (${participants.length}인)**\n\n🔴 **RED TEAM** (Avg: ${Math.round(result.redAvg)})\n${result.red.map(p => `• ${p.nickname} (${p.position})`).join('\n')}\n\n🔵 **BLUE TEAM** (Avg: ${Math.round(result.blueAvg)})\n${result.blue.map(p => `• ${p.nickname} (${p.position})`).join('\n')}`;
-        
-        if (result.standby && result.standby.length > 0) {
-          content += `\n\n⌛ **STANDBY**\n${result.standby.map(p => `• ${p.nickname}`).join('\n')}`;
-        }
-        content += `\n\n즐거운 내전 되세요!`;
-
-        return new Response(JSON.stringify({ type: 7, data: { content, components: [] } }), { headers: { 'Content-Type': 'application/json' } });
+        let content = `🔥 **팀 밸런싱 결과 (${participants.length}인)**\n\n🔴 **RED** (Avg: ${Math.round(result.redAvg)})\n${result.red.map(p => `• ${p.nickname} (${p.position === 'sniper' ? '🎯' : '🔫'})`).join('\n')}\n\n🔵 **BLUE** (Avg: ${Math.round(result.blueAvg)})\n${result.blue.map(p => `• ${p.nickname} (${p.position === 'sniper' ? '🎯' : '🔫'})`).join('\n')}`;
+        if (result.standby?.length > 0) content += `\n\n⌛ **STANDBY**\n${result.standby.map(p => `• ${p.nickname}`).join('\n')}`;
+        return new Response(JSON.stringify({ type: 7, data: { content: content + "\n\n즐거운 내전 되세요!", components: [] } }), { headers: { 'Content-Type': 'application/json' } });
       }
     }
 
-    // 4. Modal Submit
+    // 4. Modal Submit (Type 5)
     if (interaction.type === 5 && interaction.data.custom_id === 'match_entry_modal') {
       const nickname = interaction.data.components[0].components[0].value.trim();
       const discordId = interaction.member?.user?.id || interaction.user?.id;
       const session = await getDoc(PROJECT_ID, 'match_sessions', guildId);
 
-      if (!session || session.status !== 'RECRUITING') return new Response(JSON.stringify({ type: 4, data: { content: "❌ 모집이 종료되었습니다.", flags: 64 } }), { headers: { 'Content-Type': 'application/json' } });
+      if (!session || session.status !== 'RECRUITING') return new Response(JSON.stringify({ type: 4, data: { content: "❌ 종료된 모집입니다.", flags: 64 } }), { headers: { 'Content-Type': 'application/json' } });
+      if (session.participants?.some(p => p.discordId === discordId)) return new Response(JSON.stringify({ type: 4, data: { content: "⚠️ 이미 신청됨.", flags: 64 } }), { headers: { 'Content-Type': 'application/json' } });
 
-      const participants = session.participants || [];
-      if (participants.some(p => p.discordId === discordId)) return new Response(JSON.stringify({ type: 4, data: { content: "⚠️ 이미 신청되었습니다.", flags: 64 } }), { headers: { 'Content-Type': 'application/json' } });
-      if (participants.length >= 12) return new Response(JSON.stringify({ type: 4, data: { content: "❌ 이미 12명 모집이 완료되었습니다.", flags: 64 } }), { headers: { 'Content-Type': 'application/json' } });
-
-      participants.push({ nickname, discordId });
-      await setDoc(PROJECT_ID, 'match_sessions', guildId, { ...session, participants });
-
+      // Ask for position after nickname submission
       return new Response(JSON.stringify({
-        type: 7,
+        type: 4,
         data: {
-          content: `🎮 **TRACKING SA 내전 인원 모집 시작!** (${participants.length}/12)\n**현재 신청자:** ${participants.map(p => p.nickname).join(', ')}`,
-          components: getActionButtons(participants.length)
+          content: `👋 **${nickname}**님, 주 포지션을 선택해주세요!`,
+          flags: 64, // Ephemeral
+          components: [{
+            type: 1,
+            components: [
+              { type: 2, label: "라이플러 🔫", style: 1, custom_id: `set_pos_rifler_${nickname}` },
+              { type: 2, label: "스나이퍼 🎯", style: 1, custom_id: `set_pos_sniper_${nickname}` }
+            ]
+          }]
         }
       }), { headers: { 'Content-Type': 'application/json' } });
     }
