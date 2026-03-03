@@ -39,6 +39,12 @@ const applyCharacterName = document.getElementById('applyCharacterName');
 const crewModal = document.getElementById('crewModal');
 const closeModalBtn = document.getElementById('closeModalBtn');
 
+// VS Modal Elements
+const vsModal = document.getElementById('vsModal');
+const vsTargetName = document.getElementById('vsTargetName');
+const startVsBtn = document.getElementById('startVsBtn');
+const closeVsModalBtn = document.getElementById('closeVsModalBtn');
+
 let currentRankings = [];
 let primaryUserData = null; 
 const STORAGE_KEY = 'sa_recent_searches';
@@ -64,19 +70,37 @@ async function handleRefresh() {
   await handleSearch(primaryUserData.player.nickname);
 }
 
-async function handleCompare() {
-  const targetName = searchInput.value.trim();
-  if (!targetName) return;
-  if (!primaryUserData) { alert('먼저 기준이 될 유저를 검색해 주세요!'); return; }
-  if (primaryUserData.player.nickname === targetName) { alert('자기 자신과는 비교할 수 없습니다.'); return; }
+// Opens the VS Modal
+function handleCompareClick() {
+  if (!primaryUserData) { 
+    alert('먼저 기준이 될 유저(본인 등)를 검색해 주세요!'); 
+    return; 
+  }
+  vsTargetName.value = ''; // Clear previous input
+  vsModal.classList.remove('hidden');
+}
 
+// Executes the actual comparison from the modal
+async function executeVsMode() {
+  const targetName = vsTargetName.value.trim();
+  if (!targetName) return;
+  if (primaryUserData.player.nickname.toLowerCase() === targetName.toLowerCase()) { 
+    alert('자기 자신과는 비교할 수 없습니다.'); 
+    return; 
+  }
+
+  vsModal.classList.add('hidden'); // Close modal
+  
   try {
     loading.classList.remove('hidden');
     loadingText.textContent = `${primaryUserData.player.nickname} vs ${targetName} 비교 중...`;
     const targetData = await service.getFullPlayerProfile(targetName, currentRankings);
     renderVSMode(primaryUserData, targetData);
-  } catch (error) { handleSearchError(error); } 
-  finally { loading.classList.add('hidden'); }
+  } catch (error) { 
+    handleSearchError(error); 
+  } finally { 
+    loading.classList.add('hidden'); 
+  }
 }
 
 function showLoading(name) {
@@ -192,10 +216,17 @@ async function initCrew() {
   }
 }
 
+// Global Event Listeners
 searchBtn.addEventListener('click', () => handleSearch());
 refreshBtn.addEventListener('click', () => handleRefresh());
-compareBtn.addEventListener('click', () => handleCompare());
+compareBtn.addEventListener('click', () => handleCompareClick());
 searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSearch(); });
+
+// VS Modal Listeners
+startVsBtn.addEventListener('click', () => executeVsMode());
+vsTargetName.addEventListener('keypress', (e) => { if (e.key === 'Enter') executeVsMode(); });
+closeVsModalBtn.addEventListener('click', () => vsModal.classList.add('hidden'));
+
 applyCrewBtn.addEventListener('click', () => crewModal.classList.remove('hidden'));
 closeModalBtn.addEventListener('click', () => crewModal.classList.add('hidden'));
 submitApplyBtn.addEventListener('click', async () => {
