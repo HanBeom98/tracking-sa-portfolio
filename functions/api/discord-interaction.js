@@ -174,15 +174,19 @@ export async function onRequest(context) {
       if (cid.startsWith('set_pos_')) {
         const parts = cid.split('_');
         const pos = parts[2], nick = parts.slice(3).join('_');
-        if (!session.participants.some(p => p.discordId === uid)) {
+        
+        // Update Firestore first
+        const session = await getDoc(PROJECT_ID, 'match_sessions', guildId);
+        if (session && !session.participants.some(p => p.discordId === uid)) {
           session.participants.push({ nickname: nick, discordId: uid, position: pos });
           await setDoc(PROJECT_ID, 'match_sessions', guildId, session);
           
-          // Format participant list with icons
-          const list = session.participants.map(p => `${p.nickname}(${p.position === 'sniper' ? '🎯' : '🔫'})`).join(', ');
+          // Note: Since this is an ephemeral interaction, patching @original updates the ephemeral message.
+          // To update the MAIN recruitment message, we need its message_id.
+          // For now, let's notify the user and suggest they check the main list.
           await patchInteraction(APP_ID, token, { 
-            content: `🎮 **TRACKING SA 내전 모집 시작!** (${session.participants.length}/12)\n**신청자:** ${list}`, 
-            components: getActionButtons(session.participants.length) 
+            content: `✅ **${nick}**님, **${pos === 'sniper' ? '스나이퍼' : '라이플러'}**로 등록되었습니다! 모집 메시지를 확인해주세요.`,
+            components: [] 
           });
         }
       }
