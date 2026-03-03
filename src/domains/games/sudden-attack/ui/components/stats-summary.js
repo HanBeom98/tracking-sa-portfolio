@@ -77,6 +77,14 @@ export class SaStatsSummary extends HTMLElement {
       `;
     }
 
+    // Normalize Trend Data (Handle both numbers and objects)
+    const normalizedTrend = mmrTrend.map(v => {
+      if (typeof v === 'object' && v !== null) return v;
+      return { mmr: v, date: null };
+    });
+
+    const mmrValues = normalizedTrend.map(v => v.mmr);
+
     const width = 1000;
     const height = 180;
     const padding = 40;
@@ -84,21 +92,21 @@ export class SaStatsSummary extends HTMLElement {
     const chartHeight = height - (padding * 2);
 
     // Scaling
-    const maxMmr = Math.max(...mmrTrend, currentMmr) + 50; 
-    const minMmr = Math.min(...mmrTrend, currentMmr) - 50;
+    const maxMmr = Math.max(...mmrValues, currentMmr) + 50; 
+    const minMmr = Math.min(...mmrValues, currentMmr) - 50;
     const range = (maxMmr - minMmr) || 1;
 
-    const getX = (i) => padding + (i * (chartWidth / (mmrTrend.length - 1 || 1)));
+    const getX = (i) => padding + (i * (chartWidth / (normalizedTrend.length - 1 || 1)));
     const getY = (val) => height - padding - ((val - minMmr) / range * chartHeight);
 
     // Build SVG Path
-    const points = mmrTrend.map((v, i) => `${getX(i)},${getY(v)}`);
+    const points = normalizedTrend.map((v, i) => `${getX(i)},${getY(v.mmr)}`);
     const pathData = `M ${points.join(' L ')}`;
 
     return `
       <div class="trend-chart-wrapper mmr-chart">
         <div class="trend-header">
-          <h4>🏆 내전 MMR 성장 추이 (최근 ${mmrTrend.length}경기)</h4>
+          <h4>🏆 내전 MMR 성장 추이 (최근 ${normalizedTrend.length}경기)</h4>
           <span class="current-badge">현재: <strong>${currentMmr}</strong></span>
         </div>
         <svg viewBox="0 0 ${width} ${height}" class="trend-svg">
@@ -110,7 +118,7 @@ export class SaStatsSummary extends HTMLElement {
           </defs>
           
           <!-- Area Fill -->
-          <path d="${pathData} L ${getX(mmrTrend.length-1)},${height-padding} L ${getX(0)},${height-padding} Z" fill="url(#mmrGradient)" />
+          <path d="${pathData} L ${getX(normalizedTrend.length-1)},${height-padding} L ${getX(0)},${height-padding} Z" fill="url(#mmrGradient)" />
 
           <!-- Grid Lines -->
           <line x1="${padding}" y1="${getY(minMmr)}" x2="${width-padding}" y2="${getY(minMmr)}" stroke="rgba(255,255,255,0.05)" />
@@ -126,15 +134,18 @@ export class SaStatsSummary extends HTMLElement {
           <path d="${pathData}" fill="none" stroke="#ffcc00" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 8px rgba(255,204,0,0.4));" />
           
           <!-- Data Points -->
-          ${mmrTrend.map((v, i) => `
-            <circle cx="${getX(i)}" cy="${getY(v)}" r="5" fill="var(--bg-card)" stroke="#ffcc00" stroke-width="2">
-              <title>MMR: ${v}</title>
-            </circle>
-          `).join('')}
+          ${normalizedTrend.map((v, i) => {
+            const dateStr = v.date ? new Date(v.date).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }) : `Match ${i+1}`;
+            return `
+              <circle cx="${getX(i)}" cy="${getY(v.mmr)}" r="6" class="chart-point" fill="var(--bg-card)" stroke="#ffcc00" stroke-width="2">
+                <title>${dateStr}: ${v.mmr} MMR</title>
+              </circle>
+            `;
+          }).join('')}
         </svg>
         <div class="trend-labels">
           <span>과거</span>
-          <span>현재</span>
+          <span>현재 (날짜 확인은 마우스를 올리세요)</span>
         </div>
       </div>
     `;

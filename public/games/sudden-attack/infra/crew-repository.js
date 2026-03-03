@@ -397,6 +397,8 @@ export class CrewRepository {
         currentData.crewKills += kill;
         currentData.crewDeaths += death;
         
+        // Track this specific match for history
+        currentData.lastMatchDate = match.matchDate;
         currentData.isDirty = true;
       }
 
@@ -415,15 +417,18 @@ export class CrewRepository {
       if (memberCache[ouid].isDirty) {
         const memberRef = this.db.collection(this.MEMBERS_COLLECTION).doc(ouid);
         
-        // Update member stats and append to mmrHistory
+        // Update member stats and append to mmrHistory with date
         batch.update(memberRef, {
           mmr: memberCache[ouid].mmr,
           wins: memberCache[ouid].wins,
           loses: memberCache[ouid].loses,
           crewKills: memberCache[ouid].crewKills,
           crewDeaths: memberCache[ouid].crewDeaths,
-          // Atomic array push for history
-          mmrHistory: window.firebase.firestore.FieldValue.arrayUnion(memberCache[ouid].mmr),
+          // Store object {mmr, date} instead of just number
+          mmrHistory: window.firebase.firestore.FieldValue.arrayUnion({
+            mmr: memberCache[ouid].mmr,
+            date: memberCache[ouid].lastMatchDate
+          }),
           updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
         });
       }
@@ -441,6 +446,7 @@ export class CrewRepository {
       batch.update(doc.ref, { 
         mmr: 1200, wins: 0, loses: 0, 
         crewKills: 0, crewDeaths: 0,
+        mmrHistory: [], // Clear history on reset
         updatedAt: window.firebase.firestore.FieldValue.serverTimestamp() 
       });
     });
@@ -466,6 +472,7 @@ export class CrewRepository {
       batch.update(doc.ref, { 
         mmr: 1200, wins: 0, loses: 0, 
         crewKills: 0, crewDeaths: 0,
+        mmrHistory: [],
         updatedAt: window.firebase.firestore.FieldValue.serverTimestamp() 
       });
     });
@@ -515,6 +522,7 @@ export class CrewRepository {
     batch.set(memberRef, { 
       characterName, 
       mmr: 1200, wins: 0, loses: 0,
+      mmrHistory: [],
       approvedAt: window.firebase.firestore.FieldValue.serverTimestamp() 
     }, { merge: true });
     return batch.commit();
