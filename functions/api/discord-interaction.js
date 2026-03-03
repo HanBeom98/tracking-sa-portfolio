@@ -177,7 +177,13 @@ export async function onRequest(context) {
         if (!session.participants.some(p => p.discordId === uid)) {
           session.participants.push({ nickname: nick, discordId: uid, position: pos });
           await setDoc(PROJECT_ID, 'match_sessions', guildId, session);
-          await patchInteraction(APP_ID, token, { content: `🎮 **TRACKING SA 내전 모집 시작!** (${session.participants.length}/12)\n**신청자:** ${session.participants.map(p => p.nickname).join(', ')}`, components: getActionButtons(session.participants.length) });
+          
+          // Format participant list with icons
+          const list = session.participants.map(p => `${p.nickname}(${p.position === 'sniper' ? '🎯' : '🔫'})`).join(', ');
+          await patchInteraction(APP_ID, token, { 
+            content: `🎮 **TRACKING SA 내전 모집 시작!** (${session.participants.length}/12)\n**신청자:** ${list}`, 
+            components: getActionButtons(session.participants.length) 
+          });
         }
       }
 
