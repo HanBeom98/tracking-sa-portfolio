@@ -98,6 +98,7 @@ export class SaMatchList extends HTMLElement {
         .scoreboard-table th, .scoreboard-table td {
           text-align: center !important;
           padding: 10px 5px;
+          vertical-align: middle;
         }
         .scoreboard-table td.name {
           text-align: left !important;

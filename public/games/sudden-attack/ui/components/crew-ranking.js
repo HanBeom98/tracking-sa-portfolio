@@ -24,9 +24,10 @@ export class SaCrewRanking extends HTMLElement {
         .ranking-table th, .ranking-table td {
           text-align: center;
           padding: 12px 8px;
+          vertical-align: middle;
         }
         .ranking-table th:nth-child(3), .ranking-table td:nth-child(3) {
-          text-align: left; /* 캐릭터명은 좌측 정렬 */
+          text-align: left; 
           padding-left: 20px;
         }
         .ranking-table .mmr-val {
@@ -35,7 +36,14 @@ export class SaCrewRanking extends HTMLElement {
         }
         .ranking-table .stats-cell {
           font-family: 'Roboto Mono', monospace;
-          width: 120px;
+          white-space: nowrap;
+        }
+        .ranking-table th {
+          background: rgba(255,255,255,0.03);
+          color: #888;
+          font-size: 0.85em;
+          text-transform: uppercase;
+          letter-spacing: 1px;
         }
       </style>
       <div class="ranking-card">
@@ -53,8 +61,8 @@ export class SaCrewRanking extends HTMLElement {
               <th style="width: 120px;">티어</th>
               <th>캐릭터명</th>
               <th style="width: 100px;">MMR</th>
-              <th style="width: 120px;">내전 K/D (%)</th>
-              <th style="width: 150px;">승률 (전적)</th>
+              <th style="width: 130px;">내전 K/D (%)</th>
+              <th style="width: 160px;">승률 (전적)</th>
             </tr>
           </thead>
           <tbody>

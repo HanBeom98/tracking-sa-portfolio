@@ -25,10 +25,9 @@ export class SaStatsSummary extends HTMLElement {
       return;
     }
 
-    // Fix for "0 matches" issue: Ensure we use the correct count
-    const matchCount = data.totalMatchesCount || 20; 
+    const matchCount = data.totalMatchesCount || 0; 
 
-    // Update Streak Badge in external DOM
+    // Update Streak Badge
     const streakBadge = document.getElementById('streakBadge');
     if (streakBadge) {
       if (data.streakType === 'WIN') { streakBadge.innerHTML = `🔥 ${data.streakCount}연승 중!`; streakBadge.className = 'streak-badge win-streak'; } 
@@ -82,7 +81,6 @@ export class SaStatsSummary extends HTMLElement {
       </div>
     `;
 
-    // Inject data into sub-components
     const radarComp = this.querySelector('#radarChart');
     if (radarComp) radarComp.data = { radar: data.radar };
 
@@ -96,9 +94,6 @@ export class SaStatsSummary extends HTMLElement {
     if (mapComp) mapComp.mapStats = data.mapStats || [];
   }
 
-  /**
-   * Main Setter for VS Comparison Mode
-   */
   set vsModeData({ primary, target }) {
     this.innerHTML = `
       <div class="stats-summary-card vs-mode-card">
@@ -135,7 +130,7 @@ export class SaStatsSummary extends HTMLElement {
   renderCrewAnalysis(data) {
     if (!data || (data.crewMatchCount || 0) <= 0) return `<div class="crew-stats-card no-crew"><p>최근 경기 중 우리 크루(8인 이상) 내전 기록이 없습니다.</p></div>`;
     
-    // Fix: Using the correct field names passed from RecentStats constructor
+    // Use crewKills and crewDeaths for accurate internal stats
     const ck = parseInt(data.crewKills || 0);
     const cd = parseInt(data.crewDeaths || 0);
     const crewKdPercent = (ck + cd > 0) ? Math.round((ck / (ck + cd)) * 100) : 0;

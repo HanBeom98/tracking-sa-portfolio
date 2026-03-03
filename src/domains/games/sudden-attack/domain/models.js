@@ -53,7 +53,7 @@ export class RecentStats {
     this.worstPartner = null;
     this.mapStats = [];
 
-    // --- 내전 데이터 주입 (UI와 이름 일치) ---
+    // --- 내전 데이터 (Firestore) ---
     if (crewData) {
       this.crewMatchCount = (crewData.wins || 0) + (crewData.loses || 0);
       this.crewKills = crewData.crewKills || 0;
@@ -63,7 +63,7 @@ export class RecentStats {
       this.crewHsr = crewData.hsr || this.crewMmr;
       this.mmrHistory = crewData.mmrHistory || [];
       this.mmrTrend = this.mmrHistory;
-      this.calculateCrewStatus();
+      this.calculateCrewStatus(); // 여기서 위상과 아이콘이 설정됨
     } else {
       this.crewMatchCount = 0;
       this.crewKills = 0;
@@ -75,7 +75,7 @@ export class RecentStats {
     }
 
     if (matches.length > 0) {
-      this.totalMatchesCount = matches.length; // UI에서 표시할 실제 경기 수
+      this.totalMatchesCount = matches.length; 
       const totalK = matches.reduce((sum, m) => sum + m.kill, 0);
       const totalD = matches.reduce((sum, m) => sum + m.death, 0);
       const totalA = matches.reduce((sum, m) => sum + m.assist, 0);
@@ -83,7 +83,9 @@ export class RecentStats {
       this.avgK = (totalK / matches.length).toFixed(1);
       this.avgD = (totalD / matches.length).toFixed(1);
       this.avgA = (totalA / matches.length).toFixed(1);
-      this.totalKills = totalK;
+      
+      // UI 표시용 변수명 통일 (Nexon 데이터)
+      this.totalKills = totalK; 
       this.totalDeaths = totalD;
       this.totalAssists = totalA;
       
@@ -99,7 +101,7 @@ export class RecentStats {
         return kdVal < 0.5 && m.death >= 5;
       }).length;
 
-      // Radar 계산 (공방 지표 기준)
+      // Radar 계산
       const radarKd = this.kdPercent;
       let combatScore = 0;
       if (radarKd <= 40) { combatScore = radarKd * 1.0; } 
