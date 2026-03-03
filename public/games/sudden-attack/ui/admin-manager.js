@@ -301,20 +301,25 @@ export class AdminManager {
     const originalText = btn.textContent;
     btn.textContent = '스캔 중...';
 
+    let logMessages = [];
+
     try {
       let targetOuid = ouid;
       let currentNickname = name;
       const isRealOuid = targetOuid.length >= 20 && /^[0-9a-f]+$/.test(targetOuid);
+      
       if (isRealOuid) {
         const basic = await this.repository.apiClient.getPlayerBasic(targetOuid);
         if (basic && basic.user_name && basic.user_name !== currentNickname) {
           await this.crewRepo.updateNickname(targetOuid, basic.user_name);
+          logMessages.push(`📝 닉네임 변경 감지: ${currentNickname} -> ${basic.user_name}`);
           currentNickname = basic.user_name;
         }
       } else {
         const realOuid = await this.repository.apiClient.getOuid(currentNickname);
         if (realOuid) {
           await this.crewRepo.migrateToOuid(targetOuid, realOuid);
+          logMessages.push(`🚀 구형 데이터 OUID 마이그레이션 완료!`);
           targetOuid = realOuid;
         }
       }
@@ -323,14 +328,21 @@ export class AdminManager {
       const crewMatches = matches.filter(m => m.isCustomMatch);
 
       if (crewMatches.length === 0) {
-        alert(`[${currentNickname}] 님의 최근 20경기 중 새로운 내전 기록이 없습니다.`);
+        const finalMsg = logMessages.length > 0 
+          ? `${logMessages.join('\n')}\n\n최근 20경기 중 새로운 내전 기록은 없습니다.`
+          : `[${currentNickname}] 님의 최근 20경기 중 새로운 내전 기록이 없습니다.`;
+        alert(finalMsg);
       } else {
-        const settledIds = await crewRepo.settleMatches(crewMatches);
+        const settledIds = await this.crewRepo.settleMatches(crewMatches);
         if (settledIds.length > 0) {
-          alert(`✅ [${currentNickname}] 스캔 완료!\n새로운 내전 ${settledIds.length}개를 찾아 정산했습니다.`);
+          logMessages.push(`✅ 새로운 내전 ${settledIds.length}개 정산 완료!`);
+          alert(`[${currentNickname}] 스캔 결과:\n\n${logMessages.join('\n')}`);
           window.dispatchEvent(new CustomEvent('sa-rankings-updated'));
         } else {
-          alert(`[${currentNickname}] 님의 내전 기록은 이미 모두 정산되어 있습니다.`);
+          const finalMsg = logMessages.length > 0
+            ? `${logMessages.join('\n')}\n\n모든 내전 기록이 이미 정산되어 있습니다.`
+            : `[${currentNickname}] 님의 내전 기록은 이미 모두 정산되어 있습니다.`;
+          alert(finalMsg);
         }
       }
     } catch (err) {
