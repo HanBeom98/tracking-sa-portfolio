@@ -43,6 +43,7 @@ export class CrewRepository {
           id: doc.id,
           ...data,
           mmr: data.mmr || 1200,
+          hsr: data.hsr || data.mmr || 1200,
           wins,
           loses,
           totalMatches
@@ -322,6 +323,7 @@ export class CrewRepository {
       const cacheObj = {
         ouid: doc.id,
         mmr: data.mmr || 1200,
+        hsr: data.hsr || data.mmr || 1200,
         wins: data.wins || 0,
         loses: data.loses || 0,
         crewKills: data.crewKills || 0,
@@ -375,13 +377,25 @@ export class CrewRepository {
         const isWin = p.result === 'WIN';
         const kill = parseInt(p.kill || 0);
         const death = parseInt(p.death || 0);
-        const kd = parseFloat(p.kd);
+        const kd = parseFloat(p.kd || 0);
         
-        let change = isWin ? 20 : -20;
-        if (isWin && kd < 0.5) change = 10;
-        if (!isWin && kd >= 1.5) change = -10;
+        // 1. Public MMR: 승패 기반 (±20)
+        let mmrChange = isWin ? 20 : -20;
+        currentData.mmr += mmrChange;
 
-        currentData.mmr += change;
+        // 2. Hidden Skill Rating (HSR): 퍼포먼스 기반
+        // 기본 승패 점수 축소 (±10), K/D 편차에 따른 점수 확대 (최대 ±15)
+        let hsrChange = isWin ? 10 : -10;
+        
+        // 기준 K/D 1.0 대비 편차 계산
+        const kdDeviance = kd - 1.0;
+        // 편차 0.1당 1.5점 가감 (K/D 2.0이면 +15점, K/D 0.0이면 -15점)
+        let performanceAdj = Math.round(kdDeviance * 15);
+        performanceAdj = Math.max(-15, Math.min(15, performanceAdj)); // 캡 제한
+
+        hsrChange += performanceAdj;
+        currentData.hsr += hsrChange;
+
         if (isWin) currentData.wins += 1; else currentData.loses += 1;
         currentData.crewKills += kill;
         currentData.crewDeaths += death;
@@ -435,7 +449,7 @@ export class CrewRepository {
     const batch = this.db.batch();
     membersSnap.docs.forEach(doc => {
       batch.update(doc.ref, { 
-        mmr: 1200, wins: 0, loses: 0, 
+        mmr: 1200, hsr: 1200, wins: 0, loses: 0, 
         crewKills: 0, crewDeaths: 0,
         mmrHistory: [], 
         updatedAt: window.firebase.firestore.FieldValue.serverTimestamp() 
@@ -565,11 +579,25 @@ export class CrewRepository {
           const leftovers = riflers.filter(r => !redRiflers.includes(r) && !blueRiflers.includes(r));
           blueTeam.push(...leftovers);
         }
+        // HSR 기준으로 팀간 격차 계산
+        const redHSR = redTeam.reduce((sum, m) => sum + (m.hsr || m.mmr || 1200), 0);
+        const blueHSR = blueTeam.reduce((sum, m) => sum + (m.hsr || m.mmr || 1200), 0);
+        const diff = Math.abs(redHSR - blueHSR);
+        
+        // UI 출력을 위해 Public MMR 평균도 별도 계산
         const redMMR = redTeam.reduce((sum, m) => sum + (m.mmr || 1200), 0);
         const blueMMR = blueTeam.reduce((sum, m) => sum + (m.mmr || 1200), 0);
-        const diff = Math.abs(redMMR - blueMMR);
+        
         if (diff < bestSplit.diff) {
-          bestSplit = { red: redTeam, blue: blueTeam, diff, redAvg: redMMR / redTeam.length, blueAvg: blueMMR / blueTeam.length };
+          bestSplit = { 
+            red: redTeam, 
+            blue: blueTeam, 
+            diff: diff, // HSR 격차
+            redAvg: redMMR / redTeam.length, 
+            blueAvg: blueMMR / blueTeam.length,
+            redHsrAvg: redHSR / redTeam.length,
+            blueHsrAvg: blueHSR / blueTeam.length
+          };
         }
       }
     }

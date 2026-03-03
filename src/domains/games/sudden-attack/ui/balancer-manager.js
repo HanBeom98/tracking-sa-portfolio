@@ -137,6 +137,7 @@ export class BalancerManager {
         selected.push({
           characterName: m.characterName,
           mmr: m.mmr,
+          hsr: m.hsr, // Add HSR
           position: pos
         });
       }
@@ -150,7 +151,7 @@ export class BalancerManager {
     const result = this.crewRepo.balanceTeams(selected);
     if (result) {
       // Clear legacy text UI
-      this.balancerResult.innerHTML = '<h3>⚖️ 추천 팀 구성 (MMR 밸런스)</h3><sa-team-board></sa-team-board>';
+      this.balancerResult.innerHTML = '<h3>⚖️ 추천 팀 구성 (HSR 기반 스마트 밸런스)</h3><sa-team-board></sa-team-board>';
       this.balancerResult.querySelector('sa-team-board').data = result;
       this.balancerResult.classList.remove('hidden');
       

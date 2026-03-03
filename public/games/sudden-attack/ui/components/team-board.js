@@ -18,7 +18,7 @@ export class SaTeamBoard extends HTMLElement {
           <span class="name">${m.characterName}</span>
         </div>
         <div class="card-bottom">
-          <span class="mmr">${m.mmr} pts</span>
+          <span class="mmr">${m.mmr} pts <span style="font-size:0.8em;color:#777;">(HSR: ${m.hsr || m.mmr})</span></span>
         </div>
       </div>
     `;
@@ -111,7 +111,7 @@ export class SaTeamBoard extends HTMLElement {
         <div class="team-column red">
           <div class="team-header">
             <h4>🔴 RED TEAM</h4>
-            <span class="avg-mmr">평균: <b>${Math.round(res.redAvg)}</b></span>
+            <span class="avg-mmr">평균: <b>${Math.round(res.redAvg)}</b> <span style="font-size:0.85em;">(HSR: ${Math.round(res.redHsrAvg || res.redAvg)})</span></span>
           </div>
           <div class="card-grid">
             ${res.red.map(renderCard).join('')}
@@ -123,7 +123,7 @@ export class SaTeamBoard extends HTMLElement {
         <div class="team-column blue">
           <div class="team-header">
             <h4>🔵 BLUE TEAM</h4>
-            <span class="avg-mmr">평균: <b>${Math.round(res.blueAvg)}</b></span>
+            <span class="avg-mmr">평균: <b>${Math.round(res.blueAvg)}</b> <span style="font-size:0.85em;">(HSR: ${Math.round(res.blueHsrAvg || res.blueAvg)})</span></span>
           </div>
           <div class="card-grid">
             ${res.blue.map(renderCard).join('')}
@@ -131,8 +131,8 @@ export class SaTeamBoard extends HTMLElement {
         </div>
       </div>
       <div class="balance-summary">
-        ⚖️ 팀간 MMR 격차: <span class="diff-tag">${res.diff} pts</span>
-        <p style="font-size:0.8em; color:#666; margin-top:5px;">※ MMR 합산 및 포지션 분포를 최적으로 고려하여 생성된 팀입니다.</p>
+        ⚖️ 팀간 HSR 격차: <span class="diff-tag">${res.diff} pts</span>
+        <p style="font-size:0.8em; color:#666; margin-top:5px;">※ HSR(Hidden Skill Rating) 합산 및 포지션 분포를 최적으로 고려하여 생성된 팀입니다.</p>
       </div>
     `;
   }
