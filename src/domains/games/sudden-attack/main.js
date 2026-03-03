@@ -2,7 +2,6 @@ import { NexonApiClient } from './infra/nexon-api-client.js?v=20260228_7';
 import { SaRepository } from './infra/sa-repository.js?v=20260228_7';
 import { SaService } from './application/sa-service.js?v=20260228_7';
 import { CrewRepository } from './infra/crew-repository.js?v=20260228_7';
-import { RecentStats } from './domain/models.js?v=20260228_7';
 import { BalancerManager } from './ui/balancer-manager.js?v=20260228_7';
 import { AdminManager } from './ui/admin-manager.js?v=20260228_7';
 
@@ -19,8 +18,8 @@ const NEXON_API_KEY = '';
 
 const client = new NexonApiClient(NEXON_API_KEY);
 const repository = new SaRepository(client);
-const service = new SaService(repository);
 const crewRepo = new CrewRepository(client);
+const service = new SaService(repository, crewRepo);
 
 // UI Managers
 const balancerManager = new BalancerManager(crewRepo);
@@ -60,63 +59,15 @@ async function handleSearch(nameOverride = null) {
   }
 
   try {
-    loading.classList.remove('hidden');
-    loadingText.textContent = `${name} 님의 정보를 찾는 중... (최근 20경기)`;
-    profileSection.classList.add('hidden');
-    statsSection.classList.add('hidden');
-    historySection.classList.add('hidden');
-    crewRankingSection.classList.add('hidden');
-
-    const player = await service.searchPlayer(name);
+    showLoading(name);
+    
+    // Core Logic Delegated to Service
+    const { player, matches, stats } = await service.getFullPlayerProfile(name, currentRankings);
+    
     saveSearch(player.nickname);
-
-    // Sync Nickname if crew member
-    const existingMember = await crewRepo.findMemberByOuid(player.ouid);
-    if (existingMember && existingMember.characterName !== player.nickname) {
-      console.log(`[Crew] Nickname sync: ${existingMember.characterName} -> ${player.nickname}`);
-      await crewRepo.updateNickname(player.ouid, player.nickname);
-      // REFRESH FULL LIST IMMEDIATELY to include newly discovered/synced names
-      await refreshRankings();
-    }
+    renderUI(player, matches, stats);
     
-    // Render Profile
-    profileSection.innerHTML = '<sa-player-card></sa-player-card>';
-    profileSection.querySelector('sa-player-card').player = player;
-    profileSection.classList.remove('hidden');
-
-    // Load Matches
-    loadingText.textContent = '최근 매치 기록을 분석 중입니다...';
-    const matches = await service.getRecentMatches(player.ouid, player.nickname);
-
-    // Render Stats
-    loadingText.textContent = '데이터 동기화 완료!';
-    const rawStats = await repository.apiClient.getRecentInfo(player.ouid);
-    const stats = new RecentStats(rawStats, matches);
-
-    const memberData = currentRankings.find(m => m.id === player.ouid);
-    if (memberData) {
-      stats.crewMatchCount = (memberData.wins || 0) + (memberData.loses || 0);
-      stats.crewWinRate = stats.crewMatchCount > 0 ? Math.round((memberData.wins / stats.crewMatchCount) * 100) : 0;
-      stats.crewMmr = memberData.mmr || 1200;
-      const ck = memberData.crewKills || 0;
-      const cd = memberData.crewDeaths || 0;
-      stats.crewKd = cd > 0 ? (ck / cd).toFixed(2) : (ck > 0 ? ck.toFixed(2) : "0.00");
-    }
-    
-    // Calculate Crew Status based on injected data
-    stats.calculateCrewStatus();
-    
-    statsSection.innerHTML = '<sa-stats-summary></sa-stats-summary>';
-    statsSection.querySelector('sa-stats-summary').stats = stats;
-    statsSection.classList.remove('hidden');
-
-    // Render Matches
-    historySection.innerHTML = '<h2>최근 20경기 매치 기록</h2><sa-match-list></sa-match-list>';
-    historySection.querySelector('sa-match-list').matches = matches;
-    historySection.classList.remove('hidden');
-
-    // FINAL CHECK: If any matches had different names, refreshRankings was already updated inside getRecentMatches via repo
-    // But we need to ensure the LOCAL main.js state is also fresh
+    // Always refresh rankings in background to catch any nickname syncs
     await refreshRankings();
 
   } catch (error) {
@@ -124,6 +75,32 @@ async function handleSearch(nameOverride = null) {
   } finally {
     loading.classList.add('hidden');
   }
+}
+
+function showLoading(name) {
+  loading.classList.remove('hidden');
+  loadingText.textContent = `${name} 님의 정보를 분석 중... (최근 20경기)`;
+  profileSection.classList.add('hidden');
+  statsSection.classList.add('hidden');
+  historySection.classList.add('hidden');
+  crewRankingSection.classList.add('hidden');
+}
+
+function renderUI(player, matches, stats) {
+  // 1. Player Profile
+  profileSection.innerHTML = '<sa-player-card></sa-player-card>';
+  profileSection.querySelector('sa-player-card').player = player;
+  profileSection.classList.remove('hidden');
+
+  // 2. Stats Summary
+  statsSection.innerHTML = '<sa-stats-summary></sa-stats-summary>';
+  statsSection.querySelector('sa-stats-summary').stats = stats;
+  statsSection.classList.remove('hidden');
+
+  // 3. Match History
+  historySection.innerHTML = '<h2>최근 20경기 매치 기록</h2><sa-match-list></sa-match-list>';
+  historySection.querySelector('sa-match-list').matches = matches;
+  historySection.classList.remove('hidden');
 }
 
 function handleSearchError(error) {
@@ -175,36 +152,28 @@ async function refreshRankings() {
   const startDate = await crewRepo.getSeasonStartDate();
   const formattedDate = startDate.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
 
-  // EXTRACT ALL NAMES: Current + All Historical Nicknames + Migrated Names
+  // Update repository's crew membership context
   const membersSet = new Set();
   const ouids = [];
-
   currentRankings.forEach(r => {
     if (r.characterName) membersSet.add(r.characterName);
     if (r.migratedFrom) membersSet.add(r.migratedFrom);
-    if (r.previousNames && Array.isArray(r.previousNames)) {
-      r.previousNames.forEach(name => membersSet.add(name));
-    }
+    if (r.previousNames) r.previousNames.forEach(name => membersSet.add(name));
     ouids.push(r.id);
   });
-  
-  const allKnownNames = Array.from(membersSet);
-  repository.setCrewMembers(allKnownNames, ouids);
+  repository.setCrewMembers(Array.from(membersSet), ouids);
 
-  // Render MVP Section
+  // Render MVP & Rankings
   const mvpComp = document.createElement('sa-crew-mvps');
   mvpComp.data = currentRankings;
-
-  // Render Ranking Table
   const rankingComp = document.createElement('sa-crew-ranking');
   rankingComp.setAttribute('season-start', formattedDate);
   rankingComp.rankings = currentRankings;
   
   crewRankingSection.innerHTML = '';
-  crewRankingSection.appendChild(mvpComp); // MVP Cards first
-  crewRankingSection.appendChild(rankingComp); // Ranking table second
+  crewRankingSection.appendChild(mvpComp);
+  crewRankingSection.appendChild(rankingComp);
 
-  // Update Sub-Managers
   balancerManager.updateRankings(currentRankings);
   adminManager.updateRankings(currentRankings);
 }
@@ -215,10 +184,7 @@ async function initCrew() {
     if (retries-- <= 0) return;
     await new Promise(r => setTimeout(r, 100));
   }
-
   await refreshRankings();
-
-  // Auth Setup
   if (typeof window.firebase !== 'undefined' && window.firebase.auth) {
     window.firebase.auth().onAuthStateChanged(user => {
       if (crewRepo.isStaff(user)) {
@@ -231,10 +197,9 @@ async function initCrew() {
   }
 }
 
-// Global Event Listeners
+// Event Listeners
 searchBtn.addEventListener('click', () => handleSearch());
 searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSearch(); });
-
 applyCrewBtn.addEventListener('click', () => crewModal.classList.remove('hidden'));
 closeModalBtn.addEventListener('click', () => crewModal.classList.add('hidden'));
 
@@ -253,17 +218,13 @@ submitApplyBtn.addEventListener('click', async () => {
   finally { submitApplyBtn.disabled = false; submitApplyBtn.textContent = '신청하기'; }
 });
 
-// Sync rankings when sub-managers trigger an update
 window.addEventListener('sa-rankings-updated', () => refreshRankings());
-
-// Listen for nickname clicks from anywhere on the page (Ranking, Match History, etc.)
 window.addEventListener('sa-request-search', (e) => {
   if (e.detail && e.detail.name) {
     handleSearch(e.detail.name);
-    window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top to see results
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 });
 
-// Start
 initCrew();
 renderRecentSearches();
