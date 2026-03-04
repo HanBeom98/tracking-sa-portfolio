@@ -136,18 +136,37 @@ export class SaStatsSummary extends HTMLElement {
   set vsModeData({ primary, target }) {
     this.innerHTML = `
       <style>
+        .vs-mode-card .vs-grid-container {
+          display: flex; gap: 30px; align-items: center; margin-top: 15px;
+        }
+        .vs-left { flex: 0 0 180px; }
+        .vs-center { flex: 1; }
+        .vs-right { flex: 0 0 380px; }
+
         .vs-comparison-table { width: 100%; border-collapse: collapse; }
-        .vs-comparison-table th { padding: 10px; color: #666; font-size: 14px; text-transform: uppercase; border-bottom: 1px solid #2d3356; }
-        .vs-comparison-table td { text-align: center; padding: 15px; font-size: 18px; font-weight: 800; color: #fff; }
-        .vs-comparison-table td.lbl { font-size: 12px; color: #888; font-weight: 400; width: 100px; }
+        .vs-comparison-table th { padding: 8px; color: #666; font-size: 12px; text-transform: uppercase; border-bottom: 1px solid #2d3356; }
+        .vs-comparison-table td { text-align: center; padding: 12px 5px; font-size: 16px; font-weight: 800; color: #fff; }
+        .vs-comparison-table td.lbl { font-size: 11px; color: #888; font-weight: 400; width: 80px; }
+        
+        /* MMR Trend Chart compacting for VS mode */
+        .vs-mode-card sa-mmr-trend-chart { display: block; margin-top: 0; }
+        
+        @media (max-width: 1100px) {
+          .vs-mode-card .vs-grid-container { flex-wrap: wrap; justify-content: center; }
+          .vs-right { flex: 0 0 100%; margin-top: 20px; }
+        }
+        @media (max-width: 650px) {
+          .vs-mode-card .vs-grid-container { flex-direction: column; }
+          .vs-left { flex: 0 0 auto; }
+        }
       </style>
       <div class="stats-summary-card vs-mode-card">
         <div class="header-row"><h3>📊 전적 상세 비교 (VS)</h3></div>
-        <div class="stats-summary-header">
-          <div class="radar-section">
-            <sa-radar-chart id="vsRadar"></sa-radar-chart>
+        <div class="vs-grid-container">
+          <div class="vs-left">
+            <sa-radar-chart id="vsRadar" style="width: 180px; height: 180px; display: block;"></sa-radar-chart>
           </div>
-          <div class="text-stats-section">
+          <div class="vs-center">
             <table class="vs-comparison-table">
               <thead>
                 <tr>
@@ -163,8 +182,10 @@ export class SaStatsSummary extends HTMLElement {
               </tbody>
             </table>
           </div>
+          <div class="vs-right">
+            <sa-mmr-trend-chart id="vsTrend"></sa-mmr-trend-chart>
+          </div>
         </div>
-        <sa-mmr-trend-chart id="vsTrend"></sa-mmr-trend-chart>
       </div>
     `;
     this.querySelector('#vsRadar').data = { radar: primary.radar, vsTargetRadar: target.radar };
