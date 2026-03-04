@@ -137,7 +137,10 @@ export class SaMatchList extends HTMLElement {
                   <span class="type-tag">${match.matchTypeName}</span>
                   ${match.isCustomMatch ? '<span class="custom-badge" style="font-size:10px; font-weight:800; color:#ffcc00; background:rgba(255,204,0,0.15); padding:2px 6px; border-radius:4px; border:1px solid rgba(255,204,0,0.3);">크루내전</span>' : ''}
                 </div>
-                <span class="result-badge">${match.matchResult}</span>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span class="result-badge">${match.matchResult}</span>
+                  ${match.laundryInfo && match.laundryInfo.isWashed ? '<span style="font-size:11px; color:#ff4d4d; font-weight:bold; animation: pulse-red 2s infinite;">⚠️ 리조인 의심</span>' : ''}
+                </div>
               </div>
               <div class="match-map-info">
                 <span class="map">${match.mapName}</span>
