@@ -36,16 +36,16 @@ export class SaStatsSummary extends HTMLElement {
         .playstyle-label { font-size: 11px; color: #666; display: block; }
         .playstyle-title { font-size: 18px; font-weight: bold; color: #fff; }
         
-        .stats-summary-header { display: flex; gap: 30px; margin-bottom: 30px; }
-        .radar-section { flex: 0 0 250px; }
+        .stats-summary-header { display: flex; gap: 40px; margin-bottom: 30px; align-items: center; }
+        .radar-section { flex: 0 0 220px; }
         .text-stats-section { flex: 1; }
         
         .header-row {
-          display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;
-          border-bottom: 1px solid #2d3356; padding-bottom: 10px;
+          display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px;
+          border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px;
         }
-        .header-row h3 { margin: 0; font-size: 18px; color: #fff; }
-        .most-played-map { font-size: 13px; color: #888; }
+        .header-row h3 { margin: 0; font-size: 20px; color: #fff; font-weight: 800; }
+        .most-played-map { font-size: 13px; color: #888; background: rgba(255,255,255,0.03); padding: 4px 12px; border-radius: 4px; }
         .most-played-map strong { color: #ffcc00; }
 
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
