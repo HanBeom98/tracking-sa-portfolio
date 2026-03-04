@@ -15,12 +15,19 @@ Tracking SA를 프레임워크 의존 없이 안정적으로 운영 가능한 DD
 - Data: Firebase Firestore
 - News Gen: RSS + Gemini 기반 `multi-agent-system/news-desk.js`
 
-## 🚦 Deployment & Operation Model (2026-02-26 기준)
-- **배포 원칙 (Test-First)**: 모든 코드 변경은 GitHub Actions에서 **단위 테스트 및 Firestore 규칙 검증을 통과해야만** Cloudflare Pages로 배포됩니다.
-- 뉴스 자동 발행: GitHub Actions 스케줄 실행에서 `python main.py` 실행 후 `public/` 자동 커밋.
+## 🚦 Deployment & Operation Model (2026-03-04 업데이트)
+- **배포 방식 (Local-First Build)**: GitHub Actions 무료 시간 최적화를 위해 **로컬 빌드(`npm run build`) 후 `public/` 직접 푸시** 방식을 권장합니다.
+- **Actions 최적화**: `unit-tests.yml`, `site-deploy.yml`의 자동 트리거를 비활성화하고, 수동(`workflow_dispatch`) 또는 필수 예약 작업(뉴스 생성)만 가동합니다.
+- 뉴스 자동 발행: GitHub Actions 스케줄 실행 유지.
 
 ## ✅ Completed Milestones
 ### 2026-03-04
+- **서든어택 전적 검색 UX 고도화 및 분석 기능 강화**:
+  - **지능형 분석**: MMR과 HSR(히든 스킬 레이팅) 간 괴리 분석 및 성향별 피드백(승부사형, 무력가형 등) 추가.
+  - **위트 있는 게이미피케이션**: 내전 성적에 따른 다이내믹 라벨(똥싼 판, 기부천사, 역귀 등) 도입으로 유저 재미 요소 강화.
+  - **UI 접근성 향상**: 독립 서비스인 서든전적 페이지 내 전용 홈 버튼 추가 및 K/D 표기 방식(%) 정규화.
+  - **시스템 최적화**: GitHub Actions 무료 사용분 보존을 위한 워크플로 트리거 정리 및 ESM 모듈 환경 정규화.
+
 - **서든어택 도메인 Strict DDD 완성 및 테마 통합**:
   - **도메인 모델 분리**: `models.js`를 `player.js`, `match.js`, `stats.js`로 완전히 분리하여 도메인 응집도 향상.
   - **공통 레이아웃 테마 통합**: `dark-mode` 클래스 적용을 통해 메인 사이트의 GNB/Footer와 서든어택 페이지의 디자인 통일성 확보.
