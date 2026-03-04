@@ -133,7 +133,10 @@ export class SaMatchList extends HTMLElement {
           <li class="match-container">
             <div class="match-item ${match.matchResult.toLowerCase()} ${match.isCustomMatch ? 'is-custom' : ''}" data-idx="${idx}">
               <div class="match-info">
-                <span class="type-tag">${match.matchTypeName}</span>
+                <div style="display:flex; align-items:center; gap:5px; margin-bottom:4px;">
+                  <span class="type-tag">${match.matchTypeName}</span>
+                  ${match.isCustomMatch ? '<span class="custom-badge" style="font-size:10px; font-weight:800; color:#ffcc00; background:rgba(255,204,0,0.15); padding:2px 6px; border-radius:4px; border:1px solid rgba(255,204,0,0.3);">크루내전</span>' : ''}
+                </div>
                 <span class="result-badge">${match.matchResult}</span>
               </div>
               <div class="match-map-info">
