@@ -150,7 +150,7 @@ export class SaMatchList extends HTMLElement {
               </div>
             </div>
             <div class="match-detail-view hidden" id="detail-${idx}">
-              ${this.drawScoreboard(match.allPlayerStats)}
+              ${this.drawScoreboard(match)}
             </div>
           </li>
         `).join('')}
