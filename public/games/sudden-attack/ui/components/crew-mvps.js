@@ -34,7 +34,11 @@ export class SaCrewMvps extends HTMLElement {
   }
 
   render(mvps) {
-    const getKd = (m) => m.crewDeaths > 0 ? (m.crewKills / m.crewDeaths).toFixed(2) : m.crewKills.toFixed(2);
+    const getKd = (m) => {
+      const total = (m.crewKills || 0) + (m.crewDeaths || 0);
+      if (total === 0) return "0%";
+      return Math.round((m.crewKills / total) * 100) + "%";
+    };
 
     this.innerHTML = `
       <style>
