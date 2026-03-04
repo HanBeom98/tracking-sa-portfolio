@@ -101,22 +101,54 @@ body.dark-mode {
 .admin-section {
   background: var(--bg-card); border: 1px solid var(--gold); border-radius: 12px; padding: 25px; margin: 20px 0; box-shadow: 0 10px 40px rgba(0,0,0,0.6);
 }
-.admin-section h2 { margin-top: 0; color: var(--gold); }
+.admin-section h2 { margin-top: 0; color: var(--gold); margin-bottom: 20px; }
 .admin-actions-bar { display: flex; flex-direction: column; gap: 20px; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,204,0,0.2); }
+
 .admin-main-btns { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
-.admin-member-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; margin-top: 15px; }
-.admin-member-item { background: var(--bg-sub); border: 1px solid var(--border); padding: 15px; border-radius: 10px; display: flex; flex-direction: column; gap: 8px; }
-.admin-member-item .m-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 8px; }
-.admin-member-item .m-name { font-weight: bold; font-size: 15px; }
-.admin-member-item .m-score { font-family: 'Roboto Mono', monospace; font-size: 13px; color: var(--gold); }
-.admin-member-item .m-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 5px; }
+.admin-sub-btns { display: flex; gap: 10px; margin-top: 10px; }
 
-.mini-btn { padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; border: none; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 5px; }
+.settle-btn {
+  background: var(--gold); color: #000; border: none; padding: 12px 24px; border-radius: 8px; 
+  font-weight: 900; cursor: pointer; transition: all 0.2s; font-size: 14px;
+}
+.settle-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(255, 204, 0, 0.3); }
+.settle-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.season-date-setter { 
+  display: flex; align-items: center; gap: 10px; background: rgba(255, 204, 0, 0.05); 
+  padding: 8px 15px; border-radius: 8px; border: 1px solid rgba(255, 204, 0, 0.2); 
+}
+.season-date-setter label { font-size: 13px; font-weight: bold; color: var(--gold); white-space: nowrap; }
+.season-date-setter input[type="date"] { 
+  background: var(--bg-dark); border: 1px solid #333; color: #fff; padding: 5px 10px; 
+  border-radius: 4px; font-size: 13px; outline: none; 
+}
+
+.admin-reset-btn { border-color: #ff4d4d !important; color: #ff4d4d !important; margin-left: auto; }
+.repair-btn { border-color: #00bcd4 !important; color: #00bcd4 !important; }
+
+.admin-member-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; margin-top: 20px; }
+.admin-member-item { 
+  background: var(--bg-sub); border: 1px solid var(--border); padding: 18px; border-radius: 12px; 
+  display: flex; flex-direction: column; gap: 12px; transition: border-color 0.2s;
+}
+.admin-member-item:hover { border-color: var(--gold); }
+.admin-member-item .m-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 10px; }
+.admin-member-item .m-name { font-weight: bold; font-size: 16px; }
+.admin-member-item .m-score { font-family: 'Roboto Mono', monospace; font-size: 14px; color: var(--gold); }
+.admin-member-item .m-stats { font-size: 13px; color: var(--text-dim); }
+.admin-member-item .m-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+.mini-btn { 
+  padding: 10px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; 
+  border: 1px solid transparent; transition: all 0.2s; display: flex; align-items: center; justify-content: center; 
+}
 .mini-btn:hover { opacity: 0.9; transform: translateY(-1px); }
-.individual-scan-btn { background: #0288d1; color: white; grid-column: 1 / -1; }
-.update-name-btn { background: #333; color: #ccc; }
-.delete-member-btn { background: #b71c1c; color: white; }
+.individual-scan-btn { background: rgba(0, 210, 255, 0.1); color: var(--primary); border-color: rgba(0, 210, 255, 0.2); grid-column: 1 / -1; font-size: 13px; }
+.update-name-btn { background: #2d3356; color: #fff; }
+.delete-member-btn { background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border-color: rgba(255, 77, 77, 0.2); }
 
+.admin-hint { font-size: 12px; color: var(--text-dim); font-style: italic; margin-top: 20px; }
 .history-section h2 { margin-top: 40px; margin-bottom: 20px; }
 
 /* Team Balancer UI (Inside Modal) */
