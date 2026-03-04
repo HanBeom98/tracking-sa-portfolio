@@ -16,12 +16,13 @@ body.dark-mode {
   color: var(--text-main);
   font-family: 'Pretendard', sans-serif;
   margin: 0;
-  padding: 20px;
+  padding: 0; /* padding 제거하여 헤더 충돌 방지 */
 }
 
 .sa-container {
   max-width: 1000px;
   margin: 0 auto;
+  padding: 20px; /* 본문에만 padding 적용 */
 }
 
 .hidden { display: none !important; }
