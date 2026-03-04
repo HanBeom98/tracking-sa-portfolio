@@ -15,8 +15,8 @@ export class SaMatchList extends HTMLElement {
     if (!players || players.length === 0) return '<p class="no-detail">매치 상세 정보가 없습니다.</p>';
 
     const laundryHtml = match.laundryInfo && match.laundryInfo.isWashed 
-      ? `<div class="laundry-warning" style="background: rgba(255, 77, 77, 0.1); color: #ff4d4d; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 13px; font-weight: bold; border: 1px solid rgba(255, 77, 77, 0.3); text-align: center;">
-          ⚠️ 리조인 의심 (누락된 데스: ${match.laundryInfo.totalMissing})
+      ? `<div class="laundry-warning" style="background: rgba(255, 77, 77, 0.1); color: #ff4d4d; padding: 12px 20px; border-radius: 8px; margin-bottom: 15px; font-size: 13px; font-weight: bold; border: 1px solid rgba(255, 77, 77, 0.3); text-align: center; line-height: 1.5;">
+          ⚠️ <strong>데이터 불일치 감지:</strong> 상대 팀 킬 수보다 우리 팀 데스 합계가 <strong>${match.laundryInfo.totalMissing}회</strong> 부족합니다. (리조인 세탁 의심)
          </div>`
       : '';
 
