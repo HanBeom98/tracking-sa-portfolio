@@ -2,10 +2,6 @@
  * UI Component for MMR Growth Line Chart
  */
 export class SaMmrTrendChart extends HTMLElement {
-/**
- * UI Component for MMR Growth Line Chart
- */
-export class SaMmrTrendChart extends HTMLElement {
   drawMmrChart(mmrTrend, currentMmr, isCrew, vsTargetData = null) {
     if (!isCrew) return `
       <style>
