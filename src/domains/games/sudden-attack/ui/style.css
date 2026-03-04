@@ -119,6 +119,37 @@ body.dark-mode {
 
 .history-section h2 { margin-top: 40px; margin-bottom: 20px; }
 
+/* Team Balancer UI (Inside Modal) */
+.balancer-modal {
+  max-width: 1000px !important;
+  max-height: 95vh !important;
+}
+.balancer-search-input {
+  width: 100%; padding: 12px 20px; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 8px; 
+  background: var(--bg-dark); color: var(--text-main); font-size: 15px; outline: none; box-sizing: border-box;
+}
+.selected-count-display {
+  color: var(--gold); font-size: 15px; font-weight: bold; margin-bottom: 15px; text-align: right;
+}
+.balancer-member-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; margin: 20px 0; 
+  max-height: 450px; overflow-y: auto; padding: 15px; background: var(--bg-sub); border-radius: 12px; border: 1px solid var(--border);
+}
+.balancer-item {
+  display: flex; align-items: center; gap: 12px; padding: 12px; background: #1c2031; border-radius: 10px; 
+  cursor: pointer; transition: all 0.2s; border: 1px solid transparent;
+}
+.balancer-item:hover { background: var(--border); border-color: rgba(0, 210, 255, 0.3); }
+.balancer-item.selected { background: rgba(0, 210, 255, 0.1); border-color: var(--primary); }
+.balancer-item input[type="checkbox"] { margin: 0; width: 18px; height: 18px; cursor: pointer; }
+.balancer-item .m-name { font-size: 14px; color: #fff; font-weight: 600; flex: 1; text-align: left; }
+.balancer-item .m-mmr { color: var(--text-dim); font-size: 11px; margin-right: 10px; }
+
+.pos-select { display: flex; gap: 5px; background: rgba(0,0,0,0.2); padding: 3px; border-radius: 20px; }
+.pos-select input[type="radio"] { display: none; }
+.pos-select label { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 50%; font-size: 14px; transition: all 0.2s; filter: grayscale(1); opacity: 0.5; }
+.pos-select input[type="radio"]:checked + label { filter: grayscale(0); opacity: 1; background: var(--border); }
+
 @media (max-width: 768px) {
   .sa-container { padding: 0 15px; }
   .search-bar { flex-direction: column; align-items: center; }

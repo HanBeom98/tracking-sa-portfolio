@@ -65,7 +65,7 @@ ${res.blue.map(m => `- ${m.characterName} (${m.position === 'sniper' ? '스나' 
         .avg-mmr { font-size: 0.9em; color: #888; }
         .avg-mmr b { color: white; }
 
-        .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
         .draft-card { background: #1e2235; border: 1px solid #333; border-radius: 8px; padding: 10px; transition: transform 0.2s; }
         .draft-card:hover { transform: scale(1.05); border-color: #555; }
         .card-top { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
