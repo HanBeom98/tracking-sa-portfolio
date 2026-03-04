@@ -58,25 +58,17 @@ export class SaService {
       // 3. Load Matches
       const matches = await this.repository.getRecentMatches(player.ouid, 20, player.nickname);
 
-      // 4. Process Stats
-      const rawStats = await this.repository.apiClient.getRecentInfo(player.ouid);
-      const stats = new RecentStats(rawStats, matches);
-
-      // 5. Inject Crew Data and MMR Trend
-      const memberData = currentRankings.find(m => m.id === player.ouid);
-      if (memberData) {
-        stats.crewMatchCount = (memberData.wins || 0) + (memberData.loses || 0);
-        stats.crewWinRate = stats.crewMatchCount > 0 ? Math.round((memberData.wins / stats.crewMatchCount) * 100) : 0;
-        stats.crewMmr = memberData.mmr || 1200;
-        stats.crewKills = memberData.crewKills || 0;
-        stats.crewDeaths = memberData.crewDeaths || 0;
-
-        if (this.crewRepository) {
-          stats.mmrTrend = await this.crewRepository.getMemberMmrHistory(player.ouid);
-        }
+      // 4. Fetch Crew Data from local list or DB
+      let memberData = currentRankings.find(m => m.id === player.ouid);
+      if (!memberData && this.crewRepository) {
+        memberData = await this.crewRepository.findMemberByOuid(player.ouid);
       }
-      
-      stats.calculateCrewStatus();
+
+      // 5. Load Metadata (Recent Info from Nexon)
+      const rawStats = await this.repository.apiClient.getRecentInfo(player.ouid);
+
+      // 6. Construct Stats with ALL required data at once
+      const stats = new RecentStats(rawStats, matches, memberData);
 
       return { player, matches, stats };
     } catch (error) {
