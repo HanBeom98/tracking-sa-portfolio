@@ -55,6 +55,12 @@ export class SaStatsSummary extends HTMLElement {
         .stat-box label { font-size: 12px; color: #666; display: block; margin-bottom: 5px; }
         .stat-box .value { font-size: 20px; font-weight: bold; color: #fff; font-family: 'Roboto Mono', monospace; }
         .value.highlight { color: #00d2ff; }
+
+        /* Secondary Stats Grid (Trend + Map) */
+        .stats-detail-grid {
+          display: grid; grid-template-columns: 1.2fr 1fr; gap: 25px; margin-top: 30px; align-items: start;
+        }
+        .stats-detail-grid > * { margin-top: 0 !important; }
         
         /* Crew Stats Card */
         .crew-stats-card {
@@ -68,7 +74,8 @@ export class SaStatsSummary extends HTMLElement {
         .crew-grid .stat-box { border-color: rgba(255, 204, 0, 0.1); }
         .gold-highlight { color: #ffcc00 !important; }
 
-        @media (max-width: 768px) {
+        @media (max-width: 900px) {
+          .stats-detail-grid { grid-template-columns: 1fr; }
           .stats-summary-header { flex-direction: column; }
           .radar-section { margin: 0 auto; }
           .stats-grid { grid-template-columns: repeat(2, 1fr); }
@@ -112,9 +119,11 @@ export class SaStatsSummary extends HTMLElement {
           </div>
         </div>
 
-        <sa-mmr-trend-chart id="trendChart"></sa-mmr-trend-chart>
+        <div class="stats-detail-grid">
+          <sa-mmr-trend-chart id="trendChart"></sa-mmr-trend-chart>
+          <sa-map-mastery id="mapMastery"></sa-map-mastery>
+        </div>
         <sa-synergy-view id="synergyView"></sa-synergy-view>
-        <sa-map-mastery id="mapMastery"></sa-map-mastery>
 
         ${this.renderCrewAnalysis(data)}
       </div>
