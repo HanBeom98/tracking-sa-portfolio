@@ -83,26 +83,26 @@ export class AdminManager {
     const actionBar = document.createElement('div');
     actionBar.className = 'admin-actions-bar';
     actionBar.innerHTML = `
-      <div class="admin-main-btns" style="display:flex; gap:10px; width:100%; margin-bottom:15px; flex-wrap: wrap; align-items: center;">
+      <div class="admin-main-btns">
         <button id="settleMMRBtn" class="settle-btn">⚡ 크루 전체 매치 스캔 & 일괄 정산</button>
         
-        <div class="season-date-setter" style="display:flex; gap:5px; align-items:center; background:rgba(255,204,0,0.1); padding:5px 10px; border-radius:6px; border:1px solid rgba(255,204,0,0.3);">
-          <label style="font-size:12px; color:#ffcc00; font-weight:bold;">시즌 시작일:</label>
-          <input type="date" id="seasonStartDateInput" style="padding:5px; background:#141724; border:1px solid #333; color:white; border-radius:4px; font-size:12px; margin:0; width:auto;">
-          <button id="updateSeasonDateBtn" class="sub-btn" style="padding:5px 10px; font-size:11px; background:#ffcc00; color:black; border:none; font-weight:bold; cursor:pointer;">변경</button>
+        <div class="season-date-setter">
+          <label>시즌 시작일:</label>
+          <input type="date" id="seasonStartDateInput">
+          <button id="updateSeasonDateBtn" class="mini-btn update-name-btn">변경</button>
         </div>
 
-        <button id="resetSeasonBtn" class="sub-btn" style="border-color:#ff4d4d; color:#ff4d4d; margin-left: auto;">🔥 시즌 초기화</button>
+        <button id="resetSeasonBtn" class="sub-btn admin-reset-btn">🔥 시즌 초기화</button>
       </div>
-      <div class="admin-sub-btns" style="display:flex; gap:10px; width:100%; margin-bottom:15px;">
-        <button id="repairDataBtn" class="sub-btn" style="border-color:#00bcd4; color:#00bcd4;">♻️ 전적 데이터 재정산 (킬/데스 복구)</button>
+      <div class="admin-sub-btns">
+        <button id="repairDataBtn" class="sub-btn repair-btn">♻️ 전적 데이터 재정산 (킬/데스 복구)</button>
       </div>
-      <div id="crewMemberListAdmin" class="crew-manage-list" style="width:100%; border-top:1px solid #333; padding-top:15px;">
+      <div id="crewMemberListAdmin" class="crew-manage-list">
         <h4>👥 크루 멤버 관리</h4>
-        <div class="admin-member-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:10px; margin-top:10px;">
+        <div class="admin-member-grid">
         </div>
       </div>
-      <p class="admin-hint" style="width:100%; margin-top:10px;">※ 일괄 정산은 5명씩 병렬로 빠르게 진행됩니다. 닉네임이 바뀐 멤버는 자동으로 최신화됩니다.</p>
+      <p class="admin-hint">※ 일괄 정산은 5명씩 병렬로 빠르게 진행됩니다. 닉네임이 바뀐 멤버는 자동으로 최신화됩니다.</p>
     `;
     this.adminPanel.appendChild(actionBar);
 
@@ -130,19 +130,22 @@ export class AdminManager {
     const container = this.adminPanel.querySelector('.admin-member-grid');
     if (!container) return;
     if (this.currentRankings.length === 0) {
-      container.innerHTML = '<p style="grid-column:1/-1;">멤버가 없습니다.</p>';
+      container.innerHTML = '<p class="no-members-msg">멤버가 없습니다.</p>';
       return;
     }
     container.innerHTML = this.currentRankings.map(m => {
       const isRealOuid = m.id.length >= 20 && /^[0-9a-f]+$/.test(m.id);
       return `
-        <div class="admin-member-item" style="background:#222; padding:10px; border-radius:5px; display:flex; flex-direction:column; gap:5px;">
-          <span style="font-weight:bold; color:${isRealOuid ? '#4caf50' : '#ff9800'};">${m.characterName} ${isRealOuid ? '' : '(구형)'}</span>
-          <span style="font-size:0.8em; color:#888;">MMR: ${m.mmr} (${m.wins}W ${m.loses}L)</span>
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-top:5px;">
-            <button class="mini-btn individual-scan-btn" data-ouid="${m.id}" data-name="${m.characterName}" style="grid-column: 1 / -1; background:#0288d1; color:white;">🔍 개별 전적 스캔</button>
-            <button class="mini-btn update-name-btn" data-ouid="${m.id}" data-name="${m.characterName}" style="background:#333;">이름수정</button>
-            <button class="mini-btn delete-member-btn" data-ouid="${m.id}" data-name="${m.characterName}" style="background:#b71c1c;">삭제</button>
+        <div class="admin-member-item">
+          <div class="m-header">
+            <span class="m-name ${isRealOuid ? 'is-valid' : 'is-legacy'}">${m.characterName} ${isRealOuid ? '' : '(구형)'}</span>
+            <span class="m-score">${m.mmr} pts</span>
+          </div>
+          <div class="m-stats">${m.wins}승 ${m.loses}패 (킬뎃: ${m.crewKills}/${m.crewDeaths})</div>
+          <div class="m-actions">
+            <button class="mini-btn individual-scan-btn" data-ouid="${m.id}" data-name="${m.characterName}">🔍 전적 스캔</button>
+            <button class="mini-btn update-name-btn" data-ouid="${m.id}" data-name="${m.characterName}">이름수정</button>
+            <button class="mini-btn delete-member-btn" data-ouid="${m.id}" data-name="${m.characterName}">삭제</button>
           </div>
         </div>
       `;
