@@ -514,7 +514,7 @@ body.dark-theme {
 .radar-section { width: 250px; height: 250px; position: relative; flex-shrink: 0; }
 .radar-container { width: 100%; height: 100%; position: relative; }
 .radar-chart { width: 100%; height: 100%; }
-.radar-data-polygon { fill: rgba(0, 210, 255, 0.4); stroke: #00d2ff; stroke-width: 2; filter: drop-shadow(0 0 5px rgba(0, 210, 255, 0.6)); animation: radar-pulse 3s infinite alternate; }
+.radar-data-polygon { filter: drop-shadow(0 0 5px rgba(0, 210, 255, 0.6)); animation: radar-pulse 3s infinite alternate; }
 @keyframes radar-pulse { 0% { filter: drop-shadow(0 0 5px rgba(0,210,255,0.6)); } 100% { filter: drop-shadow(0 0 15px rgba(0,210,255,1)); } }
 
 .radar-labels { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
