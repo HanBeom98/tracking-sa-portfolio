@@ -163,6 +163,12 @@ export class SaRepository {
       const details = [];
       const crewData = { names: this.crewMembers, ouids: this.crewOuids };
 
+      // --- 크루 점수 히스토리 조회 및 매칭 로직 ---
+      let scoreHistory = [];
+      if (this.crewRepository) {
+        scoreHistory = await this.crewRepository.getMemberMmrHistory(ouid);
+      }
+
       for (const m of sortedMatches) {
         try {
           await delay(50);
@@ -174,7 +180,33 @@ export class SaRepository {
             discoveredNames.add(playerInMatch.character_name);
           }
 
-          const subjectInfo = { ouid: ouid, kill: m.kill, death: m.death, result: m.match_result };
+          // 해당 매치 날짜와 일치하는 정산 기록 찾기
+          const matchedEntryIdx = scoreHistory.findIndex(h => h.date === m.match_date);
+          let mmrChange = 0;
+          let hsrChange = 0;
+
+          if (matchedEntryIdx !== -1) {
+            const currentEntry = scoreHistory[matchedEntryIdx];
+            const prevEntry = matchedEntryIdx > 0 ? scoreHistory[matchedEntryIdx - 1] : null;
+            
+            if (prevEntry) {
+              mmrChange = currentEntry.mmr - prevEntry.mmr;
+              hsrChange = (currentEntry.hsr || currentEntry.mmr) - (prevEntry.hsr || prevEntry.mmr);
+            } else {
+              // 첫 기록인 경우 기본점수(1200)와의 차이
+              mmrChange = currentEntry.mmr - 1200;
+              hsrChange = (currentEntry.hsr || currentEntry.mmr) - 1200;
+            }
+          }
+
+          const subjectInfo = { 
+            ouid: ouid, 
+            kill: m.kill, 
+            death: m.death, 
+            result: m.match_result,
+            mmrChange: mmrChange,
+            hsrChange: hsrChange
+          };
           details.push(new MatchRecord(detail, m.typeName, nickname, crewData, subjectInfo));
         } catch (err) {
           details.push(new MatchRecord({
