@@ -1,3 +1,20 @@
+## 2026-03-04
+
+### refactor(sudden-attack): complete DDD split and theme integration
+- **문제/증상**:
+  - `models.js` 파일 하나에 여러 도메인 책임이 섞여 있어 관리가 어려움.
+  - 서든어택 페이지의 독자적인 `dark-theme` 클래스가 메인 사이트의 `dark-mode` 기반 공통 GNB/Footer와 충돌하여 스타일이 어긋남.
+  - 소스 코드 내 하드코딩된 버전 쿼리(`?v=...`)로 인해 캐시 관리가 수동적이고 번거로움.
+- **변경**:
+  - **DDD 모델 분리**: `models.js`를 삭제하고 `player.js`, `match.js`, `stats.js`로 분리하여 각 레이어(`SaService`, `SaRepository`)에서 명확한 모델을 참조하도록 수정.
+  - **테마 규격 통합**: `index.html` 및 `ui/style.css`에서 `dark-mode` 클래스를 사용하도록 변경하여 공통 레이아웃과의 시각적 일관성 확보.
+  - **빌드 자동화 연동**: 모든 하드코딩된 버전을 제거하고 빌드 시스템에 캐시 제어를 위임함.
+  - **단위 테스트 추가**: 도메인 로직의 안정성을 위해 `sa-domain.test.js` 신설 및 100% 통과 확인.
+- **영향 범위**: `games/sudden-attack` 도메인 전체 및 동기화 맵(`public_sync_map.txt`).
+- **검증**:
+  - `npm run build` 결과물 물리적 검증 (GNB 다크모드 적용 확인).
+  - `npm run test:unit` 실행 및 모든 도메인 테스트 통과.
+
 ## 2026-03-02
 
 ### fix(sa): 서든어택 전적 검색 UX 개선 (SA Stats UX Improvements)

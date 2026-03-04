@@ -20,6 +20,13 @@ Tracking SA를 프레임워크 의존 없이 안정적으로 운영 가능한 DD
 - 뉴스 자동 발행: GitHub Actions 스케줄 실행에서 `python main.py` 실행 후 `public/` 자동 커밋.
 
 ## ✅ Completed Milestones
+### 2026-03-04
+- **서든어택 도메인 Strict DDD 완성 및 테마 통합**:
+  - **도메인 모델 분리**: `models.js`를 `player.js`, `match.js`, `stats.js`로 완전히 분리하여 도메인 응집도 향상.
+  - **공통 레이아웃 테마 통합**: `dark-mode` 클래스 적용을 통해 메인 사이트의 GNB/Footer와 서든어택 페이지의 디자인 통일성 확보.
+  - **코드 클린업**: 하드코딩된 버전 파라미터 제거 및 `public_sync_map.txt` 최신화로 유지보수 환경 정규화.
+  - **단위 테스트 구축**: `tests/unit/sa-domain.test.js`를 신설하여 핵심 비즈니스 로직(K/D, 플레이스타일 등) 자동 검증 체계 마련.
+
 ### 2026-03-03
 - **디스코드 봇 통합 및 내전 관리 시스템 구축**:
   - **고성능 인터랙션 핸들러**: `context.waitUntil`과 지연 응답(Deferred Response)을 도입하여 3초 타임아웃 문제를 해결하고 초고속 응답 환경 구축.

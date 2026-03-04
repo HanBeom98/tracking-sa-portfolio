@@ -13,6 +13,16 @@
 - `src/shared/ui/*`: 공통 헤더/푸터/헤드 템플릿
 - `src/shared/infra/*`: 빌드/DB/뉴스 인프라
 
+### [Sudden Attack 도메인] (Strict DDD)
+- **Domain**: 
+  - `src/domains/games/sudden-attack/domain/player.js`: 플레이어 프로필 및 티어 정보.
+  - `src/domains/games/sudden-attack/domain/match.js`: 매치 기록 및 스코어보드 데이터.
+  - `src/domains/games/sudden-attack/domain/stats.js`: K/D, 승률, 레이더 차트 등 통계 분석.
+- **Application**: `src/domains/games/sudden-attack/application/sa-service.js`: 데이터 로딩(SWR) 및 비즈니스 오케스트레이션.
+- **Infra**: `src/domains/games/sudden-attack/infra/sa-repository.js`: Nexon API 및 Crew Firestore 연동.
+- **UI**: `src/domains/games/sudden-attack/ui/components/`: 기능별 Web Components 분리.
+- **특이사항**: 메인 사이트와의 테마 통합(`dark-mode`) 완료 및 독자적인 사이드 레이아웃 구조 유지.
+
 ### [Games 도메인] (Strict DDD)
 - **Domain**: `src/domains/games/domain/Game.js` (게임 엔티티 모델 및 비즈니스 규칙)
 - **Application**: `src/domains/games/application/gameService.js` (게임 라이프사이클 비즈니스 로직)
