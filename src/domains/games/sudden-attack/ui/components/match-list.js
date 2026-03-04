@@ -10,11 +10,19 @@ export class SaMatchList extends HTMLElement {
     return '';
   }
 
-  drawScoreboard(players) {
+  drawScoreboard(match) {
+    const players = match.allPlayerStats;
     if (!players || players.length === 0) return '<p class="no-detail">매치 상세 정보가 없습니다.</p>';
+
+    const laundryHtml = match.laundryInfo && match.laundryInfo.isWashed 
+      ? `<div class="laundry-warning" style="background: rgba(255, 77, 77, 0.1); color: #ff4d4d; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 13px; font-weight: bold; border: 1px solid rgba(255, 77, 77, 0.3); text-align: center;">
+          ⚠️ 리조인 의심 (누락된 데스: ${match.laundryInfo.totalMissing})
+         </div>`
+      : '';
 
     return `
       <div class="scoreboard-wrapper">
+        ${laundryHtml}
         <table class="scoreboard-table">
           <thead>
             <tr>
