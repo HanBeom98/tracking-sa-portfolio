@@ -58,12 +58,12 @@ export class SaCrewRanking extends HTMLElement {
         <table class="ranking-table">
           <thead>
             <tr>
-              <th style="width: 60px;">순위</th>
-              <th style="width: 120px;">티어</th>
-              <th>캐릭터명</th>
-              <th style="width: 100px;">MMR</th>
-              <th style="width: 130px;">내전 킬뎃</th>
-              <th style="width: 160px;">승률 (전적)</th>
+              <th style="width: 80px;">순위</th>
+              <th style="width: 140px;">티어</th>
+              <th style="text-align: left; padding-left: 20px;">캐릭터명</th>
+              <th style="width: 120px;">MMR</th>
+              <th style="width: 120px;">내전 킬뎃</th>
+              <th style="width: 180px;">승률 (전적)</th>
             </tr>
           </thead>
           <tbody>
@@ -77,12 +77,12 @@ export class SaCrewRanking extends HTMLElement {
 
               return `
                 <tr class="rank-row ${idx < 3 ? 'top-rank' : ''}">
-                  <td class="pos">#${idx + 1}</td>
+                  <td class="pos" style="font-family: 'Roboto Mono', monospace;">#${idx + 1}</td>
                   <td class="tier ${tier.class}">${tier.icon} ${tier.name}</td>
                   <td class="name clickable-name" data-name="${m.characterName}">${m.characterName}</td>
                   <td class="mmr-val">${m.mmr}</td>
                   <td class="stats">${crewKdPercent}%</td>
-                  <td class="stats">${winRate}% <small>(${m.wins}W ${m.loses}L)</small></td>
+                  <td class="stats">${winRate}% <small style="display:inline; margin-left:5px; color:#666;">(${m.wins}승 ${m.loses}패)</small></td>
                 </tr>
               `;
             }).join('')}
