@@ -113,7 +113,29 @@ export class SaMatchList extends HTMLElement {
           padding: 15px 20px;
           cursor: pointer;
           transition: transform 0.2s, border-color 0.2s;
+          position: relative;
+          overflow: hidden;
         }
+        .match-item > * { position: relative; z-index: 2; }
+        
+        .watermark-text {
+          position: absolute;
+          left: 45%;
+          top: 50%;
+          transform: translateY(-50%);
+          font-family: 'Georgia', serif;
+          font-style: italic;
+          font-size: 42px;
+          font-weight: 900;
+          color: rgba(188, 0, 255, 0.06);
+          pointer-events: none;
+          z-index: 1;
+          letter-spacing: 8px;
+          white-space: nowrap;
+          text-transform: uppercase;
+          user-select: none;
+        }
+
         .match-item:hover {
           border-color: var(--primary);
           transform: translateY(-2px);
@@ -155,6 +177,7 @@ export class SaMatchList extends HTMLElement {
         ${list.map((match, idx) => `
           <li class="match-container">
             <div class="match-item ${match.matchResult.toLowerCase()} ${match.isCustomMatch ? 'is-custom' : ''}" data-idx="${idx}">
+              <div class="watermark-text">Laputa</div>
               <div class="match-info">
                 <div style="display:flex; align-items:center; gap:5px; margin-bottom:4px;">
                   <span class="type-tag">${match.matchTypeName}</span>
