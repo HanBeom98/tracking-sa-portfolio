@@ -132,13 +132,14 @@ export class SaMatchList extends HTMLElement {
         
         .kda { font-family: 'Roboto Mono', monospace; font-size: 16px; color: var(--text-main); text-align: center; }
         .kd-expand-box { text-align: right; }
-        .kd-expand-box .kd { display: block; font-weight: bold; font-size: 15px; margin-bottom: 4px; }
-        .expand-arrow { font-size: 10px; color: #444; transition: transform 0.3s; }
+        .kd-expand-box .kd { display: inline-block; font-weight: bold; font-size: 15px; }
+        .expand-arrow { font-size: 10px; color: #444; transition: transform 0.3s; margin-left: 8px; }
 
         .crew-label {
-          font-size: 9px; font-weight: 900; color: #ffcc00; background: rgba(255, 204, 0, 0.1);
-          padding: 1px 5px; border-radius: 3px; border: 1px solid rgba(255, 204, 0, 0.3);
-          margin-top: 4px; display: inline-block; letter-spacing: 0.5px;
+          font-size: 10px; font-weight: 900; color: #ffcc00; background: rgba(255, 204, 0, 0.1);
+          padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(255, 204, 0, 0.2);
+          margin-left: 8px; vertical-align: middle; display: inline-block; letter-spacing: 0.5px;
+          text-shadow: 0 0 5px rgba(255, 204, 0, 0.3);
         }
 
         .mvp-row { background: rgba(255, 204, 0, 0.05); }
