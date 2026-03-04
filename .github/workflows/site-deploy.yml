@@ -1,20 +1,21 @@
 name: Site Deploy (Test & Build)
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "src/**"
-      - "functions/**"
-      - "tests/**"
-      - "main.py"
-      - "requirements.txt"
-      - "package.json"
-      - "package-lock.json"
-      - "firebase.json"
-      - "firestore.rules"
-      - "firestore.indexes.json"
+#  push:
+#    branches:
+#      - main
+#    paths:
+#      - "src/**"
+#      - "functions/**"
+#      - "tests/**"
+#      - "main.py"
+#      - "requirements.txt"
+#      - "package.json"
+#      - "package-lock.json"
+#      - "firebase.json"
+#      - "firestore.rules"
+#      - "firestore.indexes.json"
+  workflow_dispatch:
       - "index.html"
       - "logo.svg"
       - "favicon.svg"
