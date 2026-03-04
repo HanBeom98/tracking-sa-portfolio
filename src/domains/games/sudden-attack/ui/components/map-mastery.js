@@ -2,13 +2,21 @@
  * UI Component for Map Mastery Analytics
  */
 export class SaMapMastery extends HTMLElement {
-  set mapStats(list) {
-    if (!list || list.length === 0) {
-      this.innerHTML = '';
-      return;
-    }
+  drawMapMastery(list, isCrew) {
+    if (!isCrew) return `
+      <style>
+        .non-crew-banner { margin-top: 35px; background: rgba(255, 255, 255, 0.02); border: 1px dashed #333; border-radius: 12px; padding: 30px; text-align: center; }
+        .banner-content { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .banner-content .icon { font-size: 24px; }
+        .banner-content .text p { margin: 0; font-weight: bold; color: #888; }
+        .banner-content .text span { font-size: 12px; color: #555; }
+      </style>
+      <div class="non-crew-banner"><div class="banner-content"><span class="icon">ℹ️</span><div class="text"><p>이 유저는 <strong>TRACKING CREW</strong> 멤버가 아닙니다.</p><span>크루 전용 맵 숙련도 통계를 보려면 크루에 가입하세요.</span></div></div></div>
+    `;
 
-    this.innerHTML = `
+    if (!list || list.length === 0) return '';
+
+    return `
       <style>
         .map-mastery-section { margin-top: 35px; padding-top: 25px; border-top: 1px dashed #2d3356; }
         .map-mastery-section .synergy-header h3 { font-size: 16px; color: #aaa; margin-bottom: 20px; }
@@ -51,6 +59,11 @@ export class SaMapMastery extends HTMLElement {
         </div>
       </div>
     `;
+  }
+
+  set params(p) {
+    if (!p) return;
+    this.innerHTML = this.drawMapMastery(p.mapStats, p.isCrew);
   }
 }
 customElements.define('sa-map-mastery', SaMapMastery);

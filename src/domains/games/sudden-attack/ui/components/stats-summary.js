@@ -139,7 +139,7 @@ export class SaStatsSummary extends HTMLElement {
     if (synergyComp) synergyComp.data = data;
 
     const mapComp = this.querySelector('#mapMastery');
-    if (mapComp) mapComp.mapStats = data.mapStats || [];
+    if (mapComp) mapComp.params = { mapStats: data.mapStats || [], isCrew: (data.crewMatchCount || 0) > 0 };
   }
 
   set vsModeData({ primary, target }) {
