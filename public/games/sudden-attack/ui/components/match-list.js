@@ -135,6 +135,12 @@ export class SaMatchList extends HTMLElement {
         .kd-expand-box .kd { display: block; font-weight: bold; font-size: 15px; margin-bottom: 4px; }
         .expand-arrow { font-size: 10px; color: #444; transition: transform 0.3s; }
 
+        .crew-label {
+          font-size: 9px; font-weight: 900; color: #ffcc00; background: rgba(255, 204, 0, 0.1);
+          padding: 1px 5px; border-radius: 3px; border: 1px solid rgba(255, 204, 0, 0.3);
+          margin-top: 4px; display: inline-block; letter-spacing: 0.5px;
+        }
+
         .mvp-row { background: rgba(255, 204, 0, 0.05); }
         .mvp-crown { color: var(--gold); margin-right: 5px; }
         
@@ -165,6 +171,7 @@ export class SaMatchList extends HTMLElement {
               <span class="kda">${match.kill} / ${match.death} / ${match.assist}</span>
               <div class="kd-expand-box">
                 <span class="kd ${this.getKdClass(match.kdPercent)}">KD: ${match.kdPercent}%</span>
+                ${match.isTargetCrew ? '<span class="crew-label">CREW</span>' : ''}
                 <span class="expand-arrow">▼</span>
               </div>
             </div>

@@ -60,6 +60,18 @@ export class RecentStats {
       this.calculateSynergy(matches, info.user_name);
       this.calculateMapStats(matches);
 
+      // --- 연승/연패(Streak) 로직 복구 ---
+      if (matches.length > 0) {
+        const firstResult = matches[0].matchResult;
+        this.streakType = firstResult; // "WIN" 또는 "LOSE"
+        let count = 0;
+        for (const m of matches) {
+          if (m.matchResult === firstResult) { count++; }
+          else { break; }
+        }
+        this.streakCount = count;
+      }
+
       this.trollMatches = matches.filter(m => {
         const kdVal = parseFloat(m.kd);
         return kdVal < 0.5 && m.death >= 5;

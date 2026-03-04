@@ -79,6 +79,10 @@ export class MatchRecord {
       this.damage = parseInt(playerStat.damage || 0);
       this.headshot = parseInt(playerStat.headshot || 0);
       this.kdPercent = (this.kill + this.death > 0) ? Math.round((this.kill / (this.kill + this.death)) * 100) : 0;
+
+      // 검색된 대상 유저가 크루원인지 여부 저장
+      const targetInStats = this.allPlayerStats.find(p => p.nickname === playerStat.user_name || p.nickname === playerStat.character_name);
+      this.isTargetCrew = targetInStats ? targetInStats.isCrew : false;
     }
 
     const winTeam = this.allPlayerStats.filter(p => p.result === 'WIN');
