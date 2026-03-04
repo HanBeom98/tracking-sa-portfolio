@@ -42,7 +42,7 @@ export class SaMatchList extends HTMLElement {
         .res.lose { color: var(--red); font-weight: bold; }
         .mvp-row { background: rgba(255, 204, 0, 0.05); }
         .mvp-crown { color: var(--gold); margin-right: 5px; }
-        .crew-tag { font-size: 9px; background: var(--border); color: var(--primary); padding: 1px 4px; border-radius: 3px; margin-left: 5px; }
+        .crew-tag { font-size: 9px; background: rgba(255, 204, 0, 0.1); color: var(--gold); padding: 1px 4px; border-radius: 3px; margin-left: 5px; border: 1px solid rgba(255, 204, 0, 0.3); font-weight: 800; }
         .mission-cell { color: var(--text-dim); font-size: 0.9em; font-family: 'Roboto Mono', monospace; }
         .dmg-val { color: var(--text-main); }
       </style>

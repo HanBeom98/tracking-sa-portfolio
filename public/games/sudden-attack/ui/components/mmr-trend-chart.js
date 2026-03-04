@@ -52,19 +52,34 @@ export class SaMmrTrendChart extends HTMLElement {
     
     const getAnalysis = (mmr, hsr) => {
       const diff = mmr - hsr;
-      if (diff > 40) return { 
-        title: "🎯 승부사형 (MMR 우세)", 
-        desc: `현재 MMR(${mmr})이 히든 스킬 레이팅(HSR: ${hsr})보다 높습니다. 개인의 전투 지표를 뛰어넘는 팀 운영 능력을 갖춘 효율적인 플레이어입니다.`,
-        color: "#ffcc00"
+      
+      // HSR이 압도적으로 높은 경우 (개인 실력은 좋으나 승률이 낮은 경우 -> 팀운 부족)
+      if (diff < -80) return {
+        title: "🌪️ 고독한 투신 (팀운 부재)",
+        desc: `개인 전투 지표(HSR: ${hsr})는 최상위권이나 팀운이 따르지 않아 MMR(${mmr})이 억제된 상태입니다. 실력에 걸맞은 팀원을 만난다면 비상이 가능합니다.`,
+        color: "#ef4444"
       };
       if (diff < -40) return { 
         title: "⚔️ 무력가형 (HSR 우세)", 
-        desc: `현재 히든 스킬 레이팅(HSR: ${hsr})이 MMR(${mmr})을 상회합니다. 압도적인 개인 교전 능력을 보유하고 있으며, 승률 반영이 완료되면 더 높은 위치로 올라갈 잠재력이 충분합니다.`,
+        desc: `현재 HSR(${hsr})이 MMR(${mmr})을 상회합니다. 강력한 개인 무력을 보유하고 있으며, 승리 기여도를 높이면 더 높은 위치로 올라갈 잠재력이 충분합니다.`,
         color: "#ff8800"
       };
+
+      // MMR이 압도적으로 높은 경우 (전투 지표에 비해 승률이 과하게 높은 경우 -> 무력 보완 필요)
+      if (diff > 80) return {
+        title: "🍀 행운의 승부사 (무력 부족)",
+        desc: `전투 지표(HSR: ${hsr}) 대비 MMR(${mmr})이 매우 높습니다. 뛰어난 팀운이나 운영으로 승리를 챙기고 있으나, 정체기를 벗어나려면 개인 무력 보완이 시급합니다.`,
+        color: "#10b981"
+      };
+      if (diff > 40) return { 
+        title: "🎯 실속형 승부사 (MMR 우세)", 
+        desc: `MMR(${mmr})이 HSR(${hsr})보다 높습니다. 개인의 지표 이상의 승률을 만들어내는 효율적인 플레이어입니다.`,
+        color: "#ffcc00"
+      };
+
       return { 
         title: "💠 올라운더 (밸런스형)", 
-        desc: `MMR(${mmr})과 히든 스킬 레이팅(HSR: ${hsr})이 조화롭습니다. 탄탄한 개인 무력과 팀 운영 능력을 고루 갖춘 완성형 플레이어입니다.`,
+        desc: `MMR(${mmr})과 히든 스킬 레이팅(HSR: ${hsr})이 조화롭습니다. 탄탄한 무력과 운영 능력을 고루 갖춘 완성형 플레이어입니다.`,
         color: "#a78bfa"
       };
     };
