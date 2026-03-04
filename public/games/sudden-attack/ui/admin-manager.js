@@ -1,4 +1,4 @@
-import { SaDiscordClient } from '../infra/discord-client.js?v=20260228_7';
+import { SaDiscordClient } from '../infra/discord-client.js';
 
 /**
  * Manages Admin Panel and Actions

@@ -19,8 +19,8 @@ import './ui/components/team-board.js';
 
 const NEXON_API_KEY = ''; 
 const client = new NexonApiClient(NEXON_API_KEY);
-const repository = new SaRepository(client);
 const crewRepo = new CrewRepository(client);
+const repository = new SaRepository(client, crewRepo);
 const service = new SaService(repository, crewRepo);
 
 const balancerManager = new BalancerManager(crewRepo);
@@ -54,7 +54,10 @@ let currentRankings = [];
 let primaryUserData = null; 
 const STORAGE_KEY = 'sa_recent_searches';
 
-async function handleSearch(nameOverride = null) {
+/**
+ * Main Search Logic with URL Sync
+ */
+async function handleSearch(nameOverride = null, skipHistory = false) {
   const name = nameOverride || searchInput.value.trim();
   if (!name) return;
   if (nameOverride) searchInput.value = name;
@@ -62,22 +65,28 @@ async function handleSearch(nameOverride = null) {
   try {
     showLoading(name);
     
+    // Update URL Parameter
+    if (!skipHistory) {
+      const newUrl = new URL(window.location);
+      newUrl.searchParams.set('n', name);
+      window.history.pushState({ name }, '', newUrl);
+    }
+
     // Callback for background updates (SWR)
     const onFreshData = (fresh) => {
       console.log(`[Main] Refreshing UI with fresh data for ${fresh.player.nickname}`);
       primaryUserData = fresh;
       renderUI(fresh.player, fresh.matches, fresh.stats);
-      loading.classList.add('hidden'); // Hide loading if it was still showing
+      loading.classList.add('hidden');
     };
 
-    // 1. Get Profile (May return cached data immediately)
+    // 1. Get Profile
     const result = await service.getFullPlayerProfile(name, currentRankings, onFreshData);
     
     primaryUserData = result;
     saveSearch(result.player.nickname);
     renderUI(result.player, result.matches, result.stats);
 
-    // If result is stale (from cache), keep loading indicator or show refresh status
     if (result.isStale) {
       loadingText.textContent = '최신 데이터로 업데이트 중...';
     } else {
@@ -93,42 +102,27 @@ async function handleSearch(nameOverride = null) {
 
 async function handleRefresh() {
   if (!primaryUserData) return;
-  // Clear cache for this user to force a fresh fetch
   localStorage.removeItem(`${service.CACHE_PREFIX}${primaryUserData.player.nickname.toLowerCase()}`);
-  await handleSearch(primaryUserData.player.nickname);
+  await handleSearch(primaryUserData.player.nickname, true);
 }
 
-// Opens the VS Modal
 function handleCompareClick() {
-  if (!primaryUserData) { 
-    alert('먼저 기준이 될 유저(본인 등)를 검색해 주세요!'); 
-    return; 
-  }
-  vsTargetName.value = ''; // Clear previous input
+  if (!primaryUserData) { alert('먼저 기준이 될 유저를 검색해 주세요!'); return; }
+  vsTargetName.value = '';
   vsModal.classList.remove('hidden');
 }
 
-// Executes the actual comparison from the modal
 async function executeVsMode() {
   const targetName = vsTargetName.value.trim();
   if (!targetName) return;
-  if (primaryUserData.player.nickname.toLowerCase() === targetName.toLowerCase()) { 
-    alert('자기 자신과는 비교할 수 없습니다.'); 
-    return; 
-  }
-
-  vsModal.classList.add('hidden'); // Close modal
-  
+  if (primaryUserData.player.nickname.toLowerCase() === targetName.toLowerCase()) { alert('자기 자신과는 비교할 수 없습니다.'); return; }
+  vsModal.classList.add('hidden');
   try {
     loading.classList.remove('hidden');
     loadingText.textContent = `${primaryUserData.player.nickname} vs ${targetName} 비교 중...`;
     const targetData = await service.getFullPlayerProfile(targetName, currentRankings);
     renderVSMode(primaryUserData, targetData);
-  } catch (error) { 
-    handleSearchError(error); 
-  } finally { 
-    loading.classList.add('hidden'); 
-  }
+  } catch (error) { handleSearchError(error); } finally { loading.classList.add('hidden'); }
 }
 
 function showLoading(name) {
@@ -147,10 +141,8 @@ function showLoading(name) {
 }
 
 function renderUI(player, matches, stats) {
-  // Reveal action buttons
   refreshBtn.classList.remove('hidden');
   compareBtn.classList.remove('hidden');
-
   profileSection.innerHTML = '<sa-player-card></sa-player-card>';
   profileSection.querySelector('sa-player-card').player = player;
   profileSection.classList.remove('hidden');
@@ -160,8 +152,6 @@ function renderUI(player, matches, stats) {
   historySection.innerHTML = '<h2>최근 20경기 매치 기록</h2><sa-match-list></sa-match-list>';
   historySection.querySelector('sa-match-list').matches = matches;
   historySection.classList.remove('hidden');
-  
-  // Hide global ranking when viewing individual stats
   crewRankingSection.classList.add('hidden');
 }
 
@@ -183,8 +173,8 @@ function renderVSMode(primary, target) {
 }
 
 function handleSearchError(error) {
-  if (error.message === 'TEST_KEY_LIMITATION') alert('현재 테스트 API 키를 사용 중입니다.\n\n[제약 사항]\n테스트 키는 키를 발급받은 넥슨 계정 본인의 캐릭터만 조회가 가능합니다.');
-  else if (error.message === 'PLAYER_NOT_FOUND') alert('캐릭터를 찾을 수 없습니다.\n\n[가능한 원인]\n1. 캐릭터명이 정확하지 않음\n2. 최근 플레이 기록 없음');
+  if (error.message === 'TEST_KEY_LIMITATION') alert('현재 테스트 API 키를 사용 중입니다.\n\n[제약 사항]\n테스트 키는 본인 계정만 조회가 가능합니다.');
+  else if (error.message === 'PLAYER_NOT_FOUND') alert('캐릭터를 찾을 수 없습니다.');
   else alert('전적을 불러오는 중 오류가 발생했습니다.');
   console.error('[SA] Search Error:', error);
 }
@@ -206,7 +196,7 @@ function renderRecentSearches() {
   if (searches.length === 0) { recentSearchesContainer.innerHTML = ''; return; }
   recentSearchesContainer.innerHTML = `<span>최근 검색:</span>` + searches.map(s => `<button class="search-chip">${s}</button>`).join('');
   recentSearchesContainer.querySelectorAll('.search-chip').forEach(btn => {
-    btn.addEventListener('click', () => { searchInput.value = btn.textContent; handleSearch(); });
+    btn.addEventListener('click', () => { handleSearch(btn.textContent); });
   });
 }
 
@@ -250,13 +240,41 @@ async function initCrew() {
   }
 }
 
+/**
+ * URL Parameter Sync Initialization
+ */
+function initUrlSync() {
+  const params = new URLSearchParams(window.location.search);
+  const nameFromUrl = params.get('n');
+  
+  if (nameFromUrl) {
+    handleSearch(nameFromUrl, true);
+  }
+
+  window.addEventListener('popstate', (e) => {
+    if (e.state && e.state.name) {
+      handleSearch(e.state.name, true);
+    } else {
+      const urlParams = new URLSearchParams(window.location.search);
+      const name = urlParams.get('n');
+      if (name) handleSearch(name, true);
+      else {
+        profileSection.classList.add('hidden');
+        statsSection.classList.add('hidden');
+        historySection.classList.add('hidden');
+        crewRankingSection.classList.remove('hidden');
+        searchInput.value = '';
+      }
+    }
+  });
+}
+
 // Global Event Listeners
 searchBtn.addEventListener('click', () => handleSearch());
 refreshBtn.addEventListener('click', () => handleRefresh());
 compareBtn.addEventListener('click', () => handleCompareClick());
 searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSearch(); });
 
-// VS Modal Listeners
 startVsBtn.addEventListener('click', () => executeVsMode());
 vsTargetName.addEventListener('keypress', (e) => { if (e.key === 'Enter') executeVsMode(); });
 closeVsModalBtn.addEventListener('click', () => vsModal.classList.add('hidden'));
@@ -284,4 +302,5 @@ window.addEventListener('sa-request-search', (e) => {
 });
 
 initCrew();
+initUrlSync(); // URL 동기화 활성화
 renderRecentSearches();

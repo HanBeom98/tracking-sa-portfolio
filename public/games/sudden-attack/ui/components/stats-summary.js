@@ -55,6 +55,12 @@ export class SaStatsSummary extends HTMLElement {
         .stat-box label { font-size: 12px; color: #666; display: block; margin-bottom: 5px; }
         .stat-box .value { font-size: 20px; font-weight: bold; color: #fff; font-family: 'Roboto Mono', monospace; }
         .value.highlight { color: #00d2ff; }
+
+        /* Secondary Stats Grid (Trend + Map) */
+        .stats-detail-grid {
+          display: grid; grid-template-columns: 1.2fr 1fr; gap: 25px; margin-top: 30px; align-items: start;
+        }
+        .stats-detail-grid > * { margin-top: 0 !important; }
         
         /* Crew Stats Card */
         .crew-stats-card {
@@ -68,7 +74,8 @@ export class SaStatsSummary extends HTMLElement {
         .crew-grid .stat-box { border-color: rgba(255, 204, 0, 0.1); }
         .gold-highlight { color: #ffcc00 !important; }
 
-        @media (max-width: 768px) {
+        @media (max-width: 900px) {
+          .stats-detail-grid { grid-template-columns: 1fr; }
           .stats-summary-header { flex-direction: column; }
           .radar-section { margin: 0 auto; }
           .stats-grid { grid-template-columns: repeat(2, 1fr); }
@@ -112,9 +119,11 @@ export class SaStatsSummary extends HTMLElement {
           </div>
         </div>
 
-        <sa-mmr-trend-chart id="trendChart"></sa-mmr-trend-chart>
+        <div class="stats-detail-grid">
+          <sa-mmr-trend-chart id="trendChart"></sa-mmr-trend-chart>
+          <sa-map-mastery id="mapMastery"></sa-map-mastery>
+        </div>
         <sa-synergy-view id="synergyView"></sa-synergy-view>
-        <sa-map-mastery id="mapMastery"></sa-map-mastery>
 
         ${this.renderCrewAnalysis(data)}
       </div>
@@ -124,30 +133,49 @@ export class SaStatsSummary extends HTMLElement {
     if (radarComp) radarComp.data = { radar: data.radar };
 
     const trendComp = this.querySelector('#trendChart');
-    if (trendComp) trendComp.params = { mmrTrend: data.mmrTrend || [], currentMmr: data.crewMmr || 1200, isCrew: (data.crewMatchCount || 0) > 0 };
+    if (trendComp) trendComp.params = { mmrTrend: data.mmrTrend || [], currentMmr: data.crewMmr || 1200, isCrew: data.isCrew };
 
     const synergyComp = this.querySelector('#synergyView');
     if (synergyComp) synergyComp.data = data;
 
     const mapComp = this.querySelector('#mapMastery');
-    if (mapComp) mapComp.mapStats = data.mapStats || [];
+    if (mapComp) mapComp.params = { mapStats: data.mapStats || [], isCrew: data.isCrew };
   }
 
   set vsModeData({ primary, target }) {
     this.innerHTML = `
       <style>
+        .vs-mode-card .vs-grid-container {
+          display: flex; gap: 30px; align-items: center; margin-top: 15px;
+        }
+        .vs-left { flex: 0 0 180px; }
+        .vs-center { flex: 1; }
+        .vs-right { flex: 0 0 380px; }
+
         .vs-comparison-table { width: 100%; border-collapse: collapse; }
-        .vs-comparison-table th { padding: 10px; color: #666; font-size: 14px; text-transform: uppercase; border-bottom: 1px solid #2d3356; }
-        .vs-comparison-table td { text-align: center; padding: 15px; font-size: 18px; font-weight: 800; color: #fff; }
-        .vs-comparison-table td.lbl { font-size: 12px; color: #888; font-weight: 400; width: 100px; }
+        .vs-comparison-table th { padding: 8px; color: #666; font-size: 12px; text-transform: uppercase; border-bottom: 1px solid #2d3356; }
+        .vs-comparison-table td { text-align: center; padding: 12px 5px; font-size: 16px; font-weight: 800; color: #fff; }
+        .vs-comparison-table td.lbl { font-size: 11px; color: #888; font-weight: 400; width: 80px; }
+        
+        /* MMR Trend Chart compacting for VS mode */
+        .vs-mode-card sa-mmr-trend-chart { display: block; margin-top: 0; }
+        
+        @media (max-width: 1100px) {
+          .vs-mode-card .vs-grid-container { flex-wrap: wrap; justify-content: center; }
+          .vs-right { flex: 0 0 100%; margin-top: 20px; }
+        }
+        @media (max-width: 650px) {
+          .vs-mode-card .vs-grid-container { flex-direction: column; }
+          .vs-left { flex: 0 0 auto; }
+        }
       </style>
       <div class="stats-summary-card vs-mode-card">
         <div class="header-row"><h3>📊 전적 상세 비교 (VS)</h3></div>
-        <div class="stats-summary-header">
-          <div class="radar-section">
-            <sa-radar-chart id="vsRadar"></sa-radar-chart>
+        <div class="vs-grid-container">
+          <div class="vs-left">
+            <sa-radar-chart id="vsRadar" style="width: 180px; height: 180px; display: block;"></sa-radar-chart>
           </div>
-          <div class="text-stats-section">
+          <div class="vs-center">
             <table class="vs-comparison-table">
               <thead>
                 <tr>
@@ -163,8 +191,10 @@ export class SaStatsSummary extends HTMLElement {
               </tbody>
             </table>
           </div>
+          <div class="vs-right">
+            <sa-mmr-trend-chart id="vsTrend"></sa-mmr-trend-chart>
+          </div>
         </div>
-        <sa-mmr-trend-chart id="vsTrend"></sa-mmr-trend-chart>
       </div>
     `;
     this.querySelector('#vsRadar').data = { radar: primary.radar, vsTargetRadar: target.radar };

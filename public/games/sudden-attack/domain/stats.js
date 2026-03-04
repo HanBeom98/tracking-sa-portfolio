@@ -9,6 +9,7 @@ export class RecentStats {
     this.streakCount = 0;
     this.streakType = "NONE"; 
     this.trollMatches = 0;
+    this.crewTrollMatches = 0;
     this.playstyleTitle = "데이터 수집 중";
     this.playstyleIcon = "🕵️";
     this.mmrTrend = []; 
@@ -17,7 +18,8 @@ export class RecentStats {
     this.worstPartner = null;
     this.mapStats = [];
 
-    // --- 내전 데이터 초기화 (항상 존재하도록 보장) ---
+    // --- 내전 데이터 초기화 ---
+    this.isCrew = false; // 기본값: 비크루원
     this.crewMatchCount = 0;
     this.crewKills = 0;
     this.crewDeaths = 0;
@@ -27,6 +29,7 @@ export class RecentStats {
     this.crewStatusIcon = "👤";
 
     if (crewData) {
+      this.isCrew = true; // 크루 데이터가 있으면 크루원임
       this.crewMatchCount = (Number(crewData.wins || 0)) + (Number(crewData.loses || 0));
       this.crewKills = Number(crewData.crewKills || 0);
       this.crewDeaths = Number(crewData.crewDeaths || 0);
@@ -58,30 +61,31 @@ export class RecentStats {
       ).pop();
 
       this.calculateSynergy(matches, info.user_name);
-      this.calculateMapStats(matches);
+      
+      // --- 맵 숙련도: 내전(isCustomMatch) 기록으로만 한정 ---
+      const customMatches = matches.filter(m => m.isCustomMatch);
+      this.calculateMapStats(customMatches);
 
-      // --- 연승/연패(Streak) 로직 복구 ---
-      if (matches.length > 0) {
-        const firstResult = matches[0].matchResult;
-        this.streakType = firstResult; // "WIN" 또는 "LOSE"
-        let count = 0;
-        for (const m of matches) {
-          if (m.matchResult === firstResult) { count++; }
-          else { break; }
-        }
-        this.streakCount = count;
+      // --- 연승/연패(Streak) ---
+      const firstResult = matches[0].matchResult;
+      this.streakType = firstResult;
+      let count = 0;
+      for (const m of matches) {
+        if (m.matchResult === firstResult) { count++; }
+        else { break; }
       }
+      this.streakCount = count;
 
       this.trollMatches = matches.filter(m => {
         const kdVal = parseFloat(m.kd);
         return kdVal < 0.5 && m.death >= 5;
       }).length;
 
-      // --- 내전 부진 경기 집계 로직 추가 ---
+      // --- 내전 부진 경기 ---
       this.crewTrollMatches = matches.filter(m => {
-        if (!m.isCustomMatch) return false; // 내전이 아닌 경우 제외
+        if (!m.isCustomMatch) return false;
         const kdVal = parseFloat(m.kd);
-        return kdVal < 0.5 && m.death >= 5; // 부진 기준 적용
+        return kdVal < 0.5 && m.death >= 5;
       }).length;
 
       const radarKd = this.kdPercent;
@@ -121,7 +125,6 @@ export class RecentStats {
       else stats[m.mapName].loses += 1;
     });
 
-    // 사용자 정의 선호 순서 (드래곤로드, 프로방스, 시티캣, 크로스포트, 올드타운)
     const PREFERRED_ORDER = ['드래곤로드', '프로방스', '시티캣', '크로스포트', '올드타운'];
 
     this.mapStats = Object.values(stats)
@@ -132,14 +135,9 @@ export class RecentStats {
       .sort((a, b) => {
         const idxA = PREFERRED_ORDER.indexOf(a.name);
         const idxB = PREFERRED_ORDER.indexOf(b.name);
-
-        // 둘 다 선호 리스트에 있는 경우
         if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-        // 하나만 선호 리스트에 있는 경우 (선호 맵을 앞으로)
         if (idxA !== -1) return -1;
         if (idxB !== -1) return 1;
-
-        // 리스트에 없는 맵들은 기존처럼 승률 내림차순 정렬
         return b.winRate - a.winRate || b.total - a.total;
       });
   }

@@ -36,7 +36,8 @@ export class SaCrewRanking extends HTMLElement {
         .mmr-val { font-weight: 800; color: #00d2ff; font-size: 18px; font-family: 'Roboto Mono', monospace; }
         .stats { color: #e0e0e0; font-size: 14px; font-weight: 500; }
         .stats small { display: block; font-size: 11px; color: #666; margin-top: 4px; }
-        .tier { display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: bold; font-size: 14px; }
+        .tier { font-weight: bold; font-size: 14px; white-space: nowrap; }
+        .tier-wrapper { display: inline-flex; align-items: center; gap: 6px; vertical-align: middle; }
         .tier.t-dia { color: #00ffff; text-shadow: 0 0 10px rgba(0, 255, 255, 0.5); }
         .tier.t-pla { color: #bc00ff; }
         .tier.t-gold { color: #ffcc00; }
@@ -78,7 +79,9 @@ export class SaCrewRanking extends HTMLElement {
               return `
                 <tr class="rank-row ${idx < 3 ? 'top-rank' : ''}">
                   <td class="pos" style="font-family: 'Roboto Mono', monospace;">#${idx + 1}</td>
-                  <td class="tier ${tier.class}">${tier.icon} ${tier.name}</td>
+                  <td class="tier ${tier.class}">
+                    <span class="tier-wrapper"><span>${tier.icon}</span><span>${tier.name}</span></span>
+                  </td>
                   <td class="name clickable-name" data-name="${m.characterName}">${m.characterName}</td>
                   <td class="mmr-val">${m.mmr}</td>
                   <td class="stats">${crewKdPercent}%</td>

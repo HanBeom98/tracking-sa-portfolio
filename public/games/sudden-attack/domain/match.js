@@ -80,9 +80,14 @@ export class MatchRecord {
       this.headshot = parseInt(playerStat.headshot || 0);
       this.kdPercent = (this.kill + this.death > 0) ? Math.round((this.kill / (this.kill + this.death)) * 100) : 0;
 
-      // 검색된 대상 유저가 크루원인지 여부 저장
-      const targetInStats = this.allPlayerStats.find(p => p.nickname === playerStat.user_name || p.nickname === playerStat.character_name);
+      // 검색된 대상 유저가 크루원인지 여부 저장 (정규화된 이름으로 비교)
+      const targetName = (playerStat.user_name || playerStat.character_name || "").toLowerCase().trim();
+      const targetInStats = this.allPlayerStats.find(p => (p.nickname || "").toLowerCase().trim() === targetName);
       this.isTargetCrew = targetInStats ? targetInStats.isCrew : false;
+
+      // MMR/HSR 변동 수치 저장 (정산 데이터가 있는 경우)
+      this.mmrChange = subjectInfo ? Number(subjectInfo.mmrChange || 0) : 0;
+      this.hsrChange = subjectInfo ? Number(subjectInfo.hsrChange || 0) : 0;
     }
 
     const winTeam = this.allPlayerStats.filter(p => p.result === 'WIN');

@@ -113,7 +113,29 @@ export class SaMatchList extends HTMLElement {
           padding: 15px 20px;
           cursor: pointer;
           transition: transform 0.2s, border-color 0.2s;
+          position: relative;
+          overflow: hidden;
         }
+        .match-item > * { position: relative; z-index: 2; }
+        
+        .watermark-text {
+          position: absolute;
+          left: 45%;
+          top: 50%;
+          transform: translateY(-50%);
+          font-family: 'Georgia', serif;
+          font-style: italic;
+          font-size: 42px;
+          font-weight: 900;
+          color: rgba(188, 0, 255, 0.06);
+          pointer-events: none;
+          z-index: 1;
+          letter-spacing: 8px;
+          white-space: nowrap;
+          text-transform: uppercase;
+          user-select: none;
+        }
+
         .match-item:hover {
           border-color: var(--primary);
           transform: translateY(-2px);
@@ -132,14 +154,15 @@ export class SaMatchList extends HTMLElement {
         
         .kda { font-family: 'Roboto Mono', monospace; font-size: 16px; color: var(--text-main); text-align: center; }
         .kd-expand-box { text-align: right; }
-        .kd-expand-box .kd { display: block; font-weight: bold; font-size: 15px; margin-bottom: 4px; }
-        .expand-arrow { font-size: 10px; color: #444; transition: transform 0.3s; }
+        .kd-expand-box .kd { display: inline-block; font-weight: bold; font-size: 15px; }
+        .expand-arrow { font-size: 10px; color: #444; transition: transform 0.3s; margin-left: 8px; }
 
-        .crew-label {
-          font-size: 9px; font-weight: 900; color: #ffcc00; background: rgba(255, 204, 0, 0.1);
-          padding: 1px 5px; border-radius: 3px; border: 1px solid rgba(255, 204, 0, 0.3);
-          margin-top: 4px; display: inline-block; letter-spacing: 0.5px;
+        .score-change {
+          display: block; font-size: 10px; font-weight: 800; margin-top: 4px; letter-spacing: -0.2px;
         }
+        .score-up { color: #00ff88; }
+        .score-down { color: #ff4d4d; }
+        .score-hsr { color: var(--gold); margin-left: 4px; }
 
         .mvp-row { background: rgba(255, 204, 0, 0.05); }
         .mvp-crown { color: var(--gold); margin-right: 5px; }
@@ -154,6 +177,7 @@ export class SaMatchList extends HTMLElement {
         ${list.map((match, idx) => `
           <li class="match-container">
             <div class="match-item ${match.matchResult.toLowerCase()} ${match.isCustomMatch ? 'is-custom' : ''}" data-idx="${idx}">
+              <div class="watermark-text">Laputa</div>
               <div class="match-info">
                 <div style="display:flex; align-items:center; gap:5px; margin-bottom:4px;">
                   <span class="type-tag">${match.matchTypeName}</span>
@@ -170,8 +194,15 @@ export class SaMatchList extends HTMLElement {
               </div>
               <span class="kda">${match.kill} / ${match.death} / ${match.assist}</span>
               <div class="kd-expand-box">
-                <span class="kd ${this.getKdClass(match.kdPercent)}">KD: ${match.kdPercent}%</span>
-                ${match.isTargetCrew ? '<span class="crew-label">CREW</span>' : ''}
+                <div style="display:inline-block; vertical-align: middle;">
+                  <span class="kd ${this.getKdClass(match.kdPercent)}">KD: ${match.kdPercent}%</span>
+                  ${(match.mmrChange !== 0 || match.hsrChange !== 0) ? `
+                    <div class="score-change">
+                      <span class="${match.mmrChange >= 0 ? 'score-up' : 'score-down'}">${match.mmrChange >= 0 ? '+' : ''}${match.mmrChange} MMR</span>
+                      ${match.hsrChange !== 0 ? `<span class="score-hsr">${match.hsrChange >= 0 ? '+' : ''}${match.hsrChange} HSR</span>` : ''}
+                    </div>
+                  ` : ''}
+                </div>
                 <span class="expand-arrow">▼</span>
               </div>
             </div>
