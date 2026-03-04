@@ -48,9 +48,32 @@ export class SaMmrTrendChart extends HTMLElement {
     const getMmr = v => typeof v === 'object' && v !== null ? v.mmr : v;
     const getHsr = v => typeof v === 'object' && v !== null ? (v.hsr || v.mmr) : v;
 
+    const currentHsr = normalizedTrend.length > 0 ? getHsr(normalizedTrend[normalizedTrend.length - 1]) : currentMmr;
+    
+    const getAnalysis = (mmr, hsr) => {
+      const diff = mmr - hsr;
+      if (diff > 40) return { 
+        title: "🎯 승부사형 (MMR 우세)", 
+        desc: `현재 MMR(${mmr})이 히든 스킬 레이팅(HSR: ${hsr})보다 높습니다. 개인의 전투 지표를 뛰어넘는 팀 운영 능력을 갖춘 효율적인 플레이어입니다.`,
+        color: "#ffcc00"
+      };
+      if (diff < -40) return { 
+        title: "⚔️ 무력가형 (HSR 우세)", 
+        desc: `현재 히든 스킬 레이팅(HSR: ${hsr})이 MMR(${mmr})을 상회합니다. 압도적인 개인 교전 능력을 보유하고 있으며, 승률 반영이 완료되면 더 높은 위치로 올라갈 잠재력이 충분합니다.`,
+        color: "#ff8800"
+      };
+      return { 
+        title: "💠 올라운더 (밸런스형)", 
+        desc: `MMR(${mmr})과 히든 스킬 레이팅(HSR: ${hsr})이 조화롭습니다. 탄탄한 개인 무력과 팀 운영 능력을 고루 갖춘 완성형 플레이어입니다.`,
+        color: "#a78bfa"
+      };
+    };
+
+    const analysis = vsTargetData ? null : getAnalysis(currentMmr, currentHsr);
+
     const renderSVG = (type, color, gradientId) => {
       const getVal = type === 'MMR' ? getMmr : getHsr;
-      const curVal = type === 'MMR' ? currentMmr : (normalizedTrend[normalizedTrend.length-1]?.hsr || currentMmr);
+      const curVal = type === 'MMR' ? currentMmr : currentHsr;
       
       const allValues = [...normalizedTrend.map(getVal)];
       if (vsTargetData) {
@@ -123,6 +146,16 @@ export class SaMmrTrendChart extends HTMLElement {
         .vs-legend { display: flex; gap: 15px; font-size: 12px; justify-content: flex-end; margin-bottom: 10px; }
         .leg-item.p-color { color: #00d2ff; }
         .leg-item.t-color { color: #bc00ff; }
+        
+        .analysis-box {
+          margin-top: 10px; padding: 15px; border-radius: 12px;
+          background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+          border-left: 4px solid var(--accent-color, #a78bfa);
+          animation: slideUp 0.6s ease-out;
+        }
+        .analysis-box h5 { margin: 0 0 5px 0; font-size: 14px; color: var(--accent-color, #a78bfa); }
+        .analysis-box p { margin: 0; font-size: 12px; color: #888; line-height: 1.6; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
       </style>
       <div class="trend-chart-wrapper ${vsTargetData ? 'vs-overlay' : ''}">
         ${vsTargetData ? `
@@ -136,6 +169,13 @@ export class SaMmrTrendChart extends HTMLElement {
         ${renderSVG('HSR', '#ff8800', 'hsrGradient')}
         
         <div class="trend-labels"><span>과거 기록</span><span>최신 기록</span></div>
+        
+        ${analysis ? `
+          <div class="analysis-box" style="--accent-color: ${analysis.color}">
+            <h5>${analysis.title}</h5>
+            <p>${analysis.desc}</p>
+          </div>
+        ` : ''}
       </div>
     `;
   }

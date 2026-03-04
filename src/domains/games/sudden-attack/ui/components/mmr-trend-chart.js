@@ -48,9 +48,47 @@ export class SaMmrTrendChart extends HTMLElement {
     const getMmr = v => typeof v === 'object' && v !== null ? v.mmr : v;
     const getHsr = v => typeof v === 'object' && v !== null ? (v.hsr || v.mmr) : v;
 
+    const currentHsr = normalizedTrend.length > 0 ? getHsr(normalizedTrend[normalizedTrend.length - 1]) : currentMmr;
+    
+    const getAnalysis = (mmr, hsr) => {
+      const diff = mmr - hsr;
+      
+      // HSR이 압도적으로 높은 경우 (개인 실력은 좋으나 승률이 낮은 경우 -> 팀운 부족)
+      if (diff < -80) return {
+        title: "🌪️ 고독한 투신 (팀운 부재)",
+        desc: `개인 전투 지표(HSR: ${hsr})는 최상위권이나 팀운이 따르지 않아 MMR(${mmr})이 억제된 상태입니다. 실력에 걸맞은 팀원을 만난다면 비상이 가능합니다.`,
+        color: "#ef4444"
+      };
+      if (diff < -40) return { 
+        title: "⚔️ 무력가형 (HSR 우세)", 
+        desc: `현재 HSR(${hsr})이 MMR(${mmr})을 상회합니다. 강력한 개인 무력을 보유하고 있으며, 승리 기여도를 높이면 더 높은 위치로 올라갈 잠재력이 충분합니다.`,
+        color: "#ff8800"
+      };
+
+      // MMR이 압도적으로 높은 경우 (전투 지표에 비해 승률이 과하게 높은 경우 -> 무력 보완 필요)
+      if (diff > 80) return {
+        title: "🍀 행운의 승부사 (무력 부족)",
+        desc: `전투 지표(HSR: ${hsr}) 대비 MMR(${mmr})이 매우 높습니다. 뛰어난 팀운이나 운영으로 승리를 챙기고 있으나, 정체기를 벗어나려면 개인 무력 보완이 시급합니다.`,
+        color: "#10b981"
+      };
+      if (diff > 40) return { 
+        title: "🎯 실속형 승부사 (MMR 우세)", 
+        desc: `MMR(${mmr})이 HSR(${hsr})보다 높습니다. 개인의 지표 이상의 승률을 만들어내는 효율적인 플레이어입니다.`,
+        color: "#ffcc00"
+      };
+
+      return { 
+        title: "💠 올라운더 (밸런스형)", 
+        desc: `MMR(${mmr})과 히든 스킬 레이팅(HSR: ${hsr})이 조화롭습니다. 탄탄한 무력과 운영 능력을 고루 갖춘 완성형 플레이어입니다.`,
+        color: "#a78bfa"
+      };
+    };
+
+    const analysis = vsTargetData ? null : getAnalysis(currentMmr, currentHsr);
+
     const renderSVG = (type, color, gradientId) => {
       const getVal = type === 'MMR' ? getMmr : getHsr;
-      const curVal = type === 'MMR' ? currentMmr : (normalizedTrend[normalizedTrend.length-1]?.hsr || currentMmr);
+      const curVal = type === 'MMR' ? currentMmr : currentHsr;
       
       const allValues = [...normalizedTrend.map(getVal)];
       if (vsTargetData) {
@@ -123,6 +161,16 @@ export class SaMmrTrendChart extends HTMLElement {
         .vs-legend { display: flex; gap: 15px; font-size: 12px; justify-content: flex-end; margin-bottom: 10px; }
         .leg-item.p-color { color: #00d2ff; }
         .leg-item.t-color { color: #bc00ff; }
+        
+        .analysis-box {
+          margin-top: 10px; padding: 15px; border-radius: 12px;
+          background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+          border-left: 4px solid var(--accent-color, #a78bfa);
+          animation: slideUp 0.6s ease-out;
+        }
+        .analysis-box h5 { margin: 0 0 5px 0; font-size: 14px; color: var(--accent-color, #a78bfa); }
+        .analysis-box p { margin: 0; font-size: 12px; color: #888; line-height: 1.6; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
       </style>
       <div class="trend-chart-wrapper ${vsTargetData ? 'vs-overlay' : ''}">
         ${vsTargetData ? `
@@ -136,6 +184,13 @@ export class SaMmrTrendChart extends HTMLElement {
         ${renderSVG('HSR', '#ff8800', 'hsrGradient')}
         
         <div class="trend-labels"><span>과거 기록</span><span>최신 기록</span></div>
+        
+        ${analysis ? `
+          <div class="analysis-box" style="--accent-color: ${analysis.color}">
+            <h5>${analysis.title}</h5>
+            <p>${analysis.desc}</p>
+          </div>
+        ` : ''}
       </div>
     `;
   }
