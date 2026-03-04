@@ -2,10 +2,6 @@
  * UI Component for Stats Detailed Summary (Refactored Orchestrator)
  * Coordinates specialized sub-components: Radar, Trend, Map Mastery, and Synergy.
  */
-import './radar-chart.js?v=20260228_7';
-import './mmr-trend-chart.js?v=20260228_7';
-import './synergy-view.js?v=20260228_7';
-import './map-mastery.js?v=20260228_7';
 
 export class SaStatsSummary extends HTMLElement {
   getKdColor(kdPercent) {
