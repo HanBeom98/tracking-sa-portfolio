@@ -135,7 +135,28 @@ export async function onRequest(context) {
 
   if (interaction.type === 3) {
     const cid = interaction.data.custom_id, uid = interaction.member?.user?.id || interaction.user?.id;
-    if (cid === 'join_match') return new Response(JSON.stringify({ type: 9, data: { title: "참가 신청", custom_id: "match_entry_modal", components: [{ type: 1, components: [{ type: 4, custom_id: "user_nickname", label: "닉네임", style: 1, min_length: 2, max_length: 16, required: true }] }] } }), { headers: { 'Content-Type': 'application/json' } });
+    if (cid === 'join_match') {
+      return new Response(JSON.stringify({ 
+        type: 9, 
+        data: { 
+          title: "내전 참가 신청", 
+          custom_id: "match_entry_modal", 
+          components: [{ 
+            type: 1, 
+            components: [{ 
+              type: 4, 
+              custom_id: "user_nickname", 
+              label: "서든어택 인게임 닉네임", 
+              style: 1, 
+              placeholder: "디코 닉네임 X / 정확한 서든 닉네임 입력!", 
+              min_length: 2, 
+              max_length: 16, 
+              required: true 
+            }] 
+          }] 
+        } 
+      }), { headers: { 'Content-Type': 'application/json' } });
+    }
 
     context.waitUntil((async () => {
       const session = await getDoc(PROJECT_ID, 'match_sessions', guildId);
