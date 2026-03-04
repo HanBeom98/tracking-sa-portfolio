@@ -133,13 +133,13 @@ export class SaStatsSummary extends HTMLElement {
     if (radarComp) radarComp.data = { radar: data.radar };
 
     const trendComp = this.querySelector('#trendChart');
-    if (trendComp) trendComp.params = { mmrTrend: data.mmrTrend || [], currentMmr: data.crewMmr || 1200, isCrew: (data.crewMatchCount || 0) > 0 };
+    if (trendComp) trendComp.params = { mmrTrend: data.mmrTrend || [], currentMmr: data.crewMmr || 1200, isCrew: data.isCrew };
 
     const synergyComp = this.querySelector('#synergyView');
     if (synergyComp) synergyComp.data = data;
 
     const mapComp = this.querySelector('#mapMastery');
-    if (mapComp) mapComp.params = { mapStats: data.mapStats || [], isCrew: (data.crewMatchCount || 0) > 0 };
+    if (mapComp) mapComp.params = { mapStats: data.mapStats || [], isCrew: data.isCrew };
   }
 
   set vsModeData({ primary, target }) {
