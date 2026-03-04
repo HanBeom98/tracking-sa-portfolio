@@ -65,6 +65,13 @@ export class RecentStats {
         return kdVal < 0.5 && m.death >= 5;
       }).length;
 
+      // --- 내전 부진 경기 집계 로직 추가 ---
+      this.crewTrollMatches = matches.filter(m => {
+        if (!m.isCustomMatch) return false; // 내전이 아닌 경우 제외
+        const kdVal = parseFloat(m.kd);
+        return kdVal < 0.5 && m.death >= 5; // 부진 기준 적용
+      }).length;
+
       const radarKd = this.kdPercent;
       let combatScore = 0;
       if (radarKd <= 40) { combatScore = radarKd * 1.0; } 
