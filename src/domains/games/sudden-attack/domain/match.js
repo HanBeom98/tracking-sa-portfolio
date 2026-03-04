@@ -84,6 +84,10 @@ export class MatchRecord {
       const targetName = (playerStat.user_name || playerStat.character_name || "").toLowerCase().trim();
       const targetInStats = this.allPlayerStats.find(p => (p.nickname || "").toLowerCase().trim() === targetName);
       this.isTargetCrew = targetInStats ? targetInStats.isCrew : false;
+
+      // MMR/HSR 변동 수치 저장 (정산 데이터가 있는 경우)
+      this.mmrChange = subjectInfo ? Number(subjectInfo.mmrChange || 0) : 0;
+      this.hsrChange = subjectInfo ? Number(subjectInfo.hsrChange || 0) : 0;
     }
 
     const winTeam = this.allPlayerStats.filter(p => p.result === 'WIN');

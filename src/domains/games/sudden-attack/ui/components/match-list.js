@@ -135,12 +135,12 @@ export class SaMatchList extends HTMLElement {
         .kd-expand-box .kd { display: inline-block; font-weight: bold; font-size: 15px; }
         .expand-arrow { font-size: 10px; color: #444; transition: transform 0.3s; margin-left: 8px; }
 
-        .crew-label {
-          font-size: 10px; font-weight: 900; color: #ffcc00; background: rgba(255, 204, 0, 0.1);
-          padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(255, 204, 0, 0.2);
-          margin-left: 8px; vertical-align: middle; display: inline-block; letter-spacing: 0.5px;
-          text-shadow: 0 0 5px rgba(255, 204, 0, 0.3);
+        .score-change {
+          display: block; font-size: 10px; font-weight: 800; margin-top: 4px; letter-spacing: -0.2px;
         }
+        .score-up { color: #00ff88; }
+        .score-down { color: #ff4d4d; }
+        .score-hsr { color: var(--gold); margin-left: 4px; }
 
         .mvp-row { background: rgba(255, 204, 0, 0.05); }
         .mvp-crown { color: var(--gold); margin-right: 5px; }
@@ -171,8 +171,15 @@ export class SaMatchList extends HTMLElement {
               </div>
               <span class="kda">${match.kill} / ${match.death} / ${match.assist}</span>
               <div class="kd-expand-box">
-                <span class="kd ${this.getKdClass(match.kdPercent)}">KD: ${match.kdPercent}%</span>
-                ${match.isTargetCrew ? '<span class="crew-label">CREW</span>' : ''}
+                <div style="display:inline-block; vertical-align: middle;">
+                  <span class="kd ${this.getKdClass(match.kdPercent)}">KD: ${match.kdPercent}%</span>
+                  ${(match.mmrChange !== 0 || match.hsrChange !== 0) ? `
+                    <div class="score-change">
+                      <span class="${match.mmrChange >= 0 ? 'score-up' : 'score-down'}">${match.mmrChange >= 0 ? '+' : ''}${match.mmrChange} MMR</span>
+                      ${match.hsrChange !== 0 ? `<span class="score-hsr">${match.hsrChange >= 0 ? '+' : ''}${match.hsrChange} HSR</span>` : ''}
+                    </div>
+                  ` : ''}
+                </div>
                 <span class="expand-arrow">▼</span>
               </div>
             </div>
