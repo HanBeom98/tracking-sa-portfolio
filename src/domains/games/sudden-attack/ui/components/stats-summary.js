@@ -112,7 +112,11 @@ export class SaStatsSummary extends HTMLElement {
               <div class="stat-box">
                 <label>현재 폼</label>
                 <span class="value" style="color: ${data.streakType === 'WIN' ? '#00d2ff' : (data.streakType === 'LOSE' ? '#ff4d4d' : '#fff')};">
-                  ${data.streakType === 'WIN' ? `🔥 ${data.streakCount}연승` : (data.streakType === 'LOSE' ? `❄️ ${data.streakCount}연패` : '평범함')}
+                  ${data.streakType === 'WIN' ? 
+                    (data.streakCount >= 5 ? `🔥 ${data.streakCount}연승 (폭주 중!)` : `🔥 ${data.streakCount}연승`) : 
+                    (data.streakType === 'LOSE' ? 
+                      (data.streakCount >= 5 ? `🌊 ${data.streakCount}연패 (심해 탐사)` : `❄️ ${data.streakCount}연패`) : 
+                      '평범함')}
                 </span>
               </div>
             </div>
@@ -207,6 +211,14 @@ export class SaStatsSummary extends HTMLElement {
     const ck = Number(data.crewKills || 0), cd = Number(data.crewDeaths || 0);
     const crewKdPercent = (ck + cd > 0) ? Math.round((ck / (ck + cd)) * 100) : 0;
 
+    const getTrollLabel = (count) => {
+      if (count === 0) return "✨ 클린 플레이어";
+      if (count === 1) return "💩 내전 똥싼 판";
+      if (count === 2) return "⛏️ 내전 삽질";
+      if (count === 3) return "😇 내전 기부천사";
+      return "👺 내전 역귀 강림";
+    };
+
     return `
       <div class="crew-stats-card">
         <div class="crew-stats-header">
@@ -217,7 +229,12 @@ export class SaStatsSummary extends HTMLElement {
           <div class="stat-box"><label>내전 현재 MMR</label><span class="value gold-highlight">${data.crewMmr || 1200}</span></div>
           <div class="stat-box"><label>내전 킬뎃</label><span class="value gold-highlight">${crewKdPercent}%</span></div>
           <div class="stat-box"><label>내전 누적 승률</label><span class="value gold-highlight">${data.crewWinRate || 0}%</span></div>
-          <div class="stat-box"><label>내전 부진 경기</label><span class="value" style="color: ${data.crewTrollMatches > 0 ? '#ff4d4d' : '#888'};">${data.crewTrollMatches}회</span></div>
+          <div class="stat-box">
+            <label>${getTrollLabel(data.crewTrollMatches)}</label>
+            <span class="value" style="color: ${data.crewTrollMatches > 0 ? '#ff4d4d' : '#888'};">
+              ${data.crewTrollMatches}회
+            </span>
+          </div>
         </div>
       </div>
     `;
