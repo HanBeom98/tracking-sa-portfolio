@@ -19,8 +19,8 @@ import './ui/components/team-board.js';
 
 const NEXON_API_KEY = ''; 
 const client = new NexonApiClient(NEXON_API_KEY);
-const repository = new SaRepository(client);
 const crewRepo = new CrewRepository(client);
+const repository = new SaRepository(client, crewRepo);
 const service = new SaService(repository, crewRepo);
 
 const balancerManager = new BalancerManager(crewRepo);
