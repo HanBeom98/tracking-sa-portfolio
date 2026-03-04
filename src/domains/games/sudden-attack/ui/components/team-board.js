@@ -53,107 +53,43 @@ ${res.blue.map(m => `- ${m.characterName} (${m.position === 'sniper' ? '스나' 
 
     this.innerHTML = `
       <style>
-        .draft-board {
-          display: flex;
-          gap: 20px;
-          margin-top: 25px;
-          animation: slideUp 0.5s ease-out;
-        }
-        .team-column {
-          flex: 1;
-          border-radius: 12px;
-          padding: 15px;
-          position: relative;
-        }
-        .team-column.red {
-          background: rgba(255, 77, 77, 0.05);
-          border: 1px solid rgba(255, 77, 77, 0.2);
-        }
-        .team-column.blue {
-          background: rgba(0, 188, 212, 0.05);
-          border: 1px solid rgba(0, 188, 212, 0.2);
-        }
-        .team-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 15px;
-          padding-bottom: 10px;
-          border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
+        .draft-board { display: flex; gap: 20px; margin-top: 25px; animation: slideUp 0.5s ease-out; align-items: stretch; }
+        .team-column { flex: 1; border-radius: 12px; padding: 15px; position: relative; }
+        .team-column.red { background: rgba(255, 77, 77, 0.05); border: 1px solid rgba(255, 77, 77, 0.2); }
+        .team-column.blue { background: rgba(0, 188, 212, 0.05); border: 1px solid rgba(0, 188, 212, 0.2); }
+        .team-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .team-header h4 { margin: 0; font-size: 1.2em; }
         .red .team-header h4 { color: #ff4d4d; }
         .blue .team-header h4 { color: #00bcd4; }
-        
+
         .avg-mmr { font-size: 0.9em; color: #888; }
         .avg-mmr b { color: white; }
 
-        .card-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 10px;
-        }
-        .draft-card {
-          background: #1e2235;
-          border: 1px solid #333;
-          border-radius: 8px;
-          padding: 10px;
-          transition: transform 0.2s;
-        }
+        .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .draft-card { background: #1e2235; border: 1px solid #333; border-radius: 8px; padding: 10px; transition: transform 0.2s; }
         .draft-card:hover { transform: scale(1.05); border-color: #555; }
         .card-top { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
         .pos-icon { font-size: 1.1em; }
         .name { color: white; font-weight: bold; font-size: 0.95em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .mmr { color: #aaa; font-size: 0.85em; }
 
-        .vs-divider {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-style: italic;
-          font-weight: 900;
-          color: #444;
-          font-size: 2em;
-        }
+        .vs-divider { display: flex; align-items: center; justify-content: center; font-style: italic; font-weight: 900; color: #444; font-size: 2em; align-self: center; }
 
-        .balance-summary {
-          width: 100%;
-          margin-top: 20px;
-          background: #141724;
-          border-radius: 8px;
-          padding: 12px;
-          text-align: center;
-          border: 1px dashed #333;
-          position: relative;
-        }
-        .diff-tag {
-          color: #ffcc00;
-          font-weight: bold;
-        }
+        .balance-summary { width: 100%; margin-top: 20px; background: #141724; border-radius: 8px; padding: 12px; text-align: center; border: 1px dashed #333; position: relative; }
+        .diff-tag { color: #ffcc00; font-weight: bold; }
 
-        .copy-btn {
-          margin-top: 15px;
-          padding: 10px 20px;
-          background: #2d3356;
-          border: 1px solid #444;
-          color: white;
-          border-radius: 6px;
-          cursor: pointer;
-          font-size: 0.9em;
-          transition: all 0.2s;
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-        }
+        .copy-btn { margin-top: 15px; padding: 10px 20px; background: #2d3356; border: 1px solid #444; color: white; border-radius: 6px; cursor: pointer; font-size: 0.9em; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
         .copy-btn:hover { background: #3d446a; border-color: #ffcc00; }
         .copy-btn.success { background: #2e7d32; border-color: #4caf50; }
 
         @media (max-width: 768px) {
           .draft-board { flex-direction: column; }
           .vs-divider { padding: 10px 0; transform: rotate(90deg); }
+          .card-grid { grid-template-columns: 1fr; }
         }
       </style>
       <div class="draft-board">
+
         <div class="team-column red">
           <div class="team-header">
             <h4>🔴 RED TEAM</h4>

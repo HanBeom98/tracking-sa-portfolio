@@ -1,0 +1,64 @@
+import { test } from "node:test";
+import assert from "node:assert";
+import { Player } from "../../src/domains/games/sudden-attack/domain/player.js";
+import { MatchRecord } from "../../src/domains/games/sudden-attack/domain/match.js";
+import { RecentStats } from "../../src/domains/games/sudden-attack/domain/stats.js";
+
+test("SA Player model correctly maps Nexon data", () => {
+  const ouid = "test-ouid";
+  const basic = { user_name: "TestUser", clan_name: "TestClan" };
+  const rank = { grade: "Major", grade_ranking: 100, grade_exp: 1000000, season_grade: "Grand Master" };
+  const tier = { 
+    solo_rank_match_tier: "Diamond", solo_rank_match_score: 2000, 
+    party_rank_match_tier: "Platinum", party_rank_match_score: 1800 
+  };
+  const crewData = { ouids: ["test-ouid"], names: [] };
+
+  const player = new Player(ouid, basic, rank, tier, crewData);
+
+  assert.strictEqual(player.nickname, "TestUser");
+  assert.strictEqual(player.isCrew, true);
+  assert.strictEqual(player.soloTier, "Diamond");
+  assert.strictEqual(player.partyTier, "Platinum");
+});
+
+test("SA MatchRecord model calculates K/D percentage and MVPs", () => {
+  const detail = {
+    match_id: "match-1",
+    match_map: "Dragon Road",
+    date_match: "2026-03-04T12:00:00Z",
+    match_detail: [
+      { user_name: "Me", kill: 10, death: 5, assist: 2, result: "1", damage: 1500, headshot: 3 },
+      { user_name: "Other", kill: 2, death: 8, assist: 1, result: "1", damage: 500, headshot: 0 }
+    ]
+  };
+  const typeName = "Clan Match";
+  const targetName = "Me";
+
+  const match = new MatchRecord(detail, typeName, targetName);
+
+  assert.strictEqual(match.mapName, "Dragon Road");
+  assert.strictEqual(match.matchResult, "WIN");
+  assert.strictEqual(match.kill, 10);
+  assert.strictEqual(match.kdPercent, 67); // 10 / (10 + 5) = 0.666...
+  assert.strictEqual(match.allPlayerStats[0].isMvp, true);
+});
+
+test("SA RecentStats model assigns playstyle based on radar", () => {
+  const info = {
+    recent_kill_death_rate: 50.0, // Lower K/D to avoid Tactical Nuke
+    recent_win_rate: 70.0,
+    recent_assault_rate: 95.0,
+    user_name: "Aimbot"
+  };
+  const matches = [
+    { kill: 20, death: 5, assist: 5, mapName: "Provence", matchResult: "WIN" }
+  ];
+
+  const stats = new RecentStats(info, matches);
+
+  // Radar logic check: combat should be < 85, precision > 90
+  assert.ok(stats.radar.combat < 85);
+  assert.ok(stats.radar.precision >= 90);
+  assert.strictEqual(stats.playstyleIcon, "🤖"); // Human Aimbot
+});

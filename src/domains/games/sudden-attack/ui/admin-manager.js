@@ -224,13 +224,51 @@ export class AdminManager {
       if (allCrewMatches.length === 0) return alert('새로운 내전 기록이 없습니다.');
       btn.textContent = `정산 및 디스코드 전송 중...`;
       const settlementReports = await this.crewRepo.settleMatches(allCrewMatches);
+      
       if (settlementReports.length > 0) {
-        alert(`🎉 ${settlementReports.length}개의 내전 정산 완료!`);
-        for (const report of settlementReports) { await this.discordClient.notifyMatchSettled(report.match, report.playerChanges); }
+        this.showSettlementReport(settlementReports);
+        for (const report of settlementReports) { 
+          await this.discordClient.notifyMatchSettled(report.match, report.playerChanges); 
+        }
         window.dispatchEvent(new CustomEvent('sa-rankings-updated'));
-      } else alert('이미 정산된 매치입니다.');
+      } else {
+        alert('새로 정산할 매치가 없습니다.');
+      }
     } catch (err) { alert('오류: ' + err.message); }
     finally { btn.disabled = false; btn.textContent = originalText; }
+  }
+
+  showSettlementReport(reports) {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+      <div class="modal-content settlement-report-modal">
+        <h2>🎉 내전 정산 리포트</h2>
+        <p class="summary-text">총 ${reports.length}개의 새로운 매치가 정산되었습니다.</p>
+        <div class="report-scroll-area">
+          ${reports.map(r => `
+            <div class="report-item">
+              <div class="report-header">
+                <span class="map-name">${r.match.mapName}</span>
+                <span class="winner-tag ${r.match.matchResult === 'WIN' ? 'red' : 'blue'}">${r.match.matchResult === 'WIN' ? 'RED' : 'BLUE'} 승</span>
+              </div>
+              <div class="player-changes">
+                ${r.playerChanges.map(pc => `
+                  <div class="change-row">
+                    <span class="p-name">${pc.nickname}</span>
+                    <span class="p-mmr">MMR ${pc.mmrDiff > 0 ? '+' : ''}${pc.mmrDiff} <small>(${pc.newMmr})</small></span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="modal-btns">
+          <button class="primary" onclick="this.closest('.modal').remove()">확인</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
   }
 
   async handleIndividualScan(btn) {
@@ -238,7 +276,6 @@ export class AdminManager {
     btn.disabled = true;
     const originalText = btn.textContent;
     btn.textContent = '스캔 중...';
-    let logMessages = [];
     try {
       let targetOuid = ouid;
       let currentNickname = name;
@@ -247,7 +284,6 @@ export class AdminManager {
         const basic = await this.repository.apiClient.getPlayerBasic(targetOuid);
         if (basic && basic.user_name && basic.user_name !== currentNickname) {
           await this.crewRepo.updateNickname(targetOuid, basic.user_name);
-          logMessages.push(`📝 닉네임 변경: ${currentNickname} -> ${basic.user_name}`);
           currentNickname = basic.user_name;
         }
       } else {
@@ -260,8 +296,8 @@ export class AdminManager {
       else {
         const settlementReports = await this.crewRepo.settleMatches(crewMatches);
         if (settlementReports.length > 0) {
+          this.showSettlementReport(settlementReports);
           for (const report of settlementReports) { await this.discordClient.notifyMatchSettled(report.match, report.playerChanges); }
-          alert('✅ 정산 및 알림 전송 완료!');
           window.dispatchEvent(new CustomEvent('sa-rankings-updated'));
         } else alert('이미 정산된 기록입니다.');
       }

@@ -30,55 +30,31 @@ export class SaStatsSummary extends HTMLElement {
     this.innerHTML = `
       <style>
         .stats-summary-card {
-          background: #1a1d2e;
-          border: 1px solid #2d3356;
-          border-radius: 12px;
-          padding: 25px;
-          margin-bottom: 30px;
+          background: #1a1d2e; border: 1px solid #2d3356; border-radius: 12px; padding: 25px; margin-bottom: 30px;
         }
         .playstyle-banner {
-          display: flex;
-          align-items: center;
-          background: rgba(0, 210, 255, 0.05);
-          border: 1px solid rgba(0, 210, 255, 0.1);
-          border-radius: 10px;
-          padding: 15px 20px;
-          margin-bottom: 25px;
+          display: flex; align-items: center; background: rgba(0, 210, 255, 0.05); border: 1px solid rgba(0, 210, 255, 0.1);
+          border-radius: 10px; padding: 15px 20px; margin-bottom: 25px;
         }
         .playstyle-icon { font-size: 32px; margin-right: 15px; }
         .playstyle-label { font-size: 11px; color: #666; display: block; }
         .playstyle-title { font-size: 18px; font-weight: bold; color: #fff; }
         
-        .stats-summary-header {
-          display: flex;
-          gap: 30px;
-          margin-bottom: 30px;
-        }
+        .stats-summary-header { display: flex; gap: 30px; margin-bottom: 30px; }
         .radar-section { flex: 0 0 250px; }
         .text-stats-section { flex: 1; }
         
         .header-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 15px;
-          border-bottom: 1px solid #2d3356;
-          padding-bottom: 10px;
+          display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;
+          border-bottom: 1px solid #2d3356; padding-bottom: 10px;
         }
         .header-row h3 { margin: 0; font-size: 18px; color: #fff; }
         .most-played-map { font-size: 13px; color: #888; }
         .most-played-map strong { color: #ffcc00; }
 
-        .stats-grid {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 15px;
-        }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
         .stat-box {
-          background: #141724;
-          padding: 15px;
-          border-radius: 8px;
-          border: 1px solid #23283d;
+          background: #141724; padding: 15px; border-radius: 8px; border: 1px solid #23283d; text-align: center;
         }
         .stat-box label { font-size: 12px; color: #666; display: block; margin-bottom: 5px; }
         .stat-box .value { font-size: 20px; font-weight: bold; color: #fff; font-family: 'Roboto Mono', monospace; }
@@ -86,22 +62,20 @@ export class SaStatsSummary extends HTMLElement {
         
         /* Crew Stats Card */
         .crew-stats-card {
-          margin-top: 30px;
-          background: rgba(255, 204, 0, 0.03);
-          border: 1px solid rgba(255, 204, 0, 0.1);
-          border-radius: 12px;
-          padding: 20px;
+          margin-top: 30px; background: rgba(255, 204, 0, 0.03); border: 1px solid rgba(255, 204, 0, 0.1); border-radius: 12px; padding: 20px;
         }
         .crew-stats-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .crew-stats-header h3 { margin: 0; font-size: 16px; color: #ffcc00; }
         .match-count { font-size: 12px; color: #888; }
         
+        .crew-grid { grid-template-columns: repeat(4, 1fr); }
         .crew-grid .stat-box { border-color: rgba(255, 204, 0, 0.1); }
         .gold-highlight { color: #ffcc00 !important; }
 
         @media (max-width: 768px) {
           .stats-summary-header { flex-direction: column; }
           .radar-section { margin: 0 auto; }
+          .stats-grid { grid-template-columns: repeat(2, 1fr); }
         }
       </style>
       <div class="stats-summary-card">
@@ -131,8 +105,13 @@ export class SaStatsSummary extends HTMLElement {
             <div class="stats-grid">
               <div class="stat-box"><label>종합 K/D</label><span class="value highlight ${this.getKdColor(data.kdPercent)}">${data.kdPercent}%</span></div>
               <div class="stat-box"><label>최근 승률</label><span class="value highlight">${data.winRate}%</span></div>
-              <div class="stat-box"><label>평균 K/D/A</label><span class="value">${data.avgK || 0} / ${data.avgD || 0} / ${data.avgA || 0}</span></div>
-              <div class="stat-box"><label>${matchCount}경기 합계</label><span class="value">${data.totalKills || 0}K ${data.totalDeaths || 0}D</span></div>
+              <div class="stat-box"><label>평균 K/D/A</label><span class="value">${data.avgK || 0}/${data.avgD || 0}/${data.avgA || 0}</span></div>
+              <div class="stat-box">
+                <label>현재 폼</label>
+                <span class="value" style="color: ${data.streakType === 'WIN' ? '#00d2ff' : (data.streakType === 'LOSE' ? '#ff4d4d' : '#fff')};">
+                  ${data.streakType === 'WIN' ? `🔥 ${data.streakCount}연승` : (data.streakType === 'LOSE' ? `❄️ ${data.streakCount}연패` : '평범함')}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -159,8 +138,13 @@ export class SaStatsSummary extends HTMLElement {
   }
 
   set vsModeData({ primary, target }) {
-    // VS Mode styles are typically handled by global CSS or similar structure
     this.innerHTML = `
+      <style>
+        .vs-comparison-table { width: 100%; border-collapse: collapse; }
+        .vs-comparison-table th { padding: 10px; color: #666; font-size: 14px; text-transform: uppercase; border-bottom: 1px solid #2d3356; }
+        .vs-comparison-table td { text-align: center; padding: 15px; font-size: 18px; font-weight: 800; color: #fff; }
+        .vs-comparison-table td.lbl { font-size: 12px; color: #888; font-weight: 400; width: 100px; }
+      </style>
       <div class="stats-summary-card vs-mode-card">
         <div class="header-row"><h3>📊 전적 상세 비교 (VS)</h3></div>
         <div class="stats-summary-header">
@@ -168,18 +152,18 @@ export class SaStatsSummary extends HTMLElement {
             <sa-radar-chart id="vsRadar"></sa-radar-chart>
           </div>
           <div class="text-stats-section">
-            <table class="vs-comparison-table" style="width:100%; border-collapse:collapse;">
+            <table class="vs-comparison-table">
               <thead>
-                <tr style="border-bottom:1px solid #2d3356;">
-                  <th style="padding:10px; color:#00d2ff;">본인</th>
-                  <th style="padding:10px; color:#666;">항목</th>
-                  <th style="padding:10px; color:#bc00ff;">상대</th>
+                <tr>
+                  <th style="color:#00d2ff;">본인</th>
+                  <th>항목</th>
+                  <th style="color:#bc00ff;">상대</th>
                 </tr>
               </thead>
               <tbody>
-                <tr><td style="text-align:center; padding:12px; font-size:18px; font-weight:bold;">${primary.kdPercent}%</td><td style="text-align:center; color:#888;">종합 K/D</td><td style="text-align:center; padding:12px; font-size:18px; font-weight:bold;">${target.kdPercent}%</td></tr>
-                <tr><td style="text-align:center; padding:12px; font-size:18px; font-weight:bold;">${primary.winRate}%</td><td style="text-align:center; color:#888;">최근 승률</td><td style="text-align:center; padding:12px; font-size:18px; font-weight:bold;">${target.winRate}%</td></tr>
-                <tr><td style="text-align:center; padding:12px; font-size:18px; font-weight:bold; color:#ffcc00;">${primary.crewMmr}</td><td style="text-align:center; color:#888;">내전 MMR</td><td style="text-align:center; padding:12px; font-size:18px; font-weight:bold; color:#ffcc00;">${target.crewMmr}</td></tr>
+                <tr><td>${primary.kdPercent}%</td><td class="lbl">종합 K/D</td><td>${target.kdPercent}%</td></tr>
+                <tr><td>${primary.winRate}%</td><td class="lbl">최근 승률</td><td>${target.winRate}%</td></tr>
+                <tr><td style="color:#ffcc00;">${primary.crewMmr}</td><td class="lbl">내전 MMR</td><td style="color:#ffcc00;">${target.crewMmr}</td></tr>
               </tbody>
             </table>
           </div>
@@ -187,21 +171,14 @@ export class SaStatsSummary extends HTMLElement {
         <sa-mmr-trend-chart id="vsTrend"></sa-mmr-trend-chart>
       </div>
     `;
-
     this.querySelector('#vsRadar').data = { radar: primary.radar, vsTargetRadar: target.radar };
-    this.querySelector('#vsTrend').params = { 
-      mmrTrend: primary.mmrTrend, 
-      currentMmr: primary.crewMmr, 
-      isCrew: true,
-      vsTargetData: { trend: target.mmrTrend, currentMmr: target.crewMmr }
-    };
+    this.querySelector('#vsTrend').params = { mmrTrend: primary.mmrTrend, currentMmr: primary.crewMmr, isCrew: true, vsTargetData: { trend: target.mmrTrend, currentMmr: target.crewMmr } };
   }
 
   renderCrewAnalysis(data) {
     if (!data || (data.crewMatchCount || 0) <= 0) return `<div class="crew-stats-card no-crew"><p style="text-align:center; color:#666; padding:20px;">최근 경기 중 우리 크루(8인 이상) 내전 기록이 없습니다.</p></div>`;
     
-    const ck = Number(data.crewKills || 0);
-    const cd = Number(data.crewDeaths || 0);
+    const ck = Number(data.crewKills || 0), cd = Number(data.crewDeaths || 0);
     const crewKdPercent = (ck + cd > 0) ? Math.round((ck / (ck + cd)) * 100) : 0;
 
     return `
@@ -212,16 +189,16 @@ export class SaStatsSummary extends HTMLElement {
         </div>
         <div class="stats-grid crew-grid">
           <div class="stat-box"><label>내전 현재 MMR</label><span class="value gold-highlight">${data.crewMmr || 1200}</span></div>
-          <div class="stat-box"><label>내전 K/D</label><span class="value gold-highlight">${crewKdPercent}%</span></div>
+          <div class="stat-box"><label>내전 킬뎃</label><span class="value gold-highlight">${crewKdPercent}%</span></div>
           <div class="stat-box"><label>내전 누적 승률</label><span class="value gold-highlight">${data.crewWinRate || 0}%</span></div>
-          <div class="stat-box"><label>크루내 위상</label><span class="value gold-highlight">${data.crewStatusTitle || '일반 유저'}</span></div>
+          <div class="stat-box"><label>내전 부진 경기</label><span class="value" style="color: ${data.crewTrollMatches > 0 ? '#ff4d4d' : '#888'};">${data.crewTrollMatches}회</span></div>
         </div>
       </div>
     `;
   }
 
   renderSkeleton() {
-    this.innerHTML = `<div class="stats-summary-card loading-shimmer" style="border: 1px solid var(--bg-sub);"><div style="height: 80px; background: var(--bg-sub); border-radius: 12px; margin-bottom: 20px;"></div><div style="display: flex; gap: 30px; margin-bottom: 30px;"><div style="height: 150px; width: 150px; background: var(--bg-sub); border-radius: 50%;"></div><div style="flex: 1;"><div style="height: 24px; width: 40%; background: var(--bg-sub); border-radius: 4px; margin-bottom: 15px;"></div><div style="grid-template-columns: 1fr 1fr; display: grid; gap: 15px;"><div style="height: 60px; background: var(--bg-sub); border-radius: 8px;"></div><div style="height: 60px; background: var(--bg-sub); border-radius: 8px;"></div><div style="height: 60px; background: var(--bg-sub); border-radius: 8px;"></div><div style="height: 60px; background: var(--bg-sub); border-radius: 8px;"></div></div></div></div><div style="height: 120px; background: var(--bg-sub); border-radius: 12px;"></div></div>`;
+    this.innerHTML = `<div class="stats-summary-card loading-shimmer" style="border: 1px solid var(--bg-sub);"><div style="height: 80px; background: var(--bg-sub); border-radius: 12px; margin-bottom: 20px;"></div><div style="display: flex; gap: 30px; margin-bottom: 30px;"><div style="height: 150px; width: 150px; background: var(--bg-sub); border-radius: 50%;"></div><div style="flex: 1;"><div style="height: 24px; width: 40%; background: var(--bg-sub); border-radius: 4px; margin-bottom: 15px;"></div><div style="grid-template-columns: repeat(2, 1fr); display: grid; gap: 15px;"><div style="height: 60px; background: var(--bg-sub); border-radius: 8px;"></div><div style="height: 60px; background: var(--bg-sub); border-radius: 8px;"></div><div style="height: 60px; background: var(--bg-sub); border-radius: 8px;"></div><div style="height: 60px; background: var(--bg-sub); border-radius: 8px;"></div></div></div></div><div style="height: 120px; background: var(--bg-sub); border-radius: 12px;"></div></div>`;
   }
 }
 customElements.define('sa-stats-summary', SaStatsSummary);

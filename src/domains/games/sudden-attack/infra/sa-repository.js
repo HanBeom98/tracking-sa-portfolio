@@ -1,4 +1,6 @@
-import { Player, MatchRecord, RecentStats } from '../domain/models.js';
+import { Player } from '../domain/player.js';
+import { MatchRecord } from '../domain/match.js';
+import { RecentStats } from '../domain/stats.js';
 import { SA_META } from './meta-data.js';
 
 /**

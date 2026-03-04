@@ -10,17 +10,42 @@ export class SaMatchList extends HTMLElement {
     return '';
   }
 
+  /**
+   * Renders the detailed scoreboard for a match
+   * @param {Object} match - The match record object
+   */
   drawScoreboard(match) {
     const players = match.allPlayerStats;
     if (!players || players.length === 0) return '<p class="no-detail">매치 상세 정보가 없습니다.</p>';
 
     const laundryHtml = match.laundryInfo && match.laundryInfo.isWashed 
-      ? `<div class="laundry-warning" style="background: rgba(255, 77, 77, 0.1); color: #ff4d4d; padding: 12px 20px; border-radius: 8px; margin-bottom: 15px; font-size: 13px; font-weight: bold; border: 1px solid rgba(255, 77, 77, 0.3); text-align: center; line-height: 1.5;">
+      ? `<div class="laundry-warning">
           ⚠️ <strong>데이터 불일치 감지:</strong> 상대 팀 킬 수보다 우리 팀 데스 합계가 <strong>${match.laundryInfo.totalMissing}회</strong> 부족합니다. (리조인 세탁 의심)
          </div>`
       : '';
 
     return `
+      <style>
+        .laundry-warning {
+          background: rgba(255, 77, 77, 0.1); color: var(--red); padding: 12px 20px; border-radius: 8px; margin-bottom: 15px; 
+          font-size: 13px; font-weight: bold; border: 1px solid rgba(255, 77, 77, 0.3); text-align: center; line-height: 1.5;
+          animation: pulse-red 2s infinite;
+        }
+        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(255,77,77,0.4); } 70% { box-shadow: 0 0 0 10px rgba(255,77,77,0); } 100% { box-shadow: 0 0 0 0 rgba(255,77,77,0); } }
+
+        .scoreboard-table { width: 100%; border-collapse: collapse; margin-top: 15px; background: var(--bg-sub); border-radius: 8px; overflow: hidden; }
+        .scoreboard-table th { background: rgba(0,0,0,0.2); padding: 10px; color: var(--text-dim); font-size: 12px; text-align: center; }
+        .scoreboard-table td { padding: 12px 10px; border-bottom: 1px solid rgba(255,255,255,0.03); text-align: center; vertical-align: middle; }
+        .scoreboard-table td.name { text-align: left; padding-left: 20px; color: #fff; }
+
+        .res.win { color: var(--primary); font-weight: bold; }
+        .res.lose { color: var(--red); font-weight: bold; }
+        .mvp-row { background: rgba(255, 204, 0, 0.05); }
+        .mvp-crown { color: var(--gold); margin-right: 5px; }
+        .crew-tag { font-size: 9px; background: var(--border); color: var(--primary); padding: 1px 4px; border-radius: 3px; margin-left: 5px; }
+        .mission-cell { color: var(--text-dim); font-size: 0.9em; font-family: 'Roboto Mono', monospace; }
+        .dmg-val { color: var(--text-main); }
+      </style>
       <div class="scoreboard-wrapper">
         ${laundryHtml}
         <table class="scoreboard-table">
@@ -82,49 +107,40 @@ export class SaMatchList extends HTMLElement {
           display: grid;
           grid-template-columns: 120px 1fr 120px 140px;
           align-items: center;
-          background: #1a1d2e;
-          border: 1px solid #2d3356;
+          background: var(--bg-card);
+          border: 1px solid var(--border);
           border-radius: 12px;
           padding: 15px 20px;
           cursor: pointer;
           transition: transform 0.2s, border-color 0.2s;
         }
         .match-item:hover {
-          border-color: #00d2ff;
+          border-color: var(--primary);
           transform: translateY(-2px);
         }
-        .match-item.win { border-left: 5px solid #00d2ff; }
-        .match-item.lose { border-left: 5px solid #ff4d4d; }
+        .match-item.win { border-left: 5px solid var(--primary); }
+        .match-item.lose { border-left: 5px solid var(--red); }
         .match-item.is-custom { background: rgba(255, 204, 0, 0.03); }
 
-        .match-info .type-tag { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
+        .match-info .type-tag { font-size: 11px; color: var(--text-dim); display: block; margin-bottom: 4px; }
         .match-info .result-badge { font-weight: 900; font-size: 18px; }
-        .win .result-badge { color: #00d2ff; }
-        .lose .result-badge { color: #ff4d4d; }
+        .win .result-badge { color: var(--primary); }
+        .lose .result-badge { color: var(--red); }
 
         .match-map-info .map { font-size: 16px; font-weight: bold; color: #fff; display: block; }
-        .match-map-info .match-date { font-size: 12px; color: #666; }
+        .match-map-info .match-date { font-size: 12px; color: var(--text-dim); }
         
-        .kda { font-family: 'Roboto Mono', monospace; font-size: 16px; color: #e0e0e0; text-align: center; }
+        .kda { font-family: 'Roboto Mono', monospace; font-size: 16px; color: var(--text-main); text-align: center; }
         .kd-expand-box { text-align: right; }
         .kd-expand-box .kd { display: block; font-weight: bold; font-size: 15px; margin-bottom: 4px; }
         .expand-arrow { font-size: 10px; color: #444; transition: transform 0.3s; }
 
-        /* Scoreboard inside expanded view */
-        .scoreboard-table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #141724; border-radius: 8px; overflow: hidden; }
-        .scoreboard-table th { background: rgba(0,0,0,0.2); padding: 10px; color: #666; font-size: 12px; text-align: center; }
-        .scoreboard-table td { padding: 12px 10px; border-bottom: 1px solid rgba(255,255,255,0.03); text-align: center; vertical-align: middle; }
-        .scoreboard-table td.name { text-align: left; padding-left: 20px; color: #fff; }
-        
         .mvp-row { background: rgba(255, 204, 0, 0.05); }
-        .mvp-crown { color: #ffcc00; margin-right: 5px; }
-        .crew-tag { font-size: 9px; background: #2d3356; color: #00d2ff; padding: 1px 4px; border-radius: 3px; margin-left: 5px; }
-        .mission-cell { color: #888; font-size: 0.9em; font-family: 'Roboto Mono', monospace; }
-        .dmg-val { color: #e0e0e0; }
+        .mvp-crown { color: var(--gold); margin-right: 5px; }
         
         .kd-god { color: #ff00ff; font-weight: bold; text-shadow: 0 0 8px rgba(255,0,255,0.4); }
-        .kd-pro { color: #ffcc00; font-weight: bold; }
-        .kd-high { color: #00d2ff; }
+        .kd-pro { color: var(--gold); font-weight: bold; }
+        .kd-high { color: var(--primary); }
 
         .hidden { display: none; }
       </style>
@@ -135,11 +151,11 @@ export class SaMatchList extends HTMLElement {
               <div class="match-info">
                 <div style="display:flex; align-items:center; gap:5px; margin-bottom:4px;">
                   <span class="type-tag">${match.matchTypeName}</span>
-                  ${match.isCustomMatch ? '<span class="custom-badge" style="font-size:10px; font-weight:800; color:#ffcc00; background:rgba(255,204,0,0.15); padding:2px 6px; border-radius:4px; border:1px solid rgba(255,204,0,0.3);">크루내전</span>' : ''}
+                  ${match.isCustomMatch ? '<span class="custom-badge" style="font-size:10px; font-weight:800; color:var(--gold); background:rgba(255,204,0,0.15); padding:2px 6px; border-radius:4px; border:1px solid rgba(255,204,0,0.3);">크루내전</span>' : ''}
                 </div>
                 <div style="display:flex; align-items:center; gap:8px;">
                   <span class="result-badge">${match.matchResult}</span>
-                  ${match.laundryInfo && match.laundryInfo.isWashed ? '<span style="font-size:11px; color:#ff4d4d; font-weight:bold; animation: pulse-red 2s infinite;">⚠️ 리조인 의심</span>' : ''}
+                  ${match.laundryInfo && match.laundryInfo.isWashed ? '<span style="font-size:11px; color:var(--red); font-weight:bold; animation: pulse-red 2s infinite;">⚠️ 리조인 의심</span>' : ''}
                 </div>
               </div>
               <div class="match-map-info">

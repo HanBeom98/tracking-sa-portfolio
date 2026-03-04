@@ -27,31 +27,14 @@ export class BalancerManager {
     input.id = 'balancerSearchInput';
     input.type = 'text';
     input.placeholder = '팀 짤 인원 검색... (닉네임)';
-    input.style.cssText = `
-      width: calc(100% - 20px);
-      padding: 12px;
-      margin-bottom: 15px;
-      border: 1px solid #2d3356;
-      border-radius: 8px;
-      background: #1a1d2e;
-      color: #e0e0e0;
-      font-size: 14px;
-      outline: none;
-    `;
+    input.className = 'balancer-search-input';
     return input;
   }
 
   createCountDisplay() {
     const div = document.createElement('div');
     div.id = 'selectedCountDisplay';
-    div.style.cssText = `
-      color: #ffcc00;
-      font-size: 14px;
-      font-weight: bold;
-      margin-bottom: 10px;
-      text-align: right;
-      padding-right: 10px;
-    `;
+    div.className = 'selected-count-display';
     div.textContent = '선택된 인원: 0명';
     return div;
   }

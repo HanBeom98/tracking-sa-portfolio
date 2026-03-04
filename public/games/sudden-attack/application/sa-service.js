@@ -1,4 +1,4 @@
-import { RecentStats } from '../domain/models.js?v=20260228_7';
+import { RecentStats } from '../domain/stats.js';
 
 /**
  * Sudden Attack Application Service (Application Layer)

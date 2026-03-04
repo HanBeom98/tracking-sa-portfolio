@@ -26,6 +26,13 @@ export class SaRadarChart extends HTMLElement {
 
     if (isEmpty && !vsTargetRadar) {
       this.innerHTML = `
+        <style>
+          .radar-container.empty { position: relative; opacity: 0.5; }
+          .empty-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; z-index: 1; }
+          .empty-overlay .icon { font-size: 24px; display: block; margin-bottom: 5px; }
+          .empty-overlay p { font-size: 11px; color: #666; margin: 0; line-height: 1.4; }
+          .radar-chart.muted { filter: grayscale(1) opacity(0.3); }
+        </style>
         <div class="radar-container empty">
           <div class="empty-overlay">
             <span class="icon">📊</span>
@@ -40,6 +47,21 @@ export class SaRadarChart extends HTMLElement {
     }
 
     this.innerHTML = `
+      <style>
+        .radar-container { width: 100%; height: 100%; position: relative; }
+        .radar-chart { width: 100%; height: 100%; }
+        .radar-data-polygon { filter: drop-shadow(0 0 5px rgba(0, 210, 255, 0.3)); animation: radar-pulse 3s infinite alternate; }
+        @keyframes radar-pulse { 0% { filter: drop-shadow(0 0 2px rgba(0,210,255,0.2)); } 100% { filter: drop-shadow(0 0 10px rgba(0,210,255,0.6)); } }
+        
+        .radar-labels { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        .r-lbl { position: absolute; font-size: 11px; color: #ccc; text-align: center; line-height: 1.2; font-weight: 600; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+        .r-top { top: -5px; left: 50%; transform: translateX(-50%); color: #00d2ff; }
+        .r-right-t { top: 30%; right: -5px; }
+        .r-right-b { bottom: 10%; right: 10px; }
+        .r-left-b { bottom: 10%; left: 10px; }
+        .r-left-t { top: 30%; left: -5px; }
+        .vs-radar .r-lbl { font-size: 10px; color: #666; }
+      </style>
       <div class="radar-container ${vsTargetRadar ? 'vs-radar' : ''}">
         <svg viewBox="0 0 100 100" class="radar-chart">
           <!-- Background Grids -->
@@ -51,11 +73,11 @@ export class SaRadarChart extends HTMLElement {
           <line x1="50" y1="50" x2="27" y2="82" stroke="rgba(255,255,255,0.1)" />
           <line x1="50" y1="50" x2="12" y2="38" stroke="rgba(255,255,255,0.1)" />
           
-          <!-- Primary Data -->
+          <!-- Optional VS Data (Drawn behind for better visibility) -->
+          ${vsTargetRadar ? this.drawPolygon(vsTargetRadar, '#bc00ff', 'rgba(188, 0, 255, 0.2)') : ''}
+
+          <!-- Primary Data (Drawn on top) -->
           ${this.drawPolygon(radar)}
-          
-          <!-- Optional VS Data -->
-          ${vsTargetRadar ? this.drawPolygon(vsTargetRadar, '#bc00ff', 'rgba(188, 0, 255, 0.3)') : ''}
         </svg>
         <div class="radar-labels">
           <span class="r-lbl r-top">여포력<br>${!vsTargetRadar ? Math.round(radar.combat) : ''}</span>
