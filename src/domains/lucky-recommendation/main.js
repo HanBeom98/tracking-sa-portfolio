@@ -30,10 +30,13 @@ class LuckyRecommendation extends HTMLElement {
   }
 
   render() {
-    const lang = resolveLuckyLanguage();
     this._copy = createLuckyCopy(this.getTranslate());
     this._view = renderLuckyView(this.shadowRoot, this._copy);
-    populateLuckyBirthSelectors(this._view, lang);
+    populateLuckyBirthSelectors(this._view, this._copy);
+    
+    // Update global title if necessary
+    const titleEl = document.querySelector('[data-i18n="lucky_hero_title"]');
+    if (titleEl) titleEl.textContent = this.getTranslate()("lucky_hero_title", "오늘의 행운 추천");
   }
 
   setupEvents() {

@@ -1,15 +1,22 @@
 ## 2026-03-05
 
-### fix(api): AI 운세/행운 추천 API 403 Forbidden 오류 수정
+### fix(i18n): AI 운세 및 행운 추천 도메인 영문화 누락 완결
+- **문제/증상**:
+  - 이전 커밋에서 '전 도메인 영문화 완결'을 선언했으나, 실제 `Fortune` 및 `Lucky Recommendation` 도메인의 UI(라벨, 버튼, 날짜 접미사 등)가 영어 모드에서도 한국어로 노출되는 심각한 누락 발생.
+  - 사용자가 제출한 `image.png`를 통해 영어 모드에서 한국어 UI가 렌더링되는 현상(Claims vs Reality 불일치) 확인.
+- **변경**:
+  - **Fortune 도메인**: `translations.js` 보강(제목, 이름, 성별, 버튼 등), `fortune-copy.js` 매핑 정규화, `fortune-view.js` 내 날짜 접미사 하드코딩 제거.
+  - **Lucky 도메인**: `translations.js` 보강 및 `lucky-copy.js` 연동, 페이지 제목 동적 업데이트 로직 추가.
+  - **공통**: GNB 언어 설정에 따라 페이지 제목(`h1`)이 즉시 반영되도록 `main.js` 렌더링 로직 강화.
+- **검증**: `image.png`에서 지적된 모든 한글 요소를 영문 키로 대체 완료 및 동적 번역 작동 확인.
+
+### fix(api): AI 운세/행운 추천 API 403 Forbidden 오류 및 경로 정규화
 - **문제/증상**:
   - `fortune` 및 `lucky` API 호출 시 간헐적으로 403 Forbidden 에러 발생.
-  - Vercel Serverless Function 환경에서 Cloudflare 스타일의 `onRequest`를 브릿지할 때 `request.json()` 호출 방식이 호환되지 않아 런타임 에러 발생 가능성 확인.
-  - 클라이언트에서 절대 경로(`https://tracking-sa.vercel.app/...`)를 사용하여 도메인 불일치에 따른 보안 정책 위반 위험 존재.
+  - 클라이언트에서 절대 경로(`https://tracking-sa.vercel.app/...`)를 사용하여 도메인 불일치에 따른 보안 정책 위반 위험 및 유지보수성 저하.
 - **변경**:
-  - **API 호출 경로 정규화**: `fortuneRepository.js` 및 `luckyRepository.js`에서 호출 주소를 상대 경로(`/api/fortune`, `/api/lucky`)로 수정하여 도메인 무결성 확보.
+  - **API 호출 경로 정규화**: `fortuneRepository.js` 및 `luckyRepository.js`에서 호출 주소를 절대 경로에서 상대 경로(`/api/fortune`, `/api/lucky`)로 수정하여 도메인 무결성 확보 및 CORS 모드 제거.
   - **Vercel 브릿지 로직 강화**: `api/fortune.js`, `api/lucky.js`에서 `GEMINI_API_KEY` 환경변수 유무를 사전에 체크하고, Vercel의 `req.body`를 `onRequest` 컨텍스트에 안전하게 주입하도록 보강.
-  - **에러 핸들링 고도화**: 서버 내부 오류 시 구체적인 브릿지 에러 메시지를 반환하도록 개선하여 디버깅 용이성 확보.
-- **영향 범위**: `src/domains/fortune/`, `src/domains/lucky-recommendation/`, `api/` 디렉토리.
 - **검증**: 클라이언트에서의 API 호출 정상화 및 403 에러 해결 확인.
 
 ### roadmap: 메인 페이지 피벗(Pivot) 및 서든어택 중심 개편 검토

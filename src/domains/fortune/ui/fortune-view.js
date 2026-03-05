@@ -149,11 +149,11 @@ export function renderFortuneView(root, text) {
   };
 }
 
-export function populateBirthSelectors(view, lang) {
+export function populateBirthSelectors(view, copy) {
   if (!view?.yearSelect || !view?.monthSelect || !view?.daySelect) return;
   const currentYear = new Date().getFullYear();
-  const monthSuffix = lang === "en" ? "" : "월";
-  const daySuffix = lang === "en" ? "" : "일";
+  const monthSuffix = copy.monthSuffix || "";
+  const daySuffix = copy.daySuffix || "";
 
   for (let year = currentYear; year >= 1950; year -= 1) {
     view.yearSelect.add(new Option(String(year), String(year)));

@@ -43,22 +43,6 @@
           el.innerHTML = translated;
         }
       });
-
-      // Handle data-i18n-attr (e.g. data-i18n-attr="placeholder:search_placeholder,title:some_key")
-      root.document.querySelectorAll("[data-i18n-attr]").forEach((el) => {
-        const attrMap = el.getAttribute("data-i18n-attr");
-        if (!attrMap) return;
-
-        attrMap.split(",").forEach((pair) => {
-          const [attr, key] = pair.split(":").map((s) => s.trim());
-          if (attr && key) {
-            const translated = getTranslation(key);
-            if (translated !== key) {
-              el.setAttribute(attr, translated);
-            }
-          }
-        });
-      });
     }
 
     function setLanguage(lang) {

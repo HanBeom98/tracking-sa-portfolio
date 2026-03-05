@@ -33,10 +33,13 @@ class FortunePremium extends HTMLElement {
   }
 
   render() {
-    const lang = resolveFortuneLanguage();
     this._copy = createFortuneCopy(this.getTranslate());
     this._view = renderFortuneView(this.shadowRoot, this._copy);
-    populateBirthSelectors(this._view, lang);
+    populateBirthSelectors(this._view, this._copy);
+    
+    // Update global title if necessary
+    const titleEl = document.querySelector('[data-i18n="saju_title"]');
+    if (titleEl) titleEl.textContent = this.getTranslate()("saju_title", "AI 오늘의 운세");
   }
 
   setupEvents() {

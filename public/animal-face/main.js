@@ -75,9 +75,10 @@ class AnimalFaceTest extends HTMLElement {
 
   async predict() {
     showLoadingState(this._view);
+    const lang = window.location.pathname.startsWith("/en/") ? "en" : "ko";
 
     try {
-      const result = await this._useCase.executePredict(this._view.preview);
+      const result = await this._useCase.executePredict(this._view.preview, lang);
       this._lastResult = result;
       showResultState(this._view, result, this._messages.scoreLabel(result.score));
     } catch (error) {

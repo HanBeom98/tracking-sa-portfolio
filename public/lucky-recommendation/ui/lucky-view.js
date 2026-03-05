@@ -137,9 +137,9 @@ export function renderLuckyView(root, copy) {
   };
 }
 
-export function populateLuckyBirthSelectors(view, lang) {
-  const monthSuffix = lang === "en" ? "" : "월";
-  const daySuffix = lang === "en" ? "" : "일";
+export function populateLuckyBirthSelectors(view, copy) {
+  const monthSuffix = copy.monthSuffix || "";
+  const daySuffix = copy.daySuffix || "";
 
   for (let month = 1; month <= 12; month += 1) {
     view.monthSelect.appendChild(new Option(`${month}${monthSuffix}`, String(month)));
