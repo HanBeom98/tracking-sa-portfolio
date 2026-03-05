@@ -49,6 +49,10 @@
       root.localStorage.setItem("lang", lang);
       currentLang = lang;
       root.document.documentElement.setAttribute("lang", lang === "en" ? "en" : "ko");
+      
+      // 언어 변경 이벤트 발행 (도메인 컴포넌트 구독용)
+      root.dispatchEvent(new CustomEvent("language-changed", { detail: { lang } }));
+
       const path = root.location.pathname || "/";
       const isEnglishPath = path.startsWith("/en/");
 

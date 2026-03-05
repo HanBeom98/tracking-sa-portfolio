@@ -33,6 +33,11 @@ def generate_public_site(incremental=False):
                 process_html_file_for_common_elements(dest)
                 processed_files.add(os.path.abspath(dest))
     
+    # 런타임 설정 파일 별도 배포 (src/shared/infra -> public/)
+    runtime_cfg_src = "src/shared/infra/runtime-config.js"
+    if os.path.exists(runtime_cfg_src):
+        shutil.copy2(runtime_cfg_src, os.path.join(PUBLIC_DIR, "runtime-config.js"))
+    
     # 2. Shared Assets 복사 (src/shared/assets -> public/)
     shared_assets_dir = "src/shared/assets"
     if os.path.exists(shared_assets_dir):
