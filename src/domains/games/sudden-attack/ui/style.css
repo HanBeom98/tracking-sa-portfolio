@@ -15,11 +15,11 @@ body.dark-mode {
   background-color: var(--bg-dark);
   color: var(--text-main);
   font-family: 'Pretendard', sans-serif;
-  margin: 0;
-  padding: 0;
+  min-height: 100vh;
+  padding-top: 70px; /* GNB 높이만큼 여백 확보 */
 }
 
-/* Home Navigation Button */
+/* Home Navigation Button (Optional, since we now have GNB) */
 .home-nav { margin-bottom: 25px; text-align: left; }
 .home-link {
   text-decoration: none; font-size: 13px; font-weight: bold; color: var(--gold);
@@ -32,7 +32,7 @@ body.dark-mode {
 .sa-container {
   max-width: 1000px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 40px 20px;
 }
 
 .hidden { display: none !important; }
