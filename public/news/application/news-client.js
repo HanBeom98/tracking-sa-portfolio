@@ -14,9 +14,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const grid = document.querySelector(".news-grid");
   if (grid) {
     try {
-      // Only hydrate if grid is empty (static build failed or first visit)
-      // Otherwise, trust the static sort order from the server build
-      if (!grid.children.length) {
+      // Always hydrate in English mode to replace static Korean content,
+      // or if the grid is completely empty.
+      if (isEn || !grid.children.length) {
         await hydrateNewsIndex({ db: window.db, grid, isEn });
       }
       
