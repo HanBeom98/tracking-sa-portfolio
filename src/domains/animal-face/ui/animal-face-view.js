@@ -69,7 +69,8 @@ function createAnimalFaceTemplate(t) {
     @keyframes pop { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     .res-emoji { font-size: 6rem; margin-bottom: 12px; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.1)); }
     .res-name { font-size: 2.2rem; font-weight: 950; color: #0052cc; margin-bottom: 8px; }
-    .res-score { font-size: 1.12rem; font-weight: 700; color: #64748b; margin-bottom: 30px; }
+    .res-score { font-size: 1.12rem; font-weight: 700; color: #64748b; margin-bottom: 20px; }
+    .res-desc { font-size: 1.05rem; font-weight: 500; color: #475569; margin-bottom: 30px; line-height: 1.6; }
 
     .share-group { display: flex; justify-content: center; gap: 10px; margin-bottom: 22px; }
     .share-btn {
@@ -133,6 +134,7 @@ function createAnimalFaceTemplate(t) {
       <div class="res-emoji" id="res-emoji"></div>
       <div class="res-name" id="res-name"></div>
       <div class="res-score" id="res-score"></div>
+      <div class="res-desc" id="res-desc"></div>
 
       <span class="section-label">${t.shareTitle}</span>
       <div class="share-group">
@@ -162,6 +164,7 @@ export function renderAnimalFaceView(root, text) {
     resEmoji: root.getElementById("res-emoji"),
     resName: root.getElementById("res-name"),
     resScore: root.getElementById("res-score"),
+    resDesc: root.getElementById("res-desc"),
     shareTwitterBtn: root.getElementById("share-tw"),
     shareFacebookBtn: root.getElementById("share-fb"),
     saveBtn: root.getElementById("btn-save"),
@@ -221,4 +224,5 @@ export function showResultState(view, result, scoreLabel) {
   if (view.resEmoji) view.resEmoji.innerText = result.emoji;
   if (view.resName) view.resName.innerText = result.name;
   if (view.resScore) view.resScore.innerText = scoreLabel;
+  if (view.resDesc) view.resDesc.innerText = result.desc;
 }

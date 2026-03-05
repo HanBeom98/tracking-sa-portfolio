@@ -5,9 +5,9 @@ export function createAnimalFaceUseCase({ animalFaceRepository }) {
     return animalFaceRepository.loadModel();
   }
 
-  async function executePredict(imageElement) {
+  async function executePredict(imageElement, lang = "ko") {
     const predictions = await animalFaceRepository.predict(imageElement);
-    const result = buildAnimalFaceResult(predictions);
+    const result = buildAnimalFaceResult(predictions, lang);
     if (!result) throw new Error("EMPTY_PREDICTION");
     return result;
   }
