@@ -27,6 +27,9 @@ export const hydrateNewsIndex = async ({ db, grid, isEn }) => {
   // Explicitly sort docs before mapping
   const sortedDocs = [...docs].sort((a, b) => getSortValue(b) - getSortValue(a));
   
-  const cards = sortedDocs.map((doc) => mapNewsDocToCard(doc, isEn)).filter((card) => card.title && card.href);
+  const cards = sortedDocs
+    .map((doc) => mapNewsDocToCard(doc, isEn))
+    .filter((card) => card.title && card.title.length > 0 && card.href);
+  
   renderNewsGrid(grid, cards);
 };

@@ -39,17 +39,11 @@ export const renderMarkdown = (md = '') => {
 };
 
 export const resolveNewsFields = (data, isEn) => {
-  const titleField = isEn ? 'titleEn' : 'titleKo';
-  const contentField = isEn ? 'contentEn' : 'contentKo';
-  const title = isEn
-    ? (data[titleField] || '')
-    : (data[titleField] || data.titleKo || data.titleEn || '');
-  const content = isEn
-    ? (data[contentField] || '')
-    : (data[contentField] || data.contentKo || data.contentEn || '');
+  const title = isEn ? (data.titleEn || '') : (data.titleKo || data.titleEn || '');
+  const content = isEn ? (data.contentEn || '') : (data.contentKo || data.contentEn || '');
   return {
-    title,
-    content,
+    title: title.trim(),
+    content: content.trim(),
     date: data.date || '',
     urlKey: data.urlKey || (data.date && data.slug ? `${data.date}-${data.slug}` : ''),
   };

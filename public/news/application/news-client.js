@@ -7,6 +7,11 @@ import { setupPagination } from "./news-pagination.js";
 document.addEventListener("DOMContentLoaded", async () => {
   if (!window.db) return;
 
+  // Re-apply translations to ensure hero title and static elements are translated
+  if (typeof window.applyTranslations === 'function') {
+    window.applyTranslations();
+  }
+
   const path = window.location.pathname || "/";
   const storedLang = localStorage.getItem("lang") || "ko";
   const { isEn, isEnPath } = resolveNewsLocale({ path, storedLang });
