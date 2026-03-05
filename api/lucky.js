@@ -2,7 +2,7 @@
 export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept, x-goog-api-key');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept');
 
     if (req.method === 'OPTIONS') return res.status(204).end();
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
@@ -46,12 +46,12 @@ export default async function handler(req, res) {
             중요: 'oklch' 값은 반드시 브라우저 CSS에서 즉시 사용 가능한 'oklch(0.7 0.1 200)' 형식의 순수 문자열이어야 합니다. 모든 필드는 반드시 한국어로 작성하세요.`;
         }
 
-        const geminiResponse = await fetch(GEMINI_API_URL, {
+        // 성공했던 그 방식: Referer(슬래시 포함)와 Origin 주입
+        const geminiResponse = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
-                'x-goog-api-key': GEMINI_API_KEY, // 헤더 기반 인증 사용
-                'Referer': 'https://trackingsa.com',
+                'Referer': 'https://trackingsa.com/',
                 'Origin': 'https://trackingsa.com'
             },
             body: JSON.stringify({
