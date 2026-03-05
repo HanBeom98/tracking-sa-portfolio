@@ -135,47 +135,97 @@ export class RecentStats {
       .sort((a, b) => {
         const idxA = PREFERRED_ORDER.indexOf(a.name);
         const idxB = PREFERRED_ORDER.indexOf(b.name);
-        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-        if (idxA !== -1) return -1;
-        if (idxB !== -1) return 1;
-        return b.winRate - a.winRate || b.total - a.total;
-      });
-  }
+        this.bestPartner = null;
+        this.worstPartner = null;
+        this.nemesis = null; // 나를 가장 많이 이긴 적
+        this.prey = null;    // 내가 가장 많이 이긴 적
+        this.mapStats = [];
+        ...
+          this.calculateSynergy(matches, info.user_name);
+          this.calculateRivalry(matches, info.user_name);
 
-  calculateSynergy(matches, myNickname) {
-    const teammates = {}; 
-    const normalizedMe = (myNickname || "").toLowerCase().trim();
+          // --- 맵 숙련도: 내전(isCustomMatch) 기록으로만 한정 ---
+        ...
+        calculateSynergy(matches, myNickname) {
+        const teammates = {}; 
+        const normalizedMe = (myNickname || "").toLowerCase().trim();
 
-    matches.forEach(match => {
-      if (!match.allPlayerStats) return;
-      const isWin = match.matchResult === 'WIN';
-      match.allPlayerStats.forEach(p => {
-        const normalizedName = p.nickname.toLowerCase().trim();
-        if (normalizedName === normalizedMe) return; 
-        if (p.result === match.matchResult) {
-          if (!teammates[p.nickname]) teammates[p.nickname] = { total: 0, wins: 0 };
-          teammates[p.nickname].total += 1;
-          if (isWin) teammates[p.nickname].wins += 1;
+        matches.forEach(match => {
+          if (!match.allPlayerStats) return;
+          const isWin = match.matchResult === 'WIN';
+          match.allPlayerStats.forEach(p => {
+            const normalizedName = p.nickname.toLowerCase().trim();
+            if (normalizedName === normalizedMe) return; 
+            if (p.result === match.matchResult) {
+              if (!teammates[p.nickname]) teammates[p.nickname] = { total: 0, wins: 0 };
+              teammates[p.nickname].total += 1;
+              if (isWin) teammates[p.nickname].wins += 1;
+            }
+          });
+        });
+
+        const synergyList = Object.entries(teammates)
+          .map(([nickname, stats]) => ({
+            nickname,
+            total: stats.total,
+            winRate: Math.round((stats.wins / stats.total) * 100)
+          }))
+          .filter(s => s.total >= 3) 
+          .sort((a, b) => b.winRate - a.winRate || b.total - a.total);
+
+        if (synergyList.length > 0) {
+          this.bestPartner = synergyList[0];
+          const reversed = [...synergyList].sort((a, b) => a.winRate - b.winRate || b.total - a.total);
+          if (reversed[0].winRate < 50) this.worstPartner = reversed[0];
         }
-      });
-    });
+        }
 
-    const synergyList = Object.entries(teammates)
-      .map(([nickname, stats]) => ({
-        nickname,
-        total: stats.total,
-        winRate: Math.round((stats.wins / stats.total) * 100)
-      }))
-      .filter(s => s.total >= 3) 
-      .sort((a, b) => b.winRate - a.winRate || b.total - a.total);
+        calculateRivalry(matches, myNickname) {
+        const enemies = {}; 
+        const normalizedMe = (myNickname || "").toLowerCase().trim();
 
-    if (synergyList.length > 0) {
-      this.bestPartner = synergyList[0];
-      const reversed = [...synergyList].sort((a, b) => a.winRate - b.winRate || b.total - a.total);
-      if (reversed[0].winRate < 50) this.worstPartner = reversed[0];
-    }
-  }
+        matches.forEach(match => {
+          if (!match.allPlayerStats) return;
+          const myResult = match.matchResult;
+          const isWin = myResult === 'WIN';
 
+          match.allPlayerStats.forEach(p => {
+            const normalizedName = p.nickname.toLowerCase().trim();
+            if (normalizedName === normalizedMe) return; 
+
+            // 내 팀과 다른 팀 결과인 경우 (즉, 상대팀)
+            if (p.result !== myResult) {
+              if (!enemies[p.nickname]) enemies[p.nickname] = { total: 0, myWins: 0, myLoses: 0 };
+              enemies[p.nickname].total += 1;
+              if (isWin) enemies[p.nickname].myWins += 1;
+              else enemies[p.nickname].myLoses += 1;
+            }
+          });
+        });
+
+        const rivalryList = Object.entries(enemies)
+          .map(([nickname, stats]) => ({
+            nickname,
+            total: stats.total,
+            myWinRate: Math.round((stats.myWins / stats.total) * 100),
+            rivalWinRate: Math.round((stats.myLoses / stats.total) * 100)
+          }))
+          .filter(r => r.total >= 2); // 최소 2번은 마주쳐야 라이벌로 인정
+
+        if (rivalryList.length > 0) {
+          // Nemesis: 상대팀일 때 나를 가장 많이 이긴 사람 (나의 승률이 가장 낮음)
+          const sortedByMyLoss = [...rivalryList].sort((a, b) => a.myWinRate - b.myWinRate || b.total - a.total);
+          if (sortedByMyLoss[0].myWinRate < 50) {
+            this.nemesis = sortedByMyLoss[0];
+          }
+
+          // Prey: 상대팀일 때 내가 가장 많이 이긴 사람 (나의 승률이 가장 높음)
+          const sortedByMyWin = [...rivalryList].sort((a, b) => b.myWinRate - a.myWinRate || b.total - a.total);
+          if (sortedByMyWin[0].myWinRate > 50) {
+            this.prey = sortedByMyWin[0];
+          }
+        }
+        }
   calculateCrewStatus() {
     const mmr = this.crewMmr;
     const count = this.crewMatchCount;

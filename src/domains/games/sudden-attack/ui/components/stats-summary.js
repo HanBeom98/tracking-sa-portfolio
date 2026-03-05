@@ -122,17 +122,56 @@ export class SaStatsSummary extends HTMLElement {
             </div>
           </div>
         </div>
+<div class="stats-detail-grid">
+  <sa-mmr-trend-chart id="trendChart"></sa-mmr-trend-chart>
+  <sa-map-mastery id="mapMastery"></sa-map-mastery>
+</div>
 
-        <div class="stats-detail-grid">
-          <sa-mmr-trend-chart id="trendChart"></sa-mmr-trend-chart>
-          <sa-map-mastery id="mapMastery"></sa-map-mastery>
-        </div>
-        <sa-synergy-view id="synergyView"></sa-synergy-view>
+<div class="relationship-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 30px;">
+  <sa-synergy-view id="synergyView"></sa-synergy-view>
+  ${this.renderRivalry(data)}
+</div>
 
-        ${this.renderCrewAnalysis(data)}
-      </div>
-    `;
+${this.renderCrewAnalysis(data)}
+</div>
+`;
+...
+renderRivalry(data) {
+if (!data || (!data.nemesis && !data.prey)) return '';
 
+const renderCard = (rival, type) => {
+if (!rival) return '';
+const isNemesis = type === 'nemesis';
+const title = isNemesis ? '나만 보면 강해지는... 💀' : '만나면 반가운 맛집 🎯';
+const label = isNemesis ? '천적 (Nemesis)' : '먹잇감 (Prey)';
+const themeColor = isNemesis ? '#ff4d4d' : '#00d2ff';
+const winRateText = isNemesis ? `상대 승률: ${rival.rivalWinRate}%` : `내 승률: ${rival.myWinRate}%`;
+
+return `
+<div class="rival-card" onclick="window.dispatchEvent(new CustomEvent('sa-request-search', { detail: { name: '${rival.nickname}' } }))"
+     style="background: rgba(255,255,255,0.02); border: 1px solid ${themeColor}33; border-radius: 10px; padding: 12px; cursor: pointer; transition: all 0.2s;">
+  <div style="font-size: 11px; color: ${themeColor}; margin-bottom: 4px; font-weight: 800;">${label}</div>
+  <div style="display: flex; justify-content: space-between; align-items: center;">
+    <div style="font-weight: bold; color: #fff;">${rival.nickname}</div>
+    <div style="font-size: 12px; color: #888;">${rival.total}전 ${winRateText}</div>
+  </div>
+  <div style="font-size: 10px; color: #666; margin-top: 4px;">${title}</div>
+</div>
+`;
+};
+
+return `
+<div class="rivalry-section">
+<h3 style="margin: 0 0 15px 0; font-size: 14px; color: #888;">내전 라이벌 분석</h3>
+<div style="display: flex; flex-direction: column; gap: 10px;">
+  ${renderCard(data.nemesis, 'nemesis')}
+  ${renderCard(data.prey, 'prey')}
+</div>
+</div>
+`;
+}
+
+renderCrewAnalysis(data) {
     const radarComp = this.querySelector('#radarChart');
     if (radarComp) radarComp.data = { radar: data.radar };
 
