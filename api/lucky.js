@@ -20,7 +20,10 @@ export default async function handler(req, res) {
 
         const geminiResponse = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Referer': 'https://trackingsa.com' // Google Cloud Referer 제한 우회
+            },
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
         });
 
