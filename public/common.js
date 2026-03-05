@@ -417,14 +417,27 @@ window.AuthGateway = {
 async function initAll() {
     const shell = await ensureAppShellRuntime();
     shell.initShell();
+    
+    // 인증 세션 초기화를 우선 시작하여 상태 변화를 감지할 준비를 마침
+    const sessionRuntime = await ensureAuthSessionRuntime();
+    const initPromise = sessionRuntime.init(); // 비동기 초기화 시작
+    
     await ensureAuthStateBus();
     await ensureAuthPromptKit();
-    await initAuthControls();
+    await initAuthControls(); // UI 렌더링 시도
+    
     if (authPromptKit && typeof authPromptKit.initAuthGateLinks === "function") {
         authPromptKit.initAuthGateLinks();
     }
-    const sessionRuntime = await ensureAuthSessionRuntime();
-    await sessionRuntime.init();
+    
+    // 초기화 완료 대기
+    await initPromise;
+    
+    // 초기화 직후 한 번 더 UI 강제 업데이트 (상태 유실 방지)
+    const currentUser = sessionRuntime.getCurrentUser();
+    if (currentUser && window.updateAuthControls) {
+        window.updateAuthControls(currentUser);
+    }
 }
 
 if (document.readyState === "loading") {
