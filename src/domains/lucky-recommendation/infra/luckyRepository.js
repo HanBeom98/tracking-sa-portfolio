@@ -1,5 +1,5 @@
 export const postLuckyRecommendation = async (payload) => {
-  const response = await fetch("https://tracking-sa.vercel.app/api/lucky", {
+  const response = await fetch("/api/lucky", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),

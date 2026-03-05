@@ -1,5 +1,5 @@
 export function createFortuneRepository() {
-  const API_URL = "https://tracking-sa.vercel.app/api/fortune";
+  const API_URL = "/api/fortune";
 
   async function fetchFortune(payload) {
     const response = await fetch(API_URL, {
