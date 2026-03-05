@@ -52,7 +52,8 @@ export default async function handler(req, res) {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
-                'Referer': 'https://trackingsa.com'
+                'Origin': 'https://trackingsa.com',
+                'Referer': 'https://trackingsa.com/'
             },
             body: JSON.stringify({
                 contents: [{ parts: [{ text: prompt + "\n\nIMPORTANT: Respond ONLY with a raw JSON object. Do not include markdown formatting or backticks. Valid JSON only." }] }]
