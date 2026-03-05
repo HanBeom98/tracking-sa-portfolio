@@ -192,6 +192,75 @@ body.dark-mode {
 .pos-select label { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 50%; font-size: 14px; transition: all 0.2s; filter: grayscale(1); opacity: 0.5; }
 .pos-select input[type="radio"]:checked + label { filter: grayscale(0); opacity: 1; background: var(--border); }
 
+/* SWR Status Bar */
+.swr-status {
+  padding: 10px 20px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.5s ease;
+  opacity: 1;
+  transform: translateY(0);
+}
+.swr-status.stale {
+  background: rgba(255, 204, 0, 0.1);
+  border: 1px solid rgba(255, 204, 0, 0.3);
+  color: var(--gold);
+}
+.swr-status.fresh {
+  background: rgba(0, 210, 255, 0.1);
+  border: 1px solid rgba(0, 210, 255, 0.3);
+  color: var(--primary);
+  animation: pulse-fresh 2s infinite;
+}
+.swr-status.hidden-out {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+.swr-status .spin {
+  display: inline-block;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes pulse-fresh {
+  0% { box-shadow: 0 0 0 0 rgba(0, 210, 255, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(0, 210, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 210, 255, 0); }
+}
+
+/* Relationship (Synergy & Rivalry) Cards Common Styles */
+.rel-section { display: flex; flex-direction: column; height: 100%; }
+.rel-header { font-size: 14px; color: #888; margin: 0 0 15px 0; font-weight: normal; display: flex; align-items: center; gap: 6px; }
+.rel-grid { display: flex; flex-direction: column; gap: 10px; }
+.rel-card { 
+  background: #141724; border-radius: 10px; padding: 12px; position: relative; 
+  border: 1px solid transparent; transition: all 0.2s ease; cursor: pointer;
+  display: flex; flex-direction: column;
+}
+.rel-card:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+.rel-card.best { border-color: rgba(0, 255, 136, 0.2); background: linear-gradient(135deg, rgba(0, 255, 136, 0.08) 0%, #141724 100%); }
+.rel-card.worst { border-color: rgba(0, 210, 255, 0.2); background: linear-gradient(135deg, rgba(0, 210, 255, 0.08) 0%, #141724 100%); }
+.rel-card.nemesis { border-color: rgba(255, 77, 77, 0.2); background: linear-gradient(135deg, rgba(255, 77, 77, 0.08) 0%, #141724 100%); }
+.rel-card.prey { border-color: rgba(0, 210, 255, 0.2); background: linear-gradient(135deg, rgba(0, 210, 255, 0.08) 0%, #141724 100%); }
+
+.rel-tag { font-size: 11px; font-weight: 800; margin-bottom: 6px; display: block; }
+.best .rel-tag { color: #00ff88; }
+.worst .rel-tag, .prey .rel-tag { color: #00d2ff; }
+.nemesis .rel-tag { color: #ff4d4d; }
+
+.rel-body { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+.rel-name { font-size: 16px; font-weight: bold; color: #fff; }
+.rel-stats { font-size: 12px; color: #888; display: flex; align-items: center; }
+.rel-stats strong { color: #fff; margin: 0 2px; }
+.rel-stats .dot { margin: 0 6px; opacity: 0.3; }
+
+.rel-footer { margin-top: 6px; font-size: 10px; color: #666; line-height: 1.2; }
+
 @media (max-width: 768px) {
   .sa-container { padding: 0 15px; }
   .search-bar { flex-direction: column; align-items: center; }

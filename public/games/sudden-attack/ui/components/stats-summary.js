@@ -64,7 +64,7 @@ export class SaStatsSummary extends HTMLElement {
 
         /* Relationship Container */
         .relationship-container {
-          display: grid; grid-template-columns: 1fr 1fr; gap: 20px; 
+          display: grid; grid-template-columns: 1fr 1fr; gap: 25px; 
           margin-top: 35px; padding-top: 25px; border-top: 1px dashed #2d3356;
         }
         
@@ -136,8 +136,14 @@ export class SaStatsSummary extends HTMLElement {
         </div>
         
         <div class="relationship-container">
-          <sa-synergy-view id="synergyView"></sa-synergy-view>
-          ${this.renderRivalry(data)}
+          <div class="rel-section">
+            <h3 class="rel-header">🤝 최근 전장 시너지 분석</h3>
+            <sa-synergy-view id="synergyView"></sa-synergy-view>
+          </div>
+          <div class="rel-section">
+            <h3 class="rel-header">⚔️ 내전 라이벌 분석</h3>
+            ${this.renderRivalry(data)}
+          </div>
         </div>
 
         ${this.renderCrewAnalysis(data)}
@@ -158,39 +164,35 @@ export class SaStatsSummary extends HTMLElement {
   }
 
   renderRivalry(data) {
-    if (!data || (!data.nemesis && !data.prey)) return '';
+    if (!data || (!data.nemesis && !data.prey)) return '<div style="color:#444; font-size:12px; padding:20px; text-align:center; background:#141724; border-radius:10px;">라이벌 데이터가 부족합니다.</div>';
 
     const renderCard = (rival, type) => {
       if (!rival) return '';
       const isNemesis = type === 'nemesis';
       const title = isNemesis ? '나만 보면 강해지는... 💀' : '만나면 반가운 맛집 🎯';
       const label = isNemesis ? '천적 (Nemesis)' : '먹잇감 (Prey)';
-      const themeColor = isNemesis ? '#ff4d4d' : '#00d2ff';
-      const winRateText = isNemesis ? `상대 승률: <strong>${rival.rivalWinRate}%</strong>` : `내 승률: <strong>${rival.myWinRate}%</strong>`;
+      const winRateText = isNemesis ? `상대 승률<strong>${rival.rivalWinRate}%</strong>` : `내 승률<strong>${rival.myWinRate}%</strong>`;
 
       return `
-        <div class="rival-card" onclick="window.dispatchEvent(new CustomEvent('sa-request-search', { detail: { name: '${rival.nickname}' } }))"
-             style="background: linear-gradient(135deg, ${themeColor}11 0%, #141724 100%); border: 1px solid ${themeColor}33; border-radius: 10px; padding: 12px; cursor: pointer; transition: transform 0.2s;"
-             onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-          <span style="font-size: 11px; font-weight: 800; color: ${themeColor}; margin-bottom: 4px; display: block;">${label}</span>
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 16px; font-weight: bold; color: #fff;">${rival.nickname}</span>
-            <div style="font-size: 12px; color: #888;">
-              <span>${winRateText}</span><span style="margin: 0 5px; opacity: 0.3;">·</span><span>${rival.total}전 상대함</span>
+        <div class="rel-card ${type}" onclick="window.dispatchEvent(new CustomEvent('sa-request-search', { detail: { name: '${rival.nickname}' } }))">
+          <span class="rel-tag">${label}</span>
+          <div class="rel-body">
+            <span class="rel-name">${rival.nickname}</span>
+            <div class="rel-stats">
+              <span>${winRateText}</span>
+              <span class="dot">·</span>
+              <span>${rival.total}전 상대함</span>
             </div>
           </div>
-          <div style="margin-top: 4px; font-size: 10px; color: #666;">${title}</div>
+          <div class="rel-footer">${title}</div>
         </div>
       `;
     };
 
     return `
-      <div class="rivalry-section" style="display: flex; flex-direction: column; height: 100%;">
-        <h3 style="font-size: 14px; color: #888; margin: 0 0 15px 0; font-weight: normal;">⚔️ 내전 라이벌 분석</h3>
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-          ${renderCard(data.nemesis, 'nemesis')}
-          ${renderCard(data.prey, 'prey')}
-        </div>
+      <div class="rel-grid">
+        ${renderCard(data.nemesis, 'nemesis')}
+        ${renderCard(data.prey, 'prey')}
       </div>
     `;
   }

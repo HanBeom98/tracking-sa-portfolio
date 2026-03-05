@@ -61,6 +61,12 @@ export class SaStatsSummary extends HTMLElement {
           display: grid; grid-template-columns: 1.2fr 1fr; gap: 25px; margin-top: 30px; align-items: start;
         }
         .stats-detail-grid > * { margin-top: 0 !important; }
+
+        /* Relationship Container */
+        .relationship-container {
+          display: grid; grid-template-columns: 1fr 1fr; gap: 25px; 
+          margin-top: 35px; padding-top: 25px; border-top: 1px dashed #2d3356;
+        }
         
         /* Crew Stats Card */
         .crew-stats-card {
@@ -79,6 +85,7 @@ export class SaStatsSummary extends HTMLElement {
           .stats-summary-header { flex-direction: column; }
           .radar-section { margin: 0 auto; }
           .stats-grid { grid-template-columns: repeat(2, 1fr); }
+          .relationship-container { grid-template-columns: 1fr; }
         }
       </style>
       <div class="stats-summary-card">
@@ -127,7 +134,17 @@ export class SaStatsSummary extends HTMLElement {
           <sa-mmr-trend-chart id="trendChart"></sa-mmr-trend-chart>
           <sa-map-mastery id="mapMastery"></sa-map-mastery>
         </div>
-        <sa-synergy-view id="synergyView"></sa-synergy-view>
+        
+        <div class="relationship-container">
+          <div class="rel-section">
+            <h3 class="rel-header">🤝 최근 전장 시너지 분석</h3>
+            <sa-synergy-view id="synergyView"></sa-synergy-view>
+          </div>
+          <div class="rel-section">
+            <h3 class="rel-header">⚔️ 내전 라이벌 분석</h3>
+            ${this.renderRivalry(data)}
+          </div>
+        </div>
 
         ${this.renderCrewAnalysis(data)}
       </div>
@@ -144,6 +161,40 @@ export class SaStatsSummary extends HTMLElement {
 
     const mapComp = this.querySelector('#mapMastery');
     if (mapComp) mapComp.params = { mapStats: data.mapStats || [], isCrew: data.isCrew };
+  }
+
+  renderRivalry(data) {
+    if (!data || (!data.nemesis && !data.prey)) return '<div style="color:#444; font-size:12px; padding:20px; text-align:center; background:#141724; border-radius:10px;">라이벌 데이터가 부족합니다.</div>';
+
+    const renderCard = (rival, type) => {
+      if (!rival) return '';
+      const isNemesis = type === 'nemesis';
+      const title = isNemesis ? '나만 보면 강해지는... 💀' : '만나면 반가운 맛집 🎯';
+      const label = isNemesis ? '천적 (Nemesis)' : '먹잇감 (Prey)';
+      const winRateText = isNemesis ? `상대 승률<strong>${rival.rivalWinRate}%</strong>` : `내 승률<strong>${rival.myWinRate}%</strong>`;
+
+      return `
+        <div class="rel-card ${type}" onclick="window.dispatchEvent(new CustomEvent('sa-request-search', { detail: { name: '${rival.nickname}' } }))">
+          <span class="rel-tag">${label}</span>
+          <div class="rel-body">
+            <span class="rel-name">${rival.nickname}</span>
+            <div class="rel-stats">
+              <span>${winRateText}</span>
+              <span class="dot">·</span>
+              <span>${rival.total}전 상대함</span>
+            </div>
+          </div>
+          <div class="rel-footer">${title}</div>
+        </div>
+      `;
+    };
+
+    return `
+      <div class="rel-grid">
+        ${renderCard(data.nemesis, 'nemesis')}
+        ${renderCard(data.prey, 'prey')}
+      </div>
+    `;
   }
 
   set vsModeData({ primary, target }) {

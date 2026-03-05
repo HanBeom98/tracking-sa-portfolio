@@ -4,6 +4,8 @@ import { SaService } from './application/sa-service.js';
 import { CrewRepository } from './infra/crew-repository.js';
 import { BalancerManager } from './ui/balancer-manager.js';
 import { AdminManager } from './ui/admin-manager.js';
+import { updateSwrUI, saveSearch, renderRecentSearches } from './ui/utils/ui-helpers.js';
+
 // Import Modular UI Components
 import './ui/components/player-card.js';
 import './ui/components/stats-summary.js';
@@ -37,6 +39,7 @@ const profileSection = document.getElementById('playerProfile');
 const statsSection = document.getElementById('statsSummary');
 const crewRankingSection = document.getElementById('crewRanking');
 const historySection = document.getElementById('matchHistory');
+const swrStatus = document.getElementById('swrStatus');
 
 const applyCrewBtn = document.getElementById('applyCrewBtn');
 const submitApplyBtn = document.getElementById('submitApplyBtn');
@@ -64,6 +67,7 @@ async function handleSearch(nameOverride = null, skipHistory = false) {
 
   try {
     showLoading(name);
+    swrStatus.classList.add('hidden');
     
     // Update URL Parameter
     if (!skipHistory) {
@@ -78,25 +82,30 @@ async function handleSearch(nameOverride = null, skipHistory = false) {
       primaryUserData = fresh;
       renderUI(fresh.player, fresh.matches, fresh.stats);
       loading.classList.add('hidden');
+      updateSwrUI(swrStatus, 'fresh');
     };
 
     // 1. Get Profile
     const result = await service.getFullPlayerProfile(name, currentRankings, onFreshData);
     
     primaryUserData = result;
-    saveSearch(result.player.nickname);
+    saveSearch(STORAGE_KEY, result.player.nickname);
+    renderRecentSearches(recentSearchesContainer, STORAGE_KEY, handleSearch);
     renderUI(result.player, result.matches, result.stats);
 
     if (result.isStale) {
       loadingText.textContent = '최신 데이터로 업데이트 중...';
+      updateSwrUI(swrStatus, 'stale', result.cacheTime);
     } else {
       loading.classList.add('hidden');
+      updateSwrUI(swrStatus, 'hide');
     }
 
     await refreshRankings();
   } catch (error) { 
     handleSearchError(error); 
     loading.classList.add('hidden');
+    updateSwrUI(swrStatus, 'hide');
   } 
 }
 
@@ -177,27 +186,6 @@ function handleSearchError(error) {
   else if (error.message === 'PLAYER_NOT_FOUND') alert('캐릭터를 찾을 수 없습니다.');
   else alert('전적을 불러오는 중 오류가 발생했습니다.');
   console.error('[SA] Search Error:', error);
-}
-
-function getRecentSearches() {
-  const data = localStorage.getItem(STORAGE_KEY);
-  return data ? JSON.parse(data) : [];
-}
-
-function saveSearch(name) {
-  let searches = getRecentSearches();
-  searches = [name, ...searches.filter(s => s !== name)].slice(0, 5);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(searches));
-  renderRecentSearches();
-}
-
-function renderRecentSearches() {
-  const searches = getRecentSearches();
-  if (searches.length === 0) { recentSearchesContainer.innerHTML = ''; return; }
-  recentSearchesContainer.innerHTML = `<span>최근 검색:</span>` + searches.map(s => `<button class="search-chip">${s}</button>`).join('');
-  recentSearchesContainer.querySelectorAll('.search-chip').forEach(btn => {
-    btn.addEventListener('click', () => { handleSearch(btn.textContent); });
-  });
 }
 
 async function refreshRankings() {
@@ -303,4 +291,4 @@ window.addEventListener('sa-request-search', (e) => {
 
 initCrew();
 initUrlSync(); // URL 동기화 활성화
-renderRecentSearches();
+renderRecentSearches(recentSearchesContainer, STORAGE_KEY, handleSearch);
