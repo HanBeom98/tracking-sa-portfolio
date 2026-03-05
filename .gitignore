@@ -35,6 +35,7 @@ firebase-debug.log
 !package.json
 !package-lock.json
 !firebase.json
+!vercel.json
 !firestore.indexes.json
 !firebase-config.js
 !search-index.json
