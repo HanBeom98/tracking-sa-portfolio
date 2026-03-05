@@ -21,8 +21,14 @@
     }
 
     function getTranslation(key, defaultValue = "") {
-      const dict = (root.translations && root.translations[currentLang]) || null;
+      // 1. 기본 번역 딕셔너리에서 검색
+      let dict = (root.translations && root.translations[currentLang]) || null;
       if (dict && dict[key]) return dict[key];
+      
+      // 2. 병합되지 않은 도메인 전용 딕셔너리에서 실시간 검색 (경합 방지)
+      let domainDict = (root.domainTranslations && root.domainTranslations[currentLang]) || null;
+      if (domainDict && domainDict[key]) return domainDict[key];
+      
       return defaultValue || key;
     }
 

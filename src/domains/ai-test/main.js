@@ -19,9 +19,15 @@ class AiTestPremium extends HTMLElement {
   }
 
   connectedCallback() {
-    if (!window.getTranslation) {
+    const isTranslationReady = () => {
+      if (!window.getTranslation) return false;
+      const testValue = window.getTranslation("ai_test_start", "__MISSING__");
+      return testValue !== "ai_test_start" && testValue !== "__MISSING__";
+    };
+
+    if (!isTranslationReady()) {
       this._translationPoll = setInterval(() => {
-        if (window.getTranslation) {
+        if (isTranslationReady()) {
           clearInterval(this._translationPoll);
           this._translationPoll = null;
           this.initComponent();

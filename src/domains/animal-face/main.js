@@ -30,10 +30,17 @@ class AnimalFaceTest extends HTMLElement {
   }
 
   async connectedCallback() {
-    // 번역 엔진 대기 로직 (깜빡임 및 번역 누락 방지)
-    if (!window.getTranslation) {
+    // 번역 엔진 및 도메인 데이터 완전 로드 대기
+    const isTranslationReady = () => {
+      if (!window.getTranslation) return false;
+      // 도메인 특정 키가 정상적으로 번역되는지 확인 (폴백 방지)
+      const testValue = window.getTranslation("gender_male", "__MISSING__");
+      return testValue !== "gender_male" && testValue !== "__MISSING__";
+    };
+
+    if (!isTranslationReady()) {
       this._translationPoll = setInterval(() => {
-        if (window.getTranslation) {
+        if (isTranslationReady()) {
           clearInterval(this._translationPoll);
           this._translationPoll = null;
           this.initComponent();
