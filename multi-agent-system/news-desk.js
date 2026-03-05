@@ -57,7 +57,10 @@ async function callGemini(systemInstruction, userPrompt, temperature = 0.7) {
         try {
             const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Referer': 'https://trackingsa.com/'
+                },
                 body: JSON.stringify(body)
             });
             const data = await response.json();
