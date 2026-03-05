@@ -178,15 +178,17 @@ def build_rss():
         items = []
         if not html: return items
         # 최신 20개만 추출
-        card_regex = re.compile(r'<a[^>]*class="news-card-premium"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)</a>', re.I)
+        # href와 class 순서에 상관없이 매칭되도록 개선
+        card_regex = re.compile(r'<a[^>]+href="([^"]+)"[^>]*class="news-card-premium"[^>]*>([\s\S]*?)</a>|<a[^>]*class="news-card-premium"[^>]+href="([^"]+)"[^>]*>([\s\S]*?)</a>', re.I)
         title_regex = re.compile(r'<h2[^>]*class="news-title-text"[^>]*>([\s\S]*?)</h2>', re.I)
         date_regex = re.compile(r'<span[^>]*class="news-date"[^>]*>([\s\S]*?)</span>', re.I)
-        desc_regex = re.compile(r'<p[^>]*class="news-desc"[^>]*>([\s\S]*?)</p>', re.I)
+        # 클래스명이 news-excerpt로 변경됨
+        desc_regex = re.compile(r'<p[^>]*class="(?:news-desc|news-excerpt)"[^>]*>([\s\S]*?)</p>', re.I)
         
         for count, match in enumerate(card_regex.finditer(html)):
             if count >= 20: break
-            href = match.group(1) or ""
-            inner = match.group(2) or ""
+            href = match.group(1) or match.group(3) or ""
+            inner = match.group(2) or match.group(4) or ""
             title_match = title_regex.search(inner)
             date_match = date_regex.search(inner)
             desc_match = desc_regex.search(inner)
@@ -312,7 +314,8 @@ def build_search_index():
         card_regex = re.compile(r'<a[^>]+href="([^"]+)"[^>]*class="news-card-premium"[^>]*>([\s\S]*?)</a>|<a[^>]*class="news-card-premium"[^>]+href="([^"]+)"[^>]*>([\s\S]*?)</a>', re.I)
         title_regex = re.compile(r'<h2[^>]*class="news-title-text"[^>]*>([\s\S]*?)</h2>', re.I)
         date_regex = re.compile(r'<span[^>]*class="news-date"[^>]*>([\s\S]*?)</span>', re.I)
-        desc_regex = re.compile(r'<p[^>]*class="news-desc"[^>]*>([\s\S]*?)</p>', re.I)
+        # 클래스명이 news-excerpt로 변경됨
+        desc_regex = re.compile(r'<p[^>]*class="(?:news-desc|news-excerpt)"[^>]*>([\s\S]*?)</p>', re.I)
         
         for match in card_regex.finditer(html):
             href = match.group(1) or match.group(3) or ""
