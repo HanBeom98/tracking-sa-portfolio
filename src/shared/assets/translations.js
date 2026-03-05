@@ -66,7 +66,13 @@ window.translations = {
         'game_hub_desc': '클래식부터 AI 게임까지, 모든 게임을 한곳에서 즐기세요.',
         'tetris_game_desc': '웹에서 가볍게 즐기는 클래식 아케이드 퍼즐 게임',
         'ai_evolution_desc': 'AI 모델을 합성하여 진화시키는 2048 스타일 게임',
-        'register_game_desc': '직접 만든 게임이나 추천하고 싶은 게임을 공유하세요.'
+        'register_game_desc': '직접 만든 게임이나 추천하고 싶은 게임을 공유하세요.',
+        'cat_interactive': 'AI Interactive',
+        'badge_test': 'TEST',
+        'cat_insights': 'Insights & Column',
+        'submit_game_link': '+ 새 게임 등록',
+        'footer_brand_desc': 'Tracking SA는 최첨단 AI 기술을 활용하여 사용자에게 가장 유용한 데이터와 즐거운 경험을 제공합니다.',
+        'sa_stats': '서든어택 전적'
     },
     'en': {
         'home': 'Home',
@@ -125,7 +131,13 @@ window.translations = {
         'game_hub_desc': 'Enjoy all games from classics to AI, all in one place.',
         'tetris_game_desc': 'Classic arcade puzzle game enjoyed lightly on the web.',
         'ai_evolution_desc': '2048-style game synthesizing and evolving AI models.',
-        'register_game_desc': "Share your own games or games you'd like to recommend."
+        'register_game_desc': "Share your own games or games you'd like to recommend.",
+        'cat_interactive': 'AI Interactive',
+        'badge_test': 'TEST',
+        'cat_insights': 'Insights & Column',
+        'submit_game_link': '+ Submit Your Game',
+        'footer_brand_desc': 'Tracking SA provides users with the most useful data and enjoyable experiences using cutting-edge AI technology.',
+        'sa_stats': 'Sudden Attack Stats'
     }
 };
 

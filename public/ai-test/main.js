@@ -19,6 +19,20 @@ class AiTestPremium extends HTMLElement {
   }
 
   connectedCallback() {
+    if (!window.getTranslation) {
+      this._translationPoll = setInterval(() => {
+        if (window.getTranslation) {
+          clearInterval(this._translationPoll);
+          this._translationPoll = null;
+          this.initComponent();
+        }
+      }, 50);
+    } else {
+      this.initComponent();
+    }
+  }
+
+  initComponent() {
     this.render();
     
     // 실시간 언어 전환 리스너
@@ -27,6 +41,7 @@ class AiTestPremium extends HTMLElement {
   }
 
   disconnectedCallback() {
+    if (this._translationPoll) clearInterval(this._translationPoll);
     if (this._onLangChange) {
       window.removeEventListener("language-changed", this._onLangChange);
     }

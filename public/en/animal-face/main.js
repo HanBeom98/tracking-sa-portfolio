@@ -30,6 +30,21 @@ class AnimalFaceTest extends HTMLElement {
   }
 
   async connectedCallback() {
+    // 번역 엔진 대기 로직 (깜빡임 및 번역 누락 방지)
+    if (!window.getTranslation) {
+      this._translationPoll = setInterval(() => {
+        if (window.getTranslation) {
+          clearInterval(this._translationPoll);
+          this._translationPoll = null;
+          this.initComponent();
+        }
+      }, 50);
+    } else {
+      this.initComponent();
+    }
+  }
+
+  async initComponent() {
     this.render();
     this.setupEvents();
     
@@ -37,7 +52,6 @@ class AnimalFaceTest extends HTMLElement {
     this._onLangChange = (e) => {
       this.render();
       this.setupEvents();
-      // 이전 결과가 있었다면 점수 라벨 등 재렌더링 필요
       if (this._lastResult) {
         const translate = this.getTranslator();
         const msg = createAnimalFaceMessages(translate);
@@ -54,6 +68,7 @@ class AnimalFaceTest extends HTMLElement {
   }
 
   disconnectedCallback() {
+    if (this._translationPoll) clearInterval(this._translationPoll);
     if (this._onLangChange) {
       window.removeEventListener("language-changed", this._onLangChange);
     }
