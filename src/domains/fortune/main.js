@@ -23,24 +23,12 @@ class FortunePremium extends HTMLElement {
     this._useCase = createFortuneUseCase({ fortuneRepository });
   }
 
-  connectedCallback() {
-    const isTranslationReady = () => {
-      if (!window.getTranslation) return false;
-      const testValue = window.getTranslation("name_label", "__MISSING__");
-      return testValue !== "name_label" && testValue !== "__MISSING__";
-    };
-
-    if (!isTranslationReady()) {
-      this._translationPoll = setInterval(() => {
-        if (isTranslationReady()) {
-          clearInterval(this._translationPoll);
-          this._translationPoll = null;
-          this.initComponent();
-        }
-      }, 50);
-    } else {
-      this.initComponent();
+  async connectedCallback() {
+    // AppShell 인프라 준비 대기
+    if (window.AppShell && typeof window.AppShell.waitForTranslation === "function") {
+      await window.AppShell.waitForTranslation();
     }
+    this.initComponent();
   }
 
   initComponent() {

@@ -18,24 +18,12 @@ class AiTestPremium extends HTMLElement {
     this.models = AI_TEST_MODELS;
   }
 
-  connectedCallback() {
-    const isTranslationReady = () => {
-      if (!window.getTranslation) return false;
-      const testValue = window.getTranslation("ai_test_start", "__MISSING__");
-      return testValue !== "ai_test_start" && testValue !== "__MISSING__";
-    };
-
-    if (!isTranslationReady()) {
-      this._translationPoll = setInterval(() => {
-        if (isTranslationReady()) {
-          clearInterval(this._translationPoll);
-          this._translationPoll = null;
-          this.initComponent();
-        }
-      }, 50);
-    } else {
-      this.initComponent();
+  async connectedCallback() {
+    // AppShell 인프라 준비 대기
+    if (window.AppShell && typeof window.AppShell.waitForTranslation === "function") {
+      await window.AppShell.waitForTranslation();
     }
+    this.initComponent();
   }
 
   initComponent() {
@@ -47,16 +35,13 @@ class AiTestPremium extends HTMLElement {
   }
 
   disconnectedCallback() {
-    if (this._translationPoll) clearInterval(this._translationPoll);
     if (this._onLangChange) {
       window.removeEventListener("language-changed", this._onLangChange);
     }
   }
 
   getLanguage() {
-    const path = window.location.pathname || "/";
-    if (path.startsWith("/en/")) return "en";
-    return localStorage.getItem("lang") || "ko";
+    return (window.AppShell && window.AppShell.getCurrentLang) ? window.AppShell.getCurrentLang() : "ko";
   }
 
   getTranslation(key, fallback = "") {

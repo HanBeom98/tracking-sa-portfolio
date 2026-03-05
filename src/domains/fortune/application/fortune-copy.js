@@ -1,5 +1,8 @@
 export function resolveFortuneLanguage() {
-  return localStorage.getItem("lang") || "ko";
+  if (window.AppShell && typeof window.AppShell.getCurrentLang === "function") {
+    return window.AppShell.getCurrentLang();
+  }
+  return "ko";
 }
 
 export function createFortuneCopy(translate) {

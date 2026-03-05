@@ -9,6 +9,21 @@
     root.localStorage.setItem("lang", currentLang);
     root.document.documentElement.setAttribute("lang", currentLang === "en" ? "en" : "ko");
 
+    // --- Translation Readiness Management ---
+    let _resolveReady = null;
+    const _readyPromise = new Promise(resolve => { _resolveReady = resolve; });
+    
+    function checkReadiness() {
+      // 도메인 전용 번역이 로드되어야 하는 페이지인지 판별 (translations.js 로드 여부)
+      const hasDomainTransTag = !!root.document.querySelector('script[src*="translations.js"]:not([src*="shared"])');
+      const isMerged = root.translations && (!hasDomainTransTag || root.domainTranslations);
+      
+      if (isMerged && _resolveReady) {
+        _resolveReady();
+        _resolveReady = null; // Prevent multiple resolves
+      }
+    }
+
     // --- Translation Merging (Domain DDD Support) ---
     root.translations = root.translations || {};
     if (root.domainTranslations) {
@@ -16,7 +31,14 @@
         root.translations[lang] = root.translations[lang] || {};
         Object.assign(root.translations[lang], root.domainTranslations[lang]);
       });
+      checkReadiness();
     }
+    
+    // 주기적 체크 (이미 로드되었거나 나중에 로드될 경우 대비)
+    const readinessInterval = setInterval(() => {
+      checkReadiness();
+      if (!_resolveReady) clearInterval(readinessInterval);
+    }, 50);
 
     function getTranslation(key, defaultValue = "") {
       // 1. 기본 번역 딕셔너리에서 검색
@@ -203,11 +225,15 @@
     root.applyTranslations = () => applyTranslations();
     root.setLanguage = setLanguage;
 
-    return {
+    const shellInstance = {
       initShell,
       ensureShellVisibility,
       getCurrentLang: () => currentLang,
+      waitForTranslation: () => _readyPromise,
     };
+    
+    root.AppShell = shellInstance;
+    return shellInstance;
   }
 
   if (globalScope && typeof globalScope === "object") {

@@ -30,25 +30,11 @@ class AnimalFaceTest extends HTMLElement {
   }
 
   async connectedCallback() {
-    // 번역 엔진 및 도메인 데이터 완전 로드 대기
-    const isTranslationReady = () => {
-      if (!window.getTranslation) return false;
-      // 도메인 특정 키가 정상적으로 번역되는지 확인 (폴백 방지)
-      const testValue = window.getTranslation("gender_male", "__MISSING__");
-      return testValue !== "gender_male" && testValue !== "__MISSING__";
-    };
-
-    if (!isTranslationReady()) {
-      this._translationPoll = setInterval(() => {
-        if (isTranslationReady()) {
-          clearInterval(this._translationPoll);
-          this._translationPoll = null;
-          this.initComponent();
-        }
-      }, 50);
-    } else {
-      this.initComponent();
+    // AppShell 인프라 준비 대기 (정석적인 아키텍처 대기 로직)
+    if (window.AppShell && typeof window.AppShell.waitForTranslation === "function") {
+      await window.AppShell.waitForTranslation();
     }
+    this.initComponent();
   }
 
   async initComponent() {
@@ -117,7 +103,7 @@ class AnimalFaceTest extends HTMLElement {
 
   async predict() {
     showLoadingState(this._view);
-    const lang = window.location.pathname.startsWith("/en/") ? "en" : "ko";
+    const lang = (window.AppShell && window.AppShell.getCurrentLang) ? window.AppShell.getCurrentLang() : "ko";
 
     try {
       const result = await this._useCase.executePredict(this._view.preview, lang);
