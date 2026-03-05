@@ -314,7 +314,16 @@
     <meta name="description" content="Experience AI tests, games, and market insights in one place. Delivering latest AI trends.">
     <meta property="og:title" content="Tracking SA - AI Services & Hub">
     <meta property="og:description" content="Experience AI tests, games, and market insights in one place. Delivering latest AI trends.">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7263630893992216" crossorigin="anonymous"></script>
+    <script>
+  (function() {
+    const theme = localStorage.getItem('theme');
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark-mode');
+      document.body && document.body.classList.add('dark-mode');
+    }
+  })();
+</script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7263630893992216" crossorigin="anonymous"></script>
 <meta name="google-adsense-account" content="ca-pub-7263630893992216">
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
@@ -429,7 +438,7 @@
             <div class="search-container">
                 <div class="search-bar-wrapper">
                     <i class="fas fa-search search-icon"></i>
-                    <input type="text" id="searchInput" placeholder="관심 있는 기술 키워드나 Insights를 검색하세요..." autocomplete="off">
+                    <input type="text" id="searchInput" placeholder="Search for tech keywords or insights..." autocomplete="off">
                 </div>
                 <div id="searchResults"></div>
             </div>
@@ -448,22 +457,22 @@
                     <a href="/animal_face_test/" class="service-card">
                         <div class="card-icon icon-orange"><i class="fas fa-paw"></i></div>
                         <div class="card-title" data-i18n="animal_face_test">동물상 테스트</div>
-                        <div class="card-desc">나의 얼굴 데이터로 분석하는 가장 닮은 동물상 찾기</div>
+                        <div class="card-desc">Find your look-alike animal through face data analysis.</div>
                     </a>
                     <a href="/ai-test/" class="service-card">
                         <div class="card-icon icon-purple"><i class="fas fa-brain"></i></div>
                         <div class="card-title" data-i18n="ai_tendency_test">AI Persona Test</div>
-                        <div class="card-desc">인공지능이 진단하는 나의 성격과 업무 성향 분석</div>
+                        <div class="card-desc">AI-powered analysis of your personality and work style.</div>
                     </a>
                     <a href="/fortune/" class="service-card">
                         <div class="card-icon icon-navy"><i class="fas fa-moon"></i></div>
                         <div class="card-title" data-i18n="saju_test">AI 운세</div>
-                        <div class="card-desc">빅데이터와 명리학을 결합한 오늘의 맞춤 운세 확인</div>
+                        <div class="card-desc">Check your personalized daily fortune combining Big Data and Saju.</div>
                     </a>
                     <a href="/lucky-recommendation/" class="service-card">
                         <div class="card-icon icon-gold"><i class="fas fa-wand-magic-sparkles"></i></div>
                         <div class="card-title" data-i18n="lucky_recommendation">행운의 추천</div>
-                        <div class="card-desc">오늘 나에게 필요한 럭키 컬러와 최적의 아이템 제안</div>
+                        <div class="card-desc">Personalized lucky colors and optimal item recommendations.</div>
                     </a>
                 </div>
             </section>
@@ -477,17 +486,17 @@
                     <a href="/news/" class="service-card">
                         <div class="card-icon icon-blue"><i class="fas fa-newspaper"></i></div>
                         <div class="card-title" data-i18n="news_home">Investor Insights</div>
-                        <div class="card-desc">전문가의 시각으로 돈과 기술의 흐름을 꿰뚫는 전문 칼럼</div>
+                        <div class="card-desc">Expert columns cutting through the flow of money and tech.</div>
                     </a>
                     <a href="/glossary/" class="service-card">
                         <div class="card-icon icon-purple"><i class="fas fa-book"></i></div>
                         <div class="card-title">AI 용어사전</div>
-                        <div class="card-desc">어려운 기술 용어를 전문가의 시각으로 쉽게 풀이한 지식 창고</div>
+                        <div class="card-desc">A knowledge hub simplifying complex tech terms from an expert view.</div>
                     </a>
                     <a href="/futures-estimate/" class="service-card">
                         <div class="card-icon icon-navy"><i class="fas fa-chart-line"></i></div>
                         <div class="card-title" data-i18n="futures_estimate_index">코스피200</div>
-                        <div class="card-desc">선물 기반 지수 흐름과 추정치를 한눈에 확인</div>
+                        <div class="card-desc">Track futures-based index trends and estimates at a glance.</div>
                     </a>
                 </div>
             </section>
@@ -495,23 +504,23 @@
             <!-- Category: Community -->
             <section class="category-section">
                 <div class="category-header">
-                    <h2 data-i18n="menu_community">커뮤니티</h2>
+                    <h2 data-i18n="menu_community">Community</h2>
                 </div>
                 <div class="service-grid">
                     <a href="/board?category=notice" class="service-card">
                         <div class="card-icon icon-red"><i class="fas fa-bullhorn"></i></div>
-                        <div class="card-title" data-i18n="notice">공지사항</div>
-                        <div class="card-desc" data-i18n="notice_desc">Tracking SA의 새로운 소식과 주요 안내 사항 확인</div>
+                        <div class="card-title" data-i18n="notice">Notice</div>
+                        <div class="card-desc" data-i18n="notice_desc">Check out the latest news and important announcements from Tracking SA.</div>
                     </a>
                     <a href="/board?category=free" class="service-card">
                         <div class="card-icon icon-blue"><i class="fas fa-comments"></i></div>
-                        <div class="card-title" data-i18n="free_board">자유게시판</div>
-                        <div class="card-desc" data-i18n="free_board_desc">AI와 기술, 일상에 대해 자유롭게 이야기를 나누는 공간</div>
+                        <div class="card-title" data-i18n="free_board">Free Board</div>
+                        <div class="card-desc" data-i18n="free_board_desc">A space for free discussions on AI, tech, and daily life.</div>
                     </a>
                     <a href="/games/sudden-attack/" class="service-card">
                         <div class="card-icon" style="background: #1a1d2e; color: #00d2ff;"><i class="fas fa-crosshairs"></i></div>
-                        <div class="card-title">서든어택 전적</div>
-                        <div class="card-desc">넥슨 공식 데이터를 통한 실시간 전적 및 매치 정보 조회</div>
+                        <div class="card-title">Sudden Attack Stats</div>
+                        <div class="card-desc">Real-time stats and match info via official Nexon data.</div>
                     </a>
                 </div>
             </section>
@@ -528,23 +537,23 @@
                 <div class="service-grid">
                     <a href="/games/" class="service-card" style="border: 2px solid var(--p-blue-soft);">
                         <div class="card-icon icon-blue"><i class="fas fa-gamepad"></i></div>
-                        <div class="card-title">게임 센터 홈</div>
-                        <div class="card-desc">클래식부터 AI 게임까지, 모든 게임을 한곳에서 즐기세요.</div>
+                        <div class="card-title">Game Center Home</div>
+                        <div class="card-desc">Enjoy all games from classics to AI, all in one place.</div>
                     </a>
                     <a href="/games/tetris/" class="service-card">
                         <div class="card-icon icon-red"><i class="fas fa-shapes"></i></div>
-                        <div class="card-title" data-i18n="tetris_game">테트리스</div>
-                        <div class="card-desc">웹에서 가볍게 즐기는 클래식 아케이드 퍼즐 게임</div>
+                        <div class="card-title" data-i18n="tetris_game">Tetris</div>
+                        <div class="card-desc">Classic arcade puzzle game enjoyed lightly on the web.</div>
                     </a>
                     <a href="/games/ai-evolution/" class="service-card">
                         <div class="card-icon icon-green"><i class="fas fa-dna"></i></div>
-                        <div class="card-title" data-i18n="ai_evolution">AI 진화 게임</div>
-                        <div class="card-desc">AI 모델을 합성하여 진화시키는 2048 스타일 게임</div>
+                        <div class="card-title" data-i18n="ai_evolution">AI Evolution</div>
+                        <div class="card-desc">2048-style game synthesizing and evolving AI models.</div>
                     </a>
                     <a href="/games/submit/" class="service-card" style="background: oklch(98% 0.01 250); border: 1px dashed var(--p-blue-soft);">
                         <div class="card-icon icon-navy"><i class="fas fa-plus"></i></div>
-                        <div class="card-title">내 게임 등록</div>
-                        <div class="card-desc">직접 만든 게임이나 추천하고 싶은 게임을 공유하세요.</div>
+                        <div class="card-title">Submit Your Game</div>
+                        <div class="card-desc">Share your own games or games you'd like to recommend.</div>
                     </a>
                 </div>
             </section>

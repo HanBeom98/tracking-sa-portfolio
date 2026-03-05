@@ -15,6 +15,8 @@ def process_html_file_for_common_elements(filepath):
         is_en_page = os.path.abspath(filepath).startswith(os.path.abspath(os.path.join(PUBLIC_DIR, "en")) + os.sep)
         # Check if it's the game player page
         is_play_page = "games/play" in filepath.replace("\\", "/")
+        # 서든어택 도메인 페이지 판별 (전용 레이아웃 보호를 위해 중요)
+        is_sa_page = "games/sudden-attack" in filepath.replace("\\", "/")
         
         # Determine relative URL for og:url
         rel_path = os.path.relpath(filepath, PUBLIC_DIR).replace("\\", "/")
@@ -24,9 +26,10 @@ def process_html_file_for_common_elements(filepath):
             canonical_url = f"{BASE_URL.rstrip('/')}/{rel_path.replace('index.html', '')}"
 
         # 1. Clean up old injections and redundant metadata to ensure consistency
-        content = re.sub(r'<header[\s\S]*?</header>', '', content, flags=re.DOTALL)
-        # Match footers even with attributes or multi-line content
-        content = re.sub(r'<footer[\s\S]*?</footer>', '', content, flags=re.DOTALL)
+        # 서든어택 페이지는 전용 헤더를 사용하므로 공통 헤더 주입을 위해 지우지 않음
+        if not is_sa_page:
+            content = re.sub(r'<header[\s\S]*?</header>', '', content, flags=re.DOTALL)
+            content = re.sub(r'<footer[\s\S]*?</footer>', '', content, flags=re.DOTALL)
         
         # Remove potentially redundant/old meta tags to replace with standard ones
         meta_patterns_to_remove = [
@@ -99,6 +102,8 @@ def process_html_file_for_common_elements(filepath):
         # 3. Inject into HEAD
         if '</head>' in content:
             content = content.replace('</head>', f'    {seo_html}\n    {get_common_head()}\n</head>')
+        elif '<!-- HEAD_INJECTION -->' in content:
+            content = content.replace('<!-- HEAD_INJECTION -->', f'{seo_html}\n{get_common_head()}')
 
         # 4. Handle Language
         if is_en_page:

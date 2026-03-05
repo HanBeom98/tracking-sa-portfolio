@@ -21,10 +21,15 @@ def generate_public_site(incremental=False):
         shutil.rmtree(PUBLIC_DIR)
     os.makedirs(PUBLIC_DIR, exist_ok=True)
     
-    # 1. 루트 정적 자산 복사
+    # 1. 루트 정적 자산 복사 및 처리
     root_assets = ["index.html", "logo.svg", "favicon.svg", "ads.txt", "_redirects"]
     for asset in root_assets:
-        if os.path.exists(asset): shutil.copy2(asset, os.path.join(PUBLIC_DIR, asset))
+        if os.path.exists(asset):
+            dest = os.path.join(PUBLIC_DIR, asset)
+            shutil.copy2(asset, dest)
+            if asset == "index.html":
+                # 루트 index.html에 공통 HEAD 주입 (SEO, 테마 가드 등)
+                process_html_file_for_common_elements(dest)
     
     # 2. Shared Assets 복사 (src/shared/assets -> public/)
     shared_assets_dir = "src/shared/assets"
@@ -41,7 +46,7 @@ def generate_public_site(incremental=False):
     # 4. 도메인 빌드
     domains = [
         "animal-face", "fortune", "games", "games/submit", "ai-test", "lucky-recommendation", 
-        "games/ai-evolution", "games/tetris", "privacy-policy", "about", "contact",
+        "games/ai-evolution", "games/tetris", "games/sudden-attack", "privacy-policy", "about", "contact",
         "board", "board/write", "board/edit", "board/post", "inquiry", "search",
         "auth", "auth/signup", "account", "account/domain",
         "futures-estimate", "glossary"
@@ -60,7 +65,39 @@ def generate_public_site(incremental=False):
         "전문 기술 인사이트": "Tech Insights",
         "지능형 서비스": "AI Services Hub",
         "AI 용어 사전": "AI Glossary",
-        "사이트맵": "Sitemap"
+        "사이트맵": "Sitemap",
+        "관심 있는 기술 키워드나 인사이트를 검색하세요...": "Search for tech keywords or insights...",
+        "나의 얼굴 데이터로 분석하는 가장 닮은 동물상 찾기": "Find your look-alike animal through face data analysis.",
+        "인공지능이 진단하는 나의 성격과 업무 성향 분석": "AI-powered analysis of your personality and work style.",
+        "빅데이터와 명리학을 결합한 오늘의 맞춤 운세 확인": "Check your personalized daily fortune combining Big Data and Saju.",
+        "오늘 나에게 필요한 럭키 컬러와 최적의 아이템 제안": "Personalized lucky colors and optimal item recommendations.",
+        "전문가의 시각으로 돈과 기술의 흐름을 꿰뚫는 전문 칼럼": "Expert columns cutting through the flow of money and tech.",
+        "어려운 기술 용어를 전문가의 시각으로 쉽게 풀이한 지식 창고": "A knowledge hub simplifying complex tech terms from an expert view.",
+        "선물 기반 지수 흐름과 추정치를 한눈에 확인": "Track futures-based index trends and estimates at a glance.",
+        "Tracking SA의 새로운 소식과 주요 안내 사항 확인": "Check out the latest news and important announcements from Tracking SA.",
+        "AI와 기술, 일상에 대해 자유롭게 이야기를 나누는 공간": "A space for free discussions on AI, tech, and daily life.",
+        "넥슨 공식 데이터를 통한 실시간 전적 및 매치 정보 조회": "Real-time stats and match info via official Nexon data.",
+        "클래식부터 AI 게임까지, 모든 게임을 한곳에서 즐기세요.": "Enjoy all games from classics to AI, all in one place.",
+        "웹에서 가볍게 즐기는 클래식 아케이드 퍼즐 게임": "Classic arcade puzzle game enjoyed lightly on the web.",
+        "AI 모델을 합성하여 진화시키는 2048 스타일 게임": "2048-style game synthesizing and evolving AI models.",
+        "직접 만든 게임이나 추천하고 싶은 게임을 공유하세요.": "Share your own games or games you'd like to recommend.",
+        "커뮤니티": "Community",
+        "공지사항": "Notice",
+        "자유게시판": "Free Board",
+        "서든어택 전적": "Sudden Attack Stats",
+        "게임 센터 홈": "Game Center Home",
+        "테트리스": "Tetris",
+        "AI 진화 게임": "AI Evolution",
+        "내 게임 등록": "Submit Your Game",
+        "서비스": "Services",
+        "고객지원": "Support",
+        "바로가기": "Quick Links",
+        "문의하기": "Contact Us",
+        "파트너십 제안": "Partnership",
+        "회사 소개": "About",
+        "RSS 피드": "RSS Feed",
+        "Tracking SA는 최첨단 AI 기술을 활용하여 사용자에게": "Tracking SA provides users with the most useful data and",
+        "가장 유용한 데이터와 즐거운 경험을 제공합니다.": "enjoyable experiences using cutting-edge AI technology."
     }
 
     for domain in domains:

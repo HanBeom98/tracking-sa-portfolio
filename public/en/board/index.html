@@ -17,7 +17,16 @@
     <link rel="alternate" type="application/rss+xml" title="Tracking SA RSS" href="/rss.xml">
     <meta property="og:title" content="Tracking SA - AI Services & Hub">
     <meta property="og:description" content="Experience AI tests, games, and market insights in one place. Delivering latest AI trends.">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7263630893992216" crossorigin="anonymous"></script>
+    <script>
+  (function() {
+    const theme = localStorage.getItem('theme');
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark-mode');
+      document.body && document.body.classList.add('dark-mode');
+    }
+  })();
+</script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7263630893992216" crossorigin="anonymous"></script>
 <meta name="google-adsense-account" content="ca-pub-7263630893992216">
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
@@ -132,10 +141,10 @@
             const t = (key, fallback) => (window.getTranslation ? window.getTranslation(key, fallback) : fallback);
             
             if (category === "notice") {
-                h1.textContent = t("notice", "공지사항");
+                h1.textContent = t("notice", "Notice");
                 h1.setAttribute("data-i18n", "notice");
             } else {
-                h1.textContent = t("free_board", "자유게시판");
+                h1.textContent = t("free_board", "Free Board");
                 h1.setAttribute("data-i18n", "free_board");
             }
             

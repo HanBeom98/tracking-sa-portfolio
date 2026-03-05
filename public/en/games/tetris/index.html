@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title data-i18n="tetris_game">테트리스 - 가볍게 즐기는 클래식 퍼즐 게임 | Tracking SA</title>
+    <title data-i18n="tetris_game">Tetris - 가볍게 즐기는 클래식 퍼즐 게임 | Tracking SA</title>
     
     <!-- CSS and other head elements will be injected by main.py -->
     <!-- HEAD_INJECTION -->
@@ -69,7 +69,16 @@
     <meta name="description" content="Experience AI tests, games, and market insights in one place. Delivering latest AI trends.">
     <meta property="og:title" content="Tracking SA - AI Services & Hub">
     <meta property="og:description" content="Experience AI tests, games, and market insights in one place. Delivering latest AI trends.">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7263630893992216" crossorigin="anonymous"></script>
+    <script>
+  (function() {
+    const theme = localStorage.getItem('theme');
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark-mode');
+      document.body && document.body.classList.add('dark-mode');
+    }
+  })();
+</script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7263630893992216" crossorigin="anonymous"></script>
 <meta name="google-adsense-account" content="ca-pub-7263630893992216">
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>

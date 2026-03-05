@@ -1,3 +1,12 @@
+<script>
+  (function() {
+    const theme = localStorage.getItem('theme');
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark-mode');
+      document.body && document.body.classList.add('dark-mode');
+    }
+  })();
+</script>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ADSENSE_CLIENT_ID}}" crossorigin="anonymous"></script>
 <meta name="google-adsense-account" content="{{ADSENSE_CLIENT_ID}}">
 <!-- Google tag (gtag.js) -->

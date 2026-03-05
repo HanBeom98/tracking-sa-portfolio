@@ -97,10 +97,28 @@
       `;
     }
 
-    function updateNewsLinksForLang() {
-      const links = root.document.querySelectorAll('a[href="/news/"], a[href="/news"]');
-      const target = currentLang === "en" ? "/en/news/" : "/news/";
-      links.forEach((link) => link.setAttribute("href", target));
+    function updateGnbLinksForLang() {
+      const isEnglish = currentLang === "en";
+      const gnbLinks = root.document.querySelectorAll("header nav a, footer a");
+      gnbLinks.forEach((link) => {
+        const href = link.getAttribute("href");
+        if (!href || href === "#" || href.startsWith("http")) return;
+        
+        let newHref = href;
+        if (isEnglish) {
+          if (!href.startsWith("/en/") && href.startsWith("/")) {
+            newHref = "/en" + href;
+          }
+        } else {
+          if (href.startsWith("/en/")) {
+            newHref = href.replace(/^\/en\//, "/");
+          }
+        }
+        
+        if (newHref !== href) {
+          link.setAttribute("href", newHref.replace("//", "/"));
+        }
+      });
     }
 
     function initDropdownMenus() {
@@ -168,7 +186,7 @@
       applyTranslations();
       initTheme();
       initLanguageSwitcher();
-      updateNewsLinksForLang();
+      updateGnbLinksForLang();
       initDropdownMenus();
       ensureShellVisibility();
     }
