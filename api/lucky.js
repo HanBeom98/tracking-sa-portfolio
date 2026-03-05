@@ -20,7 +20,12 @@ export default async function handler(req, res) {
 
         const { language = 'ko', currentDate, userInfo } = data;
         const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent';
-        const dateStr = currentDate ? `${currentDate.year}-${currentDate.month}-${currentDate.day}` : new Date().toISOString().split('T')[0];
+        
+        // 날짜 및 사용자 정보 정규화 (운세와 동일하게 보강)
+        const cYear = currentDate?.year || new Date().getFullYear();
+        const cMonth = currentDate?.month || (new Date().getMonth() + 1);
+        const cDay = currentDate?.day || new Date().getDate();
+        const dateStr = `${cYear}-${cMonth}-${cDay}`;
         
         const name = userInfo?.name || '익명';
         const gender = userInfo?.gender || 'unknown';
@@ -46,7 +51,6 @@ export default async function handler(req, res) {
             중요: 'oklch' 값은 반드시 브라우저 CSS에서 즉시 사용 가능한 'oklch(0.7 0.1 200)' 형식의 순수 문자열이어야 합니다. 모든 필드는 반드시 한국어로 작성하세요.`;
         }
 
-        // 성공했던 로직: URL 파라미터 키 + 슬래시 없는 Referer
         const geminiResponse = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
             method: 'POST',
             headers: { 
