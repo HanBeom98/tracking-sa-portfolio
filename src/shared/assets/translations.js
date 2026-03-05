@@ -52,7 +52,21 @@ window.translations = {
         'cat_classic': '클래식',
         'cat_etc': '기타',
         'sort_latest': '최신순',
-        'sort_popular': '인기순'
+        'sort_popular': '인기순',
+        'animal_face_desc': '나의 얼굴 데이터로 분석하는 가장 닮은 동물상 찾기',
+        'ai_persona_desc': '인공지능이 진단하는 나의 성격과 업무 성향 분석',
+        'saju_desc': '빅데이터와 명리학을 결합한 오늘의 맞춤 운세 확인',
+        'lucky_desc': '오늘 나에게 필요한 럭키 컬러와 최적의 아이템 제안',
+        'news_home_desc': '전문가의 시각으로 돈과 기술의 흐름을 꿰뚫는 전문 칼럼',
+        'ai_glossary_desc': '어려운 기술 용어를 전문가의 시각으로 쉽게 풀이한 지식 창고',
+        'futures_estimate_desc': '선물 기반 지수 흐름과 추정치를 한눈에 확인',
+        'notice_desc': 'Tracking SA의 새로운 소식과 주요 안내 사항 확인',
+        'free_board_desc': 'AI와 기술, 일상에 대해 자유롭게 이야기를 나누는 공간',
+        'sa_stats_desc': '넥슨 공식 데이터를 통한 실시간 전적 및 매치 정보 조회',
+        'game_hub_desc': '클래식부터 AI 게임까지, 모든 게임을 한곳에서 즐기세요.',
+        'tetris_game_desc': '웹에서 가볍게 즐기는 클래식 아케이드 퍼즐 게임',
+        'ai_evolution_desc': 'AI 모델을 합성하여 진화시키는 2048 스타일 게임',
+        'register_game_desc': '직접 만든 게임이나 추천하고 싶은 게임을 공유하세요.'
     },
     'en': {
         'home': 'Home',
@@ -97,7 +111,21 @@ window.translations = {
         'cat_classic': 'Classic',
         'cat_etc': 'Etc',
         'sort_latest': 'Latest',
-        'sort_popular': 'Popular'
+        'sort_popular': 'Popular',
+        'animal_face_desc': 'Find your look-alike animal through face data analysis.',
+        'ai_persona_desc': 'AI-powered analysis of your personality and work style.',
+        'saju_desc': 'Check your personalized daily fortune combining Big Data and Saju.',
+        'lucky_desc': 'Personalized lucky colors and optimal item recommendations.',
+        'news_home_desc': 'Expert columns cutting through the flow of money and tech.',
+        'ai_glossary_desc': 'A knowledge hub simplifying complex tech terms from an expert view.',
+        'futures_estimate_desc': 'Track futures-based index trends and estimates at a glance.',
+        'notice_desc': 'Check out the latest news and important announcements from Tracking SA.',
+        'free_board_desc': 'A space for free discussions on AI, tech, and daily life.',
+        'sa_stats_desc': 'Real-time stats and match info via official Nexon data.',
+        'game_hub_desc': 'Enjoy all games from classics to AI, all in one place.',
+        'tetris_game_desc': 'Classic arcade puzzle game enjoyed lightly on the web.',
+        'ai_evolution_desc': '2048-style game synthesizing and evolving AI models.',
+        'register_game_desc': "Share your own games or games you'd like to recommend."
     }
 };
 

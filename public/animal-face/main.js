@@ -32,10 +32,30 @@ class AnimalFaceTest extends HTMLElement {
   async connectedCallback() {
     this.render();
     this.setupEvents();
+    
+    // 실시간 언어 전환 리스너 등록
+    this._onLangChange = (e) => {
+      this.render();
+      this.setupEvents();
+      // 이전 결과가 있었다면 점수 라벨 등 재렌더링 필요
+      if (this._lastResult) {
+        const translate = this.getTranslator();
+        const msg = createAnimalFaceMessages(translate);
+        showResultState(this._view, this._lastResult, msg.scoreLabel(this._lastResult.score));
+      }
+    };
+    window.addEventListener("language-changed", this._onLangChange);
+
     try {
       await this._useCase.init();
     } catch (error) {
       console.error("AnimalFace Model Init Error", error);
+    }
+  }
+
+  disconnectedCallback() {
+    if (this._onLangChange) {
+      window.removeEventListener("language-changed", this._onLangChange);
     }
   }
 

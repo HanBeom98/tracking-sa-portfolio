@@ -26,6 +26,19 @@ class FortunePremium extends HTMLElement {
   connectedCallback() {
     this.render();
     this.setupEvents();
+
+    // 실시간 언어 전환 리스너
+    this._onLangChange = () => {
+      this.render();
+      this.setupEvents();
+    };
+    window.addEventListener("language-changed", this._onLangChange);
+  }
+
+  disconnectedCallback() {
+    if (this._onLangChange) {
+      window.removeEventListener("language-changed", this._onLangChange);
+    }
   }
 
   getTranslate() {

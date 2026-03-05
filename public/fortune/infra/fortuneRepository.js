@@ -1,7 +1,8 @@
 export function createFortuneRepository() {
-  // 클라우드플레어 지역 차단(Location Not Supported)을 피하기 위해
-  // Gemini API 호출이 가능한 Vercel 엔드포인트를 직접 호출합니다.
-  const API_URL = "https://tracking-sa.vercel.app/api/fortune";
+  // 전역 설정을 통해 API 엔드포인트를 가져옵니다.
+  const API_URL = (window.runtimeConfig && window.runtimeConfig.fortuneApi) 
+    ? window.runtimeConfig.fortuneApi 
+    : "https://tracking-sa.vercel.app/api/fortune";
 
   async function fetchFortune(payload) {
     const response = await fetch(API_URL, {

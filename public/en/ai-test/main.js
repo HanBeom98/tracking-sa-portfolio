@@ -20,21 +20,15 @@ class AiTestPremium extends HTMLElement {
 
   connectedCallback() {
     this.render();
-    if (!window.translations) {
-      this._translationPoll = setInterval(() => {
-        if (window.translations) {
-          clearInterval(this._translationPoll);
-          this._translationPoll = null;
-          this.render();
-        }
-      }, 100);
-    }
+    
+    // 실시간 언어 전환 리스너
+    this._onLangChange = () => this.render();
+    window.addEventListener("language-changed", this._onLangChange);
   }
 
   disconnectedCallback() {
-    if (this._translationPoll) {
-      clearInterval(this._translationPoll);
-      this._translationPoll = null;
+    if (this._onLangChange) {
+      window.removeEventListener("language-changed", this._onLangChange);
     }
   }
 

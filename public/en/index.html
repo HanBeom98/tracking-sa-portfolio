@@ -65,11 +65,12 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<link rel="stylesheet" href="/style.css?v=1772701509">
+<link rel="stylesheet" href="/style.css?v=1772702985">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<script src="/runtime-config.js"></script>
 <script src="/firebase-config.js"></script>
-<script src="/translations.js?v=1772701509"></script>
-<script src="/common.js?v=1772701509"></script>
+<script src="/translations.js?v=1772702985"></script>
+<script src="/common.js?v=1772702985"></script>
 
     <script src="/search.js" defer></script>
     <style>
@@ -409,22 +410,22 @@
                     <a href="/animal-face/" class="service-card">
                         <div class="card-icon icon-orange"><i class="fas fa-paw"></i></div>
                         <div class="card-title" data-i18n="animal_face_test">동물상 테스트</div>
-                        <div class="card-desc">Find your look-alike animal through face data analysis.</div>
+                        <div class="card-desc" data-i18n="animal_face_desc">Find your look-alike animal through face data analysis.</div>
                     </a>
                     <a href="/ai-test/" class="service-card">
                         <div class="card-icon icon-purple"><i class="fas fa-brain"></i></div>
                         <div class="card-title" data-i18n="ai_tendency_test">AI Persona Test</div>
-                        <div class="card-desc">AI-powered analysis of your personality and work style.</div>
+                        <div class="card-desc" data-i18n="ai_persona_desc">AI-powered analysis of your personality and work style.</div>
                     </a>
                     <a href="/fortune/" class="service-card">
                         <div class="card-icon icon-navy"><i class="fas fa-moon"></i></div>
                         <div class="card-title" data-i18n="saju_test">AI 운세</div>
-                        <div class="card-desc">Check your personalized daily fortune combining Big Data and Saju.</div>
+                        <div class="card-desc" data-i18n="saju_desc">Check your personalized daily fortune combining Big Data and Saju.</div>
                     </a>
                     <a href="/lucky-recommendation/" class="service-card">
                         <div class="card-icon icon-gold"><i class="fas fa-wand-magic-sparkles"></i></div>
                         <div class="card-title" data-i18n="lucky_recommendation">행운의 추천</div>
-                        <div class="card-desc">Personalized lucky colors and optimal item recommendations.</div>
+                        <div class="card-desc" data-i18n="lucky_desc">Personalized lucky colors and optimal item recommendations.</div>
                     </a>
                 </div>
             </section>
@@ -438,17 +439,17 @@
                     <a href="/news/" class="service-card">
                         <div class="card-icon icon-blue"><i class="fas fa-newspaper"></i></div>
                         <div class="card-title" data-i18n="news_home">Investor Insights</div>
-                        <div class="card-desc">Expert columns cutting through the flow of money and tech.</div>
+                        <div class="card-desc" data-i18n="news_home_desc">Expert columns cutting through the flow of money and tech.</div>
                     </a>
                     <a href="/glossary/" class="service-card">
                         <div class="card-icon icon-purple"><i class="fas fa-book"></i></div>
-                        <div class="card-title">AI 용어사전</div>
-                        <div class="card-desc">A knowledge hub simplifying complex tech terms from an expert view.</div>
+                        <div class="card-title" data-i18n="ai_glossary">AI 용어사전</div>
+                        <div class="card-desc" data-i18n="ai_glossary_desc">A knowledge hub simplifying complex tech terms from an expert view.</div>
                     </a>
                     <a href="/futures-estimate/" class="service-card">
                         <div class="card-icon icon-navy"><i class="fas fa-chart-line"></i></div>
                         <div class="card-title" data-i18n="futures_estimate_index">코스피200</div>
-                        <div class="card-desc">Track futures-based index trends and estimates at a glance.</div>
+                        <div class="card-desc" data-i18n="futures_estimate_desc">Track futures-based index trends and estimates at a glance.</div>
                     </a>
                 </div>
             </section>
@@ -489,23 +490,23 @@
                 <div class="service-grid">
                     <a href="/games/" class="service-card" style="border: 2px solid var(--p-blue-soft);">
                         <div class="card-icon icon-blue"><i class="fas fa-gamepad"></i></div>
-                        <div class="card-title">Game Center Home</div>
-                        <div class="card-desc">Enjoy all games from classics to AI, all in one place.</div>
+                        <div class="card-title" data-i18n="game_hub">Game Center Home</div>
+                        <div class="card-desc" data-i18n="game_hub_desc">Enjoy all games from classics to AI, all in one place.</div>
                     </a>
                     <a href="/games/tetris/" class="service-card">
                         <div class="card-icon icon-red"><i class="fas fa-shapes"></i></div>
                         <div class="card-title" data-i18n="tetris_game">Tetris</div>
-                        <div class="card-desc">Classic arcade puzzle game enjoyed lightly on the web.</div>
+                        <div class="card-desc" data-i18n="tetris_game_desc">Classic arcade puzzle game enjoyed lightly on the web.</div>
                     </a>
                     <a href="/games/ai-evolution/" class="service-card">
                         <div class="card-icon icon-green"><i class="fas fa-dna"></i></div>
                         <div class="card-title" data-i18n="ai_evolution">AI Evolution</div>
-                        <div class="card-desc">2048-style game synthesizing and evolving AI models.</div>
+                        <div class="card-desc" data-i18n="ai_evolution_desc">2048-style game synthesizing and evolving AI models.</div>
                     </a>
                     <a href="/games/submit/" class="service-card" style="background: oklch(98% 0.01 250); border: 1px dashed var(--p-blue-soft);">
                         <div class="card-icon icon-navy"><i class="fas fa-plus"></i></div>
-                        <div class="card-title">Submit Your Game</div>
-                        <div class="card-desc">Share your own games or games you'd like to recommend.</div>
+                        <div class="card-title" data-i18n="register_game">Submit Your Game</div>
+                        <div class="card-desc" data-i18n="register_game_desc">Share your own games or games you'd like to recommend.</div>
                     </a>
                 </div>
             </section>
