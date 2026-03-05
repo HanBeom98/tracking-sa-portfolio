@@ -11,7 +11,8 @@ def process_html_file_for_common_elements(filepath):
             original = f.read()
         content = original
 
-        is_root_homepage = os.path.abspath(filepath) == os.path.abspath(os.path.join(PUBLIC_DIR, "index.html"))
+        is_root_homepage = (os.path.abspath(filepath) == os.path.abspath(os.path.join(PUBLIC_DIR, "index.html"))) or \
+                           (os.path.abspath(filepath) == os.path.abspath(os.path.join(PUBLIC_DIR, "en", "index.html")))
         is_en_page = os.path.abspath(filepath).startswith(os.path.abspath(os.path.join(PUBLIC_DIR, "en")) + os.sep)
         # Check if it's the game player page
         is_play_page = "games/play" in filepath.replace("\\", "/")
