@@ -82,6 +82,11 @@ def generate_public_site(incremental=False):
                 os.makedirs(os.path.dirname(dest_en), exist_ok=True)
                 shutil.copy2(src, dest_en)
 
+            # 도메인 번역 파일(translations.js)이 있다면 명시적으로 en 폴더에도 복사 확인
+            domain_trans_src = os.path.join(src, "translations.js")
+            if os.path.exists(domain_trans_src):
+                shutil.copy2(domain_trans_src, os.path.join(dest_en, "translations.js"))
+
             # HTML 후처리 (KO/EN 모두 수행)
             for current_dest in [dest_ko, dest_en]:
                 if os.path.isdir(current_dest):
@@ -115,8 +120,14 @@ def generate_public_site(incremental=False):
     
     # 뉴스 도메인 특수 빌드
     _, db_ok = generate_news_pages()
-    # 뉴스 도메인 CSS 복사 (KO/EN)
+    # 뉴스 도메인 자산 복사 (CSS, JS, Translations)
     news_style_src = os.path.join("src", "domains", "news", "ui", "style.css")
+    news_trans_src = os.path.join("src", "domains", "news", "translations.js")
+    
+    if os.path.exists(news_trans_src):
+        shutil.copy2(news_trans_src, os.path.join(PUBLIC_DIR, "news", "translations.js"))
+        shutil.copy2(news_trans_src, os.path.join(PUBLIC_DIR, "en", "news", "translations.js"))
+
     news_domain_js = os.path.join("src", "domains", "news", "domain")
     news_infra_js = os.path.join("src", "domains", "news", "infra")
     news_ui_js = os.path.join("src", "domains", "news", "ui")
