@@ -4,6 +4,8 @@ import { SaService } from './application/sa-service.js';
 import { CrewRepository } from './infra/crew-repository.js';
 import { BalancerManager } from './ui/balancer-manager.js';
 import { AdminManager } from './ui/admin-manager.js';
+import { updateSwrUI, saveSearch, renderRecentSearches } from './ui/utils/ui-helpers.js';
+
 // Import Modular UI Components
 import './ui/components/player-card.js';
 import './ui/components/stats-summary.js';
@@ -38,44 +40,6 @@ const statsSection = document.getElementById('statsSummary');
 const crewRankingSection = document.getElementById('crewRanking');
 const historySection = document.getElementById('matchHistory');
 const swrStatus = document.getElementById('swrStatus');
-
-/**
- * Time Ago Helper for SWR
- */
-function getTimeAgo(timestamp) {
-  const diff = Date.now() - timestamp;
-  const seconds = Math.floor(diff / 1000);
-  if (seconds < 60) return '방금 전';
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}분 전`;
-  const hours = Math.floor(minutes / 60);
-  return `${hours}시간 전`;
-}
-
-/**
- * Update SWR Status Bar UI
- */
-function updateSwrUI(type, timestamp = null) {
-  if (type === 'stale') {
-    const timeText = getTimeAgo(timestamp);
-    swrStatus.innerHTML = `<span class="spin">🔄</span> ${timeText} 데이터를 표시 중입니다. 최신 정보로 갱신 중...`;
-    swrStatus.className = 'swr-status stale';
-    swrStatus.classList.remove('hidden');
-  } else if (type === 'fresh') {
-    swrStatus.innerHTML = `✨ 최신 데이터로 업데이트되었습니다!`;
-    swrStatus.className = 'swr-status fresh';
-    swrStatus.classList.remove('hidden');
-    setTimeout(() => {
-      swrStatus.classList.add('hidden-out');
-      setTimeout(() => {
-        swrStatus.classList.add('hidden');
-        swrStatus.classList.remove('hidden-out');
-      }, 500);
-    }, 3000);
-  } else {
-    swrStatus.classList.add('hidden');
-  }
-}
 
 const applyCrewBtn = document.getElementById('applyCrewBtn');
 const submitApplyBtn = document.getElementById('submitApplyBtn');
@@ -118,28 +82,30 @@ async function handleSearch(nameOverride = null, skipHistory = false) {
       primaryUserData = fresh;
       renderUI(fresh.player, fresh.matches, fresh.stats);
       loading.classList.add('hidden');
-      updateSwrUI('fresh');
+      updateSwrUI(swrStatus, 'fresh');
     };
 
     // 1. Get Profile
     const result = await service.getFullPlayerProfile(name, currentRankings, onFreshData);
     
     primaryUserData = result;
-    saveSearch(result.player.nickname);
+    saveSearch(STORAGE_KEY, result.player.nickname);
+    renderRecentSearches(recentSearchesContainer, STORAGE_KEY, handleSearch);
     renderUI(result.player, result.matches, result.stats);
 
     if (result.isStale) {
       loadingText.textContent = '최신 데이터로 업데이트 중...';
-      updateSwrUI('stale', result.cacheTime);
+      updateSwrUI(swrStatus, 'stale', result.cacheTime);
     } else {
       loading.classList.add('hidden');
-      updateSwrUI('hide');
+      updateSwrUI(swrStatus, 'hide');
     }
 
     await refreshRankings();
   } catch (error) { 
     handleSearchError(error); 
     loading.classList.add('hidden');
+    updateSwrUI(swrStatus, 'hide');
   } 
 }
 
@@ -220,27 +186,6 @@ function handleSearchError(error) {
   else if (error.message === 'PLAYER_NOT_FOUND') alert('캐릭터를 찾을 수 없습니다.');
   else alert('전적을 불러오는 중 오류가 발생했습니다.');
   console.error('[SA] Search Error:', error);
-}
-
-function getRecentSearches() {
-  const data = localStorage.getItem(STORAGE_KEY);
-  return data ? JSON.parse(data) : [];
-}
-
-function saveSearch(name) {
-  let searches = getRecentSearches();
-  searches = [name, ...searches.filter(s => s !== name)].slice(0, 5);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(searches));
-  renderRecentSearches();
-}
-
-function renderRecentSearches() {
-  const searches = getRecentSearches();
-  if (searches.length === 0) { recentSearchesContainer.innerHTML = ''; return; }
-  recentSearchesContainer.innerHTML = `<span>최근 검색:</span>` + searches.map(s => `<button class="search-chip">${s}</button>`).join('');
-  recentSearchesContainer.querySelectorAll('.search-chip').forEach(btn => {
-    btn.addEventListener('click', () => { handleSearch(btn.textContent); });
-  });
 }
 
 async function refreshRankings() {
@@ -346,4 +291,4 @@ window.addEventListener('sa-request-search', (e) => {
 
 initCrew();
 initUrlSync(); // URL 동기화 활성화
-renderRecentSearches();
+renderRecentSearches(recentSearchesContainer, STORAGE_KEY, handleSearch);
