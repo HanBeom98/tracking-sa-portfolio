@@ -10,13 +10,11 @@
     root.document.documentElement.setAttribute("lang", currentLang === "en" ? "en" : "ko");
 
     // --- Translation Merging (Domain DDD Support) ---
-    if (root.translations && root.domainTranslations) {
+    root.translations = root.translations || {};
+    if (root.domainTranslations) {
       Object.keys(root.domainTranslations).forEach(lang => {
-        if (root.translations[lang]) {
-          Object.assign(root.translations[lang], root.domainTranslations[lang]);
-        } else {
-          root.translations[lang] = root.domainTranslations[lang];
-        }
+        root.translations[lang] = root.translations[lang] || {};
+        Object.assign(root.translations[lang], root.domainTranslations[lang]);
       });
     }
 

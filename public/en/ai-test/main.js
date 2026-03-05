@@ -54,15 +54,18 @@ class AiTestPremium extends HTMLElement {
   }
 
   getLanguage() {
+    const path = window.location.pathname || "/";
+    if (path.startsWith("/en/")) return "en";
     return localStorage.getItem("lang") || "ko";
   }
 
-  getTranslation(key) {
+  getTranslation(key, fallback = "") {
     const lang = this.getLanguage();
     if (window.getTranslation) {
-      return window.getTranslation(key, key);
+      return window.getTranslation(key, fallback || key);
     }
-    return (window.translations && window.translations[lang] && window.translations[lang][key]) || key;
+    const dict = (window.translations && window.translations[lang]) || {};
+    return dict[key] || fallback || key;
   }
 
   createQuestionViewModel(lang) {
