@@ -118,13 +118,7 @@ def process_html_file_for_common_elements(filepath):
         header_html = f'<div class="site-header-container">{get_common_header()}</div>'
         footer_html = f'<div class="site-footer-container">{get_common_footer()}</div>'
 
-        # 헤더 주입: 주석 우선, 없으면 바디 상단 (루트 페이지 제외)
-        if "<!-- HEADER_INJECTION -->" in content:
-            content = content.replace("<!-- HEADER_INJECTION -->", header_html)
-        elif not is_root_homepage:
-            content = re.sub(r'(<body[^>]*>)', r'\1' + header_html, content, count=1, flags=re.IGNORECASE)
-
-        # 푸터 주입: 주석 우선, 없으면 바디 하단 (루트 페이지 제외)
+        # 푸터 주입: 주석 우선, 없으면 바디 하단 (루트 페이지는 주석이 있을 때만 주입)
         if "<!-- FOOTER_INJECTION -->" in content:
             content = content.replace("<!-- FOOTER_INJECTION -->", footer_html)
         elif '</body>' in content and not is_root_homepage:

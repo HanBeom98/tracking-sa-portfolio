@@ -165,10 +165,10 @@ def generate_public_site(incremental=False):
 
     build_search_index()
     build_rss()
-    build_sitemap()
+    # build_sitemap()
     
-    # 루트 index.html 엘리먼트 처리
-    process_html_file_for_common_elements(os.path.join(PUBLIC_DIR, "index.html"))
+    # 루트 index.html 엘리먼트 처리는 이미 1번 단계에서 완료됨
+    # process_html_file_for_common_elements(os.path.join(PUBLIC_DIR, "index.html"))
     print("✨ Total DDD Build Success with Shared Assets.")
 
 
