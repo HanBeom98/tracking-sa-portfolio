@@ -20,7 +20,9 @@ window.domainTranslations = {
         'day_suffix': '일',
         'saju_api_error': '운세 확인 실패. 잠시 후 다시 시도해주세요.',
         'saju_too_many_requests': 'AI 요청량이 일시적으로 초과되었습니다. 약 1분 후 다시 시도해주세요.',
-        'saju_input_missing': '이름, 생년월일, 성별 정보를 모두 입력해주세요.'
+        'saju_input_missing': '이름, 생년월일, 성별 정보를 모두 입력해주세요.',
+        'ai_reading_fortune': 'AI가 당신의 운세를 읽는 중입니다...',
+        'saju_loading_sub': '기운의 흐름과 오늘의 핵심 신호를 분석 중입니다.'
     },
     'en': {
         'saju_test_title': 'AI Daily Fortune - Tracking SA',
@@ -38,6 +40,8 @@ window.domainTranslations = {
         'check_fortune_button': 'Check Fortune',
         'saju_api_error': 'Fortune check failed. Please try again in a moment.',
         'saju_too_many_requests': 'AI limit exceeded. Please try again in about 1 minute.',
-        'saju_input_missing': 'Please enter your name, birthdate, and gender.'
+        'saju_input_missing': 'Please enter your name, birthdate, and gender.',
+        'ai_reading_fortune': 'AI is reading your fortune...',
+        'saju_loading_sub': 'Analyzing the flow of energy and today\'s key signals.'
     }
 };

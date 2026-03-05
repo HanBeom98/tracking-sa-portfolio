@@ -24,6 +24,26 @@ class FortunePremium extends HTMLElement {
   }
 
   connectedCallback() {
+    const isTranslationReady = () => {
+      if (!window.getTranslation) return false;
+      const testValue = window.getTranslation("name_label", "__MISSING__");
+      return testValue !== "name_label" && testValue !== "__MISSING__";
+    };
+
+    if (!isTranslationReady()) {
+      this._translationPoll = setInterval(() => {
+        if (isTranslationReady()) {
+          clearInterval(this._translationPoll);
+          this._translationPoll = null;
+          this.initComponent();
+        }
+      }, 50);
+    } else {
+      this.initComponent();
+    }
+  }
+
+  initComponent() {
     this.render();
     this.setupEvents();
 
