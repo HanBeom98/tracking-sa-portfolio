@@ -2,7 +2,7 @@
  * Shared Common Translations
  * Loaded on every page via /translations.js
  */
-const translations = {
+window.translations = {
     'ko': {
         'home': '홈',
         'menu_community': '커뮤니티',
@@ -101,6 +101,3 @@ const translations = {
     }
 };
 
-if (typeof window !== "undefined") {
-    window.translations = translations;
-}
