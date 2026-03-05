@@ -27,9 +27,18 @@
     }
 
     function applyTranslations() {
+      const path = root.location.pathname || "/";
+      const isEnglishPath = path.startsWith("/en/");
+
       root.document.querySelectorAll("[data-i18n]").forEach((el) => {
         const key = el.getAttribute("data-i18n");
         const translated = getTranslation(key);
+        
+        // Skip if the text is already translated statically (for English pages)
+        if (isEnglishPath && el.innerText.trim() === translated.replace(/<[^>]*>/g, '').trim()) {
+          return;
+        }
+
         if (translated !== key) {
           el.innerHTML = translated;
         }
@@ -155,24 +164,8 @@
     }
 
     function ensureShellVisibility() {
-      if (!root.document || typeof root.document.querySelector !== "function") return;
-      const header = root.document.querySelector("header");
-      if (header) {
-        header.style.setProperty("display", "flex", "important");
-        header.style.setProperty("visibility", "visible", "important");
-
-        const nav = typeof header.querySelector === "function" ? header.querySelector("nav") : null;
-        if (nav) nav.style.setProperty("display", "block", "important");
-
-        const logo = typeof header.querySelector === "function" ? header.querySelector(".site-logo-link") : null;
-        if (logo) logo.style.setProperty("display", "block", "important");
-      }
-
-      const footer = root.document.querySelector("footer");
-      if (footer) {
-        footer.style.setProperty("display", "block", "important");
-        footer.style.setProperty("visibility", "visible", "important");
-      }
+      // Redundant with static HTML injection. 
+      // Handled by CSS for smooth loading.
     }
 
     function initShell() {

@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title data-i18n="ai_evolution_title">AI EVOLUTION 2048 - 인공지능 진화 퍼즐 게임 | Tracking SA</title>
+    
+    <!-- CSS and other head elements will be injected by main.py -->
+    <!-- HEAD_INJECTION -->
+
+    <style>
+        :root {
+            --bg-light: oklch(98% 0.01 250);
+            --board-bg: white;
+            --cell-bg: oklch(94% 0.02 260);
+            --text-primary: var(--text-main);
+            --neon-blue: var(--p-blue);
+            --neon-purple: oklch(65% 0.2 300);
+            --transition-ms: 150ms;
+            --nav-height: 70px;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            padding-top: var(--nav-height);
+            background-color: var(--bg-light);
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            touch-action: none;
+            font-family: 'Pretendard', sans-serif;
+        }
+
+        /* If inside iframe (Game Player Wrapper), hide the injected header and adjust layout */
+        body.is-embedded .site-header-container,
+        body.is-embedded .site-footer-container {
+            display: none;
+        }
+        body.is-embedded {
+            padding-top: 0;
+        }
+
+        #ai-evolution-game {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: var(--text-primary);
+            position: relative;
+            z-index: 10;
+        }
+
+        #game-wrapper {
+            width: 100%;
+            max-width: 420px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .game-top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .game-title-area h2 {
+            margin: 0;
+            font-size: 1.6rem;
+            font-weight: 950;
+            letter-spacing: -1px;
+            color: var(--text-main);
+        }
+
+        .badge {
+            font-size: 0.9rem;
+            color: var(--p-blue);
+            font-weight: 900;
+            margin-top: -2px;
+            display: block;
+        }
+
+        .score-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .score-box {
+            background: white;
+            min-width: 80px;
+            padding: 8px 12px;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid oklch(92% 0.02 260);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        }
+
+        .score-box .label {
+            font-size: 0.65rem;
+            color: var(--text-sub);
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        .score-box div:last-child {
+            font-size: 1.2rem;
+            font-weight: 900;
+            color: var(--p-blue);
+        }
+
+        .main-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 14px;
+            border: 1px solid oklch(92% 0.02 260);
+            background: white;
+            color: var(--text-main);
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        }
+
+        .action-btn:hover {
+            border-color: var(--p-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.05);
+        }
+
+        #new-game-btn {
+            background: var(--p-blue);
+            color: white;
+            border: none;
+            box-shadow: 0 8px 20px -5px var(--p-blue);
+        }
+
+        .action-btn:active {
+            transform: scale(0.96);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        #status-message {
+            height: 24px;
+            text-align: center;
+            color: var(--p-blue);
+            font-weight: 800;
+            font-size: 1rem;
+            transition: opacity 0.5s ease;
+        }
+
+        #game-board-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1/1;
+            background: white;
+            border-radius: 24px;
+            padding: 14px;
+            box-shadow: 0 20px 50px rgba(2, 6, 23, 0.08);
+            border: 2px solid oklch(92% 0.02 260);
+        }
+
+        .grid-layer {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: 14px;
+            width: 100%;
+            height: 100%;
+        }
+
+        .grid-cell {
+            background: var(--cell-bg);
+            border-radius: 12px;
+        }
+
+        #tile-layer {
+            position: absolute;
+            top: 14px; left: 14px; right: 14px; bottom: 14px;
+        }
+
+        .tile {
+            position: absolute;
+            width: calc(25% - 10.5px);
+            height: calc(25% - 10.5px);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 6px;
+            transition: left var(--transition-ms) ease-in-out, top var(--transition-ms) ease-in-out, transform 100ms ease-out;
+            z-index: 10;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .tile-inner {
+            font-weight: 900;
+            font-size: 1rem;
+            text-align: center;
+            word-break: break-word;
+            line-height: 1.1;
+        }
+
+        .tile-2 { background: white; color: var(--text-main); border: 1px solid oklch(90% 0.02 260); }
+        .tile-4 { background: oklch(96% 0.02 260); color: var(--text-main); border: 1.5px solid var(--p-blue); }
+        .tile-8 { background: var(--p-blue-soft); color: var(--p-blue); }
+        .tile-16 { background: var(--p-blue); color: white; }
+        .tile-32 { background: oklch(65% 0.2 300); color: white; }
+        .tile-64 { background: oklch(55% 0.25 300); color: white; box-shadow: 0 0 20px rgba(192, 132, 252, 0.3); }
+        .tile-128 { background: #f472b6; color: white; }
+        .tile-256 { background: #fb7185; color: white; box-shadow: 0 0 20px rgba(251, 113, 133, 0.4); }
+        .tile-512 { background: #ef4444; color: white; }
+        .tile-1024 { background: #1e293b; color: white; }
+        .tile-2048 { background: #0f172a; color: gold; animation: surge 2s infinite; border: 2px solid gold; }
+
+        @keyframes surge {
+            0%, 100% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(1.03); filter: brightness(1.2); }
+        }
+
+        .tile-new { animation: appear 200ms ease-out; }
+        .tile-merged { animation: pop 200ms ease-in-out; }
+
+        @keyframes appear { from { opacity: 0; transform: scale(0); } to { opacity: 1; transform: scale(1); } }
+        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
+
+        /* Modals */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(2, 6, 23, 0.6);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(12px);
+        }
+
+        .modal.hidden { display: none; }
+
+        .modal-content {
+            background: white;
+            width: 85%;
+            max-width: 340px;
+            padding: 40px 30px;
+            border-radius: 24px;
+            text-align: center;
+            border: 1px solid oklch(92% 0.02 260);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.15);
+        }
+
+        .modal-content h2 { font-size: 2.2rem; font-weight: 950; color: var(--p-blue); margin-bottom: 20px; }
+
+        .ranking-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: var(--bg-light);
+            border-radius: 16px;
+            border: 1px solid oklch(92% 0.02 260);
+        }
+        .ranking-title {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            margin-bottom: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        #rank-list {
+            font-size: 0.9rem;
+            color: var(--text-main);
+            text-align: left;
+        }
+        .rank-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid oklch(95% 0.01 260);
+            font-weight: 600;
+        }
+        .rank-item:last-child { border-bottom: none; }
+
+        .nick-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        #nick-input {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 2px solid oklch(92% 0.02 260);
+            background: white;
+            color: var(--text-main);
+            font-weight: 700;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        #nick-input:focus { border-color: var(--p-blue); }
+
+        #submit-btn {
+            padding: 0 20px;
+            background: var(--p-blue);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(from var(--p-blue) l c h / 0.2);
+        }
+
+        @media (max-width: 768px) {
+            #ai-evolution-game { padding: 10px; }
+            #game-wrapper { gap: 15px; }
+            .grid-layer { gap: 10px; }
+            #game-board-container { padding: 10px; }
+        }
+    </style>
+    <script>
+        // Check if embedded in iframe (Early check)
+        if (window.self !== window.top) {
+            document.documentElement.classList.add('is-embedded');
+            // Add to body as soon as it's available
+            window.addEventListener('DOMContentLoaded', () => {
+                document.body.classList.add('is-embedded');
+            });
+        }
+    </script>
+    <meta name="robots" content="index, follow">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Tracking SA">
+    <meta property="og:url" content="https://trackingsa.com/en/games/ai-evolution/">
+    <meta property="og:image" content="https://trackingsa.com/logo.svg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://trackingsa.com/logo.svg">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
+    <link rel="alternate" type="application/rss+xml" title="Tracking SA RSS" href="/rss.xml">
+    <meta name="description" content="Experience AI tests, games, and market insights in one place. Delivering latest AI trends.">
+    <meta property="og:title" content="Tracking SA - AI Services & Hub">
+    <meta property="og:description" content="Experience AI tests, games, and market insights in one place. Delivering latest AI trends.">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7263630893992216" crossorigin="anonymous"></script>
+<meta name="google-adsense-account" content="ca-pub-7263630893992216">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-TGD3WRNKPZ');
+</script>
+<meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
+<meta name="naver-site-verification" content="b15b33af838280b54d31eb3c7e5c358d2836743f" />
+<script type="text/javascript">
+(function(c,l,a,r,i,t,y){
+    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+})(window, document, "clarity", "script", "vb9q33ggpa");
+</script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<script>
+  window.FIREBASE_CONFIG = {"apiKey": "PUBLIC_FIREBASE_WEB_KEY_REMOVED", "authDomain": "tracking-sa-295db.firebaseapp.com", "projectId": "tracking-sa-295db", "storageBucket": "tracking-sa-295db.firebasestorage.app", "appId": "1:779289056217:web:cf023fc55f1a2913ffbfc8", "messagingSenderId": "779289056217"};
+</script>
+<script>
+  window.authDomainReady = window.authDomainReady || new Promise((resolve) => {
+    window.__resolveAuthDomain = resolve;
+  });
+</script>
+<script type="module" src="/auth/ui/auth-client.js"></script>
+
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="/style.css?v=1772683602">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<script src="/firebase-config.js"></script>
+<script src="/translations.js?v=1772683602"></script>
+<script src="/common.js?v=1772683602"></script>
+
+</head>
+<body data-i18n="body">
+    <div class="site-header-container"><header>
+    <div class="header-inner">
+        <a href="/" class="site-logo-link">
+            <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="site-logo">
+                <circle cx="50" cy="50" r="48" stroke="currentColor" stroke-width="4" fill="transparent"/>
+                <path d="M25 70L40 55L50 65L75 35" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="70" cy="35" r="12" stroke="currentColor" stroke-width="6" fill="currentColor"/>
+                <rect x="78" y="43" width="15" height="6" rx="3" transform="rotate(45 78 43)" fill="currentColor"/>
+            </svg>
+        </a>
+        <div class="desktop-menu-container">
+            <nav>
+                <ul>
+                    <li><a href="/news/" data-i18n="news_home">Insights</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropbtn" data-i18n="menu_board">게시판</a>
+                        <div class="dropdown-content">
+                            <a href="/board?category=notice" data-i18n="notice">공지사항</a>
+                            <a href="/board?category=free" data-i18n="free_board">자유게시판</a>
+                        </div>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropbtn" data-i18n="menu_chart">차트</a>
+                        <div class="dropdown-content">
+                            <a href="/futures-estimate/" data-i18n="futures_estimate_index">지수</a>
+                        </div>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropbtn" data-i18n="menu_test">테스트</a>
+                        <div class="dropdown-content">
+                            <a href="/animal-face/" data-i18n="animal_face_test">동물상 테스트</a>
+                            <a href="/ai-test/" data-i18n="ai_tendency_test">AI Persona Test</a>
+                            <a href="/fortune/" data-i18n="saju_test">AI 실시간 오늘의 운세</a>
+                            <a href="/lucky-recommendation/" data-i18n="lucky_recommendation">행운의 추천</a>
+                        </div>
+                    </li>
+                    <li><a href="/games/" data-i18n="menu_game">게임</a></li>
+                </ul>
+            </nav>
+            <div class="utility-controls">
+                <button id="color-change">🌙</button>
+                <div id="language-switcher"></div>
+                <div id="auth-controls" class="auth-controls"></div>
+            </div>
+        </div>
+    </div>
+</header>
+</div>
+    <!-- Navigation will be injected here -->
+
+    <main id="ai-evolution-game">
+        <div id="game-wrapper">
+            <!-- Game UI -->
+            <div class="game-top-bar">
+                <div class="game-title-area">
+                    <h2 data-i18n="ai_evolution">AI 진화 2048</h2>
+                    <span class="badge">2048</span>
+                </div>
+                <div class="score-container">
+                    <div class="score-box">
+                        <div class="label" data-i18n="score">SCORE</div>
+                        <div id="current-score">0</div>
+                    </div>
+                    <div class="score-box">
+                        <div class="label" data-i18n="best">BEST</div>
+                        <div id="best-score">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-controls">
+                <button id="new-game-btn" class="action-btn" data-i18n="new_game">New Game</button>
+                <button id="undo-btn" class="action-btn" disabled data-i18n="undo">Undo (1)</button>
+                <button id="share-btn" class="action-btn" data-i18n="share">Share</button>
+            </div>
+
+            <div id="status-message"></div>
+
+            <div id="game-board-container">
+                <div class="grid-layer">
+                    <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+                    <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+                    <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+                    <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+                </div>
+                <div id="tile-layer"></div>
+            </div>
+
+            <div id="game-over-modal" class="modal hidden">
+                <div class="modal-content">
+                    <h2 id="modal-title" data-i18n="evolution_result">Evolution Result</h2>
+                    <div class="result-info" style="margin-bottom: 25px; font-weight: 700; font-size: 1.1rem; color: var(--text-sub);">
+                        <p><span data-i18n="final_stage">Final Stage</span>: <span id="final-stage-name" style="color: var(--text-main);">-</span></p>
+                        <p><span data-i18n="total_score">Total Score</span>: <span id="final-score" style="color: var(--p-blue); font-weight: 900;">-</span></p>
+                    </div>
+                    
+                    <div class="ranking-section">
+                        <div class="ranking-title" data-i18n="top_rankings">TOP 5 EVOLUTION</div>
+                        <div id="rank-list">
+                            <!-- Rankings will be loaded here -->
+                        </div>
+                    </div>
+
+                    <div class="nick-input-group">
+                        <input type="text" id="nick-input" placeholder="Nickname" maxlength="8">
+                        <button id="submit-btn">SAVE</button>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button id="restart-btn" class="action-btn primary" data-i18n="try_again" style="background: var(--p-blue); color: white; border: none; width: 100%;">Try Again</button>
+                        <button id="modal-share-btn" class="action-btn" data-i18n="share" style="margin-top: 10px; width: 100%;">Share</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="site-footer-container"><footer>
+    <p data-i18n="footer_copyright"></p>
+    <p>
+        <a href="/about" data-i18n="about_us">About Us</a> |
+        <a href="/contact" data-i18n="contact">Contact</a> |
+        <a href="/inquiry" data-i18n="partnership_inquiry">Insights Partnership Inquiry</a> |
+        <a href="/privacy-policy" data-i18n="privacy_policy">Privacy Policy</a> |
+        <a href="/glossary">AI Glossary</a> |
+        <a href="/sitemap.xml" data-i18n="sitemap">Sitemap</a> |
+        <a href="/rss.xml">RSS Feed</a>
+    </p>
+</footer>
+</div>
+    <script type="module" src="main.js?v=20260227_premium"></script>
+</body>
+</html>

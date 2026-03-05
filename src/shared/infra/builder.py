@@ -46,21 +46,72 @@ def generate_public_site(incremental=False):
         "auth", "auth/signup", "account", "account/domain",
         "futures-estimate", "glossary"
     ]
+    
+    # Static translation map for whole-page text replacement during build
+    static_replacements = {
+        "인베스터 인사이트": "Investor Insights",
+        "AI 오늘의 운세": "AI Daily Fortune",
+        "오늘의 행운 추천": "Today's Lucky Pick",
+        "AI 성향 테스트": "AI Persona Test",
+        "코스피200 지수": "KOSPI 200 Index",
+        "서비스 소개": "About Us",
+        "개인정보처리방침": "Privacy Policy",
+        "이용약관": "Terms of Service",
+        "전문 기술 인사이트": "Tech Insights",
+        "지능형 서비스": "AI Services Hub",
+        "AI 용어 사전": "AI Glossary",
+        "사이트맵": "Sitemap"
+    }
+
     for domain in domains:
         src = f"src/domains/{domain}"
         if os.path.exists(src):
-            dest = os.path.join(PUBLIC_DIR, domain)
+            # 4-1. 한국어 버전 생성
+            dest_ko = os.path.join(PUBLIC_DIR, domain)
             if os.path.isdir(src):
-                shutil.copytree(src, dest, dirs_exist_ok=True)
+                shutil.copytree(src, dest_ko, dirs_exist_ok=True)
             else:
-                os.makedirs(os.path.dirname(dest), exist_ok=True)
-                shutil.copy2(src, dest)
+                os.makedirs(os.path.dirname(dest_ko), exist_ok=True)
+                shutil.copy2(src, dest_ko)
             
-            # HTML 후처리 (재귀적으로 수행)
-            if os.path.isdir(dest):
-                for root, _, files in os.walk(dest):
-                    for file in files:
-                        if file.endswith(".html"): process_html_file_for_common_elements(os.path.join(root, file))
+            # 4-2. 영어 버전 생성 (물리적 복제)
+            dest_en = os.path.join(PUBLIC_DIR, "en", domain)
+            if os.path.isdir(src):
+                shutil.copytree(src, dest_en, dirs_exist_ok=True)
+            else:
+                os.makedirs(os.path.dirname(dest_en), exist_ok=True)
+                shutil.copy2(src, dest_en)
+
+            # HTML 후처리 (KO/EN 모두 수행)
+            for current_dest in [dest_ko, dest_en]:
+                if os.path.isdir(current_dest):
+                    for root, _, files in os.walk(current_dest):
+                        for file in files:
+                            if file.endswith(".html"):
+                                fpath = os.path.join(root, file)
+                                # 영어 버전인 경우 텍스트 치환 수행
+                                if "public/en/" in fpath.replace("\\", "/"):
+                                    with open(fpath, "r", encoding="utf-8") as f:
+                                        html = f.read()
+                                    for ko_txt, en_txt in static_replacements.items():
+                                        html = html.replace(ko_txt, en_txt)
+                                    with open(fpath, "w", encoding="utf-8") as f:
+                                        f.write(html)
+                                
+                                process_html_file_for_common_elements(fpath)
+    
+    # 5. 루트 메인 페이지 영어 버전 별도 생성
+    main_index_src = "index.html"
+    if os.path.exists(main_index_src):
+        main_index_en = os.path.join(PUBLIC_DIR, "en", "index.html")
+        os.makedirs(os.path.dirname(main_index_en), exist_ok=True)
+        with open(main_index_src, "r", encoding="utf-8") as f:
+            html = f.read()
+        for ko_txt, en_txt in static_replacements.items():
+            html = html.replace(ko_txt, en_txt)
+        with open(main_index_en, "w", encoding="utf-8") as f:
+            f.write(html)
+        process_html_file_for_common_elements(main_index_en)
     
     # 뉴스 도메인 특수 빌드
     _, db_ok = generate_news_pages()

@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracking SA - Tech Insights & Hub</title>
+    
+    
+    <!-- CSS and other head elements will be injected by main.py -->
+    <!-- HEAD_INJECTION -->
+    <script src="/search.js" defer></script>
+    <style>
+        .home-controls-wrap {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .home-controls {
+            height: 70px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            pointer-events: auto;
+        }
+        .home-controls #color-change {
+            border: 1px solid rgba(0,0,0,0.08);
+            background: white;
+            border-radius: 999px;
+            width: 36px;
+            height: 32px;
+            cursor: pointer;
+        }
+        body.dark-mode .home-controls #color-change {
+            background: #0f172a;
+            color: white;
+            border-color: rgba(255,255,255,0.15);
+        }
+
+        .search-main-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* Hero & Search Area */
+        .hero-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 60px;
+            width: 100%;
+        }
+        .main-logo-area {
+            margin-bottom: 30px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        .main-logo-area:hover {
+            transform: scale(1.02);
+        }
+        .main-logo-area svg {
+            width: 100px;
+            height: 100px;
+        }
+        .search-container {
+            position: relative;
+            width: 100%;
+            max-width: 650px;
+        }
+        .search-bar-wrapper {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 82, 204, 0.1);
+            border-radius: 30px;
+            padding: 8px 25px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .search-bar-wrapper:hover, .search-bar-wrapper:focus-within {
+            box-shadow: 0 8px 25px rgba(0, 82, 204, 0.15);
+            border-color: rgba(0, 82, 204, 0.3);
+            background: white;
+        }
+        .search-bar-wrapper input {
+            border: none;
+            outline: none;
+            height: 50px;
+            flex: 1;
+            font-size: 1.15rem;
+            padding: 0 15px;
+            background: transparent;
+        }
+        .search-icon {
+            color: #0052cc;
+            font-size: 1.3rem;
+        }
+        
+        /* Search Results Dropdown */
+        #searchResults {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 0 0 24px 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+            z-index: 1000;
+            margin-top: 8px;
+            display: none;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.05);
+            animation: slideDown 0.2s ease-out;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        #searchResults.active {
+            display: block;
+        }
+        .search-result-item {
+            display: block;
+            padding: 18px 25px;
+            text-decoration: none;
+            color: #3c4043;
+            border-bottom: 1px solid rgba(0,0,0,0.03);
+            transition: background 0.2s;
+        }
+        .search-result-item:hover {
+            background: rgba(0, 82, 204, 0.05);
+        }
+
+        
+        /* Corporate Category Layout */
+        .category-wrapper {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+        .category-section {
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+            backdrop-filter: blur(20px);
+        }
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .category-header h2 {
+            font-size: 1.4rem;
+            color: #1e293b;
+            margin: 0;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        .category-header .badge {
+            background: #0052cc;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        
+        /* Grid within Categories */
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+        .service-card {
+            display: flex;
+            flex-direction: column;
+            padding: 25px 20px;
+            text-decoration: none;
+            color: #334155;
+            background: white;
+            border: 1px solid rgba(0,0,0,0.04);
+            border-radius: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 82, 204, 0.12);
+            border-color: rgba(0, 82, 204, 0.2);
+        }
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            background: oklch(96% 0.02 240);
+            color: #0052cc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        /* Icon Variants */
+        .icon-orange { background: oklch(95% 0.05 70); color: oklch(60% 0.15 70); }
+        .icon-purple { background: oklch(95% 0.05 300); color: oklch(60% 0.15 300); }
+        .icon-navy { background: oklch(92% 0.05 250); color: oklch(50% 0.15 250); }
+        .icon-gold { background: oklch(95% 0.05 90); color: oklch(60% 0.15 90); }
+        .icon-blue { background: oklch(95% 0.05 240); color: oklch(60% 0.15 240); }
+        .icon-red { background: oklch(95% 0.05 20); color: oklch(60% 0.15 20); }
+        .icon-green { background: oklch(95% 0.05 150); color: oklch(60% 0.15 150); }
+
+        .service-card:hover .card-icon {
+            transform: scale(1.1) rotate(5deg);
+            filter: brightness(1.05);
+        }
+        .card-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 6px;
+        }
+        .card-desc {
+            font-size: 0.85rem;
+            color: #64748b;
+            line-height: 1.4;
+        }
+
+        /* Corporate Footer */
+        .corporate-footer {
+            background: #0f172a;
+            color: #cbd5e1;
+            padding: 40px 20px 20px;
+            margin-top: 50px;
+        }
+        .footer-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        @media (max-width: 768px) {
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .brand-col {
+                grid-column: 1 / -1;
+            }
+        }
+        .footer-col h4 {
+            color: white;
+            font-size: 1rem;
+            margin-bottom: 14px;
+            font-weight: 600;
+        }
+        .footer-col ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .footer-col ul li {
+            margin-bottom: 10px;
+        }
+        .footer-col ul li a {
+            color: #94a3b8;
+            text-decoration: none;
+            transition: color 0.2s;
+            font-size: 0.9rem;
+        }
+        .footer-col ul li a:hover {
+            color: white;
+        }
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+            font-size: 0.82rem;
+            color: #64748b;
+        }
+    </style>
+    <meta name="robots" content="index, follow">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Tracking SA">
+    <meta property="og:url" content="https://trackingsa.com/en/">
+    <meta property="og:image" content="https://trackingsa.com/logo.svg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://trackingsa.com/logo.svg">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
+    <link rel="alternate" type="application/rss+xml" title="Tracking SA RSS" href="/rss.xml">
+    <meta name="description" content="Experience AI tests, games, and market insights in one place. Delivering latest AI trends.">
+    <meta property="og:title" content="Tracking SA - AI Services & Hub">
+    <meta property="og:description" content="Experience AI tests, games, and market insights in one place. Delivering latest AI trends.">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7263630893992216" crossorigin="anonymous"></script>
+<meta name="google-adsense-account" content="ca-pub-7263630893992216">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-TGD3WRNKPZ');
+</script>
+<meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
+<meta name="naver-site-verification" content="b15b33af838280b54d31eb3c7e5c358d2836743f" />
+<script type="text/javascript">
+(function(c,l,a,r,i,t,y){
+    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+})(window, document, "clarity", "script", "vb9q33ggpa");
+</script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<script>
+  window.FIREBASE_CONFIG = {"apiKey": "PUBLIC_FIREBASE_WEB_KEY_REMOVED", "authDomain": "tracking-sa-295db.firebaseapp.com", "projectId": "tracking-sa-295db", "storageBucket": "tracking-sa-295db.firebasestorage.app", "appId": "1:779289056217:web:cf023fc55f1a2913ffbfc8", "messagingSenderId": "779289056217"};
+</script>
+<script>
+  window.authDomainReady = window.authDomainReady || new Promise((resolve) => {
+    window.__resolveAuthDomain = resolve;
+  });
+</script>
+<script type="module" src="/auth/ui/auth-client.js"></script>
+
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="/style.css?v=1772683602">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<script src="/firebase-config.js"></script>
+<script src="/translations.js?v=1772683602"></script>
+<script src="/common.js?v=1772683602"></script>
+
+</head>
+<body><div class="site-header-container"><header>
+    <div class="header-inner">
+        <a href="/" class="site-logo-link">
+            <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="site-logo">
+                <circle cx="50" cy="50" r="48" stroke="currentColor" stroke-width="4" fill="transparent"/>
+                <path d="M25 70L40 55L50 65L75 35" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="70" cy="35" r="12" stroke="currentColor" stroke-width="6" fill="currentColor"/>
+                <rect x="78" y="43" width="15" height="6" rx="3" transform="rotate(45 78 43)" fill="currentColor"/>
+            </svg>
+        </a>
+        <div class="desktop-menu-container">
+            <nav>
+                <ul>
+                    <li><a href="/news/" data-i18n="news_home">Insights</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropbtn" data-i18n="menu_board">게시판</a>
+                        <div class="dropdown-content">
+                            <a href="/board?category=notice" data-i18n="notice">공지사항</a>
+                            <a href="/board?category=free" data-i18n="free_board">자유게시판</a>
+                        </div>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropbtn" data-i18n="menu_chart">차트</a>
+                        <div class="dropdown-content">
+                            <a href="/futures-estimate/" data-i18n="futures_estimate_index">지수</a>
+                        </div>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropbtn" data-i18n="menu_test">테스트</a>
+                        <div class="dropdown-content">
+                            <a href="/animal-face/" data-i18n="animal_face_test">동물상 테스트</a>
+                            <a href="/ai-test/" data-i18n="ai_tendency_test">AI Persona Test</a>
+                            <a href="/fortune/" data-i18n="saju_test">AI 실시간 오늘의 운세</a>
+                            <a href="/lucky-recommendation/" data-i18n="lucky_recommendation">행운의 추천</a>
+                        </div>
+                    </li>
+                    <li><a href="/games/" data-i18n="menu_game">게임</a></li>
+                </ul>
+            </nav>
+            <div class="utility-controls">
+                <button id="color-change">🌙</button>
+                <div id="language-switcher"></div>
+                <div id="auth-controls" class="auth-controls"></div>
+            </div>
+        </div>
+    </div>
+</header>
+</div>
+    <div class="home-controls-wrap">
+        <div class="home-controls">
+            <div id="auth-controls" class="auth-controls"></div>
+            <button id="color-change" aria-label="Theme">🌙</button>
+            <div id="language-switcher"></div>
+        </div>
+    </div>
+    <main class="search-main-container">
+        
+        <!-- Hero & Search -->
+        <section class="hero-section">
+            <div class="main-logo-area">
+                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="48" stroke="#0052cc" stroke-width="4" fill="transparent"/>
+                    <path d="M25 70L40 55L50 65L75 35" stroke="#0052cc" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="70" cy="35" r="12" stroke="#0052cc" stroke-width="6" fill="#0052cc"/>
+                    <rect x="78" y="43" width="15" height="6" rx="3" transform="rotate(45 78 43)" fill="#0052cc"/>
+                </svg>
+                <h1 style="color: #0052cc; font-size: 2.5rem; margin-top: 15px; font-weight: 800; letter-spacing: -1px;">Tracking SA</h1>
+            </div>
+
+            <div class="search-container">
+                <div class="search-bar-wrapper">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="searchInput" placeholder="관심 있는 기술 키워드나 Insights를 검색하세요..." autocomplete="off">
+                </div>
+                <div id="searchResults"></div>
+            </div>
+        </section>
+
+        <!-- Service Categories -->
+        <div class="category-wrapper">
+            
+            <!-- Category 1: Interactive Tests -->
+            <section class="category-section">
+                <div class="category-header">
+                    <h2>AI Interactive</h2>
+                    <span class="badge">TEST</span>
+                </div>
+                <div class="service-grid">
+                    <a href="/animal_face_test/" class="service-card">
+                        <div class="card-icon icon-orange"><i class="fas fa-paw"></i></div>
+                        <div class="card-title" data-i18n="animal_face_test">동물상 테스트</div>
+                        <div class="card-desc">나의 얼굴 데이터로 분석하는 가장 닮은 동물상 찾기</div>
+                    </a>
+                    <a href="/ai-test/" class="service-card">
+                        <div class="card-icon icon-purple"><i class="fas fa-brain"></i></div>
+                        <div class="card-title" data-i18n="ai_tendency_test">AI Persona Test</div>
+                        <div class="card-desc">인공지능이 진단하는 나의 성격과 업무 성향 분석</div>
+                    </a>
+                    <a href="/fortune/" class="service-card">
+                        <div class="card-icon icon-navy"><i class="fas fa-moon"></i></div>
+                        <div class="card-title" data-i18n="saju_test">AI 운세</div>
+                        <div class="card-desc">빅데이터와 명리학을 결합한 오늘의 맞춤 운세 확인</div>
+                    </a>
+                    <a href="/lucky-recommendation/" class="service-card">
+                        <div class="card-icon icon-gold"><i class="fas fa-wand-magic-sparkles"></i></div>
+                        <div class="card-title" data-i18n="lucky_recommendation">행운의 추천</div>
+                        <div class="card-desc">오늘 나에게 필요한 럭키 컬러와 최적의 아이템 제안</div>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Category 2: Insights & Analysis -->
+            <section class="category-section">
+                <div class="category-header">
+                    <h2>Insights & Column</h2>
+                </div>
+                <div class="service-grid">
+                    <a href="/news/" class="service-card">
+                        <div class="card-icon icon-blue"><i class="fas fa-newspaper"></i></div>
+                        <div class="card-title" data-i18n="news_home">Investor Insights</div>
+                        <div class="card-desc">전문가의 시각으로 돈과 기술의 흐름을 꿰뚫는 전문 칼럼</div>
+                    </a>
+                    <a href="/glossary/" class="service-card">
+                        <div class="card-icon icon-purple"><i class="fas fa-book"></i></div>
+                        <div class="card-title">AI 용어사전</div>
+                        <div class="card-desc">어려운 기술 용어를 전문가의 시각으로 쉽게 풀이한 지식 창고</div>
+                    </a>
+                    <a href="/futures-estimate/" class="service-card">
+                        <div class="card-icon icon-navy"><i class="fas fa-chart-line"></i></div>
+                        <div class="card-title" data-i18n="futures_estimate_index">코스피200</div>
+                        <div class="card-desc">선물 기반 지수 흐름과 추정치를 한눈에 확인</div>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Category: Community -->
+            <section class="category-section">
+                <div class="category-header">
+                    <h2 data-i18n="menu_community">커뮤니티</h2>
+                </div>
+                <div class="service-grid">
+                    <a href="/board?category=notice" class="service-card">
+                        <div class="card-icon icon-red"><i class="fas fa-bullhorn"></i></div>
+                        <div class="card-title" data-i18n="notice">공지사항</div>
+                        <div class="card-desc" data-i18n="notice_desc">Tracking SA의 새로운 소식과 주요 안내 사항 확인</div>
+                    </a>
+                    <a href="/board?category=free" class="service-card">
+                        <div class="card-icon icon-blue"><i class="fas fa-comments"></i></div>
+                        <div class="card-title" data-i18n="free_board">자유게시판</div>
+                        <div class="card-desc" data-i18n="free_board_desc">AI와 기술, 일상에 대해 자유롭게 이야기를 나누는 공간</div>
+                    </a>
+                    <a href="/games/sudden-attack/" class="service-card">
+                        <div class="card-icon" style="background: #1a1d2e; color: #00d2ff;"><i class="fas fa-crosshairs"></i></div>
+                        <div class="card-title">서든어택 전적</div>
+                        <div class="card-desc">넥슨 공식 데이터를 통한 실시간 전적 및 매치 정보 조회</div>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Category 3: Playground -->
+            <section class="category-section">
+                <div class="category-header" style="justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <h2>Game Center</h2>
+                        <span class="badge" style="background: var(--p-blue);">HUB</span>
+                    </div>
+                    <a href="/games/submit/" style="font-size: 0.85rem; color: var(--p-blue); font-weight: 800; text-decoration: none;">+ Submit Your Game</a>
+                </div>
+                <div class="service-grid">
+                    <a href="/games/" class="service-card" style="border: 2px solid var(--p-blue-soft);">
+                        <div class="card-icon icon-blue"><i class="fas fa-gamepad"></i></div>
+                        <div class="card-title">게임 센터 홈</div>
+                        <div class="card-desc">클래식부터 AI 게임까지, 모든 게임을 한곳에서 즐기세요.</div>
+                    </a>
+                    <a href="/games/tetris/" class="service-card">
+                        <div class="card-icon icon-red"><i class="fas fa-shapes"></i></div>
+                        <div class="card-title" data-i18n="tetris_game">테트리스</div>
+                        <div class="card-desc">웹에서 가볍게 즐기는 클래식 아케이드 퍼즐 게임</div>
+                    </a>
+                    <a href="/games/ai-evolution/" class="service-card">
+                        <div class="card-icon icon-green"><i class="fas fa-dna"></i></div>
+                        <div class="card-title" data-i18n="ai_evolution">AI 진화 게임</div>
+                        <div class="card-desc">AI 모델을 합성하여 진화시키는 2048 스타일 게임</div>
+                    </a>
+                    <a href="/games/submit/" class="service-card" style="background: oklch(98% 0.01 250); border: 1px dashed var(--p-blue-soft);">
+                        <div class="card-icon icon-navy"><i class="fas fa-plus"></i></div>
+                        <div class="card-title">내 게임 등록</div>
+                        <div class="card-desc">직접 만든 게임이나 추천하고 싶은 게임을 공유하세요.</div>
+                    </a>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Corporate Footer -->
+    
+    <div class="site-footer-container"><footer>
+    <p data-i18n="footer_copyright"></p>
+    <p>
+        <a href="/about" data-i18n="about_us">About Us</a> |
+        <a href="/contact" data-i18n="contact">Contact</a> |
+        <a href="/inquiry" data-i18n="partnership_inquiry">Insights Partnership Inquiry</a> |
+        <a href="/privacy-policy" data-i18n="privacy_policy">Privacy Policy</a> |
+        <a href="/glossary">AI Glossary</a> |
+        <a href="/sitemap.xml" data-i18n="sitemap">Sitemap</a> |
+        <a href="/rss.xml">RSS Feed</a>
+    </p>
+</footer>
+</div>
+</body>
+</html>

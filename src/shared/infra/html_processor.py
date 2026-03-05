@@ -44,7 +44,33 @@ def process_html_file_for_common_elements(filepath):
         # 2. Define standard high-quality SEO block
         site_title = "Tracking SA - AI Services & Hub"
         site_desc = "AI 테스트, 게임, 마켓 인사이트를 한 곳에서 경험하세요. 최신 인공지능 트렌드를 전달합니다."
-        if is_en_page:
+        
+        # Mappings for domain-specific static translations (SEO focused)
+        translations = {
+            "ai-test": {
+                "ko": "간단한 질문을 통해 당신의 AI 성향을 분석합니다.",
+                "en": "Analyze your AI tendency through simple questions."
+            },
+            "futures-estimate": {
+                "ko": "코스피200 지수 모니터 및 예측 데이터",
+                "en": "KOSPI200 Index monitoring and prediction data."
+            },
+            "fortune": {
+                "ko": "Gemini AI가 들려주는 오늘의 운세",
+                "en": "Daily fortune powered by Gemini AI."
+            },
+            "lucky-recommendation": {
+                "ko": "나만을 위한 행운의 컬러와 아이템 추천",
+                "en": "Personalized lucky color and item recommendations."
+            }
+        }
+
+        # Determine domain for specific description
+        current_domain = next((d for d in translations if d in filepath.replace("\\", "/")), None)
+        if current_domain:
+            site_desc = translations[current_domain]["en" if is_en_page else "ko"]
+
+        if is_en_page and not current_domain:
             site_desc = "Experience AI tests, games, and market insights in one place. Delivering latest AI trends."
 
         seo_tags = [
@@ -96,6 +122,28 @@ def process_html_file_for_common_elements(filepath):
             content = content.replace("<!-- FOOTER_INJECTION -->", footer_html)
         elif '</body>' in content and not is_root_homepage:
             content = content.replace('</body>', f'{footer_html}\n</body>')
+
+        # 6. Final Static Translations for English Pages
+        if is_en_page:
+            replacements = {
+                "인베스터 인사이트": "Investor Insights",
+                "AI 오늘의 운세": "AI Daily Fortune",
+                "오늘의 행운 추천": "Today's Lucky Pick",
+                "AI 성향 테스트": "AI Persona Test",
+                "코스피200 지수": "KOSPI 200 Index",
+                "서비스 소개": "About Us",
+                "개인정보처리방침": "Privacy Policy",
+                "이용약관": "Terms of Service",
+                "전문 기술 인사이트": "Tech Insights",
+                "지능형 서비스": "AI Services Hub",
+                "AI 용어 사전": "AI Glossary",
+                "사이트맵": "Sitemap",
+                "제휴 문의": "Partnership Inquiry",
+                "문의": "Contact",
+                "인사이트": "Insights"
+            }
+            for ko, en in replacements.items():
+                content = content.replace(ko, en)
 
         if content != original:
             with open(filepath, "w", encoding="utf-8") as f:
