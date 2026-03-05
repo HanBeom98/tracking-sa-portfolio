@@ -97,7 +97,14 @@ export class RecentStats {
       else if (radarKd <= 55) { combatScore = 40 + (radarKd - 40) * 2.0; } 
       else { combatScore = 70 + (radarKd - 55) * 1.5; }
       this.radar.combat = Math.min(100, Math.max(0, combatScore));
-      this.radar.survival = Math.min(100, Math.max(0, 100 - (parseFloat(this.avgD) * 12)));
+
+      // --- 지능형 생존력 계산 (Survival 2.0) ---
+      // 1. 기본 데스 기반 점수 (1데스당 6점 감점, 라운드제 고려)
+      const baseSurvival = 100 - (parseFloat(this.avgD) * 6);
+      // 2. K/D 보정 (K/D가 50% 이상이면 최대 20점 가산하여 '교전 중 생존' 가치 인정)
+      const kdBonus = Math.max(0, (this.kdPercent - 50) * 0.5);
+      this.radar.survival = Math.min(100, Math.max(0, baseSurvival + kdBonus));
+
       this.radar.teamwork = Math.min(100, Math.max(0, parseFloat(this.avgA) * 15));
       this.radar.precision = Math.min(100, Math.max(0, (info.recent_assault_rate || 0) * 1.5));
       this.radar.victory = this.winRate;
