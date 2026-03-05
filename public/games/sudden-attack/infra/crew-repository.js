@@ -266,24 +266,40 @@ export class CrewRepository {
         const death = parseInt(p.death || 0);
         const kd = parseFloat(p.kd || 0);
         
-        // 1. MMR 정산
+        // --- 1. MMR 정산 (괴리 보정 시스템 적용) ---
+        const gap = currentData.hsr - currentData.mmr;
+        let gapWeight = 1.0;
+        if (isWin) {
+          if (gap >= 150) gapWeight = 1.5;      // 숨은 고수: 승리 시 1.5배 획득
+          else if (gap >= 80) gapWeight = 1.2;  // 우수 실력: 승리 시 1.2배 획득
+          else if (gap <= -150) gapWeight = 0.5; // 거품 유저: 승리 시 0.5배만 획득
+          else if (gap <= -80) gapWeight = 0.8;  // 높은 점수: 승리 시 0.8배만 획득
+        } else {
+          if (gap <= -150) gapWeight = 1.5;     // 거품 유저: 패배 시 1.5배 하락
+          else if (gap <= -80) gapWeight = 1.2; // 높은 점수: 패배 시 1.2배 하락
+          else if (gap >= 150) gapWeight = 0.5; // 숨은 고수: 패배 시 0.5배만 하락
+          else if (gap >= 80) gapWeight = 0.8;  // 우수 실력: 패배 시 0.8배만 하락
+        }
+
         let mmrChange = isWin ? 20 : -20;
         let mmrBonus = 0;
         if (p.isMvp) mmrBonus += 3;
         if (p.damage >= 1500) mmrBonus += 2;
         if (p.headshot >= 7) mmrBonus += 2;
         mmrBonus = Math.min(5, mmrBonus);
-        const finalMmrDiff = mmrChange + mmrBonus;
+
+        const finalMmrDiff = Math.round((mmrChange + mmrBonus) * gapWeight);
         currentData.mmr += finalMmrDiff;
 
-        // 2. HSR 정산
+        // --- 2. HSR 정산 (성적 기반 실력 지표) ---
         let hsrChange = isWin ? 10 : -10;
         let hsrBonus = 0;
         if (isWin) {
-          if (kd <= 0.3) hsrBonus = -10;
+          // 승리했어도 성적이 너무 낮으면(K/D 0.4 이하) HSR 하락 (-10점)
+          if (kd <= 0.4) hsrBonus = -20; 
           else if (kd >= 1.0) hsrBonus = Math.min(15, Math.round((kd - 1.0) * 10));
         } else {
-          if (kd >= 1.7) hsrBonus = 15;
+          if (kd >= 1.7) hsrBonus = 15; // 졌잘싸 보정
           else if (kd <= 1.0) hsrBonus = Math.max(-15, Math.round((kd - 1.0) * 15));
         }
         if ((kill + death) >= 8 && kd >= 0.8) hsrBonus += 2;
