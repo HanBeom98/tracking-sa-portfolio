@@ -15,7 +15,7 @@ export default async function handler(req, res) {
 
         let data = req.body;
         if (typeof data === 'string') {
-            try { data = JSON.parse(data); } catch (e) { /* skip */ }
+            try { data = JSON.parse(data); } catch (e) { console.error('JSON Parse Error'); }
         }
 
         const { name, birthDate, gender, language, currentDate } = data;
@@ -62,7 +62,7 @@ export default async function handler(req, res) {
 `;
         }
 
-        // 구글 콘솔에 설정된 리퍼러 제한(Referer Restriction) 통과를 위한 헤더 주입
+        // 구글 콘솔 보안 정책 통과를 위한 핵심 헤더 주입 (Referer 세팅)
         const geminiResponse = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
             method: 'POST',
             headers: { 

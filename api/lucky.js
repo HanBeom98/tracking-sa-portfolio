@@ -46,7 +46,7 @@ export default async function handler(req, res) {
             중요: 'oklch' 값은 반드시 브라우저 CSS에서 즉시 사용 가능한 'oklch(0.7 0.1 200)' 형식의 순수 문자열이어야 합니다. 모든 필드는 반드시 한국어로 작성하세요.`;
         }
 
-        // 구글 콘솔 리퍼러 제한 통과용 헤더 주입
+        // 구글 콘솔 보안 정책 통과용 헤더 주입 (Referer 세팅)
         const geminiResponse = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
             method: 'POST',
             headers: { 
