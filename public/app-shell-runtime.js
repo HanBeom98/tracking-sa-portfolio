@@ -42,12 +42,14 @@
       root.document.documentElement.setAttribute("lang", lang === "en" ? "en" : "ko");
       const path = root.location.pathname || "/";
 
+      const isHome = path === "/" || path === "/index.html";
       const isNewsIndex = path === "/news" || path === "/news/" || path === "/news/index.html";
       const isNewsArticle = /^\/\d{4}-\d{2}-\d{2}-.+\.html$/.test(path) || /^\/news-\d{10}-\d+\.html$/.test(path);
       const isEnglishPath = path.startsWith("/en/");
 
       if (lang === "en") {
         if (isEnglishPath) return root.location.reload();
+        if (isHome) return (root.location.href = "/en/");
         if (isNewsIndex) return (root.location.href = "/en/news/");
         if (isNewsArticle) return (root.location.href = "/en" + path);
       }
