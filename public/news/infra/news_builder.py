@@ -417,13 +417,16 @@ def generate_news_pages():
         if articles:
             grid_items = "".join([
                 _build_news_card(f'/{a["url"]}', a["title"], a.get("date", ""), a.get("excerpt", ""))
-                for a in articles
+                for a in articles if str(a.get("title", "")).strip()
             ])
             final_html = base_html.replace("<!-- NEWS_INJECTION_POINT -->", f'<div class="news-grid">{grid_items}</div>')
-            if articles_en:
+            
+            # Filter strictly for English
+            valid_en_articles = [a for a in articles_en if str(a.get("title", "")).strip()]
+            if valid_en_articles:
                 grid_items_en = "".join([
                     _build_news_card(f'/en/{a["url"]}', a["title"], a.get("date", ""), a.get("excerpt", ""))
-                    for a in articles_en
+                    for a in valid_en_articles
                 ])
                 final_html_en = base_html.replace("<!-- NEWS_INJECTION_POINT -->", f'<div class="news-grid">{grid_items_en}</div>')
             else:
@@ -431,6 +434,13 @@ def generate_news_pages():
         else:
             final_html = base_html.replace("<!-- NEWS_INJECTION_POINT -->", '<div class="news-empty">아직 등록된 기사가 없습니다.</div>')
             final_html_en = base_html.replace("<!-- NEWS_INJECTION_POINT -->", '<div class="news-empty">No articles yet.</div>')
+
+        # Statically translate the hero text for the English version
+        final_html_en = final_html_en.replace('인베스터 인사이트', 'Investor Insights')
+        final_html_en = final_html_en.replace(
+            '전문가의 시각으로 돈과 기술의 흐름을 꿰뚫는 전문 칼럼. 단순 뉴스를 넘어선 독보적인 투자 인사이트를 매일 만나보세요.',
+            'Professional columns cutting through the tech noise. Get unique perspectives and investment insights daily.'
+        )
 
         dest_idx = os.path.join(PUBLIC_DIR, "news", "index.html")
         os.makedirs(os.path.dirname(dest_idx), exist_ok=True)
