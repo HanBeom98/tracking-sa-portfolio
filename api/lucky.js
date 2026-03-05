@@ -13,7 +13,13 @@ export default async function handler(req, res) {
             return res.status(500).json({ error: 'Vercel Env Error: GEMINI_API_KEY is missing.' });
         }
 
-        const { language = 'ko', currentDate, userInfo } = req.body;
+        // Vercel 환경에서 body가 문자열로 들어올 경우를 대비
+        let data = req.body;
+        if (typeof data === 'string') {
+            try { data = JSON.parse(data); } catch (e) { console.error('JSON Parse Error (Lucky)'); }
+        }
+
+        const { language = 'ko', currentDate, userInfo } = data;
         const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent';
         const dateStr = currentDate ? `${currentDate.year}-${currentDate.month}-${currentDate.day}` : new Date().toISOString().split('T')[0];
         
@@ -46,7 +52,7 @@ export default async function handler(req, res) {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
-                'Referer': 'https://trackingsa.com' // Google Cloud Referer 제한 우회
+                'Referer': 'https://trackingsa.com'
             },
             body: JSON.stringify({
                 contents: [{ parts: [{ text: prompt + "\n\nIMPORTANT: Respond ONLY with a raw JSON object. Do not include markdown formatting or backticks. Valid JSON only." }] }]

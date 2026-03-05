@@ -13,7 +13,13 @@ export default async function handler(req, res) {
             return res.status(500).json({ error: 'Vercel Env Error: GEMINI_API_KEY is missing.' });
         }
 
-        const { name, birthDate, gender, language, currentDate } = req.body;
+        // Vercel 환경에서 body가 문자열로 들어올 경우를 대비
+        let data = req.body;
+        if (typeof data === 'string') {
+            try { data = JSON.parse(data); } catch (e) { console.error('JSON Parse Error'); }
+        }
+
+        const { name, birthDate, gender, language, currentDate } = data;
         const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent';
 
         let prompt = '';
@@ -61,7 +67,7 @@ export default async function handler(req, res) {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
-                'Referer': 'https://trackingsa.com' // Google Cloud Referer 제한 우회를 위한 명함
+                'Referer': 'https://trackingsa.com'
             },
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
         });
@@ -72,12 +78,10 @@ export default async function handler(req, res) {
             const fortuneReading = geminiData.candidates[0].content.parts[0].text;
             return res.status(200).json({ sajuReading: fortuneReading });
         } else {
-            // Gemini가 403을 뱉으면 여기서 구체적인 이유를 포함해 500으로 전달 (Vercel 403과 구분하기 위함)
             console.error('Gemini API Error:', geminiData.error);
             return res.status(500).json({ 
                 error: 'Gemini API Error', 
-                message: geminiData.error?.message || 'Unknown error',
-                status: geminiResponse.status 
+                message: geminiData.error?.message || 'Unknown error'
             });
         }
     } catch (error) {
