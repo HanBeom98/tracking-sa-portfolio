@@ -17,6 +17,11 @@ export function parseFortuneMarkdown(markdown) {
     sectionOpen = false;
   };
 
+  // 인라인 스타일 (Bold 등) 처리 함수
+  const parseInline = (text) => {
+    return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  };
+
   for (const rawLine of lines) {
     const trimmed = rawLine.trim();
 
@@ -25,21 +30,23 @@ export function parseFortuneMarkdown(markdown) {
       continue;
     }
 
-    if (trimmed.startsWith("### 🌟")) {
+    // 헤더 처리 (## 또는 ###)
+    if (trimmed.startsWith("### 🌟") || trimmed.startsWith("## 🌟")) {
       closeSectionIfNeeded();
-      html += `<div class="summary-box">${trimmed.replace("###", "").trim()}</div>`;
+      html += `<div class="summary-box">${parseInline(trimmed.replace(/^#+/, "").trim())}</div>`;
       continue;
     }
 
-    if (trimmed.startsWith("###")) {
+    if (trimmed.startsWith("###") || trimmed.startsWith("##")) {
       closeSectionIfNeeded();
       html += '<div class="section-card">';
-      html += `<h3>${trimmed.replace("###", "").trim()}</h3>`;
+      html += `<h3>${parseInline(trimmed.replace(/^#+/, "").trim())}</h3>`;
       sectionOpen = true;
       continue;
     }
 
-    if (trimmed.startsWith("-")) {
+    // 리스트 처리
+    if (trimmed.startsWith("-") || trimmed.startsWith("* ")) {
       if (!sectionOpen) {
         html += '<div class="section-card">';
         sectionOpen = true;
@@ -48,16 +55,17 @@ export function parseFortuneMarkdown(markdown) {
         html += "<ul>";
         inList = true;
       }
-      html += `<li>${trimmed.slice(1).trim()}</li>`;
+      html += `<li>${parseInline(trimmed.replace(/^[-*]\s*/, ""))}</li>`;
       continue;
     }
 
+    // 일반 텍스트 처리
     if (!sectionOpen) {
       html += '<div class="section-card">';
       sectionOpen = true;
     }
     closeListIfNeeded();
-    html += `<p>${trimmed}</p>`;
+    html += `<p>${parseInline(trimmed)}</p>`;
   }
 
   closeSectionIfNeeded();
