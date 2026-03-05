@@ -21,7 +21,6 @@ export default async function handler(req, res) {
         const { language = 'ko', currentDate, userInfo } = data;
         const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent';
         
-        // 날짜 및 사용자 정보 정규화 (운세와 동일하게 보강)
         const cYear = currentDate?.year || new Date().getFullYear();
         const cMonth = currentDate?.month || (new Date().getMonth() + 1);
         const cDay = currentDate?.day || new Date().getDate();
@@ -64,10 +63,26 @@ export default async function handler(req, res) {
 
         const geminiData = await geminiResponse.json();
 
-        if (geminiResponse.ok && geminiData.candidates) {
-            return res.status(200).json(geminiData.candidates[0].content.parts[0].text);
+        if (geminiResponse.ok && geminiData.candidates && geminiData.candidates.length > 0) {
+            const rawText = geminiData.candidates[0].content.parts[0].text;
+            
+            // JSON 파싱 및 정제 로직 보강 (undefined 방지 핵심)
+            try {
+                const cleanedJson = rawText.replace(/```json|```/g, "").trim();
+                const parsedResult = JSON.parse(cleanedJson);
+                return res.status(200).json(parsedResult);
+            } catch (parseError) {
+                console.error('Gemini JSON Parse Error:', parseError, 'Raw Text:', rawText);
+                return res.status(200).json({ 
+                    colorName: "오류 발생", 
+                    oklch: "oklch(0.7 0.1 200)", 
+                    itemName: "시스템 점검 중", 
+                    itemIcon: "⚠️", 
+                    itemAction: "잠시 후 다시 시도해주세요." 
+                });
+            }
         } else {
-            return res.status(500).json(geminiData);
+            return res.status(500).json({ error: 'Gemini API Error' });
         }
     } catch (error) {
         return res.status(500).json({ error: 'Vercel API Runtime Error (Lucky)', message: error.message });
