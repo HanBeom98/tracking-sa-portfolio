@@ -263,24 +263,36 @@ async function ensureAuthPromptKit() {
     return authPromptKit;
 }
 
+let pendingAuthUiControllerPromise = null;
+
 async function ensureAuthUiController() {
     if (authUiController) return authUiController;
-    const factory = await loadAuthUiControllerFactory();
-    if (typeof factory !== "function") {
-        throw new Error("Auth UI controller factory is not available.");
-    }
-    authUiController = factory({
-        getAuthService,
-        getCurrentUser: () => authUser,
-        onLogoutSuccess: () => {
-            const path = window.location.pathname || "/";
-            const isAccountPage = path === "/account/" || path === "/account" || path === "/account/index.html";
-            if (isAccountPage) {
-                window.location.href = "/account/";
+    if (pendingAuthUiControllerPromise) return pendingAuthUiControllerPromise;
+    
+    pendingAuthUiControllerPromise = (async () => {
+        try {
+            const factory = await loadAuthUiControllerFactory();
+            if (typeof factory !== "function") {
+                throw new Error("Auth UI controller factory is not available.");
             }
-        },
-    });
-    return authUiController;
+            authUiController = factory({
+                getAuthService,
+                getCurrentUser: () => authUser,
+                onLogoutSuccess: () => {
+                    const path = window.location.pathname || "/";
+                    const isAccountPage = path === "/account/" || path === "/account" || path === "/account/index.html";
+                    if (isAccountPage) {
+                        window.location.href = "/account/";
+                    }
+                },
+            });
+            return authUiController;
+        } finally {
+            pendingAuthUiControllerPromise = null;
+        }
+    })();
+    
+    return pendingAuthUiControllerPromise;
 }
 
 async function initAuthControls() {
@@ -292,17 +304,31 @@ async function initAuthControls() {
     }
 }
 
-window.showAuthMenu = () => {
+window.showAuthMenu = async () => {
     if (!authUiController) {
-        console.error(window.getTranslation("auth_controls_unavailable", "로그인 UI를 불러오지 못했습니다. 잠시 후 다시 시도해주세요."));
+        try {
+            await ensureAuthUiController();
+        } catch (e) {
+            console.error("Failed to load Auth UI on demand:", e);
+        }
+    }
+    if (!authUiController) {
+        alert(window.getTranslation("auth_controls_unavailable", "로그인 기능이 아직 준비되지 않았습니다. 잠시 후 다시 시도해주세요."));
         return;
     }
     authUiController.showAuthMenu();
 };
 
-window.openAuthPrompt = () => {
+window.openAuthPrompt = async () => {
     if (!authUiController) {
-        alert(window.getTranslation("auth_controls_unavailable", "로그인 UI를 불러오지 못했습니다. 잠시 후 다시 시도해주세요."));
+        try {
+            await ensureAuthUiController();
+        } catch (e) {
+            console.error("Failed to load Auth UI on demand:", e);
+        }
+    }
+    if (!authUiController) {
+        alert(window.getTranslation("auth_controls_unavailable", "로그인 기능이 아직 준비되지 않았습니다. 잠시 후 다시 시도해주세요."));
         return;
     }
     authUiController.openAuthPrompt();
