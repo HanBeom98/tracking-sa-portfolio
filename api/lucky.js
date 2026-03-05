@@ -13,9 +13,10 @@ export default async function handler(req, res) {
             return res.status(500).json({ error: 'Vercel Env Error: GEMINI_API_KEY is missing.' });
         }
 
+        // Vercel 환경에서 body가 문자열로 들어올 경우를 대비
         let data = req.body;
         if (typeof data === 'string') {
-            try { data = JSON.parse(data); } catch (e) { /* skip */ }
+            try { data = JSON.parse(data); } catch (e) { console.error('JSON Parse Error (Lucky)'); }
         }
 
         const { language = 'ko', currentDate, userInfo } = data;

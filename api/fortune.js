@@ -1,26 +1,45 @@
 // /api/fortune.js - Vercel Standalone Debug Handler
 export default async function handler(req, res) {
+    // 1. CORS 보강 (Vercel 내부 보안 정책 대응)
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept');
 
-    if (req.method === 'OPTIONS') return res.status(204).end();
-    if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
+    if (req.method === 'OPTIONS') {
+        return res.status(204).end();
+    }
+
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method Not Allowed' });
+    }
 
     try {
         const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
         if (!GEMINI_API_KEY) {
-            return res.status(500).json({ error: 'Vercel Env Error', message: 'GEMINI_API_KEY is missing.' });
+            console.error('Vercel Env Error: GEMINI_API_KEY is missing.');
+            return res.status(500).json({ error: 'Vercel Env Error', message: 'API Key missing' });
         }
 
+        // 2. 요청 데이터 정규화 (Vercel 특유의 body 스트링 현상 대응)
         let data = req.body;
         if (typeof data === 'string') {
-            try { data = JSON.parse(data); } catch (e) { console.error('JSON Parse Error'); }
+            try {
+                data = JSON.parse(data);
+            } catch (e) {
+                console.error('JSON Parse Error:', e);
+                return res.status(400).json({ error: 'Bad Request', message: 'Invalid JSON body' });
+            }
+        }
+
+        // 데이터가 아예 없는 경우 방어
+        if (!data || Object.keys(data).length === 0) {
+            return res.status(400).json({ error: 'Bad Request', message: 'Empty body' });
         }
 
         const { name, birthDate, gender, language, currentDate } = data;
         const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent';
 
+        // 3. 프롬프트 (기존과 100% 동일하게 유지)
         let prompt = '';
         if (language === 'en') {
             prompt = `Today is ${currentDate.year} / ${currentDate.month} / ${currentDate.day}. You must interpret the fortune based on this date.
@@ -62,13 +81,13 @@ export default async function handler(req, res) {
 `;
         }
 
-        // 성공했던 그 방식: 정확한 Referer(슬래시 포함)와 Origin 주입
+        // 4. Gemini API 호출 (성공했던 헤더 조합)
         const geminiResponse = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
-                'Referer': 'https://trackingsa.com/',
-                'Origin': 'https://trackingsa.com'
+                'Origin': 'https://trackingsa.com',
+                'Referer': 'https://trackingsa.com/'
             },
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
         });
@@ -79,9 +98,14 @@ export default async function handler(req, res) {
             const fortuneReading = geminiData.candidates[0].content.parts[0].text;
             return res.status(200).json({ sajuReading: fortuneReading });
         } else {
-            return res.status(geminiResponse.status).json(geminiData);
+            console.error('Gemini API Error Response:', JSON.stringify(geminiData));
+            return res.status(geminiResponse.status || 500).json({ 
+                error: 'Gemini API Error', 
+                message: geminiData.error?.message || 'Upstream API error'
+            });
         }
     } catch (error) {
-        return res.status(500).json({ error: 'Vercel API Runtime Error', message: error.message });
+        console.error('Vercel Bridge Error:', error);
+        return res.status(500).json({ error: 'Internal Server Error', message: error.message });
     }
 }
