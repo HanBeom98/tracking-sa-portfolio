@@ -79,11 +79,12 @@ export async function onRequest(context) {
 `;
         }
 
+        // 구글 콘솔 리퍼러 제한 통과를 위한 핵심 헤더 주입
         const geminiResponse = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'x-goog-api-client': 'gl-js/fortune-api/1.0.0'
+                'Referer': 'https://trackingsa.com'
             },
             body: JSON.stringify({
                 contents: [{

@@ -1,5 +1,5 @@
 function addCORSHeaders(response) {
-    response.headers.set('Access-Control-Allow-Origin', '*'); 
+    response.headers.set('Access-Control-Allow-Origin', '*');
     response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
     response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
     response.headers.set('Access-Control-Max-Age', '86400');
@@ -9,44 +9,32 @@ function addCORSHeaders(response) {
 export async function onRequest(context) {
     const { request, env } = context || {};
 
-    if (!request) {
-        return new Response(JSON.stringify({ error: 'No request object' }), { status: 400 });
-    }
-
     if (request.method === 'OPTIONS') {
         return addCORSHeaders(new Response(null, { status: 204 }));
     }
 
-    const GEMINI_API_KEY = env?.GEMINI_API_KEY || (typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : null);
-
-    if (!GEMINI_API_KEY) {
-        return addCORSHeaders(new Response(JSON.stringify({ error: 'API key is not set.' }), {
+    if (!env.GEMINI_API_KEY) {
+        return addCORSHeaders(new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not set.' }), {
             status: 500,
             headers: { 'Content-Type': 'application/json' },
         }));
     }
 
-    try {
-        // Vercel/Cloudflare 호환성을 위한 body 파싱
-        let body;
-        try {
-            body = await request.json();
-        } catch (e) {
-            // JSON 파싱 실패 시 빈 객체로 시작
-            body = {};
-        }
+    if (request.method !== 'POST') {
+        return addCORSHeaders(new Response('Method Not Allowed', { status: 405 }));
+    }
 
-        const { language = 'ko', currentDate, userInfo } = body;
+    try {
+        const { language = 'ko', currentDate, userInfo } = await request.json();
+        const GEMINI_API_KEY = env.GEMINI_API_KEY;
+        const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent';
+        const dateStr = currentDate ? `${currentDate.year}-${currentDate.month}-${currentDate.day}` : new Date().toISOString().split('T')[0];
         
-        // userInfo 방어적 추출
         const name = userInfo?.name || '익명';
         const gender = userInfo?.gender || 'unknown';
         const birthMonth = userInfo?.birthMonth || '1';
         const birthDay = userInfo?.birthDay || '1';
 
-        const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent';
-        const dateStr = currentDate ? `${currentDate.year}-${currentDate.month}-${currentDate.day}` : new Date().toISOString().split('T')[0];
-        
         let prompt = '';
         if (language === 'en') {
             prompt = `Today is ${dateStr}. 
@@ -68,8 +56,9 @@ export async function onRequest(context) {
 
         const geminiResponse = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
+            headers: { 
+                'Content-Type': 'application/json',
+                'Referer': 'https://trackingsa.com'
             },
             body: JSON.stringify({
                 contents: [{ parts: [{ text: prompt + "\n\nIMPORTANT: Respond ONLY with a raw JSON object. Do not include markdown formatting or backticks. Valid JSON only." }] }]
@@ -77,20 +66,22 @@ export async function onRequest(context) {
         });
 
         const geminiData = await geminiResponse.json();
-        if (!geminiResponse.ok) throw new Error(geminiData.error?.message || 'Gemini API Error');
 
-        let text = geminiData.candidates[0].content.parts[0].text;
-        const jsonMatch = text.match(/\{[\s\S]*\}/);
-        if (!jsonMatch) throw new Error('Invalid AI response');
-        
-        return addCORSHeaders(new Response(jsonMatch[0], {
-            headers: { 'Content-Type': 'application/json' },
-            status: 200
-        }));
+        if (geminiResponse.ok && geminiData.candidates) {
+            return addCORSHeaders(new Response(JSON.stringify(geminiData.candidates[0].content.parts[0].text), {
+                headers: { 'Content-Type': 'application/json' },
+                status: 200
+            }));
+        } else {
+            return addCORSHeaders(new Response(JSON.stringify({ error: 'Failed to generate lucky recommendation' }), {
+                headers: { 'Content-Type': 'application/json' },
+                status: 500
+            }));
+        }
     } catch (error) {
         return addCORSHeaders(new Response(JSON.stringify({ error: error.message }), {
-            status: 500,
             headers: { 'Content-Type': 'application/json' },
+            status: 500
         }));
     }
 }
