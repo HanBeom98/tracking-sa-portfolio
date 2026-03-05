@@ -10,7 +10,7 @@ export default async function handler(req, res) {
     try {
         const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
         if (!GEMINI_API_KEY) {
-            return res.status(500).json({ error: 'Vercel Env Error', message: 'GEMINI_API_KEY is missing in environment variables.' });
+            return res.status(500).json({ error: 'Vercel Env Error: GEMINI_API_KEY is missing.' });
         }
 
         let data = req.body;
@@ -62,10 +62,14 @@ export default async function handler(req, res) {
 `;
         }
 
-        // 구글 API 호출 시 표준 헤더만 사용 (Referer 제한으로 인한 403 방지)
+        // 구글 콘솔에 설정된 리퍼러 제한(Referer Restriction) 통과를 위한 헤더 주입
         const geminiResponse = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Referer': 'https://trackingsa.com/',
+                'Origin': 'https://trackingsa.com'
+            },
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
         });
 
@@ -75,11 +79,7 @@ export default async function handler(req, res) {
             const fortuneReading = geminiData.candidates[0].content.parts[0].text;
             return res.status(200).json({ sajuReading: fortuneReading });
         } else {
-            // 구체적인 에러 내용을 응답에 포함시켜 원인 파악이 가능하게 함
-            return res.status(geminiResponse.status).json({ 
-                error: 'Upstream Gemini Error', 
-                details: geminiData.error || 'No detail provided'
-            });
+            return res.status(geminiResponse.status).json(geminiData);
         }
     } catch (error) {
         return res.status(500).json({ error: 'Vercel API Runtime Error', message: error.message });

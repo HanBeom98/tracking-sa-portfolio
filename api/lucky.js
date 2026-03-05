@@ -10,7 +10,7 @@ export default async function handler(req, res) {
     try {
         const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
         if (!GEMINI_API_KEY) {
-            return res.status(500).json({ error: 'Vercel Env Error', message: 'GEMINI_API_KEY is missing.' });
+            return res.status(500).json({ error: 'Vercel Env Error: GEMINI_API_KEY is missing.' });
         }
 
         let data = req.body;
@@ -46,9 +46,14 @@ export default async function handler(req, res) {
             중요: 'oklch' 값은 반드시 브라우저 CSS에서 즉시 사용 가능한 'oklch(0.7 0.1 200)' 형식의 순수 문자열이어야 합니다. 모든 필드는 반드시 한국어로 작성하세요.`;
         }
 
+        // 구글 콘솔 리퍼러 제한 통과용 헤더 주입
         const geminiResponse = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Referer': 'https://trackingsa.com/',
+                'Origin': 'https://trackingsa.com'
+            },
             body: JSON.stringify({
                 contents: [{ parts: [{ text: prompt + "\n\nIMPORTANT: Respond ONLY with a raw JSON object. Do not include markdown formatting or backticks. Valid JSON only." }] }]
             })
@@ -59,10 +64,7 @@ export default async function handler(req, res) {
         if (geminiResponse.ok) {
             return res.status(200).json(geminiData.candidates[0].content.parts[0].text);
         } else {
-            return res.status(geminiResponse.status).json({ 
-                error: 'Upstream Gemini Error (Lucky)', 
-                details: geminiData.error || 'No detail provided'
-            });
+            return res.status(geminiResponse.status).json(geminiData);
         }
     } catch (error) {
         return res.status(500).json({ error: 'Vercel API Runtime Error (Lucky)', message: error.message });
