@@ -1,5 +1,7 @@
 export const postLuckyRecommendation = async (payload) => {
-  const response = await fetch("/api/lucky", {
+  const API_URL = "/api/lucky";
+
+  const response = await fetch(API_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
