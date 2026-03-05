@@ -13,7 +13,12 @@ export default async function handler(req, res) {
             return res.status(500).json({ error: 'Vercel Env Error: GEMINI_API_KEY is missing.' });
         }
 
-        const { name, birthDate, gender, language, currentDate } = req.body;
+        let data = req.body;
+        if (typeof data === 'string') {
+            try { data = JSON.parse(data); } catch (e) { /* skip */ }
+        }
+
+        const { name, birthDate, gender, language, currentDate } = data;
         const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent';
 
         let prompt = '';
@@ -57,11 +62,12 @@ export default async function handler(req, res) {
 `;
         }
 
+        // 성공했던 로직: URL 파라미터 키 + 슬래시 없는 Referer
         const geminiResponse = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
-                'Referer': 'https://trackingsa.com' // 슬래시 없는 순수 주소 (성공의 핵심)
+                'Referer': 'https://trackingsa.com'
             },
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
         });
@@ -72,14 +78,9 @@ export default async function handler(req, res) {
             const fortuneReading = geminiData.candidates[0].content.parts[0].text;
             return res.status(200).json({ sajuReading: fortuneReading });
         } else {
-            console.error('Gemini API Error:', geminiData.error);
-            return res.status(500).json({ 
-                error: 'Gemini API Error', 
-                message: geminiData.error?.message || 'Unknown error',
-                status: geminiResponse.status 
-            });
+            return res.status(500).json(geminiData);
         }
     } catch (error) {
-        return res.status(500).json({ error: 'Vercel Runtime Error', message: error.message });
+        return res.status(500).json({ error: 'Vercel API Runtime Error', message: error.message });
     }
 }

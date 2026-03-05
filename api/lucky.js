@@ -13,11 +13,15 @@ export default async function handler(req, res) {
             return res.status(500).json({ error: 'Vercel Env Error: GEMINI_API_KEY is missing.' });
         }
 
-        const { language = 'ko', currentDate, userInfo } = req.body;
+        let data = req.body;
+        if (typeof data === 'string') {
+            try { data = JSON.parse(data); } catch (e) { /* skip */ }
+        }
+
+        const { language = 'ko', currentDate, userInfo } = data;
         const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent';
         const dateStr = currentDate ? `${currentDate.year}-${currentDate.month}-${currentDate.day}` : new Date().toISOString().split('T')[0];
         
-        // userInfo 방어적 추출
         const name = userInfo?.name || '익명';
         const gender = userInfo?.gender || 'unknown';
         const birthMonth = userInfo?.birthMonth || '1';
@@ -42,11 +46,12 @@ export default async function handler(req, res) {
             중요: 'oklch' 값은 반드시 브라우저 CSS에서 즉시 사용 가능한 'oklch(0.7 0.1 200)' 형식의 순수 문자열이어야 합니다. 모든 필드는 반드시 한국어로 작성하세요.`;
         }
 
+        // 성공했던 로직: URL 파라미터 키 + 슬래시 없는 Referer
         const geminiResponse = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
-                'Referer': 'https://trackingsa.com' // 슬래시 없는 주소 (성공 코드)
+                'Referer': 'https://trackingsa.com'
             },
             body: JSON.stringify({
                 contents: [{ parts: [{ text: prompt + "\n\nIMPORTANT: Respond ONLY with a raw JSON object. Do not include markdown formatting or backticks. Valid JSON only." }] }]
@@ -55,16 +60,12 @@ export default async function handler(req, res) {
 
         const geminiData = await geminiResponse.json();
 
-        if (geminiResponse.ok) {
+        if (geminiResponse.ok && geminiData.candidates) {
             return res.status(200).json(geminiData.candidates[0].content.parts[0].text);
         } else {
-            return res.status(500).json({ 
-                error: 'Gemini API Error (Lucky)', 
-                message: geminiData.error?.message || 'Unknown error',
-                status: geminiResponse.status 
-            });
+            return res.status(500).json(geminiData);
         }
     } catch (error) {
-        return res.status(500).json({ error: 'Vercel Runtime Error (Lucky)', message: error.message });
+        return res.status(500).json({ error: 'Vercel API Runtime Error (Lucky)', message: error.message });
     }
 }
