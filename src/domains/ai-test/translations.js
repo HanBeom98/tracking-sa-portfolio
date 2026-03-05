@@ -11,7 +11,12 @@ window.domainTranslations = {
         'ai_test_og_desc': '나의 성향과 가장 잘 맞는 AI 모델을 테스트로 확인해보세요.',
         'ai_test_start': '테스트 시작하기',
         'ai_test_loading': '성향 분석 중...',
-        'ai_test_result_title': '당신의 AI 성향 분석 결과'
+        'ai_test_result_title': '당신의 AI 성향 분석 결과',
+        'ai_tendency_test_h1': 'AI 성향 테스트',
+        'ai_tendency_test_p1': '나와 가장 닮은 인공지능 모델은?',
+        'ai_tendency_test_result_title': 'AI 성향 분석 결과',
+        'ai_tendency_test_reset': '다시 테스트하기',
+        'ai_test_start': '테스트 시작하기'
     },
     'en': {
         'ai_tendency_test': 'AI Tendency Test',
@@ -22,6 +27,10 @@ window.domainTranslations = {
         'ai_test_og_desc': 'Check which AI model matches your personality best.',
         'ai_test_start': 'Start Test',
         'ai_test_loading': 'Analyzing your tendency...',
-        'ai_test_result_title': 'Your AI Tendency Analysis Result'
+        'ai_test_result_title': 'Your AI Tendency Analysis Result',
+        'ai_tendency_test_h1': 'AI Tendency Test',
+        'ai_tendency_test_p1': 'Which AI model resembles you most?',
+        'ai_tendency_test_result_title': 'AI Tendency Result',
+        'ai_tendency_test_reset': 'Retake Test'
     }
 };
