@@ -37,6 +37,45 @@ const profileSection = document.getElementById('playerProfile');
 const statsSection = document.getElementById('statsSummary');
 const crewRankingSection = document.getElementById('crewRanking');
 const historySection = document.getElementById('matchHistory');
+const swrStatus = document.getElementById('swrStatus');
+
+/**
+ * Time Ago Helper for SWR
+ */
+function getTimeAgo(timestamp) {
+  const diff = Date.now() - timestamp;
+  const seconds = Math.floor(diff / 1000);
+  if (seconds < 60) return '방금 전';
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}분 전`;
+  const hours = Math.floor(minutes / 60);
+  return `${hours}시간 전`;
+}
+
+/**
+ * Update SWR Status Bar UI
+ */
+function updateSwrUI(type, timestamp = null) {
+  if (type === 'stale') {
+    const timeText = getTimeAgo(timestamp);
+    swrStatus.innerHTML = `<span class="spin">🔄</span> ${timeText} 데이터를 표시 중입니다. 최신 정보로 갱신 중...`;
+    swrStatus.className = 'swr-status stale';
+    swrStatus.classList.remove('hidden');
+  } else if (type === 'fresh') {
+    swrStatus.innerHTML = `✨ 최신 데이터로 업데이트되었습니다!`;
+    swrStatus.className = 'swr-status fresh';
+    swrStatus.classList.remove('hidden');
+    setTimeout(() => {
+      swrStatus.classList.add('hidden-out');
+      setTimeout(() => {
+        swrStatus.classList.add('hidden');
+        swrStatus.classList.remove('hidden-out');
+      }, 500);
+    }, 3000);
+  } else {
+    swrStatus.classList.add('hidden');
+  }
+}
 
 const applyCrewBtn = document.getElementById('applyCrewBtn');
 const submitApplyBtn = document.getElementById('submitApplyBtn');
@@ -64,6 +103,7 @@ async function handleSearch(nameOverride = null, skipHistory = false) {
 
   try {
     showLoading(name);
+    swrStatus.classList.add('hidden');
     
     // Update URL Parameter
     if (!skipHistory) {
@@ -78,6 +118,7 @@ async function handleSearch(nameOverride = null, skipHistory = false) {
       primaryUserData = fresh;
       renderUI(fresh.player, fresh.matches, fresh.stats);
       loading.classList.add('hidden');
+      updateSwrUI('fresh');
     };
 
     // 1. Get Profile
@@ -89,8 +130,10 @@ async function handleSearch(nameOverride = null, skipHistory = false) {
 
     if (result.isStale) {
       loadingText.textContent = '최신 데이터로 업데이트 중...';
+      updateSwrUI('stale', result.cacheTime);
     } else {
       loading.classList.add('hidden');
+      updateSwrUI('hide');
     }
 
     await refreshRankings();

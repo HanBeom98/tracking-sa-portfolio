@@ -28,20 +28,20 @@ export class SaService {
       
       // Background revalidation
       this.fetchFreshData(characterName, currentRankings).then(freshData => {
-        if (onUpdate && JSON.stringify(freshData) !== JSON.stringify(cached)) {
+        if (onUpdate && JSON.stringify(freshData) !== JSON.stringify(cached.data)) {
           console.log(`[SaService] Background update ready for ${characterName}.`);
           this.setCache(cacheKey, freshData);
           onUpdate(freshData);
         }
       }).catch(err => console.warn('[SaService] Background revalidation failed:', err));
 
-      return { ...cached, isStale: true };
+      return { ...cached.data, isStale: true, cacheTime: cached.timestamp };
     }
 
     // 2. No cache, fetch from server normally
     const freshData = await this.fetchFreshData(characterName, currentRankings);
     this.setCache(cacheKey, freshData);
-    return { ...freshData, isStale: false };
+    return { ...freshData, isStale: false, cacheTime: Date.now() };
   }
 
   /**
@@ -116,8 +116,8 @@ export class SaService {
     if (!str) return null;
     try {
       const item = JSON.parse(str);
-      // Check if data is too old (Optional: Even old data can be returned as SWR)
-      return item.data;
+      // Return both data and timestamp for SWR feedback
+      return { data: item.data, timestamp: item.timestamp };
     } catch (e) { return null; }
   }
 
