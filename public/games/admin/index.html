@@ -4,43 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title data-i18n="admin_game_management_title">게임 통합 관리 | Tracking SA</title>
-    <!-- HEAD_INJECTION -->
-    <style>
-        .admin-container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
-        .admin-header {
-            margin-bottom: 40px; border-bottom: 2px solid var(--p-blue-soft);
-            padding-bottom: 15px; display: flex; justify-content: space-between; align-items: center;
-        }
-        .admin-section { margin-bottom: 60px; }
-        .admin-section-title { font-size: 1.25rem; font-weight: 800; margin-bottom: 20px; color: var(--text-main); border-left: 4px solid var(--p-blue); padding-left: 15px; }
-        
-        .game-list { display: flex; flex-direction: column; gap: 15px; }
-        .game-card {
-            background: white; border-radius: 16px; padding: 20px; border: 1px solid oklch(92% 0.02 260);
-            display: flex; gap: 20px; align-items: center; transition: all 0.2s;
-        }
-        .game-card:hover { border-color: var(--p-blue-soft); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        
-        .game-thumb {
-            width: 100px; aspect-ratio: 16/9; background: oklch(96% 0.01 250);
-            border-radius: 8px; display: flex; justify-content: center; align-items: center; overflow: hidden;
-        }
-        .game-thumb img { width: 30px; opacity: 0.5; }
-        .game-info { flex: 1; }
-        .game-info h3 { margin: 0 0 5px 0; color: var(--text-main); font-size: 1.1rem; }
-        .game-info p { margin: 0; font-size: 0.85rem; color: var(--text-sub); }
-        .game-meta { margin-top: 8px; font-size: 0.75rem; color: var(--p-blue); font-weight: 600; }
-        
-        .admin-actions { display: flex; gap: 10px; align-items: center; }
-        .btn { padding: 8px 16px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; transition: all 0.2s; font-size: 0.85rem; }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-approve { background: var(--p-blue); color: white; }
-        .btn-reject { background: oklch(96% 0.01 250); color: oklch(50% 0.1 20); }
-        .btn-delete { background: oklch(90% 0.1 20); color: white; }
-        
-        .cat-select { padding: 6px 10px; border-radius: 8px; border: 1px solid var(--p-blue-soft); font-size: 0.8rem; font-weight: 700; color: var(--p-blue); cursor: pointer; }
-        .empty-state { text-align: center; padding: 40px; color: var(--text-sub); background: var(--bg-sub); border-radius: 12px; border: 1px dashed oklch(90% 0.02 260); }
-    </style>
     <meta name="robots" content="index, follow">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Tracking SA">
@@ -54,7 +17,7 @@
     <meta name="description" content="AI 테스트, 게임, 마켓 인사이트를 한 곳에서 경험하세요. 최신 인공지능 트렌드를 전달합니다.">
     <meta property="og:title" content="Tracking SA - AI Services & Hub">
     <meta property="og:description" content="AI 테스트, 게임, 마켓 인사이트를 한 곳에서 경험하세요. 최신 인공지능 트렌드를 전달합니다.">
-    <script>
+<script>
   (function() {
     const theme = localStorage.getItem('theme');
     if (theme === 'dark') {
@@ -99,12 +62,48 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<link rel="stylesheet" href="/style.css?v=1772701211">
+<link rel="stylesheet" href="/style.css?v=1772701509">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script src="/firebase-config.js"></script>
-<script src="/translations.js?v=1772701211"></script>
-<script src="/common.js?v=1772701211"></script>
+<script src="/translations.js?v=1772701509"></script>
+<script src="/common.js?v=1772701509"></script>
 
+    <style>
+        .admin-container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
+        .admin-header {
+            margin-bottom: 40px; border-bottom: 2px solid var(--p-blue-soft);
+            padding-bottom: 15px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .admin-section { margin-bottom: 60px; }
+        .admin-section-title { font-size: 1.25rem; font-weight: 800; margin-bottom: 20px; color: var(--text-main); border-left: 4px solid var(--p-blue); padding-left: 15px; }
+        
+        .game-list { display: flex; flex-direction: column; gap: 15px; }
+        .game-card {
+            background: white; border-radius: 16px; padding: 20px; border: 1px solid oklch(92% 0.02 260);
+            display: flex; gap: 20px; align-items: center; transition: all 0.2s;
+        }
+        .game-card:hover { border-color: var(--p-blue-soft); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        
+        .game-thumb {
+            width: 100px; aspect-ratio: 16/9; background: oklch(96% 0.01 250);
+            border-radius: 8px; display: flex; justify-content: center; align-items: center; overflow: hidden;
+        }
+        .game-thumb img { width: 30px; opacity: 0.5; }
+        .game-info { flex: 1; }
+        .game-info h3 { margin: 0 0 5px 0; color: var(--text-main); font-size: 1.1rem; }
+        .game-info p { margin: 0; font-size: 0.85rem; color: var(--text-sub); }
+        .game-meta { margin-top: 8px; font-size: 0.75rem; color: var(--p-blue); font-weight: 600; }
+        
+        .admin-actions { display: flex; gap: 10px; align-items: center; }
+        .btn { padding: 8px 16px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; transition: all 0.2s; font-size: 0.85rem; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-approve { background: var(--p-blue); color: white; }
+        .btn-reject { background: oklch(96% 0.01 250); color: oklch(50% 0.1 20); }
+        .btn-delete { background: oklch(90% 0.1 20); color: white; }
+        
+        .cat-select { padding: 6px 10px; border-radius: 8px; border: 1px solid var(--p-blue-soft); font-size: 0.8rem; font-weight: 700; color: var(--p-blue); cursor: pointer; }
+        .empty-state { text-align: center; padding: 40px; color: var(--text-sub); background: var(--bg-sub); border-radius: 12px; border: 1px dashed oklch(90% 0.02 260); }
+    </style>
 </head>
 <body>
     <div class="site-header-container"><header>

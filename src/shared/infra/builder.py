@@ -22,6 +22,7 @@ def generate_public_site(incremental=False):
     os.makedirs(PUBLIC_DIR, exist_ok=True)
     
     # 1. 루트 정적 자산 복사 및 처리
+    processed_files = set()
     root_assets = ["index.html", "logo.svg", "favicon.svg", "ads.txt", "_redirects"]
     for asset in root_assets:
         if os.path.exists(asset):
@@ -30,6 +31,7 @@ def generate_public_site(incremental=False):
             if asset == "index.html":
                 # 루트 index.html에 공통 HEAD 주입 (SEO, 테마 가드 등)
                 process_html_file_for_common_elements(dest)
+                processed_files.add(os.path.abspath(dest))
     
     # 2. Shared Assets 복사 (src/shared/assets -> public/)
     shared_assets_dir = "src/shared/assets"
@@ -131,6 +133,9 @@ def generate_public_site(incremental=False):
                         for file in files:
                             if file.endswith(".html"):
                                 fpath = os.path.join(root, file)
+                                # 이미 처리된 파일(루트 index.html 등)은 건너뛰어 중복 주입 방지
+                                if os.path.abspath(fpath) in processed_files: continue
+                                
                                 # 영어 버전인 경우 텍스트 치환 수행
                                 if "public/en/" in fpath.replace("\\", "/"):
                                     with open(fpath, "r", encoding="utf-8") as f:
@@ -154,6 +159,7 @@ def generate_public_site(incremental=False):
         with open(main_index_en, "w", encoding="utf-8") as f:
             f.write(html)
         process_html_file_for_common_elements(main_index_en)
+        processed_files.add(os.path.abspath(main_index_en))
     
     # 뉴스 도메인 특수 빌드
     _, db_ok = generate_news_pages()

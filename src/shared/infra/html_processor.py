@@ -100,11 +100,14 @@ def process_html_file_for_common_elements(filepath):
 
         seo_html = "\n    ".join(seo_tags)
 
-        # 3. Inject into HEAD
-        if '</head>' in content:
-            content = content.replace('</head>', f'    {seo_html}\n    {get_common_head()}\n</head>')
-        elif '<!-- HEAD_INJECTION -->' in content:
-            content = content.replace('<!-- HEAD_INJECTION -->', f'{seo_html}\n{get_common_head()}')
+        # 3. Inject into HEAD - Ensure single injection point and prevent duplicates
+        common_head = get_common_head()
+        # 이미 공통 스크립트가 주입되어 있는지 확인 (중복 방지 가드)
+        if '/common.js' not in content:
+            if '<!-- HEAD_INJECTION -->' in content:
+                content = content.replace('<!-- HEAD_INJECTION -->', f'{seo_html}\n{common_head}')
+            elif '</head>' in content:
+                content = content.replace('</head>', f'    {seo_html}\n    {common_head}\n</head>')
 
         # 4. Handle Language
         if is_en_page:
