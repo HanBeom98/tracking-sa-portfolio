@@ -103,6 +103,7 @@ test("SA RecentStats can derive season metrics from filtered matches", () => {
   assert.equal(stats.totalMatchesCount, 2);
   assert.equal(stats.kdPercent, 43); // 16 / (16 + 21)
   assert.equal(stats.winRate, 50.0);
+  assert.ok(stats.radar.precision > 45 && stats.radar.precision < 46);
 });
 
 test("SA RecentStats resets displayed metrics to zero when season has no matches", () => {

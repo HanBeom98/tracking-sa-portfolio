@@ -20,6 +20,10 @@ export class RecentStats {
     this.nemesis = null; // 나를 가장 많이 이긴 적
     this.prey = null;    // 내가 가장 많이 이긴 적
     this.mapStats = [];
+    this.totalEstimatedRounds = 0;
+    this.avgKillPerRound = 0;
+    this.avgDeathPerRound = 0;
+    this.avgAssistPerRound = 0;
 
     // --- 내전 데이터 초기화 ---
     this.isCrew = false; // 기본값: 비크루원
@@ -51,6 +55,8 @@ export class RecentStats {
       const totalA = matches.reduce((sum, m) => sum + m.assist, 0);
       const totalHs = matches.reduce((sum, m) => sum + Number(m.headshot || 0), 0);
       const winCount = matches.filter((m) => m.matchResult === 'WIN').length;
+      const totalEstimatedRounds = matches.reduce((sum, m) => sum + this.estimateMatchRounds(m), 0);
+      const safeRounds = Math.max(1, totalEstimatedRounds);
       
       this.avgK = (totalK / matches.length).toFixed(1);
       this.avgD = (totalD / matches.length).toFixed(1);
@@ -59,6 +65,10 @@ export class RecentStats {
       this.totalKills = totalK; 
       this.totalDeaths = totalD;
       this.totalAssists = totalA;
+      this.totalEstimatedRounds = totalEstimatedRounds;
+      this.avgKillPerRound = totalK / safeRounds;
+      this.avgDeathPerRound = totalD / safeRounds;
+      this.avgAssistPerRound = totalA / safeRounds;
 
       if (forceMatchMetrics) {
         const ratio = totalD > 0 ? (totalK / totalD) : (totalK > 0 ? totalK : 0);
@@ -107,18 +117,23 @@ export class RecentStats {
       if (radarKd <= 40) { combatScore = radarKd * 1.0; } 
       else if (radarKd <= 55) { combatScore = 40 + (radarKd - 40) * 2.0; } 
       else { combatScore = 70 + (radarKd - 55) * 1.5; }
-      this.radar.combat = Math.min(100, Math.max(0, combatScore));
+      const combatByRound = Math.min(100, Math.max(0, (this.avgKillPerRound / 1.2) * 100));
+      this.radar.combat = Math.min(100, Math.max(0, (combatScore * 0.7) + (combatByRound * 0.3)));
 
-      // --- 지능형 생존력 계산 (Survival 2.0) ---
-      // 1. 기본 데스 기반 점수 (1데스당 6점 감점, 라운드제 고려)
-      const baseSurvival = 100 - (parseFloat(this.avgD) * 6);
-      // 2. K/D 보정 (K/D가 50% 이상이면 최대 20점 가산하여 '교전 중 생존' 가치 인정)
-      const kdBonus = Math.max(0, (this.kdPercent - 50) * 0.5);
+      // 라운드당 데스 기반 생존력 점수 (6~10라운드 편차 보정)
+      const baseSurvival = 100 - (this.avgDeathPerRound * 45);
+      const kdBonus = Math.max(0, (this.kdPercent - 50) * 0.4);
       this.radar.survival = Math.min(100, Math.max(0, baseSurvival + kdBonus));
 
-      this.radar.teamwork = Math.min(100, Math.max(0, parseFloat(this.avgA) * 15));
-      const precisionBase = forceMatchMetrics ? (this.seasonPrecisionRate || 0) : (info.recent_assault_rate || 0);
-      this.radar.precision = Math.min(100, Math.max(0, precisionBase * 1.5));
+      this.radar.teamwork = Math.min(100, Math.max(0, this.avgAssistPerRound * 120));
+      if (forceMatchMetrics) {
+        const hsPercent = (this.seasonPrecisionRate || 0) * 100;
+        // Balanced precision model: headshot skill + duel efficiency + survival quality.
+        const weightedPrecision = (hsPercent * 0.45) + (this.kdPercent * 0.35) + (this.radar.survival * 0.20);
+        this.radar.precision = Math.min(100, Math.max(0, weightedPrecision));
+      } else {
+        this.radar.precision = Math.min(100, Math.max(0, (info.recent_assault_rate || 0) * 1.5));
+      }
       this.radar.victory = this.winRate;
 
       this.assignPlaystyle();
@@ -127,12 +142,25 @@ export class RecentStats {
       this.avgK = 0; this.avgD = 0; this.avgA = 0; 
       this.totalKills = 0; this.totalDeaths = 0; this.totalAssists = 0; 
       this.mostPlayedMap = "데이터 없음";
+      this.totalEstimatedRounds = 0;
+      this.avgKillPerRound = 0;
+      this.avgDeathPerRound = 0;
+      this.avgAssistPerRound = 0;
       if (forceMatchMetrics) {
         this.kd = 0;
         this.kdPercent = 0;
         this.winRate = 0;
       }
     }
+  }
+
+  estimateMatchRounds(match) {
+    const players = Array.isArray(match?.allPlayerStats) ? match.allPlayerStats : [];
+    if (players.length === 0) return 10;
+    const totalDeaths = players.reduce((sum, p) => sum + Number(p.death || 0), 0);
+    if (totalDeaths <= 0) return 10;
+    // Nexon API does not provide round count directly. Estimate by death volume and clamp to bomb mode range.
+    return Math.max(6, Math.min(10, Math.round(totalDeaths / 8)));
   }
 
   assignPlaystyle() {
