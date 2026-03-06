@@ -186,6 +186,35 @@ body.dark-mode {
 .admin-hint { font-size: 12px; color: var(--text-dim); font-style: italic; margin-top: 20px; }
 .history-section h2 { margin-top: 40px; margin-bottom: 20px; }
 
+.settlement-report-modal { max-width: 760px; width: 95%; text-align: left; }
+.settlement-report-modal h2 { margin: 0 0 8px 0; color: var(--gold); font-size: 22px; }
+.settlement-report-modal .summary-text { margin: 0 0 14px 0; color: var(--text-dim); font-size: 13px; }
+.report-scroll-area {
+  max-height: 55vh; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;
+  padding-right: 4px;
+}
+.report-item {
+  background: var(--bg-sub); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px;
+}
+.report-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 8px;
+}
+.map-name { color: #fff; font-weight: 800; font-size: 15px; }
+.winner-tag {
+  font-size: 11px; font-weight: 800; padding: 4px 8px; border-radius: 999px; border: 1px solid transparent;
+}
+.winner-tag.red { color: #ff7878; background: rgba(255, 77, 77, 0.14); border-color: rgba(255, 77, 77, 0.35); }
+.winner-tag.blue { color: #78dcff; background: rgba(0, 210, 255, 0.14); border-color: rgba(0, 210, 255, 0.35); }
+.player-changes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 12px; }
+.change-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.p-name { color: #dce5ff; font-size: 13px; font-weight: 700; }
+.p-mmr { color: #a7f0ff; font-size: 13px; font-family: 'Roboto Mono', monospace; }
+.p-mmr small { color: #8d97be; }
+@media (max-width: 760px) {
+  .player-changes { grid-template-columns: 1fr; }
+}
+
 /* Team Balancer UI (Inside Modal) */
 .balancer-modal {
   max-width: 1000px !important;

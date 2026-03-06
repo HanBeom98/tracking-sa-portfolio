@@ -264,11 +264,15 @@ export class AdminManager {
           `).join('')}
         </div>
         <div class="modal-btns">
-          <button class="primary" onclick="this.closest('.modal').remove()">확인</button>
+          <button class="primary settlement-close-btn">확인</button>
         </div>
       </div>
     `;
     document.body.appendChild(modal);
+    const closeBtn = modal.querySelector('.settlement-close-btn');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => modal.remove());
+    }
   }
 
   async handleIndividualScan(btn) {
