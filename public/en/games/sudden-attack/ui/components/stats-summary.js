@@ -4,6 +4,14 @@
  */
 
 export class SaStatsSummary extends HTMLElement {
+  getConfidenceMeta(matchCount = 0, target = 20) {
+    const count = Math.max(0, Number(matchCount || 0));
+    if (count < 7) return { cls: 'low', text: '신뢰도 낮음 · 샘플 적음' };
+    if (count < 14) return { cls: 'mid', text: '신뢰도 보통 · 추가 데이터 필요' };
+    if (count < target) return { cls: 'high', text: '신뢰도 높음' };
+    return { cls: 'full', text: '신뢰도 매우 높음' };
+  }
+
   getKdColor(kdPercent) {
     const val = parseInt(kdPercent);
     if (val >= 67) return 'kd-god'; // 2.0 ratio
@@ -22,6 +30,8 @@ export class SaStatsSummary extends HTMLElement {
     }
 
     const matchCount = data.totalMatchesCount || 0; 
+
+    const confidence = this.getConfidenceMeta(matchCount, 20);
 
     this.innerHTML = `
       <style>
@@ -47,6 +57,11 @@ export class SaStatsSummary extends HTMLElement {
         .header-row h3 { margin: 0; font-size: 20px; color: #fff; font-weight: 800; }
         .most-played-map { font-size: 13px; color: #888; background: rgba(255,255,255,0.03); padding: 4px 12px; border-radius: 4px; }
         .most-played-map strong { color: #ffcc00; }
+        .confidence-badge { margin-left: 8px; display: inline-flex; align-items: center; border-radius: 999px; padding: 3px 10px; font-size: 11px; font-weight: 800; letter-spacing: 0.01em; vertical-align: middle; }
+        .confidence-badge.low { color: #ff7f7f; background: rgba(255,77,77,0.14); border: 1px solid rgba(255,77,77,0.35); }
+        .confidence-badge.mid { color: #ffd580; background: rgba(255,204,0,0.12); border: 1px solid rgba(255,204,0,0.28); }
+        .confidence-badge.high { color: #79e3ff; background: rgba(0,210,255,0.12); border: 1px solid rgba(0,210,255,0.28); }
+        .confidence-badge.full { color: #98f5d5; background: rgba(46,204,113,0.14); border: 1px solid rgba(46,204,113,0.33); }
 
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
         .stat-box {
@@ -109,7 +124,11 @@ export class SaStatsSummary extends HTMLElement {
           
           <div class="text-stats-section">
             <div class="header-row">
-              <h3>최근 ${matchCount}경기 정밀 분석</h3>
+              <h3>
+                최근 20경기 정밀 분석
+                <small style="font-size:12px;color:#888;">(현재 ${matchCount}경기)</small>
+                <span class="confidence-badge ${confidence.cls}">${confidence.text}</span>
+              </h3>
               <span class="most-played-map">선호 맵: <strong>${data.mostPlayedMap || '정보 없음'}</strong></span>
             </div>
             <div class="stats-grid">
