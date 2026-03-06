@@ -5,8 +5,22 @@
     <link>https://trackingsa.com/en/news/</link>
     <description><![CDATA[Real-time tech news and market insights]]></description>
     <language>en</language>
-    <lastBuildDate>Thu, 05 Mar 2026 19:07:58 GMT</lastBuildDate>
+    <lastBuildDate>Fri, 06 Mar 2026 13:20:59 GMT</lastBuildDate>
     <atom:link href="https://trackingsa.com/en/rss.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title><![CDATA[Chicago's AI Tutor Experiment: Education Revolution or Digital Hype?]]></title>
+      <link>https://trackingsa.com/en/news-1772803255-2.html</link>
+      <guid isPermaLink="true">https://trackingsa.com/en/news-1772803255-2.html</guid>
+      <pubDate>Fri, 06 Mar 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[A school in Chicago is implementing AI tutors, sparking debate over technology in classrooms, as reported by FOX 32 Chicago. Let's cut through the noise and exa…]]></description>
+    </item>
+    <item>
+      <title><![CDATA[Google's February AI Announcements: So What?]]></title>
+      <link>https://trackingsa.com/en/news-1772803229-1.html</link>
+      <guid isPermaLink="true">https://trackingsa.com/en/news-1772803229-1.html</guid>
+      <pubDate>Fri, 06 Mar 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[Google has compiled its AI-related announcements from February? It feels like they're just saying, "Look how hard we're working!" But what matters isn't what th…]]></description>
+    </item>
     <item>
       <title><![CDATA[Nextech3D.ai's Price Hike: Fair or Foul? Let's Check the Facts]]></title>
       <link>https://trackingsa.com/en/news-1772733106-2.html</link>
@@ -27,6 +41,13 @@
       <guid isPermaLink="true">https://trackingsa.com/en/news-1772733053-0.html</guid>
       <pubDate>Thu, 05 Mar 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[Here we go again with China. This time, it's an LLM frenzy. A five-year plan? Don't make me laugh. It's just another 'Great Leap Forward 2.0' for AI. On the sur…]]></description>
+    </item>
+    <item>
+      <title><![CDATA[Claude, Iran, and Anthropic: Is There Money to Be Made in AI's Political Debut?]]></title>
+      <link>https://trackingsa.com/en/news-1772803202-0.html</link>
+      <guid isPermaLink="true">https://trackingsa.com/en/news-1772803202-0.html</guid>
+      <pubDate>Thu, 05 Mar 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[The Washington Post's report that Anthropic's LLM Claude is being used in a U.S. government campaign targeting Iran is intriguing, but investors should avoid pr…]]></description>
     </item>
     <item>
       <title><![CDATA[OpenAI's Pentagon Deal: The Beginning of the End for AI?]]></title>
@@ -125,27 +146,6 @@
       <guid isPermaLink="true">https://trackingsa.com/en/news-1772318198-1.html</guid>
       <pubDate>Sat, 28 Feb 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[Trump's order to ban government agencies from using Anthropic's AI tools? It's a pure comedy act. A blatant display of political interference crushing the techn…]]></description>
-    </item>
-    <item>
-      <title><![CDATA[Nvidia's AI Acceleration Chip? This is Simply Insane Engineering!]]></title>
-      <link>https://trackingsa.com/en/news-1772284014-2.html</link>
-      <guid isPermaLink="true">https://trackingsa.com/en/news-1772284014-2.html</guid>
-      <pubDate>Sat, 28 Feb 2026 00:00:00 GMT</pubDate>
-      <description><![CDATA[Nvidia has done it again. According to a Wall Street Journal report, they are planning to design a new AI acceleration chip. Frankly, this is just insane! We ne…]]></description>
-    </item>
-    <item>
-      <title><![CDATA[Nvidia's AI Chip: A Game-Changer That Will Make You Rich!]]></title>
-      <link>https://trackingsa.com/en/news-1772491377-0.html</link>
-      <guid isPermaLink="true">https://trackingsa.com/en/news-1772491377-0.html</guid>
-      <pubDate>Sat, 28 Feb 2026 00:00:00 GMT</pubDate>
-      <description><![CDATA[Listen up, folks! Nvidia is about to drop a bombshell on the AI market. According to a WSJ exclusive, they're designing a new chip that will boost AI processing…]]></description>
-    </item>
-    <item>
-      <title><![CDATA[Trump's Anthropic Ban: A Shameless Political Stunt!]]></title>
-      <link>https://trackingsa.com/en/news-1772457852-1.html</link>
-      <guid isPermaLink="true">https://trackingsa.com/en/news-1772457852-1.html</guid>
-      <pubDate>Sat, 28 Feb 2026 00:00:00 GMT</pubDate>
-      <description><![CDATA[Trump's at it again. Ordering federal agencies to stop using Anthropic's AI tech? This is nothing but a political circus. Technical assessment? Don't make me la…]]></description>
     </item>
   </channel>
 </rss>
