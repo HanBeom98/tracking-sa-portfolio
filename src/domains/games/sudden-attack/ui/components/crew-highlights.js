@@ -2,7 +2,8 @@ export class SaCrewHighlights extends HTMLElement {
   set data(payload) {
     const todayMvp = payload?.todayMvp || null;
     const weeklyRival = payload?.weeklyRival || null;
-    const weeklyMaps = Array.isArray(payload?.weeklyMaps) ? payload.weeklyMaps : [];
+    const weeklyClimbers = Array.isArray(payload?.weeklyClimbers) ? payload.weeklyClimbers : [];
+    const hotStreaks = Array.isArray(payload?.hotStreaks) ? payload.hotStreaks : [];
     const timeline = Array.isArray(payload?.timeline) ? payload.timeline : [];
 
     this.innerHTML = `
@@ -48,12 +49,17 @@ export class SaCrewHighlights extends HTMLElement {
             ` : '<div class="hl-main">추천 대진 산출 불가</div><div class="hl-meta">활성 멤버 데이터가 부족합니다.</div>'}
           </div>
           <div class="hl-box">
-            <h4>🗺️ 주간 맵 리포트</h4>
-            ${weeklyMaps.length > 0 ? `
+            <h4>📈 주간 급상승 TOP3 + 🔥 핫스트릭</h4>
+            ${weeklyClimbers.length > 0 ? `
               <ul class="hl-list">
-                ${weeklyMaps.map((m, idx) => `<li>${idx + 1}. ${m.map} <strong>${m.count}판</strong></li>`).join('')}
+                ${weeklyClimbers.map((c, idx) => `<li>${idx + 1}. <span class="name clickable-name" data-name="${c.name}">${c.name}</span> <strong>${c.diff > 0 ? '+' : ''}${c.diff}</strong></li>`).join('')}
               </ul>
-            ` : '<div class="hl-main">집계 중</div><div class="hl-meta">최근 7일 내전 기록이 없습니다.</div>'}
+            ` : '<div class="hl-main">상승 데이터 집계 중</div>'}
+            ${hotStreaks.length > 0 ? `
+              <ul class="hl-list">
+                ${hotStreaks.map((s) => `<li>${s}</li>`).join('')}
+              </ul>
+            ` : '<div class="hl-meta">핫스트릭 알림 없음</div>'}
           </div>
           <div class="hl-box">
             <h4>🧭 시즌 스토리 타임라인</h4>

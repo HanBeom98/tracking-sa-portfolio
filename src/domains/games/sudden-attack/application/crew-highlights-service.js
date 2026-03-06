@@ -6,7 +6,8 @@ export class CrewHighlightsService {
     return {
       todayMvp: this.getTodayMvp(safeRankings, safeHistory),
       weeklyRival: this.getWeeklyRival(safeRankings),
-      weeklyMaps: this.getWeeklyMapReport(safeHistory),
+      weeklyClimbers: this.getWeeklyClimbers(safeRankings, safeHistory),
+      hotStreaks: this.getHotStreaks(safeRankings),
       timeline: this.getSeasonTimeline(safeRankings, safeHistory, safeSeasonStart)
     };
   }
@@ -54,20 +55,60 @@ export class CrewHighlightsService {
     return best;
   }
 
-  getWeeklyMapReport(history) {
-    if (!history.length) return [];
-    const latestDate = new Date(history[0].matchDate);
-    const weekAgo = new Date(latestDate.getTime() - (7 * 24 * 60 * 60 * 1000));
-    const mapCount = {};
-    history.forEach((h) => {
-      const d = new Date(h.matchDate);
-      if (d < weekAgo) return;
-      mapCount[h.map] = (mapCount[h.map] || 0) + 1;
-    });
-    return Object.entries(mapCount)
-      .map(([map, count]) => ({ map, count }))
-      .sort((a, b) => b.count - a.count)
+  getWeeklyClimbers(rankings, history) {
+    if (!rankings.length) return [];
+    const anchorDate = history.length ? new Date(history[0].matchDate) : new Date();
+    const weekAgo = new Date(anchorDate.getTime() - (7 * 24 * 60 * 60 * 1000));
+    return rankings
+      .map((m) => {
+        const series = Array.isArray(m.mmrHistory) ? m.mmrHistory : [];
+        const weeklyEntries = series
+          .filter((entry) => entry?.date && new Date(entry.date) >= weekAgo)
+          .sort((a, b) => new Date(a.date) - new Date(b.date));
+        if (!weeklyEntries.length) return null;
+        const first = Number(weeklyEntries[0]?.mmr ?? m.mmr ?? 1200);
+        const last = Number(weeklyEntries[weeklyEntries.length - 1]?.mmr ?? m.mmr ?? 1200);
+        return {
+          name: m.characterName,
+          diff: last - first
+        };
+      })
+      .filter((x) => x && x.diff > 0)
+      .sort((a, b) => b.diff - a.diff)
       .slice(0, 3);
+  }
+
+  getHotStreaks(rankings) {
+    const streakInfo = rankings
+      .map((m) => {
+        const series = Array.isArray(m.mmrHistory) ? m.mmrHistory : [];
+        if (series.length < 2) return null;
+        let winStreak = 0;
+        let loseStreak = 0;
+        let maxWinStreak = 0;
+        let maxLoseStreak = 0;
+        for (let i = 1; i < series.length; i += 1) {
+          const diff = Number(series[i].mmr || 0) - Number(series[i - 1].mmr || 0);
+          if (diff > 0) {
+            winStreak += 1;
+            loseStreak = 0;
+          } else if (diff < 0) {
+            loseStreak += 1;
+            winStreak = 0;
+          }
+          maxWinStreak = Math.max(maxWinStreak, winStreak);
+          maxLoseStreak = Math.max(maxLoseStreak, loseStreak);
+        }
+        return { name: m.characterName, win: maxWinStreak, lose: maxLoseStreak };
+      })
+      .filter(Boolean);
+
+    const hottest = [...streakInfo].sort((a, b) => b.win - a.win)[0];
+    const coldest = [...streakInfo].sort((a, b) => b.lose - a.lose)[0];
+    const alerts = [];
+    if (hottest && hottest.win >= 2) alerts.push(`연승 흐름: ${hottest.name} (${hottest.win}연승)`); 
+    if (coldest && coldest.lose >= 2) alerts.push(`연패 경고: ${coldest.name} (${coldest.lose}연패)`);
+    return alerts;
   }
 
   getSeasonTimeline(rankings, history, seasonStart) {

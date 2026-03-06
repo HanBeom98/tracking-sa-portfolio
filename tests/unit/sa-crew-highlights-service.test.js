@@ -38,6 +38,7 @@ test("crew highlights service builds weekly highlight view model", () => {
   assert.equal(vm.todayMvp.name, "A");
   assert.equal(vm.weeklyRival.a.characterName, "A");
   assert.equal(vm.weeklyRival.b.characterName, "B");
-  assert.equal(vm.weeklyMaps[0].map, "프로방스");
+  assert.equal(vm.weeklyClimbers[0].name, "A");
+  assert.ok(Array.isArray(vm.hotStreaks));
   assert.ok(vm.timeline.length > 0);
 });
