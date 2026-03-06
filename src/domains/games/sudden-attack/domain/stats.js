@@ -1,5 +1,6 @@
 export class RecentStats {
-  constructor(info, matches = [], crewData = null) {
+  constructor(info, matches = [], crewData = null, options = {}) {
+    const forceMatchMetrics = !!options.forceMatchMetrics;
     const rawKd = info.recent_kill_death_rate || 0;
     this.kd = parseFloat(rawKd.toFixed(1));
     this.kdPercent = Math.round(rawKd);
@@ -48,6 +49,8 @@ export class RecentStats {
       const totalK = matches.reduce((sum, m) => sum + m.kill, 0);
       const totalD = matches.reduce((sum, m) => sum + m.death, 0);
       const totalA = matches.reduce((sum, m) => sum + m.assist, 0);
+      const totalHs = matches.reduce((sum, m) => sum + Number(m.headshot || 0), 0);
+      const winCount = matches.filter((m) => m.matchResult === 'WIN').length;
       
       this.avgK = (totalK / matches.length).toFixed(1);
       this.avgD = (totalD / matches.length).toFixed(1);
@@ -56,6 +59,14 @@ export class RecentStats {
       this.totalKills = totalK; 
       this.totalDeaths = totalD;
       this.totalAssists = totalA;
+
+      if (forceMatchMetrics) {
+        const ratio = totalD > 0 ? (totalK / totalD) : (totalK > 0 ? totalK : 0);
+        this.kd = parseFloat(ratio.toFixed(2));
+        this.kdPercent = (totalK + totalD) > 0 ? Math.round((totalK / (totalK + totalD)) * 100) : 0;
+        this.winRate = matches.length > 0 ? parseFloat(((winCount / matches.length) * 100).toFixed(1)) : 0;
+        this.seasonPrecisionRate = totalK > 0 ? (totalHs / totalK) : 0;
+      }
       
       const maps = matches.map(m => m.mapName);
       this.mostPlayedMap = maps.sort((a,b) =>
@@ -106,7 +117,8 @@ export class RecentStats {
       this.radar.survival = Math.min(100, Math.max(0, baseSurvival + kdBonus));
 
       this.radar.teamwork = Math.min(100, Math.max(0, parseFloat(this.avgA) * 15));
-      this.radar.precision = Math.min(100, Math.max(0, (info.recent_assault_rate || 0) * 1.5));
+      const precisionBase = forceMatchMetrics ? (this.seasonPrecisionRate || 0) : (info.recent_assault_rate || 0);
+      this.radar.precision = Math.min(100, Math.max(0, precisionBase * 1.5));
       this.radar.victory = this.winRate;
 
       this.assignPlaystyle();
@@ -115,6 +127,11 @@ export class RecentStats {
       this.avgK = 0; this.avgD = 0; this.avgA = 0; 
       this.totalKills = 0; this.totalDeaths = 0; this.totalAssists = 0; 
       this.mostPlayedMap = "데이터 없음";
+      if (forceMatchMetrics) {
+        this.kd = 0;
+        this.kdPercent = 0;
+        this.winRate = 0;
+      }
     }
   }
 

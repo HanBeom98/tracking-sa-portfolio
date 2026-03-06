@@ -86,3 +86,35 @@ test("SA RecentStats model assigns playstyle based on radar", () => {
   assert.ok(stats.radar.precision >= 90);
   assert.strictEqual(stats.playstyleIcon, "🤖"); // Human Aimbot
 });
+
+test("SA RecentStats can derive season metrics from filtered matches", () => {
+  const info = {
+    recent_kill_death_rate: 99.0,
+    recent_win_rate: 99.0,
+    recent_assault_rate: 99.0,
+    user_name: "heel"
+  };
+  const matches = [
+    { kill: 6, death: 13, assist: 5, headshot: 3, mapName: "시티캣", matchResult: "LOSE", isCustomMatch: true, kd: "0.46", allPlayerStats: [] },
+    { kill: 10, death: 8, assist: 3, headshot: 4, mapName: "프로방스", matchResult: "WIN", isCustomMatch: true, kd: "1.25", allPlayerStats: [] }
+  ];
+
+  const stats = new RecentStats(info, matches, null, { forceMatchMetrics: true });
+  assert.equal(stats.totalMatchesCount, 2);
+  assert.equal(stats.kdPercent, 43); // 16 / (16 + 21)
+  assert.equal(stats.winRate, 50.0);
+});
+
+test("SA RecentStats resets displayed metrics to zero when season has no matches", () => {
+  const info = {
+    recent_kill_death_rate: 75.0,
+    recent_win_rate: 80.0,
+    recent_assault_rate: 60.0,
+    user_name: "heel"
+  };
+
+  const stats = new RecentStats(info, [], null, { forceMatchMetrics: true });
+  assert.equal(stats.kdPercent, 0);
+  assert.equal(stats.winRate, 0);
+  assert.equal(stats.totalMatchesCount, 0);
+});

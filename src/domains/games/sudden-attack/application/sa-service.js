@@ -57,6 +57,17 @@ export class SaService {
 
       // 3. Load Matches
       const matches = await this.repository.getRecentMatches(player.ouid, 20, player.nickname);
+      let seasonMatches = matches;
+      if (this.crewRepository && typeof this.crewRepository.getSeasonStartDate === 'function') {
+        try {
+          const seasonStart = await this.crewRepository.getSeasonStartDate();
+          if (seasonStart instanceof Date && !Number.isNaN(seasonStart.getTime()) && seasonStart.getTime() > 0) {
+            seasonMatches = matches.filter((m) => m.matchDate && new Date(m.matchDate) >= seasonStart);
+          }
+        } catch (err) {
+          console.warn('[ApplicationService] Season start lookup failed (non-critical):', err);
+        }
+      }
 
       // 4. Fetch Crew Data from local list or DB
       let memberData = currentRankings.find(m => m.id === player.ouid);
@@ -68,7 +79,7 @@ export class SaService {
       const rawStats = await this.repository.apiClient.getRecentInfo(player.ouid);
 
       // 6. Construct Stats with ALL required data at once
-      const stats = new RecentStats(rawStats, matches, memberData);
+      const stats = new RecentStats(rawStats, seasonMatches, memberData, { forceMatchMetrics: true });
 
       return { player, matches, stats };
     } catch (error) {
