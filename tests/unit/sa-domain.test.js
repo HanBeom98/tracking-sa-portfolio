@@ -44,6 +44,30 @@ test("SA MatchRecord model calculates K/D percentage and MVPs", () => {
   assert.strictEqual(match.allPlayerStats[0].isMvp, true);
 });
 
+test("SA MatchRecord keeps subject mapping stable when another player has identical K/D/result", () => {
+  const detail = {
+    match_id: "match-ambiguous-subject",
+    match_map: "City Cat",
+    date_match: "2026-03-06T18:02:30.674Z",
+    match_detail: [
+      { user_name: "츠칫", kill: 6, death: 13, match_result: "2" },
+      { user_name: "xion", kill: 9, death: 11, match_result: "1" },
+      { user_name: "heel", kill: 6, death: 13, match_result: "2" }
+    ]
+  };
+
+  const subjectInfo = { ouid: "heel-ouid", kill: 6, death: 13, result: "2" };
+  const match = new MatchRecord(detail, "퀵매치 클랜전", "heel", { names: ["heel", "츠칫"], ouids: [] }, subjectInfo);
+
+  const heelStat = match.allPlayerStats.find((p) => p.nickname === "heel");
+  const tschitStat = match.allPlayerStats.find((p) => p.nickname === "츠칫");
+
+  assert.ok(heelStat);
+  assert.ok(tschitStat);
+  assert.strictEqual(heelStat.ouid, "heel-ouid");
+  assert.strictEqual(tschitStat.ouid, null);
+});
+
 test("SA RecentStats model assigns playstyle based on radar", () => {
   const info = {
     recent_kill_death_rate: 50.0, // Lower K/D to avoid Tactical Nuke
