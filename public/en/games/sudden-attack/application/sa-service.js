@@ -112,15 +112,53 @@ export class SaService {
     const currentCustom = currentMatches.filter((m) => m.isCustomMatch).slice(0, 20);
     const previousCustom = previousMatches.filter((m) => m.isCustomMatch).slice(0, 20);
 
+    const trendViews = this.buildTrendViews(memberData, seasonStart);
+
     const currentStats = new RecentStats(rawStats, currentCustom, memberData, { forceMatchMetrics: true });
+    this.applySeasonTrend(currentStats, trendViews.current);
     currentStats.seasonLabel = '이번 시즌';
+
     const previousStats = new RecentStats(rawStats, previousCustom, memberData, { forceMatchMetrics: true });
+    this.applySeasonTrend(previousStats, trendViews.previous);
     previousStats.seasonLabel = '지난 시즌';
 
     return {
       current: { key: 'current', label: '이번 시즌', matches: currentMatches, stats: currentStats },
       previous: { key: 'previous', label: '지난 시즌', matches: previousMatches, stats: previousStats }
     };
+  }
+
+  buildTrendViews(memberData, seasonStart) {
+    const rawHistory = Array.isArray(memberData?.mmrHistory) ? memberData.mmrHistory : [];
+    const normalized = rawHistory
+      .map((entry) => {
+        const date = entry?.date ? new Date(entry.date) : null;
+        return {
+          mmr: Number(entry?.mmr || 1200),
+          hsr: Number(entry?.hsr || entry?.mmr || 1200),
+          date: date && !Number.isNaN(date.getTime()) ? date.toISOString() : null
+        };
+      })
+      .filter((entry) => !!entry.date)
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    const current = normalized.filter((entry) => new Date(entry.date) >= seasonStart);
+    const previous = normalized.filter((entry) => new Date(entry.date) < seasonStart);
+    return { current, previous };
+  }
+
+  applySeasonTrend(stats, trend) {
+    const safeTrend = Array.isArray(trend) ? trend : [];
+    stats.mmrTrend = safeTrend;
+    stats.mmrHistory = safeTrend;
+    if (safeTrend.length === 0) {
+      stats.crewMmr = 1200;
+      stats.crewHsr = 1200;
+      return;
+    }
+    const latest = safeTrend[safeTrend.length - 1];
+    stats.crewMmr = Number(latest.mmr || 1200);
+    stats.crewHsr = Number(latest.hsr || latest.mmr || 1200);
   }
 
   /**
