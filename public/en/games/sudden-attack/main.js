@@ -1,9 +1,13 @@
 import { NexonApiClient } from './infra/nexon-api-client.js';
 import { SaRepository } from './infra/sa-repository.js';
 import { SaService } from './application/sa-service.js';
+import { CrewHighlightsService } from './application/crew-highlights-service.js';
+import { CrewSeasonUseCases } from './application/crew-season-use-cases.js';
+import { SaPageUseCases } from './application/sa-page-use-cases.js';
 import { CrewRepository } from './infra/crew-repository.js';
 import { BalancerManager } from './ui/balancer-manager.js';
 import { AdminManager } from './ui/admin-manager.js';
+import { initSaPageRuntime } from './ui/runtime/sa-page-runtime.js';
 import { updateSwrUI, saveSearch, renderRecentSearches } from './ui/utils/ui-helpers.js';
 
 // Import Modular UI Components
@@ -16,6 +20,7 @@ import './ui/components/map-mastery.js';
 import './ui/components/crew-ranking.js';
 import './ui/components/match-list.js';
 import './ui/components/crew-mvps.js';
+import './ui/components/crew-highlights.js';
 import './ui/components/team-board.js';
 
 
@@ -24,6 +29,15 @@ const client = new NexonApiClient(NEXON_API_KEY);
 const crewRepo = new CrewRepository(client);
 const repository = new SaRepository(client, crewRepo);
 const service = new SaService(repository, crewRepo);
+const crewHighlightsService = new CrewHighlightsService();
+const crewSeasonUseCases = new CrewSeasonUseCases(crewRepo);
+const pageUseCases = new SaPageUseCases({
+  service,
+  crewRepo,
+  repository,
+  highlightsService: crewHighlightsService,
+  crewSeasonUseCases
+});
 
 const balancerManager = new BalancerManager(crewRepo);
 const adminManager = new AdminManager(crewRepo, repository, service);
@@ -55,7 +69,55 @@ const closeVsModalBtn = document.getElementById('closeVsModalBtn');
 
 let currentRankings = [];
 let primaryUserData = null; 
+let activeSeasonMode = 'current';
 const STORAGE_KEY = 'sa_recent_searches';
+
+function parseDateSafe(value) {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function formatDateKo(value) {
+  const date = parseDateSafe(value);
+  if (!date) return '알 수 없음';
+  return date.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
+}
+
+function getSeasonView(profile, mode = activeSeasonMode) {
+  const views = profile?.seasonViews || {};
+  if (views[mode]) return views[mode];
+  if (views.current) return views.current;
+  return {
+    key: mode,
+    label: mode === 'previous' ? '지난 시즌' : '이번 시즌',
+    matches: profile?.matches || [],
+    stats: profile?.stats || null
+  };
+}
+
+function getSeasonPeriodText(profile, mode = activeSeasonMode) {
+  const seasonStart = parseDateSafe(profile?.seasonMeta?.currentStartIso);
+  if (!seasonStart) return '시즌 기준일 정보 없음';
+  if (mode === 'current') return `${formatDateKo(seasonStart)} ~ 현재`;
+  const previousEnd = new Date(seasonStart.getTime() - (24 * 60 * 60 * 1000));
+  return `~ ${formatDateKo(previousEnd)}`;
+}
+
+function renderSeasonToggle(profile) {
+  const currentCls = activeSeasonMode === 'current' ? 'active' : '';
+  const previousCls = activeSeasonMode === 'previous' ? 'active' : '';
+  const periodText = getSeasonPeriodText(profile, activeSeasonMode);
+  return `
+    <div class="season-toggle-bar">
+      <div class="season-toggle-group" role="tablist" aria-label="시즌 비교 토글">
+        <button class="season-toggle-btn ${currentCls}" data-mode="current" type="button">이번 시즌</button>
+        <button class="season-toggle-btn ${previousCls}" data-mode="previous" type="button">지난 시즌</button>
+      </div>
+      <span class="season-period">${periodText}</span>
+    </div>
+  `;
+}
 
 /**
  * Main Search Logic with URL Sync
@@ -64,6 +126,7 @@ async function handleSearch(nameOverride = null, skipHistory = false) {
   const name = nameOverride || searchInput.value.trim();
   if (!name) return;
   if (nameOverride) searchInput.value = name;
+  activeSeasonMode = 'current';
 
   try {
     showLoading(name);
@@ -80,18 +143,18 @@ async function handleSearch(nameOverride = null, skipHistory = false) {
     const onFreshData = (fresh) => {
       console.log(`[Main] Refreshing UI with fresh data for ${fresh.player.nickname}`);
       primaryUserData = fresh;
-      renderUI(fresh.player, fresh.matches, fresh.stats);
+      renderUI(fresh);
       loading.classList.add('hidden');
       updateSwrUI(swrStatus, 'fresh');
     };
 
     // 1. Get Profile
-    const result = await service.getFullPlayerProfile(name, currentRankings, onFreshData);
+    const result = await pageUseCases.loadPlayerProfile(name, currentRankings, onFreshData);
     
     primaryUserData = result;
     saveSearch(STORAGE_KEY, result.player.nickname);
     renderRecentSearches(recentSearchesContainer, STORAGE_KEY, handleSearch);
-    renderUI(result.player, result.matches, result.stats);
+    renderUI(result);
 
     if (result.isStale) {
       loadingText.textContent = '최신 데이터로 업데이트 중...';
@@ -129,7 +192,7 @@ async function executeVsMode() {
   try {
     loading.classList.remove('hidden');
     loadingText.textContent = `${primaryUserData.player.nickname} vs ${targetName} 비교 중...`;
-    const targetData = await service.getFullPlayerProfile(targetName, currentRankings);
+    const targetData = await pageUseCases.loadPlayerProfile(targetName, currentRankings);
     renderVSMode(primaryUserData, targetData);
   } catch (error) { handleSearchError(error); } finally { loading.classList.add('hidden'); }
 }
@@ -143,23 +206,39 @@ function showLoading(name) {
   statsSection.innerHTML = '<sa-stats-summary></sa-stats-summary>';
   statsSection.querySelector('sa-stats-summary').stats = null; 
   statsSection.classList.remove('hidden');
-  historySection.innerHTML = '<h2>최근 20경기 매치 기록</h2><sa-match-list></sa-match-list>';
+  historySection.innerHTML = '<h2>이번 시즌 최근 20경기 매치 기록</h2><sa-match-list></sa-match-list>';
   historySection.querySelector('sa-match-list').matches = null; 
   historySection.classList.remove('hidden');
   crewRankingSection.classList.add('hidden');
 }
 
-function renderUI(player, matches, stats) {
+function renderUI(profile) {
+  const view = getSeasonView(profile, activeSeasonMode);
+  const seasonLabel = view.label || (activeSeasonMode === 'previous' ? '지난 시즌' : '이번 시즌');
+
   refreshBtn.classList.remove('hidden');
   compareBtn.classList.remove('hidden');
   profileSection.innerHTML = '<sa-player-card></sa-player-card>';
-  profileSection.querySelector('sa-player-card').player = player;
+  profileSection.querySelector('sa-player-card').player = profile.player;
   profileSection.classList.remove('hidden');
-  statsSection.innerHTML = '<sa-stats-summary></sa-stats-summary>';
-  statsSection.querySelector('sa-stats-summary').stats = stats;
+
+  statsSection.innerHTML = `${renderSeasonToggle(profile)}<sa-stats-summary id="seasonStatsSummary"></sa-stats-summary>`;
+  const statsComp = statsSection.querySelector('#seasonStatsSummary');
+  if (statsComp) {
+    statsComp.stats = view.stats ? { ...view.stats, seasonLabel } : null;
+  }
+  statsSection.querySelectorAll('.season-toggle-btn').forEach((button) => {
+    button.addEventListener('click', () => {
+      const mode = button.dataset.mode;
+      if (!mode || mode === activeSeasonMode || !primaryUserData) return;
+      activeSeasonMode = mode;
+      renderUI(primaryUserData);
+    });
+  });
   statsSection.classList.remove('hidden');
-  historySection.innerHTML = '<h2>최근 20경기 매치 기록</h2><sa-match-list></sa-match-list>';
-  historySection.querySelector('sa-match-list').matches = matches;
+
+  historySection.innerHTML = `<h2>${seasonLabel} 최근 20경기 매치 기록</h2><sa-match-list></sa-match-list>`;
+  historySection.querySelector('sa-match-list').matches = view.matches || [];
   historySection.classList.remove('hidden');
   crewRankingSection.classList.add('hidden');
 }
@@ -188,26 +267,19 @@ function handleSearchError(error) {
   console.error('[SA] Search Error:', error);
 }
 
-async function refreshRankings() {
-  currentRankings = await crewRepo.getRankings();
-  const startDate = await crewRepo.getSeasonStartDate();
-  const formattedDate = startDate.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
-  const membersSet = new Set();
-  const ouids = [];
-  currentRankings.forEach(r => {
-    if (r.characterName) membersSet.add(r.characterName);
-    if (r.migratedFrom) membersSet.add(r.migratedFrom);
-    if (r.previousNames) r.previousNames.forEach(name => membersSet.add(name));
-    ouids.push(r.id);
-  });
-  repository.setCrewMembers(Array.from(membersSet), ouids);
+async function refreshRankings(forceRefresh = false) {
+  const { rankings, formattedDate, highlights } = await pageUseCases.loadCrewDashboard(forceRefresh);
+  currentRankings = rankings;
   const mvpComp = document.createElement('sa-crew-mvps');
   mvpComp.data = currentRankings;
+  const highlightsComp = document.createElement('sa-crew-highlights');
+  highlightsComp.data = highlights;
   const rankingComp = document.createElement('sa-crew-ranking');
   rankingComp.setAttribute('season-start', formattedDate);
   rankingComp.rankings = currentRankings;
   crewRankingSection.innerHTML = '';
   crewRankingSection.appendChild(mvpComp);
+  crewRankingSection.appendChild(highlightsComp);
   crewRankingSection.appendChild(rankingComp);
   balancerManager.updateRankings(currentRankings);
   adminManager.updateRankings(currentRankings);
@@ -226,35 +298,6 @@ async function initCrew() {
       else { adminManager.adminMenuBtn.classList.add('hidden'); }
     });
   }
-}
-
-/**
- * URL Parameter Sync Initialization
- */
-function initUrlSync() {
-  const params = new URLSearchParams(window.location.search);
-  const nameFromUrl = params.get('n');
-  
-  if (nameFromUrl) {
-    handleSearch(nameFromUrl, true);
-  }
-
-  window.addEventListener('popstate', (e) => {
-    if (e.state && e.state.name) {
-      handleSearch(e.state.name, true);
-    } else {
-      const urlParams = new URLSearchParams(window.location.search);
-      const name = urlParams.get('n');
-      if (name) handleSearch(name, true);
-      else {
-        profileSection.classList.add('hidden');
-        statsSection.classList.add('hidden');
-        historySection.classList.add('hidden');
-        crewRankingSection.classList.remove('hidden');
-        searchInput.value = '';
-      }
-    }
-  });
 }
 
 // Global Event Listeners
@@ -284,11 +327,18 @@ submitApplyBtn.addEventListener('click', async () => {
   finally { submitApplyBtn.disabled = false; submitApplyBtn.textContent = '신청하기'; }
 });
 
-window.addEventListener('sa-rankings-updated', () => refreshRankings());
-window.addEventListener('sa-request-search', (e) => {
-  if (e.detail && e.detail.name) { handleSearch(e.detail.name); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-});
-
 initCrew();
-initUrlSync(); // URL 동기화 활성화
+initSaPageRuntime({
+  handleSearch,
+  refreshRankings,
+  onRankingsUpdated: async () => {
+    pageUseCases.invalidateCrewDashboardCache();
+    await refreshRankings(true);
+  },
+  profileSection,
+  statsSection,
+  historySection,
+  crewRankingSection,
+  searchInput
+});
 renderRecentSearches(recentSearchesContainer, STORAGE_KEY, handleSearch);

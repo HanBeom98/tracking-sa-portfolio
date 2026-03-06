@@ -55,20 +55,8 @@ export class SaService {
       // 2. Sync Nickname if crew member
       await this.syncCrewNickname(player);
 
-      // 3. Load Matches
-      const matches = await this.repository.getRecentMatches(player.ouid, 20, player.nickname);
-      let seasonMatches = matches;
-      if (this.crewRepository && typeof this.crewRepository.getSeasonStartDate === 'function') {
-        try {
-          const seasonStart = await this.crewRepository.getSeasonStartDate();
-          if (seasonStart instanceof Date && !Number.isNaN(seasonStart.getTime()) && seasonStart.getTime() > 0) {
-            seasonMatches = matches.filter((m) => m.matchDate && new Date(m.matchDate) >= seasonStart);
-          }
-        } catch (err) {
-          console.warn('[ApplicationService] Season start lookup failed (non-critical):', err);
-        }
-      }
-      const seasonCustomMatches = seasonMatches.filter((m) => m.isCustomMatch).slice(0, 20);
+      // 3. Load enough matches to support season toggle (current / previous)
+      const allMatches = await this.repository.getRecentMatches(player.ouid, 80, player.nickname);
 
       // 4. Fetch Crew Data from local list or DB
       let memberData = currentRankings.find(m => m.id === player.ouid);
@@ -79,14 +67,60 @@ export class SaService {
       // 5. Load Metadata (Recent Info from Nexon)
       const rawStats = await this.repository.apiClient.getRecentInfo(player.ouid);
 
-      // 6. Construct Stats with ALL required data at once
-      const stats = new RecentStats(rawStats, seasonCustomMatches, memberData, { forceMatchMetrics: true });
+      // 6. Construct season views (default = current season)
+      const seasonStart = await this.getSeasonStartDateSafe();
+      const seasonViews = this.buildSeasonViews(allMatches, seasonStart, rawStats, memberData);
+      const currentView = seasonViews.current;
 
-      return { player, matches, stats };
+      return {
+        player,
+        matches: currentView.matches,
+        stats: currentView.stats,
+        seasonViews,
+        seasonMeta: {
+          currentStartIso: seasonStart && !Number.isNaN(seasonStart.getTime())
+            ? seasonStart.toISOString()
+            : null
+        }
+      };
     } catch (error) {
       console.error('[ApplicationService] Fetch failed:', error);
       throw error;
     }
+  }
+
+  async getSeasonStartDateSafe() {
+    if (!this.crewRepository || typeof this.crewRepository.getSeasonStartDate !== 'function') {
+      return new Date(0);
+    }
+    try {
+      const seasonStart = await this.crewRepository.getSeasonStartDate();
+      if (seasonStart instanceof Date && !Number.isNaN(seasonStart.getTime()) && seasonStart.getTime() > 0) {
+        return seasonStart;
+      }
+    } catch (err) {
+      console.warn('[ApplicationService] Season start lookup failed (non-critical):', err);
+    }
+    return new Date(0);
+  }
+
+  buildSeasonViews(allMatches, seasonStart, rawStats, memberData) {
+    const safeMatches = Array.isArray(allMatches) ? allMatches : [];
+    const isCurrentSeasonMatch = (match) => match?.matchDate && new Date(match.matchDate) >= seasonStart;
+    const currentMatches = safeMatches.filter(isCurrentSeasonMatch).slice(0, 20);
+    const previousMatches = safeMatches.filter((match) => !isCurrentSeasonMatch(match)).slice(0, 20);
+    const currentCustom = currentMatches.filter((m) => m.isCustomMatch).slice(0, 20);
+    const previousCustom = previousMatches.filter((m) => m.isCustomMatch).slice(0, 20);
+
+    const currentStats = new RecentStats(rawStats, currentCustom, memberData, { forceMatchMetrics: true });
+    currentStats.seasonLabel = '이번 시즌';
+    const previousStats = new RecentStats(rawStats, previousCustom, memberData, { forceMatchMetrics: true });
+    previousStats.seasonLabel = '지난 시즌';
+
+    return {
+      current: { key: 'current', label: '이번 시즌', matches: currentMatches, stats: currentStats },
+      previous: { key: 'previous', label: '지난 시즌', matches: previousMatches, stats: previousStats }
+    };
   }
 
   /**

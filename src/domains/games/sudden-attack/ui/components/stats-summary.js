@@ -30,6 +30,7 @@ export class SaStatsSummary extends HTMLElement {
     }
 
     const matchCount = data.totalMatchesCount || 0; 
+    const seasonLabel = data.seasonLabel || '이번 시즌';
 
     const confidence = this.getConfidenceMeta(matchCount, 20);
 
@@ -55,6 +56,11 @@ export class SaStatsSummary extends HTMLElement {
           border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px;
         }
         .header-row h3 { margin: 0; font-size: 20px; color: #fff; font-weight: 800; }
+        .season-label {
+          display: inline-flex; align-items: center; margin-right: 8px; padding: 3px 9px;
+          border-radius: 999px; font-size: 11px; color: #79e3ff; background: rgba(0,210,255,0.12);
+          border: 1px solid rgba(0,210,255,0.3); vertical-align: middle;
+        }
         .most-played-map { font-size: 13px; color: #888; background: rgba(255,255,255,0.03); padding: 4px 12px; border-radius: 4px; }
         .most-played-map strong { color: #ffcc00; }
         .confidence-badge { margin-left: 8px; display: inline-flex; align-items: center; border-radius: 999px; padding: 3px 10px; font-size: 11px; font-weight: 800; letter-spacing: 0.01em; vertical-align: middle; }
@@ -125,6 +131,7 @@ export class SaStatsSummary extends HTMLElement {
           <div class="text-stats-section">
             <div class="header-row">
               <h3>
+                <span class="season-label">${seasonLabel}</span>
                 최근 20경기 정밀 분석
                 <small style="font-size:12px;color:#888;">(현재 ${matchCount}경기)</small>
                 <span class="confidence-badge ${confidence.cls}">${confidence.text}</span>

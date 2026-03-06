@@ -69,7 +69,55 @@ const closeVsModalBtn = document.getElementById('closeVsModalBtn');
 
 let currentRankings = [];
 let primaryUserData = null; 
+let activeSeasonMode = 'current';
 const STORAGE_KEY = 'sa_recent_searches';
+
+function parseDateSafe(value) {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function formatDateKo(value) {
+  const date = parseDateSafe(value);
+  if (!date) return '알 수 없음';
+  return date.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
+}
+
+function getSeasonView(profile, mode = activeSeasonMode) {
+  const views = profile?.seasonViews || {};
+  if (views[mode]) return views[mode];
+  if (views.current) return views.current;
+  return {
+    key: mode,
+    label: mode === 'previous' ? '지난 시즌' : '이번 시즌',
+    matches: profile?.matches || [],
+    stats: profile?.stats || null
+  };
+}
+
+function getSeasonPeriodText(profile, mode = activeSeasonMode) {
+  const seasonStart = parseDateSafe(profile?.seasonMeta?.currentStartIso);
+  if (!seasonStart) return '시즌 기준일 정보 없음';
+  if (mode === 'current') return `${formatDateKo(seasonStart)} ~ 현재`;
+  const previousEnd = new Date(seasonStart.getTime() - (24 * 60 * 60 * 1000));
+  return `~ ${formatDateKo(previousEnd)}`;
+}
+
+function renderSeasonToggle(profile) {
+  const currentCls = activeSeasonMode === 'current' ? 'active' : '';
+  const previousCls = activeSeasonMode === 'previous' ? 'active' : '';
+  const periodText = getSeasonPeriodText(profile, activeSeasonMode);
+  return `
+    <div class="season-toggle-bar">
+      <div class="season-toggle-group" role="tablist" aria-label="시즌 비교 토글">
+        <button class="season-toggle-btn ${currentCls}" data-mode="current" type="button">이번 시즌</button>
+        <button class="season-toggle-btn ${previousCls}" data-mode="previous" type="button">지난 시즌</button>
+      </div>
+      <span class="season-period">${periodText}</span>
+    </div>
+  `;
+}
 
 /**
  * Main Search Logic with URL Sync
@@ -78,6 +126,7 @@ async function handleSearch(nameOverride = null, skipHistory = false) {
   const name = nameOverride || searchInput.value.trim();
   if (!name) return;
   if (nameOverride) searchInput.value = name;
+  activeSeasonMode = 'current';
 
   try {
     showLoading(name);
@@ -94,7 +143,7 @@ async function handleSearch(nameOverride = null, skipHistory = false) {
     const onFreshData = (fresh) => {
       console.log(`[Main] Refreshing UI with fresh data for ${fresh.player.nickname}`);
       primaryUserData = fresh;
-      renderUI(fresh.player, fresh.matches, fresh.stats);
+      renderUI(fresh);
       loading.classList.add('hidden');
       updateSwrUI(swrStatus, 'fresh');
     };
@@ -105,7 +154,7 @@ async function handleSearch(nameOverride = null, skipHistory = false) {
     primaryUserData = result;
     saveSearch(STORAGE_KEY, result.player.nickname);
     renderRecentSearches(recentSearchesContainer, STORAGE_KEY, handleSearch);
-    renderUI(result.player, result.matches, result.stats);
+    renderUI(result);
 
     if (result.isStale) {
       loadingText.textContent = '최신 데이터로 업데이트 중...';
@@ -157,23 +206,39 @@ function showLoading(name) {
   statsSection.innerHTML = '<sa-stats-summary></sa-stats-summary>';
   statsSection.querySelector('sa-stats-summary').stats = null; 
   statsSection.classList.remove('hidden');
-  historySection.innerHTML = '<h2>최근 20경기 매치 기록</h2><sa-match-list></sa-match-list>';
+  historySection.innerHTML = '<h2>이번 시즌 최근 20경기 매치 기록</h2><sa-match-list></sa-match-list>';
   historySection.querySelector('sa-match-list').matches = null; 
   historySection.classList.remove('hidden');
   crewRankingSection.classList.add('hidden');
 }
 
-function renderUI(player, matches, stats) {
+function renderUI(profile) {
+  const view = getSeasonView(profile, activeSeasonMode);
+  const seasonLabel = view.label || (activeSeasonMode === 'previous' ? '지난 시즌' : '이번 시즌');
+
   refreshBtn.classList.remove('hidden');
   compareBtn.classList.remove('hidden');
   profileSection.innerHTML = '<sa-player-card></sa-player-card>';
-  profileSection.querySelector('sa-player-card').player = player;
+  profileSection.querySelector('sa-player-card').player = profile.player;
   profileSection.classList.remove('hidden');
-  statsSection.innerHTML = '<sa-stats-summary></sa-stats-summary>';
-  statsSection.querySelector('sa-stats-summary').stats = stats;
+
+  statsSection.innerHTML = `${renderSeasonToggle(profile)}<sa-stats-summary id="seasonStatsSummary"></sa-stats-summary>`;
+  const statsComp = statsSection.querySelector('#seasonStatsSummary');
+  if (statsComp) {
+    statsComp.stats = view.stats ? { ...view.stats, seasonLabel } : null;
+  }
+  statsSection.querySelectorAll('.season-toggle-btn').forEach((button) => {
+    button.addEventListener('click', () => {
+      const mode = button.dataset.mode;
+      if (!mode || mode === activeSeasonMode || !primaryUserData) return;
+      activeSeasonMode = mode;
+      renderUI(primaryUserData);
+    });
+  });
   statsSection.classList.remove('hidden');
-  historySection.innerHTML = '<h2>최근 20경기 매치 기록</h2><sa-match-list></sa-match-list>';
-  historySection.querySelector('sa-match-list').matches = matches;
+
+  historySection.innerHTML = `<h2>${seasonLabel} 최근 20경기 매치 기록</h2><sa-match-list></sa-match-list>`;
+  historySection.querySelector('sa-match-list').matches = view.matches || [];
   historySection.classList.remove('hidden');
   crewRankingSection.classList.add('hidden');
 }
