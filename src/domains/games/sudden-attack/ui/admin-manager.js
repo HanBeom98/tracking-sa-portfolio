@@ -138,7 +138,7 @@ export class AdminManager {
       return `
         <div class="admin-member-item">
           <div class="m-header">
-            <span class="m-name ${isRealOuid ? 'is-valid' : 'is-legacy'}">${m.characterName} ${isRealOuid ? '' : '(구형)'}</span>
+            <span class="m-name ${isRealOuid ? 'is-valid' : 'is-legacy'}">${m.characterName} ${isRealOuid ? '' : '(ID 마이그레이션 대상)'}</span>
             <span class="m-score">${m.mmr} pts</span>
           </div>
           <div class="m-stats">${m.wins}승 ${m.loses}패 (킬뎃: ${m.crewKills}/${m.crewDeaths})</div>

@@ -161,6 +161,14 @@ export class SaStatsSummary extends HTMLElement {
 
     const mapComp = this.querySelector('#mapMastery');
     if (mapComp) mapComp.params = { mapStats: data.mapStats || [], isCrew: data.isCrew };
+
+    this.querySelectorAll('.rel-card.clickable-name').forEach((el) => {
+      el.addEventListener('click', () => {
+        const name = el.dataset.name;
+        if (!name) return;
+        window.dispatchEvent(new CustomEvent('sa-request-search', { detail: { name } }));
+      });
+    });
   }
 
   renderRivalry(data) {
@@ -174,7 +182,7 @@ export class SaStatsSummary extends HTMLElement {
       const winRateText = isNemesis ? `상대 승률<strong>${rival.rivalWinRate}%</strong>` : `내 승률<strong>${rival.myWinRate}%</strong>`;
 
       return `
-        <div class="rel-card ${type}" onclick="window.dispatchEvent(new CustomEvent('sa-request-search', { detail: { name: '${rival.nickname}' } }))">
+        <div class="rel-card ${type} clickable-name" data-name="${rival.nickname}">
           <span class="rel-tag">${label}</span>
           <div class="rel-body">
             <span class="rel-name">${rival.nickname}</span>
