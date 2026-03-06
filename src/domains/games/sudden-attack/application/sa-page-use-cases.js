@@ -5,13 +5,22 @@ export class SaPageUseCases {
     this.repository = repository;
     this.highlightsService = highlightsService;
     this.crewSeasonUseCases = crewSeasonUseCases;
+    this.dashboardCache = null;
+    this.dashboardCacheTtlMs = 60 * 1000;
   }
 
   async loadPlayerProfile(name, currentRankings = [], onFreshData = null) {
     return this.service.getFullPlayerProfile(name, currentRankings, onFreshData);
   }
 
-  async loadCrewDashboard() {
+  async loadCrewDashboard(forceRefresh = false) {
+    if (!forceRefresh && this.dashboardCache) {
+      const age = Date.now() - this.dashboardCache.timestamp;
+      if (age < this.dashboardCacheTtlMs) {
+        return this.dashboardCache.data;
+      }
+    }
+
     const rankings = await this.crewRepo.getRankings();
     const seasonStart = this.crewSeasonUseCases
       ? await this.crewSeasonUseCases.getSeasonStartDate()
@@ -24,7 +33,13 @@ export class SaPageUseCases {
     const highlights = this.highlightsService.build(rankings, seasonHistory, seasonStart);
 
     this.repository.setCrewMembers(memberNames, memberOuids);
-    return { rankings, seasonStart, seasonHistory, formattedDate, highlights };
+    const data = { rankings, seasonStart, seasonHistory, formattedDate, highlights };
+    this.dashboardCache = { timestamp: Date.now(), data };
+    return data;
+  }
+
+  invalidateCrewDashboardCache() {
+    this.dashboardCache = null;
   }
 
   buildCrewMemberIndex(rankings) {

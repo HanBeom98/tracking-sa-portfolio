@@ -1,6 +1,7 @@
 export function initSaPageRuntime({
   handleSearch,
   refreshRankings,
+  onRankingsUpdated = null,
   profileSection,
   statsSection,
   historySection,
@@ -29,7 +30,10 @@ export function initSaPageRuntime({
     searchInput.value = '';
   });
 
-  window.addEventListener('sa-rankings-updated', () => refreshRankings());
+  window.addEventListener('sa-rankings-updated', () => {
+    if (typeof onRankingsUpdated === 'function') onRankingsUpdated();
+    else refreshRankings();
+  });
   window.addEventListener('sa-request-search', (e) => {
     if (e.detail && e.detail.name) {
       handleSearch(e.detail.name);

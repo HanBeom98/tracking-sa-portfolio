@@ -202,8 +202,8 @@ function handleSearchError(error) {
   console.error('[SA] Search Error:', error);
 }
 
-async function refreshRankings() {
-  const { rankings, formattedDate, highlights } = await pageUseCases.loadCrewDashboard();
+async function refreshRankings(forceRefresh = false) {
+  const { rankings, formattedDate, highlights } = await pageUseCases.loadCrewDashboard(forceRefresh);
   currentRankings = rankings;
   const mvpComp = document.createElement('sa-crew-mvps');
   mvpComp.data = currentRankings;
@@ -266,6 +266,10 @@ initCrew();
 initSaPageRuntime({
   handleSearch,
   refreshRankings,
+  onRankingsUpdated: async () => {
+    pageUseCases.invalidateCrewDashboardCache();
+    await refreshRankings(true);
+  },
   profileSection,
   statsSection,
   historySection,
