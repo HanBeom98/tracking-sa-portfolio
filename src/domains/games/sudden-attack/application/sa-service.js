@@ -68,6 +68,7 @@ export class SaService {
           console.warn('[ApplicationService] Season start lookup failed (non-critical):', err);
         }
       }
+      const seasonCustomMatches = seasonMatches.filter((m) => m.isCustomMatch).slice(0, 20);
 
       // 4. Fetch Crew Data from local list or DB
       let memberData = currentRankings.find(m => m.id === player.ouid);
@@ -79,7 +80,7 @@ export class SaService {
       const rawStats = await this.repository.apiClient.getRecentInfo(player.ouid);
 
       // 6. Construct Stats with ALL required data at once
-      const stats = new RecentStats(rawStats, seasonMatches, memberData, { forceMatchMetrics: true });
+      const stats = new RecentStats(rawStats, seasonCustomMatches, memberData, { forceMatchMetrics: true });
 
       return { player, matches, stats };
     } catch (error) {

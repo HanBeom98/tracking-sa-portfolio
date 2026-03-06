@@ -109,7 +109,7 @@ export class SaStatsSummary extends HTMLElement {
           
           <div class="text-stats-section">
             <div class="header-row">
-              <h3>최근 ${matchCount}경기 정밀 분석</h3>
+              <h3>최근 20경기 정밀 분석 <small style="font-size:12px;color:#888;">(현재 ${matchCount}경기)</small></h3>
               <span class="most-played-map">선호 맵: <strong>${data.mostPlayedMap || '정보 없음'}</strong></span>
             </div>
             <div class="stats-grid">
