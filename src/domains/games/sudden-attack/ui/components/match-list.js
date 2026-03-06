@@ -18,11 +18,22 @@ export class SaMatchList extends HTMLElement {
     const players = match.allPlayerStats;
     if (!players || players.length === 0) return '<p class="no-detail">매치 상세 정보가 없습니다.</p>';
 
-    const laundryHtml = match.laundryInfo && match.laundryInfo.isWashed 
-      ? `<div class="laundry-warning">
-          ⚠️ <strong>데이터 불일치 감지:</strong> 상대 팀 킬 수보다 우리 팀 데스 합계가 <strong>${match.laundryInfo.totalMissing}회</strong> 부족합니다. (리조인 세탁 의심)
-         </div>`
-      : '';
+    const laundryHtml = (() => {
+      if (!match.laundryInfo || !match.laundryInfo.isWashed) return '';
+      const details = [];
+      if (Number(match.laundryInfo.winTeamMissing || 0) > 0) {
+        details.push(`승리 팀 데스가 상대 킬보다 <strong>${match.laundryInfo.winTeamMissing}회</strong> 부족`);
+      }
+      if (Number(match.laundryInfo.loseTeamMissing || 0) > 0) {
+        details.push(`패배 팀 데스가 상대 킬보다 <strong>${match.laundryInfo.loseTeamMissing}회</strong> 부족`);
+      }
+      const detailText = details.length > 0
+        ? details.join(' / ')
+        : `킬/데스 데이터 불일치 <strong>${match.laundryInfo.totalMissing}회</strong>`;
+      return `<div class="laundry-warning">
+          ⚠️ <strong>리조인/기록 세탁 강력 의심:</strong> ${detailText}. 정산 시 관리자 검토가 필요합니다.
+         </div>`;
+    })();
 
     return `
       <style>
