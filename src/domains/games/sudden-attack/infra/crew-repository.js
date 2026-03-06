@@ -213,6 +213,28 @@ export class CrewRepository {
     return settingsRef.set({ startDate: window.firebase.firestore.Timestamp.fromDate(new Date(date)) }, { merge: true });
   }
 
+  async getHistory(limit = 300) {
+    if (!this.db) return [];
+    try {
+      const snapshot = await this.db.collection(this.HISTORY_COLLECTION).get();
+      return snapshot.docs
+        .map((doc) => {
+          const data = doc.data();
+          return {
+            matchId: doc.id,
+            map: data.map || "알 수 없음",
+            matchDate: data.matchDate || "",
+            crewCount: Number(data.crewCount || 0)
+          };
+        })
+        .sort((a, b) => new Date(b.matchDate) - new Date(a.matchDate))
+        .slice(0, limit);
+    } catch (err) {
+      console.error('[CrewRepo] Failed to fetch history:', err);
+      return [];
+    }
+  }
+
   /**
    * Settle MMR for a list of matches
    * Returns reports for Discord notifications

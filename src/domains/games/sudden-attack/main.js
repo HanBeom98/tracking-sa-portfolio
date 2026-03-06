@@ -1,9 +1,13 @@
 import { NexonApiClient } from './infra/nexon-api-client.js';
 import { SaRepository } from './infra/sa-repository.js';
 import { SaService } from './application/sa-service.js';
+import { CrewHighlightsService } from './application/crew-highlights-service.js';
+import { CrewSeasonUseCases } from './application/crew-season-use-cases.js';
+import { SaPageUseCases } from './application/sa-page-use-cases.js';
 import { CrewRepository } from './infra/crew-repository.js';
 import { BalancerManager } from './ui/balancer-manager.js';
 import { AdminManager } from './ui/admin-manager.js';
+import { initSaPageRuntime } from './ui/runtime/sa-page-runtime.js';
 import { updateSwrUI, saveSearch, renderRecentSearches } from './ui/utils/ui-helpers.js';
 
 // Import Modular UI Components
@@ -16,6 +20,7 @@ import './ui/components/map-mastery.js';
 import './ui/components/crew-ranking.js';
 import './ui/components/match-list.js';
 import './ui/components/crew-mvps.js';
+import './ui/components/crew-highlights.js';
 import './ui/components/team-board.js';
 
 
@@ -24,6 +29,15 @@ const client = new NexonApiClient(NEXON_API_KEY);
 const crewRepo = new CrewRepository(client);
 const repository = new SaRepository(client, crewRepo);
 const service = new SaService(repository, crewRepo);
+const crewHighlightsService = new CrewHighlightsService();
+const crewSeasonUseCases = new CrewSeasonUseCases(crewRepo);
+const pageUseCases = new SaPageUseCases({
+  service,
+  crewRepo,
+  repository,
+  highlightsService: crewHighlightsService,
+  crewSeasonUseCases
+});
 
 const balancerManager = new BalancerManager(crewRepo);
 const adminManager = new AdminManager(crewRepo, repository, service);
@@ -86,7 +100,7 @@ async function handleSearch(nameOverride = null, skipHistory = false) {
     };
 
     // 1. Get Profile
-    const result = await service.getFullPlayerProfile(name, currentRankings, onFreshData);
+    const result = await pageUseCases.loadPlayerProfile(name, currentRankings, onFreshData);
     
     primaryUserData = result;
     saveSearch(STORAGE_KEY, result.player.nickname);
@@ -129,7 +143,7 @@ async function executeVsMode() {
   try {
     loading.classList.remove('hidden');
     loadingText.textContent = `${primaryUserData.player.nickname} vs ${targetName} 비교 중...`;
-    const targetData = await service.getFullPlayerProfile(targetName, currentRankings);
+    const targetData = await pageUseCases.loadPlayerProfile(targetName, currentRankings);
     renderVSMode(primaryUserData, targetData);
   } catch (error) { handleSearchError(error); } finally { loading.classList.add('hidden'); }
 }
@@ -189,25 +203,18 @@ function handleSearchError(error) {
 }
 
 async function refreshRankings() {
-  currentRankings = await crewRepo.getRankings();
-  const startDate = await crewRepo.getSeasonStartDate();
-  const formattedDate = startDate.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
-  const membersSet = new Set();
-  const ouids = [];
-  currentRankings.forEach(r => {
-    if (r.characterName) membersSet.add(r.characterName);
-    if (r.migratedFrom) membersSet.add(r.migratedFrom);
-    if (r.previousNames) r.previousNames.forEach(name => membersSet.add(name));
-    ouids.push(r.id);
-  });
-  repository.setCrewMembers(Array.from(membersSet), ouids);
+  const { rankings, formattedDate, highlights } = await pageUseCases.loadCrewDashboard();
+  currentRankings = rankings;
   const mvpComp = document.createElement('sa-crew-mvps');
   mvpComp.data = currentRankings;
+  const highlightsComp = document.createElement('sa-crew-highlights');
+  highlightsComp.data = highlights;
   const rankingComp = document.createElement('sa-crew-ranking');
   rankingComp.setAttribute('season-start', formattedDate);
   rankingComp.rankings = currentRankings;
   crewRankingSection.innerHTML = '';
   crewRankingSection.appendChild(mvpComp);
+  crewRankingSection.appendChild(highlightsComp);
   crewRankingSection.appendChild(rankingComp);
   balancerManager.updateRankings(currentRankings);
   adminManager.updateRankings(currentRankings);
@@ -226,35 +233,6 @@ async function initCrew() {
       else { adminManager.adminMenuBtn.classList.add('hidden'); }
     });
   }
-}
-
-/**
- * URL Parameter Sync Initialization
- */
-function initUrlSync() {
-  const params = new URLSearchParams(window.location.search);
-  const nameFromUrl = params.get('n');
-  
-  if (nameFromUrl) {
-    handleSearch(nameFromUrl, true);
-  }
-
-  window.addEventListener('popstate', (e) => {
-    if (e.state && e.state.name) {
-      handleSearch(e.state.name, true);
-    } else {
-      const urlParams = new URLSearchParams(window.location.search);
-      const name = urlParams.get('n');
-      if (name) handleSearch(name, true);
-      else {
-        profileSection.classList.add('hidden');
-        statsSection.classList.add('hidden');
-        historySection.classList.add('hidden');
-        crewRankingSection.classList.remove('hidden');
-        searchInput.value = '';
-      }
-    }
-  });
 }
 
 // Global Event Listeners
@@ -284,11 +262,14 @@ submitApplyBtn.addEventListener('click', async () => {
   finally { submitApplyBtn.disabled = false; submitApplyBtn.textContent = '신청하기'; }
 });
 
-window.addEventListener('sa-rankings-updated', () => refreshRankings());
-window.addEventListener('sa-request-search', (e) => {
-  if (e.detail && e.detail.name) { handleSearch(e.detail.name); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-});
-
 initCrew();
-initUrlSync(); // URL 동기화 활성화
+initSaPageRuntime({
+  handleSearch,
+  refreshRankings,
+  profileSection,
+  statsSection,
+  historySection,
+  crewRankingSection,
+  searchInput
+});
 renderRecentSearches(recentSearchesContainer, STORAGE_KEY, handleSearch);
