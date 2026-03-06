@@ -16,7 +16,8 @@ export class CrewRepository {
       'admin@trackingsa.com', 
       'hantiger24@naver.com',
       'bjs5739@naver.com',
-      'jungsion98@naver.com'
+      'jungsion98@naver.com',
+      'wasd1234@naver.com'
     ];
   }
 
