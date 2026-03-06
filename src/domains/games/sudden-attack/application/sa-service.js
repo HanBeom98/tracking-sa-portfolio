@@ -63,13 +63,14 @@ export class SaService {
       if (!memberData && this.crewRepository) {
         memberData = await this.crewRepository.findMemberByOuid(player.ouid);
       }
+      const archivedPreviousTrend = await this.getArchivedPreviousTrendSafe(player.ouid);
 
       // 5. Load Metadata (Recent Info from Nexon)
       const rawStats = await this.repository.apiClient.getRecentInfo(player.ouid);
 
       // 6. Construct season views (default = current season)
       const seasonStart = await this.getSeasonStartDateSafe();
-      const seasonViews = this.buildSeasonViews(allMatches, seasonStart, rawStats, memberData);
+      const seasonViews = this.buildSeasonViews(allMatches, seasonStart, rawStats, memberData, archivedPreviousTrend);
       const currentView = seasonViews.current;
 
       return {
@@ -104,7 +105,7 @@ export class SaService {
     return new Date(0);
   }
 
-  buildSeasonViews(allMatches, seasonStart, rawStats, memberData) {
+  buildSeasonViews(allMatches, seasonStart, rawStats, memberData, archivedPreviousTrend = []) {
     const safeMatches = Array.isArray(allMatches) ? allMatches : [];
     const isCurrentSeasonMatch = (match) => match?.matchDate && new Date(match.matchDate) >= seasonStart;
     const currentMatches = safeMatches.filter(isCurrentSeasonMatch).slice(0, 20);
@@ -112,7 +113,7 @@ export class SaService {
     const currentCustom = currentMatches.filter((m) => m.isCustomMatch).slice(0, 20);
     const previousCustom = previousMatches.filter((m) => m.isCustomMatch).slice(0, 20);
 
-    const trendViews = this.buildTrendViews(memberData, seasonStart);
+    const trendViews = this.buildTrendViews(memberData, seasonStart, archivedPreviousTrend);
 
     const currentStats = new RecentStats(rawStats, currentCustom, memberData, { forceMatchMetrics: true });
     this.applySeasonTrend(currentStats, trendViews.current);
@@ -128,7 +129,7 @@ export class SaService {
     };
   }
 
-  buildTrendViews(memberData, seasonStart) {
+  buildTrendViews(memberData, seasonStart, archivedPreviousTrend = []) {
     const rawHistory = Array.isArray(memberData?.mmrHistory) ? memberData.mmrHistory : [];
     const normalized = rawHistory
       .map((entry) => {
@@ -143,8 +144,36 @@ export class SaService {
       .sort((a, b) => new Date(a.date) - new Date(b.date));
 
     const current = normalized.filter((entry) => new Date(entry.date) >= seasonStart);
-    const previous = normalized.filter((entry) => new Date(entry.date) < seasonStart);
+    let previous = normalized.filter((entry) => new Date(entry.date) < seasonStart);
+    const safeArchived = Array.isArray(archivedPreviousTrend) ? archivedPreviousTrend : [];
+    if (previous.length === 0 && safeArchived.length > 0) {
+      previous = safeArchived;
+    }
     return { current, previous };
+  }
+
+  async getArchivedPreviousTrendSafe(ouid) {
+    if (!this.crewRepository || typeof this.crewRepository.getLatestSeasonArchiveHistory !== 'function') {
+      return [];
+    }
+    try {
+      const archived = await this.crewRepository.getLatestSeasonArchiveHistory(ouid);
+      if (!Array.isArray(archived)) return [];
+      return archived
+        .map((entry) => {
+          const date = entry?.date ? new Date(entry.date) : null;
+          return {
+            mmr: Number(entry?.mmr || 1200),
+            hsr: Number(entry?.hsr || entry?.mmr || 1200),
+            date: date && !Number.isNaN(date.getTime()) ? date.toISOString() : null
+          };
+        })
+        .filter((entry) => !!entry.date)
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+    } catch (err) {
+      console.warn('[ApplicationService] Archived trend lookup failed (non-critical):', err);
+      return [];
+    }
   }
 
   applySeasonTrend(stats, trend) {

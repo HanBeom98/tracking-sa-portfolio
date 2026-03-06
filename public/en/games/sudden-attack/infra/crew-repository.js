@@ -9,6 +9,7 @@ export class CrewRepository {
     this.APPLICATIONS_COLLECTION = 'sa_crew_applications';
     this.HISTORY_COLLECTION = 'sa_crew_history'; 
     this.SETTINGS_COLLECTION = 'sa_crew_settings';
+    this.SEASON_ARCHIVE_DOC = 'season_archive_latest';
     this.HISTORY_LIMIT = 50; // Max match history points to store for trend
     
     // List of Administrators and Moderators (Staff)
@@ -214,6 +215,44 @@ export class CrewRepository {
     return settingsRef.set({ startDate: window.firebase.firestore.Timestamp.fromDate(new Date(date)) }, { merge: true });
   }
 
+  async getLatestSeasonArchiveHistory(ouid) {
+    if (!this.db || !ouid) return [];
+    try {
+      const doc = await this.db.collection(this.SETTINGS_COLLECTION).doc(this.SEASON_ARCHIVE_DOC).get();
+      if (!doc.exists) return [];
+      const archive = doc.data() || {};
+      const members = archive.members || {};
+      const item = members[ouid];
+      if (!item || !Array.isArray(item.mmrHistory)) return [];
+      return item.mmrHistory;
+    } catch (err) {
+      console.warn('[CrewRepo] Failed to read season archive history:', err);
+      return [];
+    }
+  }
+
+  async getHistory(limit = 300) {
+    if (!this.db) return [];
+    try {
+      const snapshot = await this.db.collection(this.HISTORY_COLLECTION).get();
+      return snapshot.docs
+        .map((doc) => {
+          const data = doc.data();
+          return {
+            matchId: doc.id,
+            map: data.map || "알 수 없음",
+            matchDate: data.matchDate || "",
+            crewCount: Number(data.crewCount || 0)
+          };
+        })
+        .sort((a, b) => new Date(b.matchDate) - new Date(a.matchDate))
+        .slice(0, limit);
+    } catch (err) {
+      console.error('[CrewRepo] Failed to fetch history:', err);
+      return [];
+    }
+  }
+
   /**
    * Settle MMR for a list of matches
    * Returns reports for Discord notifications
@@ -355,11 +394,33 @@ export class CrewRepository {
 
   async resetSeason() {
     if (!this.db) throw new Error('DB 연결 실패');
+    const previousSeasonStart = await this.getSeasonStartDate();
     const snapshot = await this.db.collection(this.MEMBERS_COLLECTION).get();
+    const archivedMembers = {};
+    snapshot.docs.forEach((doc) => {
+      const data = doc.data() || {};
+      const trend = Array.isArray(data.mmrHistory) ? data.mmrHistory : [];
+      if (trend.length > 0) {
+        archivedMembers[doc.id] = {
+          characterName: data.characterName || "",
+          mmrHistory: trend
+        };
+      }
+    });
+
     const batch = this.db.batch();
     snapshot.docs.forEach(doc => {
       batch.update(doc.ref, { mmr: 1200, hsr: 1200, wins: 0, loses: 0, crewKills: 0, crewDeaths: 0, mmrHistory: [], updatedAt: window.firebase.firestore.FieldValue.serverTimestamp() });
     });
+    batch.set(
+      this.db.collection(this.SETTINGS_COLLECTION).doc(this.SEASON_ARCHIVE_DOC),
+      {
+        seasonStart: window.firebase.firestore.Timestamp.fromDate(previousSeasonStart),
+        archivedAt: window.firebase.firestore.FieldValue.serverTimestamp(),
+        members: archivedMembers
+      },
+      { merge: false }
+    );
     batch.set(this.db.collection(this.SETTINGS_COLLECTION).doc('season'), { startDate: window.firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
     await batch.commit();
   }
