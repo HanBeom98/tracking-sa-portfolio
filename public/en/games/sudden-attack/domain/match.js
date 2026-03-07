@@ -14,6 +14,24 @@ export class MatchRecord {
     if (Array.isArray(statsArray)) {
       let subjectFound = false;
       const crewNamesSet = new Set((crewData.names || []).map(n => (n || "").toLowerCase().trim()));
+      const normalizedTarget = (targetUserName || "").toLowerCase().trim();
+      const hasTargetName = !!normalizedTarget && statsArray.some((row) => {
+        const rowName = (row.user_name || row.character_name || "").toLowerCase().trim();
+        return rowName === normalizedTarget;
+      });
+      const subjectSignature = subjectInfo
+        ? `${parseInt(subjectInfo.kill || 0)}|${parseInt(subjectInfo.death || 0)}|${String(subjectInfo.result || "")}`
+        : null;
+      const signatureCount = new Map();
+      if (subjectSignature) {
+        statsArray.forEach((row) => {
+          const rowKill = parseInt(row.kill || row.kill_count || row.cnt_kill || 0);
+          const rowDeath = parseInt(row.death || row.death_count || row.cnt_death || 0);
+          const rowResult = String(row.match_result || row.result || "0");
+          const sig = `${rowKill}|${rowDeath}|${rowResult}`;
+          signatureCount.set(sig, (signatureCount.get(sig) || 0) + 1);
+        });
+      }
       
       this.allPlayerStats = statsArray.map(p => {
         const nickname = p.user_name || p.character_name || "";
@@ -28,9 +46,19 @@ export class MatchRecord {
 
         let isSubject = false;
         if (subjectInfo && !subjectFound) {
-          const nameMatches = targetUserName && normalizedName === targetUserName.toLowerCase().trim();
-          const statsMatch = killValue === parseInt(subjectInfo.kill) && deathValue === parseInt(subjectInfo.death) && String(resultValue) === String(subjectInfo.result);
-          if (nameMatches || statsMatch) { isSubject = true; subjectFound = true; }
+          if (hasTargetName) {
+            if (normalizedName === normalizedTarget) {
+              isSubject = true;
+              subjectFound = true;
+            }
+          } else if (subjectSignature) {
+            const currentSignature = `${killValue}|${deathValue}|${String(resultValue)}`;
+            const isUniqueFallback = currentSignature === subjectSignature && (signatureCount.get(currentSignature) || 0) === 1;
+            if (isUniqueFallback) {
+              isSubject = true;
+              subjectFound = true;
+            }
+          }
         }
         const isCrew = isSubject || crewNamesSet.has(normalizedName) || (p.ouid && (crewData.ouids || []).includes(p.ouid));
         const totalEngagements = killValue + deathValue;

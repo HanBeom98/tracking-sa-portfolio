@@ -138,7 +138,7 @@ export class AdminManager {
       return `
         <div class="admin-member-item">
           <div class="m-header">
-            <span class="m-name ${isRealOuid ? 'is-valid' : 'is-legacy'}">${m.characterName} ${isRealOuid ? '' : '(구형)'}</span>
+            <span class="m-name ${isRealOuid ? 'is-valid' : 'is-legacy'}">${m.characterName} ${isRealOuid ? '' : '(ID 마이그레이션 대상)'}</span>
             <span class="m-score">${m.mmr} pts</span>
           </div>
           <div class="m-stats">${m.wins}승 ${m.loses}패 (킬뎃: ${m.crewKills}/${m.crewDeaths})</div>
@@ -264,11 +264,15 @@ export class AdminManager {
           `).join('')}
         </div>
         <div class="modal-btns">
-          <button class="primary" onclick="this.closest('.modal').remove()">확인</button>
+          <button class="primary settlement-close-btn">확인</button>
         </div>
       </div>
     `;
     document.body.appendChild(modal);
+    const closeBtn = modal.querySelector('.settlement-close-btn');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => modal.remove());
+    }
   }
 
   async handleIndividualScan(btn) {
