@@ -185,6 +185,11 @@
     - `app-shell-runtime` 번역 준비 polling interval에 `unref()` 적용으로 Node 유닛 테스트 종료 정체 해소.
     - `document.querySelector` 접근 가드 추가로 테스트 스텁/비브라우저 환경 런타임 안정성 강화.
     - 검증: `npm run test:unit` 96개 테스트 전체 통과 및 정상 종료 확인.
+  - **2026-03-07 Day 1 업데이트 (DDD Boundary)**:
+    - `application` 레이어 브라우저 전역/DOM 직접 접근 금지 규칙 정의.
+    - `scripts/check-ddd-boundary.js` 추가 및 `npm run check:ddd-boundary` 검사 명령 도입.
+    - 기존 위반 파일은 temporary baseline으로 관리하고 신규 위반은 즉시 실패 처리.
+    - 리뷰 체크리스트 문서화: `docs/ddd-boundary-guardrails.md`.
 
 ## Phase 2 (Short-term, 3-5 days)
 - 인증 UI/상태 로직을 모듈화:
