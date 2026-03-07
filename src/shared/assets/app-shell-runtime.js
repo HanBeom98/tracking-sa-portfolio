@@ -13,9 +13,16 @@
     let _resolveReady = null;
     const _readyPromise = new Promise(resolve => { _resolveReady = resolve; });
     
+    function hasDomainTranslationScriptTag() {
+      if (!root.document || typeof root.document.querySelector !== "function") {
+        return false;
+      }
+      return !!root.document.querySelector('script[src*="translations.js"]:not([src*="shared"])');
+    }
+
     function checkReadiness() {
       // 도메인 전용 번역이 로드되어야 하는 페이지인지 판별 (translations.js 로드 여부)
-      const hasDomainTransTag = !!root.document.querySelector('script[src*="translations.js"]:not([src*="shared"])');
+      const hasDomainTransTag = hasDomainTranslationScriptTag();
       const isMerged = root.translations && (!hasDomainTransTag || root.domainTranslations);
       
       if (isMerged && _resolveReady) {
@@ -39,6 +46,9 @@
       checkReadiness();
       if (!_resolveReady) clearInterval(readinessInterval);
     }, 50);
+    if (typeof readinessInterval.unref === "function") {
+      readinessInterval.unref();
+    }
 
     function getTranslation(key, defaultValue = "") {
       // 1. 기본 번역 딕셔너리에서 검색

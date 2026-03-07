@@ -181,6 +181,10 @@
     - **FOUC(Flash of Unstyled Content) 원천 차단**: 헤더/푸터/네비게이션의 기본 텍스트를 한국어로 동기화하고 로딩 순서를 최적화하여 UI 깜빡임 해결.
     - **브랜딩 일관성 강화**: 사이트 내 '실리콘밸리' 등 특정 지칭을 **'글로벌 IT 전문가'**로 일괄 교체하여 페르소나 통일.
     - **뉴스 데이터 무결성 개선**: RSS 발행 시간(published_parsed) 기반 Firestore 저장 로직으로 정렬 논리성 확보.
+  - **2026-03-07 업데이트**:
+    - `app-shell-runtime` 번역 준비 polling interval에 `unref()` 적용으로 Node 유닛 테스트 종료 정체 해소.
+    - `document.querySelector` 접근 가드 추가로 테스트 스텁/비브라우저 환경 런타임 안정성 강화.
+    - 검증: `npm run test:unit` 96개 테스트 전체 통과 및 정상 종료 확인.
 
 ## Phase 2 (Short-term, 3-5 days)
 - 인증 UI/상태 로직을 모듈화:

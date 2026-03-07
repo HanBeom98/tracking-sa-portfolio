@@ -1,5 +1,19 @@
 # Change Log (Tracking SA)
 
+## 2026-03-07
+
+### fix(test): `app-shell-runtime` 유닛 테스트 종료 정체 해결
+- **문제/증상**:
+  - `npm run test:unit` 실행 시 `tests/unit/app-shell-runtime.test.js` 구간 이후 프로세스가 종료되지 않고 대기 상태로 남음.
+- **원인**:
+  - `src/shared/assets/app-shell-runtime.js` 내부 번역 준비 체크용 `setInterval`이 Node 테스트 런타임 이벤트 루프를 유지.
+  - 테스트 스텁 환경에서 `document.querySelector` 접근 가드가 부족해 런타임 안전성이 낮음.
+- **해결**:
+  - `hasDomainTranslationScriptTag()` 가드 함수 도입으로 `document/querySelector` 미존재 환경 안전 처리.
+  - readiness interval에 `unref()` 적용하여 테스트 런타임에서 이벤트 루프 점유 해제.
+- **검증**:
+  - `npm run test:unit` 통과 (`96 passed, 0 failed`, 정상 종료).
+
 ## 2026-03-05 (현재 진행 중)
 
 ### fix(api): 운세 및 행운 추천 API 403/400/405 에러 완전 해결
