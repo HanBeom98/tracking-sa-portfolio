@@ -5,7 +5,10 @@ import {
 } from "../domain/nickname.js";
 
 export function t(key, fallback) {
-  return window.getTranslation ? window.getTranslation(key, fallback) : fallback;
+  const direct = typeof globalThis === "object" && globalThis ? globalThis.getTranslation : null;
+  if (typeof direct === "function") return direct(key, fallback);
+  const win = typeof globalThis === "object" && globalThis ? globalThis["window"] : null;
+  return typeof win?.getTranslation === "function" ? win.getTranslation(key, fallback) : fallback;
 }
 
 export function formatProvider(providerIds) {
