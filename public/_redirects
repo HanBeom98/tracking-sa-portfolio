@@ -4,6 +4,7 @@
 /en/news/style.css /news/ui/style.css 200
 /tetris-game/* /games/tetris/:splat 301
 /ai-evolution/* /games/ai-evolution/:splat 301
+/en/games/sudden-attack/* /games/sudden-attack/:splat 301
 
 # API Proxy to Vercel
 /api/* https://tracking-sa.vercel.app/api/:splat 200
