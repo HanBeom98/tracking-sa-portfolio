@@ -26,6 +26,10 @@
     - `src/shared/ui/scroll.js` 추가.
     - `fortune`, `lucky-recommendation`의 `scrollIntoView` 호출 중복을 공통 유틸로 통합.
     - `npm run check:ddd-boundary` 통과(`source-of-truth`는 public sync 후 검증).
+  - 중복 제거(search 로직 단일화 1차):
+    - `src/shared/assets/search.js`에서 로컬 중복(fetch/필터/뉴스 fallback) 로직 제거.
+    - 비모듈 스크립트 유지 상태에서 `import()`로 `domains/search`의 `searchRepository`, `search-data`를 재사용하도록 전환.
+    - `npm run check:ddd-boundary` 통과(`source-of-truth`는 public sync 후 검증).
 - 중복/운영 리스크:
   - `src`-`public` 동일 JS 중복: 133개.
   - `src`-`public/en` 동일 JS 중복: 123개.

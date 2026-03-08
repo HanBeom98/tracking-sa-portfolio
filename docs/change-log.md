@@ -48,6 +48,15 @@
     - `src/domains/lucky-recommendation/ui/lucky-view.js`
   - 결과 렌더 후 스크롤 이동 로직(`scrollIntoView`)을 공통 함수로 통합.
   - `npm run check:ddd-boundary` 통과.
+- **추가 진행 (중복 제거 - search repository reuse)**:
+  - 대상: `src/shared/assets/search.js`
+  - 변경:
+    - 로컬 중복 로직(`loadSearchIndex`, `searchFromNewsIndex`, `searchGamesFromFirestore`, 검색 필터링) 제거.
+    - `import()` 기반으로 `src/domains/search/infra/searchRepository.js`, `src/domains/search/application/search-data.js`를 재사용.
+  - 효과:
+    - 홈 검색과 검색 페이지가 동일 저장소/필터 로직을 공유.
+    - 검색 로직 변경 시 수정 지점 축소.
+  - `npm run check:ddd-boundary` 통과.
 - **추가 진행 (board)**:
   - `board/application/authGateway.js`에서 `window` 직접 접근 제거.
   - `board/application/write-auth.js`에서 경로 계산 시 `window.location` 직접 의존 제거.
