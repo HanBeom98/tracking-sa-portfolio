@@ -30,6 +30,10 @@
     - `src/shared/assets/search.js`에서 로컬 중복(fetch/필터/뉴스 fallback) 로직 제거.
     - 비모듈 스크립트 유지 상태에서 `import()`로 `domains/search`의 `searchRepository`, `search-data`를 재사용하도록 전환.
     - `npm run check:ddd-boundary` 통과(`source-of-truth`는 public sync 후 검증).
+  - 운영 가드(CI) 추가:
+    - `scripts/check-public-edit-policy.js` 추가.
+    - 규칙: `public` 미러 변경은 source commit 이후 `chore(sync):` 커밋으로만 허용.
+    - `package.json`에 `check:public-edit-policy` 추가, `site-deploy.yml` 테스트 단계에 연결.
 - 중복/운영 리스크:
   - `src`-`public` 동일 JS 중복: 133개.
   - `src`-`public/en` 동일 JS 중복: 123개.

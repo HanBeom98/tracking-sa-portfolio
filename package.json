@@ -9,6 +9,7 @@
     "build:full": "[ -x venv/bin/python ] && venv/bin/python main.py || python3 main.py",
     "sync:public": "bash scripts/sync_public_assets.sh",
     "check:public-sync": "bash scripts/sync_public_assets.sh --check",
+    "check:public-edit-policy": "node scripts/check-public-edit-policy.js",
     "check:source-of-truth": "node scripts/check-source-of-truth.js",
     "check:ddd-boundary": "node scripts/check-ddd-boundary.js",
     "test:smoke:release": "bash scripts/smoke_auth_release.sh",

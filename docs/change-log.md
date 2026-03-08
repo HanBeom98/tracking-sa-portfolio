@@ -57,6 +57,15 @@
     - 홈 검색과 검색 페이지가 동일 저장소/필터 로직을 공유.
     - 검색 로직 변경 시 수정 지점 축소.
   - `npm run check:ddd-boundary` 통과.
+- **추가 진행 (운영 가드 - public edit policy)**:
+  - 스크립트 추가: `scripts/check-public-edit-policy.js`
+  - 규칙:
+    - 일반 리팩토링 커밋에서 `public` 미러 파일 수정 시, 동일 커밋에 대응 `src` 변경이 없으면 실패.
+    - `chore(sync):` 커밋은 `src` 변경을 포함하면 실패.
+    - 변경된 `public` 미러는 항상 대응 `src` 파일과 내용 일치해야 통과.
+  - 연동:
+    - `package.json` -> `npm run check:public-edit-policy`
+    - `.github/workflows/site-deploy.yml` test job에서 필수 검사로 실행.
 - **추가 진행 (board)**:
   - `board/application/authGateway.js`에서 `window` 직접 접근 제거.
   - `board/application/write-auth.js`에서 경로 계산 시 `window.location` 직접 의존 제거.

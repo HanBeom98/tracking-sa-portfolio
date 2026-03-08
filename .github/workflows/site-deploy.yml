@@ -49,6 +49,9 @@ jobs:
       - name: Install Node dependencies
         run: npm ci
 
+      - name: Enforce Public Edit Policy
+        run: npm run check:public-edit-policy
+
       - name: Enforce Source Of Truth (src -> public mirrors)
         run: npm run check:source-of-truth
 
