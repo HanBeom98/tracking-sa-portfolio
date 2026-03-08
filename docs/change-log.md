@@ -72,6 +72,8 @@
     - `src/domains/games/sudden-attack/**`는 `public/en/**` 미러 정합성 검사에서 제외.
   - 운영 정책:
     - 서든어택 전적 검색은 한국어 경로(`/games/sudden-attack/`)만 운영.
+  - 노출 정책:
+    - `public/en/index.html`의 커뮤니티 섹션에서 SA 카드 제거(EN 홈 비노출).
 - **추가 진행 (board)**:
   - `board/application/authGateway.js`에서 `window` 직접 접근 제거.
   - `board/application/write-auth.js`에서 경로 계산 시 `window.location` 직접 의존 제거.

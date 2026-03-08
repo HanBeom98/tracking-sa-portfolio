@@ -37,6 +37,7 @@
   - SA 영어 미운영 정책 반영:
     - `scripts/check-source-of-truth.js`에서 `src/domains/games/sudden-attack/**`는 `public/en` 미러 검사 대상에서 제외.
     - 운영 기준: SA는 한국어 경로(`/games/sudden-attack/`)만 유지.
+    - `public/en/index.html`의 SA 카드 노출 제거(EN 홈 진입점 비노출).
 - 중복/운영 리스크:
   - `src`-`public` 동일 JS 중복: 133개.
   - `src`-`public/en` 동일 JS 중복: 123개.
