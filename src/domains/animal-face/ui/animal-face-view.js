@@ -1,3 +1,5 @@
+import { bindGenderButtons } from "../../../shared/ui/gender-button-group.js";
+
 function createAnimalFaceTemplate(t) {
   return `
   <style>
@@ -189,13 +191,7 @@ export function bindAnimalFaceViewEvents(view, handlers) {
     handlers.onFileSelected?.(event.dataTransfer?.files?.[0]);
   };
 
-  view.genderButtons.forEach((button) => {
-    button.onclick = () => {
-      view.genderButtons.forEach((btn) => btn.classList.remove("active"));
-      button.classList.add("active");
-      handlers.onGenderChanged?.(button.dataset.gender || "male");
-    };
-  });
+  bindGenderButtons(view.genderButtons, handlers.onGenderChanged);
 
   view.predictBtn.onclick = () => handlers.onPredict?.();
   view.resetBtn.onclick = () => handlers.onReset?.();

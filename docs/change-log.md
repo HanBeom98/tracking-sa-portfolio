@@ -26,6 +26,14 @@
     - `news/application/news-admin-actions.js` -> `news/ui/news-admin-actions.js`
   - 연관 import 경로(`src/public/public-en`) 일괄 갱신.
   - `npm run check:ddd-boundary` / `npm run check:source-of-truth` / `npm run test:unit:news` 통과.
+- **추가 진행 (중복 제거 - gender button binding)**:
+  - 공통 유틸 추가: `src/shared/ui/gender-button-group.js`
+  - 적용:
+    - `src/domains/animal-face/ui/animal-face-view.js`
+    - `src/domains/fortune/ui/fortune-view.js`
+    - `src/domains/lucky-recommendation/ui/lucky-view.js`
+  - 동일 동작(버튼 active 토글 + `onGenderChanged` 콜백)을 3개 도메인에서 공통 함수로 통합.
+  - `public`, `public/en` 미러 파일 동기화 후 `npm run check:ddd-boundary` / `npm run check:source-of-truth` 통과.
 - **추가 진행 (board)**:
   - `board/application/authGateway.js`에서 `window` 직접 접근 제거.
   - `board/application/write-auth.js`에서 경로 계산 시 `window.location` 직접 의존 제거.

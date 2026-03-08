@@ -1,3 +1,5 @@
+import { bindGenderButtons } from "../../../shared/ui/gender-button-group.js";
+
 export function renderFortuneView(root, text) {
   root.innerHTML = `
   <style>
@@ -168,13 +170,7 @@ export function populateBirthSelectors(view, copy) {
 
 export function bindFortuneEvents(view, handlers) {
   if (!view) return;
-  view.genderButtons.forEach((button) => {
-    button.onclick = () => {
-      view.genderButtons.forEach((btn) => btn.classList.remove("active"));
-      button.classList.add("active");
-      handlers.onGenderChanged?.(button.dataset.gender || "male");
-    };
-  });
+  bindGenderButtons(view.genderButtons, handlers.onGenderChanged);
   if (view.predictButton) {
     view.predictButton.onclick = () => handlers.onPredict?.();
   }
