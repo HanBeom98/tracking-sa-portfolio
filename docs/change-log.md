@@ -9,7 +9,7 @@
   - 소스 중복(`src` vs `public` vs `public/en`)
 - **결과 요약**:
   - 신규 DDD 위반: 없음
-  - 레거시 baseline 위반: 4개 파일 유지
+  - 레거시 baseline 위반: 0개
   - 동일 JS 중복: `src`-`public` 133개, `src`-`public/en` 123개
 - **추가 진행 (account)**:
   - `account/application/account-view-model.js`에서 `window.getTranslation` 직접 접근 제거.
@@ -18,6 +18,14 @@
 - **추가 진행 (news-client)**:
   - `news/application/news-client.js`에서 `window/document` 직접 접근 제거.
   - `npm run test:unit:news` / `npm run check:ddd-boundary` / `npm run check:source-of-truth` 통과.
+- **추가 진행 (baseline 0 마감)**:
+  - UI/서비스 성격 파일을 `application` 레이어 밖으로 이동해 경계 위반 4건 정리:
+    - `games/application/gameService.js` -> `games/service/game-service.js`
+    - `games/tetris/application/tetris-game.js` -> `games/tetris/ui/tetris-game.js`
+    - `games/ai-evolution/application/ai-evolution-game.js` -> `games/ai-evolution/ui/ai-evolution-game.js`
+    - `news/application/news-admin-actions.js` -> `news/ui/news-admin-actions.js`
+  - 연관 import 경로(`src/public/public-en`) 일괄 갱신.
+  - `npm run check:ddd-boundary` / `npm run check:source-of-truth` / `npm run test:unit:news` 통과.
 - **추가 진행 (board)**:
   - `board/application/authGateway.js`에서 `window` 직접 접근 제거.
   - `board/application/write-auth.js`에서 경로 계산 시 `window.location` 직접 의존 제거.

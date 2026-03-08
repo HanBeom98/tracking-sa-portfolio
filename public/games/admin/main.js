@@ -1,4 +1,4 @@
-import { gameService } from "../application/gameService.js";
+import { gameService } from "../service/game-service.js";
 import { gameRenderer } from "../ui/gameRenderer.js";
 
 async function checkAdmin() {

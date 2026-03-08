@@ -1,4 +1,4 @@
-import { gameService } from "../application/gameService.js";
+import { gameService } from "../service/game-service.js";
 
 function t(key, fallback) {
   return typeof window !== "undefined" && window.getTranslation

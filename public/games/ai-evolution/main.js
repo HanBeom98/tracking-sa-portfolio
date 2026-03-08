@@ -1,4 +1,4 @@
-import { AIEvolution2048 } from "./application/ai-evolution-game.js";
+import { AIEvolution2048 } from "./ui/ai-evolution-game.js";
 import { initAiEvolutionFirebase } from "./infra/firebase-runtime.js";
 
 /**

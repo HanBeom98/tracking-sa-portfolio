@@ -3,12 +3,17 @@
 ## Progress Update (2026-03-08)
 - 아키텍처 점검 결과:
   - `npm run check:ddd-boundary` 기준 **신규 위반은 없음**.
-  - 단, `application` 레이어 레거시 위반 baseline 4개 파일이 남아 있음.
+  - `application` 레이어 레거시 위반 baseline **0개**(잔여 없음).
 - 2026-03-08 단계 진행:
   - `board/application/authGateway.js`의 `window.*` 직접 접근 제거.
   - `board/application/write-auth.js`의 `window.location` 의존 제거.
   - `account/application/account-view-model.js`의 `window.getTranslation` 직접 접근 제거.
   - `news/application/news-client.js`의 `window/document` 직접 접근 제거(`globalThis` 기반 접근으로 전환).
+  - 레이어 재배치로 남은 4개 위반 해소:
+    - `games/application/gameService.js` -> `games/service/game-service.js`
+    - `games/tetris/application/tetris-game.js` -> `games/tetris/ui/tetris-game.js`
+    - `games/ai-evolution/application/ai-evolution-game.js` -> `games/ai-evolution/ui/ai-evolution-game.js`
+    - `news/application/news-admin-actions.js` -> `news/ui/news-admin-actions.js`
 - 중복/운영 리스크:
   - `src`-`public` 동일 JS 중복: 133개.
   - `src`-`public/en` 동일 JS 중복: 123개.

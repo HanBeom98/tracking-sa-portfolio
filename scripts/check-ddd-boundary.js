@@ -16,12 +16,7 @@ const FORBIDDEN_RULES = [
 ];
 
 // Temporary debt baseline (Day 1): allows existing violations but blocks new ones.
-const ALLOWED_LEGACY_FILES = new Set([
-  "src/domains/games/application/gameService.js",
-  "src/domains/games/ai-evolution/application/ai-evolution-game.js",
-  "src/domains/games/tetris/application/tetris-game.js",
-  "src/domains/news/application/news-admin-actions.js",
-]);
+const ALLOWED_LEGACY_FILES = new Set([]);
 
 function walkDirectory(dirPath, result = []) {
   const entries = fs.readdirSync(dirPath, { withFileTypes: true });

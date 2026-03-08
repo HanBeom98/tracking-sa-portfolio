@@ -1,4 +1,4 @@
-import { TetrisGame } from "./application/tetris-game.js";
+import { TetrisGame } from "./ui/tetris-game.js";
 import { initTetrisFirebase } from "./infra/firebase-runtime.js";
 
 initTetrisFirebase();

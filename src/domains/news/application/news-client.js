@@ -1,7 +1,7 @@
 import { resolveNewsLocale } from "./news-routing.js";
 import { hydrateNewsIndex } from "./news-index-page.js";
 import { hydrateEnglishNewsArticle } from "./news-article-page.js";
-import { mountAdminDeleteButton } from "./news-admin-actions.js";
+import { mountAdminDeleteButton } from "../ui/news-admin-actions.js";
 import { setupPagination } from "./news-pagination.js";
 
 function getWindowObject() {
