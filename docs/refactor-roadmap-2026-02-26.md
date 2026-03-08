@@ -18,6 +18,10 @@
     - `src/shared/ui/gender-button-group.js` 추가.
     - `animal-face`, `fortune`, `lucky-recommendation`의 성별 버튼 active 토글/콜백 바인딩 중복 제거.
     - `npm run check:ddd-boundary` / `npm run check:source-of-truth` 통과.
+  - 중복 제거(날짜 셀렉터):
+    - `src/shared/ui/date-selectors.js` 추가.
+    - `fortune`, `lucky-recommendation`의 월/일(및 연도) 옵션 생성 루프 공통화.
+    - `npm run check:ddd-boundary` 통과(`source-of-truth`는 public sync 후 검증).
 - 중복/운영 리스크:
   - `src`-`public` 동일 JS 중복: 133개.
   - `src`-`public/en` 동일 JS 중복: 123개.

@@ -34,6 +34,13 @@
     - `src/domains/lucky-recommendation/ui/lucky-view.js`
   - 동일 동작(버튼 active 토글 + `onGenderChanged` 콜백)을 3개 도메인에서 공통 함수로 통합.
   - `public`, `public/en` 미러 파일 동기화 후 `npm run check:ddd-boundary` / `npm run check:source-of-truth` 통과.
+- **추가 진행 (중복 제거 - date selector binding)**:
+  - 공통 유틸 추가: `src/shared/ui/date-selectors.js`
+  - 적용:
+    - `src/domains/fortune/ui/fortune-view.js`
+    - `src/domains/lucky-recommendation/ui/lucky-view.js`
+  - 월/일(및 연도) 셀렉트 옵션 생성 중복 루프를 공통 함수로 통합.
+  - `npm run check:ddd-boundary` 통과.
 - **추가 진행 (board)**:
   - `board/application/authGateway.js`에서 `window` 직접 접근 제거.
   - `board/application/write-auth.js`에서 경로 계산 시 `window.location` 직접 의존 제거.
