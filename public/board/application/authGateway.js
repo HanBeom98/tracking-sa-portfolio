@@ -1,5 +1,18 @@
+function getGlobal(key) {
+  if (typeof globalThis !== "object" || !globalThis) return undefined;
+  return globalThis[key];
+}
+
+function getWindowObject() {
+  const candidate = getGlobal("window");
+  return candidate && typeof candidate === "object" ? candidate : null;
+}
+
 function getGateway() {
-  return window.AuthGateway || null;
+  const direct = getGlobal("AuthGateway");
+  if (direct) return direct;
+  const win = getWindowObject();
+  return win?.AuthGateway || null;
 }
 
 async function waitAuthReady() {
@@ -7,8 +20,13 @@ async function waitAuthReady() {
   if (gateway && gateway.waitForReady) {
     return gateway.waitForReady();
   }
-  if (window.authStateReady) {
-    return window.authStateReady;
+  const direct = getGlobal("authStateReady");
+  if (direct) {
+    return direct;
+  }
+  const win = getWindowObject();
+  if (win?.authStateReady) {
+    return win.authStateReady;
   }
   return null;
 }
@@ -18,7 +36,10 @@ function getCurrentUser() {
   if (gateway && gateway.getCurrentUser) {
     return gateway.getCurrentUser();
   }
-  return typeof window.getCurrentUser === "function" ? window.getCurrentUser() : null;
+  const direct = getGlobal("getCurrentUser");
+  if (typeof direct === "function") return direct();
+  const win = getWindowObject();
+  return typeof win?.getCurrentUser === "function" ? win.getCurrentUser() : null;
 }
 
 function getCurrentUserProfile() {
@@ -26,7 +47,10 @@ function getCurrentUserProfile() {
   if (gateway && gateway.getCurrentUserProfile) {
     return gateway.getCurrentUserProfile();
   }
-  return typeof window.getCurrentUserProfile === "function" ? window.getCurrentUserProfile() : null;
+  const direct = getGlobal("getCurrentUserProfile");
+  if (typeof direct === "function") return direct();
+  const win = getWindowObject();
+  return typeof win?.getCurrentUserProfile === "function" ? win.getCurrentUserProfile() : null;
 }
 
 async function requireAuth({ redirectTo } = {}) {
@@ -34,8 +58,13 @@ async function requireAuth({ redirectTo } = {}) {
   if (gateway && gateway.requireAuth) {
     return gateway.requireAuth({ redirectTo });
   }
-  if (window.requireAuth) {
-    return window.requireAuth({ redirectTo });
+  const direct = getGlobal("requireAuth");
+  if (typeof direct === "function") {
+    return direct({ redirectTo });
+  }
+  const win = getWindowObject();
+  if (typeof win?.requireAuth === "function") {
+    return win.requireAuth({ redirectTo });
   }
   return null;
 }
@@ -45,7 +74,10 @@ async function getAuthService() {
   if (gateway && gateway.getAuthService) {
     return gateway.getAuthService();
   }
-  return window.authDomainReady || null;
+  const direct = getGlobal("authDomainReady");
+  if (direct) return direct;
+  const win = getWindowObject();
+  return win?.authDomainReady || null;
 }
 
 export { waitAuthReady, getCurrentUser, getCurrentUserProfile, requireAuth, getAuthService };

@@ -9,8 +9,12 @@
   - 소스 중복(`src` vs `public` vs `public/en`)
 - **결과 요약**:
   - 신규 DDD 위반: 없음
-  - 레거시 baseline 위반: 8개 파일 유지
+  - 레거시 baseline 위반: 6개 파일 유지
   - 동일 JS 중복: `src`-`public` 133개, `src`-`public/en` 123개
+- **추가 진행 (board)**:
+  - `board/application/authGateway.js`에서 `window` 직접 접근 제거.
+  - `board/application/write-auth.js`에서 경로 계산 시 `window.location` 직접 의존 제거.
+  - `npm run test:unit:board` / `npm run check:ddd-boundary` / `npm run check:source-of-truth` 통과.
 - **판단**:
   - 구조 개선은 진행 중이나, `src` 단일 소스 운영은 아직 미완료.
 - **후속 액션**:

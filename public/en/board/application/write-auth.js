@@ -2,9 +2,19 @@ import { getCurrentUser as getBoardCurrentUser, requireAuth as requireBoardAuth 
 
 const DEFAULT_WRITE_PATH = "/board/write";
 
+function getGlobal(key) {
+  if (typeof globalThis !== "object" || !globalThis) return undefined;
+  return globalThis[key];
+}
+
 const getWritePath = () => {
-  if (typeof window !== "undefined" && window.location) {
-    return window.location.pathname + window.location.search;
+  const location = getGlobal("location");
+  if (location) {
+    return (location.pathname || DEFAULT_WRITE_PATH) + (location.search || "");
+  }
+  const win = getGlobal("window");
+  if (win?.location) {
+    return (win.location.pathname || DEFAULT_WRITE_PATH) + (win.location.search || "");
   }
   return DEFAULT_WRITE_PATH;
 };

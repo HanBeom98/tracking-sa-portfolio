@@ -18,8 +18,6 @@ const FORBIDDEN_RULES = [
 // Temporary debt baseline (Day 1): allows existing violations but blocks new ones.
 const ALLOWED_LEGACY_FILES = new Set([
   "src/domains/account/application/account-view-model.js",
-  "src/domains/board/application/authGateway.js",
-  "src/domains/board/application/write-auth.js",
   "src/domains/games/application/gameService.js",
   "src/domains/games/ai-evolution/application/ai-evolution-game.js",
   "src/domains/games/tetris/application/tetris-game.js",

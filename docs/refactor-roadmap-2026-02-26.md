@@ -3,7 +3,10 @@
 ## Progress Update (2026-03-08)
 - 아키텍처 점검 결과:
   - `npm run check:ddd-boundary` 기준 **신규 위반은 없음**.
-  - 단, `application` 레이어 레거시 위반 baseline 8개 파일이 남아 있음.
+  - 단, `application` 레이어 레거시 위반 baseline 6개 파일이 남아 있음.
+- 2026-03-08 단계 진행:
+  - `board/application/authGateway.js`의 `window.*` 직접 접근 제거.
+  - `board/application/write-auth.js`의 `window.location` 의존 제거.
 - 중복/운영 리스크:
   - `src`-`public` 동일 JS 중복: 133개.
   - `src`-`public/en` 동일 JS 중복: 123개.
