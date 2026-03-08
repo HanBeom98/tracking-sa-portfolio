@@ -1,5 +1,23 @@
 # Change Log (Tracking SA)
 
+## 2026-03-08
+
+### review(architecture): DDD 구조/클린 코드/중복 점검
+- **점검 범위**:
+  - DDD 경계 준수(`npm run check:ddd-boundary`)
+  - 레이어 클린니스(`application`의 브라우저/DOM 의존)
+  - 소스 중복(`src` vs `public` vs `public/en`)
+- **결과 요약**:
+  - 신규 DDD 위반: 없음
+  - 레거시 baseline 위반: 8개 파일 유지
+  - 동일 JS 중복: `src`-`public` 133개, `src`-`public/en` 123개
+- **판단**:
+  - 구조 개선은 진행 중이나, `src` 단일 소스 운영은 아직 미완료.
+- **후속 액션**:
+  1. `src` 단일 소스 강제 가드(CI/검증 스크립트) 추가
+  2. `ALLOWED_LEGACY_FILES` 단계 축소 계획 수립
+  3. SA 도메인 변경 커밋을 기능 코드(`src`)와 산출물(`public`)로 분리 운영
+
 ## 2026-03-07
 
 ### fix(test): `app-shell-runtime` 유닛 테스트 종료 정체 해결

@@ -53,6 +53,13 @@ class FortunePremium extends HTMLElement {
     return window.getTranslation || ((_, fallback) => fallback);
   }
 
+  getCurrentLang() {
+    if (window.AppShell && typeof window.AppShell.getCurrentLang === "function") {
+      return window.AppShell.getCurrentLang();
+    }
+    return "ko";
+  }
+
   render() {
     this._copy = createFortuneCopy(this.getTranslate());
     this._view = renderFortuneView(this.shadowRoot, this._copy);
@@ -73,7 +80,7 @@ class FortunePremium extends HTMLElement {
   }
 
   async handlePredict() {
-    const lang = resolveFortuneLanguage();
+    const lang = resolveFortuneLanguage(this.getCurrentLang());
     const name = this._view?.nameInput?.value?.trim() || "";
     const year = this._view?.yearSelect?.value;
     const month = this._view?.monthSelect?.value;

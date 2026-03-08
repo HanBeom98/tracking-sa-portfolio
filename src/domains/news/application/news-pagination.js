@@ -1,8 +1,6 @@
 const PAGE_SIZE = 12;
 
-function setupPagination() {
-  const grid = document.querySelector(".news-grid");
-  const pagination = document.getElementById("news-pagination");
+function setupPagination({ grid, pagination, prevBtn, nextBtn, indicator }) {
   if (!grid || !pagination) return;
 
   const cards = Array.from(grid.querySelectorAll(".news-card-premium"));
@@ -13,9 +11,6 @@ function setupPagination() {
 
   let currentPage = 1;
   const totalPages = Math.ceil(cards.length / PAGE_SIZE);
-  const prevBtn = document.getElementById("prev-page");
-  const nextBtn = document.getElementById("next-page");
-  const indicator = document.getElementById("page-indicator");
 
   const renderPage = (page) => {
     currentPage = Math.max(1, Math.min(totalPages, page));

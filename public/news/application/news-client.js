@@ -26,7 +26,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
       
       // Initialize pagination for either static or hydrated content
-      setupPagination();
+      setupPagination({
+        grid,
+        pagination: document.getElementById("news-pagination"),
+        prevBtn: document.getElementById("prev-page"),
+        nextBtn: document.getElementById("next-page"),
+        indicator: document.getElementById("page-indicator"),
+      });
     } catch (err) {
       console.error("News index setup failed:", err);
     }

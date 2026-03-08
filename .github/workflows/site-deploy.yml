@@ -49,6 +49,9 @@ jobs:
       - name: Install Node dependencies
         run: npm ci
 
+      - name: Enforce Source Of Truth (src -> public mirrors)
+        run: npm run check:source-of-truth
+
       - uses: dorny/paths-filter@v3
         id: filter
         with:

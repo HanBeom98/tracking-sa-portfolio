@@ -20,14 +20,11 @@ const ALLOWED_LEGACY_FILES = new Set([
   "src/domains/account/application/account-view-model.js",
   "src/domains/board/application/authGateway.js",
   "src/domains/board/application/write-auth.js",
-  "src/domains/fortune/application/fortune-copy.js",
   "src/domains/games/application/gameService.js",
   "src/domains/games/ai-evolution/application/ai-evolution-game.js",
   "src/domains/games/tetris/application/tetris-game.js",
   "src/domains/news/application/news-admin-actions.js",
   "src/domains/news/application/news-client.js",
-  "src/domains/news/application/news-pagination.js",
-  "src/domains/search/application/search-data.js",
 ]);
 
 function walkDirectory(dirPath, result = []) {

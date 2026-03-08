@@ -1,8 +1,5 @@
-export function resolveFortuneLanguage() {
-  if (window.AppShell && typeof window.AppShell.getCurrentLang === "function") {
-    return window.AppShell.getCurrentLang();
-  }
-  return "ko";
+export function resolveFortuneLanguage(currentLang) {
+  return currentLang === "en" ? "en" : "ko";
 }
 
 export function createFortuneCopy(translate) {

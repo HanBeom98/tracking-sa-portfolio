@@ -1,10 +1,29 @@
 export function decodeHtmlEntities(text = "") {
-  if (typeof document === "undefined" || !document.createElement) {
-    return text;
-  }
-  const temp = document.createElement("textarea");
-  temp.innerHTML = text;
-  return temp.value;
+  if (!text || typeof text !== "string") return "";
+
+  const named = {
+    amp: "&",
+    lt: "<",
+    gt: ">",
+    quot: '"',
+    apos: "'",
+    nbsp: " ",
+  };
+
+  return text.replace(/&(#x?[0-9a-fA-F]+|[a-zA-Z]+);/g, (full, raw) => {
+    if (!raw) return full;
+    if (raw[0] === "#") {
+      const hex = raw[1] === "x" || raw[1] === "X";
+      const value = hex ? Number.parseInt(raw.slice(2), 16) : Number.parseInt(raw.slice(1), 10);
+      if (Number.isNaN(value)) return full;
+      try {
+        return String.fromCodePoint(value);
+      } catch {
+        return full;
+      }
+    }
+    return Object.prototype.hasOwnProperty.call(named, raw) ? named[raw] : full;
+  });
 }
 
 function stripTags(text = "") {

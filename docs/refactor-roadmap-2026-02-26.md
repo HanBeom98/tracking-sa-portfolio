@@ -1,5 +1,20 @@
 # Refactor Roadmap (2026-02-26)
 
+## Progress Update (2026-03-08)
+- 아키텍처 점검 결과:
+  - `npm run check:ddd-boundary` 기준 **신규 위반은 없음**.
+  - 단, `application` 레이어 레거시 위반 baseline 8개 파일이 남아 있음.
+- 중복/운영 리스크:
+  - `src`-`public` 동일 JS 중복: 133개.
+  - `src`-`public/en` 동일 JS 중복: 123개.
+  - SA 도메인 핵심 파일이 `src`, `public`, `public/en` 3중 동기화 상태.
+- 판단:
+  - 방향은 DDD로 정렬되고 있으나, 아직 `src` 단일 소스 원칙이 완전히 고정된 상태는 아님.
+- Immediate TODO:
+  1. `src` 외 수동 편집 금지 규칙을 CI 가드로 강제.
+  2. `ALLOWED_LEGACY_FILES`를 주차 단위로 축소(우선순위: `news` -> `search` -> `games`).
+  3. SA 변경은 `src`만 수정하고 `public/**`는 빌드 산출물로만 반영.
+
 ## Goal
 - 기능 개발 속도를 유지하면서 중복 수정, 배포 충돌, 인증 로직 분산 문제를 줄인다.
 - 기준: `src` 중심 개발, 예측 가능한 배포, 도메인별 책임 분리.
