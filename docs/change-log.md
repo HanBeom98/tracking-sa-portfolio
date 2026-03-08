@@ -41,6 +41,13 @@
     - `src/domains/lucky-recommendation/ui/lucky-view.js`
   - 월/일(및 연도) 셀렉트 옵션 생성 중복 루프를 공통 함수로 통합.
   - `npm run check:ddd-boundary` 통과.
+- **추가 진행 (중복 제거 - smooth scroll helper)**:
+  - 공통 유틸 추가: `src/shared/ui/scroll.js`
+  - 적용:
+    - `src/domains/fortune/ui/fortune-view.js`
+    - `src/domains/lucky-recommendation/ui/lucky-view.js`
+  - 결과 렌더 후 스크롤 이동 로직(`scrollIntoView`)을 공통 함수로 통합.
+  - `npm run check:ddd-boundary` 통과.
 - **추가 진행 (board)**:
   - `board/application/authGateway.js`에서 `window` 직접 접근 제거.
   - `board/application/write-auth.js`에서 경로 계산 시 `window.location` 직접 의존 제거.

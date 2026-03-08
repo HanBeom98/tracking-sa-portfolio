@@ -1,5 +1,6 @@
 import { bindGenderButtons } from "../../../shared/ui/gender-button-group.js";
 import { populateMonthDaySelectors } from "../../../shared/ui/date-selectors.js";
+import { scrollIntoViewNearest } from "../../../shared/ui/scroll.js";
 
 export function renderLuckyView(root, copy) {
   root.innerHTML = `
@@ -169,7 +170,7 @@ export function renderLuckyLoading(view, copy) {
 
 export function renderLuckyResult(view, html) {
   view.resultArea.innerHTML = html;
-  view.resultArea.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  scrollIntoViewNearest(view.resultArea);
 }
 
 export function renderLuckyError(view, message) {

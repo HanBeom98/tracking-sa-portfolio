@@ -22,6 +22,10 @@
     - `src/shared/ui/date-selectors.js` 추가.
     - `fortune`, `lucky-recommendation`의 월/일(및 연도) 옵션 생성 루프 공통화.
     - `npm run check:ddd-boundary` 통과(`source-of-truth`는 public sync 후 검증).
+  - 중복 제거(결과 스크롤):
+    - `src/shared/ui/scroll.js` 추가.
+    - `fortune`, `lucky-recommendation`의 `scrollIntoView` 호출 중복을 공통 유틸로 통합.
+    - `npm run check:ddd-boundary` 통과(`source-of-truth`는 public sync 후 검증).
 - 중복/운영 리스크:
   - `src`-`public` 동일 JS 중복: 133개.
   - `src`-`public/en` 동일 JS 중복: 123개.
