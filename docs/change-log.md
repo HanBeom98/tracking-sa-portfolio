@@ -66,6 +66,12 @@
   - 연동:
     - `package.json` -> `npm run check:public-edit-policy`
     - `.github/workflows/site-deploy.yml` test job에서 필수 검사로 실행.
+- **추가 진행 (SA 영어 미운영 정책 반영)**:
+  - 대상: `scripts/check-source-of-truth.js`
+  - 변경:
+    - `src/domains/games/sudden-attack/**`는 `public/en/**` 미러 정합성 검사에서 제외.
+  - 운영 정책:
+    - 서든어택 전적 검색은 한국어 경로(`/games/sudden-attack/`)만 운영.
 - **추가 진행 (board)**:
   - `board/application/authGateway.js`에서 `window` 직접 접근 제거.
   - `board/application/write-auth.js`에서 경로 계산 시 `window.location` 직접 의존 제거.

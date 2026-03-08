@@ -34,6 +34,9 @@
     - `scripts/check-public-edit-policy.js` 추가.
     - 규칙: `public` 미러 변경은 source commit 이후 `chore(sync):` 커밋으로만 허용.
     - `package.json`에 `check:public-edit-policy` 추가, `site-deploy.yml` 테스트 단계에 연결.
+  - SA 영어 미운영 정책 반영:
+    - `scripts/check-source-of-truth.js`에서 `src/domains/games/sudden-attack/**`는 `public/en` 미러 검사 대상에서 제외.
+    - 운영 기준: SA는 한국어 경로(`/games/sudden-attack/`)만 유지.
 - 중복/운영 리스크:
   - `src`-`public` 동일 JS 중복: 133개.
   - `src`-`public/en` 동일 JS 중복: 123개.
