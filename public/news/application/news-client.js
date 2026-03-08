@@ -4,49 +4,69 @@ import { hydrateEnglishNewsArticle } from "./news-article-page.js";
 import { mountAdminDeleteButton } from "./news-admin-actions.js";
 import { setupPagination } from "./news-pagination.js";
 
-document.addEventListener("DOMContentLoaded", async () => {
-  if (!window.db) return;
+function getWindowObject() {
+  const win = globalThis["window"];
+  if (win && typeof win === "object") return win;
+  return globalThis;
+}
+
+function getDocumentObject() {
+  const doc = globalThis["document"];
+  return doc && typeof doc === "object" ? doc : null;
+}
+
+async function initNewsClient() {
+  const win = getWindowObject();
+  const doc = getDocumentObject();
+  if (!doc || !win?.db) return;
 
   // Re-apply translations to ensure hero title and static elements are translated
-  if (typeof window.applyTranslations === 'function') {
-    window.applyTranslations();
+  if (typeof win.applyTranslations === "function") {
+    win.applyTranslations();
   }
 
-  const path = window.location.pathname || "/";
-  const storedLang = localStorage.getItem("lang") || "ko";
+  const path = win.location?.pathname || "/";
+  const storedLang = win.localStorage?.getItem("lang") || "ko";
   const { isEn, isEnPath } = resolveNewsLocale({ path, storedLang });
 
-  const grid = document.querySelector(".news-grid");
+  const grid = doc.querySelector(".news-grid");
   if (grid) {
     try {
       // Always hydrate in English mode to replace static Korean content,
       // or if the grid is completely empty.
       if (isEn || !grid.children.length) {
-        await hydrateNewsIndex({ db: window.db, grid, isEn });
+        await hydrateNewsIndex({ db: win.db, grid, isEn });
       }
-      
+
       // Initialize pagination for either static or hydrated content
       setupPagination({
         grid,
-        pagination: document.getElementById("news-pagination"),
-        prevBtn: document.getElementById("prev-page"),
-        nextBtn: document.getElementById("next-page"),
-        indicator: document.getElementById("page-indicator"),
+        pagination: doc.getElementById("news-pagination"),
+        prevBtn: doc.getElementById("prev-page"),
+        nextBtn: doc.getElementById("next-page"),
+        indicator: doc.getElementById("page-indicator"),
       });
     } catch (err) {
       console.error("News index setup failed:", err);
     }
   }
 
-  const articleTitle = document.querySelector(".news-article-title");
-  const articleContent = document.querySelector(".news-article-content");
+  const articleTitle = doc.querySelector(".news-article-title");
+  const articleContent = doc.querySelector(".news-article-content");
   if (articleTitle && articleContent) {
     try {
-      await hydrateEnglishNewsArticle({ db: window.db, path, isEn, articleTitle, articleContent });
+      await hydrateEnglishNewsArticle({ db: win.db, path, isEn, articleTitle, articleContent });
     } catch (err) {
       console.error("News article fetch failed:", err);
     }
   }
 
   await mountAdminDeleteButton({ path, isEnPath });
-});
+}
+
+const doc = getDocumentObject();
+if (doc?.readyState === "loading") {
+  doc.addEventListener("DOMContentLoaded", initNewsClient);
+} else {
+  initNewsClient();
+}

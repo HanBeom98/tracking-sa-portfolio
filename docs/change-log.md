@@ -9,12 +9,15 @@
   - 소스 중복(`src` vs `public` vs `public/en`)
 - **결과 요약**:
   - 신규 DDD 위반: 없음
-  - 레거시 baseline 위반: 5개 파일 유지
+  - 레거시 baseline 위반: 4개 파일 유지
   - 동일 JS 중복: `src`-`public` 133개, `src`-`public/en` 123개
 - **추가 진행 (account)**:
   - `account/application/account-view-model.js`에서 `window.getTranslation` 직접 접근 제거.
   - `tests/unit/account-view-model.test.js` 추가.
   - `npm run test:unit:account` / `npm run check:ddd-boundary` / `npm run check:source-of-truth` 통과.
+- **추가 진행 (news-client)**:
+  - `news/application/news-client.js`에서 `window/document` 직접 접근 제거.
+  - `npm run test:unit:news` / `npm run check:ddd-boundary` / `npm run check:source-of-truth` 통과.
 - **추가 진행 (board)**:
   - `board/application/authGateway.js`에서 `window` 직접 접근 제거.
   - `board/application/write-auth.js`에서 경로 계산 시 `window.location` 직접 의존 제거.

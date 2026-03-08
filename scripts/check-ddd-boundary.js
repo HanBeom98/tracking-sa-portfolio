@@ -21,7 +21,6 @@ const ALLOWED_LEGACY_FILES = new Set([
   "src/domains/games/ai-evolution/application/ai-evolution-game.js",
   "src/domains/games/tetris/application/tetris-game.js",
   "src/domains/news/application/news-admin-actions.js",
-  "src/domains/news/application/news-client.js",
 ]);
 
 function walkDirectory(dirPath, result = []) {
