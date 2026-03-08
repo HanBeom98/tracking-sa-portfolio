@@ -1,5 +1,6 @@
 import { bindGenderButtons } from "../../../shared/ui/gender-button-group.js";
 import { populateMonthDaySelectors, populateYearSelector } from "../../../shared/ui/date-selectors.js";
+import { scrollIntoViewNearest } from "../../../shared/ui/scroll.js";
 
 export function renderFortuneView(root, text) {
   root.innerHTML = `
@@ -189,7 +190,7 @@ export function renderFortuneLoading(view, copy) {
 export function renderFortuneHtml(view, html) {
   if (!view?.resultArea) return;
   view.resultArea.innerHTML = html;
-  view.resultArea.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  scrollIntoViewNearest(view.resultArea);
 }
 
 export function renderFortuneError(view, message) {
