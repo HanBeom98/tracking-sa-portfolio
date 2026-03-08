@@ -1,4 +1,5 @@
 import { bindGenderButtons } from "../../../shared/ui/gender-button-group.js";
+import { populateMonthDaySelectors } from "../../../shared/ui/date-selectors.js";
 
 export function renderLuckyView(root, copy) {
   root.innerHTML = `
@@ -142,13 +143,7 @@ export function renderLuckyView(root, copy) {
 export function populateLuckyBirthSelectors(view, copy) {
   const monthSuffix = copy.monthSuffix || "";
   const daySuffix = copy.daySuffix || "";
-
-  for (let month = 1; month <= 12; month += 1) {
-    view.monthSelect.appendChild(new Option(`${month}${monthSuffix}`, String(month)));
-  }
-  for (let day = 1; day <= 31; day += 1) {
-    view.daySelect.appendChild(new Option(`${day}${daySuffix}`, String(day)));
-  }
+  populateMonthDaySelectors(view.monthSelect, view.daySelect, monthSuffix, daySuffix);
 }
 
 export function bindLuckyEvents(view, handlers) {

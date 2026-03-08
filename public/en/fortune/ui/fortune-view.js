@@ -1,4 +1,5 @@
 import { bindGenderButtons } from "../../../shared/ui/gender-button-group.js";
+import { populateMonthDaySelectors, populateYearSelector } from "../../../shared/ui/date-selectors.js";
 
 export function renderFortuneView(root, text) {
   root.innerHTML = `
@@ -157,15 +158,8 @@ export function populateBirthSelectors(view, copy) {
   const monthSuffix = copy.monthSuffix || "";
   const daySuffix = copy.daySuffix || "";
 
-  for (let year = currentYear; year >= 1950; year -= 1) {
-    view.yearSelect.add(new Option(String(year), String(year)));
-  }
-  for (let month = 1; month <= 12; month += 1) {
-    view.monthSelect.add(new Option(`${month}${monthSuffix}`, String(month)));
-  }
-  for (let day = 1; day <= 31; day += 1) {
-    view.daySelect.add(new Option(`${day}${daySuffix}`, String(day)));
-  }
+  populateYearSelector(view.yearSelect, currentYear, 1950);
+  populateMonthDaySelectors(view.monthSelect, view.daySelect, monthSuffix, daySuffix);
 }
 
 export function bindFortuneEvents(view, handlers) {
