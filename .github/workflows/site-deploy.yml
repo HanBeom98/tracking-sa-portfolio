@@ -1,27 +1,6 @@
 name: Site Deploy (Test & Build)
 
 on:
-#  push:
-#    branches:
-#      - main
-#    paths:
-#      - "src/**"
-#      - "functions/**"
-#      - "tests/**"
-#      - "main.py"
-#      - "requirements.txt"
-#      - "package.json"
-#      - "package-lock.json"
-#      - "firebase.json"
-#      - "firestore.rules"
-#      - "firestore.indexes.json"
-  workflow_dispatch:
-      - "index.html"
-      - "logo.svg"
-      - "favicon.svg"
-      - "ads.txt"
-      - "_redirects"
-      - ".github/workflows/site-deploy.yml"
   workflow_dispatch:
 
 permissions:

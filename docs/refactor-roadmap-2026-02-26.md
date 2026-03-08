@@ -40,6 +40,10 @@
     - `public/en/index.html`의 SA 카드 노출 제거(EN 홈 진입점 비노출).
     - `public/en/games/sudden-attack/**` 산출물 제거.
     - `/en/games/sudden-attack/* -> /games/sudden-attack/:splat` 리다이렉트 추가.
+  - 운영 마감 정리:
+    - `.github/workflows/site-deploy.yml`의 중복/깨진 `workflow_dispatch` 블록 정리.
+    - `src/shared/infra/builder.py`에서 SA EN 빌드 제외 및 EN 검색 static 항목(SA) 제거.
+    - `scripts/public_sync_map.txt`를 최신 경로로 정리해 `npm run check:public-sync` 통과 상태 확보.
 - 중복/운영 리스크:
   - `src`-`public` 동일 JS 중복: 133개.
   - `src`-`public/en` 동일 JS 중복: 123개.

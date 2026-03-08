@@ -58,6 +58,7 @@ def generate_public_site(incremental=False):
         "auth", "auth/signup", "account", "account/domain",
         "futures-estimate", "glossary"
     ]
+    en_excluded_domains = {"games/sudden-attack"}
     
     from src.shared.infra.i18n_map import STATIC_REPLACEMENTS as static_replacements
 
@@ -72,21 +73,25 @@ def generate_public_site(incremental=False):
                 os.makedirs(os.path.dirname(dest_ko), exist_ok=True)
                 shutil.copy2(src, dest_ko)
             
+            current_destinations = [dest_ko]
+
             # 4-2. 영어 버전 생성 (물리적 복제)
-            dest_en = os.path.join(PUBLIC_DIR, "en", domain)
-            if os.path.isdir(src):
-                shutil.copytree(src, dest_en, dirs_exist_ok=True)
-            else:
-                os.makedirs(os.path.dirname(dest_en), exist_ok=True)
-                shutil.copy2(src, dest_en)
+            if domain not in en_excluded_domains:
+                dest_en = os.path.join(PUBLIC_DIR, "en", domain)
+                if os.path.isdir(src):
+                    shutil.copytree(src, dest_en, dirs_exist_ok=True)
+                else:
+                    os.makedirs(os.path.dirname(dest_en), exist_ok=True)
+                    shutil.copy2(src, dest_en)
+                current_destinations.append(dest_en)
 
             # 도메인 번역 파일(translations.js)이 있다면 명시적으로 en 폴더에도 복사 확인
             domain_trans_src = os.path.join(src, "translations.js")
-            if os.path.exists(domain_trans_src):
+            if os.path.exists(domain_trans_src) and domain not in en_excluded_domains:
                 shutil.copy2(domain_trans_src, os.path.join(dest_en, "translations.js"))
 
             # HTML 후처리 (KO/EN 모두 수행)
-            for current_dest in [dest_ko, dest_en]:
+            for current_dest in current_destinations:
                 if os.path.isdir(current_dest):
                     for root, _, files in os.walk(current_dest):
                         for file in files:
@@ -374,7 +379,6 @@ def build_search_index():
             {"href": "/board?category=free", "title": "Free Board", "description": "Community space for free discussions", "keywords": ["community", "free", "board"]},
             {"href": "/futures-estimate/", "title": "KOSPI200 Prediction", "description": "AI-based KOSPI200 index direction forecast", "keywords": ["index", "futures", "K200"]},
             {"href": "/games/", "title": "Game Center", "description": "Play and share various classic and AI games", "keywords": ["games", "play", "entertainment"]},
-            {"href": "/games/sudden-attack/", "title": "SA Stats", "description": "Real-time Sudden Attack match statistics", "keywords": ["sudden", "attack", "stats", "rank"]},
             {"href": "/glossary/", "title": "AI Glossary", "description": "Comprehensive guide to IT and AI terminology", "keywords": ["dictionary", "terms", "glossary"]},
             {"href": "/ai-test/", "title": "AI Tendency Test", "description": "Discover which AI tech matches your personality", "keywords": ["test", "personality"]},
             {"href": "/animal-face/", "title": "Animal Face Test", "description": "AI analysis of your face type", "keywords": ["test", "animal face"]},

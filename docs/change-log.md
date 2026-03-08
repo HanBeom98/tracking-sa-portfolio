@@ -77,6 +77,19 @@
   - 산출물 정리:
     - `public/en/games/sudden-attack/**` 디렉터리 삭제.
     - `_redirects`, `public/_redirects`에 `/en/games/sudden-attack/*` -> `/games/sudden-attack/:splat` 301 추가.
+- **추가 진행 (운영 마감 - 워크플로/빌더/동기화맵 정리)**:
+  - `.github/workflows/site-deploy.yml`
+    - 중복 및 깨진 `workflow_dispatch` 선언 정리.
+  - `src/shared/infra/builder.py`
+    - SA 도메인을 EN 빌드 제외(`games/sudden-attack`).
+    - EN `search-index` static 항목에서 SA 제거.
+  - `scripts/public_sync_map.txt`
+    - board 경로(`application/ui` 기준) 최신화.
+    - `news-admin-actions`, `games` 레이어 이동 반영.
+    - `shared/assets/search.js`, `shared/ui/*`(gender/date/scroll) 동기화 매핑 추가.
+  - 검증:
+    - `npm run check:public-sync` 통과
+    - `npm run check:source-of-truth` 통과
 - **추가 진행 (board)**:
   - `board/application/authGateway.js`에서 `window` 직접 접근 제거.
   - `board/application/write-auth.js`에서 경로 계산 시 `window.location` 직접 의존 제거.
