@@ -277,6 +277,32 @@ export class CrewRepository {
     return `${ouid}__${matchId}`;
   }
 
+  extractManualAbandonCandidates(historyItem = {}) {
+    const matchId = historyItem.matchId || historyItem.id || "";
+    const matchDate = historyItem.matchDate || "";
+    if (!matchId || !matchDate) return [];
+
+    const manualOuids = Array.isArray(historyItem.manualAbandonOuids) ? historyItem.manualAbandonOuids : [];
+    const manualNicknames = Array.isArray(historyItem.manualAbandonNicknames) ? historyItem.manualAbandonNicknames : [];
+    const candidateCount = Math.max(manualOuids.length, manualNicknames.length);
+    const candidates = [];
+
+    for (let index = 0; index < candidateCount; index += 1) {
+      const ouid = String(manualOuids[index] || "").trim();
+      const nickname = String(manualNicknames[index] || "").trim();
+      if (!ouid && !nickname) continue;
+      candidates.push({
+        ouid,
+        nickname,
+        matchId,
+        matchDate,
+        mapName: historyItem.map || "알 수 없음"
+      });
+    }
+
+    return candidates;
+  }
+
   applyManualAbandonToMember(memberData, matchDate) {
     memberData.mmr += this.ABANDON_MMR_PENALTY;
     memberData.hsr += this.ABANDON_HSR_PENALTY;
@@ -374,6 +400,73 @@ export class CrewRepository {
       newHsr: nextHsr,
       loses: nextLoses
     };
+  }
+
+  async backfillManualAbandonEntries() {
+    if (!this.db) throw new Error('DB 연결 실패');
+
+    const [historySnapshot, manualEntries] = await Promise.all([
+      this.db.collection(this.HISTORY_COLLECTION).get(),
+      this.getManualAbandonEntries()
+    ]);
+
+    const existingIds = new Set(
+      manualEntries.map((entry) => this.buildManualAbandonDocId(entry.ouid, entry.matchId))
+    );
+    const pendingWrites = [];
+    let createdCount = 0;
+    let skippedCount = 0;
+
+    for (const doc of historySnapshot.docs) {
+      const historyItem = { matchId: doc.id, ...doc.data() };
+      const candidates = this.extractManualAbandonCandidates(historyItem);
+
+      for (const candidate of candidates) {
+        let resolvedOuid = candidate.ouid;
+        if (!resolvedOuid && candidate.nickname) {
+          resolvedOuid = await this.findOuidByNickname(candidate.nickname);
+        }
+        if (!resolvedOuid) {
+          skippedCount += 1;
+          continue;
+        }
+
+        const docId = this.buildManualAbandonDocId(resolvedOuid, candidate.matchId);
+        if (existingIds.has(docId)) {
+          skippedCount += 1;
+          continue;
+        }
+
+        pendingWrites.push({
+          docId,
+          payload: {
+            ouid: resolvedOuid,
+            nickname: candidate.nickname || resolvedOuid,
+            matchId: candidate.matchId,
+            matchDate: candidate.matchDate,
+            mapName: candidate.mapName,
+            mmrDiff: this.ABANDON_MMR_PENALTY,
+            hsrDiff: this.ABANDON_HSR_PENALTY,
+            backfilledAt: window.firebase.firestore.FieldValue.serverTimestamp(),
+            createdAt: window.firebase.firestore.FieldValue.serverTimestamp()
+          }
+        });
+        existingIds.add(docId);
+        createdCount += 1;
+      }
+    }
+
+    if (pendingWrites.length === 0) {
+      return { createdCount, skippedCount };
+    }
+
+    const batch = this.db.batch();
+    pendingWrites.forEach((item) => {
+      batch.set(this.db.collection(this.MANUAL_ABANDONS_COLLECTION).doc(item.docId), item.payload, { merge: true });
+    });
+    await batch.commit();
+
+    return { createdCount, skippedCount };
   }
 
   toDateSafe(value) {

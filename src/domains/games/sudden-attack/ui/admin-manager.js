@@ -110,6 +110,7 @@ export class AdminManager {
           </select>
           <button id="refreshPenaltyHistoryBtn" class="mini-btn update-name-btn" type="button">기록 새로고침</button>
           <button id="applyManualPenaltyBtn" class="mini-btn delete-member-btn" type="button">탈주 패널티 적용</button>
+          <button id="backfillManualPenaltyBtn" class="mini-btn individual-scan-btn" type="button">기존 패널티 이관</button>
         </div>
         <p class="manual-penalty-hint">스코어보드에서 빠진 탈주자를 수동으로 1패 처리합니다. 같은 경기에는 한 번만 적용됩니다.</p>
       </div>
@@ -131,6 +132,7 @@ export class AdminManager {
     actionBar.querySelector('#settleMMRBtn').addEventListener('click', (e) => this.handleSettleMMR(e.currentTarget));
     actionBar.querySelector('#refreshPenaltyHistoryBtn').addEventListener('click', () => this.renderManualPenaltyMatchOptions());
     actionBar.querySelector('#applyManualPenaltyBtn').addEventListener('click', (e) => this.handleManualAbandonPenalty(e.currentTarget));
+    actionBar.querySelector('#backfillManualPenaltyBtn').addEventListener('click', (e) => this.handleManualAbandonBackfill(e.currentTarget));
 
     const dateInput = actionBar.querySelector('#seasonStartDateInput');
     actionBar.querySelector('#updateSeasonDateBtn').addEventListener('click', async () => {
@@ -263,6 +265,23 @@ export class AdminManager {
       window.dispatchEvent(new CustomEvent('sa-rankings-updated'));
     } catch (err) {
       alert('적용 실패: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
+  }
+
+  async handleManualAbandonBackfill(btn) {
+    if (!confirm('기존 경기 기록에 남아 있는 수동 탈주 패널티 흔적을 영속 로그로 이관하시겠습니까?\n이미 이관된 항목은 건너뜁니다.')) return;
+
+    btn.disabled = true;
+    const originalText = btn.textContent;
+    btn.textContent = '이관 중...';
+    try {
+      const result = await this.crewRepo.backfillManualAbandonEntries();
+      alert(`수동 탈주 패널티 이관 완료\n생성: ${result.createdCount}건\n건너뜀: ${result.skippedCount}건`);
+    } catch (err) {
+      alert('이관 실패: ' + err.message);
     } finally {
       btn.disabled = false;
       btn.textContent = originalText;

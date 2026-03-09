@@ -111,3 +111,46 @@ test("CrewRepository can reapply a persisted manual abandon after repair", () =>
   });
   assert.equal(member.mmrHistory.at(-1).date, "2026-03-09T13:54:57.756Z");
 });
+
+test("CrewRepository extracts manual abandon backfill candidates from history", () => {
+  const repo = new CrewRepository(null);
+
+  const candidates = repo.extractManualAbandonCandidates({
+    matchId: "260309225457119001",
+    matchDate: "2026-03-09T13:54:57.756Z",
+    map: "크로스포트",
+    manualAbandonOuids: ["p10"],
+    manualAbandonNicknames: ["alt"]
+  });
+
+  assert.deepEqual(candidates, [
+    {
+      ouid: "p10",
+      nickname: "alt",
+      matchId: "260309225457119001",
+      matchDate: "2026-03-09T13:54:57.756Z",
+      mapName: "크로스포트"
+    }
+  ]);
+});
+
+test("CrewRepository extracts nickname-only manual abandon backfill candidates", () => {
+  const repo = new CrewRepository(null);
+
+  const candidates = repo.extractManualAbandonCandidates({
+    id: "legacy-match",
+    matchDate: "2026-03-09T13:54:57.756Z",
+    map: "드래곤로드",
+    manualAbandonNicknames: ["alt"]
+  });
+
+  assert.deepEqual(candidates, [
+    {
+      ouid: "",
+      nickname: "alt",
+      matchId: "legacy-match",
+      matchDate: "2026-03-09T13:54:57.756Z",
+      mapName: "드래곤로드"
+    }
+  ]);
+});
