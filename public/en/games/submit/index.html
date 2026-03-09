@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="game_submit_title">Games 등록 | Tracking SA</title>
+    <title data-i18n="game_submit_title">Register Game | Tracking SA</title>
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://trackingsa.com/en/games/submit/">
     <meta property="og:type" content="website">
@@ -16,7 +16,7 @@
     <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
     <link rel="alternate" type="application/rss+xml" title="Tracking SA RSS" href="/rss.xml">
     <meta name="description" content="Tracking SA services and insights page.">
-    <meta property="og:title" content="Games 등록 | Tracking SA">
+    <meta property="og:title" content="Register Game | Tracking SA">
     <meta property="og:description" content="Tracking SA services and insights page.">
 <script>
   (function() {
@@ -199,42 +199,42 @@
 </div>
     <main class="submit-container">
         <div class="form-card">
-            <h1 class="form-title" data-i18n="register_your_game">당신의 Games을 등록하세요</h1>
+            <h1 class="form-title" data-i18n="register_your_game">Register Your Game</h1>
             
             <form id="game-submit-form">
                 <div class="input-group">
-                    <label for="title" data-i18n="game_title_label">Games 제목</label>
+                    <label for="title" data-i18n="game_title_label">Game Title</label>
                     <input type="text" id="title" name="title" required placeholder="예: 미니 벽돌 깨기" maxlength="30">
                 </div>
                 
                 <div class="input-group">
-                    <label for="url" data-i18n="game_url_label">Games 실행 URL (HTML 링크 또는 외부 주소)</label>
+                    <label for="url" data-i18n="game_url_label">Game URL (HTML link or external URL)</label>
                     <input type="url" id="url" name="url" required placeholder="https://example.com/my-game">
                 </div>
 
                 <div class="input-group">
-                    <label for="thumbnail" data-i18n="game_thumb_label">썸네일 이미지 URL</label>
+                    <label for="thumbnail" data-i18n="game_thumb_label">Thumbnail Image URL</label>
                     <input type="url" id="thumbnail" name="thumbnail" placeholder="https://example.com/thumb.jpg">
                 </div>
 
                 <div class="form-group">
-                    <label for="category" data-i18n="game_category_label">카테고리</label>
+                    <label for="category" data-i18n="game_category_label">Category</label>
                     <select id="category" name="category" required>
-                        <option value="puzzle" data-i18n="cat_puzzle">퍼즐</option>
-                        <option value="action" data-i18n="cat_action">액션</option>
-                        <option value="ai" data-i18n="cat_ai">인공지능(AI)</option>
-                        <option value="classic" data-i18n="cat_classic">클래식</option>
-                        <option value="etc" data-i18n="cat_etc" selected>기타</option>
+                        <option value="puzzle" data-i18n="cat_puzzle">Puzzle</option>
+                        <option value="action" data-i18n="cat_action">Action</option>
+                        <option value="ai" data-i18n="cat_ai">Artificial Intelligence (AI)</option>
+                        <option value="classic" data-i18n="cat_classic">Classic</option>
+                        <option value="etc" data-i18n="cat_etc" selected>Other</option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label for="description" data-i18n="game_desc_label">Games 설명</label>
+                    <label for="description" data-i18n="game_desc_label">Game Description</label>
 
                     <textarea id="description" name="description" rows="4" required placeholder="Games 방법과 특징을 간단히 적어주세요." maxlength="200"></textarea>
                 </div>
 
-                <button type="submit" id="submit-btn" class="submit-form-btn" data-i18n="submit_for_review">등록 신청하기</button>
+                <button type="submit" id="submit-btn" class="submit-form-btn" data-i18n="submit_for_review">Submit for Review</button>
             </form>
 
             <div id="status-msg"></div>
