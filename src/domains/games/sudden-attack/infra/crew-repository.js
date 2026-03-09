@@ -9,8 +9,13 @@ export class CrewRepository {
     this.APPLICATIONS_COLLECTION = 'sa_crew_applications';
     this.HISTORY_COLLECTION = 'sa_crew_history'; 
     this.SETTINGS_COLLECTION = 'sa_crew_settings';
+    this.MATCH_SESSIONS_COLLECTION = 'sa_crew_match_sessions';
     this.SEASON_ARCHIVE_DOC = 'season_archive_latest';
     this.HISTORY_LIMIT = 50; // Max match history points to store for trend
+    this.MATCH_SESSION_LOOKBACK_MS = 6 * 60 * 60 * 1000;
+    this.MIN_SESSION_OVERLAP = 6;
+    this.ABANDON_MMR_PENALTY = -30;
+    this.ABANDON_HSR_PENALTY = -20;
     
     // List of Administrators and Moderators (Staff)
     this.STAFF_EMAILS = [
@@ -253,6 +258,179 @@ export class CrewRepository {
     }
   }
 
+  async applyManualAbandonPenalty({ ouid = "", nickname = "", matchId = "" } = {}) {
+    if (!this.db) throw new Error('DB 연결 실패');
+    const resolvedOuid = ouid || await this.findOuidByNickname(nickname);
+    if (!resolvedOuid) throw new Error('대상 멤버를 찾을 수 없습니다.');
+    if (!matchId) throw new Error('경기를 선택해주세요.');
+
+    const memberRef = this.db.collection(this.MEMBERS_COLLECTION).doc(resolvedOuid);
+    const historyRef = this.db.collection(this.HISTORY_COLLECTION).doc(matchId);
+    const [memberDoc, historyDoc] = await Promise.all([memberRef.get(), historyRef.get()]);
+
+    if (!memberDoc.exists) throw new Error('대상 멤버 문서가 없습니다.');
+    if (!historyDoc.exists) throw new Error('경기 기록을 찾을 수 없습니다.');
+
+    const memberData = memberDoc.data() || {};
+    const historyData = historyDoc.data() || {};
+    const matchDate = historyData.matchDate || "";
+    if (!matchDate) throw new Error('선택한 경기의 날짜 정보가 없습니다.');
+
+    const existingOuids = Array.isArray(historyData.manualAbandonOuids) ? historyData.manualAbandonOuids : [];
+    if (existingOuids.includes(resolvedOuid)) {
+      throw new Error('이미 수동 탈주 패널티가 적용된 멤버입니다.');
+    }
+
+    const currentHistory = Array.isArray(memberData.mmrHistory) ? [...memberData.mmrHistory] : [];
+    if (currentHistory.some((entry) => entry?.date === matchDate)) {
+      throw new Error('해당 경기 시각으로 이미 점수 기록이 있어 중복 적용할 수 없습니다.');
+    }
+
+    const nextMmr = Number(memberData.mmr || 1200) + this.ABANDON_MMR_PENALTY;
+    const nextHsr = Number(memberData.hsr || memberData.mmr || 1200) + this.ABANDON_HSR_PENALTY;
+    const nextLoses = Number(memberData.loses || 0) + 1;
+    const nextHistory = currentHistory
+      .concat([{ mmr: nextMmr, hsr: nextHsr, date: matchDate }])
+      .slice(-this.HISTORY_LIMIT);
+
+    const manualNicknames = Array.isArray(historyData.manualAbandonNicknames) ? [...historyData.manualAbandonNicknames] : [];
+    const targetName = nickname || memberData.characterName || "";
+    if (targetName && !manualNicknames.includes(targetName)) manualNicknames.push(targetName);
+    const manualOuids = [...existingOuids];
+    if (!manualOuids.includes(resolvedOuid)) manualOuids.push(resolvedOuid);
+
+    const batch = this.db.batch();
+    batch.update(memberRef, {
+      mmr: nextMmr,
+      hsr: nextHsr,
+      loses: nextLoses,
+      mmrHistory: nextHistory,
+      updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+    });
+    batch.update(historyRef, {
+      abandonCount: Number(historyData.abandonCount || 0) + 1,
+      manualAbandonNicknames: manualNicknames,
+      manualAbandonOuids: manualOuids
+    });
+    await batch.commit();
+
+    return {
+      ouid: resolvedOuid,
+      nickname: targetName || resolvedOuid,
+      matchId,
+      matchDate,
+      mapName: historyData.map || "알 수 없음",
+      mmrDiff: this.ABANDON_MMR_PENALTY,
+      hsrDiff: this.ABANDON_HSR_PENALTY,
+      newMmr: nextMmr,
+      newHsr: nextHsr,
+      loses: nextLoses
+    };
+  }
+
+  toDateSafe(value) {
+    if (!value) return null;
+    if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value;
+    if (typeof value?.toDate === 'function') {
+      const converted = value.toDate();
+      return Number.isNaN(converted?.getTime?.()) ? null : converted;
+    }
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+
+  async createPendingMatchSession(teamResult) {
+    if (!this.db) throw new Error('DB 연결 실패');
+    const red = Array.isArray(teamResult?.red) ? teamResult.red : [];
+    const blue = Array.isArray(teamResult?.blue) ? teamResult.blue : [];
+    const participants = [...red, ...blue]
+      .map((member) => ({
+        ouid: member?.ouid || "",
+        characterName: member?.characterName || "",
+        team: red.includes(member) ? 'RED' : 'BLUE'
+      }))
+      .filter((member) => member.ouid && member.characterName);
+
+    if (participants.length < 2) {
+      throw new Error('참가자 정보가 부족합니다.');
+    }
+
+    return this.db.collection(this.MATCH_SESSIONS_COLLECTION).add({
+      status: 'PENDING',
+      participants,
+      participantCount: participants.length,
+      createdAt: window.firebase.firestore.FieldValue.serverTimestamp()
+    });
+  }
+
+  async getPendingMatchSessions() {
+    if (!this.db) return [];
+    try {
+      const snapshot = await this.db.collection(this.MATCH_SESSIONS_COLLECTION).get();
+      return snapshot.docs
+        .map((doc) => ({ id: doc.id, ...doc.data() }))
+        .filter((item) => item.status === 'PENDING')
+        .sort((a, b) => (this.toDateSafe(b.createdAt)?.getTime() || 0) - (this.toDateSafe(a.createdAt)?.getTime() || 0));
+    } catch (err) {
+      console.warn('[CrewRepo] Failed to read pending match sessions:', err);
+      return [];
+    }
+  }
+
+  getMatchPresenceSet(match, memberCache = {}, nameMap = {}) {
+    const present = new Set();
+    const players = Array.isArray(match?.allPlayerStats) ? match.allPlayerStats : [];
+    players.forEach((player) => {
+      const nickname = String(player?.nickname || "").toLowerCase().trim();
+      if (player?.ouid && memberCache[player.ouid]) present.add(player.ouid);
+      const byName = nickname ? nameMap[nickname] : null;
+      if (byName?.ouid) present.add(byName.ouid);
+    });
+    return present;
+  }
+
+  findPendingSessionForMatch(match, pendingSessions = [], memberCache = {}, nameMap = {}, usedSessionIds = new Set()) {
+    const matchDate = this.toDateSafe(match?.matchDate);
+    if (!matchDate) return null;
+
+    const present = this.getMatchPresenceSet(match, memberCache, nameMap);
+    let best = null;
+
+    pendingSessions.forEach((session) => {
+      if (!session?.id || usedSessionIds.has(session.id)) return;
+      const participants = Array.isArray(session.participants) ? session.participants.filter((item) => item?.ouid) : [];
+      if (participants.length < 8) return;
+
+      const createdAt = this.toDateSafe(session.createdAt);
+      if (createdAt && matchDate.getTime() < createdAt.getTime()) return;
+      if (createdAt && (matchDate.getTime() - createdAt.getTime()) > this.MATCH_SESSION_LOOKBACK_MS) return;
+
+      const overlap = participants.filter((item) => present.has(item.ouid)).length;
+      if (overlap < Math.min(this.MIN_SESSION_OVERLAP, participants.length)) return;
+
+      const missing = participants.filter((item) => !present.has(item.ouid));
+      if (missing.length === 0) return;
+
+      const score = overlap * 100 - missing.length;
+      const candidate = { session, overlap, missing, score };
+      if (!best || candidate.score > best.score) best = candidate;
+    });
+
+    return best;
+  }
+
+  applyAbandonPenalty(memberData, matchDate) {
+    memberData.mmr += this.ABANDON_MMR_PENALTY;
+    memberData.hsr += this.ABANDON_HSR_PENALTY;
+    memberData.loses += 1;
+    memberData.mmrHistory.push({ mmr: memberData.mmr, hsr: memberData.hsr, date: matchDate });
+    memberData.isDirty = true;
+    return {
+      mmrDiff: this.ABANDON_MMR_PENALTY,
+      hsrDiff: this.ABANDON_HSR_PENALTY
+    };
+  }
+
   /**
    * Settle MMR for a list of matches
    * Returns reports for Discord notifications
@@ -269,6 +447,7 @@ export class CrewRepository {
       const data = doc.data();
       const cacheObj = {
         ouid: doc.id,
+        characterName: data.characterName || "",
         mmr: data.mmr || 1200,
         hsr: data.hsr || data.mmr || 1200,
         wins: data.wins || 0,
@@ -285,6 +464,8 @@ export class CrewRepository {
 
     const historySnap = await this.db.collection(this.HISTORY_COLLECTION).get();
     const settledSet = new Set(historySnap.docs.map(d => d.id));
+    const pendingSessions = await this.getPendingMatchSessions();
+    const usedSessionIds = new Set();
     const batch = this.db.batch();
     const settlementReports = [];
     const sortedMatches = [...matches].sort((a, b) => new Date(a.matchDate) - new Date(b.matchDate));
@@ -294,12 +475,15 @@ export class CrewRepository {
       if (settledSet.has(match.matchId)) continue;
 
       const playerChanges = [];
+      const processedOuids = new Set();
+      const matchedSession = this.findPendingSessionForMatch(match, pendingSessions, memberCache, nameMap, usedSessionIds);
 
       for (const p of match.allPlayerStats) {
         if (!p.isCrew) continue;
         
         let currentData = p.ouid && memberCache[p.ouid] ? memberCache[p.ouid] : nameMap[p.nickname.toLowerCase()];
         if (!currentData) continue; 
+        processedOuids.add(currentData.ouid);
 
         const isWin = p.result === 'WIN';
         const kill = parseInt(p.kill || 0);
@@ -362,12 +546,41 @@ export class CrewRepository {
         });
       }
 
+      let abandonCount = 0;
+      if (matchedSession) {
+        matchedSession.missing.forEach((missingMember) => {
+          const currentData = memberCache[missingMember.ouid];
+          if (!currentData || processedOuids.has(currentData.ouid)) return;
+          const penalty = this.applyAbandonPenalty(currentData, match.matchDate);
+          abandonCount += 1;
+          processedOuids.add(currentData.ouid);
+          playerChanges.push({
+            nickname: missingMember.characterName || currentData.characterName || missingMember.ouid,
+            originalResult: 'ABANDON',
+            mmrDiff: penalty.mmrDiff,
+            hsrDiff: penalty.hsrDiff,
+            newMmr: currentData.mmr,
+            newHsr: currentData.hsr
+          });
+        });
+      }
+
       batch.set(this.db.collection(this.HISTORY_COLLECTION).doc(match.matchId), {
         settledAt: window.firebase.firestore.FieldValue.serverTimestamp(),
         map: match.mapName,
         matchDate: match.matchDate,
-        crewCount: match.crewParticipants.length
+        crewCount: match.crewParticipants.length,
+        abandonCount,
+        matchedSessionId: matchedSession?.session?.id || null
       });
+      if (matchedSession?.session?.id) {
+        batch.update(this.db.collection(this.MATCH_SESSIONS_COLLECTION).doc(matchedSession.session.id), {
+          status: 'SETTLED',
+          settledMatchId: match.matchId,
+          settledAt: window.firebase.firestore.FieldValue.serverTimestamp()
+        });
+        usedSessionIds.add(matchedSession.session.id);
+      }
       settlementReports.push({ match, playerChanges });
       settledSet.add(match.matchId);
     }

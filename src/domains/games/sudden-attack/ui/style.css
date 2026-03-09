@@ -142,6 +142,38 @@ body.dark-mode {
 .admin-main-btns { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
 .admin-sub-btns { display: flex; gap: 10px; margin-top: 10px; }
 
+.manual-penalty-panel {
+  background: rgba(255, 77, 77, 0.06);
+  border: 1px solid rgba(255, 77, 77, 0.22);
+  border-radius: 12px;
+  padding: 16px;
+}
+.manual-penalty-panel h4 {
+  margin: 0 0 12px 0;
+  color: #ff9c9c;
+  font-size: 15px;
+}
+.manual-penalty-controls {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(240px, 1.3fr) auto auto;
+  gap: 10px;
+  align-items: center;
+}
+.manual-penalty-controls select {
+  width: 100%;
+  background: var(--bg-dark);
+  border: 1px solid var(--border);
+  color: #fff;
+  padding: 10px 12px;
+  border-radius: 8px;
+  min-height: 40px;
+}
+.manual-penalty-hint {
+  margin: 10px 0 0 0;
+  font-size: 12px;
+  color: #c9b0b0;
+}
+
 .settle-btn {
   background: var(--gold); color: #000; border: none; padding: 12px 24px; border-radius: 8px; 
   font-weight: 900; cursor: pointer; transition: all 0.2s; font-size: 14px;
@@ -362,4 +394,5 @@ body.dark-mode {
   .search-bar { flex-direction: column; align-items: center; }
   .search-bar input { width: 100%; max-width: 400px; }
   .season-toggle-bar { flex-direction: column; align-items: flex-start; }
+  .manual-penalty-controls { grid-template-columns: 1fr; }
 }
