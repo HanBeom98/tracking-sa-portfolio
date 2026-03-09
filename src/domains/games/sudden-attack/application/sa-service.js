@@ -64,13 +64,23 @@ export class SaService {
         memberData = await this.crewRepository.findMemberByOuid(player.ouid);
       }
       const archivedPreviousTrend = await this.getArchivedPreviousTrendSafe(player.ouid);
+      const seasonStart = await this.getSeasonStartDateSafe();
+      const seasonHistory = this.crewRepository
+        ? await this.crewRepository.getHistory(300)
+        : [];
+      const abandonSummary = this.crewRepository
+        ? this.crewRepository.buildMemberAbandonSummary(seasonHistory, {
+            ouid: player.ouid,
+            nickname: player.nickname,
+            seasonStart
+          })
+        : { current: 0, previous: 0 };
 
       // 5. Load Metadata (Recent Info from Nexon)
       const rawStats = await this.repository.apiClient.getRecentInfo(player.ouid);
 
       // 6. Construct season views (default = current season)
-      const seasonStart = await this.getSeasonStartDateSafe();
-      const seasonViews = this.buildSeasonViews(allMatches, seasonStart, rawStats, memberData, archivedPreviousTrend);
+      const seasonViews = this.buildSeasonViews(allMatches, seasonStart, rawStats, memberData, archivedPreviousTrend, abandonSummary);
       const currentView = seasonViews.current;
 
       return {
@@ -105,7 +115,7 @@ export class SaService {
     return new Date(0);
   }
 
-  buildSeasonViews(allMatches, seasonStart, rawStats, memberData, archivedPreviousTrend = []) {
+  buildSeasonViews(allMatches, seasonStart, rawStats, memberData, archivedPreviousTrend = [], abandonSummary = { current: 0, previous: 0 }) {
     const safeMatches = Array.isArray(allMatches) ? allMatches : [];
     const isCurrentSeasonMatch = (match) => match?.matchDate && new Date(match.matchDate) >= seasonStart;
     const currentMatches = safeMatches.filter(isCurrentSeasonMatch).slice(0, 20);
@@ -115,11 +125,17 @@ export class SaService {
 
     const trendViews = this.buildTrendViews(memberData, seasonStart, archivedPreviousTrend);
 
-    const currentStats = new RecentStats(rawStats, currentCustom, memberData, { forceMatchMetrics: true });
+    const currentStats = new RecentStats(rawStats, currentCustom, memberData, {
+      forceMatchMetrics: true,
+      abandonCount: Number(abandonSummary?.current || 0)
+    });
     this.applySeasonTrend(currentStats, trendViews.current);
     currentStats.seasonLabel = '이번 시즌';
 
-    const previousStats = new RecentStats(rawStats, previousCustom, memberData, { forceMatchMetrics: true });
+    const previousStats = new RecentStats(rawStats, previousCustom, memberData, {
+      forceMatchMetrics: true,
+      abandonCount: Number(abandonSummary?.previous || 0)
+    });
     this.applySeasonTrend(previousStats, trendViews.previous);
     previousStats.seasonLabel = '지난 시즌';
 

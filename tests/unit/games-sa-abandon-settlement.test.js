@@ -175,3 +175,29 @@ test("CrewRepository builds history patch for persisted manual abandons", () => 
     manualAbandonNicknames: ["alt"]
   });
 });
+
+test("CrewRepository counts member manual abandons by season split", () => {
+  const repo = new CrewRepository(null);
+
+  const summary = repo.buildMemberAbandonSummary(
+    [
+      {
+        matchDate: "2026-03-09T13:54:57.756Z",
+        manualAbandonOuids: ["p10"],
+        manualAbandonNicknames: ["alt"]
+      },
+      {
+        matchDate: "2026-03-01T13:54:57.756Z",
+        manualAbandonOuids: ["p10"],
+        manualAbandonNicknames: ["alt"]
+      }
+    ],
+    {
+      ouid: "p10",
+      nickname: "alt",
+      seasonStart: new Date("2026-03-05T00:00:00.000Z")
+    }
+  );
+
+  assert.deepEqual(summary, { current: 1, previous: 1 });
+});

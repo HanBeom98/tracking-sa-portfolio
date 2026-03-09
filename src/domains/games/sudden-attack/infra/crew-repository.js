@@ -248,7 +248,10 @@ export class CrewRepository {
             matchId: doc.id,
             map: data.map || "알 수 없음",
             matchDate: data.matchDate || "",
-            crewCount: Number(data.crewCount || 0)
+            crewCount: Number(data.crewCount || 0),
+            abandonCount: Number(data.abandonCount || 0),
+            manualAbandonOuids: Array.isArray(data.manualAbandonOuids) ? data.manualAbandonOuids : [],
+            manualAbandonNicknames: Array.isArray(data.manualAbandonNicknames) ? data.manualAbandonNicknames : []
           };
         })
         .sort((a, b) => new Date(b.matchDate) - new Date(a.matchDate))
@@ -257,6 +260,30 @@ export class CrewRepository {
       console.error('[CrewRepo] Failed to fetch history:', err);
       return [];
     }
+  }
+
+  buildMemberAbandonSummary(history = [], { ouid = "", nickname = "", seasonStart = null } = {}) {
+    const normalizedNickname = String(nickname || "").toLowerCase().trim();
+    const safeSeasonStart = seasonStart instanceof Date && !Number.isNaN(seasonStart.getTime())
+      ? seasonStart
+      : null;
+
+    return (Array.isArray(history) ? history : []).reduce((acc, item) => {
+      const matchDate = item?.matchDate ? new Date(item.matchDate) : null;
+      const manualOuids = Array.isArray(item?.manualAbandonOuids) ? item.manualAbandonOuids : [];
+      const manualNicknames = Array.isArray(item?.manualAbandonNicknames) ? item.manualAbandonNicknames : [];
+      const hitByOuid = !!ouid && manualOuids.includes(ouid);
+      const hitByNickname = !!normalizedNickname && manualNicknames.some((value) => String(value || "").toLowerCase().trim() === normalizedNickname);
+      if (!hitByOuid && !hitByNickname) return acc;
+
+      const isCurrent = safeSeasonStart && matchDate && !Number.isNaN(matchDate.getTime())
+        ? matchDate >= safeSeasonStart
+        : true;
+
+      if (isCurrent) acc.current += 1;
+      else acc.previous += 1;
+      return acc;
+    }, { current: 0, previous: 0 });
   }
 
   async getManualAbandonEntries() {
