@@ -113,6 +113,15 @@ export class AdminManager {
         </div>
         <p class="manual-penalty-hint">스코어보드에서 빠진 탈주자를 수동으로 1패 처리합니다. 같은 경기에는 한 번만 적용됩니다.</p>
       </div>
+      <div class="manual-penalty-log-panel">
+        <div class="manual-penalty-log-head">
+          <h4>📜 수동 탈주 패널티 로그</h4>
+          <button id="refreshManualPenaltyLogBtn" class="mini-btn update-name-btn" type="button">로그 새로고침</button>
+        </div>
+        <div id="manualPenaltyLogList" class="manual-penalty-log-list">
+          <p class="manual-penalty-log-empty">로그를 불러오는 중...</p>
+        </div>
+      </div>
       <div id="crewMemberListAdmin" class="crew-manage-list">
         <h4>👥 크루 멤버 관리</h4>
         <div class="admin-member-grid">
@@ -125,12 +134,14 @@ export class AdminManager {
     this.renderAdminMemberList();
     this.renderManualPenaltyMemberOptions();
     this.renderManualPenaltyMatchOptions();
+    this.renderManualPenaltyLog();
 
     actionBar.querySelector('#repairDataBtn').addEventListener('click', () => this.handleRepairData());
     actionBar.querySelector('#resetSeasonBtn').addEventListener('click', () => this.handleResetSeason());
     actionBar.querySelector('#settleMMRBtn').addEventListener('click', (e) => this.handleSettleMMR(e.currentTarget));
     actionBar.querySelector('#refreshPenaltyHistoryBtn').addEventListener('click', () => this.renderManualPenaltyMatchOptions());
     actionBar.querySelector('#applyManualPenaltyBtn').addEventListener('click', (e) => this.handleManualAbandonPenalty(e.currentTarget));
+    actionBar.querySelector('#refreshManualPenaltyLogBtn').addEventListener('click', () => this.renderManualPenaltyLog());
 
     const dateInput = actionBar.querySelector('#seasonStartDateInput');
     actionBar.querySelector('#updateSeasonDateBtn').addEventListener('click', async () => {
@@ -218,6 +229,50 @@ export class AdminManager {
     return `${label} | ${item.map || '알 수 없음'} | ${item.crewCount || 0}명`;
   }
 
+  formatLogDate(value) {
+    if (!value) return '시간 미상';
+    const date = typeof value?.toDate === 'function' ? value.toDate() : new Date(value);
+    if (Number.isNaN(date.getTime())) return '시간 미상';
+    return date.toLocaleString('ko-KR', { hour12: false });
+  }
+
+  async renderManualPenaltyLog() {
+    if (!this.adminPanel) return;
+    const container = this.adminPanel.querySelector('#manualPenaltyLogList');
+    if (!container) return;
+    container.innerHTML = '<p class="manual-penalty-log-empty">로그를 불러오는 중...</p>';
+    try {
+      const entries = await this.crewRepo.getManualAbandonEntries();
+      const recentEntries = entries.slice().sort((a, b) => {
+        const aTime = new Date(a?.matchDate || 0).getTime();
+        const bTime = new Date(b?.matchDate || 0).getTime();
+        return bTime - aTime;
+      }).slice(0, 20);
+
+      if (recentEntries.length === 0) {
+        container.innerHTML = '<p class="manual-penalty-log-empty">수동 탈주 패널티 로그가 없습니다.</p>';
+        return;
+      }
+
+      container.innerHTML = recentEntries.map((entry) => `
+        <div class="manual-penalty-log-item">
+          <div class="manual-penalty-log-title">
+            <strong>${entry.nickname || entry.ouid}</strong>
+            <span>${entry.mapName || '알 수 없음'} / ${this.formatLogDate(entry.matchDate)}</span>
+          </div>
+          <div class="manual-penalty-log-meta">
+            <span>사유: ${entry.reason || '미입력'}</span>
+            <span>적용자: ${entry.appliedByEmail || '기록 없음'}</span>
+            <span>적용시각: ${this.formatLogDate(entry.appliedAt || entry.createdAt)}</span>
+          </div>
+        </div>
+      `).join('');
+    } catch (err) {
+      console.error('Failed to load manual penalty logs:', err);
+      container.innerHTML = '<p class="manual-penalty-log-empty">로그 불러오기 실패</p>';
+    }
+  }
+
   async handleRepairData() {
     if (!confirm('이미 정산된 기록을 모두 삭제하고 처음부터 다시 계산하시겠습니까?')) return;
     try {
@@ -269,6 +324,7 @@ export class AdminManager {
       });
       alert(`[${result.nickname}] 패널티 적용 완료\n${result.mapName} / ${result.matchDate}\n사유: ${result.reason}\nMMR ${result.mmrDiff}, HSR ${result.hsrDiff}, 총 ${result.loses}패`);
       await this.renderManualPenaltyMatchOptions();
+      await this.renderManualPenaltyLog();
       window.dispatchEvent(new CustomEvent('sa-rankings-updated'));
     } catch (err) {
       alert('적용 실패: ' + err.message);
