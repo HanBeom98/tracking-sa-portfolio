@@ -85,3 +85,29 @@ test("CrewRepository manual abandon guard rejects duplicate match-date history",
 
   assert.equal(alreadySettled, true);
 });
+
+test("CrewRepository can reapply a persisted manual abandon after repair", () => {
+  const repo = new CrewRepository(null);
+  const member = {
+    ouid: "p10",
+    characterName: "alt",
+    mmr: 1221,
+    hsr: 1260,
+    loses: 4,
+    mmrHistory: [
+      { mmr: 1221, hsr: 1260, date: "2026-03-09T13:43:02.181Z" }
+    ],
+    isDirty: false
+  };
+
+  const result = repo.applyManualAbandonToMember(member, "2026-03-09T13:54:57.756Z");
+
+  assert.deepEqual(result, {
+    mmrDiff: -30,
+    hsrDiff: -20,
+    newMmr: 1191,
+    newHsr: 1240,
+    loses: 5
+  });
+  assert.equal(member.mmrHistory.at(-1).date, "2026-03-09T13:54:57.756Z");
+});

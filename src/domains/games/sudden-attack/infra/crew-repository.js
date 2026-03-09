@@ -10,6 +10,7 @@ export class CrewRepository {
     this.HISTORY_COLLECTION = 'sa_crew_history'; 
     this.SETTINGS_COLLECTION = 'sa_crew_settings';
     this.MATCH_SESSIONS_COLLECTION = 'sa_crew_match_sessions';
+    this.MANUAL_ABANDONS_COLLECTION = 'sa_crew_manual_abandons';
     this.SEASON_ARCHIVE_DOC = 'season_archive_latest';
     this.HISTORY_LIMIT = 50; // Max match history points to store for trend
     this.MATCH_SESSION_LOOKBACK_MS = 6 * 60 * 60 * 1000;
@@ -258,6 +259,39 @@ export class CrewRepository {
     }
   }
 
+  async getManualAbandonEntries() {
+    if (!this.db) return [];
+    try {
+      const snapshot = await this.db.collection(this.MANUAL_ABANDONS_COLLECTION).get();
+      return snapshot.docs
+        .map((doc) => ({ id: doc.id, ...doc.data() }))
+        .filter((item) => !!item?.ouid && !!item?.matchId && !!item?.matchDate)
+        .sort((a, b) => new Date(a.matchDate) - new Date(b.matchDate));
+    } catch (err) {
+      console.warn('[CrewRepo] Failed to read manual abandon entries:', err);
+      return [];
+    }
+  }
+
+  buildManualAbandonDocId(ouid, matchId) {
+    return `${ouid}__${matchId}`;
+  }
+
+  applyManualAbandonToMember(memberData, matchDate) {
+    memberData.mmr += this.ABANDON_MMR_PENALTY;
+    memberData.hsr += this.ABANDON_HSR_PENALTY;
+    memberData.loses += 1;
+    memberData.mmrHistory.push({ mmr: memberData.mmr, hsr: memberData.hsr, date: matchDate });
+    memberData.isDirty = true;
+    return {
+      mmrDiff: this.ABANDON_MMR_PENALTY,
+      hsrDiff: this.ABANDON_HSR_PENALTY,
+      newMmr: memberData.mmr,
+      newHsr: memberData.hsr,
+      loses: memberData.loses
+    };
+  }
+
   async applyManualAbandonPenalty({ ouid = "", nickname = "", matchId = "" } = {}) {
     if (!this.db) throw new Error('DB 연결 실패');
     const resolvedOuid = ouid || await this.findOuidByNickname(nickname);
@@ -266,7 +300,8 @@ export class CrewRepository {
 
     const memberRef = this.db.collection(this.MEMBERS_COLLECTION).doc(resolvedOuid);
     const historyRef = this.db.collection(this.HISTORY_COLLECTION).doc(matchId);
-    const [memberDoc, historyDoc] = await Promise.all([memberRef.get(), historyRef.get()]);
+    const manualRef = this.db.collection(this.MANUAL_ABANDONS_COLLECTION).doc(this.buildManualAbandonDocId(resolvedOuid, matchId));
+    const [memberDoc, historyDoc, manualDoc] = await Promise.all([memberRef.get(), historyRef.get(), manualRef.get()]);
 
     if (!memberDoc.exists) throw new Error('대상 멤버 문서가 없습니다.');
     if (!historyDoc.exists) throw new Error('경기 기록을 찾을 수 없습니다.');
@@ -277,6 +312,9 @@ export class CrewRepository {
     if (!matchDate) throw new Error('선택한 경기의 날짜 정보가 없습니다.');
 
     const existingOuids = Array.isArray(historyData.manualAbandonOuids) ? historyData.manualAbandonOuids : [];
+    if (manualDoc.exists) {
+      throw new Error('이미 수동 탈주 패널티가 적용된 멤버입니다.');
+    }
     if (existingOuids.includes(resolvedOuid)) {
       throw new Error('이미 수동 탈주 패널티가 적용된 멤버입니다.');
     }
@@ -311,6 +349,16 @@ export class CrewRepository {
       abandonCount: Number(historyData.abandonCount || 0) + 1,
       manualAbandonNicknames: manualNicknames,
       manualAbandonOuids: manualOuids
+    });
+    batch.set(manualRef, {
+      ouid: resolvedOuid,
+      nickname: targetName || resolvedOuid,
+      matchId,
+      matchDate,
+      mapName: historyData.map || "알 수 없음",
+      mmrDiff: this.ABANDON_MMR_PENALTY,
+      hsrDiff: this.ABANDON_HSR_PENALTY,
+      createdAt: window.firebase.firestore.FieldValue.serverTimestamp()
     });
     await batch.commit();
 
@@ -465,6 +513,7 @@ export class CrewRepository {
     const historySnap = await this.db.collection(this.HISTORY_COLLECTION).get();
     const settledSet = new Set(historySnap.docs.map(d => d.id));
     const pendingSessions = await this.getPendingMatchSessions();
+    const manualAbandons = await this.getManualAbandonEntries();
     const usedSessionIds = new Set();
     const batch = this.db.batch();
     const settlementReports = [];
@@ -584,6 +633,13 @@ export class CrewRepository {
       settlementReports.push({ match, playerChanges });
       settledSet.add(match.matchId);
     }
+
+    manualAbandons.forEach((entry) => {
+      const currentData = memberCache[entry.ouid];
+      if (!currentData) return;
+      if ((currentData.mmrHistory || []).some((item) => item?.date === entry.matchDate)) return;
+      this.applyManualAbandonToMember(currentData, entry.matchDate);
+    });
 
     for (const ouid in memberCache) {
       if (memberCache[ouid].isDirty) {
