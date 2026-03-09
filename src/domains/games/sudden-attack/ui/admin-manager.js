@@ -94,7 +94,7 @@ export class AdminManager {
           <button id="updateSeasonDateBtn" class="mini-btn update-name-btn">변경</button>
         </div>
 
-        <button id="resetSeasonBtn" class="sub-btn admin-reset-btn">🔥 시즌 초기화</button>
+        <button id="resetSeasonBtn" class="sub-btn admin-reset-btn">🔥 시즌 마감 후 새 시즌 시작</button>
       </div>
       <div class="admin-sub-btns">
         <button id="repairDataBtn" class="sub-btn repair-btn">♻️ 전적 데이터 재정산 (킬/데스 복구)</button>
@@ -160,12 +160,17 @@ export class AdminManager {
     if (!this.adminPanel) return;
     const container = this.adminPanel.querySelector('.admin-member-grid');
     if (!container) return;
+    const tierOptions = typeof this.crewRepo.getManualSeedTierOptions === 'function'
+      ? this.crewRepo.getManualSeedTierOptions()
+      : [];
     if (this.currentRankings.length === 0) {
       container.innerHTML = '<p class="no-members-msg">멤버가 없습니다.</p>';
       return;
     }
     container.innerHTML = this.currentRankings.map(m => {
       const isRealOuid = m.id.length >= 20 && /^[0-9a-f]+$/.test(m.id);
+      const manualSeedTier = String(m.manualSeedTier || '');
+      const manualSeedTierLabel = tierOptions.find((option) => option.value === manualSeedTier)?.label || '미설정';
       return `
         <div class="admin-member-item">
           <div class="m-header">
@@ -173,6 +178,16 @@ export class AdminManager {
             <span class="m-score">${m.mmr} pts</span>
           </div>
           <div class="m-stats">${m.wins}승 ${m.loses}패 (킬뎃: ${m.crewKills}/${m.crewDeaths})</div>
+          <div class="m-stats">최고티어 시드: ${manualSeedTierLabel}</div>
+          <div class="m-actions">
+            <select class="mini-btn manual-seed-tier-select" data-ouid="${m.id}">
+              <option value="">최고티어 없음</option>
+              ${tierOptions.map((option) => `
+                <option value="${option.value}" ${option.value === manualSeedTier ? 'selected' : ''}>${option.label}</option>
+              `).join('')}
+            </select>
+            <button class="mini-btn update-seed-tier-btn" data-ouid="${m.id}" data-name="${m.characterName}">최고티어 저장</button>
+          </div>
           <div class="m-actions">
             <button class="mini-btn individual-scan-btn" data-ouid="${m.id}" data-name="${m.characterName}">🔍 전적 스캔</button>
             <button class="mini-btn update-name-btn" data-ouid="${m.id}" data-name="${m.characterName}">이름수정</button>
@@ -184,6 +199,7 @@ export class AdminManager {
     container.querySelectorAll('.individual-scan-btn').forEach(btn => btn.addEventListener('click', (e) => this.handleIndividualScan(e.currentTarget)));
     container.querySelectorAll('.delete-member-btn').forEach(btn => btn.addEventListener('click', (e) => this.handleDeleteMember(e.currentTarget.dataset)));
     container.querySelectorAll('.update-name-btn').forEach(btn => btn.addEventListener('click', (e) => this.handleUpdateName(e.currentTarget.dataset)));
+    container.querySelectorAll('.update-seed-tier-btn').forEach(btn => btn.addEventListener('click', (e) => this.handleUpdateManualSeedTier(e.currentTarget.dataset)));
   }
 
   renderManualPenaltyMemberOptions() {
@@ -283,10 +299,10 @@ export class AdminManager {
   }
 
   async handleResetSeason() {
-    if (!confirm('정말 모든 전적을 초기화하시겠습니까?')) return;
+    if (!confirm('현재 시즌을 마감하고, 이전 시즌 점수를 기반으로 새 시즌 시작 점수를 설정하시겠습니까?')) return;
     try {
       await this.crewRepo.resetSeason();
-      alert('시즌 초기화 완료!');
+      alert('시즌 마감 및 새 시즌 시작 완료!');
       window.dispatchEvent(new CustomEvent('sa-rankings-updated'));
     } catch (e) { alert('초기화 실패: ' + e.message); }
   }
@@ -483,5 +499,19 @@ export class AdminManager {
     if (!newName || newName === name) return;
     try { await this.crewRepo.updateNicknameManually(ouid, newName); window.dispatchEvent(new CustomEvent('sa-rankings-updated')); }
     catch (err) { alert('실패: ' + err.message); }
+  }
+
+  async handleUpdateManualSeedTier(data) {
+    const { ouid, name } = data;
+    const select = this.adminPanel?.querySelector(`.manual-seed-tier-select[data-ouid="${ouid}"]`);
+    if (!select) return;
+    const manualSeedTier = select.value || "";
+    try {
+      await this.crewRepo.updateManualSeedTier(ouid, manualSeedTier);
+      alert(`[${name}] 최고티어 시드 저장 완료`);
+      window.dispatchEvent(new CustomEvent('sa-rankings-updated'));
+    } catch (err) {
+      alert('저장 실패: ' + err.message);
+    }
   }
 }

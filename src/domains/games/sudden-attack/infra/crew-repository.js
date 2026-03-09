@@ -12,6 +12,38 @@ export class CrewRepository {
     this.MATCH_SESSIONS_COLLECTION = 'sa_crew_match_sessions';
     this.MANUAL_ABANDONS_COLLECTION = 'sa_crew_manual_abandons';
     this.SEASON_ARCHIVE_DOC = 'season_archive_latest';
+    this.SEASON_ARCHIVE_PREFIX = 'season_archive_';
+    this.SEASON_ARCHIVE_INDEX_DOC = 'season_archives_index';
+    this.MANUAL_SEED_TIERS = [
+      'BRONZE',
+      'SILVER',
+      'GOLD',
+      'MASTER',
+      'GRANDMASTER',
+      'LEGEND',
+      'BLACK_LEGEND',
+      'STAR_LEGEND'
+    ];
+    this.MANUAL_SEED_TIER_LABELS = {
+      BRONZE: '브론즈',
+      SILVER: '실버',
+      GOLD: '골드',
+      MASTER: '마스터',
+      GRANDMASTER: '그랜드마스터',
+      LEGEND: '레전드',
+      BLACK_LEGEND: '불레전드 (in300)',
+      STAR_LEGEND: '별레전드 (in100)'
+    };
+    this.MANUAL_SEED_TIER_HSR = {
+      BRONZE: 1080,
+      SILVER: 1160,
+      GOLD: 1240,
+      MASTER: 1320,
+      GRANDMASTER: 1400,
+      LEGEND: 1480,
+      BLACK_LEGEND: 1540,
+      STAR_LEGEND: 1600
+    };
     this.HISTORY_LIMIT = 50; // Max match history points to store for trend
     this.MATCH_SESSION_LOOKBACK_MS = 6 * 60 * 60 * 1000;
     this.MIN_SESSION_OVERLAP = 6;
@@ -235,6 +267,224 @@ export class CrewRepository {
       console.warn('[CrewRepo] Failed to read season archive history:', err);
       return [];
     }
+  }
+
+  formatSeasonKeyPart(date) {
+    const safeDate = date instanceof Date && !Number.isNaN(date.getTime()) ? date : new Date(0);
+    return safeDate.toISOString().slice(0, 10);
+  }
+
+  buildSeasonArchiveId(startDate, endDate = new Date()) {
+    return `${this.SEASON_ARCHIVE_PREFIX}${this.formatSeasonKeyPart(startDate)}_${this.formatSeasonKeyPart(endDate)}`;
+  }
+
+  normalizeSeasonMemberArchive(ouid, data = {}) {
+    const wins = Number(data.wins || 0);
+    const loses = Number(data.loses || 0);
+    const mmrHistory = Array.isArray(data.mmrHistory) ? data.mmrHistory : [];
+    const latestEntry = mmrHistory.length > 0 ? mmrHistory[mmrHistory.length - 1] : null;
+    const finalMmr = Number(latestEntry?.mmr ?? data.mmr ?? 1200);
+    const finalHsr = Number(latestEntry?.hsr ?? data.hsr ?? finalMmr);
+    return {
+      ouid,
+      characterName: data.characterName || "",
+      finalMmr,
+      finalHsr,
+      wins,
+      loses,
+      matchCount: Number(data.matchCount ?? (wins + loses)),
+      crewKills: Number(data.crewKills || 0),
+      crewDeaths: Number(data.crewDeaths || 0),
+      manualSeedTier: data.manualSeedTier || "",
+      mmrHistory
+    };
+  }
+
+  getManualSeedTierOptions() {
+    return this.MANUAL_SEED_TIERS.map((tier) => ({
+      value: tier,
+      label: this.MANUAL_SEED_TIER_LABELS[tier] || tier,
+      hsr: Number(this.MANUAL_SEED_TIER_HSR[tier] || 1200)
+    }));
+  }
+
+  getManualSeedTierHsr(tier = "") {
+    return Number(this.MANUAL_SEED_TIER_HSR[tier] || 1200);
+  }
+
+  async updateManualSeedTier(ouid, manualSeedTier = "") {
+    if (!this.db || !ouid) throw new Error('DB 연결 실패');
+    const normalizedTier = String(manualSeedTier || '').trim().toUpperCase();
+    if (normalizedTier && !this.MANUAL_SEED_TIERS.includes(normalizedTier)) {
+      throw new Error('유효하지 않은 최고티어 값입니다.');
+    }
+    return this.db.collection(this.MEMBERS_COLLECTION).doc(ouid).update({
+      manualSeedTier: normalizedTier,
+      updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+    });
+  }
+
+  buildSeasonArchivePayload(snapshot, seasonStart, seasonEnd = new Date()) {
+    const archivedMembers = {};
+    snapshot.docs.forEach((doc) => {
+      const data = doc.data() || {};
+      const normalized = this.normalizeSeasonMemberArchive(doc.id, data);
+      if (normalized.matchCount > 0 || normalized.mmrHistory.length > 0) {
+        archivedMembers[doc.id] = normalized;
+      }
+    });
+
+    return {
+      seasonId: this.buildSeasonArchiveId(seasonStart, seasonEnd).replace(this.SEASON_ARCHIVE_PREFIX, ''),
+      seasonStart: window.firebase.firestore.Timestamp.fromDate(seasonStart),
+      seasonEnd: window.firebase.firestore.Timestamp.fromDate(seasonEnd),
+      archivedAt: window.firebase.firestore.FieldValue.serverTimestamp(),
+      members: archivedMembers
+    };
+  }
+
+  async getSeasonArchiveIndex() {
+    if (!this.db) return [];
+    try {
+      const doc = await this.db.collection(this.SETTINGS_COLLECTION).doc(this.SEASON_ARCHIVE_INDEX_DOC).get();
+      if (!doc.exists) return [];
+      const archives = Array.isArray(doc.data()?.archives) ? doc.data().archives : [];
+      return archives
+        .filter((item) => item?.docId)
+        .sort((a, b) => {
+          const aTime = this.toDateSafe(a.seasonEnd)?.getTime() || 0;
+          const bTime = this.toDateSafe(b.seasonEnd)?.getTime() || 0;
+          return bTime - aTime;
+        });
+    } catch (err) {
+      console.warn('[CrewRepo] Failed to read season archive index:', err);
+      return [];
+    }
+  }
+
+  async getRecentSeasonArchives(limit = 2) {
+    if (!this.db) return [];
+    const index = await this.getSeasonArchiveIndex();
+    const targets = index.slice(0, limit);
+    if (targets.length === 0) return [];
+
+    const docs = await Promise.all(
+      targets.map((item) => this.db.collection(this.SETTINGS_COLLECTION).doc(item.docId).get())
+    );
+
+    return docs
+      .filter((doc) => doc.exists)
+      .map((doc) => ({ id: doc.id, ...(doc.data() || {}) }));
+  }
+
+  getArchiveMemberRecord(archive = null, ouid = "") {
+    if (!archive || !ouid) return null;
+    const raw = archive.members?.[ouid];
+    if (!raw) return null;
+    return this.normalizeSeasonMemberArchive(ouid, raw);
+  }
+
+  calculateSeasonSeed(memberId, recentArchive = null, olderArchive = null) {
+    const recent = this.getArchiveMemberRecord(recentArchive, memberId);
+    const older = this.getArchiveMemberRecord(olderArchive, memberId);
+    const manualSeedTier = recent?.manualSeedTier || older?.manualSeedTier || "";
+    const manualSeedHsr = this.getManualSeedTierHsr(manualSeedTier);
+
+    if (!recent && !older) {
+      return {
+        seedMmr: 1200,
+        seedHsr: manualSeedTier ? manualSeedHsr : 1200,
+        seedMeta: {
+          recentWeight: 0,
+          olderWeight: 0,
+          baselineWeight: manualSeedTier ? 0 : 1,
+          manualWeight: manualSeedTier ? 1 : 0,
+          source: manualSeedTier ? 'manual-tier' : 'default',
+          manualSeedTier
+        }
+      };
+    }
+
+    const recentMatchCount = Number(recent?.matchCount || 0);
+    let recentWeight = 0.30;
+    let olderWeight = 0.30;
+    let baselineWeight = 0.40;
+    let manualWeight = 0;
+    if (recentMatchCount >= 15) {
+      recentWeight = 0.75;
+      olderWeight = 0.25;
+      baselineWeight = 0;
+    } else if (recentMatchCount >= 5) {
+      recentWeight = 0.55;
+      olderWeight = 0.25;
+      baselineWeight = 0.20;
+    }
+
+    if (!older) {
+      baselineWeight += olderWeight;
+      olderWeight = 0;
+    }
+    if (!recent) {
+      recentWeight = 0;
+      olderWeight = 0.60;
+      baselineWeight = 0.40;
+    }
+
+    let hsrRecentWeight = recentWeight;
+    let hsrOlderWeight = olderWeight;
+    let hsrBaselineWeight = baselineWeight;
+    if (manualSeedTier) {
+      if (recentMatchCount >= 15) manualWeight = 0.15;
+      else if (recentMatchCount >= 5) manualWeight = 0.30;
+      else manualWeight = 0.45;
+
+      const nonManualWeight = hsrRecentWeight + hsrOlderWeight + hsrBaselineWeight;
+      const scale = nonManualWeight > 0 ? (1 - manualWeight) / nonManualWeight : 0;
+      hsrRecentWeight *= scale;
+      hsrOlderWeight *= scale;
+      hsrBaselineWeight *= scale;
+    }
+
+    const baseHsr = (Number(recent?.finalHsr || 1200) * hsrRecentWeight)
+      + (Number(older?.finalHsr || 1200) * hsrOlderWeight)
+      + (manualSeedHsr * manualWeight)
+      + (1200 * hsrBaselineWeight);
+    const baseMmr = (Number(recent?.finalMmr || 1200) * recentWeight)
+      + (Number(older?.finalMmr || 1200) * olderWeight)
+      + (1200 * baselineWeight);
+
+    const seedHsr = Math.round(1200 + ((baseHsr - 1200) * 0.8));
+    const seedMmr = Math.round(1200 + ((baseMmr - 1200) * 0.8));
+
+    return {
+      seedMmr,
+      seedHsr,
+      seedMeta: {
+        recentWeight: hsrRecentWeight,
+        olderWeight: hsrOlderWeight,
+        baselineWeight: hsrBaselineWeight,
+        manualWeight,
+        source: manualSeedTier
+          ? `${recent && older ? 'recent+older' : recent ? 'recent' : 'older'}+manual-tier`
+          : recent && older ? 'recent+older' : recent ? 'recent' : 'older',
+        manualSeedTier
+      }
+    };
+  }
+
+  buildSeasonResetState(seed = {}) {
+    return {
+      mmr: 1200,
+      hsr: Number(seed.seedHsr || 1200),
+      wins: 0,
+      loses: 0,
+      crewKills: 0,
+      crewDeaths: 0,
+      mmrHistory: [],
+      seasonSeedMmr: 1200,
+      seasonSeedHsr: Number(seed.seedHsr || 1200),
+      seasonSeedSource: seed.seedMeta?.source || 'default'
+    };
   }
 
   async getHistory(limit = 300) {
@@ -849,31 +1099,38 @@ export class CrewRepository {
   async resetSeason() {
     if (!this.db) throw new Error('DB 연결 실패');
     const previousSeasonStart = await this.getSeasonStartDate();
+    const seasonEnd = new Date();
     const snapshot = await this.db.collection(this.MEMBERS_COLLECTION).get();
-    const archivedMembers = {};
-    snapshot.docs.forEach((doc) => {
-      const data = doc.data() || {};
-      const trend = Array.isArray(data.mmrHistory) ? data.mmrHistory : [];
-      if (trend.length > 0) {
-        archivedMembers[doc.id] = {
-          characterName: data.characterName || "",
-          mmrHistory: trend
-        };
-      }
-    });
+    const archivePayload = this.buildSeasonArchivePayload(snapshot, previousSeasonStart, seasonEnd);
+    const archiveDocId = this.buildSeasonArchiveId(previousSeasonStart, seasonEnd);
+    const previousArchives = await this.getRecentSeasonArchives(2);
+    const recentArchive = { id: archiveDocId, ...archivePayload };
+    const olderArchive = previousArchives[0] || null;
+    const archiveIndex = await this.getSeasonArchiveIndex();
+    const nextArchiveIndex = [
+      {
+        docId: archiveDocId,
+        seasonId: archivePayload.seasonId,
+        seasonStart: archivePayload.seasonStart,
+        seasonEnd: archivePayload.seasonEnd
+      },
+      ...archiveIndex.filter((item) => item.docId !== archiveDocId)
+    ].slice(0, 12);
 
     const batch = this.db.batch();
-    snapshot.docs.forEach(doc => {
-      batch.update(doc.ref, { mmr: 1200, hsr: 1200, wins: 0, loses: 0, crewKills: 0, crewDeaths: 0, mmrHistory: [], updatedAt: window.firebase.firestore.FieldValue.serverTimestamp() });
+    snapshot.docs.forEach((doc) => {
+      const seed = this.calculateSeasonSeed(doc.id, recentArchive, olderArchive);
+      batch.update(doc.ref, {
+        ...this.buildSeasonResetState(seed),
+        updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+      });
     });
+    batch.set(this.db.collection(this.SETTINGS_COLLECTION).doc(archiveDocId), archivePayload, { merge: false });
+    batch.set(this.db.collection(this.SETTINGS_COLLECTION).doc(this.SEASON_ARCHIVE_DOC), archivePayload, { merge: false });
     batch.set(
-      this.db.collection(this.SETTINGS_COLLECTION).doc(this.SEASON_ARCHIVE_DOC),
-      {
-        seasonStart: window.firebase.firestore.Timestamp.fromDate(previousSeasonStart),
-        archivedAt: window.firebase.firestore.FieldValue.serverTimestamp(),
-        members: archivedMembers
-      },
-      { merge: false }
+      this.db.collection(this.SETTINGS_COLLECTION).doc(this.SEASON_ARCHIVE_INDEX_DOC),
+      { archives: nextArchiveIndex, updatedAt: window.firebase.firestore.FieldValue.serverTimestamp() },
+      { merge: true }
     );
     batch.set(this.db.collection(this.SETTINGS_COLLECTION).doc('season'), { startDate: window.firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
     await batch.commit();
