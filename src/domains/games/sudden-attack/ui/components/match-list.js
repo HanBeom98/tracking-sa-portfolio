@@ -153,12 +153,14 @@ export class SaMatchList extends HTMLElement {
         }
         .match-item.win { border-left: 5px solid var(--primary); }
         .match-item.lose { border-left: 5px solid var(--red); }
+        .match-item.abandon { border-left: 5px solid #ff9b52; }
         .match-item.is-custom { background: rgba(255, 204, 0, 0.03); }
 
         .match-info .type-tag { font-size: 11px; color: var(--text-dim); display: block; margin-bottom: 4px; }
         .match-info .result-badge { font-weight: 900; font-size: 18px; }
         .win .result-badge { color: var(--primary); }
         .lose .result-badge { color: var(--red); }
+        .abandon .result-badge { color: #ff9b52; }
 
         .match-map-info .map { font-size: 16px; font-weight: bold; color: #fff; display: block; }
         .match-map-info .match-date { font-size: 12px; color: var(--text-dim); }
@@ -193,6 +195,7 @@ export class SaMatchList extends HTMLElement {
                 <div style="display:flex; align-items:center; gap:5px; margin-bottom:4px;">
                   <span class="type-tag">${match.matchTypeName}</span>
                   ${match.isCustomMatch ? '<span class="custom-badge" style="font-size:10px; font-weight:800; color:var(--gold); background:rgba(255,204,0,0.15); padding:2px 6px; border-radius:4px; border:1px solid rgba(255,204,0,0.3);">크루내전</span>' : ''}
+                  ${match.isSyntheticAbandon ? '<span class="custom-badge" style="font-size:10px; font-weight:800; color:#ff9b52; background:rgba(255,155,82,0.12); padding:2px 6px; border-radius:4px; border:1px solid rgba(255,155,82,0.28);">탈주 판정</span>' : ''}
                 </div>
                 <div style="display:flex; align-items:center; gap:8px;">
                   <span class="result-badge">${match.matchResult}</span>
@@ -203,10 +206,10 @@ export class SaMatchList extends HTMLElement {
                 <span class="map">${match.mapName}</span>
                 <span class="match-date">${new Date(match.matchDate).toLocaleDateString()}</span>
               </div>
-              <span class="kda">${match.kill} / ${match.death} / ${match.assist}</span>
+              <span class="kda">${match.killDisplay ?? match.kill} / ${match.deathDisplay ?? match.death} / ${match.assistDisplay ?? match.assist}</span>
               <div class="kd-expand-box">
                 <div style="display:inline-block; vertical-align: middle;">
-                  <span class="kd ${this.getKdClass(match.kdPercent)}">KD: ${match.kdPercent}%</span>
+                  <span class="kd ${this.getKdClass(match.kdPercent)}">KD: ${match.kdDisplay ?? `${match.kdPercent}%`}</span>
                   ${(match.mmrChange !== 0 || match.hsrChange !== 0) ? `
                     <div class="score-change">
                       <span class="${match.mmrChange >= 0 ? 'score-up' : 'score-down'}">${match.mmrChange >= 0 ? '+' : ''}${match.mmrChange} MMR</span>

@@ -68,6 +68,13 @@ export class SaService {
       const seasonHistory = this.crewRepository
         ? await this.crewRepository.getHistory(300)
         : [];
+      const syntheticAbandonMatches = this.crewRepository
+        ? this.buildSyntheticAbandonMatches(allMatches, seasonHistory, {
+            ouid: player.ouid,
+            nickname: player.nickname
+          })
+        : [];
+      const mergedMatches = this.mergeMatchesWithSyntheticAbandons(allMatches, syntheticAbandonMatches);
       const abandonSummary = this.crewRepository
         ? this.crewRepository.buildMemberAbandonSummary(seasonHistory, {
             ouid: player.ouid,
@@ -80,7 +87,7 @@ export class SaService {
       const rawStats = await this.repository.apiClient.getRecentInfo(player.ouid);
 
       // 6. Construct season views (default = current season)
-      const seasonViews = this.buildSeasonViews(allMatches, seasonStart, rawStats, memberData, archivedPreviousTrend, abandonSummary);
+      const seasonViews = this.buildSeasonViews(mergedMatches, seasonStart, rawStats, memberData, archivedPreviousTrend, abandonSummary);
       const currentView = seasonViews.current;
 
       return {
@@ -143,6 +150,51 @@ export class SaService {
       current: { key: 'current', label: '이번 시즌', matches: currentMatches, stats: currentStats },
       previous: { key: 'previous', label: '지난 시즌', matches: previousMatches, stats: previousStats }
     };
+  }
+
+  buildSyntheticAbandonMatches(existingMatches = [], history = [], { ouid = "", nickname = "" } = {}) {
+    const existingMatchIds = new Set((Array.isArray(existingMatches) ? existingMatches : []).map((match) => match?.matchId).filter(Boolean));
+    const normalizedNickname = String(nickname || "").toLowerCase().trim();
+
+    return (Array.isArray(history) ? history : [])
+      .filter((item) => !!item?.matchId && !existingMatchIds.has(item.matchId))
+      .filter((item) => {
+        const manualOuids = Array.isArray(item?.manualAbandonOuids) ? item.manualAbandonOuids : [];
+        const manualNicknames = Array.isArray(item?.manualAbandonNicknames) ? item.manualAbandonNicknames : [];
+        const hitByOuid = !!ouid && manualOuids.includes(ouid);
+        const hitByNickname = !!normalizedNickname && manualNicknames.some((value) => String(value || "").toLowerCase().trim() === normalizedNickname);
+        return hitByOuid || hitByNickname;
+      })
+      .map((item) => ({
+        matchId: item.matchId,
+        matchTypeName: '수동 탈주',
+        mapName: item.map || '알 수 없음',
+        matchDate: item.matchDate,
+        participants: [],
+        crewParticipants: nickname ? [nickname] : [],
+        isCustomMatch: true,
+        isSyntheticAbandon: true,
+        syntheticBadge: '탈주 판정',
+        allPlayerStats: [],
+        matchResult: 'ABANDON',
+        kill: 0,
+        death: 0,
+        assist: 0,
+        killDisplay: '-',
+        deathDisplay: '-',
+        assistDisplay: '-',
+        kdPercent: 0,
+        kdDisplay: '-',
+        mmrChange: -30,
+        hsrChange: -20,
+        laundryInfo: { isWashed: false, totalMissing: 0, winTeamMissing: 0, loseTeamMissing: 0 }
+      }))
+      .sort((a, b) => new Date(b.matchDate) - new Date(a.matchDate));
+  }
+
+  mergeMatchesWithSyntheticAbandons(matches = [], syntheticMatches = []) {
+    return [...(Array.isArray(matches) ? matches : []), ...(Array.isArray(syntheticMatches) ? syntheticMatches : [])]
+      .sort((a, b) => new Date(b.matchDate) - new Date(a.matchDate));
   }
 
   buildTrendViews(memberData, seasonStart, archivedPreviousTrend = []) {
