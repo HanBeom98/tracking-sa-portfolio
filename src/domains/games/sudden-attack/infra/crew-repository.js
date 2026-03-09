@@ -369,7 +369,9 @@ export class CrewRepository {
     };
   }
 
-  async applyManualAbandonPenalty({ ouid = "", nickname = "", matchId = "" } = {}) {
+  async applyManualAbandonPenalty({ ouid = "", nickname = "", matchId = "", reason = "", appliedBy = null } = {}) {
+    const trimmedReason = String(reason || "").trim();
+    if (!trimmedReason) throw new Error('적용 사유를 입력해주세요.');
     if (!this.db) throw new Error('DB 연결 실패');
     const resolvedOuid = ouid || await this.findOuidByNickname(nickname);
     if (!resolvedOuid) throw new Error('대상 멤버를 찾을 수 없습니다.');
@@ -413,6 +415,12 @@ export class CrewRepository {
     if (targetName && !manualNicknames.includes(targetName)) manualNicknames.push(targetName);
     const manualOuids = [...existingOuids];
     if (!manualOuids.includes(resolvedOuid)) manualOuids.push(resolvedOuid);
+    const manualReasons = Array.isArray(historyData.manualAbandonReasons) ? [...historyData.manualAbandonReasons] : [];
+    manualReasons.push(trimmedReason);
+    const manualAppliedByEmails = Array.isArray(historyData.manualAbandonAppliedByEmails) ? [...historyData.manualAbandonAppliedByEmails] : [];
+    const appliedByEmail = String(appliedBy?.email || "").trim();
+    if (appliedByEmail) manualAppliedByEmails.push(appliedByEmail);
+    const appliedByUid = String(appliedBy?.uid || "").trim();
 
     const batch = this.db.batch();
     batch.update(memberRef, {
@@ -425,7 +433,9 @@ export class CrewRepository {
     batch.update(historyRef, {
       abandonCount: Number(historyData.abandonCount || 0) + 1,
       manualAbandonNicknames: manualNicknames,
-      manualAbandonOuids: manualOuids
+      manualAbandonOuids: manualOuids,
+      manualAbandonReasons: manualReasons,
+      manualAbandonAppliedByEmails: manualAppliedByEmails
     });
     batch.set(manualRef, {
       ouid: resolvedOuid,
@@ -435,6 +445,10 @@ export class CrewRepository {
       mapName: historyData.map || "알 수 없음",
       mmrDiff: this.ABANDON_MMR_PENALTY,
       hsrDiff: this.ABANDON_HSR_PENALTY,
+      reason: trimmedReason,
+      appliedByUid: appliedByUid || null,
+      appliedByEmail: appliedByEmail || null,
+      appliedAt: window.firebase.firestore.FieldValue.serverTimestamp(),
       createdAt: window.firebase.firestore.FieldValue.serverTimestamp()
     });
     await batch.commit();
@@ -447,6 +461,9 @@ export class CrewRepository {
       mapName: historyData.map || "알 수 없음",
       mmrDiff: this.ABANDON_MMR_PENALTY,
       hsrDiff: this.ABANDON_HSR_PENALTY,
+      reason: trimmedReason,
+      appliedByUid: appliedByUid || null,
+      appliedByEmail: appliedByEmail || null,
       newMmr: nextMmr,
       newHsr: nextHsr,
       loses: nextLoses

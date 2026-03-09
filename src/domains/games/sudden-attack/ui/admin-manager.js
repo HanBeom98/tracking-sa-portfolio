@@ -247,18 +247,27 @@ export class AdminManager {
 
     if (!ouid || !member) return alert('패널티를 줄 멤버를 선택해주세요.');
     if (!matchId) return alert('경기를 선택해주세요.');
+    const reason = prompt('탈주 패널티 적용 사유를 입력해주세요.', '게임 중 탈주 아이템 사용');
+    if (reason === null) return;
+    const trimmedReason = String(reason || "").trim();
+    if (!trimmedReason) return alert('적용 사유를 입력해주세요.');
     if (!confirm(`[${member.characterName}]에게\n[${matchLabel}]\n기준 탈주 패널티를 적용하시겠습니까?`)) return;
 
     btn.disabled = true;
     const originalText = btn.textContent;
     btn.textContent = '적용 중...';
     try {
+      const currentUser = typeof window !== 'undefined' && window.firebase?.auth
+        ? window.firebase.auth().currentUser
+        : null;
       const result = await this.crewRepo.applyManualAbandonPenalty({
         ouid,
         nickname: member.characterName,
-        matchId
+        matchId,
+        reason: trimmedReason,
+        appliedBy: currentUser
       });
-      alert(`[${result.nickname}] 패널티 적용 완료\n${result.mapName} / ${result.matchDate}\nMMR ${result.mmrDiff}, HSR ${result.hsrDiff}, 총 ${result.loses}패`);
+      alert(`[${result.nickname}] 패널티 적용 완료\n${result.mapName} / ${result.matchDate}\n사유: ${result.reason}\nMMR ${result.mmrDiff}, HSR ${result.hsrDiff}, 총 ${result.loses}패`);
       await this.renderManualPenaltyMatchOptions();
       window.dispatchEvent(new CustomEvent('sa-rankings-updated'));
     } catch (err) {

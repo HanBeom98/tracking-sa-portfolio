@@ -201,3 +201,12 @@ test("CrewRepository counts member manual abandons by season split", () => {
 
   assert.deepEqual(summary, { current: 1, previous: 1 });
 });
+
+test("CrewRepository requires a non-empty reason for manual abandon penalties", async () => {
+  const repo = new CrewRepository(null);
+
+  await assert.rejects(
+    () => repo.applyManualAbandonPenalty({ ouid: "p10", matchId: "m1", reason: "   " }),
+    /적용 사유를 입력해주세요\./
+  );
+});
