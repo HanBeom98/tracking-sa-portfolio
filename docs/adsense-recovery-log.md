@@ -12,7 +12,7 @@ Last updated: 2026-03-09 (UTC)
 - [x] Step 4: Trust page enrichment (About/Contact/Privacy operator info and update date)
 - [~] Step 5: Content quality curation (news indexing blocked + direct UI exposure reduced; selective keep/remove pending)
 - [~] Step 6: English page consistency cleanup (EN `data-i18n` fallback Korean removed; remaining quality polish optional)
-- [ ] Step 7: Deploy, Search Console validation and AdSense re-apply
+- [~] Step 7: Deploy, Search Console validation and AdSense re-apply
 
 ## Changes Applied In This Round
 - Added rule-based `noindex, nofollow` in HTML processor for:
@@ -35,6 +35,10 @@ Last updated: 2026-03-09 (UTC)
   - Removed news card from home "Insights" section, keeping glossary/futures tools.
   - Removed news recommendation from search empty-state suggestions.
   - Changed footer fallback text to neutral "서비스 제휴 문의".
+- Live deploy validation completed on 2026-03-09 UTC:
+  - `build.txt` confirms latest commit `e9d9aee2` deployed (`built_at_utc=2026-03-09T10:42:17Z`).
+  - Core pages `/`, `/about/`, `/contact/`, `/privacy-policy/`, `/terms/` are `index, follow` with canonical.
+  - `/news/` remains `noindex, nofollow` with canonical `/news/`.
 
 ## Verification Checklist (Next)
 - [x] Build output regenerated (`public/` recompiled)
@@ -44,6 +48,8 @@ Last updated: 2026-03-09 (UTC)
 - [x] Confirm trust-page updates (`about/contact/privacy/terms`)
 - [x] EN shared navigation fallback text replaced (header/menu/common cards)
 - [x] EN `data-i18n` fallback Korean removed (global scan)
+- [x] Live deploy reflected (`trackingsa.com` build/version and HTML checks)
+- [x] Live robots/canonical checks for key pages
 - [ ] Finalize content curation list (which news to keep vs archive if re-open indexing later)
 - [ ] EN copy polish for phrasing consistency (non-blocking)
 - [ ] Search Console: URL inspection for `/`, `/about/`, `/contact/`, `/privacy-policy/`, `/terms/`
