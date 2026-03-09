@@ -99,6 +99,10 @@ service cloud.firestore {
       allow write: if isStaff() || isSaStaff();
     }
 
+    match /sa_crew_manual_abandons/{docId} {
+      allow read, write: if isStaff() || isSaStaff();
+    }
+
     match /sa_crew_settings/{docId} {
       allow read: if true;
       allow write: if isStaff() || isSaStaff();

@@ -318,6 +318,30 @@ export class CrewRepository {
     };
   }
 
+  buildManualAbandonHistoryPatch(entries = [], baseHistory = {}) {
+    const manualAbandonOuids = Array.isArray(baseHistory.manualAbandonOuids)
+      ? [...baseHistory.manualAbandonOuids]
+      : [];
+    const manualAbandonNicknames = Array.isArray(baseHistory.manualAbandonNicknames)
+      ? [...baseHistory.manualAbandonNicknames]
+      : [];
+
+    entries.forEach((entry) => {
+      if (entry?.ouid && !manualAbandonOuids.includes(entry.ouid)) {
+        manualAbandonOuids.push(entry.ouid);
+      }
+      if (entry?.nickname && !manualAbandonNicknames.includes(entry.nickname)) {
+        manualAbandonNicknames.push(entry.nickname);
+      }
+    });
+
+    return {
+      abandonCount: Number(baseHistory.abandonCount || 0) + entries.length,
+      manualAbandonOuids,
+      manualAbandonNicknames
+    };
+  }
+
   async applyManualAbandonPenalty({ ouid = "", nickname = "", matchId = "" } = {}) {
     if (!this.db) throw new Error('DB 연결 실패');
     const resolvedOuid = ouid || await this.findOuidByNickname(nickname);
@@ -605,6 +629,9 @@ export class CrewRepository {
 
     const historySnap = await this.db.collection(this.HISTORY_COLLECTION).get();
     const settledSet = new Set(historySnap.docs.map(d => d.id));
+    const historyStateMap = new Map(
+      historySnap.docs.map((doc) => [doc.id, doc.data() || {}])
+    );
     const pendingSessions = await this.getPendingMatchSessions();
     const manualAbandons = await this.getManualAbandonEntries();
     const usedSessionIds = new Set();
@@ -715,6 +742,14 @@ export class CrewRepository {
         abandonCount,
         matchedSessionId: matchedSession?.session?.id || null
       });
+      historyStateMap.set(match.matchId, {
+        ...(historyStateMap.get(match.matchId) || {}),
+        map: match.mapName,
+        matchDate: match.matchDate,
+        crewCount: match.crewParticipants.length,
+        abandonCount,
+        matchedSessionId: matchedSession?.session?.id || null
+      });
       if (matchedSession?.session?.id) {
         batch.update(this.db.collection(this.MATCH_SESSIONS_COLLECTION).doc(matchedSession.session.id), {
           status: 'SETTLED',
@@ -727,11 +762,24 @@ export class CrewRepository {
       settledSet.add(match.matchId);
     }
 
+    const manualAbandonsByMatch = new Map();
     manualAbandons.forEach((entry) => {
       const currentData = memberCache[entry.ouid];
+      if (settledSet.has(entry.matchId)) {
+        const items = manualAbandonsByMatch.get(entry.matchId) || [];
+        items.push(entry);
+        manualAbandonsByMatch.set(entry.matchId, items);
+      }
       if (!currentData) return;
       if ((currentData.mmrHistory || []).some((item) => item?.date === entry.matchDate)) return;
       this.applyManualAbandonToMember(currentData, entry.matchDate);
+    });
+
+    manualAbandonsByMatch.forEach((entries, matchId) => {
+      const baseHistory = historyStateMap.get(matchId) || {};
+      const patch = this.buildManualAbandonHistoryPatch(entries, baseHistory);
+      batch.set(this.db.collection(this.HISTORY_COLLECTION).doc(matchId), patch, { merge: true });
+      historyStateMap.set(matchId, { ...baseHistory, ...patch });
     });
 
     for (const ouid in memberCache) {

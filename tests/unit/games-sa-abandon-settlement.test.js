@@ -154,3 +154,24 @@ test("CrewRepository extracts nickname-only manual abandon backfill candidates",
     }
   ]);
 });
+
+test("CrewRepository builds history patch for persisted manual abandons", () => {
+  const repo = new CrewRepository(null);
+
+  const patch = repo.buildManualAbandonHistoryPatch(
+    [
+      { ouid: "p10", nickname: "alt" }
+    ],
+    {
+      abandonCount: 0,
+      manualAbandonOuids: [],
+      manualAbandonNicknames: []
+    }
+  );
+
+  assert.deepEqual(patch, {
+    abandonCount: 1,
+    manualAbandonOuids: ["p10"],
+    manualAbandonNicknames: ["alt"]
+  });
+});
