@@ -487,6 +487,28 @@ export class CrewRepository {
     };
   }
 
+  buildCurrentSeasonReseedState(memberData = {}, seed = {}, changedAt = new Date()) {
+    const currentMmr = Number(memberData.mmr || 1200);
+    const nextHsr = Number(seed.seedHsr || memberData.hsr || 1200);
+    const currentHistory = Array.isArray(memberData.mmrHistory) ? [...memberData.mmrHistory] : [];
+    const changedAtIso = changedAt instanceof Date && !Number.isNaN(changedAt.getTime())
+      ? changedAt.toISOString()
+      : new Date().toISOString();
+    const lastEntry = currentHistory[currentHistory.length - 1] || null;
+    const nextHistory = (!lastEntry || Number(lastEntry.hsr || lastEntry.mmr || 1200) !== nextHsr)
+      ? currentHistory.concat([{ mmr: currentMmr, hsr: nextHsr, date: changedAtIso }]).slice(-this.HISTORY_LIMIT)
+      : currentHistory;
+
+    return {
+      hsr: nextHsr,
+      mmr: currentMmr,
+      mmrHistory: nextHistory,
+      seasonSeedMmr: 1200,
+      seasonSeedHsr: nextHsr,
+      seasonSeedSource: `current-reseed:${seed.seedMeta?.source || 'default'}`
+    };
+  }
+
   async getHistory(limit = 300) {
     if (!this.db) return [];
     try {
@@ -1133,6 +1155,32 @@ export class CrewRepository {
       { merge: true }
     );
     batch.set(this.db.collection(this.SETTINGS_COLLECTION).doc('season'), { startDate: window.firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+    await batch.commit();
+  }
+
+  async reseedCurrentSeasonHsr() {
+    if (!this.db) throw new Error('DB 연결 실패');
+    const snapshot = await this.db.collection(this.MEMBERS_COLLECTION).get();
+    const currentArchive = this.buildSeasonArchivePayload(snapshot, await this.getSeasonStartDate(), new Date());
+    const previousArchives = await this.getRecentSeasonArchives(1);
+    const olderArchive = previousArchives[0] || null;
+    const changedAt = new Date();
+    const batch = this.db.batch();
+
+    snapshot.docs.forEach((doc) => {
+      const data = doc.data() || {};
+      const seed = this.calculateSeasonSeed(doc.id, currentArchive, olderArchive);
+      const reseedState = this.buildCurrentSeasonReseedState(data, seed, changedAt);
+      batch.update(doc.ref, {
+        hsr: reseedState.hsr,
+        mmrHistory: reseedState.mmrHistory,
+        seasonSeedMmr: reseedState.seasonSeedMmr,
+        seasonSeedHsr: reseedState.seasonSeedHsr,
+        seasonSeedSource: reseedState.seasonSeedSource,
+        updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+      });
+    });
+
     await batch.commit();
   }
 

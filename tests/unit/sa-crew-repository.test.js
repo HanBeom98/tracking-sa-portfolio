@@ -149,3 +149,32 @@ test("CrewRepository boosts HSR seed with manual highest tier", () => {
   assert.equal(result.seedHsr, 1287);
   assert.equal(result.seedMmr, 1219);
 });
+
+test("CrewRepository current season reseed keeps MMR and updates only HSR trend", () => {
+  const repo = new CrewRepository(null);
+  const memberData = {
+    mmr: 1200,
+    hsr: 1210,
+    mmrHistory: [
+      { mmr: 1200, hsr: 1210, date: "2026-03-09T10:00:00.000Z" }
+    ]
+  };
+
+  const reseedState = repo.buildCurrentSeasonReseedState(
+    memberData,
+    { seedHsr: 1380, seedMeta: { source: "manual-tier" } },
+    new Date("2026-03-09T12:00:00.000Z")
+  );
+
+  assert.equal(reseedState.mmr, 1200);
+  assert.equal(reseedState.hsr, 1380);
+  assert.equal(reseedState.seasonSeedMmr, 1200);
+  assert.equal(reseedState.seasonSeedHsr, 1380);
+  assert.equal(reseedState.seasonSeedSource, "current-reseed:manual-tier");
+  assert.equal(reseedState.mmrHistory.length, 2);
+  assert.deepEqual(reseedState.mmrHistory[1], {
+    mmr: 1200,
+    hsr: 1380,
+    date: "2026-03-09T12:00:00.000Z"
+  });
+});

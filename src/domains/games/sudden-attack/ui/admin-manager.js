@@ -98,6 +98,7 @@ export class AdminManager {
       </div>
       <div class="admin-sub-btns">
         <button id="repairDataBtn" class="sub-btn repair-btn">♻️ 전적 데이터 재정산 (킬/데스 복구)</button>
+        <button id="reseedCurrentHsrBtn" class="sub-btn update-name-btn">🎯 현재 HSR 재시드</button>
       </div>
       <div class="manual-penalty-panel">
         <h4>🚨 수동 탈주 패널티</h4>
@@ -137,6 +138,7 @@ export class AdminManager {
     this.renderManualPenaltyLog();
 
     actionBar.querySelector('#repairDataBtn').addEventListener('click', () => this.handleRepairData());
+    actionBar.querySelector('#reseedCurrentHsrBtn').addEventListener('click', () => this.handleReseedCurrentHsr());
     actionBar.querySelector('#resetSeasonBtn').addEventListener('click', () => this.handleResetSeason());
     actionBar.querySelector('#settleMMRBtn').addEventListener('click', (e) => this.handleSettleMMR(e.currentTarget));
     actionBar.querySelector('#refreshPenaltyHistoryBtn').addEventListener('click', () => this.renderManualPenaltyMatchOptions());
@@ -305,6 +307,17 @@ export class AdminManager {
       alert('시즌 마감 및 새 시즌 시작 완료!');
       window.dispatchEvent(new CustomEvent('sa-rankings-updated'));
     } catch (e) { alert('초기화 실패: ' + e.message); }
+  }
+
+  async handleReseedCurrentHsr() {
+    if (!confirm('현재 시즌 MMR은 유지하고, 저장된 최고티어와 시즌 데이터를 기준으로 HSR만 다시 계산하시겠습니까?')) return;
+    try {
+      await this.crewRepo.reseedCurrentSeasonHsr();
+      alert('현재 시즌 HSR 재시드 완료!');
+      window.dispatchEvent(new CustomEvent('sa-rankings-updated'));
+    } catch (e) {
+      alert('현재 HSR 재시드 실패: ' + e.message);
+    }
   }
 
   async handleManualAbandonPenalty(btn) {
