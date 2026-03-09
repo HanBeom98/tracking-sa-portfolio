@@ -13,8 +13,26 @@ window.translations = {
         'notice': '공지사항',
         'free_board': '자유게시판',
         'about_us': '서비스 소개',
+        'about_operator_label': '운영 주체:',
+        'about_operator_value': 'Tracking SA Team',
+        'about_contact_label': '연락처:',
+        'about_updated_label': '최종 업데이트:',
+        'about_editorial_title': '편집 및 콘텐츠 원칙',
+        'about_editorial_li1': '출처 기반 사실 요약과 관점 분석을 분리합니다.',
+        'about_editorial_li2': '추정·의견은 명확히 구분하고 과장 표현을 지양합니다.',
+        'about_editorial_li3': '법률·의료·투자 판단의 최종 책임은 사용자에게 있습니다.',
         'contact': '문의',
+        'contact_operator_label': '운영 주체:',
+        'contact_operator_value': 'Tracking SA Team',
+        'contact_scope_label': '문의 범위:',
+        'contact_scope_value': '서비스 오류, 정책 문의, 제휴/콘텐츠 제안',
+        'contact_updated_label': '최종 업데이트:',
         'privacy_policy': '개인정보처리방침',
+        'privacy_operator_label': '운영 주체:',
+        'privacy_operator_value': 'Tracking SA Team',
+        'privacy_contact_label': '문의 이메일:',
+        'privacy_effective_label': '시행일:',
+        'terms_of_service': '이용약관',
         'theme_change': '테마 변경',
         'login': '로그인',
         'logout': '로그아웃',
@@ -73,6 +91,14 @@ window.translations = {
         'submit_game_link': '+ 새 게임 등록',
         'footer_brand_desc': 'Tracking SA는 최첨단 AI 기술을 활용하여 사용자에게 가장 유용한 데이터와 즐거운 경험을 제공합니다.',
         'sa_stats': '서든어택 전적'
+        ,'terms_title': '이용약관'
+        ,'terms_intro': '본 약관은 Tracking SA 웹사이트 및 관련 서비스 이용과 관련된 기본 조건을 설명합니다.'
+        ,'terms_section_1_title': '1. 서비스 이용'
+        ,'terms_section_1_body': '사용자는 법령 및 본 약관을 준수하여 서비스를 이용해야 합니다. 서비스 안정성, 보안, 운영 목적을 해치는 행위는 제한될 수 있습니다.'
+        ,'terms_section_2_title': '2. 콘텐츠 및 책임'
+        ,'terms_section_2_body': '사이트 내 게시되는 정보는 참고용이며, 투자·법률·의료 등 고위험 의사결정의 최종 근거로 사용될 수 없습니다. 최종 판단과 책임은 이용자에게 있습니다.'
+        ,'terms_section_3_title': '3. 약관 변경'
+        ,'terms_section_3_body': '운영상 필요에 따라 약관은 변경될 수 있으며, 중요한 변경사항은 사이트를 통해 고지합니다. 변경 이후 서비스 이용 시 개정 약관에 동의한 것으로 간주될 수 있습니다.'
     },
     'en': {
         'home': 'Home',
@@ -84,8 +110,26 @@ window.translations = {
         'notice': 'Notice',
         'free_board': 'Free Board',
         'about_us': 'About Us',
+        'about_operator_label': 'Operator:',
+        'about_operator_value': 'Tracking SA Team',
+        'about_contact_label': 'Contact:',
+        'about_updated_label': 'Last updated:',
+        'about_editorial_title': 'Editorial Principles',
+        'about_editorial_li1': 'We separate fact-based summaries from opinion-based analysis.',
+        'about_editorial_li2': 'Estimates and opinions are clearly labeled, avoiding exaggerated claims.',
+        'about_editorial_li3': 'Final responsibility for legal, medical, or investment decisions remains with users.',
         'contact': 'Contact',
+        'contact_operator_label': 'Operator:',
+        'contact_operator_value': 'Tracking SA Team',
+        'contact_scope_label': 'Inquiry scope:',
+        'contact_scope_value': 'Service issues, policy inquiries, partnerships/content proposals',
+        'contact_updated_label': 'Last updated:',
         'privacy_policy': 'Privacy Policy',
+        'privacy_operator_label': 'Operator:',
+        'privacy_operator_value': 'Tracking SA Team',
+        'privacy_contact_label': 'Contact email:',
+        'privacy_effective_label': 'Effective date:',
+        'terms_of_service': 'Terms of Service',
         'theme_change': 'Theme',
         'login': 'Log in',
         'logout': 'Log out',
@@ -137,7 +181,14 @@ window.translations = {
         'cat_insights': 'Insights & Column',
         'submit_game_link': '+ Submit Your Game',
         'footer_brand_desc': 'Tracking SA provides users with the most useful data and enjoyable experiences using cutting-edge AI technology.',
-        'sa_stats': 'Sudden Attack Stats'
+        'sa_stats': 'Sudden Attack Stats',
+        'terms_title': 'Terms of Service',
+        'terms_intro': 'These terms describe the basic conditions for using the Tracking SA website and related services.',
+        'terms_section_1_title': '1. Use of Service',
+        'terms_section_1_body': 'You must comply with applicable laws and these terms. Actions that harm service stability, security, or operations may be restricted.',
+        'terms_section_2_title': '2. Content and Responsibility',
+        'terms_section_2_body': 'Information on this site is for reference only and should not be treated as final advice for high-stakes decisions such as investment, legal, or medical matters.',
+        'terms_section_3_title': '3. Changes to Terms',
+        'terms_section_3_body': 'These terms may change for operational reasons. Material updates will be announced on the site, and continued use may be considered acceptance of updated terms.'
     }
 };
-

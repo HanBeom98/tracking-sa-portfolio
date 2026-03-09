@@ -53,7 +53,7 @@ def generate_public_site(incremental=False):
     # 4. 도메인 빌드
     domains = [
         "animal-face", "fortune", "games", "games/submit", "ai-test", "lucky-recommendation", 
-        "games/ai-evolution", "games/tetris", "games/sudden-attack", "privacy-policy", "about", "contact",
+        "games/ai-evolution", "games/tetris", "games/sudden-attack", "privacy-policy", "terms", "about", "contact",
         "board", "board/write", "board/edit", "board/post", "inquiry", "search",
         "auth", "auth/signup", "account", "account/domain",
         "futures-estimate", "glossary"
@@ -230,12 +230,37 @@ def build_rss():
 
 
 def build_sitemap():
+    noindex_exact_paths = {
+        "news/index.html",
+        "en/news/index.html",
+        "auth/signup/index.html",
+        "en/auth/signup/index.html",
+        "games/admin/index.html",
+        "en/games/admin/index.html",
+        "board/write/index.html",
+        "en/board/write/index.html",
+        "board/edit/index.html",
+        "en/board/edit/index.html",
+        "board/post/index.html",
+        "en/board/post/index.html",
+    }
+
+    def is_news_article_page(rel_path):
+        return bool(
+            re.match(r'^(en/)?news-\d{10}-\d+\.html$', rel_path)
+            or re.match(r'^(en/)?20\d{2}-\d{2}-\d{2}-.+\.html$', rel_path)
+        )
+
     def is_public_page(rel_path):
         if not rel_path.endswith(".html"):
             return False
         if rel_path.startswith("ui/") or "/ui/" in rel_path:
             return False
         if "/domain/" in rel_path or "/infra/" in rel_path or "/application/" in rel_path:
+            return False
+        if rel_path in noindex_exact_paths:
+            return False
+        if is_news_article_page(rel_path):
             return False
         return True
 
