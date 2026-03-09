@@ -20,9 +20,42 @@ class LuckyRecommendation extends HTMLElement {
     this._copy = null;
   }
 
-  connectedCallback() {
+  async connectedCallback() {
+    await this.waitForAppShellTranslation();
     this.render();
     this.setupEvents();
+    this._onLangChange = () => {
+      this.render();
+      this.setupEvents();
+    };
+    window.addEventListener("language-changed", this._onLangChange);
+  }
+
+  disconnectedCallback() {
+    if (this._onLangChange) {
+      window.removeEventListener("language-changed", this._onLangChange);
+    }
+  }
+
+  async waitForAppShellTranslation() {
+    const startedAt = Date.now();
+    const timeoutMs = 4000;
+
+    while (
+      (!window.AppShell || typeof window.AppShell.waitForTranslation !== "function") &&
+      Date.now() - startedAt < timeoutMs
+    ) {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+
+    if (window.AppShell && typeof window.AppShell.waitForTranslation === "function") {
+      await window.AppShell.waitForTranslation();
+      return;
+    }
+
+    while (!window.getTranslation && Date.now() - startedAt < timeoutMs) {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
   }
 
   getTranslate() {

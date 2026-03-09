@@ -19,11 +19,29 @@ class AiTestPremium extends HTMLElement {
   }
 
   async connectedCallback() {
-    // AppShell 인프라 준비 대기
+    await this.waitForAppShellTranslation();
+    this.initComponent();
+  }
+
+  async waitForAppShellTranslation() {
+    const startedAt = Date.now();
+    const timeoutMs = 4000;
+
+    while (
+      (!window.AppShell || typeof window.AppShell.waitForTranslation !== "function") &&
+      Date.now() - startedAt < timeoutMs
+    ) {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+
     if (window.AppShell && typeof window.AppShell.waitForTranslation === "function") {
       await window.AppShell.waitForTranslation();
+      return;
     }
-    this.initComponent();
+
+    while (!window.getTranslation && Date.now() - startedAt < timeoutMs) {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
   }
 
   initComponent() {
