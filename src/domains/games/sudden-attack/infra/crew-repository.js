@@ -312,6 +312,18 @@ export class CrewRepository {
     return Number(this.MANUAL_SEED_TIER_HSR[tier] || 1200);
   }
 
+  getManualSeedWeight(recentMatchCount = 0, olderMatchCount = 0, seasonCount = 0) {
+    let manualWeight = 0;
+    if (recentMatchCount >= 15) manualWeight = 0.15;
+    else if (recentMatchCount >= 5) manualWeight = 0.30;
+    else manualWeight = 0.45;
+
+    const totalMatchCount = Number(recentMatchCount || 0) + Number(olderMatchCount || 0);
+    if (seasonCount >= 2 && totalMatchCount >= 40) return Math.min(manualWeight, 0.05);
+    if (seasonCount >= 2 && totalMatchCount >= 25) return Math.min(manualWeight, 0.15);
+    return manualWeight;
+  }
+
   async updateManualSeedTier(ouid, manualSeedTier = "") {
     if (!this.db || !ouid) throw new Error('DB 연결 실패');
     const normalizedTier = String(manualSeedTier || '').trim().toUpperCase();
@@ -406,6 +418,8 @@ export class CrewRepository {
     }
 
     const recentMatchCount = Number(recent?.matchCount || 0);
+    const olderMatchCount = Number(older?.matchCount || 0);
+    const seasonCount = [recent, older].filter(Boolean).length;
     let recentWeight = 0.30;
     let olderWeight = 0.30;
     let baselineWeight = 0.40;
@@ -434,9 +448,7 @@ export class CrewRepository {
     let hsrOlderWeight = olderWeight;
     let hsrBaselineWeight = baselineWeight;
     if (manualSeedTier) {
-      if (recentMatchCount >= 15) manualWeight = 0.15;
-      else if (recentMatchCount >= 5) manualWeight = 0.30;
-      else manualWeight = 0.45;
+      manualWeight = this.getManualSeedWeight(recentMatchCount, olderMatchCount, seasonCount);
 
       const nonManualWeight = hsrRecentWeight + hsrOlderWeight + hsrBaselineWeight;
       const scale = nonManualWeight > 0 ? (1 - manualWeight) / nonManualWeight : 0;
@@ -1227,6 +1239,23 @@ export class CrewRepository {
     return user && this.STAFF_EMAILS.includes(user.email);
   }
 
+  getHsrConfidence(matchCount = 0) {
+    const count = Number(matchCount || 0);
+    if (count >= 20) return 0.90;
+    if (count >= 10) return 0.75;
+    if (count >= 5) return 0.55;
+    return 0.35;
+  }
+
+  getEffectiveHsr(member = {}) {
+    const rawHsr = Number(member.hsr || member.mmr || 1200);
+    const wins = Number(member.wins || 0);
+    const loses = Number(member.loses || 0);
+    const matchCount = Number(member.totalMatches || (wins + loses));
+    const confidence = this.getHsrConfidence(matchCount);
+    return Math.round(1200 + ((rawHsr - 1200) * confidence));
+  }
+
   balanceTeams(selectedMembers) {
     if (selectedMembers.length < 2) return null;
     const snipers = selectedMembers.filter(m => m.position === 'sniper');
@@ -1257,15 +1286,31 @@ export class CrewRepository {
       if (riflersNeededForRed < 0 || riflersNeededForRed > riflers.length) continue;
       for (const redRiflers of combinations(riflers, riflersNeededForRed)) {
         const blueRiflers = riflers.filter(r => !redRiflers.includes(r));
-        const redTeam = [...redSnipers, ...redRiflers];
-        const blueTeam = [...blueSnipers, ...blueRiflers];
-        const redHSR = redTeam.reduce((sum, m) => sum + (m.hsr || m.mmr || 1200), 0);
-        const blueHSR = blueTeam.reduce((sum, m) => sum + (m.hsr || m.mmr || 1200), 0);
+        const redTeam = [...redSnipers, ...redRiflers].map((member) => ({
+          ...member,
+          effectiveHsr: this.getEffectiveHsr(member),
+          hsrConfidence: this.getHsrConfidence(Number(member.totalMatches || (Number(member.wins || 0) + Number(member.loses || 0))))
+        }));
+        const blueTeam = [...blueSnipers, ...blueRiflers].map((member) => ({
+          ...member,
+          effectiveHsr: this.getEffectiveHsr(member),
+          hsrConfidence: this.getHsrConfidence(Number(member.totalMatches || (Number(member.wins || 0) + Number(member.loses || 0))))
+        }));
+        const redHSR = redTeam.reduce((sum, m) => sum + (m.effectiveHsr || m.hsr || m.mmr || 1200), 0);
+        const blueHSR = blueTeam.reduce((sum, m) => sum + (m.effectiveHsr || m.hsr || m.mmr || 1200), 0);
         const diff = Math.abs(redHSR - blueHSR);
         const redMMR = redTeam.reduce((sum, m) => sum + (m.mmr || 1200), 0);
         const blueMMR = blueTeam.reduce((sum, m) => sum + (m.mmr || 1200), 0);
         if (diff < bestSplit.diff) {
-          bestSplit = { red: redTeam, blue: blueTeam, diff, redAvg: redMMR / redTeam.length, blueAvg: blueMMR / blueTeam.length, redHsrAvg: redHSR / redTeam.length, blueHsrAvg: blueHSR / blueTeam.length };
+          bestSplit = {
+            red: redTeam,
+            blue: blueTeam,
+            diff,
+            redAvg: redMMR / redTeam.length,
+            blueAvg: blueMMR / blueTeam.length,
+            redHsrAvg: redHSR / redTeam.length,
+            blueHsrAvg: blueHSR / blueTeam.length
+          };
         }
       }
     }

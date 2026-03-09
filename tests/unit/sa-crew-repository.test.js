@@ -150,6 +150,44 @@ test("CrewRepository boosts HSR seed with manual highest tier", () => {
   assert.equal(result.seedMmr, 1219);
 });
 
+test("CrewRepository reduces manual highest tier weight once internal season data is sufficient", () => {
+  const repo = new CrewRepository(null);
+  const recentArchive = {
+    members: {
+      echo: {
+        characterName: "Echo",
+        finalMmr: 1390,
+        finalHsr: 1410,
+        matchCount: 22,
+        manualSeedTier: "STAR_LEGEND",
+        mmrHistory: [{ mmr: 1390, hsr: 1410, date: "2026-03-06T10:00:00.000Z" }]
+      }
+    }
+  };
+  const olderArchive = {
+    members: {
+      echo: {
+        characterName: "Echo",
+        finalMmr: 1350,
+        finalHsr: 1370,
+        matchCount: 21,
+        manualSeedTier: "STAR_LEGEND",
+        mmrHistory: [{ mmr: 1350, hsr: 1370, date: "2026-02-27T10:00:00.000Z" }]
+      }
+    }
+  };
+
+  const result = repo.calculateSeasonSeed("echo", recentArchive, olderArchive);
+
+  assert.equal(result.seedMeta.manualSeedTier, "STAR_LEGEND");
+  assert.equal(result.seedMeta.manualWeight, 0.05);
+  assert.ok(Math.abs(result.seedMeta.recentWeight - 0.7125) < 1e-9);
+  assert.ok(Math.abs(result.seedMeta.olderWeight - 0.2375) < 1e-9);
+  assert.equal(result.seedMeta.baselineWeight, 0);
+  assert.equal(result.seedMeta.source, "recent+older+manual-tier");
+  assert.equal(result.seedHsr, 1368);
+});
+
 test("CrewRepository current season reseed keeps MMR and updates only HSR trend", () => {
   const repo = new CrewRepository(null);
   const memberData = {
@@ -177,4 +215,39 @@ test("CrewRepository current season reseed keeps MMR and updates only HSR trend"
     hsr: 1380,
     date: "2026-03-09T12:00:00.000Z"
   });
+});
+
+test("CrewRepository shrinks effective HSR toward 1200 when match confidence is low", () => {
+  const repo = new CrewRepository(null);
+
+  assert.equal(repo.getHsrConfidence(3), 0.35);
+  assert.equal(repo.getHsrConfidence(7), 0.55);
+  assert.equal(repo.getHsrConfidence(14), 0.75);
+  assert.equal(repo.getHsrConfidence(25), 0.90);
+
+  assert.equal(repo.getEffectiveHsr({ hsr: 1400, wins: 1, loses: 2 }), 1270);
+  assert.equal(repo.getEffectiveHsr({ hsr: 1400, wins: 10, loses: 10 }), 1380);
+  assert.equal(repo.getEffectiveHsr({ hsr: 1000, wins: 2, loses: 1 }), 1130);
+});
+
+test("CrewRepository balanceTeams uses effective HSR instead of raw HSR", () => {
+  const repo = new CrewRepository(null);
+  const selectedMembers = [
+    { ouid: "a", characterName: "A", mmr: 1200, hsr: 1500, wins: 1, loses: 1, position: "rifler" },
+    { ouid: "b", characterName: "B", mmr: 1200, hsr: 1300, wins: 20, loses: 0, position: "rifler" },
+    { ouid: "c", characterName: "C", mmr: 1200, hsr: 1200, wins: 20, loses: 0, position: "rifler" },
+    { ouid: "d", characterName: "D", mmr: 1200, hsr: 1200, wins: 20, loses: 0, position: "rifler" }
+  ];
+
+  const result = repo.balanceTeams(selectedMembers);
+
+  assert.ok(result);
+  assert.equal(result.diff, 15);
+  const teamNames = [result.red, result.blue]
+    .map((team) => team.map((member) => member.characterName).sort().join(","))
+    .sort();
+  assert.deepEqual(teamNames, ["A,C", "B,D"]);
+  const memberA = [...result.red, ...result.blue].find((member) => member.characterName === "A");
+  assert.equal(memberA.effectiveHsr, 1305);
+  assert.equal(memberA.hsrConfidence, 0.35);
 });
