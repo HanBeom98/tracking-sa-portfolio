@@ -1,4 +1,8 @@
 class AppLayout extends HTMLElement {
+  static get observedAttributes() {
+    return ['page-title', 'page-description'];
+  }
+
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
@@ -6,6 +10,12 @@ class AppLayout extends HTMLElement {
 
   connectedCallback() {
     this.render();
+  }
+
+  attributeChangedCallback() {
+    if (this.isConnected) {
+      this.render();
+    }
   }
 
   render() {

@@ -66,6 +66,24 @@
       const path = root.location.pathname || "/";
       const isEnglishPath = path.startsWith("/en/");
 
+      // Attribute translations: data-i18n-attr="attr:key;attr2:key2"
+      root.document.querySelectorAll("[data-i18n-attr]").forEach((el) => {
+        const raw = el.getAttribute("data-i18n-attr") || "";
+        raw
+          .split(";")
+          .map((part) => part.trim())
+          .filter(Boolean)
+          .forEach((mapping) => {
+            const [attrName, key] = mapping.split(":").map((v) => (v || "").trim());
+            if (!attrName || !key) return;
+            const currentValue = el.getAttribute(attrName) || "";
+            const translated = getTranslation(key, currentValue);
+            if (translated && translated !== key) {
+              el.setAttribute(attrName, translated);
+            }
+          });
+      });
+
       root.document.querySelectorAll("[data-i18n]").forEach((el) => {
         const key = el.getAttribute("data-i18n");
         const translated = getTranslation(key);

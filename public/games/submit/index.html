@@ -63,12 +63,12 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<link rel="stylesheet" href="/style.css?v=1773053745">
+<link rel="stylesheet" href="/style.css?v=1773054104">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script src="/runtime-config.js"></script>
 <script src="/firebase-config.js"></script>
-<script src="/translations.js?v=1773053745"></script>
-<script src="/common.js?v=1773053745"></script>
+<script src="/translations.js?v=1773054104"></script>
+<script src="/common.js?v=1773054104"></script>
 
     <link rel="stylesheet" href="/style.css">
     <style>
@@ -203,7 +203,7 @@
             <form id="game-submit-form">
                 <div class="input-group">
                     <label for="title" data-i18n="game_title_label">게임 제목</label>
-                    <input type="text" id="title" name="title" required placeholder="예: 미니 벽돌 깨기" maxlength="30">
+                    <input type="text" id="title" name="title" required data-i18n-attr="placeholder:game_title_placeholder" placeholder="예: 미니 벽돌 깨기" maxlength="30">
                 </div>
                 
                 <div class="input-group">
@@ -230,7 +230,7 @@
                 <div class="form-group">
                     <label for="description" data-i18n="game_desc_label">게임 설명</label>
 
-                    <textarea id="description" name="description" rows="4" required placeholder="게임 방법과 특징을 간단히 적어주세요." maxlength="200"></textarea>
+                    <textarea id="description" name="description" rows="4" required data-i18n-attr="placeholder:game_desc_placeholder" placeholder="게임 방법과 특징을 간단히 적어주세요." maxlength="200"></textarea>
                 </div>
 
                 <button type="submit" id="submit-btn" class="submit-form-btn" data-i18n="submit_for_review">등록 신청하기</button>

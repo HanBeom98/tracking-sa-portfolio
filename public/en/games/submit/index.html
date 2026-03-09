@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="game_submit_title">Register Game | Tracking SA</title>
+    <title data-i18n="game_submit_title">게임 등록 | Tracking SA</title>
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://trackingsa.com/en/games/submit/">
     <meta property="og:type" content="website">
@@ -16,7 +16,7 @@
     <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
     <link rel="alternate" type="application/rss+xml" title="Tracking SA RSS" href="/rss.xml">
     <meta name="description" content="Tracking SA services and insights page.">
-    <meta property="og:title" content="Register Game | Tracking SA">
+    <meta property="og:title" content="게임 등록 | Tracking SA">
     <meta property="og:description" content="Tracking SA services and insights page.">
 <script>
   (function() {
@@ -63,12 +63,12 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<link rel="stylesheet" href="/style.css?v=1773053745">
+<link rel="stylesheet" href="/style.css?v=1773054104">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script src="/runtime-config.js"></script>
 <script src="/firebase-config.js"></script>
-<script src="/translations.js?v=1773053745"></script>
-<script src="/common.js?v=1773053745"></script>
+<script src="/translations.js?v=1773054104"></script>
+<script src="/common.js?v=1773054104"></script>
 
     <link rel="stylesheet" href="/style.css">
     <style>
@@ -184,7 +184,7 @@
                             <a href="/lucky-recommendation/" data-i18n="lucky_recommendation">Lucky Recommendation</a>
                         </div>
                     </li>
-                    <li><a href="/games/" data-i18n="menu_game">Games</a></li>
+                    <li><a href="/games/" data-i18n="menu_game">게임</a></li>
                 </ul>
             </nav>
             <div class="utility-controls">
@@ -198,16 +198,16 @@
 </div>
     <main class="submit-container">
         <div class="form-card">
-            <h1 class="form-title" data-i18n="register_your_game">Register Your Game</h1>
+            <h1 class="form-title" data-i18n="register_your_game">당신의 게임을 등록하세요</h1>
             
             <form id="game-submit-form">
                 <div class="input-group">
-                    <label for="title" data-i18n="game_title_label">Game Title</label>
-                    <input type="text" id="title" name="title" required placeholder="예: 미니 벽돌 깨기" maxlength="30">
+                    <label for="title" data-i18n="game_title_label">게임 제목</label>
+                    <input type="text" id="title" name="title" required data-i18n-attr="placeholder:game_title_placeholder" placeholder="e.g. Mini Brick Breaker" maxlength="30">
                 </div>
                 
                 <div class="input-group">
-                    <label for="url" data-i18n="game_url_label">Game URL (HTML link or external URL)</label>
+                    <label for="url" data-i18n="game_url_label">게임 실행 URL (HTML 링크 또는 외부 주소)</label>
                     <input type="url" id="url" name="url" required placeholder="https://example.com/my-game">
                 </div>
 
@@ -228,9 +228,9 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="description" data-i18n="game_desc_label">Game Description</label>
+                    <label for="description" data-i18n="game_desc_label">게임 설명</label>
 
-                    <textarea id="description" name="description" rows="4" required placeholder="Games 방법과 특징을 간단히 적어주세요." maxlength="200"></textarea>
+                    <textarea id="description" name="description" rows="4" required data-i18n-attr="placeholder:game_desc_placeholder" placeholder="Briefly describe how to play and key features." maxlength="200"></textarea>
                 </div>
 
                 <button type="submit" id="submit-btn" class="submit-form-btn" data-i18n="submit_for_review">Submit for Review</button>
@@ -239,8 +239,8 @@
             <div id="status-msg"></div>
             
             <p style="margin-top: 25px; font-size: 0.85rem; color: var(--text-sub); line-height: 1.5; text-align: center;" data-i18n="game_review_policy">
-                ※ 등록하신 Games은 관리자의 검토 후 승인 시에만 목록에 노출됩니다. <br>
-                부적절한 콘텐츠는 반려될 수 있습니다.
+                Submitted games are shown only after admin approval. <br>
+                Inappropriate content may be rejected.
             </p>
         </div>
     </main>
@@ -251,8 +251,8 @@
     <p data-i18n="footer_copyright"></p>
     <p style="margin-top: 10px;">
         <a href="/about" data-i18n="about_us">About Us</a> |
-        <a href="/contact" data-i18n="contact">Contact</a> |
-        <a href="/inquiry" data-i18n="partnership_inquiry">Services Partnership Inquiry</a> |
+        <a href="/contact" data-i18n="contact">문의</a> |
+        <a href="/inquiry" data-i18n="partnership_inquiry">Partnership Inquiry</a> |
         <a href="/privacy-policy" data-i18n="privacy_policy">Privacy Policy</a> |
         <a href="/terms" data-i18n="terms_of_service">Terms of Service</a> |
         <a href="/glossary">AI Glossary</a> |
