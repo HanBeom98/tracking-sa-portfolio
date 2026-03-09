@@ -47,6 +47,7 @@ STATIC_REPLACEMENTS = {
     "고객지원": "Support",
     "바로가기": "Quick Links",
     "문의하기": "Contact Us",
+    "서비스 제휴 문의": "Partnership Inquiry",
     "연락처:": "Contact:",
     "운영 주체:": "Operator:",
     "최종 업데이트:": "Last Updated:",
