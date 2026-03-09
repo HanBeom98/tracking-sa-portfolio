@@ -5,15 +5,18 @@ class GlossaryPage extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({ mode: 'open' });
+        this._onLangChange = () => this.render();
     }
 
     connectedCallback() {
         this.render();
         this.setupHashScroll();
+        window.addEventListener('language-changed', this._onLangChange);
         window.addEventListener('hashchange', () => this.setupHashScroll());
     }
 
     disconnectedCallback() {
+        window.removeEventListener('language-changed', this._onLangChange);
         window.removeEventListener('hashchange', () => this.setupHashScroll());
     }
 
@@ -35,19 +38,38 @@ class GlossaryPage extends HTMLElement {
     }
 
     render() {
+        const lang = localStorage.getItem('lang') === 'en' ? 'en' : 'ko';
+        const copy = lang === 'en'
+            ? {
+                pageTitle: 'AI & Tech Glossary',
+                pageDescPrefix: 'Complex tech terms explained clearly from an ',
+                pageDescStrong: 'investor perspective',
+                pageDescSuffix: '. This page helps you understand article content more easily.',
+                summaryLabel: '💡 Key Summary:',
+                impactLabel: '💰 Investor Impact:'
+            }
+            : {
+                pageTitle: 'AI & 테크 용어 사전',
+                pageDescPrefix: '어려운 기술 용어를 ',
+                pageDescStrong: '투자자의 관점',
+                pageDescSuffix: '에서 가장 쉽고 날카롭게 해설합니다. 이 페이지는 기사 본문의 이해를 돕기 위해 제공됩니다.',
+                summaryLabel: '💡 핵심 요약:',
+                impactLabel: '💰 투자자 관점 (Impact):'
+            };
+
         const termsHtml = glossaryData.map(item => `
             <div class="term-card" id="${item.id}">
                 <div class="term-header">
-                    <span class="category-badge">${item.category}</span>
-                    <h2 class="term-title">${item.term}</h2>
+                    <span class="category-badge">${item.category?.[lang] || item.category?.ko || item.category}</span>
+                    <h2 class="term-title">${item.term?.[lang] || item.term?.ko || item.term}</h2>
                 </div>
                 <div class="term-body">
-                    <p class="short-desc"><strong>💡 핵심 요약:</strong> ${item.shortDesc}</p>
-                    <p class="long-desc">${item.longDesc}</p>
+                    <p class="short-desc"><strong>${copy.summaryLabel}</strong> ${item.shortDesc?.[lang] || item.shortDesc?.ko || item.shortDesc}</p>
+                    <p class="long-desc">${item.longDesc?.[lang] || item.longDesc?.ko || item.longDesc}</p>
                 </div>
                 <div class="term-impact">
-                    <strong>💰 투자자 관점 (Impact):</strong>
-                    <p>${item.impact}</p>
+                    <strong>${copy.impactLabel}</strong>
+                    <p>${item.impact?.[lang] || item.impact?.ko || item.impact}</p>
                 </div>
             </div>
         `).join('');
@@ -172,8 +194,8 @@ class GlossaryPage extends HTMLElement {
 
             <div class="container">
                 <div class="header">
-                    <h1>AI & 테크 용어 사전</h1>
-                    <p>어려운 기술 용어를 <strong>투자자의 관점</strong>에서 가장 쉽고 날카롭게 해설합니다. 이 페이지는 기사 본문의 이해를 돕기 위해 제공됩니다.</p>
+                    <h1>${copy.pageTitle}</h1>
+                    <p>${copy.pageDescPrefix}<strong>${copy.pageDescStrong}</strong>${copy.pageDescSuffix}</p>
                 </div>
                 <div class="terms-list">
                     ${termsHtml}

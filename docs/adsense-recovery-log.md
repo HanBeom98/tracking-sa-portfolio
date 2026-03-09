@@ -40,6 +40,20 @@ Last updated: 2026-03-09 (UTC)
   - Core pages `/`, `/about/`, `/contact/`, `/privacy-policy/`, `/terms/` are `index, follow` with canonical.
   - `/news/` remains `noindex, nofollow` with canonical `/news/`.
 
+## Additional i18n Cleanup (2026-03-09 UTC)
+- Fixed runtime-visible EN fallback leaks outside Sudden Attack domain:
+  - `footer`: glossary/rss links now use shared i18n keys.
+  - `search`: no-result/error messages now resolve via translation keys in both header search and search page renderer.
+  - `auth/signup`: title/description/body labels/buttons/alerts connected to i18n keys.
+  - `glossary`: header + term cards migrated to bilingual (`ko/en`) data model and re-render on `language-changed` event.
+  - `board/edit`: footer copyright switched to shared i18n key.
+- Added shared translation keys:
+  - `ai_glossary`, `glossary_page_title`, `sitemap`, `rss_feed`
+  - `search_no_results`, `search_error`, `search_results_for`, `search_count_suffix`
+  - `password`
+  - `signup_page_*`, `signup_service_unavailable`, `signup_failed_retry`
+- Rebuilt `public/` after changes and confirmed build success.
+
 ## Verification Checklist (Next)
 - [x] Build output regenerated (`public/` recompiled)
 - [x] Confirm `meta robots` on blocked pages
@@ -48,6 +62,7 @@ Last updated: 2026-03-09 (UTC)
 - [x] Confirm trust-page updates (`about/contact/privacy/terms`)
 - [x] EN shared navigation fallback text replaced (header/menu/common cards)
 - [x] EN `data-i18n` fallback Korean removed (global scan)
+- [x] EN runtime text leaks patched for footer/search/signup/glossary (except explicitly excluded Sudden Attack)
 - [x] Live deploy reflected (`trackingsa.com` build/version and HTML checks)
 - [x] Live robots/canonical checks for key pages
 - [ ] Finalize content curation list (which news to keep vs archive if re-open indexing later)

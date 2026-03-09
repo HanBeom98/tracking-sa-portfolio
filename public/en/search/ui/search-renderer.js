@@ -39,7 +39,7 @@ export function renderSearchResults(items, query = "") {
           <h4 style="font-size: 1rem; margin-bottom: 15px; color: var(--text-main);">${tr("recommended_for_you", "이런 서비스는 어때요?")}</h4>
           <div style="display: flex; flex-direction: column; gap: 10px;">
             <a href="/games/" style="text-decoration:none; color:var(--p-blue); font-weight:700;">➔ ${tr("game_center_menu", "게임 센터")}</a>
-            <a href="/glossary/" style="text-decoration:none; color:var(--p-blue); font-weight:700;">➔ AI 용어사전</a>
+            <a href="/glossary/" style="text-decoration:none; color:var(--p-blue); font-weight:700;">➔ ${tr("ai_glossary", "AI 용어사전")}</a>
             <a href="/futures-estimate/" style="text-decoration:none; color:var(--p-blue); font-weight:700;">➔ ${tr("futures_estimate_index", "지수 예측")}</a>
             <a href="/about/" style="text-decoration:none; color:var(--p-blue); font-weight:700;">➔ ${tr("about_us", "서비스 소개")}</a>
           </div>

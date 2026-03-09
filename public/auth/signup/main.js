@@ -2,6 +2,10 @@ function qs(key) {
   return new URLSearchParams(window.location.search).get(key) || '';
 }
 
+function t(key, fallback) {
+  return window.getTranslation ? window.getTranslation(key, fallback) : fallback;
+}
+
 async function getAuthService() {
   if (window.AuthService) return window.AuthService;
   if (window.authDomainReady) {
@@ -25,16 +29,16 @@ function initSignup() {
     const email = document.getElementById('email')?.value.trim();
     const password = document.getElementById('password')?.value;
     if (!email || !password) {
-      alert('이메일과 비밀번호를 입력해주세요.');
+      alert(t('auth_email_password_required', '이메일과 비밀번호를 입력해주세요.'));
       return;
     }
     if (password.length < 6) {
-      alert('비밀번호는 6자 이상이어야 합니다.');
+      alert(t('signup_password_hint', '비밀번호는 6자 이상이어야 합니다.'));
       return;
     }
     const authService = await getAuthService();
     if (!authService) {
-      alert('회원가입 기능이 아직 준비되지 않았습니다.');
+      alert(t('signup_service_unavailable', '회원가입 기능이 아직 준비되지 않았습니다.'));
       return;
     }
     try {
@@ -43,7 +47,7 @@ function initSignup() {
       window.location.href = redirect;
     } catch (error) {
       console.error('회원가입 실패:', error);
-      alert('회원가입에 실패했습니다. 잠시 후 다시 시도해주세요.');
+      alert(t('signup_failed_retry', '회원가입에 실패했습니다. 잠시 후 다시 시도해주세요.'));
     }
   });
 }

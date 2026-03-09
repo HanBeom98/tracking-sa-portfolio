@@ -5,6 +5,10 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!searchInput || !searchResultsContainer) return;
 
     const currentLang = localStorage.getItem('lang') || 'ko';
+    const t = (key, fallback) =>
+        window.getTranslation
+            ? window.getTranslation(key, fallback)
+            : ((window.translations?.[currentLang] || {})[key] || fallback);
 
     let debounceTimer;
     let searchRepo = null;
@@ -32,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function renderFallbackItems(items, query = "") {
         if (!items.length) {
-            searchResultsContainer.innerHTML = '<div class="search-no-results">검색 결과가 없습니다.</div>';
+            searchResultsContainer.innerHTML = `<div class="search-no-results">${t("search_no_results", "검색 결과가 없습니다.")}</div>`;
             searchResultsContainer.classList.add('active');
             return;
         }
@@ -110,7 +114,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 renderFallbackItems(items, searchTerm);
             } catch (finalError) {
                 console.error("Search error:", finalError);
-                searchResultsContainer.innerHTML = '<div class="search-no-results">검색 중 오류가 발생했습니다.</div>';
+                searchResultsContainer.innerHTML = `<div class="search-no-results">${t("search_error", "검색 중 오류가 발생했습니다.")}</div>`;
                 searchResultsContainer.classList.add('active');
             }
         }
