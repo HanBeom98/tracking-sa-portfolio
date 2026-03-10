@@ -48,6 +48,8 @@ function balanceTeams(players) {
   const snipers = players.filter(m => (m.position || 'rifler').toLowerCase() === 'sniper');
   const riflers = players.filter(m => (m.position || 'rifler').toLowerCase() !== 'sniper');
   let best = { red: [], blue: [], standby: [], diff: Infinity };
+  const getMmr = (player) => Number(player.mmr || 1200);
+  const getHsr = (player) => Number(player.hsr || player.mmr || 1200);
 
   const combos = (arr, n) => {
     if (n === 0) return [[]];
@@ -70,8 +72,23 @@ function balanceTeams(players) {
       const rem = players.filter(p => !red.some(rt => rt.nickname === p.nickname));
       for (const blue of combos(rem, size)) {
         const standby = rem.filter(p => !blue.some(bt => bt.nickname === p.nickname));
-        const d = Math.abs(red.reduce((s, m) => s + (m.mmr || 1200), 0) - blue.reduce((s, m) => s + (m.mmr || 1200), 0));
-        if (d < best.diff) best = { red, blue, standby, diff: d, redAvg: red.reduce((s, m) => s + (m.mmr || 1200), 0) / red.length, blueAvg: blue.reduce((s, m) => s + (m.mmr || 1200), 0) / blue.length };
+        const redHsr = red.reduce((sum, member) => sum + getHsr(member), 0);
+        const blueHsr = blue.reduce((sum, member) => sum + getHsr(member), 0);
+        const diff = Math.abs(redHsr - blueHsr);
+        const redMmr = red.reduce((sum, member) => sum + getMmr(member), 0);
+        const blueMmr = blue.reduce((sum, member) => sum + getMmr(member), 0);
+        if (diff < best.diff) {
+          best = {
+            red,
+            blue,
+            standby,
+            diff,
+            redAvg: redMmr / red.length,
+            blueAvg: blueMmr / blue.length,
+            redHsrAvg: redHsr / red.length,
+            blueHsrAvg: blueHsr / blue.length
+          };
+        }
       }
     }
   }
@@ -192,10 +209,10 @@ export async function onRequest(context) {
           const players = await Promise.all(session.participants.map(async (p) => {
             const res = await fetch(`https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents:runQuery`, { method: 'POST', body: JSON.stringify({ structuredQuery: { from: [{ collectionId: 'sa_crew_members' }], where: { fieldFilter: { field: { fieldPath: 'characterName' }, op: 'EQUAL', value: { stringValue: p.nickname } } }, limit: 1 } }), headers: { 'Content-Type': 'application/json' } });
             const data = await res.json(), d = data?.[0]?.document ? fromFirestore(data[0].document.fields) : {};
-            return { nickname: p.nickname, mmr: d.mmr || 1200, position: p.position, discordId: p.discordId };
+            return { nickname: p.nickname, mmr: d.mmr || 1200, hsr: d.hsr || d.mmr || 1200, position: p.position, discordId: p.discordId };
           }));
           const r = balanceTeams(players), m = session.participants.map(p => `<@${p.discordId}>`).join(' ');
-          const c = `📢 **팀 구성 완료!**\n${m}\n\n🔴 **RED** (Avg: ${Math.round(r.redAvg)})\n${r.red.map(p => `• ${p.nickname} (${p.position === 'sniper' ? '🎯' : '🔫'})`).join('\n')}\n\n🔵 **BLUE** (Avg: ${Math.round(r.blueAvg)})\n${r.blue.map(p => `• ${p.nickname} (${p.position === 'sniper' ? '🎯' : '🔫'})`).join('\n')}` + (r.standby?.length ? `\n\n⌛ **STANDBY**\n${r.standby.map(p => `• ${p.nickname}`).join('\n')}` : "");
+          const c = `📢 **팀 구성 완료!**\n${m}\n\n🔴 **RED** (Avg: ${Math.round(r.redAvg)}, HSR: ${Math.round(r.redHsrAvg || r.redAvg)})\n${r.red.map(p => `• ${p.nickname} (${p.position === 'sniper' ? '🎯' : '🔫'})`).join('\n')}\n\n🔵 **BLUE** (Avg: ${Math.round(r.blueAvg)}, HSR: ${Math.round(r.blueHsrAvg || r.blueAvg)})\n${r.blue.map(p => `• ${p.nickname} (${p.position === 'sniper' ? '🎯' : '🔫'})`).join('\n')}\n\n⚖️ **HSR 격차:** ${r.diff} pts` + (r.standby?.length ? `\n\n⌛ **STANDBY**\n${r.standby.map(p => `• ${p.nickname}`).join('\n')}` : "");
           await patchInteraction(APP_ID, token, { content: c + "\n\n즐거운 내전 되세요!", components: [] });
         }
       }
