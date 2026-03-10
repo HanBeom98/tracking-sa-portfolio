@@ -14,6 +14,7 @@ export class BalancerManager {
     this.balancerMemberList = document.getElementById('balancerMemberList');
     this.calculateBalanceBtn = document.getElementById('calculateBalanceBtn');
     this.balancerResult = document.getElementById('balancerResult');
+    this.lastBalanceResult = null;
 
     this.searchInput = this.createSearchInput();
     this.countDisplay = this.createCountDisplay();
@@ -118,6 +119,7 @@ export class BalancerManager {
         const radioR = document.getElementById(`r-${m.id}`);
         const pos = (radioR && radioR.checked) ? 'rifler' : 'sniper';
         selected.push({
+          ouid: m.id,
           characterName: m.characterName,
           mmr: m.mmr,
           hsr: m.hsr, // Add HSR
@@ -133,9 +135,30 @@ export class BalancerManager {
 
     const result = this.crewRepo.balanceTeams(selected);
     if (result) {
+      this.lastBalanceResult = result;
       // Replace fallback text block with dedicated team-board component
       this.balancerResult.innerHTML = '<h3>⚖️ 추천 팀 구성 (HSR 기반 스마트 밸런스)</h3><sa-team-board></sa-team-board>';
       this.balancerResult.querySelector('sa-team-board').data = result;
+      const saveBtn = document.createElement('button');
+      saveBtn.type = 'button';
+      saveBtn.className = 'copy-btn';
+      saveBtn.style.marginTop = '12px';
+      saveBtn.textContent = '📝 내전 시작 기록';
+      saveBtn.addEventListener('click', async () => {
+        saveBtn.disabled = true;
+        const originalText = saveBtn.textContent;
+        try {
+          await this.crewRepo.createPendingMatchSession(this.lastBalanceResult);
+          saveBtn.textContent = '✅ 기록 저장됨';
+        } catch (err) {
+          console.error('Failed to store pending match session:', err);
+          alert('내전 시작 기록 저장 실패: ' + err.message);
+          saveBtn.textContent = originalText;
+          saveBtn.disabled = false;
+          return;
+        }
+      });
+      this.balancerResult.appendChild(saveBtn);
       this.balancerResult.classList.remove('hidden');
       
       // Scroll result into view

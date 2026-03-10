@@ -1,6 +1,7 @@
 export class RecentStats {
   constructor(info, matches = [], crewData = null, options = {}) {
     const forceMatchMetrics = !!options.forceMatchMetrics;
+    const abandonCount = Number(options.abandonCount || 0);
     const rawKd = info.recent_kill_death_rate || 0;
     this.kd = parseFloat(rawKd.toFixed(1));
     this.kdPercent = Math.round(rawKd);
@@ -11,6 +12,7 @@ export class RecentStats {
     this.streakType = "NONE"; 
     this.trollMatches = 0;
     this.crewTrollMatches = 0;
+    this.crewAbandonCount = abandonCount;
     this.playstyleTitle = "데이터 수집 중";
     this.playstyleIcon = "🕵️";
     this.mmrTrend = []; 

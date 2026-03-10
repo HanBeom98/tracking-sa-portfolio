@@ -22,6 +22,8 @@ export class AdminManager {
 
   updateRankings(rankings) {
     this.currentRankings = rankings;
+    this.renderAdminMemberList();
+    this.renderManualPenaltyMemberOptions();
   }
 
   initEvents() {
@@ -92,10 +94,34 @@ export class AdminManager {
           <button id="updateSeasonDateBtn" class="mini-btn update-name-btn">변경</button>
         </div>
 
-        <button id="resetSeasonBtn" class="sub-btn admin-reset-btn">🔥 시즌 초기화</button>
+        <button id="resetSeasonBtn" class="sub-btn admin-reset-btn">🔥 시즌 마감 후 새 시즌 시작</button>
       </div>
       <div class="admin-sub-btns">
         <button id="repairDataBtn" class="sub-btn repair-btn">♻️ 전적 데이터 재정산 (킬/데스 복구)</button>
+        <button id="reseedCurrentHsrBtn" class="sub-btn update-name-btn">🎯 현재 HSR 재시드</button>
+      </div>
+      <div class="manual-penalty-panel">
+        <h4>🚨 수동 탈주 패널티</h4>
+        <div class="manual-penalty-controls">
+          <select id="manualPenaltyMemberSelect">
+            <option value="">멤버 선택</option>
+          </select>
+          <select id="manualPenaltyMatchSelect">
+            <option value="">경기 선택</option>
+          </select>
+          <button id="refreshPenaltyHistoryBtn" class="mini-btn update-name-btn" type="button">기록 새로고침</button>
+          <button id="applyManualPenaltyBtn" class="mini-btn delete-member-btn" type="button">탈주 패널티 적용</button>
+        </div>
+        <p class="manual-penalty-hint">스코어보드에서 빠진 탈주자를 수동으로 1패 처리합니다. 같은 경기에는 한 번만 적용됩니다.</p>
+      </div>
+      <div class="manual-penalty-log-panel">
+        <div class="manual-penalty-log-head">
+          <h4>📜 수동 탈주 패널티 로그</h4>
+          <button id="refreshManualPenaltyLogBtn" class="mini-btn update-name-btn" type="button">로그 새로고침</button>
+        </div>
+        <div id="manualPenaltyLogList" class="manual-penalty-log-list">
+          <p class="manual-penalty-log-empty">로그를 불러오는 중...</p>
+        </div>
       </div>
       <div id="crewMemberListAdmin" class="crew-manage-list">
         <h4>👥 크루 멤버 관리</h4>
@@ -107,10 +133,17 @@ export class AdminManager {
     this.adminPanel.appendChild(actionBar);
 
     this.renderAdminMemberList();
+    this.renderManualPenaltyMemberOptions();
+    this.renderManualPenaltyMatchOptions();
+    this.renderManualPenaltyLog();
 
     actionBar.querySelector('#repairDataBtn').addEventListener('click', () => this.handleRepairData());
+    actionBar.querySelector('#reseedCurrentHsrBtn').addEventListener('click', () => this.handleReseedCurrentHsr());
     actionBar.querySelector('#resetSeasonBtn').addEventListener('click', () => this.handleResetSeason());
     actionBar.querySelector('#settleMMRBtn').addEventListener('click', (e) => this.handleSettleMMR(e.currentTarget));
+    actionBar.querySelector('#refreshPenaltyHistoryBtn').addEventListener('click', () => this.renderManualPenaltyMatchOptions());
+    actionBar.querySelector('#applyManualPenaltyBtn').addEventListener('click', (e) => this.handleManualAbandonPenalty(e.currentTarget));
+    actionBar.querySelector('#refreshManualPenaltyLogBtn').addEventListener('click', () => this.renderManualPenaltyLog());
 
     const dateInput = actionBar.querySelector('#seasonStartDateInput');
     actionBar.querySelector('#updateSeasonDateBtn').addEventListener('click', async () => {
@@ -129,12 +162,17 @@ export class AdminManager {
     if (!this.adminPanel) return;
     const container = this.adminPanel.querySelector('.admin-member-grid');
     if (!container) return;
+    const tierOptions = typeof this.crewRepo.getManualSeedTierOptions === 'function'
+      ? this.crewRepo.getManualSeedTierOptions()
+      : [];
     if (this.currentRankings.length === 0) {
       container.innerHTML = '<p class="no-members-msg">멤버가 없습니다.</p>';
       return;
     }
     container.innerHTML = this.currentRankings.map(m => {
       const isRealOuid = m.id.length >= 20 && /^[0-9a-f]+$/.test(m.id);
+      const manualSeedTier = String(m.manualSeedTier || '');
+      const manualSeedTierLabel = tierOptions.find((option) => option.value === manualSeedTier)?.label || '미설정';
       return `
         <div class="admin-member-item">
           <div class="m-header">
@@ -142,6 +180,16 @@ export class AdminManager {
             <span class="m-score">${m.mmr} pts</span>
           </div>
           <div class="m-stats">${m.wins}승 ${m.loses}패 (킬뎃: ${m.crewKills}/${m.crewDeaths})</div>
+          <div class="m-stats">최고티어 시드: ${manualSeedTierLabel}</div>
+          <div class="m-actions">
+            <select class="mini-btn manual-seed-tier-select" data-ouid="${m.id}">
+              <option value="">최고티어 없음</option>
+              ${tierOptions.map((option) => `
+                <option value="${option.value}" ${option.value === manualSeedTier ? 'selected' : ''}>${option.label}</option>
+              `).join('')}
+            </select>
+            <button class="mini-btn update-seed-tier-btn" data-ouid="${m.id}" data-name="${m.characterName}">최고티어 저장</button>
+          </div>
           <div class="m-actions">
             <button class="mini-btn individual-scan-btn" data-ouid="${m.id}" data-name="${m.characterName}">🔍 전적 스캔</button>
             <button class="mini-btn update-name-btn" data-ouid="${m.id}" data-name="${m.characterName}">이름수정</button>
@@ -153,6 +201,94 @@ export class AdminManager {
     container.querySelectorAll('.individual-scan-btn').forEach(btn => btn.addEventListener('click', (e) => this.handleIndividualScan(e.currentTarget)));
     container.querySelectorAll('.delete-member-btn').forEach(btn => btn.addEventListener('click', (e) => this.handleDeleteMember(e.currentTarget.dataset)));
     container.querySelectorAll('.update-name-btn').forEach(btn => btn.addEventListener('click', (e) => this.handleUpdateName(e.currentTarget.dataset)));
+    container.querySelectorAll('.update-seed-tier-btn').forEach(btn => btn.addEventListener('click', (e) => this.handleUpdateManualSeedTier(e.currentTarget.dataset)));
+  }
+
+  renderManualPenaltyMemberOptions() {
+    if (!this.adminPanel) return;
+    const select = this.adminPanel.querySelector('#manualPenaltyMemberSelect');
+    if (!select) return;
+    const currentValue = select.value;
+    const options = this.currentRankings
+      .slice()
+      .sort((a, b) => String(a.characterName || "").localeCompare(String(b.characterName || ""), 'ko'))
+      .map((member) => `<option value="${member.id}">${member.characterName}</option>`)
+      .join('');
+    select.innerHTML = `<option value="">멤버 선택</option>${options}`;
+    if (currentValue) select.value = currentValue;
+  }
+
+  async renderManualPenaltyMatchOptions() {
+    if (!this.adminPanel) return;
+    const select = this.adminPanel.querySelector('#manualPenaltyMatchSelect');
+    if (!select) return;
+    const previousValue = select.value;
+    select.innerHTML = '<option value="">불러오는 중...</option>';
+    try {
+      const history = await this.crewRepo.getHistory(30);
+      const options = history.map((item) => `
+        <option value="${item.matchId}">
+          ${this.formatHistoryOption(item)}
+        </option>
+      `).join('');
+      select.innerHTML = `<option value="">경기 선택</option>${options}`;
+      if (previousValue) select.value = previousValue;
+    } catch (err) {
+      console.error('Failed to load history options:', err);
+      select.innerHTML = '<option value="">경기 불러오기 실패</option>';
+    }
+  }
+
+  formatHistoryOption(item) {
+    const date = item?.matchDate ? new Date(item.matchDate) : null;
+    const label = date && !Number.isNaN(date.getTime())
+      ? date.toLocaleString('ko-KR', { hour12: false })
+      : '날짜 미상';
+    return `${label} | ${item.map || '알 수 없음'} | ${item.crewCount || 0}명`;
+  }
+
+  formatLogDate(value) {
+    if (!value) return '시간 미상';
+    const date = typeof value?.toDate === 'function' ? value.toDate() : new Date(value);
+    if (Number.isNaN(date.getTime())) return '시간 미상';
+    return date.toLocaleString('ko-KR', { hour12: false });
+  }
+
+  async renderManualPenaltyLog() {
+    if (!this.adminPanel) return;
+    const container = this.adminPanel.querySelector('#manualPenaltyLogList');
+    if (!container) return;
+    container.innerHTML = '<p class="manual-penalty-log-empty">로그를 불러오는 중...</p>';
+    try {
+      const entries = await this.crewRepo.getManualAbandonEntries();
+      const recentEntries = entries.slice().sort((a, b) => {
+        const aTime = new Date(a?.matchDate || 0).getTime();
+        const bTime = new Date(b?.matchDate || 0).getTime();
+        return bTime - aTime;
+      }).slice(0, 20);
+
+      if (recentEntries.length === 0) {
+        container.innerHTML = '<p class="manual-penalty-log-empty">수동 탈주 패널티 로그가 없습니다.</p>';
+        return;
+      }
+
+      container.innerHTML = recentEntries.map((entry) => `
+        <div class="manual-penalty-log-item">
+          <div class="manual-penalty-log-title">
+            <strong>${entry.nickname || entry.ouid}</strong>
+            <span>${entry.mapName || '알 수 없음'} / ${this.formatLogDate(entry.matchDate)}</span>
+          </div>
+          <div class="manual-penalty-log-meta">
+            <span>사유: ${entry.reason || '미입력'}</span>
+            <span>적용자: ${entry.appliedByEmail || '기록 없음'}</span>
+            <span>적용시각: ${this.formatLogDate(entry.appliedAt || entry.createdAt)}</span>
+          </div>
+        </div>
+      `).join('');
+    } catch (err) {
+      console.error('Failed to load manual penalty logs:', err);
+      container.innerHTML = '<p class="manual-penalty-log-empty">로그 불러오기 실패</p>';
+    }
   }
 
   async handleRepairData() {
@@ -165,12 +301,66 @@ export class AdminManager {
   }
 
   async handleResetSeason() {
-    if (!confirm('정말 모든 전적을 초기화하시겠습니까?')) return;
+    if (!confirm('현재 시즌을 마감하고, 이전 시즌 점수를 기반으로 새 시즌 시작 점수를 설정하시겠습니까?')) return;
     try {
       await this.crewRepo.resetSeason();
-      alert('시즌 초기화 완료!');
+      alert('시즌 마감 및 새 시즌 시작 완료!');
       window.dispatchEvent(new CustomEvent('sa-rankings-updated'));
     } catch (e) { alert('초기화 실패: ' + e.message); }
+  }
+
+  async handleReseedCurrentHsr() {
+    if (!confirm('현재 시즌 MMR은 유지하고, 저장된 최고티어와 시즌 데이터를 기준으로 HSR만 다시 계산하시겠습니까?')) return;
+    try {
+      await this.crewRepo.reseedCurrentSeasonHsr();
+      alert('현재 시즌 HSR 재시드 완료!');
+      window.dispatchEvent(new CustomEvent('sa-rankings-updated'));
+    } catch (e) {
+      alert('현재 HSR 재시드 실패: ' + e.message);
+    }
+  }
+
+  async handleManualAbandonPenalty(btn) {
+    if (!this.adminPanel) return;
+    const memberSelect = this.adminPanel.querySelector('#manualPenaltyMemberSelect');
+    const matchSelect = this.adminPanel.querySelector('#manualPenaltyMatchSelect');
+    const ouid = memberSelect?.value || "";
+    const matchId = matchSelect?.value || "";
+    const member = this.currentRankings.find((item) => item.id === ouid);
+    const matchLabel = matchSelect?.selectedOptions?.[0]?.textContent?.trim() || "";
+
+    if (!ouid || !member) return alert('패널티를 줄 멤버를 선택해주세요.');
+    if (!matchId) return alert('경기를 선택해주세요.');
+    const reason = prompt('탈주 패널티 적용 사유를 입력해주세요.', '게임 중 탈주 아이템 사용');
+    if (reason === null) return;
+    const trimmedReason = String(reason || "").trim();
+    if (!trimmedReason) return alert('적용 사유를 입력해주세요.');
+    if (!confirm(`[${member.characterName}]에게\n[${matchLabel}]\n기준 탈주 패널티를 적용하시겠습니까?`)) return;
+
+    btn.disabled = true;
+    const originalText = btn.textContent;
+    btn.textContent = '적용 중...';
+    try {
+      const currentUser = typeof window !== 'undefined' && window.firebase?.auth
+        ? window.firebase.auth().currentUser
+        : null;
+      const result = await this.crewRepo.applyManualAbandonPenalty({
+        ouid,
+        nickname: member.characterName,
+        matchId,
+        reason: trimmedReason,
+        appliedBy: currentUser
+      });
+      alert(`[${result.nickname}] 패널티 적용 완료\n${result.mapName} / ${result.matchDate}\n사유: ${result.reason}\nMMR ${result.mmrDiff}, HSR ${result.hsrDiff}, 총 ${result.loses}패`);
+      await this.renderManualPenaltyMatchOptions();
+      await this.renderManualPenaltyLog();
+      window.dispatchEvent(new CustomEvent('sa-rankings-updated'));
+    } catch (err) {
+      alert('적용 실패: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
   }
 
   async handleSettleMMR(btn) {
@@ -322,5 +512,19 @@ export class AdminManager {
     if (!newName || newName === name) return;
     try { await this.crewRepo.updateNicknameManually(ouid, newName); window.dispatchEvent(new CustomEvent('sa-rankings-updated')); }
     catch (err) { alert('실패: ' + err.message); }
+  }
+
+  async handleUpdateManualSeedTier(data) {
+    const { ouid, name } = data;
+    const select = this.adminPanel?.querySelector(`.manual-seed-tier-select[data-ouid="${ouid}"]`);
+    if (!select) return;
+    const manualSeedTier = select.value || "";
+    try {
+      await this.crewRepo.updateManualSeedTier(ouid, manualSeedTier);
+      alert(`[${name}] 최고티어 시드 저장 완료`);
+      window.dispatchEvent(new CustomEvent('sa-rankings-updated'));
+    } catch (err) {
+      alert('저장 실패: ' + err.message);
+    }
   }
 }

@@ -320,6 +320,12 @@ export class SaStatsSummary extends HTMLElement {
               ${data.crewTrollMatches}회
             </span>
           </div>
+          <div class="stat-box">
+            <label>탈주 기록</label>
+            <span class="value" style="color: ${data.crewAbandonCount > 0 ? '#ff9b52' : '#888'};">
+              ${data.crewAbandonCount || 0}회
+            </span>
+          </div>
         </div>
       </div>
     `;
