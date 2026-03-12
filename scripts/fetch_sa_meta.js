@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 // Using a simpler approach for API Key to avoid ESM/CJS dotenv issues in standalone script
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const META_DIR = path.join(__dirname, '../src/domains/games/sudden-attack/infra/meta');
+const META_DIR = path.join(__dirname, '../src/domains/stats/sudden-attack/infra/meta');
 
 if (!fs.existsSync(META_DIR)) {
   fs.mkdirSync(META_DIR, { recursive: true });

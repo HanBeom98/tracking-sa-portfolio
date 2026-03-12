@@ -8,10 +8,6 @@ const SRC_DOMAINS_DIR = path.join(ROOT_DIR, "src", "domains");
 const SRC_SHARED_ASSETS_DIR = path.join(ROOT_DIR, "src", "shared", "assets");
 
 const TRACKED_EXTENSIONS = new Set([".js", ".css"]);
-const EN_MIRROR_EXCLUDED_PREFIXES = [
-  "src/domains/games/sudden-attack/",
-];
-
 function walkFiles(dirPath, result = []) {
   if (!fs.existsSync(dirPath)) return result;
   const entries = fs.readdirSync(dirPath, { withFileTypes: true });
@@ -41,14 +37,16 @@ function buffersEqual(a, b) {
 }
 
 function resolveMirrorCandidates(srcRepoPath) {
+  if (srcRepoPath.startsWith("src/domains/stats/sudden-attack/")) {
+    const rel = srcRepoPath.slice("src/domains/stats/sudden-attack/".length);
+    return [
+      `public/games/sudden-attack/${rel}`,
+      `public/en/games/sudden-attack/${rel}`,
+    ];
+  }
   if (srcRepoPath.startsWith("src/domains/")) {
     const rel = srcRepoPath.slice("src/domains/".length);
-    const candidates = [`public/${rel}`];
-    const enExcluded = EN_MIRROR_EXCLUDED_PREFIXES.some((prefix) => srcRepoPath.startsWith(prefix));
-    if (!enExcluded) {
-      candidates.push(`public/en/${rel}`);
-    }
-    return candidates;
+    return [`public/${rel}`, `public/en/${rel}`];
   }
   if (srcRepoPath.startsWith("src/shared/assets/")) {
     const rel = srcRepoPath.slice("src/shared/assets/".length);
