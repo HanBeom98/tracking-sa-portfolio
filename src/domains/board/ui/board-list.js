@@ -160,6 +160,52 @@ class BoardList extends HTMLElement {
         font-weight: 600;
       }
 
+      :host-context(body.dark-mode) .tab-item {
+        background: oklch(22% 0.02 260);
+        border-color: oklch(30% 0.02 260);
+        color: var(--text-sub);
+      }
+
+      :host-context(body.dark-mode) .tab-item.active {
+        background: var(--p-blue);
+        border-color: var(--p-blue);
+        color: white;
+      }
+
+      :host-context(body.dark-mode) .list-container {
+        background: oklch(21% 0.02 260);
+        border-color: oklch(30% 0.02 260);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+      }
+
+      :host-context(body.dark-mode) .list-header {
+        background: oklch(24% 0.02 260);
+        border-bottom-color: oklch(30% 0.02 260);
+        color: var(--text-sub);
+      }
+
+      :host-context(body.dark-mode) .list-item {
+        border-bottom-color: oklch(28% 0.02 260);
+      }
+
+      :host-context(body.dark-mode) .list-item:hover {
+        background: oklch(24% 0.02 260);
+      }
+
+      :host-context(body.dark-mode) .item-title,
+      :host-context(body.dark-mode) .item-author {
+        color: var(--text-main);
+      }
+
+      :host-context(body.dark-mode) .item-no,
+      :host-context(body.dark-mode) .item-date {
+        color: var(--text-sub);
+      }
+
+      :host-context(body.dark-mode) .notice-row {
+        background: oklch(25% 0.03 260);
+      }
+
       .loader {
         width: 30px;
         height: 30px;
