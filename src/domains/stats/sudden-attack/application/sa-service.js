@@ -1,6 +1,5 @@
 import { buildSeasonViews } from './season-view-builder.js';
-import { buildSyntheticAbandonMatches, mergeMatchesWithSyntheticAbandons } from './abandon-match-service.js';
-import { normalizeTrendEntries } from './trend-view-builder.js';
+import { loadPlayerProfileContext } from './player-profile-loader.js';
 
 /**
  * Sudden Attack Application Service (Application Layer)
@@ -51,44 +50,21 @@ export class SaService {
    */
   async fetchFreshData(characterName, currentRankings = []) {
     try {
-      // 1. Search Player
-      const player = await this.repository.getPlayer(characterName);
-      
-      // 2. Sync Nickname if crew member
-      await this.syncCrewNickname(player);
+      const {
+        player,
+        memberData,
+        archivedPreviousTrend,
+        seasonStart,
+        rawStats,
+        mergedMatches,
+        abandonSummary
+      } = await loadPlayerProfileContext({
+        repository: this.repository,
+        crewRepository: this.crewRepository,
+        characterName,
+        currentRankings
+      });
 
-      // 3. Load enough matches to support season toggle (current / previous)
-      const allMatches = await this.repository.getRecentMatches(player.ouid, 80, player.nickname);
-
-      // 4. Fetch Crew Data from local list or DB
-      let memberData = currentRankings.find(m => m.id === player.ouid);
-      if (!memberData && this.crewRepository) {
-        memberData = await this.crewRepository.findMemberByOuid(player.ouid);
-      }
-      const archivedPreviousTrend = await this.getArchivedPreviousTrendSafe(player.ouid);
-      const seasonStart = await this.getSeasonStartDateSafe();
-      const seasonHistory = this.crewRepository
-        ? await this.crewRepository.getHistory(300)
-        : [];
-      const syntheticAbandonMatches = this.crewRepository
-        ? buildSyntheticAbandonMatches(allMatches, seasonHistory, {
-            ouid: player.ouid,
-            nickname: player.nickname
-          })
-        : [];
-      const mergedMatches = mergeMatchesWithSyntheticAbandons(allMatches, syntheticAbandonMatches);
-      const abandonSummary = this.crewRepository
-        ? this.crewRepository.buildMemberAbandonSummary(seasonHistory, {
-            ouid: player.ouid,
-            nickname: player.nickname,
-            seasonStart
-          })
-        : { current: 0, previous: 0 };
-
-      // 5. Load Metadata (Recent Info from Nexon)
-      const rawStats = await this.repository.apiClient.getRecentInfo(player.ouid);
-
-      // 6. Construct season views (default = current season)
       const seasonViews = buildSeasonViews(mergedMatches, seasonStart, rawStats, memberData, archivedPreviousTrend, abandonSummary);
       const currentView = seasonViews.current;
 
@@ -109,58 +85,11 @@ export class SaService {
     }
   }
 
-  async getSeasonStartDateSafe() {
-    if (!this.crewRepository || typeof this.crewRepository.getSeasonStartDate !== 'function') {
-      return new Date(0);
-    }
-    try {
-      const seasonStart = await this.crewRepository.getSeasonStartDate();
-      if (seasonStart instanceof Date && !Number.isNaN(seasonStart.getTime()) && seasonStart.getTime() > 0) {
-        return seasonStart;
-      }
-    } catch (err) {
-      console.warn('[ApplicationService] Season start lookup failed (non-critical):', err);
-    }
-    return new Date(0);
-  }
-
-  async getArchivedPreviousTrendSafe(ouid) {
-    if (!this.crewRepository || typeof this.crewRepository.getLatestSeasonArchiveHistory !== 'function') {
-      return [];
-    }
-    try {
-      const archived = await this.crewRepository.getLatestSeasonArchiveHistory(ouid);
-      return normalizeTrendEntries(archived);
-    } catch (err) {
-      console.warn('[ApplicationService] Archived trend lookup failed (non-critical):', err);
-      return [];
-    }
-  }
-
   /**
    * Search and load basic player profile
    */
   async searchPlayer(characterName) {
     return await this.repository.getPlayer(characterName);
-  }
-
-  /**
-   * Sync player's current nickname with crew database if they are a member
-   */
-  async syncCrewNickname(player) {
-    if (!this.crewRepository) return;
-    
-    try {
-      const existingMember = await this.crewRepository.findMemberByOuid(player.ouid);
-      if (existingMember && existingMember.characterName !== player.nickname) {
-        console.log(`[ApplicationService] Nickname sync: ${existingMember.characterName} -> ${player.nickname}`);
-        await this.crewRepository.updateNickname(player.ouid, player.nickname);
-        return true; 
-      }
-    } catch (err) {
-      console.warn('[ApplicationService] Crew sync failed (non-critical):', err);
-    }
-    return false;
   }
 
   /**
