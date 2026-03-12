@@ -1,7 +1,7 @@
 import { buildPostService } from "../application/postService.js";
 import { createFirestorePostRepository } from "../infra/firestorePostRepository.js";
 import { ensureAuthenticated, getCurrentUser } from "../application/write-auth.js";
-import { getCurrentUserProfile } from "../application/authGateway.js";
+import { waitAuthReady, getCurrentUserProfile } from "../application/authGateway.js";
 import { createSubmitPostUseCase } from "../application/submit-post-use-case.js";
 import { renderWriteAccess } from "../ui/write-access-renderer.js";
 
@@ -61,7 +61,7 @@ async function initWriteForm() {
   renderWriteAccess({ section, writeForm, user });
   if (!user) return;
 
-  // Use profile to get role
+  await waitAuthReady();
   const profile = getCurrentUserProfile();
   const userRole = (profile && profile.role) || "free";
 
@@ -92,6 +92,8 @@ function bindAuthStateUpdates() {
       const { section, writeForm } = getWritePageElements();
       if (!section || !writeForm) return;
       renderWriteAccess({ section, writeForm, user: user || null });
+      const profile = getCurrentUserProfile();
+      writeForm.setAttribute("user-role", (profile && profile.role) || "free");
     });
   }
 
@@ -100,6 +102,8 @@ function bindAuthStateUpdates() {
     if (!section || !writeForm) return;
     const user = event && event.detail ? event.detail.user : getCurrentUser();
     renderWriteAccess({ section, writeForm, user });
+    const profile = getCurrentUserProfile();
+    writeForm.setAttribute("user-role", (profile && profile.role) || "free");
   };
   window.addEventListener("auth-state-changed", handler);
   return () => window.removeEventListener("auth-state-changed", handler);
