@@ -1,4 +1,6 @@
-import { RecentStats } from '../domain/stats.js';
+import { buildSeasonViews } from './season-view-builder.js';
+import { buildSyntheticAbandonMatches, mergeMatchesWithSyntheticAbandons } from './abandon-match-service.js';
+import { normalizeTrendEntries } from './trend-view-builder.js';
 
 /**
  * Sudden Attack Application Service (Application Layer)
@@ -69,12 +71,12 @@ export class SaService {
         ? await this.crewRepository.getHistory(300)
         : [];
       const syntheticAbandonMatches = this.crewRepository
-        ? this.buildSyntheticAbandonMatches(allMatches, seasonHistory, {
+        ? buildSyntheticAbandonMatches(allMatches, seasonHistory, {
             ouid: player.ouid,
             nickname: player.nickname
           })
         : [];
-      const mergedMatches = this.mergeMatchesWithSyntheticAbandons(allMatches, syntheticAbandonMatches);
+      const mergedMatches = mergeMatchesWithSyntheticAbandons(allMatches, syntheticAbandonMatches);
       const abandonSummary = this.crewRepository
         ? this.crewRepository.buildMemberAbandonSummary(seasonHistory, {
             ouid: player.ouid,
@@ -87,7 +89,7 @@ export class SaService {
       const rawStats = await this.repository.apiClient.getRecentInfo(player.ouid);
 
       // 6. Construct season views (default = current season)
-      const seasonViews = this.buildSeasonViews(mergedMatches, seasonStart, rawStats, memberData, archivedPreviousTrend, abandonSummary);
+      const seasonViews = buildSeasonViews(mergedMatches, seasonStart, rawStats, memberData, archivedPreviousTrend, abandonSummary);
       const currentView = seasonViews.current;
 
       return {
@@ -122,140 +124,17 @@ export class SaService {
     return new Date(0);
   }
 
-  buildSeasonViews(allMatches, seasonStart, rawStats, memberData, archivedPreviousTrend = [], abandonSummary = { current: 0, previous: 0 }) {
-    const safeMatches = Array.isArray(allMatches) ? allMatches : [];
-    const isCurrentSeasonMatch = (match) => match?.matchDate && new Date(match.matchDate) >= seasonStart;
-    const currentMatches = safeMatches.filter(isCurrentSeasonMatch).slice(0, 20);
-    const previousMatches = safeMatches.filter((match) => !isCurrentSeasonMatch(match)).slice(0, 20);
-    const currentCustom = currentMatches.filter((m) => m.isCustomMatch).slice(0, 20);
-    const previousCustom = previousMatches.filter((m) => m.isCustomMatch).slice(0, 20);
-
-    const trendViews = this.buildTrendViews(memberData, seasonStart, archivedPreviousTrend);
-
-    const currentStats = new RecentStats(rawStats, currentCustom, memberData, {
-      forceMatchMetrics: true,
-      abandonCount: Number(abandonSummary?.current || 0)
-    });
-    this.applySeasonTrend(currentStats, trendViews.current);
-    currentStats.seasonLabel = '이번 시즌';
-
-    const previousStats = new RecentStats(rawStats, previousCustom, memberData, {
-      forceMatchMetrics: true,
-      abandonCount: Number(abandonSummary?.previous || 0)
-    });
-    this.applySeasonTrend(previousStats, trendViews.previous);
-    previousStats.seasonLabel = '지난 시즌';
-
-    return {
-      current: { key: 'current', label: '이번 시즌', matches: currentMatches, stats: currentStats },
-      previous: { key: 'previous', label: '지난 시즌', matches: previousMatches, stats: previousStats }
-    };
-  }
-
-  buildSyntheticAbandonMatches(existingMatches = [], history = [], { ouid = "", nickname = "" } = {}) {
-    const existingMatchIds = new Set((Array.isArray(existingMatches) ? existingMatches : []).map((match) => match?.matchId).filter(Boolean));
-    const normalizedNickname = String(nickname || "").toLowerCase().trim();
-
-    return (Array.isArray(history) ? history : [])
-      .filter((item) => !!item?.matchId && !existingMatchIds.has(item.matchId))
-      .filter((item) => {
-        const manualOuids = Array.isArray(item?.manualAbandonOuids) ? item.manualAbandonOuids : [];
-        const manualNicknames = Array.isArray(item?.manualAbandonNicknames) ? item.manualAbandonNicknames : [];
-        const hitByOuid = !!ouid && manualOuids.includes(ouid);
-        const hitByNickname = !!normalizedNickname && manualNicknames.some((value) => String(value || "").toLowerCase().trim() === normalizedNickname);
-        return hitByOuid || hitByNickname;
-      })
-      .map((item) => ({
-        matchId: item.matchId,
-        matchTypeName: '수동 탈주',
-        mapName: item.map || '알 수 없음',
-        matchDate: item.matchDate,
-        participants: [],
-        crewParticipants: nickname ? [nickname] : [],
-        isCustomMatch: true,
-        isSyntheticAbandon: true,
-        syntheticBadge: '탈주 판정',
-        allPlayerStats: [],
-        matchResult: 'ABANDON',
-        kill: 0,
-        death: 0,
-        assist: 0,
-        killDisplay: '-',
-        deathDisplay: '-',
-        assistDisplay: '-',
-        kdPercent: 0,
-        kdDisplay: '-',
-        mmrChange: -30,
-        hsrChange: -20,
-        laundryInfo: { isWashed: false, totalMissing: 0, winTeamMissing: 0, loseTeamMissing: 0 }
-      }))
-      .sort((a, b) => new Date(b.matchDate) - new Date(a.matchDate));
-  }
-
-  mergeMatchesWithSyntheticAbandons(matches = [], syntheticMatches = []) {
-    return [...(Array.isArray(matches) ? matches : []), ...(Array.isArray(syntheticMatches) ? syntheticMatches : [])]
-      .sort((a, b) => new Date(b.matchDate) - new Date(a.matchDate));
-  }
-
-  buildTrendViews(memberData, seasonStart, archivedPreviousTrend = []) {
-    const rawHistory = Array.isArray(memberData?.mmrHistory) ? memberData.mmrHistory : [];
-    const normalized = rawHistory
-      .map((entry) => {
-        const date = entry?.date ? new Date(entry.date) : null;
-        return {
-          mmr: Number(entry?.mmr || 1200),
-          hsr: Number(entry?.hsr || entry?.mmr || 1200),
-          date: date && !Number.isNaN(date.getTime()) ? date.toISOString() : null
-        };
-      })
-      .filter((entry) => !!entry.date)
-      .sort((a, b) => new Date(a.date) - new Date(b.date));
-
-    const current = normalized.filter((entry) => new Date(entry.date) >= seasonStart);
-    let previous = normalized.filter((entry) => new Date(entry.date) < seasonStart);
-    const safeArchived = Array.isArray(archivedPreviousTrend) ? archivedPreviousTrend : [];
-    if (previous.length === 0 && safeArchived.length > 0) {
-      previous = safeArchived;
-    }
-    return { current, previous };
-  }
-
   async getArchivedPreviousTrendSafe(ouid) {
     if (!this.crewRepository || typeof this.crewRepository.getLatestSeasonArchiveHistory !== 'function') {
       return [];
     }
     try {
       const archived = await this.crewRepository.getLatestSeasonArchiveHistory(ouid);
-      if (!Array.isArray(archived)) return [];
-      return archived
-        .map((entry) => {
-          const date = entry?.date ? new Date(entry.date) : null;
-          return {
-            mmr: Number(entry?.mmr || 1200),
-            hsr: Number(entry?.hsr || entry?.mmr || 1200),
-            date: date && !Number.isNaN(date.getTime()) ? date.toISOString() : null
-          };
-        })
-        .filter((entry) => !!entry.date)
-        .sort((a, b) => new Date(a.date) - new Date(b.date));
+      return normalizeTrendEntries(archived);
     } catch (err) {
       console.warn('[ApplicationService] Archived trend lookup failed (non-critical):', err);
       return [];
     }
-  }
-
-  applySeasonTrend(stats, trend) {
-    const safeTrend = Array.isArray(trend) ? trend : [];
-    stats.mmrTrend = safeTrend;
-    stats.mmrHistory = safeTrend;
-    if (safeTrend.length === 0) {
-      stats.crewMmr = 1200;
-      stats.crewHsr = 1200;
-      return;
-    }
-    const latest = safeTrend[safeTrend.length - 1];
-    stats.crewMmr = Number(latest.mmr || 1200);
-    stats.crewHsr = Number(latest.hsr || latest.mmr || 1200);
   }
 
   /**
