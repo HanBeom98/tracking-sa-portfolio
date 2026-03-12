@@ -3,11 +3,6 @@ import { waitAuthReady, getCurrentUserProfile } from "../application/authGateway
 import { createFirestorePostRepository } from "../infra/firestorePostRepository.js";
 import { createPostDetailUseCases } from "../application/post-detail-use-cases.js";
 
-const postService = buildPostService({
-  postRepository: createFirestorePostRepository(),
-});
-const postDetailUseCases = createPostDetailUseCases({ postService });
-
 const postId = new URLSearchParams(window.location.search).get("id");
 const postView = document.querySelector("board-post-view");
 if (!postView) {
@@ -46,6 +41,16 @@ function attachPostActions(post, user) {
   });
 }
 
+async function waitForFirestoreReady(timeoutMs = 5000) {
+  const startedAt = Date.now();
+  while (!window.db) {
+    if (Date.now() - startedAt > timeoutMs) {
+      throw new Error("FIRESTORE_NOT_READY");
+    }
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   if (!postId) {
     postView.renderError();
@@ -53,6 +58,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   try {
+    await waitForFirestoreReady();
+    const postService = buildPostService({
+      postRepository: createFirestorePostRepository(),
+    });
+    const postDetailUseCases = createPostDetailUseCases({ postService });
     const authUser = await waitAuthReady();
     
     // Enrich user with profile data (like role)
