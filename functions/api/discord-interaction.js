@@ -251,57 +251,56 @@ export async function onRequest(context) {
   if (interaction.type === 2) {
     if (interaction.data.name === '대내모집') {
       const hostId = interaction.member?.user?.id || interaction.user?.id;
-      context.waitUntil(setDoc(PROJECT_ID, 'match_sessions', guildId, { status: 'RECRUITING', participants: [], hostId, createdAt: new Date().toISOString(), lastRefreshedAt: 0 }));
+      await setDoc(PROJECT_ID, 'match_sessions', guildId, { status: 'RECRUITING', participants: [], hostId, createdAt: new Date().toISOString(), lastRefreshedAt: 0 });
       return new Response(JSON.stringify({ type: 4, data: { content: "🎮 **TRACKING SA 내전 모집 시작!** (0/12)\n최소 10명부터 팀 나누기가 가능합니다.", components: getActionButtons(0) } }), { headers: { 'Content-Type': 'application/json' } });
     }
 
     if (interaction.data.name === '전적검색') {
-      context.waitUntil((async () => {
-        const nick = (interaction.data.options || []).find(o => o.name === '닉네임')?.value?.trim();
-        const d = await queryCrewMember(PROJECT_ID, nick);
-        if (!d) return patchInteraction(APP_ID, token, { content: `❌ **${nick}**님은 등록되어 있지 않습니다.` });
-        const winRate = (Number(d.wins || 0) + Number(d.loses || 0)) > 0 ? ((Number(d.wins || 0) / (Number(d.wins || 0) + Number(d.loses || 0))) * 100).toFixed(1) + '%' : '0%';
-        const kd = (Number(d.crewKills || 0) + Number(d.crewDeaths || 0)) > 0 ? ((Number(d.crewKills || 0) / (Number(d.crewKills || 0) + Number(d.crewDeaths || 0))) * 100).toFixed(1) + '%' : '0%';
-        const c = `📊 **[${nick}] 크루원 전적 리포트**\n\n🔹 **MMR:** ${d.mmr || 1200}\n🔹 **HSR 점수:** ${d.hsr || 1200}\n🔹 **내전 킬뎃:** ${kd}\n🔹 **내전 승률:** ${winRate}\n\n*TRACKING SA 공식 데이터베이스 기준*`;
-        await patchInteraction(APP_ID, token, { content: c });
-      })());
-      return new Response(JSON.stringify({ type: 5 }), { headers: { 'Content-Type': 'application/json' } });
+      const nick = (interaction.data.options || []).find(o => o.name === '닉네임')?.value?.trim();
+      const d = await queryCrewMember(PROJECT_ID, nick);
+      if (!d) {
+        return new Response(JSON.stringify({ type: 4, data: { content: `❌ **${nick}**님은 등록되어 있지 않습니다.` } }), { headers: { 'Content-Type': 'application/json' } });
+      }
+      const winRate = (Number(d.wins || 0) + Number(d.loses || 0)) > 0 ? ((Number(d.wins || 0) / (Number(d.wins || 0) + Number(d.loses || 0))) * 100).toFixed(1) + '%' : '0%';
+      const kd = (Number(d.crewKills || 0) + Number(d.crewDeaths || 0)) > 0 ? ((Number(d.crewKills || 0) / (Number(d.crewKills || 0) + Number(d.crewDeaths || 0))) * 100).toFixed(1) + '%' : '0%';
+      const c = `📊 **[${nick}] 크루원 전적 리포트**\n\n🔹 **MMR:** ${d.mmr || 1200}\n🔹 **HSR 점수:** ${d.hsr || 1200}\n🔹 **내전 킬뎃:** ${kd}\n🔹 **내전 승률:** ${winRate}\n\n*TRACKING SA 공식 데이터베이스 기준*`;
+      return new Response(JSON.stringify({ type: 4, data: { content: c } }), { headers: { 'Content-Type': 'application/json' } });
     }
 
     if (interaction.data.name === '라이벌') {
-      context.waitUntil((async () => {
-        const options = interaction.data.options || [];
-        const primaryName = options.find(o => o.name === '기준유저')?.value?.trim();
-        const targetName = options.find(o => o.name === '상대유저')?.value?.trim();
+      const options = interaction.data.options || [];
+      const primaryName = options.find(o => o.name === '기준유저')?.value?.trim();
+      const targetName = options.find(o => o.name === '상대유저')?.value?.trim();
 
-        if (!primaryName || !targetName) {
-          return patchInteraction(APP_ID, token, { content: '❌ 기준 유저와 상대 유저를 모두 입력해주세요.' });
-        }
+      if (!primaryName || !targetName) {
+        return new Response(JSON.stringify({ type: 4, data: { content: '❌ 기준 유저와 상대 유저를 모두 입력해주세요.' } }), { headers: { 'Content-Type': 'application/json' } });
+      }
 
-        if (primaryName === targetName) {
-          return patchInteraction(APP_ID, token, { content: '❌ 같은 닉네임 두 개는 비교할 수 없습니다. 서로 다른 두 유저를 입력해주세요.' });
-        }
+      if (primaryName === targetName) {
+        return new Response(JSON.stringify({ type: 4, data: { content: '❌ 같은 닉네임 두 개는 비교할 수 없습니다. 서로 다른 두 유저를 입력해주세요.' } }), { headers: { 'Content-Type': 'application/json' } });
+      }
 
-        const [primaryData, targetData] = await Promise.all([
-          queryCrewMember(PROJECT_ID, primaryName),
-          queryCrewMember(PROJECT_ID, targetName)
-        ]);
+      const [primaryData, targetData] = await Promise.all([
+        queryCrewMember(PROJECT_ID, primaryName),
+        queryCrewMember(PROJECT_ID, targetName)
+      ]);
 
-        if (!primaryData && !targetData) {
-          return patchInteraction(APP_ID, token, { content: `❌ **${primaryName}**님과 **${targetName}**님 모두 등록되어 있지 않습니다.` });
-        }
-        if (!primaryData) {
-          return patchInteraction(APP_ID, token, { content: `❌ **${primaryName}**님은 등록되어 있지 않습니다.` });
-        }
-        if (!targetData) {
-          return patchInteraction(APP_ID, token, { content: `❌ **${targetName}**님은 등록되어 있지 않습니다.` });
-        }
+      if (!primaryData && !targetData) {
+        return new Response(JSON.stringify({ type: 4, data: { content: `❌ **${primaryName}**님과 **${targetName}**님 모두 등록되어 있지 않습니다.` } }), { headers: { 'Content-Type': 'application/json' } });
+      }
+      if (!primaryData) {
+        return new Response(JSON.stringify({ type: 4, data: { content: `❌ **${primaryName}**님은 등록되어 있지 않습니다.` } }), { headers: { 'Content-Type': 'application/json' } });
+      }
+      if (!targetData) {
+        return new Response(JSON.stringify({ type: 4, data: { content: `❌ **${targetName}**님은 등록되어 있지 않습니다.` } }), { headers: { 'Content-Type': 'application/json' } });
+      }
 
-        await patchInteraction(APP_ID, token, {
+      return new Response(JSON.stringify({
+        type: 4,
+        data: {
           content: buildRivalSummary(primaryName, primaryData, targetName, targetData)
-        });
-      })());
-      return new Response(JSON.stringify({ type: 5 }), { headers: { 'Content-Type': 'application/json' } });
+        }
+      }), { headers: { 'Content-Type': 'application/json' } });
     }
   }
 

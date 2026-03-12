@@ -19,6 +19,7 @@ export default async function handler(req, res) {
   try {
     const rawBody = await getRawBody(req);
     const bodyText = rawBody.toString('utf-8');
+    const backgroundTasks = [];
 
     const context = {
       request: {
@@ -30,14 +31,21 @@ export default async function handler(req, res) {
         text: async () => bodyText,
         json: async () => JSON.parse(bodyText)
       },
-      env: process.env
+      env: process.env,
+      waitUntil: (promise) => {
+        backgroundTasks.push(Promise.resolve(promise).catch((error) => {
+          console.error('Discord waitUntil task failed:', error);
+        }));
+      }
     };
 
     const response = await onRequest(context);
     const data = await response.json();
 
     res.setHeader('Content-Type', 'application/json');
-    return res.status(response.status || 200).json(data);
+    const result = res.status(response.status || 200).json(data);
+    void Promise.allSettled(backgroundTasks);
+    return result;
   } catch (error) {
     console.error('Discord Interaction Bridge Error:', error);
     return res.status(500).json({ error: error.message });
