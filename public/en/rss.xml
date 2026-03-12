@@ -1,151 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title><![CDATA[Tracking SA - News Insights]]></title>
-    <link>https://trackingsa.com/en/news/</link>
-    <description><![CDATA[Real-time tech news and market insights]]></description>
+    <title><![CDATA[Tracking SA - Service Updates]]></title>
+    <link>https://trackingsa.com/en/</link>
+    <description><![CDATA[Key Tracking SA services and featured functionality]]></description>
     <language>en</language>
-    <lastBuildDate>Wed, 11 Mar 2026 13:38:03 GMT</lastBuildDate>
+    <lastBuildDate>Wed, 11 Mar 2026 23:59:38 GMT</lastBuildDate>
     <atom:link href="https://trackingsa.com/en/rss.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title><![CDATA[NVIDIA-Nebius Partnership: A Crazy Move That Will Shake Up the AI Cloud Landscape!]]></title>
-      <link>https://trackingsa.com/en/news-1773236224-0.html</link>
-      <guid isPermaLink="true">https://trackingsa.com/en/news-1773236224-0.html</guid>
+      <title><![CDATA[Featured Service: Sudden Attack Stats]]></title>
+      <link>https://trackingsa.com/en/games/sudden-attack/</link>
+      <guid isPermaLink="true">https://trackingsa.com/en/games/sudden-attack/</guid>
       <pubDate>Wed, 11 Mar 2026 00:00:00 GMT</pubDate>
-      <description><![CDATA[Listen up, people! What I'm about to tell you isn't just some partnership announcement. It's an event that will reshape the AI cloud market! Don't just brush of…]]></description>
+      <description><![CDATA[Official API-based player stats, match history, versus comparison, and crew tools.]]></description>
     </item>
     <item>
-      <title><![CDATA[Canal+ and Google Cloud's AI Alliance? Let's Check the Facts.]]></title>
-      <link>https://trackingsa.com/en/news-1773236278-2.html</link>
-      <guid isPermaLink="true">https://trackingsa.com/en/news-1773236278-2.html</guid>
+      <title><![CDATA[Games, Tests, and Community Hub]]></title>
+      <link>https://trackingsa.com/en/</link>
+      <guid isPermaLink="true">https://trackingsa.com/en/</guid>
       <pubDate>Wed, 11 Mar 2026 00:00:00 GMT</pubDate>
-      <description><![CDATA[Canal+ and Google Cloud have announced a partnership to deliver AI-driven entertainment experiences. Applause... maybe? Premature excitement is unwarranted. Let…]]></description>
-    </item>
-    <item>
-      <title><![CDATA[Anthropic Gets the Boot: Is the AI Bubble About to Burst?]]></title>
-      <link>https://trackingsa.com/en/news-1773236252-1.html</link>
-      <guid isPermaLink="true">https://trackingsa.com/en/news-1773236252-1.html</guid>
-      <pubDate>Wed, 11 Mar 2026 00:00:00 GMT</pubDate>
-      <description><![CDATA[Anthropic, they've finally screwed up big time. The Pentagon ordering the removal of Anthropic's AI tech from key systems isn't just a minor hiccup. It's a majo…]]></description>
-    </item>
-    <item>
-      <title><![CDATA[Nextech3D.ai Onboards Google & Microsoft: 50 Clients, But Where's the Real Money?]]></title>
-      <link>https://trackingsa.com/en/news-1773149816-0.html</link>
-      <guid isPermaLink="true">https://trackingsa.com/en/news-1773149816-0.html</guid>
-      <pubDate>Tue, 10 Mar 2026 00:00:00 GMT</pubDate>
-      <description><![CDATA[Nextech3D.ai has announced the acquisition of 50 clients and the onboarding of Google and Microsoft. Is this the dawn of the LLM -powered AI event platform mark…]]></description>
-    </item>
-    <item>
-      <title><![CDATA[AI in Healthcare: A Liability Dump on Doctors?]]></title>
-      <link>https://trackingsa.com/en/news-1773149844-1.html</link>
-      <guid isPermaLink="true">https://trackingsa.com/en/news-1773149844-1.html</guid>
-      <pubDate>Tue, 10 Mar 2026 00:00:00 GMT</pubDate>
-      <description><![CDATA[The Medscape article sends shivers down my spine. Doctors are at risk of becoming 'liability sinks' for errors made by LLM -based AI healthcare systems. This is…]]></description>
-    </item>
-    <item>
-      <title><![CDATA[Yann LeCun's $1 Billion: What's the Actual Plan?]]></title>
-      <link>https://trackingsa.com/en/news-1773149874-2.html</link>
-      <guid isPermaLink="true">https://trackingsa.com/en/news-1773149874-2.html</guid>
-      <pubDate>Tue, 10 Mar 2026 00:00:00 GMT</pubDate>
-      <description><![CDATA[Yann LeCun raised $1 billion? So what? While Bloomberg headlines make it sound like something huge is happening, opening the lid reveals nothing substantial. A…]]></description>
-    </item>
-    <item>
-      <title><![CDATA[Malaysia's AI Tourism Push: Show Me the Blueprint, Not Just Lip Service]]></title>
-      <link>https://trackingsa.com/en/news-1773063594-2.html</link>
-      <guid isPermaLink="true">https://trackingsa.com/en/news-1773063594-2.html</guid>
-      <pubDate>Mon, 09 Mar 2026 00:00:00 GMT</pubDate>
-      <description><![CDATA[Malaysia is reportedly integrating AI into its tourism and hospitality sectors, aiming for "hyper-localized communication strategies." The article highlights th…]]></description>
-    </item>
-    <item>
-      <title><![CDATA[AMD and University of Toronto's AI Research Expansion: So What's the Plan?]]></title>
-      <link>https://trackingsa.com/en/news-1773063545-0.html</link>
-      <guid isPermaLink="true">https://trackingsa.com/en/news-1773063545-0.html</guid>
-      <pubDate>Mon, 09 Mar 2026 00:00:00 GMT</pubDate>
-      <description><![CDATA[The news of AMD and the University of Toronto expanding their AI research collaboration and establishing a new lab is making headlines. However, many such annou…]]></description>
-    </item>
-    <item>
-      <title><![CDATA[AI Boss Era: A Prudent Approach Required]]></title>
-      <link>https://trackingsa.com/en/news-1772975427-1.html</link>
-      <guid isPermaLink="true">https://trackingsa.com/en/news-1772975427-1.html</guid>
-      <pubDate>Sun, 08 Mar 2026 00:00:00 GMT</pubDate>
-      <description><![CDATA[Al Jazeera's report suggests that AI is increasingly involved in workplace decision-making. However, let's not pop the champagne just yet. It's time for a cold,…]]></description>
-    </item>
-    <item>
-      <title><![CDATA[Automotive Industry's AI 'Backdoor'? M&A and Price Competitiveness are 'Just a Show']]></title>
-      <link>https://trackingsa.com/en/news-1772975451-2.html</link>
-      <guid isPermaLink="true">https://trackingsa.com/en/news-1772975451-2.html</guid>
-      <pubDate>Sun, 08 Mar 2026 00:00:00 GMT</pubDate>
-      <description><![CDATA[The automotive industry is reportedly relying on outdated engines of M&amp;A and price competitiveness. They seem to be trying to grease the wheels with LLM and…]]></description>
-    </item>
-    <item>
-      <title><![CDATA[AI War Videos? Don't Make Me Laugh! Scammers Profiting Through Backdoors Should Be Arrested]]></title>
-      <link>https://trackingsa.com/en/news-1772888903-0.html</link>
-      <guid isPermaLink="true">https://trackingsa.com/en/news-1772888903-0.html</guid>
-      <pubDate>Sat, 07 Mar 2026 00:00:00 GMT</pubDate>
-      <description><![CDATA[The surge of AI-generated Iran war videos reported by the BBC? It's laughable. Scratch beneath the surface of AI technology's "advancement," and you'll find hye…]]></description>
-    </item>
-    <item>
-      <title><![CDATA[The AI War Machine: A Specter of Data Monopoly and Control]]></title>
-      <link>https://trackingsa.com/en/news-1772888927-1.html</link>
-      <guid isPermaLink="true">https://trackingsa.com/en/news-1772888927-1.html</guid>
-      <pubDate>Sat, 07 Mar 2026 00:00:00 GMT</pubDate>
-      <description><![CDATA[Listen up, savvy investors. Don't get blinded by the shiny facade. Today, we're diving into a pitfall – the monster called military AI. "AI becomes a new frontl…]]></description>
-    </item>
-    <item>
-      <title><![CDATA[Chicago's AI Tutor Experiment: Education Revolution or Digital Hype?]]></title>
-      <link>https://trackingsa.com/en/news-1772803255-2.html</link>
-      <guid isPermaLink="true">https://trackingsa.com/en/news-1772803255-2.html</guid>
-      <pubDate>Fri, 06 Mar 2026 00:00:00 GMT</pubDate>
-      <description><![CDATA[A school in Chicago is implementing AI tutors, sparking debate over technology in classrooms, as reported by FOX 32 Chicago. Let's cut through the noise and exa…]]></description>
-    </item>
-    <item>
-      <title><![CDATA[Smart Home, Rebooted with AI? Let's Check the Facts First.]]></title>
-      <link>https://trackingsa.com/en/news-1772888952-2.html</link>
-      <guid isPermaLink="true">https://trackingsa.com/en/news-1772888952-2.html</guid>
-      <pubDate>Fri, 06 Mar 2026 00:00:00 GMT</pubDate>
-      <description><![CDATA[The smart home, once touted as the future of living, faces a cold reality. Refrigerators that play Netflix, voice assistants that misunderstand commands – this…]]></description>
-    </item>
-    <item>
-      <title><![CDATA[Google's February AI Announcements: So What?]]></title>
-      <link>https://trackingsa.com/en/news-1772803229-1.html</link>
-      <guid isPermaLink="true">https://trackingsa.com/en/news-1772803229-1.html</guid>
-      <pubDate>Fri, 06 Mar 2026 00:00:00 GMT</pubDate>
-      <description><![CDATA[Google has compiled its AI-related announcements from February? It feels like they're just saying, "Look how hard we're working!" But what matters isn't what th…]]></description>
-    </item>
-    <item>
-      <title><![CDATA[Nextech3D.ai's Price Hike: Fair or Foul? Let's Check the Facts]]></title>
-      <link>https://trackingsa.com/en/news-1772733106-2.html</link>
-      <guid isPermaLink="true">https://trackingsa.com/en/news-1772733106-2.html</guid>
-      <pubDate>Thu, 05 Mar 2026 00:00:00 GMT</pubDate>
-      <description><![CDATA[Nextech3D.ai is raising prices by 20-30% for the festival and fair market? Hold your horses. Let's stick to the facts. We need to coldly assess why and how the…]]></description>
-    </item>
-    <item>
-      <title><![CDATA[Farm Day in Kern County: AI? Let's Dig Deeper.]]></title>
-      <link>https://trackingsa.com/en/news-1772733080-1.html</link>
-      <guid isPermaLink="true">https://trackingsa.com/en/news-1772733080-1.html</guid>
-      <pubDate>Thu, 05 Mar 2026 00:00:00 GMT</pubDate>
-      <description><![CDATA[The news reports that AI technology was showcased at the Kern County Farm Day. Applause... or should we? To be blunt, such press releases are nothing more than…]]></description>
-    </item>
-    <item>
-      <title><![CDATA[China's AI Five-Year Plan: Western Investors, Pack Your Bags Now]]></title>
-      <link>https://trackingsa.com/en/news-1772733053-0.html</link>
-      <guid isPermaLink="true">https://trackingsa.com/en/news-1772733053-0.html</guid>
-      <pubDate>Thu, 05 Mar 2026 00:00:00 GMT</pubDate>
-      <description><![CDATA[Here we go again with China. This time, it's an LLM frenzy. A five-year plan? Don't make me laugh. It's just another 'Great Leap Forward 2.0' for AI. On the sur…]]></description>
-    </item>
-    <item>
-      <title><![CDATA[Claude, Iran, and Anthropic: Is There Money to Be Made in AI's Political Debut?]]></title>
-      <link>https://trackingsa.com/en/news-1772803202-0.html</link>
-      <guid isPermaLink="true">https://trackingsa.com/en/news-1772803202-0.html</guid>
-      <pubDate>Thu, 05 Mar 2026 00:00:00 GMT</pubDate>
-      <description><![CDATA[The Washington Post's report that Anthropic's LLM Claude is being used in a U.S. government campaign targeting Iran is intriguing, but investors should avoid pr…]]></description>
-    </item>
-    <item>
-      <title><![CDATA[OpenAI's Pentagon Deal: The Beginning of the End for AI?]]></title>
-      <link>https://trackingsa.com/en/news-1772544144-0.html</link>
-      <guid isPermaLink="true">https://trackingsa.com/en/news-1772544144-0.html</guid>
-      <pubDate>Tue, 03 Mar 2026 00:00:00 GMT</pubDate>
-      <description><![CDATA[OpenAI, they've completely lost it. Where did their mantra of "AI for the benefit of humanity" go? Now they're joining hands with the Pentagon to develop killer…]]></description>
+      <description><![CDATA[Tracking SA is a multi-service hub for game utilities, web games, AI tests, community pages, and practical tools.]]></description>
     </item>
   </channel>
 </rss>

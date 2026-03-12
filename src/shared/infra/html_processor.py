@@ -40,6 +40,20 @@ def _extract_page_title(content, fallback):
     return title or fallback
 
 
+def _build_page_title(rel_path, is_en_page, extracted_title):
+    exact_title_map = {
+        "index.html": "Tracking SA | 게임·도구·커뮤니티 허브",
+        "en/index.html": "Tracking SA | Games, Tools, and Community Hub",
+        "about/index.html": "서비스 소개 - Tracking SA",
+        "en/about/index.html": "About Us - Tracking SA",
+        "games/index.html": "게임 센터 | Tracking SA",
+        "en/games/index.html": "Game Center | Tracking SA",
+        "games/sudden-attack/index.html": "Sudden Attack Statistics - TrackingSA",
+        "en/games/sudden-attack/index.html": "Sudden Attack Statistics - TrackingSA",
+    }
+    return exact_title_map.get(rel_path, extracted_title or ("Tracking SA" if is_en_page else "Tracking SA"))
+
+
 def _build_description(rel_path, is_en_page, page_title):
     if _is_news_article_path(rel_path):
         if is_en_page:
@@ -47,10 +61,10 @@ def _build_description(rel_path, is_en_page, page_title):
         return f"{page_title} 핵심 이슈와 투자 관점을 정리한 Tracking SA 인사이트 기사입니다."
 
     exact_desc_map = {
-        "index.html": "AI 테스트, 게임, 마켓 인사이트를 한 곳에서 경험하세요. 최신 인공지능 트렌드를 전달합니다.",
-        "en/index.html": "Experience AI tests, games, and market insights in one place. Delivering the latest AI trends.",
-        "about/index.html": "Tracking SA의 서비스 방향과 운영 목적을 소개합니다.",
-        "en/about/index.html": "Learn about Tracking SA's mission and editorial direction.",
+        "index.html": "서든어택 전적 검색, 게임, AI 테스트, 커뮤니티와 실용 도구를 한곳에서 이용할 수 있는 멀티 서비스 허브입니다.",
+        "en/index.html": "A multi-service hub for Sudden Attack stats, games, AI tests, community pages, and practical tools.",
+        "about/index.html": "Tracking SA는 서든어택 전적 검색을 중심으로 게임, 커뮤니티, AI 테스트와 실용 도구를 제공하는 서비스 허브입니다.",
+        "en/about/index.html": "Tracking SA is a service hub centered on Sudden Attack stats, with games, community pages, AI tests, and practical tools.",
         "contact/index.html": "문의 및 제휴 관련 연락 방법을 안내합니다.",
         "en/contact/index.html": "Contact Tracking SA for questions and partnership opportunities.",
         "privacy-policy/index.html": "Tracking SA 개인정보 처리 및 데이터 이용 정책 안내.",
@@ -83,9 +97,9 @@ def _build_description(rel_path, is_en_page, page_title):
         return en_domain_desc_map[current_domain] if is_en_page else domain_desc_map[current_domain]
 
     return (
-        "Tracking SA services and insights page."
+        "Tracking SA services and utility pages."
         if is_en_page
-        else "Tracking SA 서비스 및 인사이트 페이지입니다."
+        else "Tracking SA의 서비스 및 유틸리티 페이지입니다."
     )
 
 
@@ -115,7 +129,8 @@ def process_html_file_for_common_elements(filepath):
         else:
             canonical_url = f"{BASE_URL.rstrip('/')}/{rel_path.replace('index.html', '')}"
         noindex_page = _should_noindex(rel_path)
-        page_title = _extract_page_title(content, "Tracking SA - AI Services & Hub")
+        extracted_title = _extract_page_title(content, "Tracking SA - AI Services & Hub")
+        page_title = _build_page_title(rel_path, is_en_page, extracted_title)
 
         # 2. 기존 레거시 요소 정리
         # 서든어택 페이지는 전용 헤더를 보존하기 위해 기존 헤더 삭제를 건너뜀 (주입은 수행)
@@ -153,13 +168,14 @@ def process_html_file_for_common_elements(filepath):
             f'<meta name="twitter:image" content="{BASE_URL.rstrip("/")}/logo.svg">',
             f'<link rel="icon" href="/favicon.svg" type="image/svg+xml">',
             f'<link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">',
-            f'<link rel="alternate" type="application/rss+xml" title="Tracking SA RSS" href="/rss.xml">',
             f'<meta name="description" content="{site_desc}">',
             f'<meta property="og:title" content="{page_title}">',
             f'<meta property="og:description" content="{site_desc}">',
         ]
 
         seo_html = "\n    ".join(seo_tags)
+
+        content = re.sub(r"(<title[^>]*>)([\s\S]*?)(</title>)", rf"\1{page_title}\3", content, count=1, flags=re.IGNORECASE)
 
         # 4. HEAD 주입 (테마 가드 및 SEO)
         common_head = get_common_head()

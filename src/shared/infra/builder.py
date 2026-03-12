@@ -178,50 +178,38 @@ def generate_public_site(incremental=False):
 
 
 def build_rss():
-    """
-    뉴스 인덱스 페이지에서 데이터를 추출하여 rss.xml을 생성합니다.
-    """
-    def parse_cards_for_rss(html):
-        items = []
-        if not html: return items
-        # 최신 20개만 추출
-        # href와 class 순서에 상관없이 매칭되도록 개선
-        card_regex = re.compile(r'<a[^>]+href="([^"]+)"[^>]*class="news-card-premium"[^>]*>([\s\S]*?)</a>|<a[^>]*class="news-card-premium"[^>]+href="([^"]+)"[^>]*>([\s\S]*?)</a>', re.I)
-        title_regex = re.compile(r'<h2[^>]*class="news-title-text"[^>]*>([\s\S]*?)</h2>', re.I)
-        date_regex = re.compile(r'<span[^>]*class="news-date"[^>]*>([\s\S]*?)</span>', re.I)
-        # 클래스명이 news-excerpt로 변경됨
-        desc_regex = re.compile(r'<p[^>]*class="(?:news-desc|news-excerpt)"[^>]*>([\s\S]*?)</p>', re.I)
-        
-        for count, match in enumerate(card_regex.finditer(html)):
-            if count >= 20: break
-            href = match.group(1) or match.group(3) or ""
-            inner = match.group(2) or match.group(4) or ""
-            title_match = title_regex.search(inner)
-            date_match = date_regex.search(inner)
-            desc_match = desc_regex.search(inner)
-            
-            title = re.sub(r"<[^>]*>", "", title_match.group(1)).strip() if title_match else ""
-            date = re.sub(r"<[^>]*>", "", date_match.group(1)).strip() if date_match else ""
-            desc = re.sub(r"<[^>]*>", "", desc_match.group(1)).strip() if desc_match else ""
-            
-            if href and title:
-                items.append({"href": href, "title": title, "date": date, "description": desc})
-        return items
-
-    def load_html(path):
-        if not os.path.exists(path): return ""
-        with open(path, "r", encoding="utf-8") as f: return f.read()
-
-    # KO RSS
-    ko_html = load_html(os.path.join(PUBLIC_DIR, "news", "index.html"))
-    ko_items = parse_cards_for_rss(ko_html)
+    ko_items = [
+        {
+            "href": "/games/sudden-attack/",
+            "title": "대표 서비스: 서든어택 전적 검색",
+            "date": datetime.datetime.utcnow().strftime("%Y-%m-%d"),
+            "description": "공식 API 기반 전적 검색, 매치 기록 조회, VS 비교, 크루 관리 기능을 제공합니다.",
+        },
+        {
+            "href": "/",
+            "title": "게임·테스트·커뮤니티 허브 운영",
+            "date": datetime.datetime.utcnow().strftime("%Y-%m-%d"),
+            "description": "Tracking SA는 게임 유틸리티, 웹 게임, AI 테스트, 커뮤니티와 실용 도구를 함께 제공하는 멀티 서비스 허브입니다.",
+        },
+    ]
     ko_rss = build_rss_xml(ko_items, lang="ko")
     with open(os.path.join(PUBLIC_DIR, "rss.xml"), "w", encoding="utf-8") as f:
         f.write(ko_rss)
 
-    # EN RSS
-    en_html = load_html(os.path.join(PUBLIC_DIR, "en", "news", "index.html"))
-    en_items = parse_cards_for_rss(en_html)
+    en_items = [
+        {
+            "href": "/en/games/sudden-attack/",
+            "title": "Featured Service: Sudden Attack Stats",
+            "date": datetime.datetime.utcnow().strftime("%Y-%m-%d"),
+            "description": "Official API-based player stats, match history, versus comparison, and crew tools.",
+        },
+        {
+            "href": "/en/",
+            "title": "Games, Tests, and Community Hub",
+            "date": datetime.datetime.utcnow().strftime("%Y-%m-%d"),
+            "description": "Tracking SA is a multi-service hub for game utilities, web games, AI tests, community pages, and practical tools.",
+        },
+    ]
     en_rss = build_rss_xml(en_items, lang="en")
     with open(os.path.join(PUBLIC_DIR, "en", "rss.xml"), "w", encoding="utf-8") as f:
         f.write(en_rss)
@@ -382,11 +370,9 @@ def build_search_index():
             enriched.append({**item, "keywords": keywords})
         return enriched
 
-    ko_html = load_html(os.path.join(PUBLIC_DIR, "news", "index.html"))
-    en_html = load_html(os.path.join(PUBLIC_DIR, "en", "news", "index.html"))
     static_items = {
         "ko": [
-            {"href": "/news/", "title": "테크 인사이트", "description": "최신 AI 및 기술 트렌드 분석 칼럼", "keywords": ["뉴스", "인사이트"]},
+            {"href": "/", "title": "Tracking SA 홈", "description": "게임, 커뮤니티, 테스트와 실용 도구를 모은 멀티 서비스 허브", "keywords": ["tracking sa", "홈", "허브", "포털"]},
             {"href": "/board?category=notice", "title": "공지사항", "description": "Tracking SA의 새로운 소식을 전해드립니다.", "keywords": ["공지", "게시판", "소식"]},
             {"href": "/board?category=free", "title": "자유게시판", "description": "자유롭게 의견을 나누는 커뮤니티 공간", "keywords": ["커뮤니티", "자유", "게시판"]},
             {"href": "/futures-estimate/", "title": "코스피200 지수 예측", "description": "AI 기반 KOSPI200 지수 상승/하락 예측 데이터", "keywords": ["지수", "선물", "코스피", "K200"]},
@@ -399,11 +385,12 @@ def build_search_index():
             {"href": "/account/", "title": "내 정보", "description": "프로필 관리 및 활동 내역 확인", "keywords": ["계정", "회원정보", "프로필"]},
         ],
         "en": [
-            {"href": "/en/news/", "title": "Tech Insights", "description": "Latest AI and tech trend analysis columns", "keywords": ["news", "insights"]},
+            {"href": "/en/", "title": "Tracking SA Home", "description": "A multi-service hub for game tools, community pages, tests, and utilities", "keywords": ["tracking sa", "hub", "portal"]},
             {"href": "/board?category=notice", "title": "Notice", "description": "Official announcements and news from Tracking SA", "keywords": ["notice", "announcement", "board"]},
             {"href": "/board?category=free", "title": "Free Board", "description": "Community space for free discussions", "keywords": ["community", "free", "board"]},
             {"href": "/futures-estimate/", "title": "KOSPI200 Prediction", "description": "AI-based KOSPI200 index direction forecast", "keywords": ["index", "futures", "K200"]},
             {"href": "/games/", "title": "Game Center", "description": "Play and share various classic and AI games", "keywords": ["games", "play", "entertainment"]},
+            {"href": "/en/games/sudden-attack/", "title": "Sudden Attack Stats", "description": "Official API-based player stats, match history, versus comparison, and crew tools", "keywords": ["sudden attack", "stats", "match history", "crew"]},
             {"href": "/glossary/", "title": "AI Glossary", "description": "Comprehensive guide to IT and AI terminology", "keywords": ["dictionary", "terms", "glossary"]},
             {"href": "/ai-test/", "title": "AI Tendency Test", "description": "Discover which AI tech matches your personality", "keywords": ["test", "personality"]},
             {"href": "/animal-face/", "title": "Animal Face Test", "description": "AI analysis of your face type", "keywords": ["test", "animal face"]},
@@ -414,8 +401,8 @@ def build_search_index():
     payload = {
         "generated_at": datetime.datetime.utcnow().isoformat() + "Z",
         "items": {
-            "ko": add_keywords(static_items["ko"] + parse_cards(ko_html)),
-            "en": add_keywords(static_items["en"] + parse_cards(en_html)),
+            "ko": add_keywords(static_items["ko"]),
+            "en": add_keywords(static_items["en"]),
         },
     }
     out_path = os.path.join(PUBLIC_DIR, "search-index.json")

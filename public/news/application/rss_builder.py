@@ -6,9 +6,9 @@ def build_rss_xml(news_items, lang="ko"):
     뉴스 아이템 리스트를 받아 RSS 2.0 규격의 XML 문자열을 생성합니다.
     """
     base_url = BASE_URL.rstrip("/")
-    title = "Tracking SA - 뉴스 인사이트" if lang == "ko" else "Tracking SA - News Insights"
-    description = "실시간 테크 뉴스 및 마켓 인사이트" if lang == "ko" else "Real-time tech news and market insights"
-    link = f"{base_url}/news/" if lang == "ko" else f"{base_url}/en/news/"
+    title = "Tracking SA - 서비스 업데이트" if lang == "ko" else "Tracking SA - Service Updates"
+    description = "Tracking SA의 주요 서비스와 대표 기능 안내" if lang == "ko" else "Key Tracking SA services and featured functionality"
+    link = f"{base_url}/" if lang == "ko" else f"{base_url}/en/"
     
     now = datetime.datetime.utcnow().strftime("%a, %d %b %Y %H:%M:%S GMT")
     

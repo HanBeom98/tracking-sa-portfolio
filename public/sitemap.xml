@@ -8,11 +8,32 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/" />
   </url>
   <url>
-    <loc>https://trackingsa.com/lucky-recommendation/</loc>
+    <loc>https://trackingsa.com/privacy-policy/</loc>
     <lastmod>2026-03-11</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/lucky-recommendation/" />
-    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/lucky-recommendation/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/lucky-recommendation/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/privacy-policy/" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/privacy-policy/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/privacy-policy/" />
+  </url>
+  <url>
+    <loc>https://trackingsa.com/search/</loc>
+    <lastmod>2026-03-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/search/" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/search/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/search/" />
+  </url>
+  <url>
+    <loc>https://trackingsa.com/fortune/</loc>
+    <lastmod>2026-03-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/fortune/" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/fortune/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/fortune/" />
+  </url>
+  <url>
+    <loc>https://trackingsa.com/inquiry/</loc>
+    <lastmod>2026-03-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/inquiry/" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/inquiry/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/inquiry/" />
   </url>
   <url>
     <loc>https://trackingsa.com/glossary/</loc>
@@ -29,32 +50,18 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/contact/" />
   </url>
   <url>
+    <loc>https://trackingsa.com/futures-estimate/</loc>
+    <lastmod>2026-03-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/futures-estimate/" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/futures-estimate/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/futures-estimate/" />
+  </url>
+  <url>
     <loc>https://trackingsa.com/terms/</loc>
     <lastmod>2026-03-11</lastmod>
     <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/terms/" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/terms/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/terms/" />
-  </url>
-  <url>
-    <loc>https://trackingsa.com/fortune/</loc>
-    <lastmod>2026-03-11</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/fortune/" />
-    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/fortune/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/fortune/" />
-  </url>
-  <url>
-    <loc>https://trackingsa.com/account/</loc>
-    <lastmod>2026-03-11</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/account/" />
-    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/account/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/account/" />
-  </url>
-  <url>
-    <loc>https://trackingsa.com/privacy-policy/</loc>
-    <lastmod>2026-03-11</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/privacy-policy/" />
-    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/privacy-policy/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/privacy-policy/" />
   </url>
   <url>
     <loc>https://trackingsa.com/games/</loc>
@@ -64,25 +71,11 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/games/" />
   </url>
   <url>
-    <loc>https://trackingsa.com/games/submit/</loc>
+    <loc>https://trackingsa.com/games/play/</loc>
     <lastmod>2026-03-11</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/games/submit/" />
-    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/games/submit/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/games/submit/" />
-  </url>
-  <url>
-    <loc>https://trackingsa.com/games/sudden-attack/</loc>
-    <lastmod>2026-03-11</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/games/sudden-attack/" />
-    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/games/sudden-attack/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/games/sudden-attack/" />
-  </url>
-  <url>
-    <loc>https://trackingsa.com/games/tetris/</loc>
-    <lastmod>2026-03-11</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/games/tetris/" />
-    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/games/tetris/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/games/tetris/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/games/play/" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/games/play/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/games/play/" />
   </url>
   <url>
     <loc>https://trackingsa.com/games/ai-evolution/</loc>
@@ -92,39 +85,39 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/games/ai-evolution/" />
   </url>
   <url>
-    <loc>https://trackingsa.com/games/play/</loc>
+    <loc>https://trackingsa.com/games/tetris/</loc>
     <lastmod>2026-03-11</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/games/play/" />
-    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/games/play/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/games/play/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/games/tetris/" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/games/tetris/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/games/tetris/" />
   </url>
   <url>
-    <loc>https://trackingsa.com/futures-estimate/</loc>
+    <loc>https://trackingsa.com/games/sudden-attack/</loc>
     <lastmod>2026-03-11</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/futures-estimate/" />
-    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/futures-estimate/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/futures-estimate/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/games/sudden-attack/" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/games/sudden-attack/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/games/sudden-attack/" />
   </url>
   <url>
-    <loc>https://trackingsa.com/about/</loc>
+    <loc>https://trackingsa.com/games/submit/</loc>
     <lastmod>2026-03-11</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/about/" />
-    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/about/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/about/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/games/submit/" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/games/submit/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/games/submit/" />
   </url>
   <url>
-    <loc>https://trackingsa.com/search/</loc>
+    <loc>https://trackingsa.com/account/</loc>
     <lastmod>2026-03-11</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/search/" />
-    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/search/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/search/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/account/" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/account/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/account/" />
   </url>
   <url>
-    <loc>https://trackingsa.com/inquiry/</loc>
+    <loc>https://trackingsa.com/ai-test/</loc>
     <lastmod>2026-03-11</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/inquiry/" />
-    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/inquiry/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/inquiry/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/ai-test/" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/ai-test/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/ai-test/" />
   </url>
   <url>
     <loc>https://trackingsa.com/board/</loc>
@@ -134,6 +127,27 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/board/" />
   </url>
   <url>
+    <loc>https://trackingsa.com/lucky-recommendation/</loc>
+    <lastmod>2026-03-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/lucky-recommendation/" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/lucky-recommendation/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/lucky-recommendation/" />
+  </url>
+  <url>
+    <loc>https://trackingsa.com/animal-face/</loc>
+    <lastmod>2026-03-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/animal-face/" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/animal-face/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/animal-face/" />
+  </url>
+  <url>
+    <loc>https://trackingsa.com/about/</loc>
+    <lastmod>2026-03-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/about/" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/about/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/about/" />
+  </url>
+  <url>
     <loc>https://trackingsa.com/en/</loc>
     <lastmod>2026-03-11</lastmod>
     <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/" />
@@ -141,11 +155,32 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/" />
   </url>
   <url>
-    <loc>https://trackingsa.com/en/lucky-recommendation/</loc>
+    <loc>https://trackingsa.com/en/privacy-policy/</loc>
     <lastmod>2026-03-11</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/lucky-recommendation/" />
-    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/lucky-recommendation/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/lucky-recommendation/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/privacy-policy/" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/privacy-policy/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/privacy-policy/" />
+  </url>
+  <url>
+    <loc>https://trackingsa.com/en/search/</loc>
+    <lastmod>2026-03-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/search/" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/search/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/search/" />
+  </url>
+  <url>
+    <loc>https://trackingsa.com/en/fortune/</loc>
+    <lastmod>2026-03-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/fortune/" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/fortune/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/fortune/" />
+  </url>
+  <url>
+    <loc>https://trackingsa.com/en/inquiry/</loc>
+    <lastmod>2026-03-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/inquiry/" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/inquiry/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/inquiry/" />
   </url>
   <url>
     <loc>https://trackingsa.com/en/glossary/</loc>
@@ -162,32 +197,18 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/contact/" />
   </url>
   <url>
+    <loc>https://trackingsa.com/en/futures-estimate/</loc>
+    <lastmod>2026-03-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/futures-estimate/" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/futures-estimate/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/futures-estimate/" />
+  </url>
+  <url>
     <loc>https://trackingsa.com/en/terms/</loc>
     <lastmod>2026-03-11</lastmod>
     <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/terms/" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/terms/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/terms/" />
-  </url>
-  <url>
-    <loc>https://trackingsa.com/en/fortune/</loc>
-    <lastmod>2026-03-11</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/fortune/" />
-    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/fortune/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/fortune/" />
-  </url>
-  <url>
-    <loc>https://trackingsa.com/en/account/</loc>
-    <lastmod>2026-03-11</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/account/" />
-    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/account/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/account/" />
-  </url>
-  <url>
-    <loc>https://trackingsa.com/en/privacy-policy/</loc>
-    <lastmod>2026-03-11</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/privacy-policy/" />
-    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/privacy-policy/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/privacy-policy/" />
   </url>
   <url>
     <loc>https://trackingsa.com/en/games/</loc>
@@ -197,25 +218,11 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/games/" />
   </url>
   <url>
-    <loc>https://trackingsa.com/en/games/submit/</loc>
+    <loc>https://trackingsa.com/en/games/play/</loc>
     <lastmod>2026-03-11</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/games/submit/" />
-    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/games/submit/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/games/submit/" />
-  </url>
-  <url>
-    <loc>https://trackingsa.com/en/games/sudden-attack/</loc>
-    <lastmod>2026-03-11</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/games/sudden-attack/" />
-    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/games/sudden-attack/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/games/sudden-attack/" />
-  </url>
-  <url>
-    <loc>https://trackingsa.com/en/games/tetris/</loc>
-    <lastmod>2026-03-11</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/games/tetris/" />
-    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/games/tetris/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/games/tetris/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/games/play/" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/games/play/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/games/play/" />
   </url>
   <url>
     <loc>https://trackingsa.com/en/games/ai-evolution/</loc>
@@ -225,53 +232,32 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/games/ai-evolution/" />
   </url>
   <url>
-    <loc>https://trackingsa.com/en/games/play/</loc>
+    <loc>https://trackingsa.com/en/games/tetris/</loc>
     <lastmod>2026-03-11</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/games/play/" />
-    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/games/play/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/games/play/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/games/tetris/" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/games/tetris/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/games/tetris/" />
   </url>
   <url>
-    <loc>https://trackingsa.com/en/futures-estimate/</loc>
+    <loc>https://trackingsa.com/en/games/sudden-attack/</loc>
     <lastmod>2026-03-11</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/futures-estimate/" />
-    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/futures-estimate/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/futures-estimate/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/games/sudden-attack/" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/games/sudden-attack/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/games/sudden-attack/" />
   </url>
   <url>
-    <loc>https://trackingsa.com/en/about/</loc>
+    <loc>https://trackingsa.com/en/games/submit/</loc>
     <lastmod>2026-03-11</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/about/" />
-    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/about/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/about/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/games/submit/" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/games/submit/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/games/submit/" />
   </url>
   <url>
-    <loc>https://trackingsa.com/en/search/</loc>
+    <loc>https://trackingsa.com/en/account/</loc>
     <lastmod>2026-03-11</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/search/" />
-    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/search/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/search/" />
-  </url>
-  <url>
-    <loc>https://trackingsa.com/en/inquiry/</loc>
-    <lastmod>2026-03-11</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/inquiry/" />
-    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/inquiry/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/inquiry/" />
-  </url>
-  <url>
-    <loc>https://trackingsa.com/en/board/</loc>
-    <lastmod>2026-03-11</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/board/" />
-    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/board/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/board/" />
-  </url>
-  <url>
-    <loc>https://trackingsa.com/en/animal-face/</loc>
-    <lastmod>2026-03-11</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/animal-face/" />
-    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/animal-face/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/animal-face/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/account/" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/account/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/account/" />
   </url>
   <url>
     <loc>https://trackingsa.com/en/ai-test/</loc>
@@ -281,17 +267,31 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/ai-test/" />
   </url>
   <url>
-    <loc>https://trackingsa.com/animal-face/</loc>
+    <loc>https://trackingsa.com/en/board/</loc>
+    <lastmod>2026-03-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/board/" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/board/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/board/" />
+  </url>
+  <url>
+    <loc>https://trackingsa.com/en/lucky-recommendation/</loc>
+    <lastmod>2026-03-11</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/lucky-recommendation/" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/lucky-recommendation/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/lucky-recommendation/" />
+  </url>
+  <url>
+    <loc>https://trackingsa.com/en/animal-face/</loc>
     <lastmod>2026-03-11</lastmod>
     <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/animal-face/" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/animal-face/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/animal-face/" />
   </url>
   <url>
-    <loc>https://trackingsa.com/ai-test/</loc>
+    <loc>https://trackingsa.com/en/about/</loc>
     <lastmod>2026-03-11</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/ai-test/" />
-    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/ai-test/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/ai-test/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/about/" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/about/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/about/" />
   </url>
 </urlset>
