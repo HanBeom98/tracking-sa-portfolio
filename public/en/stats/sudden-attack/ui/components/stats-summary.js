@@ -33,6 +33,7 @@ export class SaStatsSummary extends HTMLElement {
     const seasonLabel = data.seasonLabel || '이번 시즌';
 
     const confidence = this.getConfidenceMeta(matchCount, 20);
+    const headshotRate = Number(data.avgHs || data.headshotRate || 0);
 
     this.innerHTML = `
       <style>
@@ -47,7 +48,7 @@ export class SaStatsSummary extends HTMLElement {
         .playstyle-label { font-size: 11px; color: #666; display: block; }
         .playstyle-title { font-size: 18px; font-weight: bold; color: #fff; }
         
-        .stats-summary-header { display: flex; gap: 40px; margin-bottom: 30px; align-items: center; }
+        .stats-summary-header { display: flex; gap: 32px; margin-bottom: 24px; align-items: center; }
         .radar-section { flex: 0 0 220px; }
         .text-stats-section { flex: 1; }
         
@@ -76,6 +77,43 @@ export class SaStatsSummary extends HTMLElement {
         .stat-box label { font-size: 12px; color: #666; display: block; margin-bottom: 5px; }
         .stat-box .value { font-size: 20px; font-weight: bold; color: #fff; font-family: 'Roboto Mono', monospace; }
         .value.highlight { color: #00d2ff; }
+        .quick-kpi-grid {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 14px;
+          margin-bottom: 22px;
+        }
+        .quick-kpi {
+          background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+          border: 1px solid rgba(255,255,255,0.07);
+          border-radius: 14px;
+          padding: 16px;
+        }
+        .quick-kpi label {
+          display: block;
+          color: #7f8ab1;
+          font-size: 11px;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          margin-bottom: 8px;
+        }
+        .quick-kpi strong {
+          display: block;
+          color: #fff;
+          font-size: 28px;
+          line-height: 1;
+          font-weight: 900;
+          letter-spacing: -0.04em;
+        }
+        .quick-kpi span {
+          display: block;
+          margin-top: 8px;
+          color: #95a0c9;
+          font-size: 12px;
+        }
+        .quick-kpi.emphasis strong { color: #79e3ff; }
+        .quick-kpi.gold strong { color: #ffcc00; }
 
         /* Secondary Stats Grid (Trend + Map) */
         .stats-detail-grid {
@@ -106,7 +144,11 @@ export class SaStatsSummary extends HTMLElement {
           .stats-summary-header { flex-direction: column; }
           .radar-section { margin: 0 auto; }
           .stats-grid { grid-template-columns: repeat(2, 1fr); }
+          .quick-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
           .relationship-container { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 560px) {
+          .quick-kpi-grid { grid-template-columns: 1fr; }
         }
       </style>
       <div class="stats-summary-card">
@@ -120,6 +162,29 @@ export class SaStatsSummary extends HTMLElement {
           <div class="status-info">
             <span class="playstyle-label" style="color:#ffcc00;">크루 내 위상</span>
             <span class="playstyle-title" style="color:#ffcc00;">${data.crewStatusTitle || '일반 유저'}</span>
+          </div>
+        </div>
+
+        <div class="quick-kpi-grid">
+          <div class="quick-kpi emphasis">
+            <label>${seasonLabel} 승률</label>
+            <strong>${data.winRate}%</strong>
+            <span>최근 ${matchCount}경기 기준</span>
+          </div>
+          <div class="quick-kpi">
+            <label>종합 K/D</label>
+            <strong class="${this.getKdColor(data.kdPercent)}">${data.kdPercent}%</strong>
+            <span>킬/데스 비율 환산</span>
+          </div>
+          <div class="quick-kpi">
+            <label>평균 K/D/A</label>
+            <strong>${data.avgK || 0}/${data.avgD || 0}/${data.avgA || 0}</strong>
+            <span>경기당 평균 전투 지표</span>
+          </div>
+          <div class="quick-kpi gold">
+            <label>내전 HSR</label>
+            <strong>${data.crewHsr || 1200}</strong>
+            <span>헤드샷 기반 체감 지표</span>
           </div>
         </div>
 
@@ -139,9 +204,9 @@ export class SaStatsSummary extends HTMLElement {
               <span class="most-played-map">선호 맵: <strong>${data.mostPlayedMap || '정보 없음'}</strong></span>
             </div>
             <div class="stats-grid">
-              <div class="stat-box"><label>종합 K/D</label><span class="value highlight ${this.getKdColor(data.kdPercent)}">${data.kdPercent}%</span></div>
-              <div class="stat-box"><label>최근 승률</label><span class="value highlight">${data.winRate}%</span></div>
-              <div class="stat-box"><label>평균 K/D/A</label><span class="value">${data.avgK || 0}/${data.avgD || 0}/${data.avgA || 0}</span></div>
+              <div class="stat-box"><label>헤드샷 비율</label><span class="value">${headshotRate}%</span></div>
+              <div class="stat-box"><label>내전 MMR</label><span class="value highlight">${data.crewMmr || 1200}</span></div>
+              <div class="stat-box"><label>내전 HSR</label><span class="value">${data.crewHsr || 1200}</span></div>
               <div class="stat-box">
                 <label>현재 폼</label>
                 <span class="value" style="color: ${data.streakType === 'WIN' ? '#00d2ff' : (data.streakType === 'LOSE' ? '#ff4d4d' : '#fff')};">

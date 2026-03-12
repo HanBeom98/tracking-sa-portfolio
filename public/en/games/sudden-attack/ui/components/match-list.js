@@ -116,12 +116,12 @@ export class SaMatchList extends HTMLElement {
         
         .match-item {
           display: grid;
-          grid-template-columns: 120px 1fr 120px 140px;
+          grid-template-columns: 112px minmax(0, 1.2fr) 132px 150px;
           align-items: center;
           background: var(--bg-card);
           border: 1px solid var(--border);
-          border-radius: 12px;
-          padding: 15px 20px;
+          border-radius: 16px;
+          padding: 18px 20px;
           cursor: pointer;
           transition: transform 0.2s, border-color 0.2s;
           position: relative;
@@ -150,6 +150,7 @@ export class SaMatchList extends HTMLElement {
         .match-item:hover {
           border-color: var(--primary);
           transform: translateY(-2px);
+          box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
         }
         .match-item.win { border-left: 5px solid var(--primary); }
         .match-item.lose { border-left: 5px solid var(--red); }
@@ -164,8 +165,39 @@ export class SaMatchList extends HTMLElement {
 
         .match-map-info .map { font-size: 16px; font-weight: bold; color: #fff; display: block; }
         .match-map-info .match-date { font-size: 12px; color: var(--text-dim); }
+        .match-map-info .map-sub {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+          margin-top: 6px;
+          color: #95a0c9;
+          font-size: 12px;
+        }
+        .compact-pill {
+          display: inline-flex;
+          align-items: center;
+          padding: 3px 8px;
+          border-radius: 999px;
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.08);
+          font-size: 11px;
+          font-weight: 700;
+        }
         
-        .kda { font-family: 'Roboto Mono', monospace; font-size: 16px; color: var(--text-main); text-align: center; }
+        .kda {
+          font-family: 'Roboto Mono', monospace;
+          font-size: 15px;
+          color: var(--text-main);
+          text-align: center;
+        }
+        .kda-label {
+          display: block;
+          color: var(--text-dim);
+          font-size: 11px;
+          margin-bottom: 5px;
+          font-family: inherit;
+        }
         .kd-expand-box { text-align: right; }
         .kd-expand-box .kd { display: inline-block; font-weight: bold; font-size: 15px; }
         .expand-arrow { font-size: 10px; color: #444; transition: transform 0.3s; margin-left: 8px; }
@@ -185,6 +217,19 @@ export class SaMatchList extends HTMLElement {
         .kd-high { color: var(--primary); }
 
         .hidden { display: none; }
+        @media (max-width: 900px) {
+          .match-item {
+            grid-template-columns: 1fr;
+            gap: 12px;
+          }
+          .kda, .kd-expand-box {
+            text-align: left;
+          }
+          .watermark-text {
+            left: 50%;
+            transform: translate(-50%, -50%);
+          }
+        }
       </style>
       <ul class="match-list">
         ${list.map((match, idx) => `
@@ -204,12 +249,17 @@ export class SaMatchList extends HTMLElement {
               </div>
               <div class="match-map-info">
                 <span class="map">${match.mapName}</span>
-                <span class="match-date">${new Date(match.matchDate).toLocaleDateString()}</span>
+                <div class="map-sub">
+                  <span class="match-date">${new Date(match.matchDate).toLocaleDateString()}</span>
+                  ${match.isSyntheticAbandon ? '<span class="compact-pill" style="color:#ffb27a;">탈주 판정</span>' : ''}
+                  ${match.laundryInfo && match.laundryInfo.isWashed ? '<span class="compact-pill" style="color:#ff8f8f;">리조인 의심</span>' : ''}
+                </div>
               </div>
-              <span class="kda">${match.killDisplay ?? match.kill} / ${match.deathDisplay ?? match.death} / ${match.assistDisplay ?? match.assist}</span>
+              <span class="kda"><span class="kda-label">K / D / A</span>${match.killDisplay ?? match.kill} / ${match.deathDisplay ?? match.death} / ${match.assistDisplay ?? match.assist}</span>
               <div class="kd-expand-box">
                 <div style="display:inline-block; vertical-align: middle;">
-                  <span class="kd ${this.getKdClass(match.kdPercent)}">KD: ${match.kdDisplay ?? `${match.kdPercent}%`}</span>
+                  <span class="kda-label" style="text-align:right;">핵심 지표</span>
+                  <span class="kd ${this.getKdClass(match.kdPercent)}">KD ${match.kdDisplay ?? `${match.kdPercent}%`}</span>
                   ${(match.mmrChange !== 0 || match.hsrChange !== 0) ? `
                     <div class="score-change">
                       <span class="${match.mmrChange >= 0 ? 'score-up' : 'score-down'}">${match.mmrChange >= 0 ? '+' : ''}${match.mmrChange} MMR</span>

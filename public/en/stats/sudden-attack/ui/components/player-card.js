@@ -2,16 +2,20 @@
  * UI Component for Player Profile Card
  */
 export class SaPlayerCard extends HTMLElement {
+  formatNumber(value) {
+    return Number(value || 0).toLocaleString();
+  }
+
   set player(data) {
     if (!data) {
       this.innerHTML = `
-        <div class="sa-card loading-shimmer" style="height: 180px; border: 1px solid var(--bg-sub);">
-          <div style="padding: 20px;">
-            <div style="height: 24px; width: 40%; background: var(--bg-sub); border-radius: 4px; margin-bottom: 15px;"></div>
-            <div style="height: 18px; width: 60%; background: var(--bg-sub); border-radius: 4px; margin-bottom: 25px;"></div>
-            <div style="display: flex; gap: 15px;">
-              <div style="height: 50px; width: 100px; background: var(--bg-sub); border-radius: 8px;"></div>
-              <div style="height: 50px; width: 100px; background: var(--bg-sub); border-radius: 8px;"></div>
+        <div class="sa-card loading-shimmer" style="height: 220px; border: 1px solid var(--bg-sub); border-radius: 18px;">
+          <div style="padding: 24px;">
+            <div style="height: 16px; width: 120px; background: var(--bg-sub); border-radius: 999px; margin-bottom: 14px;"></div>
+            <div style="height: 34px; width: 220px; background: var(--bg-sub); border-radius: 10px; margin-bottom: 12px;"></div>
+            <div style="height: 16px; width: 260px; background: var(--bg-sub); border-radius: 10px; margin-bottom: 24px;"></div>
+            <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px;">
+              ${Array(4).fill('<div style="height:72px; background: var(--bg-sub); border-radius: 14px;"></div>').join('')}
             </div>
           </div>
         </div>
@@ -19,110 +23,257 @@ export class SaPlayerCard extends HTMLElement {
       return;
     }
 
+    const clanName = data.clanName ? `[${data.clanName}]` : '클랜 없음';
+    const seasonRank = data.seasonRank || '시즌 정보 없음';
+    const rankName = data.rankName || '랭크 정보 없음';
+    const soloTier = data.soloTier || 'UNRANK';
+    const partyTier = data.partyTier || 'UNRANK';
+    const ranking = data.ranking ? `#${this.formatNumber(data.ranking)}` : '집계 외';
+
     this.innerHTML = `
       <style>
         .sa-card {
-          background: #1a1d2e; border: 1px solid #2d3356; border-radius: 12px; padding: 30px; margin: 30px 0;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.5); position: relative; overflow: hidden;
+          background:
+            radial-gradient(circle at top right, rgba(0, 210, 255, 0.14), transparent 30%),
+            linear-gradient(180deg, #171b2d 0%, #111522 100%);
+          border: 1px solid #2d3356;
+          border-radius: 20px;
+          padding: 28px;
+          margin: 24px 0 18px;
+          box-shadow: 0 18px 40px rgba(0,0,0,0.28);
+          position: relative;
+          overflow: hidden;
         }
-        .is-crew-card { border: 2px solid #ffcc00; box-shadow: 0 0 15px rgba(255, 204, 0, 0.2); }
-        
-        .official-crew-badge {
-          display: block; font-size: 10px; font-weight: 900; color: #ffcc00; background: rgba(255, 204, 0, 0.1);
-          width: fit-content; padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(255, 204, 0, 0.3); margin-bottom: 6px;
-          letter-spacing: 1px; animation: glow-gold 2s infinite alternate;
+        .sa-card.is-crew-card {
+          border-color: rgba(255, 204, 0, 0.45);
+          box-shadow: 0 18px 40px rgba(0,0,0,0.28), 0 0 0 1px rgba(255, 204, 0, 0.12);
         }
-        @keyframes glow-gold { 
-          from { text-shadow: 0 0 2px #ffcc00; box-shadow: 0 0 2px rgba(255, 204, 0, 0.2); }
-          to { text-shadow: 0 0 8px #ffcc00; box-shadow: 0 0 8px rgba(255, 204, 0, 0.5); }
+        .summary-topline {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          margin-bottom: 16px;
         }
-
-        .sa-header { display: flex; flex-direction: column; gap: 8px; margin-bottom: 25px; border-bottom: 2px solid #2d3356; padding-bottom: 15px; }
-        .profile-main { display: flex; align-items: center; gap: 12px; }
-        .name-area { display: flex; flex-direction: column; }
-        .rank-icon-wrapper { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
-        .rank-icon { max-width: 100%; max-height: 100%; object-fit: contain; }
-        .nickname { font-size: 32px; font-weight: bold; color: #00d2ff; line-height: 1.1; }
-        .clan-name { font-size: 18px; color: #ffcc00; font-weight: 600; }
-        .profile-sub { display: flex; gap: 10px; color: #888; font-size: 16px; padding-left: 44px; }
-        .rank-name { color: #fff; font-weight: 500; }
-        .season-rank { font-style: italic; }
-
-        .sa-body { display: flex; flex-direction: column; gap: 25px; }
-        .tier-section { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; background: rgba(255, 255, 255, 0.02); padding: 15px; border-radius: 12px; }
-        .tier-item { display: flex; flex-direction: column; padding: 15px; border-radius: 8px; background: #141724; border: 1px solid #2d3356; }
-        .tier-item.party { border-top: 3px solid #ffcc00; }
-        .tier-item.solo { border-top: 3px solid #00d2ff; }
-        .tier-item label { font-size: 12px; color: #888; margin-bottom: 10px; }
-        .tier-content { display: flex; align-items: center; gap: 15px; }
-        .tier-medal { width: 50px; height: 50px; object-fit: contain; }
-        .tier-text { display: flex; flex-direction: column; }
-        .tier-value { font-size: 18px; font-weight: 800; color: #fff; }
-        .tier-score { font-size: 14px; color: #00d2ff; margin-top: 2px; }
-
-        .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding-left: 10px; }
-        .stat-item label { display: block; color: #888; margin-bottom: 5px; font-size: 14px; }
-        .stat-item span { font-size: 20px; font-weight: 600; }
-        
-        .streak-badge { padding: 4px 10px; border-radius: 20px; font-size: 14px; font-weight: 900; color: #fff; display: inline-flex; align-items: center; gap: 5px; margin-left: 10px; }
-        .win-streak { background: linear-gradient(90deg, #ff416c, #ff4b2b); }
-        .lose-streak { background: linear-gradient(90deg, #00d2ff, #3a7bd5); }
+        .identity-chip {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 6px 12px;
+          border-radius: 999px;
+          background: rgba(255,255,255,0.05);
+          border: 1px solid rgba(255,255,255,0.08);
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 0.04em;
+          color: #9aa6d1;
+          text-transform: uppercase;
+        }
+        .identity-chip.crew {
+          color: #ffcc00;
+          background: rgba(255, 204, 0, 0.08);
+          border-color: rgba(255, 204, 0, 0.2);
+        }
+        .profile-main {
+          display: grid;
+          grid-template-columns: auto 1fr auto;
+          gap: 16px;
+          align-items: center;
+          margin-bottom: 22px;
+        }
+        .rank-icon-wrapper {
+          width: 52px;
+          height: 52px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 14px;
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.08);
+        }
+        .rank-icon { max-width: 34px; max-height: 34px; object-fit: contain; }
+        .name-area {
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+        .nickname-row {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          flex-wrap: wrap;
+        }
+        .nickname {
+          font-size: 32px;
+          line-height: 1.05;
+          font-weight: 900;
+          color: #ffffff;
+          letter-spacing: -0.03em;
+        }
+        .clan-name {
+          color: #ffcc00;
+          font-size: 15px;
+          font-weight: 700;
+        }
+        .profile-sub {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          flex-wrap: wrap;
+          color: #95a0c9;
+          font-size: 14px;
+        }
+        .sub-dot {
+          width: 4px;
+          height: 4px;
+          border-radius: 50%;
+          background: rgba(255,255,255,0.2);
+        }
+        .rank-summary {
+          display: flex;
+          gap: 12px;
+          align-items: stretch;
+        }
+        .rank-pill {
+          min-width: 138px;
+          padding: 12px 14px;
+          border-radius: 14px;
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.08);
+        }
+        .rank-pill-label {
+          display: block;
+          color: #7e8ab2;
+          font-size: 11px;
+          margin-bottom: 6px;
+          font-weight: 700;
+          text-transform: uppercase;
+        }
+        .rank-pill-value {
+          display: block;
+          color: #fff;
+          font-size: 15px;
+          font-weight: 800;
+        }
+        .rank-pill-score {
+          display: block;
+          color: #79e3ff;
+          font-size: 13px;
+          margin-top: 4px;
+          font-weight: 700;
+        }
+        .summary-grid {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 14px;
+        }
+        .summary-card {
+          padding: 16px 16px 14px;
+          border-radius: 16px;
+          background: #101423;
+          border: 1px solid rgba(255,255,255,0.06);
+        }
+        .summary-card label {
+          display: block;
+          margin-bottom: 8px;
+          font-size: 11px;
+          color: #7f8ab1;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+        }
+        .summary-card strong {
+          display: block;
+          color: #fff;
+          font-size: 22px;
+          line-height: 1.15;
+          font-weight: 900;
+          letter-spacing: -0.03em;
+        }
+        .summary-card span {
+          display: block;
+          margin-top: 6px;
+          color: #99a4ca;
+          font-size: 12px;
+        }
+        .summary-card.emphasis strong { color: #79e3ff; }
+        .summary-card.crew strong { color: #ffcc00; }
+        @media (max-width: 980px) {
+          .profile-main { grid-template-columns: auto 1fr; }
+          .rank-summary { grid-column: 1 / -1; }
+          .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (max-width: 640px) {
+          .sa-card { padding: 22px; }
+          .nickname { font-size: 28px; }
+          .profile-main { grid-template-columns: 1fr; }
+          .rank-summary { flex-direction: column; }
+          .summary-grid { grid-template-columns: 1fr; }
+        }
       </style>
       <div class="sa-card ${data.isCrew ? 'is-crew-card' : ''}">
-        <div class="sa-header">
-          <div class="profile-main">
-            <div class="rank-icon-wrapper">
-              ${data.rankImage ? `<img src="${data.rankImage}" alt="${data.rankName}" class="rank-icon">` : ''}
-            </div>
-            <div class="name-area">
-              ${data.isCrew ? '<span class="official-crew-badge">TRACKING CREW</span>' : ''}
-              <span class="nickname">${data.nickname}</span>
-            </div>
-            <span class="clan-name">[${data.clanName}]</span>
-            <span id="streakBadge" class="streak-badge hidden"></span>
+        <div class="summary-topline">
+          <span class="identity-chip ${data.isCrew ? 'crew' : ''}">${data.isCrew ? 'TRACKING CREW' : 'PLAYER SUMMARY'}</span>
+          <span class="identity-chip">대표 전적 프로필</span>
+        </div>
+
+        <div class="profile-main">
+          <div class="rank-icon-wrapper">
+            ${data.rankImage ? `<img src="${data.rankImage}" alt="${rankName}" class="rank-icon">` : ''}
           </div>
-          <div class="profile-sub">
-            <span class="rank-name">${data.rankName}</span>
-            <span class="season-rank">(${data.seasonRank})</span>
+
+          <div class="name-area">
+            <div class="nickname-row">
+              <span class="nickname">${data.nickname}</span>
+              <span class="clan-name">${clanName}</span>
+            </div>
+            <div class="profile-sub">
+              <span>${rankName}</span>
+              <span class="sub-dot"></span>
+              <span>${seasonRank}</span>
+            </div>
+          </div>
+
+          <div class="rank-summary">
+            <div class="rank-pill">
+              <span class="rank-pill-label">Party Rank</span>
+              <span class="rank-pill-value">${partyTier}</span>
+              <span class="rank-pill-score">${this.formatNumber(data.partyScore)} RP</span>
+            </div>
+            <div class="rank-pill">
+              <span class="rank-pill-label">Solo Rank</span>
+              <span class="rank-pill-value">${soloTier}</span>
+              <span class="rank-pill-score">${this.formatNumber(data.soloScore)} RP</span>
+            </div>
           </div>
         </div>
 
-        <div class="sa-body">
-          <div class="tier-section">
-            <div class="tier-item party">
-              <label>파티 랭크</label>
-              <div class="tier-content">
-                ${data.partyImage ? `<img src="${data.partyImage}" alt="${data.partyTier}" class="tier-medal">` : ''}
-                <div class="tier-text">
-                  <span class="tier-value">${data.partyTier}</span>
-                  <span class="tier-score">${data.partyScore.toLocaleString()} RP</span>
-                </div>
-              </div>
-            </div>
-            <div class="tier-item solo">
-              <label>개인 랭크</label>
-              <div class="tier-content">
-                ${data.soloImage ? `<img src="${data.soloImage}" alt="${data.soloTier}" class="tier-medal">` : ''}
-                <div class="tier-text">
-                  <span class="tier-value">${data.soloTier}</span>
-                  <span class="tier-score">${data.soloScore.toLocaleString()} RP</span>
-                </div>
-              </div>
-            </div>
+        <div class="summary-grid">
+          <div class="summary-card emphasis">
+            <label>현재 랭킹</label>
+            <strong>${ranking}</strong>
+            <span>공식 집계 기준</span>
           </div>
-          <div class="stat-row">
-            <div class="stat-item">
-              <label>Current Ranking</label>
-              <span>#${(data.ranking || 0).toLocaleString()}</span>
-            </div>
-            <div class="stat-item">
-              <label>Total Experience</label>
-              <span>${(data.totalExp || 0).toLocaleString()} EXP</span>
-            </div>
+          <div class="summary-card">
+            <label>총 경험치</label>
+            <strong>${this.formatNumber(data.totalExp)}</strong>
+            <span>누적 EXP</span>
+          </div>
+          <div class="summary-card">
+            <label>파티 랭크 점수</label>
+            <strong>${this.formatNumber(data.partyScore)}</strong>
+            <span>${partyTier}</span>
+          </div>
+          <div class="summary-card ${data.isCrew ? 'crew' : ''}">
+            <label>크루 상태</label>
+            <strong>${data.isCrew ? '공식 크루' : '일반 유저'}</strong>
+            <span>${data.isCrew ? '내전/크루 도구 연동 대상' : '공개 전적 조회 대상'}</span>
           </div>
         </div>
       </div>
     `;
   }
 }
+
 customElements.define('sa-player-card', SaPlayerCard);
