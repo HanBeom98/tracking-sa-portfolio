@@ -15,6 +15,36 @@ from src.domains.news.infra.news_builder import (
 )
 from src.domains.news.application.rss_builder import build_rss_xml
 
+SKIP_COPY_NAMES = {"README.md"}
+SKIP_COPY_SUFFIXES = (".full",)
+SKIP_COPY_DIR_NAMES = {"__pycache__"}
+
+
+def should_skip_copy(path):
+    normalized = path.replace("\\", "/")
+    parts = normalized.split("/")
+    if any(part in SKIP_COPY_DIR_NAMES for part in parts):
+        return True
+    base = os.path.basename(normalized)
+    if base in SKIP_COPY_NAMES:
+        return True
+    return any(base.endswith(suffix) for suffix in SKIP_COPY_SUFFIXES)
+
+
+def copy_path_filtered(src, dest):
+    if should_skip_copy(src):
+        return
+    if os.path.isdir(src):
+        shutil.copytree(
+            src,
+            dest,
+            dirs_exist_ok=True,
+            ignore=shutil.ignore_patterns("__pycache__", "*.full", "README.md"),
+        )
+        return
+    os.makedirs(os.path.dirname(dest), exist_ok=True)
+    shutil.copy2(src, dest)
+
 def generate_public_site(incremental=False):
     news_snapshot = snapshot_news()
     if os.path.exists(PUBLIC_DIR) and not incremental:
@@ -42,37 +72,35 @@ def generate_public_site(incremental=False):
     shared_assets_dir = "src/shared/assets"
     if os.path.exists(shared_assets_dir):
         for item in os.listdir(shared_assets_dir):
-            shutil.copy2(os.path.join(shared_assets_dir, item), os.path.join(PUBLIC_DIR, item))
+            copy_path_filtered(os.path.join(shared_assets_dir, item), os.path.join(PUBLIC_DIR, item))
 
     # 3. Shared UI Components 복사 (src/shared/ui -> public/ui/)
     shared_ui_dir = "src/shared/ui"
     if os.path.exists(shared_ui_dir):
         dest_ui = os.path.join(PUBLIC_DIR, "ui")
-        shutil.copytree(shared_ui_dir, dest_ui, dirs_exist_ok=True)
+        copy_path_filtered(shared_ui_dir, dest_ui)
     
     def copy_domain_variants(src, dest_ko, dest_en=None):
         if not os.path.exists(src):
             return
 
         if os.path.isdir(src):
-            shutil.copytree(src, dest_ko, dirs_exist_ok=True)
+            copy_path_filtered(src, dest_ko)
         else:
-            os.makedirs(os.path.dirname(dest_ko), exist_ok=True)
-            shutil.copy2(src, dest_ko)
+            copy_path_filtered(src, dest_ko)
 
         current_destinations = [dest_ko]
 
         if dest_en:
             if os.path.isdir(src):
-                shutil.copytree(src, dest_en, dirs_exist_ok=True)
+                copy_path_filtered(src, dest_en)
             else:
-                os.makedirs(os.path.dirname(dest_en), exist_ok=True)
-                shutil.copy2(src, dest_en)
+                copy_path_filtered(src, dest_en)
             current_destinations.append(dest_en)
 
         domain_trans_src = os.path.join(src, "translations.js")
         if os.path.exists(domain_trans_src) and dest_en:
-            shutil.copy2(domain_trans_src, os.path.join(dest_en, "translations.js"))
+            copy_path_filtered(domain_trans_src, os.path.join(dest_en, "translations.js"))
 
         for current_dest in current_destinations:
             if os.path.isdir(current_dest):
@@ -174,7 +202,7 @@ def generate_public_site(incremental=False):
         (news_app_js, os.path.join(PUBLIC_DIR, "news", "application")),
     ]:
         if os.path.exists(src_dir):
-            shutil.copytree(src_dir, dest_dir, dirs_exist_ok=True)
+            copy_path_filtered(src_dir, dest_dir)
     if not db_ok:
         print("⚠️ [NEWS BUILD] Restoring cached news from previous public/ build.")
         restore_news_snapshot(news_snapshot)
