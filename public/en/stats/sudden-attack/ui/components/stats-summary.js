@@ -20,35 +20,6 @@ export class SaStatsSummary extends HTMLElement {
     return 'kd-normal';
   }
 
-  getRecentTrendSummary(data, headshotRate) {
-    const kd = Number(data?.kdPercent || 0);
-    const winRate = Number(data?.winRate || 0);
-    const streakCount = Number(data?.streakCount || 0);
-    const streakType = String(data?.streakType || 'NONE');
-    const precision = Number(data?.radar?.precision || 0);
-    const hs = Number(headshotRate || 0);
-
-    if (streakType === 'WIN' && streakCount >= 4) {
-      return { title: `연승 흐름 ${streakCount}경기`, detail: '최근 일반 매치 상승세가 뚜렷합니다.' };
-    }
-    if (streakType === 'LOSE' && streakCount >= 4) {
-      return { title: `연패 흐름 ${streakCount}경기`, detail: '최근 일반 매치 기복이 커진 상태입니다.' };
-    }
-    if (winRate >= 65 && kd >= 60) {
-      return { title: '공수 균형 우세', detail: '승률과 교전 효율이 동시에 강한 편입니다.' };
-    }
-    if (precision >= 80 || hs >= 28) {
-      return { title: '정밀 교전 우위', detail: '헤드샷과 교전 마무리 감각이 안정적입니다.' };
-    }
-    if (winRate >= 55) {
-      return { title: '완만한 상승세', detail: '최근 일반 매치에서 우세한 흐름을 유지 중입니다.' };
-    }
-    if (kd < 45) {
-      return { title: '교전 리듬 조정 필요', detail: '최근 전투 효율이 다소 흔들리는 구간입니다.' };
-    }
-    return { title: '보합권 흐름', detail: '최근 일반 매치 폼이 큰 변동 없이 유지됩니다.' };
-  }
-
   /**
    * Main Setter for Single User Stats
    */
@@ -63,8 +34,6 @@ export class SaStatsSummary extends HTMLElement {
 
     const confidence = this.getConfidenceMeta(matchCount, 20);
     const headshotRate = Number(data.avgHs || data.headshotRate || 0);
-    const recentTrend = this.getRecentTrendSummary(data, headshotRate);
-
     this.innerHTML = `
       <style>
         .stats-summary-card {
@@ -219,10 +188,10 @@ export class SaStatsSummary extends HTMLElement {
             <strong>${data.avgK || 0}/${data.avgD || 0}/${data.avgA || 0}</strong>
             <span>경기당 평균 전투 지표</span>
           </div>
-          <div class="quick-kpi trend">
-            <label>최근 일반 매치 동향</label>
-            <strong>${recentTrend.title}</strong>
-            <span>${recentTrend.detail}</span>
+          <div class="quick-kpi">
+            <label>내전 HSR</label>
+            <strong>${data.crewHsr || 1200}</strong>
+            <span>Tracking crew 내전 지표</span>
           </div>
         </div>
 
