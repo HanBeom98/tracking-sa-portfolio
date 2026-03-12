@@ -1,4 +1,4 @@
-# Tracking SA(2월 3일 - 현재)
+# Tracking SA (Feb 2026 – Present)
 
 ※ 실제 서비스 코드는 보안 및 운영 안정성을 위해 비공개 레포지토리로 관리하고 있으며,
 
@@ -10,7 +10,7 @@
 
 ![Tracking SA home](docs/images/sa-home.png)
 
-## What I Focused On
+## 프로젝트 역할
 
 - 역할: 기획, 프론트엔드 개발, 서버리스 백엔드 연동, 구조 설계, 배포/운영
 - `서든어택 전적 검색`을 프로젝트의 대표 제품으로 재정의
@@ -18,7 +18,7 @@
 - 반복 검색이 많은 서비스 특성에 맞춰 캐시 정책과 검색 UX 개선
 - `src -> public` 빌드 구조와 DDD 경계를 유지하면서 기능 확장
 
-## Key Features
+## 주요 기능
 
 - 공식 API 기반 서든어택 전적 검색
 - 최근 매치 기록 / 시즌 기준 통계 / VS 비교
@@ -27,7 +27,7 @@
 - 최근 검색 / 즐겨찾기 / 즐겨찾기 기반 VS 비교
 - 게시판, 테스트형 기능, 실용 도구를 포함한 허브 구조
 
-## Technical Highlights
+## 기술적 구현
 
 ### 1. Stats Domain Migration
 
@@ -65,7 +65,7 @@
 - 캐시 5분 이내: 캐시만 반환
 - 캐시 5분 초과: 캐시 먼저 반환 후 백그라운드 재검증
 
-## Architecture
+## 시스템 구조
 
 - Frontend: JavaScript (ES Modules), Web Components, Shadow DOM
 - Serverless/API: Vercel/Cloudflare Functions, Discord Interactions, Firebase REST integration
@@ -98,7 +98,7 @@
 
 을 연속적으로 수행한 경험을 담고 있습니다.
 
-## Usage Snapshot
+## 실제 운영 지표
 
 2026-03 기준 Google Analytics 최근 30일 운영 지표:
 - 활성 사용자 약 285명
@@ -108,7 +108,7 @@
 
 특히 서든어택 전적 검색은 반복 검색과 비교 기능 수요가 실제로 발생하는 핵심 기능으로 운영 중입니다.
 
-## Troubleshooting
+## 트러블슈팅
 
 - AI API 403 이슈
   직접 호출 환경에서 실패하던 요청을 서버리스 경유 구조로 재정리해 안정적으로 응답하도록 조정했습니다.
