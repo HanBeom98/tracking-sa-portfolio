@@ -104,7 +104,7 @@ export function renderRecentSearches(container, storageKey, onSearch, onClear = 
   }
 }
 
-export function renderFavoriteSearches(container, storageKey, onSearch, onRemove = null) {
+export function renderFavoriteSearches(container, storageKey, onSearch, onRemove = null, onCompare = null) {
   if (!container) return;
   const favorites = getFavoriteSearches(storageKey);
   if (favorites.length === 0) {
@@ -114,6 +114,7 @@ export function renderFavoriteSearches(container, storageKey, onSearch, onRemove
   container.innerHTML = `<span>즐겨찾기:</span>` + favorites.map((name) => `
     <span class="search-chip chip-with-remove" data-name="${name}">
       <button class="chip-label">★ ${name}</button>
+      <button class="chip-compare" aria-label="${name} VS 비교" title="현재 검색 유저와 VS 비교">VS</button>
       <button class="chip-remove" aria-label="${name} 즐겨찾기 삭제" title="즐겨찾기 삭제">×</button>
     </span>
   `).join('');
@@ -128,6 +129,13 @@ export function renderFavoriteSearches(container, storageKey, onSearch, onRemove
       event.stopPropagation();
       const name = btn.closest('.chip-with-remove')?.dataset.name;
       if (name && typeof onRemove === 'function') onRemove(name);
+    });
+  });
+  container.querySelectorAll('.chip-compare').forEach((btn) => {
+    btn.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const name = btn.closest('.chip-with-remove')?.dataset.name;
+      if (name && typeof onCompare === 'function') onCompare(name);
     });
   });
 }

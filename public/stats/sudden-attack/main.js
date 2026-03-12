@@ -84,11 +84,19 @@ function renderSearchCollections() {
     clearRecentSearches(STORAGE_KEY);
     renderSearchCollections();
   });
-  renderFavoriteSearches(favoriteSearchesContainer, FAVORITES_STORAGE_KEY, handleSearch, (name) => {
-    removeFavoriteSearch(FAVORITES_STORAGE_KEY, name);
-    renderSearchCollections();
-    if (primaryUserData?.player?.nickname === name) syncFavoriteButton(name);
-  });
+  renderFavoriteSearches(
+    favoriteSearchesContainer,
+    FAVORITES_STORAGE_KEY,
+    handleSearch,
+    (name) => {
+      removeFavoriteSearch(FAVORITES_STORAGE_KEY, name);
+      renderSearchCollections();
+      if (primaryUserData?.player?.nickname === name) syncFavoriteButton(name);
+    },
+    (name) => {
+      runFavoriteVsCompare(name);
+    }
+  );
 }
 
 function parseDateSafe(value) {
@@ -223,6 +231,28 @@ async function executeVsMode() {
     const targetData = await pageUseCases.loadPlayerProfile(targetName, currentRankings);
     renderVSMode(primaryUserData, targetData);
   } catch (error) { handleSearchError(error); } finally { loading.classList.add('hidden'); }
+}
+
+async function runFavoriteVsCompare(targetName) {
+  if (!primaryUserData) {
+    alert('먼저 기준이 될 유저를 검색해 주세요!');
+    return;
+  }
+  if (!targetName) return;
+  if (primaryUserData.player.nickname.toLowerCase() === targetName.toLowerCase()) {
+    alert('자기 자신과는 비교할 수 없습니다.');
+    return;
+  }
+  try {
+    loading.classList.remove('hidden');
+    loadingText.textContent = `${primaryUserData.player.nickname} vs ${targetName} 비교 중...`;
+    const targetData = await pageUseCases.loadPlayerProfile(targetName, currentRankings);
+    renderVSMode(primaryUserData, targetData);
+  } catch (error) {
+    handleSearchError(error);
+  } finally {
+    loading.classList.add('hidden');
+  }
 }
 
 function showLoading(name) {
