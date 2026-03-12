@@ -6,6 +6,7 @@ window.translations = {
     'ko': {
         'home': '홈',
         'menu_community': '커뮤니티',
+        'home_category_community': 'Community',
         'menu_board': '게시판',
         'menu_chart': '차트',
         'menu_test': '테스트',
@@ -157,6 +158,7 @@ window.translations = {
     'en': {
         'home': 'Home',
         'menu_community': 'Community',
+        'home_category_community': 'Community',
         'menu_board': 'Board',
         'menu_chart': 'Charts',
         'menu_test': 'Tests',
