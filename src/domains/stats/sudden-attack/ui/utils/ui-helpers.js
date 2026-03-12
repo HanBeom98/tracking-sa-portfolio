@@ -56,6 +56,10 @@ export function saveSearch(storageKey, name) {
   localStorage.setItem(storageKey, JSON.stringify(searches));
 }
 
+export function clearRecentSearches(storageKey) {
+  localStorage.removeItem(storageKey);
+}
+
 export function getFavoriteSearches(storageKey) {
   const data = localStorage.getItem(storageKey);
   return data ? JSON.parse(data) : [];
@@ -75,31 +79,55 @@ export function toggleFavoriteSearch(storageKey, name) {
   return !exists;
 }
 
-export function renderRecentSearches(container, storageKey, onSearch) {
+export function removeFavoriteSearch(storageKey, name) {
+  const favorites = getFavoriteSearches(storageKey).filter((item) => item !== name);
+  localStorage.setItem(storageKey, JSON.stringify(favorites));
+}
+
+export function renderRecentSearches(container, storageKey, onSearch, onClear = null) {
   if (!container) return;
   const searches = getRecentSearches(storageKey);
   if (searches.length === 0) {
     container.innerHTML = '';
     return;
   }
-  container.innerHTML = `<span>최근 검색:</span>` + searches.map(s => `<button class="search-chip">${s}</button>`).join('');
+  container.innerHTML =
+    `<span>최근 검색:</span>` +
+    searches.map((s) => `<button class="search-chip">${s}</button>`).join('') +
+    `<button class="chip-action-btn" data-action="clear">전체 비우기</button>`;
   container.querySelectorAll('.search-chip').forEach(btn => {
     btn.addEventListener('click', () => { onSearch(btn.textContent); });
   });
+  const clearBtn = container.querySelector('[data-action="clear"]');
+  if (clearBtn && typeof onClear === 'function') {
+    clearBtn.addEventListener('click', onClear);
+  }
 }
 
-export function renderFavoriteSearches(container, storageKey, onSearch) {
+export function renderFavoriteSearches(container, storageKey, onSearch, onRemove = null) {
   if (!container) return;
   const favorites = getFavoriteSearches(storageKey);
   if (favorites.length === 0) {
     container.innerHTML = '';
     return;
   }
-  container.innerHTML = `<span>즐겨찾기:</span>` + favorites.map((name) => `<button class="search-chip">★ ${name}</button>`).join('');
-  container.querySelectorAll('.search-chip').forEach((btn) => {
+  container.innerHTML = `<span>즐겨찾기:</span>` + favorites.map((name) => `
+    <span class="search-chip chip-with-remove" data-name="${name}">
+      <button class="chip-label">★ ${name}</button>
+      <button class="chip-remove" aria-label="${name} 즐겨찾기 삭제" title="즐겨찾기 삭제">×</button>
+    </span>
+  `).join('');
+  container.querySelectorAll('.chip-label').forEach((btn) => {
     btn.addEventListener('click', () => {
       const name = btn.textContent.replace(/^★\s*/, '').trim();
       onSearch(name);
+    });
+  });
+  container.querySelectorAll('.chip-remove').forEach((btn) => {
+    btn.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const name = btn.closest('.chip-with-remove')?.dataset.name;
+      if (name && typeof onRemove === 'function') onRemove(name);
     });
   });
 }
