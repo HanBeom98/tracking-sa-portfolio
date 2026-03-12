@@ -5,20 +5,20 @@
     <link>https://trackingsa.com/en/</link>
     <description><![CDATA[Key Tracking SA services and featured functionality]]></description>
     <language>en</language>
-    <lastBuildDate>Wed, 11 Mar 2026 23:59:38 GMT</lastBuildDate>
+    <lastBuildDate>Thu, 12 Mar 2026 00:08:18 GMT</lastBuildDate>
     <atom:link href="https://trackingsa.com/en/rss.xml" rel="self" type="application/rss+xml" />
     <item>
       <title><![CDATA[Featured Service: Sudden Attack Stats]]></title>
       <link>https://trackingsa.com/en/games/sudden-attack/</link>
       <guid isPermaLink="true">https://trackingsa.com/en/games/sudden-attack/</guid>
-      <pubDate>Wed, 11 Mar 2026 00:00:00 GMT</pubDate>
+      <pubDate>Thu, 12 Mar 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[Official API-based player stats, match history, versus comparison, and crew tools.]]></description>
     </item>
     <item>
       <title><![CDATA[Games, Tests, and Community Hub]]></title>
       <link>https://trackingsa.com/en/</link>
       <guid isPermaLink="true">https://trackingsa.com/en/</guid>
-      <pubDate>Wed, 11 Mar 2026 00:00:00 GMT</pubDate>
+      <pubDate>Thu, 12 Mar 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[Tracking SA is a multi-service hub for game utilities, web games, AI tests, community pages, and practical tools.]]></description>
     </item>
   </channel>
