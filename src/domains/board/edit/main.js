@@ -3,10 +3,6 @@ import { requireAuth, getCurrentUserProfile } from "../application/authGateway.j
 import { createFirestorePostRepository } from "../infra/firestorePostRepository.js";
 import { createEditPostUseCases } from "../application/edit-post-use-cases.js";
 
-const postService = buildPostService({
-  postRepository: createFirestorePostRepository(),
-});
-const editPostUseCases = createEditPostUseCases({ postService });
 const t = (key, fallback) => (
   window.getTranslation ? window.getTranslation(key, fallback) : fallback
 );
@@ -40,6 +36,10 @@ function attachSubmit(post, user) {
   editForm.onSubmit(async (values) => {
     editForm.setSubmitting(true);
     try {
+      const postService = buildPostService({
+        postRepository: createFirestorePostRepository(),
+      });
+      const editPostUseCases = createEditPostUseCases({ postService });
       await editPostUseCases.submitEdit({ postId, user, post, values });
       alert(t("post_edit_success", "게시물이 성공적으로 수정되었습니다."));
       window.location.href = `/board/post?id=${postId}`;
@@ -51,6 +51,16 @@ function attachSubmit(post, user) {
   });
 }
 
+async function waitForFirestoreReady(timeoutMs = 5000) {
+  const startedAt = Date.now();
+  while (!window.db) {
+    if (Date.now() - startedAt > timeoutMs) {
+      throw new Error("FIRESTORE_NOT_READY");
+    }
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   if (!postId) {
     editForm.renderNotFound();
@@ -58,6 +68,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   try {
+    await waitForFirestoreReady();
+    const postService = buildPostService({
+      postRepository: createFirestorePostRepository(),
+    });
+    const editPostUseCases = createEditPostUseCases({ postService });
     const authUser = await requireAuth({ redirectTo: `/board/edit?id=${postId}` });
     if (!authUser) {
       editForm.renderNotFound();
