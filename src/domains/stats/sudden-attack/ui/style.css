@@ -88,6 +88,17 @@ body.dark-mode {
   margin-top: 15px; display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; min-height: 35px;
 }
 .recent-searches span { color: #666; font-size: 13px; }
+.favorite-searches { margin-top: 8px; }
+.favorite-searches .search-chip {
+  border-color: rgba(255, 204, 0, 0.28);
+  color: #ffdd76;
+  background: rgba(255, 204, 0, 0.06);
+}
+.favorite-searches .search-chip:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(255, 204, 0, 0.12);
+}
 .search-chip {
   background: var(--bg-card); border: 1px solid var(--border); color: #aaa; padding: 5px 12px; border-radius: 20px; font-size: 13px; cursor: pointer; transition: all 0.2s;
 }
@@ -106,6 +117,11 @@ body.dark-mode {
 .clickable-name:hover { color: var(--primary); text-decoration: underline; }
 .sub-btn { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-dim); padding: 8px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; transition: all 0.2s; }
 .sub-btn:hover { background: var(--border); color: #fff; }
+.sub-btn.favorite-active {
+  border-color: rgba(255, 204, 0, 0.4);
+  color: var(--gold);
+  background: rgba(255, 204, 0, 0.08);
+}
 
 /* Admin Panel UI */
 .admin-section {

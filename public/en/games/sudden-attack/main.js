@@ -10,7 +10,7 @@ import { CrewRepository } from './infra/crew-repository.js';
 import { BalancerManager } from './ui/balancer-manager.js';
 import { AdminManager } from './ui/admin-manager.js';
 import { initSaPageRuntime } from './ui/runtime/sa-page-runtime.js';
-import { updateSwrUI, saveSearch, renderRecentSearches } from './ui/utils/ui-helpers.js';
+import { updateSwrUI, saveSearch, renderRecentSearches, renderFavoriteSearches, toggleFavoriteSearch, isFavoriteSearch } from './ui/utils/ui-helpers.js';
 
 // Import Modular UI Components
 import './ui/components/player-card.js';
@@ -53,6 +53,7 @@ const compareBtn = document.getElementById('compareBtn');
 const loading = document.getElementById('loading');
 const loadingText = document.getElementById('loadingText');
 const recentSearchesContainer = document.getElementById('recentSearches');
+const favoriteSearchesContainer = document.getElementById('favoriteSearches');
 const profileSection = document.getElementById('playerProfile');
 const statsSection = document.getElementById('statsSummary');
 const crewRankingSection = document.getElementById('crewRanking');
@@ -60,6 +61,7 @@ const historySection = document.getElementById('matchHistory');
 const swrStatus = document.getElementById('swrStatus');
 
 const applyCrewBtn = document.getElementById('applyCrewBtn');
+const favoriteBtn = document.getElementById('favoriteBtn');
 const submitApplyBtn = document.getElementById('submitApplyBtn');
 const applyCharacterName = document.getElementById('applyCharacterName');
 const crewModal = document.getElementById('crewModal');
@@ -75,6 +77,7 @@ let currentRankings = [];
 let primaryUserData = null; 
 let activeSeasonMode = 'current';
 const STORAGE_KEY = 'sa_recent_searches';
+const FAVORITES_STORAGE_KEY = 'sa_favorite_searches';
 
 function parseDateSafe(value) {
   if (!value) return null;
@@ -158,6 +161,8 @@ async function handleSearch(nameOverride = null, skipHistory = false) {
     primaryUserData = result;
     saveSearch(STORAGE_KEY, result.player.nickname);
     renderRecentSearches(recentSearchesContainer, STORAGE_KEY, handleSearch);
+    renderFavoriteSearches(favoriteSearchesContainer, FAVORITES_STORAGE_KEY, handleSearch);
+    syncFavoriteButton(result.player.nickname);
     renderUI(result);
 
     if (result.isStale) {
@@ -180,6 +185,14 @@ async function handleRefresh() {
   if (!primaryUserData) return;
   localStorage.removeItem(`${SA_PROFILE_CACHE_PREFIX}${primaryUserData.player.nickname.toLowerCase()}`);
   await handleSearch(primaryUserData.player.nickname, true);
+}
+
+function syncFavoriteButton(name) {
+  if (!favoriteBtn || !name) return;
+  const favorite = isFavoriteSearch(FAVORITES_STORAGE_KEY, name);
+  favoriteBtn.classList.remove('hidden');
+  favoriteBtn.classList.toggle('favorite-active', favorite);
+  favoriteBtn.textContent = favorite ? '★ 즐겨찾기 해제' : '☆ 즐겨찾기 추가';
 }
 
 function handleCompareClick() {
@@ -309,6 +322,13 @@ searchBtn.addEventListener('click', () => handleSearch());
 refreshBtn.addEventListener('click', () => handleRefresh());
 compareBtn.addEventListener('click', () => handleCompareClick());
 searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSearch(); });
+favoriteBtn?.addEventListener('click', () => {
+  const nickname = primaryUserData?.player?.nickname;
+  if (!nickname) return;
+  toggleFavoriteSearch(FAVORITES_STORAGE_KEY, nickname);
+  syncFavoriteButton(nickname);
+  renderFavoriteSearches(favoriteSearchesContainer, FAVORITES_STORAGE_KEY, handleSearch);
+});
 
 startVsBtn.addEventListener('click', () => executeVsMode());
 vsTargetName.addEventListener('keypress', (e) => { if (e.key === 'Enter') executeVsMode(); });
@@ -346,3 +366,4 @@ initSaPageRuntime({
   searchInput
 });
 renderRecentSearches(recentSearchesContainer, STORAGE_KEY, handleSearch);
+renderFavoriteSearches(favoriteSearchesContainer, FAVORITES_STORAGE_KEY, handleSearch);

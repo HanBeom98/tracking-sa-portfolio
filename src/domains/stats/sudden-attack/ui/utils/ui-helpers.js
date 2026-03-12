@@ -56,6 +56,25 @@ export function saveSearch(storageKey, name) {
   localStorage.setItem(storageKey, JSON.stringify(searches));
 }
 
+export function getFavoriteSearches(storageKey) {
+  const data = localStorage.getItem(storageKey);
+  return data ? JSON.parse(data) : [];
+}
+
+export function isFavoriteSearch(storageKey, name) {
+  return getFavoriteSearches(storageKey).includes(name);
+}
+
+export function toggleFavoriteSearch(storageKey, name) {
+  const favorites = getFavoriteSearches(storageKey);
+  const exists = favorites.includes(name);
+  const next = exists
+    ? favorites.filter((item) => item !== name)
+    : [name, ...favorites.filter((item) => item !== name)].slice(0, 8);
+  localStorage.setItem(storageKey, JSON.stringify(next));
+  return !exists;
+}
+
 export function renderRecentSearches(container, storageKey, onSearch) {
   if (!container) return;
   const searches = getRecentSearches(storageKey);
@@ -66,5 +85,21 @@ export function renderRecentSearches(container, storageKey, onSearch) {
   container.innerHTML = `<span>최근 검색:</span>` + searches.map(s => `<button class="search-chip">${s}</button>`).join('');
   container.querySelectorAll('.search-chip').forEach(btn => {
     btn.addEventListener('click', () => { onSearch(btn.textContent); });
+  });
+}
+
+export function renderFavoriteSearches(container, storageKey, onSearch) {
+  if (!container) return;
+  const favorites = getFavoriteSearches(storageKey);
+  if (favorites.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+  container.innerHTML = `<span>즐겨찾기:</span>` + favorites.map((name) => `<button class="search-chip">★ ${name}</button>`).join('');
+  container.querySelectorAll('.search-chip').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const name = btn.textContent.replace(/^★\s*/, '').trim();
+      onSearch(name);
+    });
   });
 }
