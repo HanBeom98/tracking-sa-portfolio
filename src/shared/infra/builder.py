@@ -50,66 +50,78 @@ def generate_public_site(incremental=False):
         dest_ui = os.path.join(PUBLIC_DIR, "ui")
         shutil.copytree(shared_ui_dir, dest_ui, dirs_exist_ok=True)
     
+    def copy_domain_variants(src, dest_ko, dest_en=None):
+        if not os.path.exists(src):
+            return
+
+        if os.path.isdir(src):
+            shutil.copytree(src, dest_ko, dirs_exist_ok=True)
+        else:
+            os.makedirs(os.path.dirname(dest_ko), exist_ok=True)
+            shutil.copy2(src, dest_ko)
+
+        current_destinations = [dest_ko]
+
+        if dest_en:
+            if os.path.isdir(src):
+                shutil.copytree(src, dest_en, dirs_exist_ok=True)
+            else:
+                os.makedirs(os.path.dirname(dest_en), exist_ok=True)
+                shutil.copy2(src, dest_en)
+            current_destinations.append(dest_en)
+
+        domain_trans_src = os.path.join(src, "translations.js")
+        if os.path.exists(domain_trans_src) and dest_en:
+            shutil.copy2(domain_trans_src, os.path.join(dest_en, "translations.js"))
+
+        for current_dest in current_destinations:
+            if os.path.isdir(current_dest):
+                for root, _, files in os.walk(current_dest):
+                    for file in files:
+                        if file.endswith(".html"):
+                            fpath = os.path.join(root, file)
+                            if os.path.abspath(fpath) in processed_files:
+                                continue
+
+                            if "public/en/" in fpath.replace("\\", "/"):
+                                with open(fpath, "r", encoding="utf-8") as f:
+                                    html = f.read()
+                                for ko_txt, en_txt in static_replacements.items():
+                                    html = html.replace(ko_txt, en_txt)
+                                with open(fpath, "w", encoding="utf-8") as f:
+                                    f.write(html)
+
+                            process_html_file_for_common_elements(fpath)
+
     # 4. 도메인 빌드
     domains = [
         "animal-face", "fortune", "games", "games/submit", "ai-test", "lucky-recommendation", 
-        "games/ai-evolution", "games/tetris", "games/sudden-attack", "privacy-policy", "terms", "about", "contact",
+        "games/ai-evolution", "games/tetris", "privacy-policy", "terms", "about", "contact",
         "board", "board/write", "board/edit", "board/post", "inquiry", "search",
         "auth", "auth/signup", "account", "account/domain",
         "futures-estimate", "glossary"
     ]
-    en_excluded_domains = {"games/sudden-attack"}
+    special_domain_mappings = [
+        {
+            "source": "stats/sudden-attack",
+            "dest_ko": "games/sudden-attack",
+            "dest_en": "en/games/sudden-attack",
+        }
+    ]
     
     from src.shared.infra.i18n_map import STATIC_REPLACEMENTS as static_replacements
 
     for domain in domains:
         src = f"src/domains/{domain}"
-        if os.path.exists(src):
-            # 4-1. 한국어 버전 생성
-            dest_ko = os.path.join(PUBLIC_DIR, domain)
-            if os.path.isdir(src):
-                shutil.copytree(src, dest_ko, dirs_exist_ok=True)
-            else:
-                os.makedirs(os.path.dirname(dest_ko), exist_ok=True)
-                shutil.copy2(src, dest_ko)
-            
-            current_destinations = [dest_ko]
+        dest_ko = os.path.join(PUBLIC_DIR, domain)
+        dest_en = os.path.join(PUBLIC_DIR, "en", domain)
+        copy_domain_variants(src, dest_ko, dest_en)
 
-            # 4-2. 영어 버전 생성 (물리적 복제)
-            if domain not in en_excluded_domains:
-                dest_en = os.path.join(PUBLIC_DIR, "en", domain)
-                if os.path.isdir(src):
-                    shutil.copytree(src, dest_en, dirs_exist_ok=True)
-                else:
-                    os.makedirs(os.path.dirname(dest_en), exist_ok=True)
-                    shutil.copy2(src, dest_en)
-                current_destinations.append(dest_en)
-
-            # 도메인 번역 파일(translations.js)이 있다면 명시적으로 en 폴더에도 복사 확인
-            domain_trans_src = os.path.join(src, "translations.js")
-            if os.path.exists(domain_trans_src) and domain not in en_excluded_domains:
-                shutil.copy2(domain_trans_src, os.path.join(dest_en, "translations.js"))
-
-            # HTML 후처리 (KO/EN 모두 수행)
-            for current_dest in current_destinations:
-                if os.path.isdir(current_dest):
-                    for root, _, files in os.walk(current_dest):
-                        for file in files:
-                            if file.endswith(".html"):
-                                fpath = os.path.join(root, file)
-                                # 이미 처리된 파일(루트 index.html 등)은 건너뛰어 중복 주입 방지
-                                if os.path.abspath(fpath) in processed_files: continue
-                                
-                                # 영어 버전인 경우 텍스트 치환 수행
-                                if "public/en/" in fpath.replace("\\", "/"):
-                                    with open(fpath, "r", encoding="utf-8") as f:
-                                        html = f.read()
-                                    for ko_txt, en_txt in static_replacements.items():
-                                        html = html.replace(ko_txt, en_txt)
-                                    with open(fpath, "w", encoding="utf-8") as f:
-                                        f.write(html)
-                                
-                                process_html_file_for_common_elements(fpath)
+    for mapping in special_domain_mappings:
+        src = os.path.join("src", "domains", mapping["source"])
+        dest_ko = os.path.join(PUBLIC_DIR, mapping["dest_ko"])
+        dest_en = os.path.join(PUBLIC_DIR, mapping["dest_en"])
+        copy_domain_variants(src, dest_ko, dest_en)
     
     # 5. 루트 메인 페이지 영어 버전 별도 생성
     main_index_src = "index.html"
