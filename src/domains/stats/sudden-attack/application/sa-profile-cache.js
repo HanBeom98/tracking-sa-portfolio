@@ -23,10 +23,10 @@ export class SaProfileCache {
     }
   }
 
-  set(key, data) {
+  set(key, data, timestamp = Date.now()) {
     if (!this.storage?.setItem) return;
     try {
-      const item = { data, timestamp: Date.now() };
+      const item = { data, timestamp };
       this.storage.setItem(key, JSON.stringify(item));
     } catch (err) {
       console.warn('[SaProfileCache] Cache save failed:', err);

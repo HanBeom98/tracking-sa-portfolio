@@ -46,7 +46,7 @@ ${res.blue.map(m => `- ${m.characterName} (${m.position === 'sniper' ? '스나' 
           <span class="name">${m.characterName}</span>
         </div>
         <div class="card-bottom">
-          <span class="mmr">${m.mmr} pts <span style="font-size:0.8em;color:#777;">(HSR: ${m.hsr || m.mmr})</span></span>
+          <span class="mmr">${m.mmr} pts <span style="font-size:0.8em;color:var(--text-dim);">(HSR: ${m.hsr || m.mmr})</span></span>
         </div>
       </div>
     `;
@@ -57,29 +57,29 @@ ${res.blue.map(m => `- ${m.characterName} (${m.position === 'sniper' ? '스나' 
         .team-column { flex: 1; border-radius: 12px; padding: 15px; position: relative; }
         .team-column.red { background: rgba(255, 77, 77, 0.05); border: 1px solid rgba(255, 77, 77, 0.2); }
         .team-column.blue { background: rgba(0, 188, 212, 0.05); border: 1px solid rgba(0, 188, 212, 0.2); }
-        .team-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .team-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--sa-line-soft); }
         .team-header h4 { margin: 0; font-size: 1.2em; }
         .red .team-header h4 { color: #ff4d4d; }
         .blue .team-header h4 { color: #00bcd4; }
 
-        .avg-mmr { font-size: 0.9em; color: #888; }
-        .avg-mmr b { color: white; }
+        .avg-mmr { font-size: 0.9em; color: var(--text-dim); }
+        .avg-mmr b { color: var(--sa-text-strong); }
 
         .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
-        .draft-card { background: #1e2235; border: 1px solid #333; border-radius: 8px; padding: 10px; transition: transform 0.2s; }
-        .draft-card:hover { transform: scale(1.05); border-color: #555; }
+        .draft-card { background: var(--sa-surface-2); border: 1px solid var(--sa-line-strong); border-radius: 8px; padding: 10px; transition: transform 0.2s; }
+        .draft-card:hover { transform: scale(1.05); border-color: var(--border); }
         .card-top { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
         .pos-icon { font-size: 1.1em; }
-        .name { color: white; font-weight: bold; font-size: 0.95em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .mmr { color: #aaa; font-size: 0.85em; }
+        .name { color: var(--sa-text-strong); font-weight: bold; font-size: 0.95em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .mmr { color: var(--sa-text-muted); font-size: 0.85em; }
 
-        .vs-divider { display: flex; align-items: center; justify-content: center; font-style: italic; font-weight: 900; color: #444; font-size: 2em; align-self: center; }
+        .vs-divider { display: flex; align-items: center; justify-content: center; font-style: italic; font-weight: 900; color: var(--text-dim); font-size: 2em; align-self: center; }
 
-        .balance-summary { width: 100%; margin-top: 20px; background: #141724; border-radius: 8px; padding: 12px; text-align: center; border: 1px dashed #333; position: relative; }
+        .balance-summary { width: 100%; margin-top: 20px; background: var(--sa-surface-2); border-radius: 8px; padding: 12px; text-align: center; border: 1px dashed var(--border); position: relative; }
         .diff-tag { color: #ffcc00; font-weight: bold; }
 
-        .copy-btn { margin-top: 15px; padding: 10px 20px; background: #2d3356; border: 1px solid #444; color: white; border-radius: 6px; cursor: pointer; font-size: 0.9em; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
-        .copy-btn:hover { background: #3d446a; border-color: #ffcc00; }
+        .copy-btn { margin-top: 15px; padding: 10px 20px; background: var(--sa-surface-4); border: 1px solid var(--border); color: var(--sa-text-strong); border-radius: 6px; cursor: pointer; font-size: 0.9em; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+        .copy-btn:hover { background: var(--bg-sub); border-color: #ffcc00; }
         .copy-btn.success { background: #2e7d32; border-color: #4caf50; }
 
         @media (max-width: 768px) {
@@ -115,7 +115,7 @@ ${res.blue.map(m => `- ${m.characterName} (${m.position === 'sniper' ? '스나' 
       <div class="balance-summary">
         <div>
           ⚖️ 팀간 HSR 격차: <span class="diff-tag">${res.diff} pts</span>
-          <p style="font-size:0.8em; color:#666; margin-top:5px;">※ HSR(Hidden Skill Rating) 합산 및 포지션 분포를 최적으로 고려하여 생성된 팀입니다.</p>
+          <p style="font-size:0.8em; color:var(--text-dim); margin-top:5px;">※ HSR(Hidden Skill Rating) 합산 및 포지션 분포를 최적으로 고려하여 생성된 팀입니다.</p>
         </div>
         <button class="copy-btn">📋 텍스트 결과 복사</button>
       </div>

@@ -312,7 +312,12 @@ function renderVSMode(primary, target) {
   profileSection.querySelector('#primaryCard').player = primary.player;
   profileSection.querySelector('#targetCard').player = target.player;
   statsSection.innerHTML = '<sa-stats-summary id="vsStats"></sa-stats-summary>';
-  statsSection.querySelector('#vsStats').vsModeData = { primary: primary.stats, target: target.stats };
+  statsSection.querySelector('#vsStats').vsModeData = {
+    primary: primary.stats,
+    target: target.stats,
+    primaryName: primary.player.nickname,
+    targetName: target.player.nickname,
+  };
   statsSection.classList.remove('hidden');
   historySection.classList.add('hidden');
   crewRankingSection.classList.add('hidden');

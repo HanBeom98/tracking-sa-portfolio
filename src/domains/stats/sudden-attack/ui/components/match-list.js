@@ -45,9 +45,9 @@ export class SaMatchList extends HTMLElement {
         @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(255,77,77,0.4); } 70% { box-shadow: 0 0 0 10px rgba(255,77,77,0); } 100% { box-shadow: 0 0 0 0 rgba(255,77,77,0); } }
 
         .scoreboard-table { width: 100%; border-collapse: collapse; margin-top: 15px; background: var(--bg-sub); border-radius: 8px; overflow: hidden; }
-        .scoreboard-table th { background: rgba(0,0,0,0.2); padding: 10px; color: var(--text-dim); font-size: 12px; text-align: center; }
-        .scoreboard-table td { padding: 12px 10px; border-bottom: 1px solid rgba(255,255,255,0.03); text-align: center; vertical-align: middle; }
-        .scoreboard-table td.name { text-align: left; padding-left: 20px; color: #fff; }
+        .scoreboard-table th { background: var(--sa-line-soft); padding: 10px; color: var(--text-dim); font-size: 12px; text-align: center; }
+        .scoreboard-table td { padding: 12px 10px; border-bottom: 1px solid var(--sa-line-soft); text-align: center; vertical-align: middle; }
+        .scoreboard-table td.name { text-align: left; padding-left: 20px; color: var(--sa-text-strong); }
 
         .res.win { color: var(--primary); font-weight: bold; }
         .res.lose { color: var(--red); font-weight: bold; }
@@ -138,7 +138,7 @@ export class SaMatchList extends HTMLElement {
           font-style: italic;
           font-size: 42px;
           font-weight: 900;
-          color: rgba(188, 0, 255, 0.06);
+          color: color-mix(in srgb, var(--secondary) 12%, transparent);
           pointer-events: none;
           z-index: 1;
           letter-spacing: 8px;
@@ -150,7 +150,7 @@ export class SaMatchList extends HTMLElement {
         .match-item:hover {
           border-color: var(--primary);
           transform: translateY(-2px);
-          box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+          box-shadow: var(--sa-shadow);
         }
         .match-item.win { border-left: 5px solid var(--primary); }
         .match-item.lose { border-left: 5px solid var(--red); }
@@ -163,7 +163,7 @@ export class SaMatchList extends HTMLElement {
         .lose .result-badge { color: var(--red); }
         .abandon .result-badge { color: #ff9b52; }
 
-        .match-map-info .map { font-size: 16px; font-weight: bold; color: #fff; display: block; }
+        .match-map-info .map { font-size: 16px; font-weight: bold; color: var(--sa-text-strong); display: block; }
         .match-map-info .match-date { font-size: 12px; color: var(--text-dim); }
         .match-map-info .map-sub {
           display: flex;
@@ -171,7 +171,7 @@ export class SaMatchList extends HTMLElement {
           gap: 8px;
           flex-wrap: wrap;
           margin-top: 6px;
-          color: #95a0c9;
+          color: var(--sa-text-muted);
           font-size: 12px;
         }
         .compact-pill {
@@ -179,10 +179,26 @@ export class SaMatchList extends HTMLElement {
           align-items: center;
           padding: 3px 8px;
           border-radius: 999px;
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.08);
+          background: var(--sa-line-soft);
+          border: 1px solid var(--sa-line-strong);
           font-size: 11px;
           font-weight: 700;
+        }
+        .warning-badge {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 52px;
+          padding: 4px 6px;
+          border-radius: 6px;
+          border: 1px solid rgba(255, 77, 77, 0.35);
+          background: rgba(255, 77, 77, 0.08);
+          color: var(--red);
+          font-size: 10px;
+          font-weight: 800;
+          line-height: 1.15;
+          text-align: center;
+          white-space: normal;
         }
         
         .kda {
@@ -200,7 +216,7 @@ export class SaMatchList extends HTMLElement {
         }
         .kd-expand-box { text-align: right; }
         .kd-expand-box .kd { display: inline-block; font-weight: bold; font-size: 15px; }
-        .expand-arrow { font-size: 10px; color: #444; transition: transform 0.3s; margin-left: 8px; }
+        .expand-arrow { font-size: 10px; color: var(--text-dim); transition: transform 0.3s; margin-left: 8px; }
 
         .score-change {
           display: block; font-size: 10px; font-weight: 800; margin-top: 4px; letter-spacing: -0.2px;
@@ -221,13 +237,51 @@ export class SaMatchList extends HTMLElement {
           .match-item {
             grid-template-columns: 1fr;
             gap: 12px;
+            padding: 16px;
           }
           .kda, .kd-expand-box {
             text-align: left;
           }
+          .kd-expand-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+          }
+          .kd-expand-box .kda-label {
+            text-align: left !important;
+          }
+          .expand-arrow {
+            margin-left: auto;
+          }
           .watermark-text {
             left: 50%;
             transform: translate(-50%, -50%);
+          }
+        }
+        @media (max-width: 520px) {
+          .match-item {
+            padding: 14px;
+            border-radius: 14px;
+          }
+          .match-map-info .map {
+            font-size: 15px;
+          }
+          .match-map-info .map-sub {
+            gap: 6px;
+          }
+          .kda {
+            font-size: 14px;
+          }
+          .kd-expand-box {
+            flex-wrap: wrap;
+          }
+          .kd-expand-box > div {
+            width: 100%;
+          }
+          .watermark-text {
+            font-size: 28px;
+            letter-spacing: 5px;
           }
         }
       </style>
@@ -244,7 +298,7 @@ export class SaMatchList extends HTMLElement {
                 </div>
                 <div style="display:flex; align-items:center; gap:8px;">
                   <span class="result-badge">${match.matchResult}</span>
-                  ${match.laundryInfo && match.laundryInfo.isWashed ? '<span style="font-size:11px; color:var(--red); font-weight:bold; animation: pulse-red 2s infinite;">⚠️ 리조인 의심</span>' : ''}
+                  ${match.laundryInfo && match.laundryInfo.isWashed ? '<span class="warning-badge">리조인<br>의심</span>' : ''}
                 </div>
               </div>
               <div class="match-map-info">
@@ -252,7 +306,6 @@ export class SaMatchList extends HTMLElement {
                 <div class="map-sub">
                   <span class="match-date">${new Date(match.matchDate).toLocaleDateString()}</span>
                   ${match.isSyntheticAbandon ? '<span class="compact-pill" style="color:#ffb27a;">탈주 판정</span>' : ''}
-                  ${match.laundryInfo && match.laundryInfo.isWashed ? '<span class="compact-pill" style="color:#ff8f8f;">리조인 의심</span>' : ''}
                 </div>
               </div>
               <span class="kda"><span class="kda-label">K / D / A</span>${match.killDisplay ?? match.kill} / ${match.deathDisplay ?? match.death} / ${match.assistDisplay ?? match.assist}</span>

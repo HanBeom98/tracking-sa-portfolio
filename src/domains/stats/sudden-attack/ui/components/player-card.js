@@ -64,19 +64,19 @@ export class SaPlayerCard extends HTMLElement {
       <style>
         .sa-card {
           background:
-            radial-gradient(circle at top right, rgba(0, 210, 255, 0.14), transparent 30%),
-            linear-gradient(180deg, #171b2d 0%, #111522 100%);
-          border: 1px solid #2d3356;
+            radial-gradient(circle at top right, var(--sa-accent-soft), transparent 30%),
+            linear-gradient(180deg, var(--sa-surface-1) 0%, var(--sa-surface-2) 100%);
+          border: 1px solid var(--border);
           border-radius: 20px;
           padding: 28px;
           margin: 24px 0 18px;
-          box-shadow: 0 18px 40px rgba(0,0,0,0.28);
+          box-shadow: var(--sa-shadow);
           position: relative;
           overflow: hidden;
         }
         .sa-card.is-crew-card {
-          border-color: rgba(255, 204, 0, 0.45);
-          box-shadow: 0 18px 40px rgba(0,0,0,0.28), 0 0 0 1px rgba(255, 204, 0, 0.12);
+          border-color: color-mix(in srgb, var(--gold) 45%, transparent);
+          box-shadow: var(--sa-shadow), 0 0 0 1px color-mix(in srgb, var(--gold) 14%, transparent);
         }
         .summary-topline {
           display: flex;
@@ -91,18 +91,18 @@ export class SaPlayerCard extends HTMLElement {
           gap: 8px;
           padding: 6px 12px;
           border-radius: 999px;
-          background: rgba(255,255,255,0.05);
-          border: 1px solid rgba(255,255,255,0.08);
+          background: var(--sa-line-soft);
+          border: 1px solid var(--sa-line-strong);
           font-size: 11px;
           font-weight: 800;
           letter-spacing: 0.04em;
-          color: #9aa6d1;
+          color: var(--sa-text-muted);
           text-transform: uppercase;
         }
         .identity-chip.crew {
           color: #ffcc00;
-          background: rgba(255, 204, 0, 0.08);
-          border-color: rgba(255, 204, 0, 0.2);
+          background: var(--sa-gold-soft);
+          border-color: color-mix(in srgb, var(--gold) 20%, transparent);
         }
         .profile-main {
           display: grid;
@@ -118,8 +118,8 @@ export class SaPlayerCard extends HTMLElement {
           align-items: center;
           justify-content: center;
           border-radius: 14px;
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.08);
+          background: var(--sa-line-soft);
+          border: 1px solid var(--sa-line-strong);
         }
         .rank-icon { max-width: 34px; max-height: 34px; object-fit: contain; }
         .name-area {
@@ -138,7 +138,7 @@ export class SaPlayerCard extends HTMLElement {
           font-size: 32px;
           line-height: 1.05;
           font-weight: 900;
-          color: #ffffff;
+          color: var(--sa-text-strong);
           letter-spacing: -0.03em;
         }
         .clan-name {
@@ -151,14 +151,14 @@ export class SaPlayerCard extends HTMLElement {
           align-items: center;
           gap: 10px;
           flex-wrap: wrap;
-          color: #95a0c9;
+          color: var(--sa-text-muted);
           font-size: 14px;
         }
         .sub-dot {
           width: 4px;
           height: 4px;
           border-radius: 50%;
-          background: rgba(255,255,255,0.2);
+          background: var(--sa-line-strong);
         }
         .rank-summary {
           display: flex;
@@ -169,12 +169,12 @@ export class SaPlayerCard extends HTMLElement {
           min-width: 138px;
           padding: 12px 14px;
           border-radius: 14px;
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.08);
+          background: var(--sa-line-soft);
+          border: 1px solid var(--sa-line-strong);
         }
         .rank-pill-label {
           display: block;
-          color: #7e8ab2;
+          color: var(--sa-text-soft);
           font-size: 11px;
           margin-bottom: 6px;
           font-weight: 700;
@@ -182,13 +182,13 @@ export class SaPlayerCard extends HTMLElement {
         }
         .rank-pill-value {
           display: block;
-          color: #fff;
+          color: var(--sa-text-strong);
           font-size: 15px;
           font-weight: 800;
         }
         .rank-pill-score {
           display: block;
-          color: #79e3ff;
+          color: var(--primary);
           font-size: 13px;
           margin-top: 4px;
           font-weight: 700;
@@ -197,38 +197,57 @@ export class SaPlayerCard extends HTMLElement {
           display: grid;
           grid-template-columns: repeat(4, minmax(0, 1fr));
           gap: 14px;
+          align-items: stretch;
         }
         .summary-card {
           padding: 16px 16px 14px;
           border-radius: 16px;
-          background: #101423;
-          border: 1px solid rgba(255,255,255,0.06);
+          background: var(--sa-surface-3);
+          border: 1px solid var(--sa-line-soft);
+          display: flex;
+          flex-direction: column;
+          min-height: 122px;
         }
         .summary-card label {
           display: block;
           margin-bottom: 8px;
           font-size: 11px;
-          color: #7f8ab1;
+          color: var(--sa-text-soft);
           font-weight: 700;
           text-transform: uppercase;
           letter-spacing: 0.04em;
         }
         .summary-card strong {
           display: block;
-          color: #fff;
+          color: var(--sa-text-strong);
           font-size: 22px;
           line-height: 1.15;
           font-weight: 900;
           letter-spacing: -0.03em;
+          overflow-wrap: anywhere;
+          word-break: break-word;
         }
         .summary-card span {
           display: block;
           margin-top: 6px;
-          color: #99a4ca;
+          color: var(--sa-text-muted);
           font-size: 12px;
+          line-height: 1.5;
         }
-        .summary-card.emphasis strong { color: #79e3ff; }
+        .summary-card.emphasis strong { color: var(--primary); }
         .summary-card.crew strong { color: #ffcc00; }
+        .summary-card.compact-number strong {
+          font-size: clamp(18px, 1.7vw, 22px);
+          line-height: 1.1;
+        }
+        .summary-card.trend strong {
+          font-size: 19px;
+          line-height: 1.25;
+          min-height: 48px;
+        }
+        .summary-card.trend span {
+          margin-top: auto;
+        }
         @media (max-width: 980px) {
           .profile-main { grid-template-columns: auto 1fr; }
           .rank-summary { grid-column: 1 / -1; }
@@ -236,10 +255,48 @@ export class SaPlayerCard extends HTMLElement {
         }
         @media (max-width: 640px) {
           .sa-card { padding: 22px; }
+          .summary-topline {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+          }
           .nickname { font-size: 28px; }
           .profile-main { grid-template-columns: 1fr; }
           .rank-summary { flex-direction: column; }
+          .rank-pill {
+            min-width: 0;
+          }
           .summary-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 420px) {
+          .sa-card {
+            padding: 18px;
+            border-radius: 18px;
+          }
+          .rank-icon-wrapper {
+            width: 46px;
+            height: 46px;
+          }
+          .rank-icon {
+            max-width: 30px;
+            max-height: 30px;
+          }
+          .nickname {
+            font-size: 24px;
+          }
+          .clan-name,
+          .profile-sub {
+            font-size: 13px;
+          }
+          .summary-card {
+            padding: 14px;
+          }
+          .summary-card strong {
+            font-size: 20px;
+          }
+          .summary-card span {
+            line-height: 1.45;
+          }
         }
       </style>
       <div class="sa-card ${data.isCrew ? 'is-crew-card' : ''}">
@@ -285,12 +342,12 @@ export class SaPlayerCard extends HTMLElement {
             <strong>${ranking}</strong>
             <span>공식 집계 기준</span>
           </div>
-          <div class="summary-card">
+          <div class="summary-card compact-number">
             <label>총 경험치</label>
             <strong>${this.formatNumber(data.totalExp)}</strong>
             <span>누적 EXP</span>
           </div>
-          <div class="summary-card">
+          <div class="summary-card trend">
             <label>최근 일반 매치 동향</label>
             <strong>${recentTrend.title}</strong>
             <span>${recentTrend.detail}</span>

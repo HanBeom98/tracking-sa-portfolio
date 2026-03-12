@@ -21,21 +21,21 @@ export class SaCrewRanking extends HTMLElement {
 
     this.innerHTML = `
       <style>
-        .ranking-card { background: #1a1d2e; border: 1px solid #2d3356; border-radius: 12px; padding: 25px; margin: 40px 0; box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow-x: auto; }
-        .ranking-header { margin-bottom: 25px; border-bottom: 1px solid #2d3356; padding-bottom: 15px; }
-        .ranking-header h3 { margin: 0 0 10px 0; font-size: 24px; color: #fff; text-shadow: 0 0 10px rgba(0, 210, 255, 0.3); }
-        .ranking-header .sub-info { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #666; }
+        .ranking-card { background: var(--sa-surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 25px; margin: 40px 0; box-shadow: var(--sa-shadow); overflow-x: auto; }
+        .ranking-header { margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+        .ranking-header h3 { margin: 0 0 10px 0; font-size: 24px; color: var(--sa-text-strong); text-shadow: none; }
+        .ranking-header .sub-info { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--text-dim); }
         .ranking-table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        .ranking-table th { text-align: center; padding: 15px 10px; color: #888; font-size: 13px; border-bottom: 2px solid #2d3356; text-transform: uppercase; letter-spacing: 1px; }
-        .ranking-table td { padding: 18px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; text-align: center; }
+        .ranking-table th { text-align: center; padding: 15px 10px; color: var(--text-dim); font-size: 13px; border-bottom: 2px solid var(--border); text-transform: uppercase; letter-spacing: 1px; }
+        .ranking-table td { padding: 18px 10px; border-bottom: 1px solid var(--sa-line-soft); vertical-align: middle; text-align: center; }
         .rank-row { transition: background 0.2s; }
-        .rank-row:hover { background: rgba(255, 255, 255, 0.02); }
-        .rank-row.top-rank { background: rgba(0, 210, 255, 0.02); }
+        .rank-row:hover { background: var(--sa-line-soft); }
+        .rank-row.top-rank { background: var(--sa-accent-soft); }
         .rank-row.top-rank .pos { font-size: 22px; font-weight: 900; color: #ffcc00; font-style: italic; }
-        .ranking-table td.name { text-align: left; padding-left: 20px; font-weight: 600; color: #fff; }
-        .mmr-val { font-weight: 800; color: #00d2ff; font-size: 18px; font-family: 'Roboto Mono', monospace; }
-        .stats { color: #e0e0e0; font-size: 14px; font-weight: 500; }
-        .stats small { display: block; font-size: 11px; color: #666; margin-top: 4px; }
+        .ranking-table td.name { text-align: left; padding-left: 20px; font-weight: 600; color: var(--sa-text-strong); }
+        .mmr-val { font-weight: 800; color: var(--primary); font-size: 18px; font-family: 'Roboto Mono', monospace; }
+        .stats { color: var(--text-main); font-size: 14px; font-weight: 500; }
+        .stats small { display: block; font-size: 11px; color: var(--text-dim); margin-top: 4px; }
         .tier { font-weight: bold; font-size: 14px; white-space: nowrap; }
         .tier-wrapper { display: inline-flex; align-items: center; gap: 6px; vertical-align: middle; }
         .tier.t-dia { color: #00ffff; text-shadow: 0 0 10px rgba(0, 255, 255, 0.5); }
@@ -45,7 +45,7 @@ export class SaCrewRanking extends HTMLElement {
         .tier.t-bro { color: #cd7f32; }
         .tier.t-iron { color: #8b4513; opacity: 0.7; }
         .clickable-name { cursor: pointer; transition: color 0.2s; }
-        .clickable-name:hover { color: #00d2ff; text-decoration: underline; }
+        .clickable-name:hover { color: var(--primary); text-decoration: underline; }
         @media (max-width: 768px) { .ranking-table th, .ranking-table td { padding: 12px 5px; font-size: 12px; } .mmr-val { font-size: 16px; } }
       </style>
       <div class="ranking-card">
@@ -85,7 +85,7 @@ export class SaCrewRanking extends HTMLElement {
                   <td class="name clickable-name" data-name="${m.characterName}">${m.characterName}</td>
                   <td class="mmr-val">${m.mmr}</td>
                   <td class="stats">${crewKdPercent}%</td>
-                  <td class="stats">${winRate}% <small style="display:inline; margin-left:5px; color:#666;">(${m.wins}승 ${m.loses}패)</small></td>
+                  <td class="stats">${winRate}% <small style="display:inline; margin-left:5px; color:var(--text-dim);">(${m.wins}승 ${m.loses}패)</small></td>
                 </tr>
               `;
             }).join('')}

@@ -4,6 +4,54 @@
  */
 
 export class SaStatsSummary extends HTMLElement {
+  getVsMetricRows(primary, target) {
+    const rows = [
+      { label: '종합 K/D', primary: Number(primary.kdPercent || 0), target: Number(target.kdPercent || 0), suffix: '%'},
+      { label: '최근 승률', primary: Number(primary.winRate || 0), target: Number(target.winRate || 0), suffix: '%'},
+      { label: '내전 MMR', primary: Number(primary.crewMmr || 0), target: Number(target.crewMmr || 0), suffix: ''},
+      { label: '내전 HSR', primary: Number(primary.crewHsr || 0), target: Number(target.crewHsr || 0), suffix: ''},
+    ];
+
+    return rows.map((row) => {
+      const delta = row.primary - row.target;
+      return {
+        ...row,
+        delta,
+        winner: delta > 0 ? 'primary' : delta < 0 ? 'target' : 'draw',
+      };
+    });
+  }
+
+  formatVsMetric(value, suffix = '') {
+    const numeric = Number(value || 0);
+    return suffix ? `${numeric}${suffix}` : `${numeric}`;
+  }
+
+  getVsSummary(primary, target, rows, primaryName = '본인', targetName = '상대') {
+    const primaryWins = rows.filter((row) => row.winner === 'primary').length;
+    const targetWins = rows.filter((row) => row.winner === 'target').length;
+    const leadRows = rows.filter((row) => row.winner === (primaryWins >= targetWins ? 'primary' : 'target'));
+    const leaderName = primaryWins >= targetWins ? primaryName : targetName;
+    const leaderColor = primaryWins >= targetWins ? 'primary' : 'target';
+
+    if (primaryWins === targetWins) {
+      return {
+        tone: 'neutral',
+        title: '팽팽한 비교 구도',
+        detail: `${primaryName}과 ${targetName}의 핵심 지표가 비슷합니다. 내전 MMR과 최근 승률 흐름을 함께 보는 게 좋습니다.`,
+        score: `${primaryWins}:${targetWins}`,
+      };
+    }
+
+    const focusText = leadRows.slice(0, 2).map((row) => row.label).join(', ');
+    return {
+      tone: leaderColor,
+      title: `${leaderName} 우세`,
+      detail: `${focusText}에서 앞서고 있습니다. 수치상 우세 지표는 ${primaryWins}:${targetWins} 입니다.`,
+      score: `${primaryWins}:${targetWins}`,
+    };
+  }
+
   getConfidenceMeta(matchCount = 0, target = 20) {
     const count = Math.max(0, Number(matchCount || 0));
     if (count < 7) return { cls: 'low', text: '신뢰도 낮음 · 샘플 적음' };
@@ -37,15 +85,15 @@ export class SaStatsSummary extends HTMLElement {
     this.innerHTML = `
       <style>
         .stats-summary-card {
-          background: #1a1d2e; border: 1px solid #2d3356; border-radius: 12px; padding: 25px; margin-bottom: 30px;
+          background: var(--sa-surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 25px; margin-bottom: 30px; box-shadow: var(--sa-shadow);
         }
         .playstyle-banner {
-          display: flex; align-items: center; background: rgba(0, 210, 255, 0.05); border: 1px solid rgba(0, 210, 255, 0.1);
+          display: flex; align-items: center; background: var(--sa-accent-soft); border: 1px solid color-mix(in srgb, var(--primary) 18%, transparent);
           border-radius: 10px; padding: 15px 20px; margin-bottom: 25px;
         }
         .playstyle-icon { font-size: 32px; margin-right: 15px; }
-        .playstyle-label { font-size: 11px; color: #666; display: block; }
-        .playstyle-title { font-size: 18px; font-weight: bold; color: #fff; }
+        .playstyle-label { font-size: 11px; color: var(--text-dim); display: block; }
+        .playstyle-title { font-size: 18px; font-weight: bold; color: var(--sa-text-strong); }
         
         .stats-summary-header { display: flex; gap: 32px; margin-bottom: 24px; align-items: center; }
         .radar-section { flex: 0 0 220px; }
@@ -53,15 +101,15 @@ export class SaStatsSummary extends HTMLElement {
         
         .header-row {
           display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px;
-          border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px;
+          border-bottom: 1px solid var(--sa-line-soft); padding-bottom: 12px;
         }
-        .header-row h3 { margin: 0; font-size: 20px; color: #fff; font-weight: 800; }
+        .header-row h3 { margin: 0; font-size: 20px; color: var(--sa-text-strong); font-weight: 800; }
         .season-label {
           display: inline-flex; align-items: center; margin-right: 8px; padding: 3px 9px;
-          border-radius: 999px; font-size: 11px; color: #79e3ff; background: rgba(0,210,255,0.12);
-          border: 1px solid rgba(0,210,255,0.3); vertical-align: middle;
+          border-radius: 999px; font-size: 11px; color: var(--primary); background: var(--sa-accent-soft);
+          border: 1px solid color-mix(in srgb, var(--primary) 30%, transparent); vertical-align: middle;
         }
-        .most-played-map { font-size: 13px; color: #888; background: rgba(255,255,255,0.03); padding: 4px 12px; border-radius: 4px; }
+        .most-played-map { font-size: 13px; color: var(--text-dim); background: var(--sa-line-soft); padding: 4px 12px; border-radius: 4px; }
         .most-played-map strong { color: #ffcc00; }
         .confidence-badge { margin-left: 8px; display: inline-flex; align-items: center; border-radius: 999px; padding: 3px 10px; font-size: 11px; font-weight: 800; letter-spacing: 0.01em; vertical-align: middle; }
         .confidence-badge.low { color: #ff7f7f; background: rgba(255,77,77,0.14); border: 1px solid rgba(255,77,77,0.35); }
@@ -71,11 +119,11 @@ export class SaStatsSummary extends HTMLElement {
 
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
         .stat-box {
-          background: #141724; padding: 15px; border-radius: 8px; border: 1px solid #23283d; text-align: center;
+          background: var(--sa-surface-2); padding: 15px; border-radius: 8px; border: 1px solid var(--sa-line-soft); text-align: center;
         }
-        .stat-box label { font-size: 12px; color: #666; display: block; margin-bottom: 5px; }
-        .stat-box .value { font-size: 20px; font-weight: bold; color: #fff; font-family: 'Roboto Mono', monospace; }
-        .value.highlight { color: #00d2ff; }
+        .stat-box label { font-size: 12px; color: var(--text-dim); display: block; margin-bottom: 5px; }
+        .stat-box .value { font-size: 20px; font-weight: bold; color: var(--sa-text-strong); font-family: 'Roboto Mono', monospace; }
+        .value.highlight { color: var(--primary); }
         .quick-kpi-grid {
           display: grid;
           grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -83,14 +131,14 @@ export class SaStatsSummary extends HTMLElement {
           margin-bottom: 22px;
         }
         .quick-kpi {
-          background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
-          border: 1px solid rgba(255,255,255,0.07);
+          background: linear-gradient(180deg, var(--sa-surface-2), var(--sa-surface-1));
+          border: 1px solid var(--sa-line-soft);
           border-radius: 14px;
           padding: 16px;
         }
         .quick-kpi label {
           display: block;
-          color: #7f8ab1;
+          color: var(--sa-text-soft);
           font-size: 11px;
           font-weight: 800;
           text-transform: uppercase;
@@ -99,7 +147,7 @@ export class SaStatsSummary extends HTMLElement {
         }
         .quick-kpi strong {
           display: block;
-          color: #fff;
+          color: var(--sa-text-strong);
           font-size: 28px;
           line-height: 1;
           font-weight: 900;
@@ -108,15 +156,15 @@ export class SaStatsSummary extends HTMLElement {
         .quick-kpi span {
           display: block;
           margin-top: 8px;
-          color: #95a0c9;
+          color: var(--sa-text-muted);
           font-size: 12px;
         }
-        .quick-kpi.emphasis strong { color: #79e3ff; }
+        .quick-kpi.emphasis strong { color: var(--primary); }
         .quick-kpi.gold strong { color: #ffcc00; }
         .quick-kpi.trend strong {
           font-size: 22px;
           line-height: 1.15;
-          color: #9be7ff;
+          color: var(--primary);
         }
         .quick-kpi.trend span {
           line-height: 1.5;
@@ -131,16 +179,16 @@ export class SaStatsSummary extends HTMLElement {
         /* Relationship Container */
         .relationship-container {
           display: grid; grid-template-columns: 1fr 1fr; gap: 25px; 
-          margin-top: 35px; padding-top: 25px; border-top: 1px dashed #2d3356;
+          margin-top: 35px; padding-top: 25px; border-top: 1px dashed var(--border);
         }
         
         /* Crew Stats Card */
         .crew-stats-card {
-          margin-top: 30px; background: rgba(255, 204, 0, 0.03); border: 1px solid rgba(255, 204, 0, 0.1); border-radius: 12px; padding: 20px;
+          margin-top: 30px; background: var(--sa-gold-soft); border: 1px solid color-mix(in srgb, var(--gold) 18%, transparent); border-radius: 12px; padding: 20px;
         }
         .crew-stats-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .crew-stats-header h3 { margin: 0; font-size: 16px; color: #ffcc00; }
-        .match-count { font-size: 12px; color: #888; }
+        .match-count { font-size: 12px; color: var(--text-dim); }
         
         .crew-grid { grid-template-columns: repeat(4, 1fr); }
         .crew-grid .stat-box { border-color: rgba(255, 204, 0, 0.1); }
@@ -155,6 +203,30 @@ export class SaStatsSummary extends HTMLElement {
           .relationship-container { grid-template-columns: 1fr; }
         }
         @media (max-width: 560px) {
+          .stats-summary-card {
+            padding: 18px;
+          }
+          .playstyle-banner {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px 16px;
+          }
+          .status-divider {
+            display: none;
+          }
+          .header-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+          }
+          .header-row h3 {
+            font-size: 18px;
+            line-height: 1.4;
+          }
+          .stats-grid {
+            grid-template-columns: 1fr;
+          }
           .quick-kpi-grid { grid-template-columns: 1fr; }
         }
       </style>
@@ -165,7 +237,7 @@ export class SaStatsSummary extends HTMLElement {
             <span class="playstyle-label">AI 분석 플레이 스타일</span>
             <span class="playstyle-title">${data.playstyleTitle}</span>
           </div>
-          <div class="status-divider" style="width:1px; height:40px; background:rgba(255,255,255,0.1); margin:0 20px;"></div>
+          <div class="status-divider" style="width:1px; height:40px; background:var(--sa-line-strong); margin:0 20px;"></div>
           <div class="status-info">
             <span class="playstyle-label" style="color:#ffcc00;">크루 내 위상</span>
             <span class="playstyle-title" style="color:#ffcc00;">${data.crewStatusTitle || '일반 유저'}</span>
@@ -205,7 +277,7 @@ export class SaStatsSummary extends HTMLElement {
               <h3>
                 <span class="season-label">${seasonLabel}</span>
                 최근 20경기 정밀 분석
-                <small style="font-size:12px;color:#888;">(현재 ${matchCount}경기)</small>
+                <small style="font-size:12px;color:var(--text-dim);">(현재 ${matchCount}경기)</small>
                 <span class="confidence-badge ${confidence.cls}">${confidence.text}</span>
               </h3>
               <span class="most-played-map">선호 맵: <strong>${data.mostPlayedMap || '정보 없음'}</strong></span>
@@ -216,7 +288,7 @@ export class SaStatsSummary extends HTMLElement {
               <div class="stat-box"><label>내전 HSR</label><span class="value">${data.crewHsr || 1200}</span></div>
               <div class="stat-box">
                 <label>현재 폼</label>
-                <span class="value" style="color: ${data.streakType === 'WIN' ? '#00d2ff' : (data.streakType === 'LOSE' ? '#ff4d4d' : '#fff')};">
+                <span class="value" style="color: ${data.streakType === 'WIN' ? 'var(--primary)' : (data.streakType === 'LOSE' ? 'var(--red)' : 'var(--sa-text-strong)')};">
                   ${data.streakType === 'WIN' ? 
                     (data.streakCount >= 5 ? `🔥 ${data.streakCount}연승 (폭주 중!)` : `🔥 ${data.streakCount}연승`) : 
                     (data.streakType === 'LOSE' ? 
@@ -270,7 +342,7 @@ export class SaStatsSummary extends HTMLElement {
   }
 
   renderRivalry(data) {
-    if (!data || (!data.nemesis && !data.prey)) return '<div style="color:#444; font-size:12px; padding:20px; text-align:center; background:#141724; border-radius:10px;">라이벌 데이터가 부족합니다.</div>';
+    if (!data || (!data.nemesis && !data.prey)) return '<div style="color:var(--text-dim); font-size:12px; padding:20px; text-align:center; background:var(--sa-surface-2); border:1px solid var(--sa-line-soft); border-radius:10px;">라이벌 데이터가 부족합니다.</div>';
 
     const renderCard = (rival, type) => {
       if (!rival) return '';
@@ -303,35 +375,138 @@ export class SaStatsSummary extends HTMLElement {
     `;
   }
 
-  set vsModeData({ primary, target }) {
+  set vsModeData({ primary, target, primaryName = '본인', targetName = '상대' }) {
+    const rows = this.getVsMetricRows(primary, target);
+    const summary = this.getVsSummary(primary, target, rows, primaryName, targetName);
     this.innerHTML = `
       <style>
-        .vs-mode-card .vs-grid-container {
-          display: flex; gap: 30px; align-items: center; margin-top: 15px;
+        .vs-summary-banner {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 16px;
+          padding: 16px 18px;
+          margin-bottom: 18px;
+          border-radius: 14px;
+          background: var(--sa-line-soft);
+          border: 1px solid var(--sa-line-strong);
         }
-        .vs-left { flex: 0 0 180px; }
-        .vs-center { flex: 1; }
-        .vs-right { flex: 0 0 380px; }
+        .vs-summary-banner.primary {
+          border-color: rgba(0, 210, 255, 0.28);
+          background: linear-gradient(135deg, var(--sa-accent-soft), var(--sa-surface-1));
+        }
+        .vs-summary-banner.target {
+          border-color: rgba(188, 0, 255, 0.28);
+          background: linear-gradient(135deg, var(--sa-secondary-soft), var(--sa-surface-1));
+        }
+        .vs-summary-copy strong {
+          display: block;
+          color: var(--sa-text-strong);
+          font-size: 22px;
+          font-weight: 900;
+          letter-spacing: -0.03em;
+        }
+        .vs-summary-copy span {
+          display: block;
+          margin-top: 6px;
+          color: #aab5d7;
+          font-size: 13px;
+          line-height: 1.55;
+        }
+        .vs-summary-score {
+          min-width: 92px;
+          text-align: right;
+        }
+        .vs-summary-score label {
+          display: block;
+          color: #7f8ab1;
+          font-size: 11px;
+          font-weight: 800;
+          text-transform: uppercase;
+          margin-bottom: 6px;
+        }
+        .vs-summary-score strong {
+          display: block;
+          color: var(--sa-text-strong);
+          font-size: 30px;
+          line-height: 1;
+          font-weight: 900;
+        }
+        .vs-mode-card .vs-grid-container {
+          display: grid;
+          grid-template-columns: 220px minmax(280px, 1fr) minmax(320px, 380px);
+          gap: 24px;
+          align-items: start;
+          margin-top: 15px;
+        }
+        .vs-left,
+        .vs-center,
+        .vs-right {
+          min-width: 0;
+        }
+        .vs-left {
+          display: flex;
+          justify-content: center;
+          padding-top: 10px;
+        }
+        .vs-center {
+          align-self: center;
+        }
+        .vs-right {
+          align-self: stretch;
+        }
 
         .vs-comparison-table { width: 100%; border-collapse: collapse; }
-        .vs-comparison-table th { padding: 8px; color: #666; font-size: 12px; text-transform: uppercase; border-bottom: 1px solid #2d3356; }
-        .vs-comparison-table td { text-align: center; padding: 12px 5px; font-size: 16px; font-weight: 800; color: #fff; }
-        .vs-comparison-table td.lbl { font-size: 11px; color: #888; font-weight: 400; width: 80px; }
+        .vs-comparison-table th { padding: 8px; color: var(--text-dim); font-size: 12px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+        .vs-comparison-table td { text-align: center; padding: 14px 6px; font-size: 18px; font-weight: 800; color: var(--sa-text-strong); }
+        .vs-comparison-table td.lbl { font-size: 11px; color: var(--text-dim); font-weight: 400; width: 80px; }
+        .vs-comparison-table td.primary-win { color: #79e3ff; }
+        .vs-comparison-table td.target-win { color: #df9cff; }
+        .vs-comparison-table td.draw { color: #d8dcef; }
+        .vs-delta {
+          display: block;
+          margin-top: 5px;
+          font-size: 11px;
+          font-weight: 700;
+          color: #7f8ab1;
+        }
         
         /* MMR Trend Chart compacting for VS mode */
         .vs-mode-card sa-mmr-trend-chart { display: block; margin-top: 0; }
         
         @media (max-width: 1100px) {
-          .vs-mode-card .vs-grid-container { flex-wrap: wrap; justify-content: center; }
-          .vs-right { flex: 0 0 100%; margin-top: 20px; }
+          .vs-summary-banner {
+            flex-direction: column;
+          }
+          .vs-summary-score {
+            text-align: left;
+          }
+          .vs-mode-card .vs-grid-container {
+            grid-template-columns: 1fr;
+          }
+          .vs-left {
+            padding-top: 0;
+          }
+          .vs-right {
+            margin-top: 6px;
+          }
         }
         @media (max-width: 650px) {
-          .vs-mode-card .vs-grid-container { flex-direction: column; }
-          .vs-left { flex: 0 0 auto; }
+          .vs-mode-card .vs-grid-container { gap: 18px; }
         }
       </style>
       <div class="stats-summary-card vs-mode-card">
         <div class="header-row"><h3>📊 전적 상세 비교 (VS)</h3></div>
+        <div class="vs-summary-banner ${summary.tone}">
+          <div class="vs-summary-copy">
+            <strong>${summary.title}</strong>
+            <span>${summary.detail}</span>
+          </div>
+          <div class="vs-summary-score">
+            <label>우세 지표</label>
+            <strong>${summary.score}</strong>
+          </div>
+        </div>
         <div class="vs-grid-container">
           <div class="vs-left">
             <sa-radar-chart id="vsRadar" style="width: 180px; height: 180px; display: block;"></sa-radar-chart>
@@ -340,15 +515,25 @@ export class SaStatsSummary extends HTMLElement {
             <table class="vs-comparison-table">
               <thead>
                 <tr>
-                  <th style="color:#00d2ff;">본인</th>
+                  <th style="color:#00d2ff;">${primaryName}</th>
                   <th>항목</th>
-                  <th style="color:#bc00ff;">상대</th>
+                  <th style="color:#bc00ff;">${targetName}</th>
                 </tr>
               </thead>
               <tbody>
-                <tr><td>${primary.kdPercent}%</td><td class="lbl">종합 K/D</td><td>${target.kdPercent}%</td></tr>
-                <tr><td>${primary.winRate}%</td><td class="lbl">최근 승률</td><td>${target.winRate}%</td></tr>
-                <tr><td style="color:#ffcc00;">${primary.crewMmr}</td><td class="lbl">내전 MMR</td><td style="color:#ffcc00;">${target.crewMmr}</td></tr>
+                ${rows.map((row) => `
+                  <tr>
+                    <td class="${row.winner === 'primary' ? 'primary-win' : row.winner === 'draw' ? 'draw' : ''}">
+                      ${this.formatVsMetric(row.primary, row.suffix)}
+                      <span class="vs-delta">${row.winner === 'primary' ? `+${Math.abs(row.delta)} 우세` : row.winner === 'draw' ? '동률' : ''}</span>
+                    </td>
+                    <td class="lbl">${row.label}</td>
+                    <td class="${row.winner === 'target' ? 'target-win' : row.winner === 'draw' ? 'draw' : ''}">
+                      ${this.formatVsMetric(row.target, row.suffix)}
+                      <span class="vs-delta">${row.winner === 'target' ? `+${Math.abs(row.delta)} 우세` : row.winner === 'draw' ? '동률' : ''}</span>
+                    </td>
+                  </tr>
+                `).join('')}
               </tbody>
             </table>
           </div>
@@ -363,7 +548,7 @@ export class SaStatsSummary extends HTMLElement {
   }
 
   renderCrewAnalysis(data) {
-    if (!data || (data.crewMatchCount || 0) <= 0) return `<div class="crew-stats-card no-crew"><p style="text-align:center; color:#666; padding:20px;">최근 경기 중 우리 크루(8인 이상) 내전 기록이 없습니다.</p></div>`;
+    if (!data || (data.crewMatchCount || 0) <= 0) return `<div class="crew-stats-card no-crew"><p style="text-align:center; color:var(--text-dim); padding:20px;">최근 경기 중 우리 크루(8인 이상) 내전 기록이 없습니다.</p></div>`;
     
     const ck = Number(data.crewKills || 0), cd = Number(data.crewDeaths || 0);
     const crewKdPercent = (ck + cd > 0) ? Math.round((ck / (ck + cd)) * 100) : 0;
@@ -388,13 +573,13 @@ export class SaStatsSummary extends HTMLElement {
           <div class="stat-box"><label>내전 누적 승률</label><span class="value gold-highlight">${data.crewWinRate || 0}%</span></div>
           <div class="stat-box">
             <label>${getTrollLabel(data.crewTrollMatches)}</label>
-            <span class="value" style="color: ${data.crewTrollMatches > 0 ? '#ff4d4d' : '#888'};">
+            <span class="value" style="color: ${data.crewTrollMatches > 0 ? 'var(--red)' : 'var(--text-dim)'};">
               ${data.crewTrollMatches}회
             </span>
           </div>
           <div class="stat-box">
             <label>탈주 기록</label>
-            <span class="value" style="color: ${data.crewAbandonCount > 0 ? '#ff9b52' : '#888'};">
+            <span class="value" style="color: ${data.crewAbandonCount > 0 ? '#ff9b52' : 'var(--text-dim)'};">
               ${data.crewAbandonCount || 0}회
             </span>
           </div>
