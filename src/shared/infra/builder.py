@@ -6,6 +6,7 @@ import re
 
 from src.shared.infra.config import *
 from src.shared.infra.html_processor import process_html_file_for_common_elements
+from src.shared.infra.templates import get_build_version
 from src.domains.news.infra.news_builder import (
     generate_news_pages,
     snapshot_news,
@@ -18,6 +19,8 @@ from src.domains.news.application.rss_builder import build_rss_xml
 SKIP_COPY_NAMES = {"README.md"}
 SKIP_COPY_SUFFIXES = (".full",)
 SKIP_COPY_DIR_NAMES = {"__pycache__"}
+STATIC_JS_IMPORT_RE = re.compile(r'((?:import|export)\s+(?:[^;]*?\s+from\s+)?[\'"])(\.{1,2}/[^\'"]+?\.js)([\'"])')
+DYNAMIC_JS_IMPORT_RE = re.compile(r'(\bimport\(\s*[\'"])(\.{1,2}/[^\'"]+?\.js)([\'"]\s*\))')
 
 
 def should_skip_copy(path):
@@ -44,6 +47,34 @@ def copy_path_filtered(src, dest):
         return
     os.makedirs(os.path.dirname(dest), exist_ok=True)
     shutil.copy2(src, dest)
+
+
+def _append_version(specifier, version):
+    return specifier if "?v=" in specifier else f"{specifier}?v={version}"
+
+
+def version_relative_js_imports(public_dir):
+    version = get_build_version()
+    for root, _, files in os.walk(public_dir):
+        for filename in files:
+            if not filename.endswith(".js"):
+                continue
+            path = os.path.join(root, filename)
+            with open(path, "r", encoding="utf-8") as f:
+                original = f.read()
+
+            updated = STATIC_JS_IMPORT_RE.sub(
+                lambda m: f"{m.group(1)}{_append_version(m.group(2), version)}{m.group(3)}",
+                original,
+            )
+            updated = DYNAMIC_JS_IMPORT_RE.sub(
+                lambda m: f"{m.group(1)}{_append_version(m.group(2), version)}{m.group(3)}",
+                updated,
+            )
+
+            if updated != original:
+                with open(path, "w", encoding="utf-8") as f:
+                    f.write(updated)
 
 def generate_public_site(incremental=False):
     news_snapshot = snapshot_news()
@@ -208,6 +239,8 @@ def generate_public_site(incremental=False):
         restore_news_snapshot(news_snapshot)
         upgrade_cached_news_index()
         upgrade_cached_article_pages()
+
+    version_relative_js_imports(PUBLIC_DIR)
 
     build_search_index()
     build_rss()

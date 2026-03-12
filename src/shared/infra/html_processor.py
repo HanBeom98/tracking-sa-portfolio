@@ -2,7 +2,7 @@ import os
 import re
 
 from src.shared.infra.config import PUBLIC_DIR, BASE_URL
-from src.shared.infra.templates import get_common_head, get_common_header, get_common_footer
+from src.shared.infra.templates import get_build_version, get_common_head, get_common_header, get_common_footer
 
 
 NOINDEX_EXACT_PATHS = {
@@ -109,6 +109,19 @@ def _build_description(rel_path, is_en_page, page_title):
     )
 
 
+def _version_local_asset_refs(content):
+    version = get_build_version()
+    pattern = re.compile(r'((?:src|href)=["\'])(?!https?:|/|#|data:|mailto:)([^"\']+\.(?:js|css))(["\'])', re.IGNORECASE)
+
+    def repl(match):
+        prefix, asset_path, suffix = match.groups()
+        if "?v=" in asset_path:
+            return match.group(0)
+        return f"{prefix}{asset_path}?v={version}{suffix}"
+
+    return pattern.sub(repl, content)
+
+
 def process_html_file_for_common_elements(filepath):
     """
     HTML 파일에 공통 헤더, 푸터, SEO 태그 및 테마 가드를 주입하고
@@ -191,6 +204,8 @@ def process_html_file_for_common_elements(filepath):
                 content = content.replace('<!-- HEAD_INJECTION -->', f'{seo_html}\n{common_head}')
             elif '</head>' in content:
                 content = content.replace('</head>', f'    {seo_html}\n    {common_head}\n</head>')
+
+        content = _version_local_asset_refs(content)
 
         # 5. 언어 속성 처리
         if is_en_page:
