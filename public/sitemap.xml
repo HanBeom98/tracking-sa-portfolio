@@ -141,6 +141,20 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/animal-face/" />
   </url>
   <url>
+    <loc>https://trackingsa.com/stats/</loc>
+    <lastmod>2026-03-12</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/stats/" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/stats/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/stats/" />
+  </url>
+  <url>
+    <loc>https://trackingsa.com/stats/sudden-attack/</loc>
+    <lastmod>2026-03-12</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/stats/sudden-attack/" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/stats/sudden-attack/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/stats/sudden-attack/" />
+  </url>
+  <url>
     <loc>https://trackingsa.com/about/</loc>
     <lastmod>2026-03-12</lastmod>
     <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/about/" />
@@ -286,6 +300,20 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/animal-face/" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/animal-face/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/animal-face/" />
+  </url>
+  <url>
+    <loc>https://trackingsa.com/en/stats/</loc>
+    <lastmod>2026-03-12</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/stats/" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/stats/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/stats/" />
+  </url>
+  <url>
+    <loc>https://trackingsa.com/en/stats/sudden-attack/</loc>
+    <lastmod>2026-03-12</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://trackingsa.com/en/stats/sudden-attack/" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://trackingsa.com/stats/sudden-attack/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://trackingsa.com/stats/sudden-attack/" />
   </url>
   <url>
     <loc>https://trackingsa.com/en/about/</loc>

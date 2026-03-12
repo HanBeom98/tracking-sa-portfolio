@@ -1,6 +1,7 @@
 export class SaPageUseCases {
-  constructor({ service, crewRepo, repository, highlightsService, crewSeasonUseCases }) {
+  constructor({ service, profileQueryService, crewRepo, repository, highlightsService, crewSeasonUseCases }) {
     this.service = service;
+    this.profileQueryService = profileQueryService;
     this.crewRepo = crewRepo;
     this.repository = repository;
     this.highlightsService = highlightsService;
@@ -10,7 +11,7 @@ export class SaPageUseCases {
   }
 
   async loadPlayerProfile(name, currentRankings = [], onFreshData = null) {
-    return this.service.getFullPlayerProfile(name, currentRankings, onFreshData);
+    return this.profileQueryService.getFullPlayerProfile(name, currentRankings, onFreshData);
   }
 
   async loadCrewDashboard(forceRefresh = false) {

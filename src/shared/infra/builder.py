@@ -193,7 +193,7 @@ def generate_public_site(incremental=False):
 def build_rss():
     ko_items = [
         {
-            "href": "/games/sudden-attack/",
+            "href": "/stats/sudden-attack/",
             "title": "대표 서비스: 서든어택 전적 검색",
             "date": datetime.datetime.utcnow().strftime("%Y-%m-%d"),
             "description": "공식 API 기반 전적 검색, 매치 기록 조회, VS 비교, 크루 관리 기능을 제공합니다.",
@@ -211,7 +211,7 @@ def build_rss():
 
     en_items = [
         {
-            "href": "/en/games/sudden-attack/",
+            "href": "/en/stats/sudden-attack/",
             "title": "Featured Service: Sudden Attack Stats",
             "date": datetime.datetime.utcnow().strftime("%Y-%m-%d"),
             "description": "Official API-based player stats, match history, versus comparison, and crew tools.",
@@ -391,7 +391,7 @@ def build_search_index():
             {"href": "/board?category=free", "title": "자유게시판", "description": "자유롭게 의견을 나누는 커뮤니티 공간", "keywords": ["커뮤니티", "자유", "게시판"]},
             {"href": "/futures-estimate/", "title": "코스피200 지수 예측", "description": "AI 기반 KOSPI200 지수 상승/하락 예측 데이터", "keywords": ["지수", "선물", "코스피", "K200"]},
             {"href": "/games/", "title": "게임 센터", "description": "다양한 클래식 및 AI 게임 플레이 및 등록", "keywords": ["게임", "play", "games", "오락"]},
-            {"href": "/games/sudden-attack/", "title": "서든어택 전적", "description": "공식 API 기반 실시간 전적 및 매치 정보 조회", "keywords": ["서든", "전적", "sudden", "attack", "통계"]},
+            {"href": "/stats/sudden-attack/", "title": "서든어택 전적", "description": "공식 API 기반 실시간 전적 및 매치 정보 조회", "keywords": ["서든", "전적", "sudden", "attack", "통계"]},
             {"href": "/glossary/", "title": "AI 용어사전", "description": "어려운 IT/AI 용어를 쉽게 풀이한 백과사전", "keywords": ["사전", "용어", "백과사전", "IT용어"]},
             {"href": "/ai-test/", "title": "AI 성향 테스트", "description": "나와 어울리는 AI 기술은 무엇일까요?", "keywords": ["테스트", "성향"]},
             {"href": "/animal-face/", "title": "동물상 테스트", "description": "인공지능이 분석하는 나의 동물상 관상", "keywords": ["테스트", "동물상"]},
@@ -405,7 +405,7 @@ def build_search_index():
             {"href": "/board?category=free", "title": "Free Board", "description": "Community space for free discussions", "keywords": ["community", "free", "board"]},
             {"href": "/futures-estimate/", "title": "KOSPI200 Prediction", "description": "AI-based KOSPI200 index direction forecast", "keywords": ["index", "futures", "K200"]},
             {"href": "/games/", "title": "Game Center", "description": "Play and share various classic and AI games", "keywords": ["games", "play", "entertainment"]},
-            {"href": "/en/games/sudden-attack/", "title": "Sudden Attack Stats", "description": "Official API-based player stats, match history, versus comparison, and crew tools", "keywords": ["sudden attack", "stats", "match history", "crew"]},
+            {"href": "/en/stats/sudden-attack/", "title": "Sudden Attack Stats", "description": "Official API-based player stats, match history, versus comparison, and crew tools", "keywords": ["sudden attack", "stats", "match history", "crew"]},
             {"href": "/glossary/", "title": "AI Glossary", "description": "Comprehensive guide to IT and AI terminology", "keywords": ["dictionary", "terms", "glossary"]},
             {"href": "/ai-test/", "title": "AI Tendency Test", "description": "Discover which AI tech matches your personality", "keywords": ["test", "personality"]},
             {"href": "/animal-face/", "title": "Animal Face Test", "description": "AI analysis of your face type", "keywords": ["test", "animal face"]},

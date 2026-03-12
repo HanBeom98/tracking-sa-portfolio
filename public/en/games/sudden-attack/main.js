@@ -1,6 +1,8 @@
 import { NexonApiClient } from './infra/nexon-api-client.js';
 import { SaRepository } from './infra/sa-repository.js';
 import { SaService } from './application/sa-service.js';
+import { ProfileQueryService } from './application/profile-query-service.js';
+import { SA_PROFILE_CACHE_PREFIX } from './application/sa-profile-cache.js';
 import { CrewHighlightsService } from './application/crew-highlights-service.js';
 import { CrewSeasonUseCases } from './application/crew-season-use-cases.js';
 import { SaPageUseCases } from './application/sa-page-use-cases.js';
@@ -29,10 +31,12 @@ const client = new NexonApiClient(NEXON_API_KEY);
 const crewRepo = new CrewRepository(client);
 const repository = new SaRepository(client, crewRepo);
 const service = new SaService(repository, crewRepo);
+const profileQueryService = new ProfileQueryService(service);
 const crewHighlightsService = new CrewHighlightsService();
 const crewSeasonUseCases = new CrewSeasonUseCases(crewRepo);
 const pageUseCases = new SaPageUseCases({
   service,
+  profileQueryService,
   crewRepo,
   repository,
   highlightsService: crewHighlightsService,
@@ -174,7 +178,7 @@ async function handleSearch(nameOverride = null, skipHistory = false) {
 
 async function handleRefresh() {
   if (!primaryUserData) return;
-  localStorage.removeItem(`${service.CACHE_PREFIX}${primaryUserData.player.nickname.toLowerCase()}`);
+  localStorage.removeItem(`${SA_PROFILE_CACHE_PREFIX}${primaryUserData.player.nickname.toLowerCase()}`);
   await handleSearch(primaryUserData.player.nickname, true);
 }
 

@@ -40,8 +40,8 @@ function resolveMirrorCandidates(srcRepoPath) {
   if (srcRepoPath.startsWith("src/domains/stats/sudden-attack/")) {
     const rel = srcRepoPath.slice("src/domains/stats/sudden-attack/".length);
     return [
-      `public/games/sudden-attack/${rel}`,
-      `public/en/games/sudden-attack/${rel}`,
+      `public/stats/sudden-attack/${rel}`,
+      `public/en/stats/sudden-attack/${rel}`,
     ];
   }
   if (srcRepoPath.startsWith("src/domains/")) {

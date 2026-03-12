@@ -5,12 +5,12 @@
     <link>https://trackingsa.com/</link>
     <description><![CDATA[Tracking SA의 주요 서비스와 대표 기능 안내]]></description>
     <language>ko</language>
-    <lastBuildDate>Thu, 12 Mar 2026 00:18:23 GMT</lastBuildDate>
+    <lastBuildDate>Thu, 12 Mar 2026 02:15:06 GMT</lastBuildDate>
     <atom:link href="https://trackingsa.com/rss.xml" rel="self" type="application/rss+xml" />
     <item>
       <title><![CDATA[대표 서비스: 서든어택 전적 검색]]></title>
-      <link>https://trackingsa.com/games/sudden-attack/</link>
-      <guid isPermaLink="true">https://trackingsa.com/games/sudden-attack/</guid>
+      <link>https://trackingsa.com/stats/sudden-attack/</link>
+      <guid isPermaLink="true">https://trackingsa.com/stats/sudden-attack/</guid>
       <pubDate>Thu, 12 Mar 2026 00:00:00 GMT</pubDate>
       <description><![CDATA[공식 API 기반 전적 검색, 매치 기록 조회, VS 비교, 크루 관리 기능을 제공합니다.]]></description>
     </item>

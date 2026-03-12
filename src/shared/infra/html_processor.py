@@ -50,6 +50,8 @@ def _build_page_title(rel_path, is_en_page, extracted_title):
         "en/stats/index.html": "Stats Center | Tracking SA",
         "games/index.html": "게임 센터 | Tracking SA",
         "en/games/index.html": "Game Center | Tracking SA",
+        "stats/sudden-attack/index.html": "Sudden Attack Statistics - TrackingSA",
+        "en/stats/sudden-attack/index.html": "Sudden Attack Statistics - TrackingSA",
         "games/sudden-attack/index.html": "Sudden Attack Statistics - TrackingSA",
         "en/games/sudden-attack/index.html": "Sudden Attack Statistics - TrackingSA",
     }
@@ -124,7 +126,8 @@ def process_html_file_for_common_elements(filepath):
         # 영어 페이지 여부
         is_en_page = os.path.abspath(filepath).startswith(os.path.abspath(os.path.join(PUBLIC_DIR, "en")) + os.sep)
         # 서든어택 도메인 페이지 (전용 레이아웃 보호 및 GNB 통합 대상)
-        is_sa_page = "games/sudden-attack" in filepath.replace("\\", "/")
+        normalized_filepath = filepath.replace("\\", "/")
+        is_sa_page = "games/sudden-attack" in normalized_filepath or "stats/sudden-attack" in normalized_filepath
         
         # og:url 결정을 위한 상대 경로 계산
         rel_path = os.path.relpath(filepath, PUBLIC_DIR).replace("\\", "/")
