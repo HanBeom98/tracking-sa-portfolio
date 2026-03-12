@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="stats_hub_title">전적 센터 | Tracking SA</title>
+    <meta name="description" content="서든어택 전적 검색을 포함한 게임 전적 조회와 매치 분석 서비스를 한곳에서 확인하세요.">
+    <!-- HEAD_INJECTION -->
+    <style>
+        .stats-hub {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px 80px;
+        }
+        .stats-hero {
+            padding: 36px;
+            border-radius: 28px;
+            background: linear-gradient(135deg, #0f172a 0%, #111827 48%, #0052cc 100%);
+            color: white;
+            box-shadow: 0 24px 48px rgba(15, 23, 42, 0.2);
+            margin-bottom: 32px;
+        }
+        .stats-hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            font-size: 0.8rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+        }
+        .stats-hero h1 {
+            margin: 0 0 12px;
+            font-size: 2.4rem;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+        }
+        .stats-hero p {
+            margin: 0;
+            max-width: 720px;
+            line-height: 1.7;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+        .stats-card {
+            background: white;
+            border: 1px solid oklch(92% 0.02 260);
+            border-radius: 24px;
+            padding: 28px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+        .stats-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--p-blue-soft);
+            box-shadow: 0 20px 40px rgba(0, 82, 204, 0.12);
+        }
+        .stats-card.disabled {
+            opacity: 0.72;
+            cursor: default;
+        }
+        .stats-card.disabled:hover {
+            transform: none;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+            border-color: oklch(92% 0.02 260);
+        }
+        .stats-card-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: fit-content;
+            min-height: 30px;
+            padding: 0 12px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 800;
+        }
+        .stats-card-badge.live {
+            background: oklch(95% 0.05 240);
+            color: var(--p-blue);
+        }
+        .stats-card-badge.planned {
+            background: oklch(96% 0.01 260);
+            color: var(--text-sub);
+        }
+        .stats-card h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--text-main);
+        }
+        .stats-card p {
+            margin: 0;
+            color: var(--text-sub);
+            line-height: 1.6;
+        }
+        .stats-card ul {
+            margin: 0;
+            padding-left: 18px;
+            color: var(--text-sub);
+            line-height: 1.6;
+        }
+        .stats-card-footer {
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 0.92rem;
+            font-weight: 800;
+            color: var(--p-blue);
+        }
+        @media (max-width: 768px) {
+            .stats-hero { padding: 28px; }
+            .stats-hero h1 { font-size: 1.9rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER_INJECTION -->
+    <main class="stats-hub">
+        <section class="stats-hero">
+            <div class="stats-hero-badge" data-i18n="stats_hub_badge">STATS DOMAIN</div>
+            <h1 data-i18n="stats_hub_h1">전적 센터</h1>
+            <p data-i18n="stats_hub_desc">Tracking SA의 게임 전적 검색과 매치 분석 기능을 모아둔 허브입니다. 현재는 서든어택 전적 검색이 대표 서비스이며, 앞으로 다른 게임 전적검색도 이 영역 아래에서 확장할 예정입니다.</p>
+        </section>
+
+        <section class="stats-grid">
+            <a href="/games/sudden-attack/" class="stats-card">
+                <span class="stats-card-badge live" data-i18n="stats_live_badge">LIVE</span>
+                <h2 data-i18n="stats_sa_card_title">서든어택 전적 검색</h2>
+                <p data-i18n="stats_sa_card_desc">공식 API 기반 전적 조회, 최근 매치 기록, VS 비교, 크루 랭킹과 운영 도구를 제공하는 대표 전적 서비스입니다.</p>
+                <ul>
+                    <li data-i18n="stats_sa_feature_1">실시간 전적 및 최근 매치 기록</li>
+                    <li data-i18n="stats_sa_feature_2">VS 비교와 시즌별 추이 확인</li>
+                    <li data-i18n="stats_sa_feature_3">크루 랭킹, 신청, 밸런서 기능</li>
+                </ul>
+                <div class="stats-card-footer">
+                    <span data-i18n="stats_open_service">서비스 열기</span>
+                    <span aria-hidden="true">→</span>
+                </div>
+            </a>
+
+            <div class="stats-card disabled">
+                <span class="stats-card-badge planned" data-i18n="stats_planned_badge">PLANNED</span>
+                <h2 data-i18n="stats_next_card_title">다음 전적검색 슬롯</h2>
+                <p data-i18n="stats_next_card_desc">새로운 게임 전적검색 기능을 추가할 때 이 구조를 그대로 재사용할 수 있도록 `stats` 도메인 기준을 먼저 정리했습니다.</p>
+                <ul>
+                    <li data-i18n="stats_next_feature_1">공통 도메인 위치: `src/domains/stats/`</li>
+                    <li data-i18n="stats_next_feature_2">공개 경로와 내부 소스 분리 가능</li>
+                    <li data-i18n="stats_next_feature_3">확장 시 검색/빌드 흐름 재사용</li>
+                </ul>
+                <div class="stats-card-footer">
+                    <span data-i18n="stats_architecture_ready">구조 준비 완료</span>
+                    <span aria-hidden="true">•</span>
+                </div>
+            </div>
+        </section>
+    </main>
+    <!-- FOOTER_INJECTION -->
+    <script src="/translations.js"></script>
+</body>
+</html>

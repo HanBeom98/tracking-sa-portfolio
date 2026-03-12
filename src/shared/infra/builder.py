@@ -96,6 +96,7 @@ def generate_public_site(incremental=False):
     # 4. 도메인 빌드
     domains = [
         "animal-face", "fortune", "games", "games/submit", "ai-test", "lucky-recommendation", 
+        "stats",
         "games/ai-evolution", "games/tetris", "privacy-policy", "terms", "about", "contact",
         "board", "board/write", "board/edit", "board/post", "inquiry", "search",
         "auth", "auth/signup", "account", "account/domain",
@@ -385,6 +386,7 @@ def build_search_index():
     static_items = {
         "ko": [
             {"href": "/", "title": "Tracking SA 홈", "description": "게임, 커뮤니티, 테스트와 실용 도구를 모은 멀티 서비스 허브", "keywords": ["tracking sa", "홈", "허브", "포털"]},
+            {"href": "/stats/", "title": "전적 센터", "description": "게임 전적 검색과 매치 분석 기능을 모아둔 허브", "keywords": ["전적", "통계", "매치", "전적검색", "stats"]},
             {"href": "/board?category=notice", "title": "공지사항", "description": "Tracking SA의 새로운 소식을 전해드립니다.", "keywords": ["공지", "게시판", "소식"]},
             {"href": "/board?category=free", "title": "자유게시판", "description": "자유롭게 의견을 나누는 커뮤니티 공간", "keywords": ["커뮤니티", "자유", "게시판"]},
             {"href": "/futures-estimate/", "title": "코스피200 지수 예측", "description": "AI 기반 KOSPI200 지수 상승/하락 예측 데이터", "keywords": ["지수", "선물", "코스피", "K200"]},
@@ -398,6 +400,7 @@ def build_search_index():
         ],
         "en": [
             {"href": "/en/", "title": "Tracking SA Home", "description": "A multi-service hub for game tools, community pages, tests, and utilities", "keywords": ["tracking sa", "hub", "portal"]},
+            {"href": "/en/stats/", "title": "Stats Center", "description": "A hub for game stat lookup and match analysis services", "keywords": ["stats", "match analysis", "game stats", "tracker"]},
             {"href": "/board?category=notice", "title": "Notice", "description": "Official announcements and news from Tracking SA", "keywords": ["notice", "announcement", "board"]},
             {"href": "/board?category=free", "title": "Free Board", "description": "Community space for free discussions", "keywords": ["community", "free", "board"]},
             {"href": "/futures-estimate/", "title": "KOSPI200 Prediction", "description": "AI-based KOSPI200 index direction forecast", "keywords": ["index", "futures", "K200"]},
