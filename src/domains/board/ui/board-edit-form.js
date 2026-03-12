@@ -65,11 +65,33 @@ class BoardEditForm extends HTMLElement {
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         font-family: inherit;
       }
+      input::placeholder, textarea::placeholder {
+        color: oklch(62% 0.02 260);
+      }
       input:focus, textarea:focus {
         outline: none;
         border-color: var(--p-blue);
         box-shadow: 0 0 0 4px oklch(from var(--p-blue) l c h / 0.1);
         background: white;
+      }
+      :host-context(body.dark-mode) label {
+        color: #e5eefc;
+      }
+      :host-context(body.dark-mode) input,
+      :host-context(body.dark-mode) textarea {
+        background: #0b1220;
+        color: #f8fbff;
+        border-color: rgba(148, 163, 184, 0.32);
+      }
+      :host-context(body.dark-mode) input::placeholder,
+      :host-context(body.dark-mode) textarea::placeholder {
+        color: rgba(203, 213, 225, 0.62);
+      }
+      :host-context(body.dark-mode) input:focus,
+      :host-context(body.dark-mode) textarea:focus {
+        background: #111a2b;
+        color: #ffffff;
+        border-color: #3b82f6;
       }
       textarea {
         resize: vertical;
