@@ -1,16 +1,17 @@
 import { buildSeasonViews } from './season-view-builder.js';
 import { loadPlayerProfileContext } from './player-profile-loader.js';
+import { SaProfileCache, SA_PROFILE_CACHE_PREFIX } from './sa-profile-cache.js';
 
 /**
  * Sudden Attack Application Service (Application Layer)
  * Coordinates user requests and domain operations using a repository.
  */
 export class SaService {
-  constructor(repository, crewRepository = null) {
+  constructor(repository, crewRepository = null, profileCache = new SaProfileCache()) {
     this.repository = repository;
     this.crewRepository = crewRepository;
-    this.CACHE_PREFIX = 'sa_cache_';
-    this.CACHE_TTL = 5 * 60 * 1000; // 5 minutes in milliseconds
+    this.profileCache = profileCache;
+    this.CACHE_PREFIX = SA_PROFILE_CACHE_PREFIX;
   }
 
   /**
@@ -20,8 +21,8 @@ export class SaService {
    * @param {Function} onUpdate Callback for background fresh data update
    */
   async getFullPlayerProfile(characterName, currentRankings = [], onUpdate = null) {
-    const cacheKey = `${this.CACHE_PREFIX}${characterName.toLowerCase()}`;
-    const cached = this.getCache(cacheKey);
+    const cacheKey = this.profileCache.buildKey(characterName);
+    const cached = this.profileCache.get(cacheKey);
 
     // 1. If cache exists, return it immediately and trigger background update
     if (cached) {
@@ -31,7 +32,7 @@ export class SaService {
       this.fetchFreshData(characterName, currentRankings).then(freshData => {
         if (onUpdate && JSON.stringify(freshData) !== JSON.stringify(cached.data)) {
           console.log(`[SaService] Background update ready for ${characterName}.`);
-          this.setCache(cacheKey, freshData);
+          this.profileCache.set(cacheKey, freshData);
           onUpdate(freshData);
         }
       }).catch(err => console.warn('[SaService] Background revalidation failed:', err));
@@ -41,7 +42,7 @@ export class SaService {
 
     // 2. No cache, fetch from server normally
     const freshData = await this.fetchFreshData(characterName, currentRankings);
-    this.setCache(cacheKey, freshData);
+    this.profileCache.set(cacheKey, freshData);
     return { ...freshData, isStale: false, cacheTime: Date.now() };
   }
 
@@ -97,23 +98,5 @@ export class SaService {
    */
   async getRecentMatches(ouid, nickname = "", limit = 20) {
     return await this.repository.getRecentMatches(ouid, limit, nickname);
-  }
-
-  // --- Caching Utilities ---
-  getCache(key) {
-    const str = localStorage.getItem(key);
-    if (!str) return null;
-    try {
-      const item = JSON.parse(str);
-      // Return both data and timestamp for SWR feedback
-      return { data: item.data, timestamp: item.timestamp };
-    } catch (e) { return null; }
-  }
-
-  setCache(key, data) {
-    try {
-      const item = { data, timestamp: Date.now() };
-      localStorage.setItem(key, JSON.stringify(item));
-    } catch (e) { console.warn('[SaService] Cache save failed:', e); }
   }
 }

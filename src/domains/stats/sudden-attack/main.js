@@ -1,6 +1,7 @@
 import { NexonApiClient } from './infra/nexon-api-client.js';
 import { SaRepository } from './infra/sa-repository.js';
 import { SaService } from './application/sa-service.js';
+import { SA_PROFILE_CACHE_PREFIX } from './application/sa-profile-cache.js';
 import { CrewHighlightsService } from './application/crew-highlights-service.js';
 import { CrewSeasonUseCases } from './application/crew-season-use-cases.js';
 import { SaPageUseCases } from './application/sa-page-use-cases.js';
@@ -174,7 +175,7 @@ async function handleSearch(nameOverride = null, skipHistory = false) {
 
 async function handleRefresh() {
   if (!primaryUserData) return;
-  localStorage.removeItem(`${service.CACHE_PREFIX}${primaryUserData.player.nickname.toLowerCase()}`);
+  localStorage.removeItem(`${SA_PROFILE_CACHE_PREFIX}${primaryUserData.player.nickname.toLowerCase()}`);
   await handleSearch(primaryUserData.player.nickname, true);
 }
 

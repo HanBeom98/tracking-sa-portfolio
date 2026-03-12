@@ -1,12 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { SaService } from "../../src/domains/games/sudden-attack/application/sa-service.js";
+import { buildSyntheticAbandonMatches } from "../../src/domains/stats/sudden-attack/application/abandon-match-service.js";
 
-test("SaService creates a synthetic abandon row when Nexon match history is missing", () => {
-  const service = new SaService({}, null);
-
-  const synthetic = service.buildSyntheticAbandonMatches(
+test("buildSyntheticAbandonMatches creates a synthetic abandon row when Nexon match history is missing", () => {
+  const synthetic = buildSyntheticAbandonMatches(
     [],
     [
       {
@@ -30,10 +28,8 @@ test("SaService creates a synthetic abandon row when Nexon match history is miss
   assert.equal(synthetic[0].hsrChange, -20);
 });
 
-test("SaService does not create a synthetic abandon row when the match already exists", () => {
-  const service = new SaService({}, null);
-
-  const synthetic = service.buildSyntheticAbandonMatches(
+test("buildSyntheticAbandonMatches does not create a synthetic abandon row when the match already exists", () => {
+  const synthetic = buildSyntheticAbandonMatches(
     [
       { matchId: "260309225457119001", matchDate: "2026-03-09T13:54:57.756Z" }
     ],
