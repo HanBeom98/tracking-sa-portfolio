@@ -33,7 +33,7 @@ export class SaStatsSummary extends HTMLElement {
     const seasonLabel = data.seasonLabel || '이번 시즌';
 
     const confidence = this.getConfidenceMeta(matchCount, 20);
-    const headshotRate = Number(data.avgHs || data.headshotRate || 0);
+    const crewHeadshotRate = Number(data.crewHeadshotRate || 0);
     this.innerHTML = `
       <style>
         .stats-summary-card {
@@ -211,7 +211,7 @@ export class SaStatsSummary extends HTMLElement {
               <span class="most-played-map">선호 맵: <strong>${data.mostPlayedMap || '정보 없음'}</strong></span>
             </div>
             <div class="stats-grid">
-              <div class="stat-box"><label>헤드샷 비율</label><span class="value">${headshotRate}%</span></div>
+              <div class="stat-box"><label>헤드샷 비율</label><span class="value">${crewHeadshotRate}%</span></div>
               <div class="stat-box"><label>내전 MMR</label><span class="value highlight">${data.crewMmr || 1200}</span></div>
               <div class="stat-box"><label>내전 HSR</label><span class="value">${data.crewHsr || 1200}</span></div>
               <div class="stat-box">

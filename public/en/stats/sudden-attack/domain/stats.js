@@ -32,6 +32,8 @@ export class RecentStats {
     this.crewMatchCount = 0;
     this.crewKills = 0;
     this.crewDeaths = 0;
+    this.crewHeadshots = 0;
+    this.crewHeadshotRate = 0;
     this.crewWinRate = 0;
     this.crewMmr = 1200;
     this.crewStatusTitle = "일반 유저";
@@ -113,6 +115,16 @@ export class RecentStats {
         const kdVal = parseFloat(m.kd);
         return kdVal < 0.5 && m.death >= 5;
       }).length;
+
+      const crewMatches = matches.filter((m) => m.isCustomMatch);
+      if (crewMatches.length > 0) {
+        const crewKillsFromMatches = crewMatches.reduce((sum, m) => sum + Number(m.kill || 0), 0);
+        const crewHeadshotsFromMatches = crewMatches.reduce((sum, m) => sum + Number(m.headshot || 0), 0);
+        this.crewHeadshots = crewHeadshotsFromMatches;
+        this.crewHeadshotRate = crewKillsFromMatches > 0
+          ? Math.round((crewHeadshotsFromMatches / crewKillsFromMatches) * 100)
+          : 0;
+      }
 
       const radarKd = this.kdPercent;
       let combatScore = 0;
