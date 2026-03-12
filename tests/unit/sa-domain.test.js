@@ -1,8 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert";
-import { Player } from "../../src/domains/games/sudden-attack/domain/player.js";
-import { MatchRecord } from "../../src/domains/games/sudden-attack/domain/match.js";
-import { RecentStats } from "../../src/domains/games/sudden-attack/domain/stats.js";
+import { Player } from "../../src/domains/stats/sudden-attack/domain/player.js";
+import { MatchRecord } from "../../src/domains/stats/sudden-attack/domain/match.js";
+import { RecentStats } from "../../src/domains/stats/sudden-attack/domain/stats.js";
 
 test("SA Player model correctly maps Nexon data", () => {
   const ouid = "test-ouid";

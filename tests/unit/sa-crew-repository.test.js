@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { CrewRepository } from "../../src/domains/games/sudden-attack/infra/crew-repository.js";
+import { CrewRepository } from "../../src/domains/stats/sudden-attack/infra/crew-repository.js";
 
 test("CrewRepository calculates season seed from recent and older archives", () => {
   const repo = new CrewRepository(null);

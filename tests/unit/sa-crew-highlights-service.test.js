@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert";
-import { CrewHighlightsService } from "../../src/domains/games/sudden-attack/application/crew-highlights-service.js";
+import { CrewHighlightsService } from "../../src/domains/stats/sudden-attack/application/crew-highlights-service.js";
 
 test("crew highlights service builds weekly highlight view model", () => {
   const service = new CrewHighlightsService();
