@@ -1,65 +1,132 @@
 # Tracking SA
 
-Tracking SA는 `서든어택 전적 검색`을 중심으로 게임 유틸리티, 테스트, 커뮤니티, 실용 도구를 함께 제공하는 멀티 서비스 허브입니다.
+Tracking SA는 제가 기획·개발·운영한 개인 프로젝트로, `서든어택 전적 검색`을 핵심 제품으로 운영하면서 반복 조회가 많은 실제 사용 흐름에 맞춰 구조 재편, 검색 UX 개선, 캐시 정책 설계를 진행했습니다.
 
-현재 핵심 제품은 `Sudden Attack Stats` 이며, 공식 공개 경로는 `/stats/sudden-attack/` 입니다. 기존 `/games/sudden-attack/` 경로는 외부 링크와 검색엔진 호환을 위해 유지되고 있습니다.
+단순 기능 추가보다 `대표 제품 재정의`, `stats 도메인 분리`, `VS 비교·라이벌 분석 강화`, `운영 호환성을 고려한 공개 경로 유지`에 집중했습니다.
 
-## Current Focus
+![Tracking SA home](docs/images/sa-home.png)
 
-- 대표 서비스: 서든어택 전적 검색
-- 홈 정체성: 게임·도구·커뮤니티 허브
-- 내부 소스 오브 트루스: `src/domains/stats/sudden-attack`
+## What I Focused On
+
+- `서든어택 전적 검색`을 프로젝트의 대표 제품으로 재정의
+- `games` 하위 기능이던 구조를 `stats` 도메인 중심으로 재편
+- 반복 검색이 많은 서비스 특성에 맞춰 캐시 정책과 검색 UX 개선
+- `src -> public` 빌드 구조와 DDD 경계를 유지하면서 기능 확장
+
+## Key Features
+
+- 공식 API 기반 서든어택 전적 검색
+- 최근 매치 기록 / 시즌 기준 통계 / VS 비교
+- 전적 기반 라이벌 분석 / 상성 확인
+- 크루 랭킹 / 팀 밸런서 / 내전 보조 도구
+- 최근 검색 / 즐겨찾기 / 즐겨찾기 기반 VS 비교
+- 게시판, 테스트형 기능, 실용 도구를 포함한 허브 구조
+
+## Technical Highlights
+
+### 1. Stats Domain Migration
+
+서든어택 기능이 일반 `games` 하위 페이지 수준을 넘어서면서, 내부 소스 오브 트루스를 `src/domains/stats/sudden-attack` 으로 이동했습니다.
+
 - 공식 공개 경로: `/stats/sudden-attack/`
 - 호환 경로: `/games/sudden-attack/`
+- 기존 외부 링크와 검색엔진 유입이 끊기지 않도록 호환 경로는 유지
+
+### 2. Pragmatic DDD
+
+기능을 `domain`, `application`, `infra`, `ui` 계층으로 나누고, 비대해진 서비스 로직을 단계적으로 분리했습니다.
+
+예를 들어 서든어택 도메인에서는:
+- 시즌 뷰 조립
+- 탈주 처리
+- 트렌드 계산
+- 프로필 로딩
+- 캐시 조회 / query orchestration
+
+를 각각 별도 단위로 나눠 유지보수 가능성을 높였습니다.
+
+### 3. Search UX And Cache Policy
+
+전적 검색은 같은 유저를 반복 조회하는 패턴이 많기 때문에, 단순 검색 기능보다 재방문 UX와 캐시 정책이 중요했습니다.
+
+적용한 개선:
+- 최근 검색
+- 즐겨찾기
+- 즐겨찾기에서 바로 VS 비교
+- 프로필 캐시 5분 TTL
+
+현재 캐시 정책:
+- 캐시 없음: fresh fetch
+- 캐시 5분 이내: 캐시만 반환
+- 캐시 5분 초과: 캐시 먼저 반환 후 백그라운드 재검증
 
 ## Architecture
 
-- Pragmatic DDD
-  `domain`, `application`, `infra`, `ui` 계층을 기준으로 기능을 분리합니다.
-- Source of Truth Build
-  `src/` 를 기준으로 `public/` 산출물을 생성합니다.
-- Compatibility Aliases
-  공개 URL 이전 시 기존 링크가 깨지지 않도록 alias 경로를 유지합니다.
-
-## Key Services
-
-- Sudden Attack Stats
-  공식 API 기반 전적 검색, 매치 기록, VS 비교, 크루 도구, 팀 밸런서
-- Board
-  공지사항/자유게시판 기반 커뮤니티
-- AI Test / Fortune / Lucky Recommendation
-  테스트형 및 생성형 기능
-- Glossary / Futures Estimate
-  실용 정보와 도구형 페이지
-
-## Recent Updates
-
-- `stats` 도메인으로 서든어택 소스 이전 완료
-- 공식 공개 경로를 `/stats/sudden-attack/` 로 승격
-- 구경로 `/games/sudden-attack/` 는 호환 유지
-- 서든어택 application 레이어 분리
-  시즌 뷰, 탈주 처리, 트렌드, 프로필 로더, 캐시, query orchestration 분리
-- 검색 UX 개선
-  최근 검색, 즐겨찾기, 즐겨찾기 기반 VS 비교 추가
-- 프로필 캐시 정책 개선
-  5분 TTL 안에서는 재검색 시 넥슨 API 재검증 없이 캐시만 사용
-
-## Tech Stack
-
 - Frontend: JavaScript (ES Modules), Web Components, Shadow DOM
-- Backend / Data: Firebase Firestore, Nexon Open API
+- Data: Firebase Firestore, Nexon Open API
 - Hosting: Cloudflare Pages
 - Build: Python-based static site build pipeline
 
-## Local Notes
+프로젝트 원칙:
+- `src` 를 source of truth 로 사용
+- `public` 은 빌드 산출물로 관리
+- 공개 경로 변경 시 alias 를 유지해 서비스 안정성을 우선
 
-- 빌드 결과물은 `public/`
-- 불필요 산출물(`README.md`, `*.full`, `__pycache__`)은 퍼블릭 복사에서 제외
-- 아키텍처 체크 스크립트:
-  - `npm run check:ddd-boundary`
-  - `npm run check:source-of-truth`
+## Why This Project Matters
+
+이 프로젝트는 단순 CRUD 중심 포트폴리오가 아니라,
+- 실제 외부 API를 붙인 서비스
+- 반복 사용 패턴이 있는 검색 제품
+- 구조 재정리와 운영 호환성을 함께 고려한 프로젝트
+
+라는 점에서 의미가 있습니다.
+
+특히 `서든어택 전적 검색`을 중심으로
+- 제품 방향 재정의
+- 도메인 분리
+- 캐시 정책 개선
+- UX 개선
+
+을 연속적으로 수행한 경험을 담고 있습니다.
+
+## Usage Snapshot
+
+2026-03 기준 최근 30일 운영 지표:
+- 활성 사용자 약 285명
+- 조회수 약 7.5K
+- 이벤트 수 약 18K
+- 디스코드 기반 실사용 흐름 존재
+
+특히 서든어택 전적 검색은 반복 검색과 비교 기능 수요가 실제로 발생하는 핵심 기능으로 운영 중입니다.
 
 ## Links
 
 - Live: [https://trackingsa.com](https://trackingsa.com)
+- Main Service: [https://trackingsa.com/stats/sudden-attack/](https://trackingsa.com/stats/sudden-attack/)
 - Developer: [https://github.com/HanBeom98](https://github.com/HanBeom98)
+
+## Screenshots
+
+### Main Search Experience
+
+서든어택 전적 검색 메인 화면입니다. 검색창, 최근 검색, 즐겨찾기, 실시간 랭킹을 한 화면에서 연결했습니다.
+
+![Sudden Attack stats home](docs/images/sa-home.png)
+
+### VS Comparison
+
+두 유저의 프로필, 핵심 지표, 성장 추이를 한 번에 비교할 수 있도록 VS 모드를 구성했습니다.
+
+![Sudden Attack VS comparison](docs/images/sa-vs.png)
+
+### Crew Ranking
+
+내전 기준 랭킹과 핵심 지표를 빠르게 스캔할 수 있도록 테이블 중심으로 설계했습니다.
+
+![Tracking crew ranking](docs/images/sa-ranking.png)
+
+### Real Usage In Discord
+
+웹 기능으로 끝내지 않고, 디스코드 봇을 통해 팀 밸런서 결과가 실제 사용 흐름에 연결되도록 운영했습니다.
+
+![Discord bot real usage](docs/images/sa-discord-bot.png)
