@@ -1,6 +1,6 @@
 /**
  * Discord Slash Command Registration Script
- * Run this to register the /대내모집 command.
+ * Run this to register the Discord slash commands.
  */
 import dotenv from 'dotenv';
 dotenv.config();
@@ -31,6 +31,25 @@ const commands = [
         required: true
       }
     ]
+  },
+  {
+    name: "라이벌",
+    description: "두 크루원의 내전 지표를 비교합니다",
+    type: 1,
+    options: [
+      {
+        name: "기준유저",
+        description: "비교의 기준이 되는 인게임 닉네임",
+        type: 3,
+        required: true
+      },
+      {
+        name: "상대유저",
+        description: "비교할 상대 인게임 닉네임",
+        type: 3,
+        required: true
+      }
+    ]
   }
 ];
 
@@ -47,7 +66,7 @@ async function registerCommands() {
     });
 
     if (response.ok) {
-      console.log('✅ 명령어 등록 성공! 이제 디스코드에서 /대내모집을 사용할 수 있습니다.');
+      console.log('✅ 명령어 등록 성공! 이제 디스코드에서 /대내모집, /전적검색, /라이벌 을 사용할 수 있습니다.');
     } else {
       const error = await response.json();
       console.error('❌ 등록 실패:', error);

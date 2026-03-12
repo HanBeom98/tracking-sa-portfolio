@@ -42,6 +42,129 @@ function fromFirestore(f) {
   return o;
 }
 
+async function queryCrewMember(projectId, nickname) {
+  const qUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents:runQuery`;
+  const qBody = {
+    structuredQuery: {
+      from: [{ collectionId: 'sa_crew_members' }],
+      where: {
+        fieldFilter: {
+          field: { fieldPath: 'characterName' },
+          op: 'EQUAL',
+          value: { stringValue: nickname }
+        }
+      },
+      limit: 1
+    }
+  };
+  const qResp = await fetch(qUrl, {
+    method: 'POST',
+    body: JSON.stringify(qBody),
+    headers: { 'Content-Type': 'application/json' }
+  });
+  const res = await qResp.json();
+  return res?.[0]?.document ? fromFirestore(res[0].document.fields) : null;
+}
+
+function safeNumber(value, fallback = 0) {
+  const num = Number(value);
+  return Number.isFinite(num) ? num : fallback;
+}
+
+function calcWinRate(data) {
+  const wins = safeNumber(data.wins);
+  const loses = safeNumber(data.loses);
+  const total = wins + loses;
+  return total > 0 ? (wins / total) * 100 : 0;
+}
+
+function calcKdRatio(data) {
+  const kills = safeNumber(data.crewKills);
+  const deaths = safeNumber(data.crewDeaths);
+  if (kills <= 0 && deaths <= 0) return 0;
+  if (deaths <= 0) return kills;
+  return kills / deaths;
+}
+
+function formatNumber(value) {
+  return new Intl.NumberFormat('ko-KR').format(Math.round(value));
+}
+
+function formatPercent(value) {
+  return `${value.toFixed(1)}%`;
+}
+
+function formatKd(value) {
+  return value.toFixed(2);
+}
+
+function buildRivalSummary(primaryName, primaryData, targetName, targetData) {
+  const primaryMetrics = {
+    mmr: safeNumber(primaryData.mmr, 1200),
+    hsr: safeNumber(primaryData.hsr, safeNumber(primaryData.mmr, 1200)),
+    winRate: calcWinRate(primaryData),
+    kd: calcKdRatio(primaryData)
+  };
+  const targetMetrics = {
+    mmr: safeNumber(targetData.mmr, 1200),
+    hsr: safeNumber(targetData.hsr, safeNumber(targetData.mmr, 1200)),
+    winRate: calcWinRate(targetData),
+    kd: calcKdRatio(targetData)
+  };
+
+  const comparisons = [
+    { label: '내전 MMR', key: 'mmr', formatter: formatNumber },
+    { label: '내전 HSR', key: 'hsr', formatter: formatNumber },
+    { label: '내전 승률', key: 'winRate', formatter: formatPercent },
+    { label: '내전 K/D', key: 'kd', formatter: formatKd }
+  ];
+
+  const primaryWins = [];
+  const targetWins = [];
+  let primaryScore = 0;
+  let targetScore = 0;
+
+  for (const item of comparisons) {
+    const primaryValue = primaryMetrics[item.key];
+    const targetValue = targetMetrics[item.key];
+    if (primaryValue > targetValue) {
+      primaryWins.push(item.label);
+      primaryScore += 1;
+    } else if (targetValue > primaryValue) {
+      targetWins.push(item.label);
+      targetScore += 1;
+    }
+  }
+
+  let verdict;
+  if (primaryScore === targetScore) {
+    verdict = `⚖️ **접전**: ${primaryName}와 ${targetName}의 핵심 지표가 비슷합니다.`;
+  } else if (primaryScore > targetScore) {
+    verdict = `🏆 **${primaryName} 우세**: ${primaryWins.join(', ')}에서 앞섭니다.`;
+  } else {
+    verdict = `🏆 **${targetName} 우세**: ${targetWins.join(', ')}에서 앞섭니다.`;
+  }
+
+  const detailLines = comparisons.map(({ label, key, formatter }) =>
+    `• ${label}: **${primaryName} ${formatter(primaryMetrics[key])}** vs **${targetName} ${formatter(targetMetrics[key])}**`
+  );
+
+  const links = [
+    `https://trackingsa.com/stats/sudden-attack/?n=${encodeURIComponent(primaryName)}`,
+    `https://trackingsa.com/stats/sudden-attack/?n=${encodeURIComponent(targetName)}`
+  ];
+
+  return [
+    `⚔️ **라이벌 비교 | ${primaryName} vs ${targetName}**`,
+    '',
+    verdict,
+    '',
+    ...detailLines,
+    '',
+    `🔗 프로필 보기: ${links.join(' | ')}`
+  ].join('\n');
+}
+
 function balanceTeams(players) {
   if (players.length < 2) return null;
   const size = Math.floor(players.length / 2);
@@ -135,16 +258,48 @@ export async function onRequest(context) {
     if (interaction.data.name === '전적검색') {
       context.waitUntil((async () => {
         const nick = (interaction.data.options || []).find(o => o.name === '닉네임')?.value?.trim();
-        const qUrl = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents:runQuery`;
-        const qBody = { structuredQuery: { from: [{ collectionId: 'sa_crew_members' }], where: { fieldFilter: { field: { fieldPath: 'characterName' }, op: 'EQUAL', value: { stringValue: nick } } }, limit: 1 } };
-        const qResp = await fetch(qUrl, { method: 'POST', body: JSON.stringify(qBody), headers: { 'Content-Type': 'application/json' } });
-        const res = await qResp.json();
-        if (!res?.[0]?.document) return patchInteraction(APP_ID, token, { content: `❌ **${nick}**님은 등록되어 있지 않습니다.` });
-        const d = fromFirestore(res[0].document.fields);
+        const d = await queryCrewMember(PROJECT_ID, nick);
+        if (!d) return patchInteraction(APP_ID, token, { content: `❌ **${nick}**님은 등록되어 있지 않습니다.` });
         const winRate = (Number(d.wins || 0) + Number(d.loses || 0)) > 0 ? ((Number(d.wins || 0) / (Number(d.wins || 0) + Number(d.loses || 0))) * 100).toFixed(1) + '%' : '0%';
         const kd = (Number(d.crewKills || 0) + Number(d.crewDeaths || 0)) > 0 ? ((Number(d.crewKills || 0) / (Number(d.crewKills || 0) + Number(d.crewDeaths || 0))) * 100).toFixed(1) + '%' : '0%';
         const c = `📊 **[${nick}] 크루원 전적 리포트**\n\n🔹 **MMR:** ${d.mmr || 1200}\n🔹 **HSR 점수:** ${d.hsr || 1200}\n🔹 **내전 킬뎃:** ${kd}\n🔹 **내전 승률:** ${winRate}\n\n*TRACKING SA 공식 데이터베이스 기준*`;
         await patchInteraction(APP_ID, token, { content: c });
+      })());
+      return new Response(JSON.stringify({ type: 5 }), { headers: { 'Content-Type': 'application/json' } });
+    }
+
+    if (interaction.data.name === '라이벌') {
+      context.waitUntil((async () => {
+        const options = interaction.data.options || [];
+        const primaryName = options.find(o => o.name === '기준유저')?.value?.trim();
+        const targetName = options.find(o => o.name === '상대유저')?.value?.trim();
+
+        if (!primaryName || !targetName) {
+          return patchInteraction(APP_ID, token, { content: '❌ 기준 유저와 상대 유저를 모두 입력해주세요.' });
+        }
+
+        if (primaryName === targetName) {
+          return patchInteraction(APP_ID, token, { content: '❌ 같은 닉네임 두 개는 비교할 수 없습니다. 서로 다른 두 유저를 입력해주세요.' });
+        }
+
+        const [primaryData, targetData] = await Promise.all([
+          queryCrewMember(PROJECT_ID, primaryName),
+          queryCrewMember(PROJECT_ID, targetName)
+        ]);
+
+        if (!primaryData && !targetData) {
+          return patchInteraction(APP_ID, token, { content: `❌ **${primaryName}**님과 **${targetName}**님 모두 등록되어 있지 않습니다.` });
+        }
+        if (!primaryData) {
+          return patchInteraction(APP_ID, token, { content: `❌ **${primaryName}**님은 등록되어 있지 않습니다.` });
+        }
+        if (!targetData) {
+          return patchInteraction(APP_ID, token, { content: `❌ **${targetName}**님은 등록되어 있지 않습니다.` });
+        }
+
+        await patchInteraction(APP_ID, token, {
+          content: buildRivalSummary(primaryName, primaryData, targetName, targetData)
+        });
       })());
       return new Response(JSON.stringify({ type: 5 }), { headers: { 'Content-Type': 'application/json' } });
     }
