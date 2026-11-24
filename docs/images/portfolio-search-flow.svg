@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1030" viewBox="0 0 1600 1030">
+<rect width="1600" height="1030" fill="#F3F6FB"/>
+<text x="60" y="56.79" fill="#087F79" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="17" font-weight="700">TRACKINGSA   /   03  USER FLOW</text>
+<text x="60" y="124.41" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="43" font-weight="700">전적 검색에서 비교·공유까지</text>
+<text x="60" y="175.27" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="21" font-weight="400">검색 결과를 확인한 뒤 비교·공유·즐겨찾기를 선택할 수 있습니다.</text>
+<text x="60" y="998.92" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="16" font-weight="400">TrackingSA  ·  코드 기준 1df8890  ·  2026.11</text>
+<polyline points="320,355 360,355" fill="none" stroke="#245EDB" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="360,355 349.3560609266486,360.5413501064978 349.3560609266486,349.4586498935022" fill="#245EDB"/>
+<polyline points="620,355 660,355" fill="none" stroke="#245EDB" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="660,355 649.3560609266486,360.5413501064978 649.3560609266486,349.4586498935022" fill="#245EDB"/>
+<polyline points="920,355 960,355" fill="none" stroke="#245EDB" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="960,355 949.3560609266486,360.5413501064978 949.3560609266486,349.4586498935022" fill="#245EDB"/>
+<polyline points="1220,355 1260,355" fill="none" stroke="#245EDB" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="1260,355 1249.3560609266485,360.5413501064978 1249.3560609266485,349.4586498935022" fill="#245EDB"/>
+<rect x="60" y="255" width="260" height="225" rx="20" fill="#E8EDF5" stroke="none" stroke-width="2"/>
+<rect x="60" y="250" width="260" height="225" rx="20" fill="#FFFFFF" stroke="#D7E0EB" stroke-width="2"/>
+<rect x="82" y="275" width="5" height="29" rx="2" fill="#245EDB" stroke="none" stroke-width="2"/>
+<text x="102" y="296.75" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="25" font-weight="700">01  닉네임 입력</text>
+<text x="84" y="344.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">전적 검색 진입</text>
+<text x="84" y="382.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">최근 검색·즐겨찾기</text>
+<rect x="360" y="255" width="260" height="225" rx="20" fill="#E8EDF5" stroke="none" stroke-width="2"/>
+<rect x="360" y="250" width="260" height="225" rx="20" fill="#FFFFFF" stroke="#D7E0EB" stroke-width="2"/>
+<rect x="382" y="275" width="5" height="29" rx="2" fill="#245EDB" stroke="none" stroke-width="2"/>
+<text x="402" y="296.75" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="25" font-weight="700">02  캐시·API 조회</text>
+<text x="384" y="344.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">캐시 상태 확인</text>
+<text x="384" y="382.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">OUID·프로필·경기 조회</text>
+<rect x="660" y="255" width="260" height="225" rx="20" fill="#E8EDF5" stroke="none" stroke-width="2"/>
+<rect x="660" y="250" width="260" height="225" rx="20" fill="#FFFFFF" stroke="#D7E0EB" stroke-width="2"/>
+<rect x="682" y="275" width="5" height="29" rx="2" fill="#245EDB" stroke="none" stroke-width="2"/>
+<text x="702" y="296.75" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="25" font-weight="700">03  결과 확인</text>
+<text x="684" y="344.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">요약·상세·활동 탭</text>
+<text x="684" y="382.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">필요한 기록 펼치기</text>
+<rect x="960" y="255" width="260" height="225" rx="20" fill="#E8EDF5" stroke="none" stroke-width="2"/>
+<rect x="960" y="250" width="260" height="225" rx="20" fill="#FFFFFF" stroke="#D7E0EB" stroke-width="2"/>
+<rect x="982" y="275" width="5" height="29" rx="2" fill="#245EDB" stroke="none" stroke-width="2"/>
+<text x="1002" y="296.75" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="25" font-weight="700">04  선수 비교</text>
+<text x="984" y="344.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">상대 선수 선택</text>
+<text x="984" y="382.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">같은 구간의 지표 비교</text>
+<rect x="1260" y="255" width="260" height="225" rx="20" fill="#E8EDF5" stroke="none" stroke-width="2"/>
+<rect x="1260" y="250" width="260" height="225" rx="20" fill="#FFFFFF" stroke="#D7E0EB" stroke-width="2"/>
+<rect x="1282" y="275" width="5" height="29" rx="2" fill="#087F79" stroke="none" stroke-width="2"/>
+<text x="1302" y="296.75" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="25" font-weight="700">05  공유·재방문</text>
+<text x="1284" y="344.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">요약 이미지·링크</text>
+<text x="1284" y="382.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">즐겨찾기로 다시 검색</text>
+<text x="60" y="557.62" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="26" font-weight="700">화면 뒤에서 지키는 세 가지 규칙</text>
+<rect x="60" y="600" width="470" height="260" rx="20" fill="#E8EDF5" stroke="none" stroke-width="2"/>
+<rect x="60" y="595" width="470" height="260" rx="20" fill="#FFFFFF" stroke="#D7E0EB" stroke-width="2"/>
+<rect x="82" y="620" width="5" height="29" rx="2" fill="#245EDB" stroke="none" stroke-width="2"/>
+<text x="102" y="641.75" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="25" font-weight="700">캐시 상태에 따라 조회</text>
+<text x="84" y="691.14" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="22" font-weight="400">없음: 네트워크 조회</text>
+<text x="84" y="729.14" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="22" font-weight="400">5분 이내: 캐시만 표시</text>
+<text x="84" y="767.14" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="22" font-weight="400">5분 경과: 캐시 우선 + 갱신</text>
+<rect x="565" y="600" width="470" height="260" rx="20" fill="#E8EDF5" stroke="none" stroke-width="2"/>
+<rect x="565" y="595" width="470" height="260" rx="20" fill="#FFFFFF" stroke="#D7E0EB" stroke-width="2"/>
+<rect x="587" y="620" width="5" height="29" rx="2" fill="#087F79" stroke="none" stroke-width="2"/>
+<text x="607" y="641.75" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="25" font-weight="700">실패와 빈 기록을 구분</text>
+<text x="589" y="691.14" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="22" font-weight="400">정상 빈 목록: 기록 없음</text>
+<text x="589" y="729.14" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="22" font-weight="400">일부 / 전체 실패: 안내·재시도</text>
+<text x="589" y="767.14" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="22" font-weight="400">기록이 없으면 0으로 확정하지 않음</text>
+<rect x="1070" y="600" width="470" height="260" rx="20" fill="#E8EDF5" stroke="none" stroke-width="2"/>
+<rect x="1070" y="595" width="470" height="260" rx="20" fill="#FFFFFF" stroke="#D7E0EB" stroke-width="2"/>
+<rect x="1092" y="620" width="5" height="29" rx="2" fill="#7656B6" stroke="none" stroke-width="2"/>
+<text x="1112" y="641.75" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="25" font-weight="700">새로고침의 완료 기준</text>
+<text x="1094" y="691.14" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="22" font-weight="400">메모리·저장소 캐시 무효화</text>
+<text x="1094" y="729.14" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="22" font-weight="400">동일 요청은 진행 중 결과 공유</text>
+<text x="1094" y="767.14" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="22" font-weight="400">이전 응답이 최신 결과를 덮지 않음</text>
+<rect x="60" y="895" width="1480" height="85" rx="16" fill="#E7F3F2" stroke="none" stroke-width="2"/>
+<text x="84" y="934.14" fill="#087F79" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="22" font-weight="700">공개 전적 검색·기본 비교는 로그인 없이 이용</text>
+</svg>

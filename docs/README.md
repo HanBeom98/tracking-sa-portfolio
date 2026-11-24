@@ -4,6 +4,14 @@
 
 ## 먼저 읽을 문서
 
+### 공개 포트폴리오 안내 · 2026.11.24
+
+- [구조·데이터 모델·유저 플로우](portfolio-system-design.md): 원본 코드에 근거한 그림 4종
+- [핵심 API 명세](portfolio-api.md): 요청·응답·인증·캐시·실패 처리와 Firebase SDK 계약
+- [문제 해결 사례](portfolio-case-studies.md), [공개판 범위](portfolio-snapshot.md), [공개판 검증 기록](portfolio-verification.md)
+
+### 운영·개발 문서
+
 | 목적 | 문서 | 역할 |
 | --- | --- | --- |
 | 지금 제공하는 기능과 준비 상태 | [현재 상태](current-status.md) | 공개 기능·TEST·실제 판매 경계, 확인 시점 |

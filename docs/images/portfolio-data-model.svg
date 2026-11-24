@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1230" viewBox="0 0 1600 1230">
+<rect width="1600" height="1230" fill="#F3F6FB"/>
+<text x="60" y="56.79" fill="#087F79" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="17" font-weight="700">TRACKINGSA   /   02  FIRESTORE DATA MODEL</text>
+<text x="60" y="124.41" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="43" font-weight="700">UID와 OUID를 나누어 읽는 데이터 구조</text>
+<text x="60" y="175.27" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="21" font-weight="400">대표 컬렉션의 주요 필드만 표시했습니다. 점선은 논리 참조이며 관계형 FK가 아닙니다.</text>
+<text x="60" y="1198.92" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="16" font-weight="400">TrackingSA  ·  코드 기준 1df8890  ·  2026.11</text>
+<rect x="40" y="232" width="740" height="860" rx="24" fill="#EAF0FC" stroke="none" stroke-width="2"/>
+<rect x="820" y="232" width="740" height="860" rx="24" fill="#E7F3F2" stroke="none" stroke-width="2"/>
+<text x="65" y="272.4" fill="#245EDB" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="700">회원 · 커뮤니티  /  Firebase Auth UID</text>
+<text x="845" y="272.4" fill="#087F79" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="700">크루 · 정산  /  NEXON 선수 OUID</text>
+<polyline points="390,450 430,450" fill="none" stroke="#245EDB" stroke-width="3" stroke-linejoin="round" stroke-dasharray="10 8"/>
+<polygon points="430,450 419.3560609266486,455.5413501064978 419.3560609266486,444.4586498935022" fill="#245EDB"/>
+<polyline points="230,590 230,720" fill="none" stroke="#245EDB" stroke-width="3" stroke-linejoin="round" stroke-dasharray="10 8"/>
+<polygon points="230,720 224.4586498935022,709.3560609266486 235.5413501064978,709.3560609266486" fill="#245EDB"/>
+<text x="245" y="655.79" fill="#245EDB" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="17" font-weight="700">authorUid</text>
+<polyline points="390,865 430,865" fill="none" stroke="#245EDB" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="430,865 419.3560609266486,870.5413501064978 419.3560609266486,859.4586498935022" fill="#245EDB"/>
+<polyline points="1170,450 1210,450" fill="none" stroke="#087F79" stroke-width="3" stroke-linejoin="round" stroke-dasharray="10 8"/>
+<polygon points="1210,450 1199.3560609266485,455.5413501064978 1199.3560609266485,444.4586498935022" fill="#087F79"/>
+<text x="1180" y="509.79" fill="#087F79" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="17" font-weight="700">승인</text>
+<rect x="70" y="315" width="320" height="280" rx="20" fill="#E8EDF5" stroke="none" stroke-width="2"/>
+<rect x="70" y="310" width="320" height="280" rx="20" fill="#FFFFFF" stroke="#D7E0EB" stroke-width="2"/>
+<rect x="92" y="335" width="5" height="29" rx="2" fill="#245EDB" stroke="none" stroke-width="2"/>
+<text x="112" y="356.75" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="25" font-weight="700">사용자 프로필</text>
+<text x="94" y="401.79" fill="#245EDB" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="17" font-weight="700">users/{uid}</text>
+<text x="94" y="438.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">uid · email · role</text>
+<text x="94" y="476.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">nickname · displayName</text>
+<text x="94" y="514.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">photoURL · createdAt</text>
+<text x="94" y="552.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">nicknameUpdatedAt</text>
+<rect x="430" y="315" width="320" height="280" rx="20" fill="#E8EDF5" stroke="none" stroke-width="2"/>
+<rect x="430" y="310" width="320" height="280" rx="20" fill="#FFFFFF" stroke="#D7E0EB" stroke-width="2"/>
+<rect x="452" y="335" width="5" height="29" rx="2" fill="#245EDB" stroke="none" stroke-width="2"/>
+<text x="472" y="356.75" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="25" font-weight="700">닉네임 예약</text>
+<text x="454" y="401.79" fill="#245EDB" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="17" font-weight="700">nicknames/{nickname}</text>
+<text x="454" y="438.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">uid · nickname</text>
+<text x="454" y="476.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">updatedAt</text>
+<text x="454" y="514.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">닉네임 키는 소문자</text>
+<text x="454" y="552.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">프로필과 함께 트랜잭션 갱신</text>
+<rect x="70" y="725" width="320" height="290" rx="20" fill="#E8EDF5" stroke="none" stroke-width="2"/>
+<rect x="70" y="720" width="320" height="290" rx="20" fill="#FFFFFF" stroke="#D7E0EB" stroke-width="2"/>
+<rect x="92" y="745" width="5" height="29" rx="2" fill="#245EDB" stroke="none" stroke-width="2"/>
+<text x="112" y="766.75" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="25" font-weight="700">게시글</text>
+<text x="94" y="811.79" fill="#245EDB" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="17" font-weight="700">board_posts/{postId}</text>
+<text x="94" y="848.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">authorUid · authorName</text>
+<text x="94" y="886.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">title · content · category</text>
+<text x="94" y="924.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">attachments[] · createdAt</text>
+<text x="94" y="962.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">공개 작성자에 이메일 미포함</text>
+<rect x="430" y="725" width="320" height="290" rx="20" fill="#E8EDF5" stroke="none" stroke-width="2"/>
+<rect x="430" y="720" width="320" height="290" rx="20" fill="#FFFFFF" stroke="#D7E0EB" stroke-width="2"/>
+<rect x="452" y="745" width="5" height="29" rx="2" fill="#245EDB" stroke="none" stroke-width="2"/>
+<text x="472" y="766.75" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="25" font-weight="700">댓글 · 답글</text>
+<text x="454" y="811.79" fill="#245EDB" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="17" font-weight="700">board_posts/{postId}/</text>
+<text x="454" y="837.79" fill="#245EDB" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="17" font-weight="700">comments/{commentId}</text>
+<text x="454" y="874.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">authorUid · authorName</text>
+<text x="454" y="912.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">content · parentId</text>
+<text x="454" y="950.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">deleted · createdAt</text>
+<text x="454" y="988.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">게시글 아래 하위 컬렉션</text>
+<rect x="850" y="315" width="320" height="280" rx="20" fill="#E8EDF5" stroke="none" stroke-width="2"/>
+<rect x="850" y="310" width="320" height="280" rx="20" fill="#FFFFFF" stroke="#D7E0EB" stroke-width="2"/>
+<rect x="872" y="335" width="5" height="29" rx="2" fill="#087F79" stroke="none" stroke-width="2"/>
+<text x="892" y="356.75" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="25" font-weight="700">크루 가입 신청</text>
+<text x="874" y="401.79" fill="#087F79" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="17" font-weight="700">sa_crew_applications/{uid}</text>
+<text x="874" y="438.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">applicantUid → users.uid</text>
+<text x="874" y="476.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">ouid → 선수 식별자</text>
+<text x="874" y="514.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">characterName · status</text>
+<text x="874" y="552.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">appliedAt</text>
+<rect x="1210" y="315" width="320" height="280" rx="20" fill="#E8EDF5" stroke="none" stroke-width="2"/>
+<rect x="1210" y="310" width="320" height="280" rx="20" fill="#FFFFFF" stroke="#D7E0EB" stroke-width="2"/>
+<rect x="1232" y="335" width="5" height="29" rx="2" fill="#087F79" stroke="none" stroke-width="2"/>
+<text x="1252" y="356.75" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="25" font-weight="700">크루 멤버</text>
+<text x="1234" y="401.79" fill="#087F79" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="17" font-weight="700">sa_crew_members/{ouid}</text>
+<text x="1234" y="438.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">characterName · mmr · hsr</text>
+<text x="1234" y="476.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">previousNames[]</text>
+<text x="1234" y="514.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">wins · loses · mmrHistory[]</text>
+<text x="1234" y="552.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">crewKills · crewDeaths</text>
+<rect x="850" y="725" width="320" height="290" rx="20" fill="#E8EDF5" stroke="none" stroke-width="2"/>
+<rect x="850" y="720" width="320" height="290" rx="20" fill="#FFFFFF" stroke="#D7E0EB" stroke-width="2"/>
+<rect x="872" y="745" width="5" height="29" rx="2" fill="#087F79" stroke="none" stroke-width="2"/>
+<text x="892" y="766.75" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="25" font-weight="700">시즌 설정 · 보관</text>
+<text x="874" y="811.79" fill="#087F79" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="17" font-weight="700">sa_crew_settings/{docId}</text>
+<text x="874" y="848.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">season: startDate</text>
+<text x="874" y="886.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">season_archive_*</text>
+<text x="874" y="924.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">members: { [ouid]: … }</text>
+<text x="874" y="962.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">멤버별 이전 시즌 요약 보관</text>
+<rect x="1210" y="725" width="320" height="290" rx="20" fill="#E8EDF5" stroke="none" stroke-width="2"/>
+<rect x="1210" y="720" width="320" height="290" rx="20" fill="#FFFFFF" stroke="#D7E0EB" stroke-width="2"/>
+<rect x="1232" y="745" width="5" height="29" rx="2" fill="#087F79" stroke="none" stroke-width="2"/>
+<text x="1252" y="766.75" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="25" font-weight="700">경기 정산 영수증</text>
+<text x="1234" y="811.79" fill="#087F79" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="17" font-weight="700">sa_crew_history/{matchId}</text>
+<text x="1234" y="848.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">map · matchDate · settledAt</text>
+<text x="1234" y="886.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">crewCount · abandonOuids[]</text>
+<text x="1234" y="924.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">matchedSessionId</text>
+<text x="1234" y="962.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">같은 경기의 중복 정산 방지</text>
+<rect x="60" y="1110" width="1480" height="65" rx="16" fill="#E7F3F2" stroke="none" stroke-width="2"/>
+<text x="84" y="1149.14" fill="#087F79" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="22" font-weight="700">참고</text>
+<text x="155" y="1147.66" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="18" font-weight="400">실선: 하위 컬렉션   ·   점선: 논리 참조 / 승인   ·   UID = 사이트 계정, OUID = 게임 선수</text>
+</svg>

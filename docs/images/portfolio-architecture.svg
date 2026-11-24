@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1160" viewBox="0 0 1600 1160">
+<rect width="1600" height="1160" fill="#F3F6FB"/>
+<text x="60" y="56.79" fill="#087F79" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="17" font-weight="700">TRACKINGSA   /   01  SYSTEM ARCHITECTURE</text>
+<text x="60" y="124.41" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="43" font-weight="700">검색은 서버를 거치고, 기본 복기는 기기 안에서</text>
+<text x="60" y="175.27" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="21" font-weight="400">핵심 전적·리플레이·회원/게시판 경로와 실행 위치를 구분했습니다.</text>
+<text x="60" y="1128.92" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="16" font-weight="400">TrackingSA  ·  코드 기준 1df8890  ·  2026.11</text>
+<polyline points="460,340 590,340" fill="none" stroke="#245EDB" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="590,340 579.3560609266486,345.5413501064978 579.3560609266486,334.4586498935022" fill="#245EDB"/>
+<polygon points="460,340 470.6439390733514,334.4586498935022 470.6439390733514,345.5413501064978" fill="#245EDB"/>
+<text x="486" y="305.66" fill="#245EDB" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="18" font-weight="700">요청·응답</text>
+<polyline points="990,340 1120,340" fill="none" stroke="#245EDB" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="1120,340 1109.3560609266485,345.5413501064978 1109.3560609266485,334.4586498935022" fill="#245EDB"/>
+<polygon points="990,340 1000.6439390733514,334.4586498935022 1000.6439390733514,345.5413501064978" fill="#245EDB"/>
+<text x="1006" y="305.66" fill="#245EDB" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="18" font-weight="700">서버 키</text>
+<polyline points="260,470 260,650" fill="none" stroke="#087F79" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="260,650 254.4586498935022,639.3560609266486 265.5413501064978,639.3560609266486" fill="#087F79"/>
+<text x="83" y="569.53" fill="#087F79" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="19" font-weight="700">JSON 파일·가상 샘플</text>
+<polyline points="420,470 420,550 790,550 790,650" fill="none" stroke="#245EDB" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="790,650 784.4586498935022,639.3560609266486 795.5413501064978,639.3560609266486" fill="#245EDB"/>
+<text x="494" y="526.53" fill="#245EDB" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="19" font-weight="700">Firebase SDK 직접 연결</text>
+<polyline points="1120,760 990,760" fill="none" stroke="#7656B6" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="990,760 1000.6439390733514,754.4586498935022 1000.6439390733514,765.5413501064978" fill="#7656B6"/>
+<polygon points="1120,760 1109.3560609266485,765.5413501064978 1109.3560609266485,754.4586498935022" fill="#7656B6"/>
+<text x="1005" y="720.79" fill="#7656B6" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="17" font-weight="700">트리거·</text>
+<text x="1005" y="747.79" fill="#7656B6" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="17" font-weight="700">서버 처리</text>
+<rect x="60" y="255" width="400" height="220" rx="20" fill="#E8EDF5" stroke="none" stroke-width="2"/>
+<rect x="60" y="250" width="400" height="220" rx="20" fill="#FFFFFF" stroke="#D7E0EB" stroke-width="2"/>
+<rect x="82" y="275" width="5" height="29" rx="2" fill="#245EDB" stroke="none" stroke-width="2"/>
+<text x="102" y="296.75" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="25" font-weight="700">사용자 브라우저</text>
+<text x="84" y="341.79" fill="#245EDB" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="17" font-weight="700">JavaScript · Web Components</text>
+<text x="84" y="378.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">전적·VS·활동 화면</text>
+<text x="84" y="416.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">메모리·저장소 캐시</text>
+<text x="84" y="454.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">최근 검색·즐겨찾기</text>
+<rect x="590" y="255" width="400" height="220" rx="20" fill="#E8EDF5" stroke="none" stroke-width="2"/>
+<rect x="590" y="250" width="400" height="220" rx="20" fill="#FFFFFF" stroke="#D7E0EB" stroke-width="2"/>
+<rect x="612" y="275" width="5" height="29" rx="2" fill="#245EDB" stroke="none" stroke-width="2"/>
+<text x="632" y="296.75" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="25" font-weight="700">Cloudflare Pages</text>
+<text x="614" y="341.79" fill="#245EDB" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="17" font-weight="700">Pages + Pages Functions</text>
+<text x="614" y="378.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">정적 HTML·CSS·JS 제공</text>
+<text x="614" y="416.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">Functions: /api/sa-proxy</text>
+<text x="614" y="454.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">성공 응답 캐시·요청 공유</text>
+<rect x="1120" y="255" width="420" height="220" rx="20" fill="#E8EDF5" stroke="none" stroke-width="2"/>
+<rect x="1120" y="250" width="420" height="220" rx="20" fill="#FFFFFF" stroke="#D7E0EB" stroke-width="2"/>
+<rect x="1142" y="275" width="5" height="29" rx="2" fill="#245EDB" stroke="none" stroke-width="2"/>
+<text x="1162" y="296.75" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="25" font-weight="700">NEXON Open API</text>
+<text x="1144" y="341.79" fill="#245EDB" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="17" font-weight="700">외부 공식 경기 데이터</text>
+<text x="1144" y="378.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">닉네임 → 선수 OUID</text>
+<text x="1144" y="416.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">프로필·경기 목록·경기 상세</text>
+<text x="1144" y="454.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">허용 경로만 프록시로 요청</text>
+<rect x="60" y="655" width="400" height="235" rx="20" fill="#E8EDF5" stroke="none" stroke-width="2"/>
+<rect x="60" y="650" width="400" height="235" rx="20" fill="#FFFFFF" stroke="#D7E0EB" stroke-width="2"/>
+<rect x="82" y="675" width="5" height="29" rx="2" fill="#087F79" stroke="none" stroke-width="2"/>
+<text x="102" y="696.75" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="25" font-weight="700">브라우저 내부 리플레이</text>
+<text x="84" y="741.79" fill="#087F79" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="17" font-weight="700">기본 파일·계산 결과: 서버 저장 없음</text>
+<text x="84" y="778.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">JSON 검증 → 규칙 기반 계산</text>
+<text x="84" y="816.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">재생·여러 경기 비교</text>
+<text x="84" y="854.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">PNG·인쇄/PDF 생성</text>
+<rect x="590" y="655" width="400" height="235" rx="20" fill="#E8EDF5" stroke="none" stroke-width="2"/>
+<rect x="590" y="650" width="400" height="235" rx="20" fill="#FFFFFF" stroke="#D7E0EB" stroke-width="2"/>
+<rect x="612" y="675" width="5" height="29" rx="2" fill="#7656B6" stroke="none" stroke-width="2"/>
+<text x="632" y="696.75" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="25" font-weight="700">Firebase</text>
+<text x="614" y="741.79" fill="#7656B6" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="17" font-weight="700">Security Rules로 읽기·쓰기 검증</text>
+<text x="614" y="778.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">Auth: 사용자 인증</text>
+<text x="614" y="816.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">Firestore: 회원·게시판·리그</text>
+<text x="614" y="854.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">Storage: 게시판 첨부 이미지</text>
+<rect x="1120" y="655" width="420" height="235" rx="20" fill="#E8EDF5" stroke="none" stroke-width="2"/>
+<rect x="1120" y="650" width="420" height="235" rx="20" fill="#FFFFFF" stroke="#D7E0EB" stroke-width="2"/>
+<rect x="1142" y="675" width="5" height="29" rx="2" fill="#7656B6" stroke="none" stroke-width="2"/>
+<text x="1162" y="696.75" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="25" font-weight="700">Firebase 서버 함수</text>
+<text x="1144" y="741.79" fill="#7656B6" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="17" font-weight="700">Cloud Functions · Admin SDK</text>
+<text x="1144" y="778.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">게시글 삭제 → 댓글 정리</text>
+<text x="1144" y="816.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">구형 Discord 세션 RPC 보존</text>
+<text x="1144" y="854.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">기본 리플레이의 필수 경로 아님</text>
+<rect x="60" y="945" width="1480" height="120" rx="16" fill="#E7F3F2" stroke="none" stroke-width="2"/>
+<text x="84" y="984.14" fill="#087F79" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="22" font-weight="700">검증 후 배포</text>
+<text x="84" y="1019.4" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">GitHub Actions 검증 → Python 빌드(public/) + Functions → Cloudflare Pages. Discord 요청은 Functions에서 별도 서명 검증합니다.</text>
+</svg>

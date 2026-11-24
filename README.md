@@ -12,9 +12,11 @@
 
 ## 먼저 볼 내용
 
-1. [문제 해결 사례](docs/portfolio-case-studies.md): 캐시 무효화, 실패와 0의 구분, 리플레이 상태 관리
-2. [핵심 소스와 테스트](#핵심-소스와-테스트): 기능별 구현과 검증 코드
-3. [공개판 검증 기록](docs/portfolio-verification.md): 이번 갱신에서 실제 실행한 검사와 범위
+1. [구조·데이터 모델·유저 플로우](docs/portfolio-system-design.md): 그림 4종과 설계 근거
+2. [핵심 API 명세](docs/portfolio-api.md): 요청·응답, 인증, 캐시, 실패 처리
+3. [문제 해결 사례](docs/portfolio-case-studies.md): 캐시 무효화, 실패와 0의 구분, 리플레이 상태 관리
+4. [핵심 소스와 테스트](#핵심-소스와-테스트): 기능별 구현과 검증 코드
+5. [공개판 검증 기록](docs/portfolio-verification.md): 이번 갱신에서 실제 실행한 검사와 범위
 
 ## 무엇을 만들었나
 
@@ -53,6 +55,10 @@
 
 ## 기술과 구조
 
+![TrackingSA 시스템 아키텍처](docs/images/portfolio-architecture.png)
+
+전적 조회는 키를 보관한 서버 프록시를 거치고, 기본 리플레이 분석은 브라우저 안에서 처리합니다. 로그인·게시판·크루는 Firebase SDK와 보안 규칙을 사용합니다. [실행 경로와 코드 근거](docs/portfolio-system-design.md#1-아키텍처)
+
 | 영역 | 사용 기술 |
 | --- | --- |
 | 화면 | JavaScript ES Modules, Web Components, Shadow DOM, HTML/CSS |
@@ -73,6 +79,16 @@ cloud-functions/ 별도 서버 함수
 tests/            단위·Python·브라우저·Emulator 검사
 public/           빌드로 생성한 결과
 ```
+
+### 데이터 구조와 사용자 동선
+
+![Firestore 데이터 모델](docs/images/portfolio-data-model.png)
+
+회원 계정 UID와 게임 선수 OUID를 구분하고, 게시글·댓글의 하위 컬렉션과 크루 정산 구조를 표시했습니다. 점선은 코드의 논리 참조이며 관계형 외래 키가 아닙니다.
+
+- [전적 검색 → 비교·공유 흐름](docs/portfolio-system-design.md#3-전적-검색-유저-플로우)
+- [JSON → 한 경기 복기·여러 경기 비교 흐름](docs/portfolio-system-design.md#4-리플레이-분석-유저-플로우)
+- [API 명세와 Firebase SDK 계약](docs/portfolio-api.md)
 
 ## 핵심 소스와 테스트
 
@@ -110,7 +126,7 @@ python -m http.server 4173 --directory public
 
 ## 화면과 기록
 
-현재 화면과 가상 리플레이 체험은 [운영 서비스](https://trackingsa.com)에서 확인할 수 있습니다. `docs/images/`의 기존 캡처는 과거 화면 기록이며 최신 UI를 뜻하지 않습니다.
+현재 화면과 가상 리플레이 체험은 [운영 서비스](https://trackingsa.com)에서 확인할 수 있습니다. 위의 구조도 4종은 최신 원본 코드를 기준으로 제작했습니다. `docs/images/`의 기존 화면 캡처는 과거 기록이며 최신 UI를 뜻하지 않습니다.
 
 - [개발일지 모음](https://blog.naver.com/PostList.naver?blogId=hantiger24&from=postList&categoryNo=33)
 - [전적·리플레이 가이드](https://trackingsa.com/guides/replay-analysis-guide/)

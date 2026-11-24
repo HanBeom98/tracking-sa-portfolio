@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1030" viewBox="0 0 1600 1030">
+<rect width="1600" height="1030" fill="#F3F6FB"/>
+<text x="60" y="56.79" fill="#087F79" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="17" font-weight="700">TRACKINGSA   /   04  USER FLOW</text>
+<text x="60" y="124.41" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="43" font-weight="700">파일을 넣고, 근거를 따라 경기 복기</text>
+<text x="60" y="175.27" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="21" font-weight="400">홈 또는 분석실에서 직접 고른 JSON과 가상 샘플로 시작합니다.</text>
+<text x="60" y="998.92" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="16" font-weight="400">TrackingSA  ·  코드 기준 1df8890  ·  2026.11</text>
+<polyline points="320,355 360,355" fill="none" stroke="#245EDB" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="360,355 349.3560609266486,360.5413501064978 349.3560609266486,349.4586498935022" fill="#245EDB"/>
+<polyline points="620,355 660,355" fill="none" stroke="#245EDB" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="660,355 649.3560609266486,360.5413501064978 649.3560609266486,349.4586498935022" fill="#245EDB"/>
+<polyline points="920,355 960,355" fill="none" stroke="#245EDB" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="960,355 949.3560609266486,360.5413501064978 949.3560609266486,349.4586498935022" fill="#245EDB"/>
+<polyline points="1220,355 1260,355" fill="none" stroke="#245EDB" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="1260,355 1249.3560609266485,360.5413501064978 1249.3560609266485,349.4586498935022" fill="#245EDB"/>
+<rect x="60" y="255" width="260" height="225" rx="20" fill="#E8EDF5" stroke="none" stroke-width="2"/>
+<rect x="60" y="250" width="260" height="225" rx="20" fill="#FFFFFF" stroke="#D7E0EB" stroke-width="2"/>
+<rect x="82" y="275" width="5" height="29" rx="2" fill="#245EDB" stroke="none" stroke-width="2"/>
+<text x="102" y="296.75" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="25" font-weight="700">01  분석 진입</text>
+<text x="84" y="344.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">JSON 파일 선택</text>
+<text x="84" y="382.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">가상 샘플 체험 가능</text>
+<rect x="360" y="255" width="260" height="225" rx="20" fill="#E8EDF5" stroke="none" stroke-width="2"/>
+<rect x="360" y="250" width="260" height="225" rx="20" fill="#FFFFFF" stroke="#D7E0EB" stroke-width="2"/>
+<rect x="382" y="275" width="5" height="29" rx="2" fill="#245EDB" stroke="none" stroke-width="2"/>
+<text x="402" y="296.75" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="25" font-weight="700">02  파일 검증</text>
+<text x="384" y="344.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">파일·참가자·기록 확인</text>
+<text x="384" y="382.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">입력 오류는 다시 선택</text>
+<rect x="660" y="255" width="260" height="225" rx="20" fill="#E8EDF5" stroke="none" stroke-width="2"/>
+<rect x="660" y="250" width="260" height="225" rx="20" fill="#FFFFFF" stroke="#D7E0EB" stroke-width="2"/>
+<rect x="682" y="275" width="5" height="29" rx="2" fill="#245EDB" stroke="none" stroke-width="2"/>
+<text x="702" y="296.75" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="25" font-weight="700">03  분석 모드</text>
+<text x="684" y="344.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">1개: 한 경기 분석</text>
+<text x="684" y="382.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">2~5개: 같은 선수 비교</text>
+<rect x="960" y="255" width="260" height="225" rx="20" fill="#E8EDF5" stroke="none" stroke-width="2"/>
+<rect x="960" y="250" width="260" height="225" rx="20" fill="#FFFFFF" stroke="#D7E0EB" stroke-width="2"/>
+<rect x="982" y="275" width="5" height="29" rx="2" fill="#245EDB" stroke="none" stroke-width="2"/>
+<text x="1002" y="296.75" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="25" font-weight="700">04  장면·변화 확인</text>
+<text x="984" y="344.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">시점 재생·선수 필터</text>
+<text x="984" y="382.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">검증 지표·보류 사유</text>
+<rect x="1260" y="255" width="260" height="225" rx="20" fill="#E8EDF5" stroke="none" stroke-width="2"/>
+<rect x="1260" y="250" width="260" height="225" rx="20" fill="#FFFFFF" stroke="#D7E0EB" stroke-width="2"/>
+<rect x="1282" y="275" width="5" height="29" rx="2" fill="#087F79" stroke="none" stroke-width="2"/>
+<text x="1302" y="296.75" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="25" font-weight="700">05  결과 활용</text>
+<text x="1284" y="344.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">한 경기: PNG·PDF</text>
+<text x="1284" y="382.4" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">여러 경기: 변화 비교</text>
+<polyline points="790,475 790,525 420,525 420,585" fill="none" stroke="#087F79" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="420,585 414.4586498935022,574.3560609266486 425.5413501064978,574.3560609266486" fill="#087F79"/>
+<polyline points="790,525 1180,525 1180,585" fill="none" stroke="#245EDB" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="1180,585 1174.4586498935023,574.3560609266486 1185.5413501064977,574.3560609266486" fill="#245EDB"/>
+<rect x="60" y="590" width="720" height="260" rx="20" fill="#E8EDF5" stroke="none" stroke-width="2"/>
+<rect x="60" y="585" width="720" height="260" rx="20" fill="#FFFFFF" stroke="#D7E0EB" stroke-width="2"/>
+<rect x="82" y="610" width="5" height="29" rx="2" fill="#087F79" stroke="none" stroke-width="2"/>
+<text x="102" y="631.75" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="25" font-weight="700">JSON 1개  /  한 경기 복기</text>
+<text x="84" y="682.01" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="23" font-weight="400">공식 총계와 검증된 라운드 지표의 출처를 구분</text>
+<text x="84" y="720.01" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="23" font-weight="400">장면·선수·시점 선택 → 재생 / PNG / 인쇄·PDF</text>
+<text x="84" y="758.01" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="23" font-weight="400">검증할 수 없는 구간은 판단을 보류</text>
+<rect x="820" y="590" width="720" height="260" rx="20" fill="#E8EDF5" stroke="none" stroke-width="2"/>
+<rect x="820" y="585" width="720" height="260" rx="20" fill="#FFFFFF" stroke="#D7E0EB" stroke-width="2"/>
+<rect x="842" y="610" width="5" height="29" rx="2" fill="#245EDB" stroke="none" stroke-width="2"/>
+<text x="862" y="631.75" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="25" font-weight="700">JSON 2~5개  /  같은 선수 비교</text>
+<text x="844" y="682.01" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="23" font-weight="400">같은 OUID의 검증된 경기 기록으로 범위를 제한</text>
+<text x="844" y="720.01" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="23" font-weight="400">기준·이후 경기 선택 → 라운드 가중 지표 비교</text>
+<text x="844" y="758.01" fill="#52657B" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="23" font-weight="400">분석 파일을 교체하면 이전 비동기 결과의 반영 차단</text>
+<rect x="60" y="885" width="1480" height="95" rx="16" fill="#E7F3F2" stroke="none" stroke-width="2"/>
+<text x="84" y="924.14" fill="#087F79" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="22" font-weight="700">기본 분석·재생·비교는 기기 안에서 처리</text>
+<text x="84" y="959.4" fill="#16283F" font-family="Malgun Gothic,Noto Sans CJK KR,sans-serif" font-size="20" font-weight="400">추가 경기 유형·전력 조회는 별도 API 경로입니다. 기본 규칙 분석을 생성형 AI 판단으로 표시하지 않습니다.</text>
+</svg>
