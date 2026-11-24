@@ -1,13 +1,8 @@
 (function (globalScope) {
   function createAppShellRuntime() {
     const root = globalScope || globalThis;
-    let currentLang = root.localStorage.getItem("lang") || "ko";
-    const initialPath = root.location.pathname || "/";
-    if (initialPath.startsWith("/en/")) {
-      currentLang = "en";
-    }
-    root.localStorage.setItem("lang", currentLang);
-    root.document.documentElement.setAttribute("lang", currentLang === "en" ? "en" : "ko");
+    const currentLang = "ko";
+    root.document.documentElement.setAttribute("lang", "ko");
 
     // --- Translation Readiness Management ---
     let _resolveReady = null;
@@ -63,9 +58,6 @@
     }
 
     function applyTranslations() {
-      const path = root.location.pathname || "/";
-      const isEnglishPath = path.startsWith("/en/");
-
       // Attribute translations: data-i18n-attr="attr:key;attr2:key2"
       root.document.querySelectorAll("[data-i18n-attr]").forEach((el) => {
         const raw = el.getAttribute("data-i18n-attr") || "";
@@ -87,96 +79,43 @@
       root.document.querySelectorAll("[data-i18n]").forEach((el) => {
         const key = el.getAttribute("data-i18n");
         const translated = getTranslation(key);
-        
-        // Skip if the text is already translated statically (for English pages)
-        if (isEnglishPath && el.innerText.trim() === translated.replace(/<[^>]*>/g, '').trim()) {
-          return;
-        }
-
         if (translated !== key) {
           el.innerHTML = translated;
         }
       });
     }
 
-    function setLanguage(lang) {
-      root.localStorage.setItem("lang", lang);
-      currentLang = lang;
-      root.document.documentElement.setAttribute("lang", lang === "en" ? "en" : "ko");
-      
-      // 언어 변경 이벤트 발행 (도메인 컴포넌트 구독용)
-      root.dispatchEvent(new CustomEvent("language-changed", { detail: { lang } }));
-
-      const path = root.location.pathname || "/";
-      const isEnglishPath = path.startsWith("/en/");
-
-      if (lang === "en") {
-        if (isEnglishPath) return root.location.reload();
-        // Redirect to /en/ path for all pages
-        return (root.location.href = "/en" + path);
-      }
-
-      if (lang === "ko" && isEnglishPath) {
-        // Remove /en/ prefix for all pages
-        return (root.location.href = path.replace(/^\/en\//, "/"));
-      }
-
-      root.location.reload();
-    }
-
     function initTheme() {
       const body = root.document.body;
+      const documentElement = root.document.documentElement;
       const themeBtn = root.document.getElementById("color-change");
-      const savedTheme = root.localStorage.getItem("theme") || "light";
+      let savedTheme = "dark";
+      try { savedTheme = root.localStorage.getItem("theme") === "light" ? "light" : "dark"; } catch {}
 
       if (savedTheme === "dark") {
         body.classList.add("dark-mode");
+        documentElement.classList.add("dark-mode");
         if (themeBtn) themeBtn.innerText = "🌙";
       } else {
         body.classList.remove("dark-mode");
+        documentElement.classList.remove("dark-mode");
         if (themeBtn) themeBtn.innerText = "☀️";
       }
+      root.window.dispatchEvent(new CustomEvent("theme-changed", {
+        detail: { theme: savedTheme }
+      }));
 
       if (themeBtn) {
         themeBtn.onclick = () => {
           const isDark = body.classList.toggle("dark-mode");
-          root.localStorage.setItem("theme", isDark ? "dark" : "light");
+          documentElement.classList.toggle("dark-mode", isDark);
+          try { root.localStorage.setItem("theme", isDark ? "dark" : "light"); } catch {}
           themeBtn.innerText = isDark ? "🌙" : "☀️";
+          root.window.dispatchEvent(new CustomEvent("theme-changed", {
+            detail: { theme: isDark ? "dark" : "light" }
+          }));
         };
       }
-    }
-
-    function initLanguageSwitcher() {
-      const container = root.document.getElementById("language-switcher");
-      if (!container) return;
-      container.innerHTML = `
-        <button class="lang-button ${currentLang === "ko" ? "active" : ""}" onclick="setLanguage('ko')">KOR</button>
-        <button class="lang-button ${currentLang === "en" ? "active" : ""}" onclick="setLanguage('en')">ENG</button>
-      `;
-    }
-
-    function updateGnbLinksForLang() {
-      const isEnglish = currentLang === "en";
-      const gnbLinks = root.document.querySelectorAll("header nav a, footer a");
-      gnbLinks.forEach((link) => {
-        const href = link.getAttribute("href");
-        if (!href || href === "#" || href.startsWith("http")) return;
-        
-        let newHref = href;
-        if (isEnglish) {
-          if (!href.startsWith("/en/") && href.startsWith("/")) {
-            newHref = "/en" + href;
-          }
-        } else {
-          if (href.startsWith("/en/")) {
-            newHref = href.replace(/^\/en\//, "/");
-          }
-        }
-        
-        if (newHref !== href) {
-          link.setAttribute("href", newHref.replace("//", "/"));
-        }
-      });
     }
 
     function initDropdownMenus() {
@@ -235,6 +174,43 @@
       });
     }
 
+    function initMobileNavigation() {
+      if (!root.document || typeof root.document.querySelector !== "function") return;
+      const header = root.document.querySelector("header");
+      const toggle = root.document.querySelector(".mobile-menu-toggle");
+      const navigation = root.document.getElementById("primary-navigation");
+      if (!header || !toggle || !navigation) return;
+      if (toggle.dataset.mobileNavigationReady === "true") return;
+      toggle.dataset.mobileNavigationReady = "true";
+
+      const close = () => {
+        header.classList.remove("mobile-nav-open");
+        toggle.setAttribute("aria-expanded", "false");
+        toggle.setAttribute("aria-label", "메뉴 열기");
+      };
+
+      toggle.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const isOpen = header.classList.toggle("mobile-nav-open");
+        toggle.setAttribute("aria-expanded", String(isOpen));
+        toggle.setAttribute("aria-label", isOpen ? "메뉴 닫기" : "메뉴 열기");
+      });
+
+      navigation.addEventListener("click", (event) => {
+        if (event.target.closest("a")) close();
+      });
+
+      root.document.addEventListener("click", (event) => {
+        if (event.target.closest(".mobile-menu-toggle")) return;
+        if (!header.contains(event.target)) close();
+      });
+
+      root.document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") close();
+      });
+    }
+
     function ensureShellVisibility() {
       // Redundant with static HTML injection. 
       // Handled by CSS for smooth loading.
@@ -243,15 +219,13 @@
     function initShell() {
       applyTranslations();
       initTheme();
-      initLanguageSwitcher();
-      updateGnbLinksForLang();
       initDropdownMenus();
+      initMobileNavigation();
       ensureShellVisibility();
     }
 
     root.getTranslation = getTranslation;
     root.applyTranslations = () => applyTranslations();
-    root.setLanguage = setLanguage;
 
     const shellInstance = {
       initShell,

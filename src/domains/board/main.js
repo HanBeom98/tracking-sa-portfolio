@@ -1,10 +1,9 @@
 import { buildPostService } from "./application/postService.js";
 import { createFirestorePostRepository } from "./infra/firestorePostRepository.js";
-import { createCryptoAdapter } from "./infra/cryptoAdapter.js";
+import { readBoardListCache, writeBoardListCache } from "./application/board-list-cache.js";
 
 const postService = buildPostService({
   postRepository: createFirestorePostRepository(),
-  crypto: createCryptoAdapter(),
 });
 
 const boardList = document.getElementById("board-list");
@@ -16,7 +15,14 @@ async function loadPosts() {
     const urlParams = new URLSearchParams(window.location.search);
     const category = urlParams.get("category");
     boardList.setAttribute("category", category || "");
+    const cachedPosts = readBoardListCache({ category });
+    if (cachedPosts) {
+      boardList.setPosts(cachedPosts);
+      boardList.setAttribute("status", "ready");
+      return;
+    }
     const posts = await postService.listPosts({ limit: 30, category });
+    writeBoardListCache(posts, { category });
     boardList.setPosts(posts);
     boardList.setAttribute("status", "ready");
   } catch (error) {

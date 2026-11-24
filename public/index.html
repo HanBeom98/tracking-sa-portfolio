@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tracking SA | 게임·도구·커뮤니티 허브</title>
-    <!-- CSS and other head elements will be injected by main.py -->
+    <title>Tracking SA | 서든어택 전적 검색</title>
+    
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://trackingsa.com/">
     <meta property="og:type" content="website">
@@ -15,12 +15,23 @@
     <meta name="twitter:image" content="https://trackingsa.com/logo.svg">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
-    <meta name="description" content="서든어택 전적 검색, 게임, AI 테스트, 커뮤니티와 실용 도구를 한곳에서 이용할 수 있는 멀티 서비스 허브입니다.">
-    <meta property="og:title" content="Tracking SA | 게임·도구·커뮤니티 허브">
-    <meta property="og:description" content="서든어택 전적 검색, 게임, AI 테스트, 커뮤니티와 실용 도구를 한곳에서 이용할 수 있는 멀티 서비스 허브입니다.">
+    <meta name="description" content="서든어택 닉네임 전적 검색, 최근 31일 활동, 매치 유형별 분석, 크루 리그와 SOOP 라이브를 한곳에서 확인하는 Tracking SA 허브입니다.">
+    <meta property="og:title" content="Tracking SA | 서든어택 전적 검색">
+    <meta property="og:description" content="서든어택 닉네임 전적 검색, 최근 31일 활동, 매치 유형별 분석, 크루 리그와 SOOP 라이브를 한곳에서 확인하는 Tracking SA 허브입니다.">
+<style>
+  html.dark-mode,
+  html.dark-mode body {
+    background-color: #0f172a;
+    color: #f8fafc;
+    color-scheme: dark;
+  }
+</style>
 <script>
   (function() {
-    const theme = localStorage.getItem('theme');
+    let theme = 'dark';
+    try {
+      theme = localStorage.getItem('theme') === 'light' ? 'light' : 'dark';
+    } catch {}
     if (theme === 'dark') {
       document.documentElement.classList.add('dark-mode');
       document.body && document.body.classList.add('dark-mode');
@@ -29,561 +40,1279 @@
 </script>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7263630893992216" crossorigin="anonymous"></script>
 <meta name="google-adsense-account" content="ca-pub-7263630893992216">
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-TGD3WRNKPZ');
-</script>
+<script type="module" src="/analytics-loader.js?v=86d5e62d50ed"></script>
 <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
 <meta name="naver-site-verification" content="b15b33af838280b54d31eb3c7e5c358d2836743f" />
-<script type="text/javascript">
-(function(c,l,a,r,i,t,y){
-    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-})(window, document, "clarity", "script", "vb9q33ggpa");
-</script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 <script>
-  window.FIREBASE_CONFIG = {"apiKey": "AIzaSyBdHVxk9u6iG_whEIhvDzjde3BVn5gT19o", "authDomain": "tracking-sa-295db.firebaseapp.com", "projectId": "tracking-sa-295db", "storageBucket": "tracking-sa-295db.firebasestorage.app", "appId": "1:779289056217:web:cf023fc55f1a2913ffbfc8", "messagingSenderId": "779289056217"};
+  window.FIREBASE_CONFIG = {"apiKey": "", "authDomain": "demo-tracking-sa-portfolio.firebaseapp.com", "projectId": "demo-tracking-sa-portfolio", "storageBucket": "demo-tracking-sa-portfolio.firebasestorage.app", "appId": "1:000000000000:web:portfolio-example", "messagingSenderId": "779289056217", "appCheckSiteKey": ""};
 </script>
 <script>
   window.authDomainReady = window.authDomainReady || new Promise((resolve) => {
     window.__resolveAuthDomain = resolve;
   });
 </script>
-<script type="module" src="/auth/ui/auth-client.js"></script>
+<style id="home-shared-styles">
+/* --- Tracking SA PREMIUM DESIGN SYSTEM (Final Stability v3.0) --- */
 
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<link rel="stylesheet" href="/style.css?v=1773279943">
+:root {
+    --p-blue: oklch(55% 0.18 260);
+    --p-blue-soft: oklch(95% 0.02 260);
+    --text-main: oklch(25% 0.05 260);
+    --text-sub: oklch(50% 0.02 260);
+    --surface-card: #fff;
+    --surface-muted: #f3f6fb;
+    --surface-hover: #f8fafc;
+    --surface-input: #f8fafc;
+    --surface-input-focus: #fff;
+    --surface-border: #dbe3ef;
+    --surface-border-strong: #cbd5e1;
+    --surface-notice: #eff6ff;
+    --text-placeholder: #64748b;
+    --link-color: #1d4ed8;
+    --text-danger: #b91c1c;
+    --bg-main: oklch(98% 0.01 250);
+    --header-h: 70px;
+    --max-w: 1200px;
+    --content-pad-top: 32px;
+    --content-pad-bottom: 40px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html,
+body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+}
+
+img,
+svg,
+video,
+canvas {
+    max-width: 100%;
+}
+
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", "Malgun Gothic", sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    line-height: 1.6;
+    padding-top: var(--header-h); /* 헤더 공간 강제 확보 */
+    min-height: 100vh;
+}
+
+/* --- Dark Mode (Global) --- */
+html.dark-mode {
+    --bg-main: oklch(18% 0.02 260);
+    --text-main: oklch(95% 0.02 260);
+    --text-sub: oklch(75% 0.02 260);
+    --surface-card: #111827;
+    --surface-muted: #1e293b;
+    --surface-hover: #1e293b;
+    --surface-input: #0b1220;
+    --surface-input-focus: #111a2b;
+    --surface-border: #334155;
+    --surface-border-strong: #475569;
+    --surface-notice: #172640;
+    --text-placeholder: #94a3b8;
+    --link-color: #93c5fd;
+    --text-danger: #fca5a5;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+}
+
+html.dark-mode header {
+    background: color-mix(in oklch, oklch(18% 0.02 260) 92%, transparent) !important;
+    border-bottom: 1px solid oklch(30% 0.02 260) !important;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.45) !important;
+}
+
+html.dark-mode nav a,
+html.dark-mode .dropbtn {
+    color: var(--text-main);
+}
+
+html.dark-mode nav a:hover {
+    color: var(--p-blue);
+}
+
+html.dark-mode nav a:hover,
+html.dark-mode .dropbtn:hover {
+    background: oklch(25% 0.02 260);
+}
+
+html.dark-mode footer {
+    background: #0f172a;
+    border-top: 1px solid oklch(30% 0.02 260);
+    color: var(--text-sub);
+}
+
+html.dark-mode footer a {
+    color: var(--text-sub);
+}
+
+/* --- THE HEADER (ABSOLUTE VISIBILITY) --- */
+header {
+    position: fixed !important;
+    top: 0; left: 0; right: 0;
+    height: var(--header-h) !important;
+    background: color-mix(in oklch, white 92%, transparent) !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    z-index: 2147483647 !important;
+    box-shadow: 0 8px 30px rgba(2, 6, 23, 0.12) !important;
+    border-bottom: 1px solid oklch(92% 0.02 260) !important;
+    backdrop-filter: blur(14px);
+}
+
+.header-inner {
+    width: 100%;
+    max-width: var(--max-w);
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.site-logo { width: 40px; height: 40px; fill: var(--p-blue); color: var(--p-blue); }
+.site-logo-link { margin-right: 12px; flex-shrink: 0; }
+
+.desktop-menu-container { display: flex; align-items: center; gap: 20px; width: 100%; }
+nav ul { display: flex; list-style: none; gap: 10px; }
+nav a, .dropbtn {
+    text-decoration: none;
+    color: var(--text-main);
+    font-weight: 800;
+    padding: 8px 12px;
+    font-size: 0.95rem;
+    border-radius: 999px;
+    transition: 0.2s ease;
+    background: transparent;
+}
+nav a:hover, .dropbtn:hover {
+    color: var(--p-blue);
+    background: oklch(97% 0.03 260);
+}
+.dropdown {
+    position: relative;
+}
+
+.dropdown::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 100%;
+    width: 220px;
+    height: 14px;
+    display: none;
+}
+
+.dropdown:hover::after,
+.dropdown.open::after,
+.dropdown:focus-within::after {
+    display: block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    top: calc(100% - 4px);
+    margin-top: 0;
+    left: 0;
+    min-width: 180px;
+    background: white;
+    border: 1px solid oklch(92% 0.02 260);
+    border-radius: 14px;
+    padding: 10px;
+    box-shadow: 0 20px 40px rgba(2, 6, 23, 0.12);
+    z-index: 1000;
+}
+.dropdown-content a {
+    display: block;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-weight: 700;
+}
+.dropdown-content a:hover {
+    background: oklch(97% 0.03 260);
+}
+.dropdown:hover .dropdown-content,
+.dropdown:focus-within .dropdown-content,
+.dropdown.open .dropdown-content { display: block; }
+
+.utility-controls {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.utility-controls #color-change {
+    width: 36px;
+    height: 32px;
+    border-radius: 999px;
+    border: 1px solid oklch(90% 0.01 260);
+    background: white;
+    cursor: pointer;
+}
+
+.mobile-menu-toggle {
+    display: none;
+    width: 36px;
+    height: 36px;
+    padding: 8px;
+    border: 1px solid oklch(90% 0.01 260);
+    border-radius: 10px;
+    background: white;
+    cursor: pointer;
+}
+
+.mobile-menu-toggle span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    margin: 3px 0;
+    border-radius: 999px;
+    background: currentColor;
+    transition: transform .2s ease, opacity .2s ease;
+}
+
+html.dark-mode .mobile-menu-toggle {
+    background: #0f172a;
+    border-color: oklch(35% 0.02 260);
+    color: white;
+}
+
+html.dark-mode .dropdown-content {
+    background: oklch(20% 0.02 260);
+    border-color: oklch(30% 0.02 260);
+}
+
+html.dark-mode .dropdown-content a:hover {
+    background: oklch(25% 0.02 260);
+}
+
+html.dark-mode .utility-controls #color-change {
+    background: #0f172a;
+    border-color: oklch(35% 0.02 260);
+    color: white;
+}
+
+/* --- Auth Controls --- */
+.auth-controls {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.auth-status {
+    min-height: 32px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 8px;
+    color: var(--text-sub);
+    font-size: 0.82rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.auth-button {
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid oklch(90% 0.01 260);
+    background: white;
+    color: var(--text-main);
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.auth-button.primary {
+    background: var(--p-blue);
+    border-color: var(--p-blue);
+    color: white;
+}
+
+.auth-user {
+    max-width: 160px;
+    font-size: 0.85rem;
+    color: var(--text-sub);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.auth-avatar {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid oklch(90% 0.02 260);
+}
+
+.auth-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    min-width: 180px;
+    max-width: 280px;
+    background: white;
+    border: 1px solid oklch(92% 0.02 260);
+    border-radius: 14px;
+    padding: 10px;
+    box-shadow: 0 16px 30px rgba(2, 6, 23, 0.15);
+    display: none;
+    z-index: 1000;
+}
+
+.auth-controls.open .auth-menu {
+    display: block;
+}
+
+.auth-menu button {
+    width: 100%;
+    text-align: left;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.auth-menu button:hover {
+    background: oklch(97% 0.03 260);
+}
+
+.auth-button.danger {
+    background: #ffe8e8;
+    color: #c62828;
+    border: 1px solid #f2b8b8;
+}
+
+.auth-button.danger:hover {
+    background: #ffd6d6;
+}
+
+html.dark-mode .auth-button {
+    background: #0f172a;
+    border-color: oklch(35% 0.02 260);
+    color: var(--text-main);
+}
+
+html.dark-mode .auth-button.primary {
+    background: var(--p-blue);
+    border-color: var(--p-blue);
+    color: white;
+}
+
+html.dark-mode .auth-menu {
+    background: oklch(20% 0.02 260);
+    border-color: oklch(30% 0.02 260);
+}
+
+html.dark-mode .auth-menu button:hover {
+    background: oklch(25% 0.02 260);
+}
+
+.auth-form {
+    display: grid;
+    gap: 8px;
+    padding: 6px 2px 2px;
+}
+
+.auth-form input {
+    height: 34px;
+    padding: 0 10px;
+    border-radius: 10px;
+    border: 1px solid oklch(90% 0.01 260);
+    background: white;
+    color: var(--text-main);
+    font-size: 0.9rem;
+}
+
+.auth-form .auth-actions {
+    display: grid;
+    gap: 6px;
+}
+
+.auth-form .auth-helper {
+    font-size: 0.8rem;
+    color: var(--text-sub);
+}
+
+html.dark-mode .auth-form input {
+    background: #0f172a;
+    border-color: oklch(35% 0.02 260);
+    color: var(--text-main);
+}
+
+.inline-login-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 6, 23, 0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 2147483646;
+}
+
+.inline-login-modal.open {
+    display: flex;
+}
+
+.inline-login-dialog {
+    width: min(420px, 92vw);
+    background: white;
+    border: 1px solid oklch(92% 0.02 260);
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 24px 48px rgba(2, 6, 23, 0.2);
+    display: grid;
+    gap: 10px;
+}
+
+.inline-login-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.inline-login-close {
+    justify-self: end;
+    min-width: 76px;
+}
+
+.inline-login-row {
+    display: grid;
+    gap: 8px;
+}
+
+.inline-login-input {
+    height: 42px;
+    border-radius: 10px;
+    border: 1px solid oklch(88% 0.02 260);
+    padding: 0 12px;
+    font-size: 0.92rem;
+    background: white;
+    color: var(--text-main);
+}
+
+.inline-login-input:focus {
+    outline: none;
+    border-color: var(--p-blue);
+    box-shadow: 0 0 0 3px rgba(0, 82, 204, 0.18);
+}
+
+.inline-login-actions {
+    display: grid;
+    gap: 8px;
+}
+
+.inline-login-error {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #c62828;
+    min-height: 1.2em;
+}
+
+html.dark-mode .inline-login-dialog {
+    background: oklch(20% 0.02 260);
+    border-color: oklch(30% 0.02 260);
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
+}
+
+html.dark-mode .inline-login-input {
+    background: #0f172a;
+    border-color: oklch(35% 0.02 260);
+    color: var(--text-main);
+}
+
+/* --- Footer --- */
+footer {
+    margin-top: 80px;
+    padding: 40px 20px;
+    text-align: center;
+    background: white;
+    border-top: 1px solid oklch(95% 0.01 260);
+    color: var(--text-sub);
+}
+footer a {
+    color: var(--text-sub);
+    text-decoration: none;
+    font-weight: 700;
+}
+footer a:hover { color: var(--p-blue); }
+
+.site-footer { padding: 36px 20px 24px; text-align: left; }
+.footer-inner { width: min(100%, var(--max-w)); margin: 0 auto; }
+.footer-top { display: grid; grid-template-columns: minmax(180px, 1fr) minmax(0, 2fr); gap: 48px; padding-bottom: 26px; }
+.site-footer .footer-brand-link { display: inline-flex; align-items: center; gap: 11px; color: var(--text-main); text-decoration: none; }
+.footer-brand-link svg { flex: none; color: var(--p-blue); }
+.footer-brand-link strong { font-size: 1.05rem; font-weight: 850; letter-spacing: .08em; }
+.footer-brand-link strong span { color: var(--p-blue); }
+.footer-brand p { margin: 12px 0 0; font-size: .82rem; line-height: 1.8; }
+.footer-nav { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.footer-link-group h2 { margin: 0 0 10px; color: var(--text-main); font-size: .78rem; font-weight: 750; }
+.footer-link-group ul { display: grid; grid-template-columns: 1fr; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.site-footer .footer-link-group a { display: inline-flex; align-items: center; min-height: 34px; padding: 0; border-radius: 3px; color: var(--text-sub); font-size: .79rem; font-weight: 500; line-height: 1.6; white-space: normal; overflow-wrap: anywhere; }
+.site-footer .footer-nav a:hover { color: var(--p-blue); background: transparent; }
+.site-footer a:hover { color: var(--p-blue); text-decoration: underline; text-underline-offset: 4px; }
+.site-footer a:focus-visible, .footer-install:focus-visible { outline: 2px solid var(--p-blue); outline-offset: 4px; border-radius: 3px; }
+.footer-install { display: inline-flex; align-items: center; gap: 12px; min-height: 44px; margin-top: 14px; padding: 8px 12px; border: 1px solid color-mix(in oklch, var(--text-sub) 30%, transparent); border-radius: 9px; background: transparent; color: var(--text-main); font: inherit; font-size: .76rem; font-weight: 650; cursor: pointer; }
+.footer-install[hidden] { display: none; }
+.footer-install:hover { border-color: var(--p-blue); }
+.footer-business-info { margin: 0; padding: 0 0 12px; border-top: 1px solid color-mix(in oklch, var(--text-sub) 22%, transparent); font-size: .76rem; line-height: 1.9; overflow-wrap: anywhere; }
+.footer-business-summary { display: flex; align-items: center; gap: 10px; width: fit-content; max-width: 100%; min-height: 52px; padding: 10px 2px; list-style: none; cursor: pointer; }
+.footer-business-summary::-webkit-details-marker { display: none; }
+.footer-business-summary strong { color: var(--text-main); font-size: .82rem; font-weight: 750; }
+.footer-business-summary span { font-size: .74rem; }
+.footer-business-summary svg { flex: none; }
+.footer-business-details[open] > summary svg { transform: rotate(180deg); }
+.footer-business-summary:hover { color: var(--p-blue); }
+.footer-business-summary:focus-visible { outline: 2px solid var(--p-blue); outline-offset: 3px; border-radius: 4px; }
+.footer-business-details[open] { padding-bottom: 10px; }
+.footer-business-contact { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 18px; }
+.footer-business-contact > span { font-weight: 600; }
+.footer-business-contact a { display: inline-flex; align-items: center; min-height: 32px; font-weight: 500; }
+.footer-business-info dl { display: flex; flex-wrap: wrap; gap: 3px 22px; margin: 0; }
+.footer-business-info dl > div { display: flex; gap: 8px; min-width: 0; max-width: 100%; }
+.footer-business-info dt { flex-shrink: 0; font-weight: 600; }
+.footer-business-info dd { min-width: 0; margin: 0; }
+.footer-business-info dd a { font-weight: 500; }
+.footer-business-info .footer-business-address { flex-basis: 100%; }
+.footer-bottom { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 14px 32px; padding-top: 18px; border-top: 1px solid color-mix(in oklch, var(--text-sub) 22%, transparent); }
+.site-footer .nexon-api-attribution { margin: 0; font-size: .72rem; line-height: 1.8; }
+.site-footer .nexon-api-attribution span { display: block; }
+.footer-copyright { margin: 0; font-size: .7rem; line-height: 1.8; }
+@media (max-width: 820px) {
+    .footer-top { grid-template-columns: 1fr; gap: 24px; }
+    .footer-brand p br { display: none; }
+}
+@media (max-width: 540px) {
+    .site-footer { margin-top: 48px; padding: 28px 20px 22px; }
+    .footer-nav { grid-template-columns: 1fr; gap: 14px; }
+    .footer-link-group h2 { margin-bottom: 2px; }
+    .footer-link-group ul { display: flex; flex-wrap: wrap; gap: 0 20px; }
+    .site-footer .footer-link-group a { min-height: 44px; }
+    .footer-business-info dl { display: grid; gap: 4px; }
+    .footer-business-info dl > div { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 8px; }
+    .footer-business-info dt { word-break: keep-all; }
+    .footer-business-contact { gap: 0 16px; }
+    .footer-business-contact > span { flex-basis: 100%; }
+    .footer-business-contact a { min-height: 44px; }
+    .footer-bottom { display: grid; gap: 12px; }
+}
+
+.nexon-api-attribution {
+    margin: 10px auto 0;
+    color: var(--text-sub);
+    font-size: .82rem;
+    line-height: 1.6;
+}
+
+.nexon-api-attribution a {
+    color: var(--p-blue);
+    font-weight: 800;
+}
+
+/* --- CENTERED CONTENT LAYOUT --- */
+main {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* 수평 정중앙 정렬의 핵심 */
+    justify-content: flex-start;
+    margin: 0 auto;
+    min-height: 80vh;
+}
+
+/* Force centered page width for non-game pages */
+main:not(.search-main-container) {
+    max-width: var(--max-w);
+    margin-left: auto;
+    margin-right: auto;
+    padding-top: var(--content-pad-top);
+    padding-bottom: var(--content-pad-bottom);
+}
+
+/* 모든 main의 직계 자식에 대해 자동 중앙 정렬 보장 (강력한 안정화 장치) */
+main > *:not(script):not(style) {
+    display: block;
+    width: 100%;
+    max-width: var(--max-w);
+    margin: 0 auto; /* 안전장치 */
+}
+
+/* Fallback: pages rendering content directly under body (DDD 전환 이후 대비) */
+body > :not(header):not(footer):not(script):not(style):not(link):not(main) {
+    display: block;
+    width: 100%;
+    max-width: var(--max-w);
+    margin: 0 auto;
+}
+
+.container {
+    width: 100% !important;
+    max-width: var(--max-w) !important;
+    padding: 20px;
+    position: relative;
+    margin: 0 auto;
+}
+
+.container.centered {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Homepage Overrides (Navigation is now visible globally) */
+body.home-page header { background: color-mix(in oklch, white 92%, transparent) !important; box-shadow: 0 8px 30px rgba(2, 6, 23, 0.12) !important; border-bottom: 1px solid oklch(92% 0.02 260) !important; }
+body.home-page .header-inner { justify-content: space-between; }
+
+/* --- Search Highlighting --- */
+.search-highlight {
+    background-color: oklch(90% 0.1 90);
+    color: var(--text-main);
+    padding: 0 2px;
+    border-radius: 4px;
+    font-weight: 800;
+}
+
+html.dark-mode .search-highlight {
+    background-color: oklch(40% 0.1 90);
+    color: white;
+}
+
+@media (max-width: 900px) {
+    :root {
+        --header-h: 60px;
+    }
+
+    header {
+        height: var(--header-h) !important;
+        align-items: center !important;
+    }
+
+    .header-inner {
+        position: relative;
+        padding: 0 14px;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .desktop-menu-container {
+        display: none;
+        position: absolute;
+        top: calc(100% + 10px);
+        left: 10px;
+        right: 10px;
+        width: auto;
+        padding: 10px;
+        border: 1px solid oklch(90% 0.01 260);
+        border-radius: 16px;
+        background: color-mix(in oklch, white 96%, transparent);
+        box-shadow: 0 18px 45px rgba(2, 6, 23, .18);
+        backdrop-filter: blur(16px);
+    }
+
+    header.mobile-nav-open .desktop-menu-container {
+        display: block;
+    }
+
+    html.dark-mode .desktop-menu-container {
+        border-color: oklch(30% 0.02 260);
+        background: color-mix(in oklch, #0f172a 96%, transparent);
+    }
+
+    nav {
+        min-width: 0;
+    }
+
+    nav ul {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 4px;
+        padding: 0;
+    }
+
+    nav a,
+    .dropbtn {
+        padding: 7px 10px;
+        font-size: 0.88rem;
+        white-space: nowrap;
+        display: block;
+    }
+
+    .utility-controls {
+        width: auto;
+        margin-left: auto;
+        justify-content: flex-end;
+        flex-wrap: nowrap;
+        gap: 8px;
+    }
+
+    .mobile-menu-toggle {
+        display: block;
+        flex: 0 0 auto;
+    }
+
+    header.mobile-nav-open .mobile-menu-toggle span:nth-child(1) {
+        transform: translateY(5px) rotate(45deg);
+    }
+
+    header.mobile-nav-open .mobile-menu-toggle span:nth-child(2) {
+        opacity: 0;
+    }
+
+    header.mobile-nav-open .mobile-menu-toggle span:nth-child(3) {
+        transform: translateY(-5px) rotate(-45deg);
+    }
+
+    .auth-controls {
+        max-width: 100%;
+    }
+
+    .auth-user {
+        max-width: 120px;
+    }
+}
+
+@media (max-width: 640px) {
+    :root {
+        --header-h: 56px;
+    }
+
+    .site-logo {
+        width: 36px;
+        height: 36px;
+    }
+
+    .header-inner {
+        padding: 0 10px;
+        gap: 8px;
+    }
+
+    nav a,
+    .dropbtn,
+    .auth-button {
+        font-size: 0.82rem;
+    }
+
+    .utility-controls {
+        gap: 6px;
+    }
+
+    .desktop-menu-container {
+        right: 8px;
+        left: 8px;
+    }
+
+    nav ul {
+        grid-template-columns: 1fr;
+    }
+
+    .utility-controls #color-change,
+    .auth-button {
+        height: 30px;
+    }
+
+    .auth-button {
+        padding: 0 10px;
+    }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 77, 79, 0.7); }
+    70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(255, 77, 79, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 77, 79, 0); }
+}
+
+.loading-shimmer {
+    animation: shimmer 1.5s infinite ease-in-out;
+}
+
+</style>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<script src="/runtime-config.js"></script>
-<script src="/firebase-config.js"></script>
-<script src="/translations.js?v=1773279943"></script>
-<script src="/common.js?v=1773279943"></script>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#0052cc">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Tracking SA">
+<script defer src="/runtime-config.js"></script>
+<script>window.AUTH_RUNTIME_DEFERRED = true;</script>
+<script defer src="/deferred-auth-loader.js?v=7c4177555bdb"></script>
+<script defer src="/pwa-register.js"></script>
+<script defer src="/translations.js?v=8eb99f0dbaa9"></script>
+<script defer src="/common.js?v=5cfaaa0b27e3"></script>
 
-    <script src="/search.js" defer></script>
     <style>
-        .home-controls-wrap {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 70px;
-            z-index: 10;
-            pointer-events: none;
+        :root { --home-bg:#080f1d; --home-cyan:#57d5ed; --home-red:#ff7c88; --home-input:#19263b; --home-drop-line:#44608a; --home-error:#ff7c88; --home-ink:#f8fafc; --home-muted:#94a3b8; --home-line:rgba(148,163,184,.16); --home-card:#111c2f; --home-orange:#ff5a2f; --home-blue:#2f7cff; }
+        body { background:var(--home-bg); color:var(--home-ink); }
+        body:not(.dark-mode) { --home-bg:#f5f7fb; --home-cyan:#007c9d; --home-red:#c23b4a; --home-input:#f3f6fb; --home-drop-line:#8aa8d1; --home-error:#b91c1c; --home-ink:#172033; --home-muted:#52627a; --home-line:#d5deeb; --home-card:#fff; --home-blue:#245dda; }
+        .home-shell { width:min(1240px,calc(100% - 40px)); margin:0 auto; padding:34px 0 84px; }
+        .home-hero { display:grid; grid-template-columns:1fr 1.05fr; gap:42px; align-items:center; padding:4px 0 8px; background:radial-gradient(ellipse at 90% 50%,color-mix(in srgb,var(--home-blue) 9%,transparent),transparent 55%); }
+        .hero-copy { min-width:0; }
+        .home-shell .eyebrow { display:block; margin-bottom:14px; color:var(--home-cyan); font-size:.72rem; font-weight:700; letter-spacing:.1em; }
+        .home-brand { display:inline-grid; gap:8px; margin:0 0 22px; max-width:100%; }
+        .home-brand-name { display:flex; align-items:center; gap:9px; color:var(--home-ink); font-family:Arial,Helvetica,sans-serif; font-size:clamp(1.15rem,2vw,1.35rem); font-weight:900; line-height:1; letter-spacing:.12em; }
+        .home-brand-name::before { content:""; width:4px; height:23px; margin:0 13px 0 3px; background:var(--home-cyan); box-shadow:7px 0 0 color-mix(in srgb,var(--home-cyan) 35%,transparent); transform:skewX(-18deg); }
+        .home-brand-name b { display:inline-block; padding:5px 7px 4px; border:1px solid color-mix(in srgb,var(--home-cyan) 65%,transparent); border-radius:3px; background:color-mix(in srgb,var(--home-cyan) 12%,var(--home-card)); color:var(--home-cyan); font-size:.82em; font-weight:900; letter-spacing:.03em; transform:skewX(-9deg); }
+        .home-brand-name b span { display:block; transform:skewX(9deg); }
+        .home-brand-game { display:flex; align-items:center; gap:10px; margin-left:26px; color:var(--home-muted); font-size:.58rem; font-weight:650; line-height:1.2; letter-spacing:.25em; }
+        .home-brand-game::after { content:""; width:36px; height:1px; background:linear-gradient(90deg,var(--home-cyan),transparent); }
+        .hero-copy h1 { margin:0; font-size:clamp(2.2rem,3.8vw,3.2rem); line-height:1.2; letter-spacing:-.045em; font-weight:750; word-break:keep-all; }
+        .hero-copy h1 em { color:var(--home-cyan); font-style:normal; }
+        .hero-copy>p { margin:18px 0 0; color:var(--home-muted); font-size:.9rem; line-height:1.8; word-break:keep-all; }
+        .search-panel { min-width:0; margin-top:25px; }
+        .search-panel h2 { margin:0 0 9px; font-size:.9rem; font-weight:650; }
+        .hero-search { display:flex; align-items:stretch; gap:8px; }
+        .hero-search input { width:100%; min-width:0; flex:1; min-height:50px; padding:0 14px; border:1px solid var(--home-line); border-radius:11px; background:var(--home-card); color:var(--home-ink); font:inherit; font-size:16px; }
+        .hero-search button { flex:none; min-height:50px; padding:0 17px; border:0; border-radius:11px; background:var(--home-blue); color:#fff; font:inherit; font-size:.85rem; font-weight:700; cursor:pointer; }
+        .hero-search button>span { margin-left:6px; }
+        .hero-search input:focus-visible,.home-replay-drop:focus-within { outline:3px solid var(--home-cyan); outline-offset:3px; }
+        .home-tool-note { margin:9px 0 0; color:var(--home-muted); font-size:.75rem; line-height:1.6; }
+        .recent-wrap { margin-top:17px; }
+        .recent-wrap[data-has-items="false"] { display:none; }
+        .recent-head { display:flex; justify-content:space-between; gap:10px; color:var(--home-muted); font-size:.72rem; }
+        .recent-searches { display:flex; flex-wrap:wrap; gap:7px; margin-top:8px; }
+        .recent-searches a,.recent-empty { padding:8px 10px; border:1px solid var(--home-line); border-radius:9px; color:var(--home-ink); text-decoration:none; font-size:.78rem; overflow-wrap:anywhere; }
+        .home-preview { min-width:0; padding:18px 20px 12px; border:1px solid color-mix(in srgb,var(--home-blue) 40%,var(--home-line)); border-radius:18px; background:var(--home-card); }
+        .home-preview-heading { display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:.7rem; color:var(--home-cyan); letter-spacing:.08em; }
+        .home-preview-heading>span:last-child { padding:4px 7px; border-radius:6px; background:var(--home-input); color:var(--home-muted); letter-spacing:0; }
+        .home-preview-score { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:18px 0; }
+        .home-preview-score small { color:var(--home-muted); font-size:.72rem; }
+        .home-preview-score h2 { margin:5px 0 0; font-size:1rem; font-weight:600; letter-spacing:-.02em; word-break:keep-all; }
+        .home-preview-score>strong { display:flex; align-items:center; gap:8px; white-space:nowrap; font-size:.65rem; font-weight:500; color:var(--home-cyan); }
+        .home-preview-score>strong>span:last-child { color:var(--home-red); }
+        .home-preview-score b { font-size:1.5rem; font-weight:650; }
+        .home-preview-score i { color:var(--home-muted); font-size:1rem; font-style:normal; }
+        .home-preview-axis-title { display:flex; justify-content:space-between; flex-wrap:wrap; gap:5px 10px; color:var(--home-muted); font-size:.7rem; }
+        .home-preview-plot { position:relative; margin:12px 0 0 27px; }
+        .home-preview-axis { position:absolute; top:-4px; bottom:0; left:-27px; display:flex; flex-direction:column; justify-content:space-between; color:var(--home-muted); font-size:11px; }
+        .home-preview-plot svg { display:block; width:100%; height:140px; overflow:hidden; }
+        .home-preview-a { stop-color:var(--home-cyan); }
+        .home-preview-b { stop-color:var(--home-red); }
+        .home-preview-line { fill:none; stroke-width:2; stroke-linejoin:round; vector-effect:non-scaling-stroke; }
+        .home-preview-grid { fill:none; stroke:var(--home-line); stroke-width:1; vector-effect:non-scaling-stroke; }
+        .home-preview-balance { fill:none; stroke:var(--home-muted); stroke-width:1; stroke-dasharray:4 4; opacity:.65; vector-effect:non-scaling-stroke; }
+        .home-preview-legend { display:flex; justify-content:space-between; gap:8px; margin:6px 0 13px 27px; color:var(--home-muted); font-size:11px; }
+        .home-preview-legend b { font-weight:500; color:var(--home-cyan); }
+        .home-preview-legend b:last-child { color:var(--home-red); }
+        .home-preview-scene { display:flex; align-items:center; gap:10px; min-height:58px; width:100%; padding:10px 12px; border:1px solid var(--home-line); border-radius:10px; background:var(--home-input); color:var(--home-ink); text-align:left; font:inherit; cursor:pointer; }
+        .home-preview-scene>span:first-child { color:var(--home-cyan); font-size:1.1rem; }
+        .home-preview-scene>span:last-child { margin-left:auto; color:var(--home-muted); }
+        .home-preview-scene strong { display:block; font-size:.78rem; font-weight:650; }
+        .home-preview-scene small { display:block; margin-top:3px; color:var(--home-muted); font-size:.7rem; line-height:1.6; }
+        .home-preview-caption { margin:11px 0 0; color:var(--home-muted); font-size:.7rem; }
+        .home-replay-panel { display:grid; grid-template-columns:.85fr 1.15fr; align-items:center; gap:26px; min-width:0; margin-top:26px; padding:22px 26px; border:1px solid var(--home-line); border-radius:18px; background:var(--home-card); }
+        .home-replay-copy .eyebrow { margin-bottom:6px; }
+        .home-replay-copy h2 { margin:0; font-size:1.65rem; font-weight:650; letter-spacing:-.03em; }
+        .home-replay-copy p { margin:10px 0 0; color:var(--home-muted); font-size:.85rem; line-height:1.8; }
+        .home-replay-controls { min-width:0; }
+        .home-replay-drop { position:relative; display:flex; align-items:center; justify-content:center; gap:11px; min-height:88px; padding:14px; border:1px dashed var(--home-drop-line); border-radius:12px; background:var(--home-input); cursor:pointer; }
+        .home-replay-drop input { position:absolute; width:1px; height:1px; clip:rect(0 0 0 0); }
+        .home-upload-plus { color:var(--home-cyan); font-size:1.7rem; }
+        .home-replay-drop strong { display:block; color:var(--home-ink); font-size:.95rem; font-weight:650; }
+        .home-replay-drop small { display:block; margin-top:5px; color:var(--home-muted); font-size:.72rem; line-height:1.6; }
+        .home-replay-drop.dragging { outline:3px solid var(--home-cyan); outline-offset:3px; }
+        .home-replay-links { display:flex; align-items:start; justify-content:space-between; flex-wrap:wrap; gap:4px 16px; margin-top:4px; }
+        .home-download-help { flex:1; min-width:145px; color:var(--home-muted); font-size:.8rem; }
+        .home-download-help summary { display:list-item; min-height:44px; padding:11px 0; cursor:pointer; color:var(--home-cyan); }
+        .home-download-help ol { padding-left:18px; margin:0 0 8px; line-height:1.8; }
+        .home-download-help a,.home-replay-fallback { color:var(--home-cyan); text-underline-offset:3px; }
+        .home-replay-links button { min-height:44px; padding:8px 0; border:0; background:transparent; color:var(--home-cyan); font:inherit; font-size:.8rem; cursor:pointer; }
+        .home-replay-fallback { display:inline-flex; align-items:center; min-height:44px; font-size:.76rem; }
+        .home-replay-controls>.home-tool-note { margin-top:2px; }
+        .home-mygun-link { display:grid; grid-template-columns:minmax(0,1fr) 240px auto; align-items:center; gap:24px; margin-top:20px; padding:18px 26px; border:1px solid var(--home-line); border-radius:18px; background:radial-gradient(ellipse at 70% 50%,color-mix(in srgb,var(--home-cyan) 12%,transparent),transparent 55%),var(--home-card); color:var(--home-ink); text-decoration:none; }
+        .home-mygun-link:hover { border-color:var(--home-cyan); }
+        .home-mygun-link:focus-visible { outline:3px solid var(--home-cyan); outline-offset:4px; }
+        .home-mygun-link .eyebrow { margin-bottom:6px; }
+        .home-mygun-link h2 { margin:0; font-size:1.35rem; letter-spacing:-.03em; }
+        .home-mygun-link p { margin:7px 0 0; color:var(--home-muted); font-size:.8rem; line-height:1.7; }
+        .home-mygun-link img { display:block; width:100%; height:100px; object-fit:contain; }
+        .home-mygun-cta { color:var(--home-cyan); font-size:.82rem; font-weight:700; white-space:nowrap; }
+        @media(max-width:820px) { .home-mygun-link { order:2; grid-template-columns:minmax(0,1fr) 130px; gap:10px; padding:18px; } .home-mygun-cta { grid-column:1/-1; } .home-mygun-link img { height:80px; } .home-mygun-link h2 { font-size:1.2rem; } }
+        @media(max-width:360px) { .home-mygun-link { grid-template-columns:minmax(0,1fr) 100px; } }
+        #homeReplayStatus[data-tone="error"] { color:var(--home-error); }
+        #homeHub[hidden],#homeReplayWorkspace[hidden] { display:none!important; }
+        .home-workspace-toolbar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; width:min(1180px,calc(100% - 32px)); margin:18px auto 0; }
+        .home-workspace-toolbar button,.home-workspace-toolbar a { display:inline-flex; align-items:center; min-height:44px; padding:8px 12px; border:1px solid var(--home-line); border-radius:10px; background:var(--home-card); color:var(--home-ink); font:inherit; font-size:.85rem; cursor:pointer; }
+        body[data-home-view="replay"] .home-workspace-toolbar { scroll-margin-top:90px; }
+        @media(max-width:820px) {
+            .home-shell { display:flex; flex-direction:column; }
+            .home-hero { display:contents; }
+            .hero-copy { order:0; }
+            .home-replay-panel { order:1; grid-template-columns:1fr; gap:15px; padding:18px; margin-top:22px; }
+            .home-notice-bar { order:2; }
+            .home-preview { order:3; margin-top:22px; }
+            .home-shell>section[aria-labelledby="feature-title"] { order:4; }
+            #soop-live { order:5; }
+            .home-shell>.content-grid { order:6; }
+            .home-brand { display:inline-grid; gap:8px; margin:0 0 22px; max-width:100%; }
+        .home-brand-name { display:flex; align-items:center; gap:9px; color:var(--home-ink); font-family:Arial,Helvetica,sans-serif; font-size:clamp(1.15rem,2vw,1.35rem); font-weight:900; line-height:1; letter-spacing:.12em; }
+        .home-brand-name::before { content:""; width:4px; height:23px; margin:0 13px 0 3px; background:var(--home-cyan); box-shadow:7px 0 0 color-mix(in srgb,var(--home-cyan) 35%,transparent); transform:skewX(-18deg); }
+        .home-brand-name b { display:inline-block; padding:5px 7px 4px; border:1px solid color-mix(in srgb,var(--home-cyan) 65%,transparent); border-radius:3px; background:color-mix(in srgb,var(--home-cyan) 12%,var(--home-card)); color:var(--home-cyan); font-size:.82em; font-weight:900; letter-spacing:.03em; transform:skewX(-9deg); }
+        .home-brand-name b span { display:block; transform:skewX(9deg); }
+        .home-brand-game { display:flex; align-items:center; gap:10px; margin-left:26px; color:var(--home-muted); font-size:.58rem; font-weight:650; line-height:1.2; letter-spacing:.25em; }
+        .home-brand-game::after { content:""; width:36px; height:1px; background:linear-gradient(90deg,var(--home-cyan),transparent); }
+        .hero-copy h1 { font-size:2rem; }
+            .hero-copy>p { font-size:.85rem; margin-top:13px; }
+            .search-panel { margin-top:20px; }
+            .hero-search button { padding:0 13px; }
+            .hero-search button>span { display:none; }
+            .home-replay-copy p br { display:none; }
+            .home-replay-copy h2 { font-size:1.4rem; }
+            .home-replay-copy p { margin-top:5px; font-size:.8rem; }
+            .home-tool-note { font-size:.72rem; }
+            .home-preview-plot svg { height:145px; }
         }
-        .home-controls {
-            height: 70px;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 10px;
-            pointer-events: auto;
-        }
-        .home-controls #color-change {
-            border: 1px solid rgba(0,0,0,0.08);
-            background: white;
-            border-radius: 999px;
-            width: 36px;
-            height: 32px;
-            cursor: pointer;
-        }
-        body.dark-mode .home-controls #color-change {
-            background: #0f172a;
-            color: white;
-            border-color: rgba(255,255,255,0.15);
-        }
-
-        .search-main-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 40px 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        /* Hero & Search Area */
-        .hero-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 60px;
-            width: 100%;
-        }
-        .main-logo-area {
-            margin-bottom: 30px;
-            text-align: center;
-            transition: transform 0.3s ease;
-        }
-        .main-logo-area:hover {
-            transform: scale(1.02);
-        }
-        .main-logo-area svg {
-            width: 100px;
-            height: 100px;
-        }
-        .search-container {
-            position: relative;
-            width: 100%;
-            max-width: 650px;
-        }
-        .search-bar-wrapper {
-            display: flex;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 82, 204, 0.1);
-            border-radius: 30px;
-            padding: 8px 25px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        }
-        .search-bar-wrapper:hover, .search-bar-wrapper:focus-within {
-            box-shadow: 0 8px 25px rgba(0, 82, 204, 0.15);
-            border-color: rgba(0, 82, 204, 0.3);
-            background: white;
-        }
-        .search-bar-wrapper input {
-            border: none;
-            outline: none;
-            height: 50px;
-            flex: 1;
-            font-size: 1.15rem;
-            padding: 0 15px;
-            background: transparent;
-        }
-        .search-icon {
-            color: #0052cc;
-            font-size: 1.3rem;
-        }
-        
-        /* Search Results Dropdown */
-        #searchResults {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(15px);
-            border-radius: 0 0 24px 24px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
-            z-index: 1000;
-            margin-top: 8px;
-            display: none;
-            overflow: hidden;
-            border: 1px solid rgba(0,0,0,0.05);
-            animation: slideDown 0.2s ease-out;
-        }
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        #searchResults.active {
-            display: block;
-        }
-        .search-result-item {
-            display: block;
-            padding: 18px 25px;
-            text-decoration: none;
-            color: #3c4043;
-            border-bottom: 1px solid rgba(0,0,0,0.03);
-            transition: background 0.2s;
-        }
-        .search-result-item:hover {
-            background: rgba(0, 82, 204, 0.05);
-        }
-
-        
-        /* Corporate Category Layout */
-        .category-wrapper {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 40px;
-        }
-        .category-section {
-            background: rgba(255, 255, 255, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            border-radius: 24px;
-            padding: 30px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
-            backdrop-filter: blur(20px);
-        }
-        .category-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-        }
-        .category-header h2 {
-            font-size: 1.4rem;
-            color: #1e293b;
-            margin: 0;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-        .category-header .badge {
-            background: #0052cc;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: bold;
-        }
-        
-        /* Grid within Categories */
-        .service-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 20px;
-        }
-        .service-card {
-            display: flex;
-            flex-direction: column;
-            padding: 25px 20px;
-            text-decoration: none;
-            color: #334155;
-            background: white;
-            border: 1px solid rgba(0,0,0,0.04);
-            border-radius: 16px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
-        }
-        .service-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 24px rgba(0, 82, 204, 0.12);
-            border-color: rgba(0, 82, 204, 0.2);
-        }
-        .card-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 14px;
-            background: oklch(96% 0.02 240);
-            color: #0052cc;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            margin-bottom: 15px;
-            transition: all 0.3s ease;
-        }
-        
-        /* Icon Variants */
-        .icon-orange { background: oklch(95% 0.05 70); color: oklch(60% 0.15 70); }
-        .icon-purple { background: oklch(95% 0.05 300); color: oklch(60% 0.15 300); }
-        .icon-navy { background: oklch(92% 0.05 250); color: oklch(50% 0.15 250); }
-        .icon-gold { background: oklch(95% 0.05 90); color: oklch(60% 0.15 90); }
-        .icon-blue { background: oklch(95% 0.05 240); color: oklch(60% 0.15 240); }
-        .icon-red { background: oklch(95% 0.05 20); color: oklch(60% 0.15 20); }
-        .icon-green { background: oklch(95% 0.05 150); color: oklch(60% 0.15 150); }
-
-        .service-card:hover .card-icon {
-            transform: scale(1.1) rotate(5deg);
-            filter: brightness(1.05);
-        }
-        .card-title {
-            font-weight: 700;
-            font-size: 1.1rem;
-            margin-bottom: 6px;
-        }
-        .card-desc {
-            font-size: 0.85rem;
-            color: #64748b;
-            line-height: 1.4;
-        }
-        .featured-service {
-            margin-bottom: 28px;
-            padding: 32px;
-            border-radius: 28px;
-            background: linear-gradient(135deg, #0f172a 0%, #111827 48%, #0052cc 100%);
-            color: white;
-            box-shadow: 0 20px 45px rgba(15, 23, 42, 0.24);
-            overflow: hidden;
-            position: relative;
-        }
-        .featured-service::after {
-            content: "";
-            position: absolute;
-            inset: auto -60px -80px auto;
-            width: 220px;
-            height: 220px;
-            border-radius: 999px;
-            background: radial-gradient(circle, rgba(0, 210, 255, 0.28), transparent 70%);
-            pointer-events: none;
-        }
-        .featured-service-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 14px;
-        }
-        .featured-service-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 5px 12px;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.14);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            font-size: 0.78rem;
-            font-weight: 800;
-            letter-spacing: 0.04em;
-        }
-        .featured-service-title {
-            margin: 0;
-            font-size: 2rem;
-            font-weight: 900;
-            letter-spacing: -0.03em;
-        }
-        .featured-service-desc {
-            margin: 0 0 12px;
-            max-width: 720px;
-            color: rgba(255, 255, 255, 0.9);
-            line-height: 1.6;
-            font-size: 1rem;
-        }
-        .featured-service-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin: 18px 0 24px;
-        }
-        .featured-service-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 14px;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            font-size: 0.82rem;
-            color: rgba(255, 255, 255, 0.92);
-        }
-        .featured-service-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-        .featured-service-link {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 44px;
-            padding: 0 18px;
-            border-radius: 999px;
-            text-decoration: none;
-            font-weight: 800;
-            transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
-        }
-        .featured-service-link.primary {
-            background: white;
-            color: #0f172a;
-        }
-        .featured-service-link.secondary {
-            background: rgba(255, 255, 255, 0.08);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.18);
-        }
-        .featured-service-link:hover {
-            transform: translateY(-2px);
-        }
-        @media (max-width: 768px) {
-            .featured-service {
-                padding: 24px;
-            }
-            .featured-service-title {
-                font-size: 1.6rem;
-            }
-        }
+        .home-notice-bar { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:14px; margin-top:18px; padding:14px 16px; border:1px solid rgba(239,68,68,.28); border-radius:16px; background:rgba(17,24,39,.88); box-shadow:0 12px 30px rgba(0,0,0,.16); }
+        .home-notice-bar[hidden] { display:none; }
+        .home-notice-badge { display:inline-flex; min-height:28px; align-items:center; padding:0 10px; border-radius:8px; background:#dc2626; color:#fff; font-size:.76rem; font-weight:950; letter-spacing:.04em; }
+        .home-notice-link { overflow:hidden; color:#f8fafc; text-decoration:none; text-overflow:ellipsis; white-space:nowrap; font-size:.9rem; font-weight:850; }
+        .home-notice-text { display:inline-block; min-width:0; }
+        .home-notice-link:hover { color:#fecaca; text-decoration:underline; text-underline-offset:3px; }
+        .home-notice-controls { display:flex; gap:6px; }
+        .home-notice-control { display:grid; place-items:center; width:30px; height:30px; padding:0; border:1px solid var(--home-line); border-radius:9px; background:rgba(255,255,255,.04); color:#cbd5e1; font:inherit; font-weight:900; cursor:pointer; }
+        .home-notice-control:hover { border-color:rgba(239,68,68,.45); color:#fff; }
+        body:not(.dark-mode) .home-notice-bar { background:#fff; box-shadow:0 10px 24px rgba(15,23,42,.08); }
+        body:not(.dark-mode) .home-notice-link { color:#172033; }
+        body:not(.dark-mode) .home-notice-link:hover { color:#b91c1c; }
+        body:not(.dark-mode) .home-notice-control { background:#f8fafc; color:#475569; }
+        @keyframes home-notice-marquee { 0%,12%{transform:translateX(0)} 88%,100%{transform:translateX(calc(-1 * var(--notice-marquee-distance,0px)))} }
+        .section { margin-top:56px; }
+        .section-head { display:flex; align-items:end; justify-content:space-between; gap:20px; margin-bottom:20px; }
+        .section-kicker { display:block; margin-bottom:7px; color:var(--home-orange); font-size:.72rem; font-weight:950; letter-spacing:.13em; }
+        .section-head h2 { margin:0; font-size:clamp(1.4rem,2.3vw,1.8rem); font-weight:650; letter-spacing:-.03em; }
+        .section-head p { max-width:570px; margin:0; color:var(--home-muted); line-height:1.65; font-size:.9rem; }
+        .text-link { color:var(--home-blue); text-decoration:none; font-size:.85rem; font-weight:850; white-space:nowrap; }
+        .live-shell { overflow:hidden; border:1px solid var(--home-line); border-radius:26px; background:var(--home-card); }
+        .live-toolbar { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:18px 22px; border-bottom:1px solid var(--home-line); }
+        .live-status { display:flex; align-items:center; gap:9px; font-weight:900; }
+        .live-dot { width:9px; height:9px; border-radius:50%; background:#ef4444; box-shadow:0 0 12px #ef4444; }
+        .live-toolbar small { color:#64748b; }
+        .live-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; padding:18px; }
+        .live-preview { min-height:220px; padding:22px; border:1px solid var(--home-line); border-radius:19px; background:linear-gradient(150deg,rgba(47,124,255,.12),rgba(255,90,47,.06)); }
+        .live-preview-icon { display:grid; place-items:center; width:45px; height:45px; border-radius:14px; background:rgba(255,90,47,.14); color:#ff7d59; font-size:1.25rem; }
+        .live-preview h3 { margin:34px 0 8px; font-size:1.05rem; }
+        .live-preview p { margin:0; color:var(--home-muted); line-height:1.65; font-size:.84rem; }
+        .live-preview.pending { display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; grid-column:span 2; }
+        .live-preview.pending h3 { margin:15px 0 7px; }
+        .live-message { display:flex; min-height:220px; flex-direction:column; justify-content:center; align-items:center; grid-column:1/-1; padding:28px; border:1px solid var(--home-line); border-radius:19px; background:linear-gradient(150deg,rgba(47,124,255,.12),rgba(255,90,47,.06)); text-align:center; }
+        .live-message h3 { margin:15px 0 7px; font-size:1.05rem; }
+        .live-message p { max-width:520px; margin:0; color:var(--home-muted); line-height:1.65; font-size:.84rem; }
+        .live-message.error .live-preview-icon { background:rgba(239,68,68,.14); color:#f87171; }
+        .live-card { overflow:hidden; border:1px solid var(--home-line); border-radius:18px; background:var(--home-card); color:inherit; text-decoration:none; transition:transform .2s ease,border-color .2s ease; }
+        .live-card:hover { transform:translateY(-4px); border-color:rgba(255,90,47,.5); }
+        .live-card-media { position:relative; aspect-ratio:16/9; overflow:hidden; background:#111827; }
+        .live-card-thumb { display:block; width:100%; height:100%; object-fit:cover; transition:transform .25s ease; }
+        .live-card:hover .live-card-thumb { transform:scale(1.035); }
+        .live-card-thumb-fallback { display:grid; place-items:center; color:#64748b; font-size:1.2rem; font-weight:950; letter-spacing:.12em; }
+        .live-badge,.live-viewers { position:absolute; top:10px; padding:5px 7px; border-radius:7px; color:#fff; font-size:.7rem; font-weight:950; }
+        .live-badge { left:10px; background:#ef2028; }
+        .live-viewers { right:10px; background:rgba(3,7,18,.8); backdrop-filter:blur(6px); }
+        .live-card-body { display:grid; gap:6px; padding:14px 15px 16px; }
+        .live-streamer { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:.9rem; }
+        .live-card-title { overflow:hidden; color:var(--home-muted); font-size:.8rem; line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+        .live-actions { display:flex; justify-content:center; padding:0 18px 18px; }
+        .live-actions[hidden] { display:none; }
+        .live-toggle { padding:11px 18px; border:1px solid rgba(255,90,47,.38); border-radius:12px; background:rgba(255,90,47,.1); color:#fed7aa; font:inherit; font-size:.82rem; font-weight:900; cursor:pointer; transition:background .2s ease,border-color .2s ease; }
+        .live-toggle:hover { border-color:rgba(255,90,47,.7); background:rgba(255,90,47,.17); }
+        [data-soop-live-root]:not([data-expanded="true"]) .live-card:nth-child(n+7) { display:none; }
+        [data-soop-live-root][data-has-desktop-overflow="false"] .live-actions { display:none; }
+        .feature-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+        .feature-card { display:flex; min-height:125px; flex-direction:column; padding:18px 0; border:0; border-top:1px solid var(--home-line); border-radius:0; background:transparent; color:inherit; text-decoration:none; transition:transform .2s ease,border-color .2s ease,background .2s ease; }
+        .feature-card:hover { transform:translateY(-5px); border-color:rgba(255,90,47,.5); background:var(--home-input); }
+        .feature-card h3 { margin:0 0 9px; font-size:1rem; font-weight:650; }
+        .feature-card p { margin:0; color:var(--home-muted); line-height:1.65; font-size:.82rem; }
+        .home-discord-card { --discord-accent:#b5baff; display:flex; min-width:0; flex-direction:column; align-items:flex-start; padding:22px; border:1px solid color-mix(in srgb,#5865f2 55%,var(--home-line)); border-radius:18px; background:radial-gradient(ellipse at 100% 0%,rgba(88,101,242,.2),transparent 70%),var(--home-card); }
+        body:not(.dark-mode) .home-discord-card { --discord-accent:#4752c4; }
+        .home-discord-heading { display:flex; align-items:center; gap:10px; width:100%; margin-bottom:18px; color:var(--discord-accent); font-size:.65rem; font-weight:750; letter-spacing:.12em; }
+        .home-discord-icon { display:grid; flex:none; place-items:center; width:36px; height:36px; border:1px solid rgba(88,101,242,.3); border-radius:11px; background:rgba(88,101,242,.15); }
+        .home-discord-icon svg { width:23px; height:23px; fill:currentColor; }
+        .home-discord-free { margin-left:auto; padding:4px 7px; border:1px solid var(--home-line); border-radius:6px; color:var(--home-muted); font-size:.65rem; letter-spacing:0; white-space:nowrap; }
+        .home-discord-card h3 { margin:0 0 9px; color:var(--home-ink); font-size:1.15rem; font-weight:750; letter-spacing:-.035em; word-break:keep-all; }
+        .home-discord-card p { margin:0; color:var(--home-muted); font-size:.82rem; line-height:1.75; word-break:keep-all; }
+        .home-discord-commands { display:flex; flex-wrap:wrap; gap:6px; margin:15px 0 18px; padding:0; list-style:none; }
+        .home-discord-commands li { padding:5px 8px; border:1px solid color-mix(in srgb,#5865f2 22%,var(--home-line)); border-radius:7px; background:color-mix(in srgb,#5865f2 7%,var(--home-card)); color:var(--discord-accent); font-size:.73rem; font-weight:650; }
+        .home-discord-invite { display:flex; align-items:center; justify-content:space-between; gap:14px; width:100%; min-height:44px; margin-top:auto; padding:11px 13px; border-radius:10px; background:#4752c4; color:#fff; font-size:.82rem; font-weight:750; text-decoration:none; }
+        .home-discord-invite:hover { background:#3942a5; color:#fff; }
+        .home-discord-invite:focus-visible { outline:3px solid var(--discord-accent); outline-offset:4px; }
+        .home-discord-note { margin-top:9px; color:var(--home-muted); font-size:.68rem; line-height:1.6; }
+        .content-grid { display:grid; grid-template-columns:1.15fr .85fr; gap:18px; }
+        .hub-card { padding:26px; border:1px solid var(--home-line); border-radius:24px; background:var(--home-card); }
+        .hub-card h3 { margin:0 0 15px; font-size:1.2rem; }
+        .hub-list { display:grid; gap:10px; }
+        .hub-list a { display:flex; justify-content:space-between; gap:15px; padding:14px 0; border-bottom:1px solid var(--home-line); color:var(--home-ink); text-decoration:none; font-size:.88rem; font-weight:800; }
+        .hub-list a:last-child { border-bottom:0; }
+        .hub-list span { color:#64748b; font-weight:700; }
+        .trust-card { background:var(--home-card); }
+        .trust-card p { color:var(--home-muted); line-height:1.75; font-size:.88rem; }
+        .trust-links { display:flex; flex-wrap:wrap; gap:8px; margin-top:20px; }
+        .trust-links a { padding:9px 12px; border:1px solid var(--home-line); border-radius:10px; color:var(--home-blue); text-decoration:none; font-size:.76rem; font-weight:800; }
+        @media(max-width:960px){ .feature-grid{grid-template-columns:repeat(2,1fr)}.live-grid{grid-template-columns:1fr 1fr}.live-preview.pending{grid-column:span 1}.content-grid{grid-template-columns:1fr} }
+        @media(max-width:640px){ .home-shell{width:min(100% - 24px,1240px);padding-top:18px}.home-notice-bar{gap:9px;padding:12px}.home-notice-badge{padding:0 8px}.home-notice-link.is-marquee .home-notice-text{animation:home-notice-marquee var(--notice-marquee-duration,12s) linear infinite}.home-notice-link.is-marquee:hover .home-notice-text,.home-notice-link.is-marquee:focus .home-notice-text{animation-play-state:paused}.home-notice-control{width:28px;height:28px}.section{margin-top:32px}.section-head{align-items:start;flex-direction:column}.live-grid,.feature-grid{grid-template-columns:1fr}.live-preview.pending{grid-column:auto}.live-toolbar{align-items:start;flex-direction:column}.feature-card{min-height:140px}[data-soop-live-root]:not([data-expanded="true"]) .live-card:nth-child(n+4){display:none}[data-soop-live-root][data-has-mobile-overflow="true"] .live-actions{display:flex}[data-soop-live-root][data-has-mobile-overflow="false"] .live-actions{display:none} }
+        @media(prefers-reduced-motion:reduce){ .home-notice-link.is-marquee .home-notice-text{animation:none} }
     </style>
 </head>
 <body>
-    <div class="home-controls-wrap">
-        <div class="home-controls">
-            <div id="auth-controls" class="auth-controls"></div>
-            <button id="color-change" aria-label="Theme">🌙</button>
-            <div id="language-switcher"></div>
+    <div class="site-header-container"><header>
+    <div class="header-inner">
+        <a href="/" class="site-logo-link" aria-label="Tracking SA home">
+            <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="site-logo">
+                <circle cx="50" cy="50" r="48" stroke="currentColor" stroke-width="4" fill="transparent"/>
+                <path d="M25 70L40 55L50 65L75 35" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="70" cy="35" r="12" stroke="currentColor" stroke-width="6" fill="currentColor"/>
+                <rect x="78" y="43" width="15" height="6" rx="3" transform="rotate(45 78 43)" fill="currentColor"/>
+            </svg>
+        </a>
+        <div class="desktop-menu-container">
+            <nav id="primary-navigation">
+                <ul>
+                    <li><a href="/stats/sudden-attack/" data-i18n="menu_stats_search">전적 검색</a></li>
+                    <li><a href="/stats/sudden-attack/replay/">리플레이 분석실</a></li>
+                    <li><a href="/guides/mygun2/">마이건2 도감</a></li>
+                    <li><a href="/guides/">가이드</a></li>
+                    <li><a href="/lab/">실험실</a></li>
+                    <li><a href="/board?category=notice" data-i18n="notice">공지사항</a></li>
+                </ul>
+            </nav>
         </div>
+        <div class="utility-controls">
+            <button id="color-change" aria-label="테마 변경">🌙</button>
+            <div id="auth-controls" class="auth-controls"></div>
+        </div>
+        <button class="mobile-menu-toggle" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="primary-navigation">
+            <span></span><span></span><span></span>
+        </button>
     </div>
-    <main class="search-main-container">
-        
-        <!-- Hero & Search -->
-        <section class="hero-section">
-            <div class="main-logo-area">
-                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="50" cy="50" r="48" stroke="#0052cc" stroke-width="4" fill="transparent"/>
-                    <path d="M25 70L40 55L50 65L75 35" stroke="#0052cc" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-                    <circle cx="70" cy="35" r="12" stroke="#0052cc" stroke-width="6" fill="#0052cc"/>
-                    <rect x="78" y="43" width="15" height="6" rx="3" transform="rotate(45 78 43)" fill="#0052cc"/>
-                </svg>
-                <h1 style="color: #0052cc; font-size: 2.5rem; margin-top: 15px; font-weight: 800; letter-spacing: -1px;">Tracking SA</h1>
-            </div>
-
-            <div class="search-container">
-                <div class="search-bar-wrapper">
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="text" id="searchInput" placeholder="관심 있는 기술 키워드나 인사이트를 검색하세요..." data-i18n="search_placeholder" autocomplete="off">
+</header>
+</div>
+    <main class="home-shell" id="homeHub">
+        <section class="home-hero" aria-labelledby="home-title">
+            <div class="hero-copy">
+                <div class="home-brand" role="img" aria-label="Tracking SA · Sudden Attack">
+                    <span class="home-brand-name">TRACKING <b><span>SA</span></b></span>
+                    <span class="home-brand-game">SUDDEN ATTACK</span>
                 </div>
-                <div id="searchResults"></div>
+                <h1 id="home-title">기록 너머의,<br><em>플레이를 읽다.</em></h1>
+                <p>서든어택 전적 검색과 리플레이 분석.<br>궁금한 선수의 기록부터 내 경기에서 놓친 장면까지.</p>
+                <section class="search-panel" aria-labelledby="homeSearchTitle">
+                    <h2 id="homeSearchTitle">서든어택 전적 검색</h2>
+                    <form class="hero-search" action="/stats/sudden-attack/" method="get">
+                        <input name="n" maxlength="24" autocomplete="off" aria-label="서든어택 캐릭터명" placeholder="닉네임을 입력하세요" required>
+                        <button type="submit">전적 검색 <span aria-hidden="true">↗</span></button>
+                    </form>
+                    <p class="home-tool-note">닉네임으로 최근 경기와 선수 기록을 확인하세요.</p>
+                    <div class="recent-wrap" data-has-items="false">
+                        <div class="recent-head"><span>최근 검색</span><span>이 브라우저 기준</span></div>
+                        <div class="recent-searches" id="homeRecentSearches"><span class="recent-empty">검색 기록이 없습니다</span></div>
+                    </div>
+                </section>
+            </div>
+            <aside class="home-preview" aria-labelledby="homePreviewTitle">
+                <div class="home-preview-heading"><span>••• &nbsp; REPLAY LAB</span><span>가상 경기 예시</span></div>
+                <div class="home-preview-score"><div><small>경기 흐름 재생</small><h2 id="homePreviewTitle">라운드마다 달라지는 순간.</h2></div><strong><span>A팀 <b>1</b></span><i>:</i><span><b>5</b> B팀</span></strong></div>
+                <div class="home-preview-axis-title"><span>A팀 기준 경기 승리 추정치 (%)</span><span>50 = 균형</span></div>
+                <div class="home-preview-plot"><div class="home-preview-axis" aria-hidden="true"><span>100</span><span>50</span><span>0</span></div>
+                    <svg data-home-preview-chart data-home-preview-metric="match-estimate" viewBox="0 0 1000 240" preserveAspectRatio="none" role="img" aria-label="가상 랭크전의 경기 승리 추정치. 전후반과 조기 종료를 반영합니다. 50 위는 A팀 우세, 아래는 B팀 우세입니다. 동등 전력 가정이며 실측 승률이 아닙니다.">
+                        <defs><linearGradient id="home-preview-advantage" x1="0" y1="2" x2="0" y2="238" gradientUnits="userSpaceOnUse"><stop offset="50%" class="home-preview-a"/><stop offset="50%" class="home-preview-b"/></linearGradient></defs>
+                        <path class="home-preview-grid" d="M0 2H1000M0 238H1000"/><path class="home-preview-balance" d="M0 120H1000"/>
+                        <!-- HOME_REPLAY_PREVIEW_BEGIN -->
+                        <path class="home-preview-line" stroke="url(#home-preview-advantage)" d="M2,120 H24.13 V114.57 H51.8 V120 H112.67 V125.43 H120.97 V130.86 H129.27 V136.28 H137.57 V141.71 H168 V154.22"/><path class="home-preview-line" stroke="url(#home-preview-advantage)" d="M168,154.22 H190.13 V148.56 H217.8 V154.22 H278.67 V148.56 H286.97 V143.13 H295.27 V137.7 H303.57 V132.27 H334 V120"/><path class="home-preview-line" stroke="url(#home-preview-advantage)" d="M334,120 H356.13 V114.57 H383.8 V120 H444.67 V125.19 H452.97 V130.62 H461.27 V135.81 H469.57 V141.24 H500 V153.28"/><path class="home-preview-line" stroke="url(#home-preview-advantage)" d="M500,153.28 H522.13 V147.85 H549.8 V153.28 H610.67 V158.47 H618.97 V163.9 H627.27 V169.09 H635.57 V174.52 H666 V186.32"/><path class="home-preview-line" stroke="url(#home-preview-advantage)" d="M666,186.32 H688.13 V180.42 H715.8 V186.32 H776.67 V192.22 H784.97 V198.12 H793.27 V204.02 H801.57 V209.92 H832 V223.13"/><path class="home-preview-line" stroke="url(#home-preview-advantage)" d="M832,223.13 H854.13 V221.01 H881.8 V223.13 H942.67 V225.49 H950.97 V227.85 H959.27 V230.21 H967.57 V232.57 H998 V238"/>
+                        <!-- HOME_REPLAY_PREVIEW_END --></svg>
+                </div>
+                <div class="home-preview-legend"><span>1R</span><span><b>A팀 우세 ↑</b> · <b>B팀 우세 ↓</b></span><span>6R</span></div>
+                <button class="home-preview-scene" type="button" data-home-replay-sample><span aria-hidden="true">↗</span><span><strong>이번 경기 핵심 장면</strong><small>샘플로 재생과 전후 흐름을 확인하세요.</small></span><span aria-hidden="true">→</span></button>
+                <p class="home-preview-caption">가상 경기 · 내 전적이 아닙니다. 동등 전력 가정 · 실측 승률 아님.</p>
+            </aside>
+        </section>
+        <section class="home-replay-panel" aria-labelledby="homeReplayTitle" data-home-replay-entry>
+            <div class="home-replay-copy"><span class="eyebrow">LOCAL REPLAY</span><h2 id="homeReplayTitle">내 경기, 한 번 더.</h2><p>공식 병영수첩에서 받은 JSON으로<br>내 리플레이를 분석하세요.</p></div>
+            <div class="home-replay-controls">
+                <label class="home-replay-drop" data-home-replay-drop>
+                    <input type="file" data-home-replay-files accept=".json,application/json" multiple aria-label="리플레이 JSON 파일 선택" aria-describedby="homeReplayFileHelp">
+                    <span class="home-upload-plus" aria-hidden="true">＋</span><span><strong>JSON 파일 선택</strong><small id="homeReplayFileHelp">끌어놓기도 가능 · 1~5개 · 파일당 최대 2MB</small></span>
+                </label>
+                <div class="home-replay-links">
+                    <details class="home-download-help"><summary>파일 받는 방법</summary><ol><li><a href="https://barracks.sa.nexon.com/" target="_blank" rel="noopener noreferrer">공식 병영수첩 열기 ↗</a></li><li>리플레이가 제공되는 경기의 상세 기록에서 JSON을 저장하세요.</li><li>다운로드한 원본 파일을 위 영역에 넣어주세요.</li></ol><a href="/guides/replay-analysis-guide/#download">자세한 사용 가이드 →</a></details>
+                    <button type="button" data-home-replay-sample>샘플 체험 ↗</button>
+                </div>
+                <p class="home-tool-note">1개는 경기 분석 · 2~5개는 같은 선수의 경기 비교</p>
+                <p id="homeReplayStatus" class="home-tool-note" role="status" aria-live="polite">원본 JSON은 서버로 전송하거나 저장하지 않습니다.</p>
+                <a class="home-replay-fallback" href="/stats/sudden-attack/replay/" data-home-replay-open>리플레이 분석실 열기 →</a>
+                <noscript><p>홈에서 파일을 연결하려면 JavaScript가 필요합니다. 분석실 링크를 이용해 주세요.</p></noscript>
             </div>
         </section>
 
-        <!-- Service Categories -->
-        <div class="category-wrapper">
-            <section class="featured-service">
-                <div class="featured-service-header">
-                    <span class="featured-service-badge" data-i18n="featured_service_badge">TOP SERVICE</span>
-                    <span data-i18n="featured_service_label">대표 서비스</span>
-                </div>
-                <h2 class="featured-service-title" data-i18n="featured_sa_title">서든어택 전적 검색</h2>
-                <p class="featured-service-desc" data-i18n="featured_sa_desc">Tracking SA에서 가장 많이 사용되는 핵심 기능입니다. 공식 API 기반 전적 조회, 매치 기록 확인, 크루 랭킹 확인까지 한 번에 연결됩니다.</p>
-                <div class="featured-service-meta">
-                    <span class="featured-service-pill" data-i18n="featured_sa_meta_realtime">실시간 전적 조회</span>
-                    <span class="featured-service-pill" data-i18n="featured_sa_meta_matches">최근 매치 기록</span>
-                    <span class="featured-service-pill" data-i18n="featured_sa_meta_crew">크루 랭킹 및 운영 도구</span>
-                </div>
-                <div class="featured-service-actions">
-                    <a href="/stats/sudden-attack/" class="featured-service-link primary" data-i18n="featured_sa_cta_search">전적 검색 바로가기</a>
-                    <a href="/stats/sudden-attack/#crewRanking" class="featured-service-link secondary" data-i18n="featured_sa_cta_ranking">크루 랭킹 보기</a>
-                    <a href="/stats/sudden-attack/#matchHistory" class="featured-service-link secondary" data-i18n="featured_sa_cta_history">매치 기록 보기</a>
-                </div>
-            </section>
-            
-            <!-- Category 1: Interactive Tests -->
-            <section class="category-section">
-                <div class="category-header">
-                    <h2 data-i18n="cat_interactive">AI Interactive</h2>
-                    <span class="badge" data-i18n="badge_test">TEST</span>
-                </div>
-                <div class="service-grid">
-                    <a href="/animal-face/" class="service-card">
-                        <div class="card-icon icon-orange"><i class="fas fa-paw"></i></div>
-                        <div class="card-title" data-i18n="animal_face_test">동물상 테스트</div>
-                        <div class="card-desc" data-i18n="animal_face_desc">나의 얼굴 데이터로 분석하는 가장 닮은 동물상 찾기</div>
-                    </a>
-                    <a href="/ai-test/" class="service-card">
-                        <div class="card-icon icon-purple"><i class="fas fa-brain"></i></div>
-                        <div class="card-title" data-i18n="ai_tendency_test">AI 성향 테스트</div>
-                        <div class="card-desc" data-i18n="ai_persona_desc">인공지능이 진단하는 나의 성격과 업무 성향 분석</div>
-                    </a>
-                    <a href="/fortune/" class="service-card">
-                        <div class="card-icon icon-navy"><i class="fas fa-moon"></i></div>
-                        <div class="card-title" data-i18n="saju_test">AI 운세</div>
-                        <div class="card-desc" data-i18n="saju_desc">빅데이터와 명리학을 결합한 오늘의 맞춤 운세 확인</div>
-                    </a>
-                    <a href="/lucky-recommendation/" class="service-card">
-                        <div class="card-icon icon-gold"><i class="fas fa-wand-magic-sparkles"></i></div>
-                        <div class="card-title" data-i18n="lucky_recommendation">행운의 추천</div>
-                        <div class="card-desc" data-i18n="lucky_desc">오늘 나에게 필요한 럭키 컬러와 최적의 아이템 제안</div>
-                    </a>
-                </div>
-            </section>
+        <aside class="home-notice-bar" data-home-notices hidden aria-label="최신 공지사항">
+            <span class="home-notice-badge">공지</span>
+            <a class="home-notice-link" data-home-notice-link href="/board?category=notice"><span class="home-notice-text" data-home-notice-text></span></a>
+            <div class="home-notice-controls" data-home-notice-controls>
+                <button class="home-notice-control" type="button" data-home-notice-prev aria-label="이전 공지">‹</button>
+                <button class="home-notice-control" type="button" data-home-notice-next aria-label="다음 공지">›</button>
+            </div>
+        </aside>
 
-            <!-- Category 2: Insights & Analysis -->
-            <section class="category-section">
-                <div class="category-header">
-                    <h2 data-i18n="cat_insights">Core Insights</h2>
-                </div>
-                <div class="service-grid">
-                    <a href="/glossary/" class="service-card">
-                        <div class="card-icon icon-purple"><i class="fas fa-book"></i></div>
-                        <div class="card-title" data-i18n="ai_glossary">AI 용어사전</div>
-                        <div class="card-desc" data-i18n="ai_glossary_desc">자주 찾는 AI와 IT 용어를 쉽게 정리한 실용 사전</div>
-                    </a>
-                    <a href="/futures-estimate/" class="service-card">
-                        <div class="card-icon icon-navy"><i class="fas fa-chart-line"></i></div>
-                        <div class="card-title" data-i18n="futures_estimate_index">코스피200</div>
-                        <div class="card-desc" data-i18n="futures_estimate_desc">선물 기반 지수 흐름과 추정치를 빠르게 확인</div>
-                    </a>
-                </div>
-            </section>
+        <a class="home-mygun-link" href="/guides/mygun2/" aria-labelledby="homeMygunTitle" aria-describedby="homeMygunDescription">
+            <div><span class="eyebrow">WEAPON ARCHIVE</span><h2 id="homeMygunTitle">마이건2 도감</h2><p id="homeMygunDescription">어떤 총기가 어떤 기능일까?<br>총기 사진·발동 조건·세트 효과를 찾아보세요.</p></div>
+            <img src="/guides/mygun2/images/eon-04.webp" width="310" height="150" alt="이온 AWP 대표 외형" loading="lazy" decoding="async">
+            <span class="home-mygun-cta">도감 열기 →</span>
+        </a>
 
-            <!-- Category: Community -->
-            <section class="category-section">
-                <div class="category-header">
-                    <h2 data-i18n="home_category_community">Community</h2>
-                </div>
-                <div class="service-grid">
-                    <a href="/board?category=notice" class="service-card">
-                        <div class="card-icon icon-red"><i class="fas fa-bullhorn"></i></div>
-                        <div class="card-title" data-i18n="notice">공지사항</div>
-                        <div class="card-desc" data-i18n="notice_desc">서비스 업데이트와 운영 안내를 확인하는 공간</div>
-                    </a>
-                    <a href="/board?category=free" class="service-card">
-                        <div class="card-icon icon-blue"><i class="fas fa-comments"></i></div>
-                        <div class="card-title" data-i18n="free_board">자유게시판</div>
-                        <div class="card-desc" data-i18n="free_board_desc">게임, 기술, 일상 이야기를 자유롭게 나누는 커뮤니티 공간</div>
-                    </a>
-                </div>
-            </section>
-
-            <!-- Category 3: Playground -->
-            <section class="category-section">
-                <div class="category-header" style="justify-content: space-between;">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <h2>Game Center</h2>
-                        <span class="badge" style="background: var(--p-blue);">HUB</span>
+        <section class="section" aria-labelledby="feature-title">
+            <div class="section-head"><div><span class="section-kicker">더 살펴보기</span><h2 id="feature-title">기록을 이해하는 도구</h2></div></div>
+            <div class="feature-grid">
+                <a class="feature-card" href="/stats/sudden-attack/"><h3>전적 지표 살펴보기</h3><p>최근 31일 활동과 매치 유형별 최근 최대 20경기의 승률·킬뎃을 확인합니다.</p></a>
+                <article class="home-discord-card" aria-labelledby="home-discord-title">
+                    <div class="home-discord-heading">
+                        <span class="home-discord-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.211.375-.445.864-.608 1.248a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.248.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.994 3.03.078.078 0 0 0 .084-.028 14.2 14.2 0 0 0 1.226-1.994.076.076 0 0 0-.042-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.099.246.197.373.291a.077.077 0 0 1-.007.128c-.598.351-1.22.65-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03ZM8.02 15.331c-1.183 0-2.157-1.085-2.157-2.419s.955-2.419 2.157-2.419c1.211 0 2.176 1.095 2.157 2.419 0 1.334-.955 2.419-2.157 2.419Zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419s.955-2.419 2.157-2.419c1.211 0 2.176 1.095 2.157 2.419 0 1.334-.946 2.419-2.157 2.419Z"/></svg></span>
+                        <span>TRACKING SA BOT</span><span class="home-discord-free">무료</span>
                     </div>
-                    <a href="/games/submit/" style="font-size: 0.85rem; color: var(--p-blue); font-weight: 800; text-decoration: none;">+ Submit Your Game</a>
-                </div>
-                <div class="service-grid">
-                    <a href="/games/" class="service-card" style="border: 2px solid var(--p-blue-soft);">
-                        <div class="card-icon icon-blue"><i class="fas fa-gamepad"></i></div>
-                        <div class="card-title" data-i18n="game_hub">게임 센터 홈</div>
-                        <div class="card-desc" data-i18n="game_hub_desc">클래식부터 AI 게임까지, 모든 게임을 한곳에서 즐기세요.</div>
-                    </a>
-                    <a href="/games/tetris/" class="service-card">
-                        <div class="card-icon icon-red"><i class="fas fa-shapes"></i></div>
-                        <div class="card-title" data-i18n="tetris_game">테트리스</div>
-                        <div class="card-desc" data-i18n="tetris_game_desc">웹에서 가볍게 즐기는 클래식 아케이드 퍼즐 게임</div>
-                    </a>
-                    <a href="/games/ai-evolution/" class="service-card">
-                        <div class="card-icon icon-green"><i class="fas fa-dna"></i></div>
-                        <div class="card-title" data-i18n="ai_evolution">AI 진화 게임</div>
-                        <div class="card-desc" data-i18n="ai_evolution_desc">AI 모델을 합성하여 진화시키는 2048 스타일 게임</div>
-                    </a>
-                    <a href="/games/submit/" class="service-card" style="background: oklch(98% 0.01 250); border: 1px dashed var(--p-blue-soft);">
-                        <div class="card-icon icon-navy"><i class="fas fa-plus"></i></div>
-                        <div class="card-title" data-i18n="register_game">내 게임 등록</div>
-                        <div class="card-desc" data-i18n="register_game_desc">직접 만든 게임이나 추천하고 싶은 게임을 공유하세요.</div>
-                    </a>
-                </div>
-            </section>
+                    <h3 id="home-discord-title">우리 서버에도 TrackingSA</h3>
+                    <p>채팅창에서 전적 검색부터<br>JSON 리플레이의 선수 기록 요약까지.</p>
+                    <ul class="home-discord-commands" aria-label="사용 가능한 봇 명령어"><li>/전적</li><li>/리플레이</li><li>/도움말</li></ul>
+                    <a class="home-discord-invite" href="https://discord.com/oauth2/authorize?client_id=1478495458900054300&amp;scope=bot%20applications.commands&amp;permissions=52224&amp;integration_type=0" target="_blank" rel="noopener noreferrer" aria-label="디스코드 서버에 봇 초대하기 (새 탭)">서버에 봇 초대하기 <span aria-hidden="true">↗</span></a>
+                    <small class="home-discord-note">서버 관리 권한 필요 · 초대 후 /도움말로 시작</small>
+                </article>
+                <a class="feature-card" href="/guides/"><h3>분석 사용 가이드</h3><p>리플레이 파일 받기와 전적 지표·VS 비교의 해석 방법을 살펴봅니다.</p></a>
+            </div>
+        </section>
 
-        </div>
+        <section id="soop-live" class="section" aria-labelledby="live-title" style="scroll-margin-top: 100px;">
+            <div class="section-head"><div><span class="section-kicker">SOOP LIVE</span><h2 id="live-title">지금 서든 방송</h2></div><p>SOOP에서 현재 방송 중인 서든어택 스트리머의 썸네일, 방송 제목과 현재 시청자 수를 확인하고 바로 시청할 수 있습니다.</p></div>
+            <div class="live-shell" data-soop-live-root>
+                <div class="live-toolbar"><div class="live-status"><i class="live-dot"></i>서든어택 LIVE</div><small data-soop-live-meta>라이브 방송 확인 중</small></div>
+                <div class="live-grid" data-soop-live-grid>
+                    <article class="live-message pending"><div class="live-preview-icon">●</div><h3>SOOP 라이브 불러오는 중</h3><p>현재 방송 중인 서든어택 스트리머를 확인하고 있습니다.</p></article>
+                </div>
+                <div class="live-actions" data-soop-live-actions hidden>
+                    <button class="live-toggle" type="button" data-soop-live-toggle aria-expanded="false">방송 더 보기</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="section content-grid">
+            <article id="content-guides" class="hub-card">
+                <span class="section-kicker">가이드와 커뮤니티</span><h3>서든어택 콘텐츠</h3>
+                <div class="hub-list">
+                    <a href="/guides/">전체 가이드 보기 <span>주제별 안내 모음 →</span></a>
+                    <a href="/guides/form-signal-report/">승률·킬뎃 비교 <span>계산·실제 조회 사례 →</span></a>
+                    <a href="/guides/map-sample-report/">맵별 승률과 편중 <span>표본·맵 구성 해석 →</span></a>
+                    <a href="/guides/vs-comparison-guide/">VS 비교 사용법 <span>두 사람의 기록 비교 →</span></a>
+                    <a href="/board?category=notice">서비스 공지사항 <span>업데이트 확인 →</span></a>
+                    <a href="/board/">자유게시판 <span>커뮤니티 →</span></a>
+                </div>
+            </article>
+            <article class="hub-card trust-card"><span class="section-kicker">공식 데이터</span><h3>근거가 보이는 전적 서비스</h3><p>Tracking SA는 NEXON Open API를 이용한 공개 전적과 SOOP 공식 API를 통한 서든어택 라이브 방송 정보를 제공합니다. 각 데이터의 출처와 갱신 범위를 구분해 안내합니다.</p><div class="trust-links"><a href="/service-methodology/">서비스 기준</a><a href="/editorial-policy/">편집 원칙</a><a href="/about/">서비스 소개</a><a href="/contact/">문의</a></div></article>
+        </section>
     </main>
-
-    <div class="site-footer-container"><footer>
-    <div style="margin-bottom: 15px;">
-        <strong style="color: #0052cc; font-size: 1.2rem; font-weight: 800;">Tracking SA</strong>
+    <main id="homeReplayWorkspace" hidden aria-label="리플레이 분석 작업 화면">
+        <div class="home-workspace-toolbar">
+            <button type="button" data-home-replay-close>← 홈으로 돌아가기</button>
+            <a href="/stats/sudden-attack/replay/">분석실 별도 페이지 열기 ↗</a>
+        </div>
+        <div data-home-replay-mount></div>
+    </main>
+    <div class="site-footer-container"><footer class="site-footer">
+    <div class="footer-inner">
+        <div class="footer-top">
+            <div class="footer-brand">
+                <a class="footer-brand-link" href="/" aria-label="Tracking SA 홈">
+                    <svg width="36" height="36" viewBox="0 0 100 100" fill="none" aria-hidden="true" focusable="false">
+                        <circle cx="50" cy="50" r="48" stroke="currentColor" stroke-width="4"/>
+                        <path d="M25 70L40 55L50 65L75 35" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="70" cy="35" r="12" fill="currentColor"/>
+                    </svg>
+                    <strong>TRACKING <span>SA</span></strong>
+                </a>
+                <p>서든어택의 기록을,<br>더 쉽게 읽는 곳.</p>
+                <button id="pwa-install-button" class="footer-install" type="button" hidden>Tracking SA 앱 설치 <span aria-hidden="true">↗</span></button>
+            </div>
+            <nav class="footer-nav" aria-label="하단 메뉴">
+                <div class="footer-link-group">
+                    <h2>둘러보기</h2>
+                    <ul>
+                        <li><a href="/stats/sudden-attack/">서든어택 전적</a></li>
+                        <li><a href="/stats/sudden-attack/replay/">리플레이 분석실</a></li>
+                        <li><a href="/guides/">가이드</a></li>
+                    </ul>
+                </div>
+                <div class="footer-link-group">
+                    <h2>서비스 안내</h2>
+                    <ul>
+                        <li><a href="/about" data-i18n="about_us">서비스 소개</a></li>
+                        <li><a href="/service-methodology/">서비스 기준</a></li>
+                        <li><a href="/editorial-policy/">편집 원칙</a></li>
+                        <li><a href="/sitemap.xml" data-i18n="sitemap">사이트맵</a></li>
+                    </ul>
+                </div>
+                <div class="footer-link-group">
+                    <h2>이용 및 문의</h2>
+                    <ul>
+                        <li><a href="/privacy-policy" data-i18n="privacy_policy">개인정보처리방침</a></li>
+                        <li><a href="/terms" data-i18n="terms_of_service">이용약관</a></li>
+                        <li><a href="/ai-replay-pass/">AI 이용권 · 판매 준비</a></li>
+                        <li><a href="/contact/" data-i18n="contact">문의</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+        <div class="footer-business-info" aria-label="사업자 정보">
+            <details class="footer-business-details">
+                <summary class="footer-business-summary"><strong>로직 스토어</strong><span>사업자 정보</span><svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false"><path d="m4 6 4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+                <dl>
+                    <div><dt>상호</dt><dd>로직 스토어</dd></div>
+                    <div><dt>사업자등록번호</dt><dd>000-00-00000</dd></div>
+                    <div><dt>대표자</dt><dd>조한범</dd></div>
+                    <div class="footer-business-address"><dt>사업장 주소</dt><dd>경기도 수원시 인계동 992-13 크레텔 하우스 2동 302호</dd></div>
+                    <div><dt>통신판매업 신고번호</dt><dd>2026-수원팔달-0279호</dd></div>
+                </dl>
+            </details>
+            <div class="footer-business-contact" aria-label="고객 문의"><span>고객 문의</span><a href="tel:01081129691" aria-label="고객 문의 전화 010-0000-0000">010-0000-0000</a><a href="mailto:demo-15b9ce4f@example.com" aria-label="문의 이메일 demo-15b9ce4f@example.com">demo-15b9ce4f@example.com</a></div>
+        </div>
+        <div class="footer-bottom">
+            <p class="nexon-api-attribution">본 서비스는 <a href="https://openapi.nexon.com/ko/support/terms/" target="_blank" rel="noopener noreferrer">NEXON Open API</a>를 이용하여 데이터를 제공합니다. <span lang="en">This service uses NEXON Open API.</span></p>
+            <p class="footer-copyright" data-i18n="footer_copyright">&copy; 2026 TrackingSA. 서든어택 전적 검색 중심 서비스.</p>
+        </div>
     </div>
-    <p data-i18n="footer_copyright"></p>
-    <p style="margin-top: 10px;">
-        <a href="/about" data-i18n="about_us">서비스 소개</a> |
-        <a href="/contact" data-i18n="contact">문의</a> |
-        <a href="/inquiry" data-i18n="partnership_inquiry">서비스 제휴 문의</a> |
-        <a href="/privacy-policy" data-i18n="privacy_policy">개인정보처리방침</a> |
-        <a href="/terms" data-i18n="terms_of_service">이용약관</a> |
-        <a href="/glossary" data-i18n="ai_glossary">AI 용어 사전</a> |
-        <a href="/sitemap.xml" data-i18n="sitemap">사이트맵</a> |
-        <a href="/stats/sudden-attack/">서든어택 전적</a>
-    </p>
 </footer>
 </div>
+    <script>
+        (() => {
+            const root = document.getElementById('homeRecentSearches');
+            if (!root) return;
+            let names = [];
+            try { names = JSON.parse(localStorage.getItem('sa_recent_searches') || '[]'); } catch {}
+            names = Array.isArray(names) ? names.filter((name) => typeof name === 'string' && name.trim()).slice(0, 5) : [];
+            if (!names.length) return;
+            root.closest('.recent-wrap').dataset.hasItems = 'true';
+            root.innerHTML = names.map((name) => `<a href="/stats/sudden-attack/?n=${encodeURIComponent(name)}">${name.replace(/[&<>"']/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]))}</a>`).join('');
+        })();
+    </script>
+    <script type="module" src="./home/replay-entry.js?v=0e1258a735fe"></script>
+    <script type="module" src="/home/notice-ticker.js"></script>
+    <script type="module" src="/home/soop-live.js"></script>
 </body>
 </html>

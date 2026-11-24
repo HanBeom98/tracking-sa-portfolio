@@ -147,6 +147,34 @@ body.dark-mode .search-highlight {
     color: white;
 }
 
+@media (max-width: 640px) {
+  .search-head h1 {
+    margin-top: 24px;
+    font-size: 2rem;
+  }
+
+  .search-box {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .search-box input,
+  .search-box button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .results {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .result-card,
+  .result-empty {
+    min-width: 0;
+    padding: 18px;
+  }
+}
+
 @keyframes shimmer {
     0% { opacity: 0.5; }
     50% { opacity: 1; }

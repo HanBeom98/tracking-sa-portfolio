@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>리플레이 분석·비교 가이드와 샘플 사례 | Tracking SA</title>
+
+<meta name="keywords" content="서든어택, 리플레이, 병영수첩, JSON, 경기 비교, 상황 우세 지수, 재접속, 위장 닉네임">
+<meta property="article:published_time" content="2026-10-28">
+<meta property="article:modified_time" content="2026-10-29">
+<meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://trackingsa.com/guides/replay-analysis-guide/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Tracking SA">
+    <meta property="og:url" content="https://trackingsa.com/guides/replay-analysis-guide/">
+    <meta property="og:image" content="https://trackingsa.com/logo.svg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://trackingsa.com/logo.svg">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
+    <meta name="description" content="서든어택 리플레이 JSON을 받는 방법, 한 경기 분석과 여러 경기 비교, 상황 우세 지수, 이탈·재접속 기록의 해석 범위를 샘플 계산표로 설명합니다.">
+    <meta property="og:title" content="리플레이 분석·비교 가이드와 샘플 사례 | Tracking SA">
+    <meta property="og:description" content="서든어택 리플레이 JSON을 받는 방법, 한 경기 분석과 여러 경기 비교, 상황 우세 지수, 이탈·재접속 기록의 해석 범위를 샘플 계산표로 설명합니다.">
+<style>
+  html.dark-mode,
+  html.dark-mode body {
+    background-color: #0f172a;
+    color: #f8fafc;
+    color-scheme: dark;
+  }
+</style>
+<script>
+  (function() {
+    let theme = 'dark';
+    try {
+      theme = localStorage.getItem('theme') === 'light' ? 'light' : 'dark';
+    } catch {}
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark-mode');
+      document.body && document.body.classList.add('dark-mode');
+    }
+  })();
+</script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7263630893992216" crossorigin="anonymous"></script>
+<meta name="google-adsense-account" content="ca-pub-7263630893992216">
+<script type="module" src="/analytics-loader.js?v=86d5e62d50ed"></script>
+<meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
+<meta name="naver-site-verification" content="b15b33af838280b54d31eb3c7e5c358d2836743f" />
+<script>
+  window.FIREBASE_CONFIG = {"apiKey": "", "authDomain": "demo-tracking-sa-portfolio.firebaseapp.com", "projectId": "demo-tracking-sa-portfolio", "storageBucket": "demo-tracking-sa-portfolio.firebasestorage.app", "appId": "1:000000000000:web:portfolio-example", "messagingSenderId": "779289056217", "appCheckSiteKey": ""};
+</script>
+<script>
+  window.authDomainReady = window.authDomainReady || new Promise((resolve) => {
+    window.__resolveAuthDomain = resolve;
+  });
+</script>
+<link rel="stylesheet" href="/style.css?v=8f0895c6daf8">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#0052cc">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Tracking SA">
+<script src="/runtime-config.js"></script>
+<script>window.AUTH_RUNTIME_DEFERRED = true;</script>
+<script defer src="/deferred-auth-loader.js?v=7c4177555bdb"></script>
+<script defer src="/pwa-register.js"></script>
+<script src="/translations.js?v=8eb99f0dbaa9"></script>
+<script src="/common.js?v=5cfaaa0b27e3"></script>
+
+<style>
+.replay-guide{max-width:1000px;margin:auto;padding:36px 20px 80px;color:#334155;line-height:1.85;overflow-wrap:anywhere}.rg-hero{padding:32px;border-radius:24px;background:linear-gradient(125deg,#0f172a,#164e63);color:#fff}.rg-hero h1{margin:12px 0;font-size:clamp(1.8rem,5vw,2.55rem);line-height:1.3;word-break:keep-all}.rg-hero p{margin:12px 0;color:#e2e8f0}.rg-meta{font-size:.85rem;color:#cbd5e1}.rg-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}.rg-actions a{display:inline-flex;align-items:center;min-height:44px;padding:8px 16px;border-radius:10px;background:#cffafe;color:#083344;font-weight:800;text-decoration:none}.rg-actions a:last-child{background:#e2e8f0;color:#0f172a}.rg-toc{display:flex;flex-wrap:wrap;gap:10px 18px;padding:22px 0}.replay-guide a{color:#075985;text-underline-offset:3px}.replay-guide :is(a,[tabindex]):focus-visible{outline:3px solid #0891b2;outline-offset:4px}.rg-card{margin:20px 0;padding:28px;border:1px solid #cbd5e1;border-radius:20px;background:#fff;scroll-margin-top:100px}.rg-card h2{margin:0 0 16px;font-size:1.45rem;line-height:1.4;word-break:keep-all}.rg-card h3{margin-top:24px;font-size:1.08rem}.rg-card p:last-child{margin-bottom:0}.rg-card li+li{margin-top:10px}.rg-note{padding:16px 20px;border-left:4px solid #0891b2;border-radius:10px;background:#ecfeff;color:#164e63}.rg-table-wrap{max-width:100%;overflow-x:auto;border:1px solid #cbd5e1;border-radius:12px;scrollbar-width:thin}.rg-table{width:100%;min-width:570px;border-collapse:collapse;text-align:left;font-size:.9rem}.rg-table caption{text-align:left;padding:14px;background:#ecfeff;color:#164e63;font-weight:800}.rg-table :is(th,td){padding:12px;border-bottom:1px solid #cbd5e1;vertical-align:top}.rg-table thead,.rg-table tfoot{background:#f1f5f9}.rg-formula{padding:14px 18px;border-radius:10px;background:#f1f5f9;line-height:1.8}.rg-states{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:0;list-style:none}.rg-states li{padding:15px 10px;border-radius:12px;background:#f1f5f9;text-align:center}.rg-states strong,.rg-states span{display:block}.rg-states strong{font-size:1.65rem;color:#075985}.rg-states small{font-size:.8rem}.rg-states li+li{margin-top:0}body.dark-mode .replay-guide{color:#cbd5e1}body.dark-mode .rg-card{background:#111827;border-color:#334155}body.dark-mode .rg-card h2,body.dark-mode .rg-card h3{color:#f8fafc}body.dark-mode .replay-guide a{color:#7dd3fc}body.dark-mode .rg-actions a{color:#083344}body.dark-mode .rg-actions a:last-child{color:#0f172a}body.dark-mode .rg-note,body.dark-mode .rg-table caption{background:#083344;color:#cffafe}body.dark-mode .rg-table-wrap,body.dark-mode .rg-table :is(th,td){border-color:#475569}body.dark-mode .rg-table thead,body.dark-mode .rg-table tfoot,body.dark-mode .rg-formula,body.dark-mode .rg-states li{background:#1e293b}body.dark-mode .rg-states strong{color:#67e8f9}@media(max-width:640px){.replay-guide{padding:24px 14px 60px}.rg-hero,.rg-card{padding:22px}.rg-actions a{width:100%;justify-content:center}.rg-states{gap:6px}.rg-states li{padding:12px 6px}.rg-states span{font-size:.8rem;line-height:1.6}}
+</style>
+</head>
+<body>
+<div class="site-header-container"><header>
+    <div class="header-inner">
+        <a href="/" class="site-logo-link" aria-label="Tracking SA home">
+            <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="site-logo">
+                <circle cx="50" cy="50" r="48" stroke="currentColor" stroke-width="4" fill="transparent"/>
+                <path d="M25 70L40 55L50 65L75 35" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="70" cy="35" r="12" stroke="currentColor" stroke-width="6" fill="currentColor"/>
+                <rect x="78" y="43" width="15" height="6" rx="3" transform="rotate(45 78 43)" fill="currentColor"/>
+            </svg>
+        </a>
+        <div class="desktop-menu-container">
+            <nav id="primary-navigation">
+                <ul>
+                    <li><a href="/stats/sudden-attack/" data-i18n="menu_stats_search">전적 검색</a></li>
+                    <li><a href="/stats/sudden-attack/replay/">리플레이 분석실</a></li>
+                    <li><a href="/guides/mygun2/">마이건2 도감</a></li>
+                    <li><a href="/guides/">가이드</a></li>
+                    <li><a href="/lab/">실험실</a></li>
+                    <li><a href="/board?category=notice" data-i18n="notice">공지사항</a></li>
+                </ul>
+            </nav>
+        </div>
+        <div class="utility-controls">
+            <button id="color-change" aria-label="테마 변경">🌙</button>
+            <div id="auth-controls" class="auth-controls"></div>
+        </div>
+        <button class="mobile-menu-toggle" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="primary-navigation">
+            <span></span><span></span><span></span>
+        </button>
+    </div>
+</header>
+</div>
+<main class="replay-guide">
+<div class="rg-hero">
+<span>TRACKING SA · REPLAY GUIDE</span>
+<h1>리플레이 분석·비교 가이드와 샘플 사례</h1>
+<p>한 경기의 장면을 다시 보고 싶은지, 여러 경기에서 같은 선수의 기록을 비교하고 싶은지부터 고르세요. 실제 화면의 사용 순서와 직접 재현할 수 있는 가상 샘플의 수치를 함께 설명합니다.</p>
+<div class="rg-meta">작성·확인 <time datetime="2026-10-28">2026-10-28</time> · 무료 기본 분석 기준</div>
+<div class="rg-actions"><a href="/stats/sudden-attack/replay/">리플레이 분석실 열기</a><a href="/guides/">다른 가이드 보기</a></div>
+</div>
+<nav class="rg-toc" aria-label="이 문서의 목차">
+<a href="#choose">분석 방법 선택</a><a href="#download">JSON 준비</a><a href="#single">한 경기 분석</a><a href="#index">그래프 지수</a><a href="#reconnect">이탈·재접속</a><a href="#compare">여러 경기 비교</a><a href="#sample">샘플 계산표</a><a href="#questions">자주 막히는 부분</a>
+</nav>
+
+<section id="choose" class="rg-card">
+<h2>1. 한 경기 분석과 여러 경기 비교는 언제 쓰나요?</h2>
+<div class="rg-table-wrap" role="region" tabindex="0" aria-label="분석 방법 선택 표">
+<table class="rg-table"><caption>확인하려는 질문에 맞춰 시작하세요</caption><thead><tr><th scope="col">확인할 것</th><th scope="col">선택할 화면</th><th scope="col">준비할 것</th></tr></thead><tbody>
+<tr><th scope="row">언제 처치·사망했고 어느 라운드를 다시 볼까?</th><td>한 경기 상세 분석</td><td>JSON 1개와 분석할 선수 선택</td></tr>
+<tr><th scope="row">여러 경기에서 같은 선수의 생존·처치가 어떻게 달랐을까?</th><td>여러 경기 비교</td><td>서로 다른 경기의 JSON 2~5개, 공통 선수 ID</td></tr>
+<tr><th scope="row">두 사람의 최근 전적을 비교하고 싶다</th><td>전적 검색의 VS 비교</td><td>두 사람의 닉네임. <a href="/guides/vs-comparison-guide/">VS 가이드</a> 참고</td></tr>
+</tbody></table></div>
+<p>‘여러 경기 비교’는 여러 사람의 실력을 순위로 매기는 기능이 아닙니다. 같은 선수의 기록을 경기별로 놓고 표본과 차이를 확인하는 기능입니다.</p>
+<aside class="rg-note"><strong>파일이 없어도 먼저 체험할 수 있어요.</strong><br>분석실 첫 화면에서 ‘샘플로 한 경기 체험’ 또는 ‘샘플로 여러 경기 비교’를 누르세요. 샘플은 브라우저에서 만든 가상의 경기이며 실제 플레이어의 전적이 아닙니다. 외부 전력 조회나 유료 AI 호출 없이 동작합니다.</aside>
+</section>
+
+<section id="download" class="rg-card">
+<h2>2. 공식 리플레이 JSON을 준비하세요</h2>
+<ol><li><a href="https://barracks.sa.nexon.com/" target="_blank" rel="noopener noreferrer">서든어택 공식 병영수첩</a>에서 캐릭터의 기록을 찾습니다.</li>
+<li>리플레이가 제공되는 경기의 상세 기록을 열고 JSON 파일을 저장합니다. 분석실에는 저장된 <strong>.json 파일</strong>을 넣습니다.</li>
+<li>다운로드 폴더에서 파일을 찾고, 파일당 최대 2MB인지 확인합니다. 여러 경기를 비교하려면 서로 다른 경기의 파일을 준비하세요.</li></ol>
+<p>홈의 ‘내 리플레이 분석’에서도 파일을 선택하거나 끌어놓을 수 있습니다. 1개는 한 경기 분석, 2~5개는 같은 선수의 경기 비교로 이어지며 파일을 다시 선택할 필요가 없습니다. 홈으로 돌아가도 현재 페이지 안의 작업은 유지되지만, 새로고침하면 파일을 다시 선택해야 합니다.</p>
+<p>동영상·스크린샷이나 이름만 .json으로 바꾼 파일은 분석할 수 없습니다. 공식 사이트에서 특정 경기의 리플레이 파일을 제공하지 않는 경우 Tracking SA가 그 파일을 새로 만들어 가져오지는 않습니다.</p>
+<p>처음에는 파일을 따로 편집하지 않고 저장한 원본 그대로 사용하세요. 비교할 때 동일한 파일을 복사해서 두 개 넣어도 서로 다른 경기 두 개로 계산하지 않습니다.</p>
+</section>
+
+<section id="single" class="rg-card">
+<h2>3. 기본 분석부터 보고, 필요한 장면으로 이동하세요</h2>
+<ol><li>‘한 경기 상세 분석’에서 파일을 선택하거나 선택 영역에 끌어놓습니다.</li><li>‘분석할 플레이어’에서 본인 또는 확인할 선수를 고르고 ‘이 플레이어 분석’을 누릅니다.</li><li>경기 흐름 재생에서 시간을 이동하거나 라운드를 선택합니다. 현재 생존자·사건 기록과 그래프를 함께 확인하세요.</li><li>핵심 장면의 ‘라운드 보기’, 처치·사망 필터, 상세 분석 항목으로 근거를 더 확인합니다.</li></ol>
+<p>기본 분석과 재생은 전력 조회를 기다리지 않고 표시됩니다. 경기 유형 자동 확인이나 전력 조회가 늦거나 실패해도 파일에 있는 라운드 기록은 먼저 볼 수 있습니다. 전력 정보가 준비되면 전력 패널만 갱신되며 재생 위치는 유지됩니다.</p>
+<p>결과 상단의 수치와 핵심 장면부터 확인하세요. ‘핵심 장면 / 경기 재생 / 세부 기록’으로 이동할 수 있으며, 세부 기록에는 기록 진단·추가 전력·기록 해설 예시·생존·투척·라운드 항목을 모았습니다. 계산 기준과 검증 보류 안내를 함께 확인하세요.</p>
+<div class="rg-table-wrap" role="region" tabindex="0" aria-label="파일 분석과 외부 전력 비교의 차이">
+<table class="rg-table"><caption>같은 결과 화면 안에서도 데이터 출처가 다릅니다</caption><thead><tr><th scope="col">부분</th><th scope="col">사용하는 정보</th><th scope="col">조회가 안 될 때</th></tr></thead><tbody>
+<tr><th scope="row">라운드·재생·기본 해설</th><td>선택한 JSON의 기록을 기기 안에서 분석</td><td>확인 가능한 기록은 유지하고 부족한 판정은 보류</td></tr>
+<tr><th scope="row">양 팀 전력 비교</th><td>경기 ID·닉네임을 이용한 넥슨 OpenAPI 조회와 경기 직전 기록</td><td>기본 분석은 계속 사용 가능. 유형 자동 확인 실패 시 비교 기준을 직접 선택</td></tr>
+</tbody></table></div>
+<p>당시 전력 비교는 경기 후 7일 이내의 리플레이를 대상으로 합니다. 날짜를 확인할 수 없거나 이 기간이 지난 파일은 전력 비교를 제외해도 기본 분석이 가능합니다. 닉네임 변경 등으로 외부 정보를 찾지 못한 경우도 곧바로 ‘기록 없음’이나 ‘실력이 낮음’으로 해석하지 않습니다.</p>
+<p>장면을 남길 때는 재생 위치를 맞춘 뒤 ‘이 시점 이미지’를 사용하세요. 경기 전체 요약은 ‘이미지 공유’로 별도로 만들 수 있습니다. 두 기능 모두 원본 게임 영상을 생성하는 기능은 아닙니다.</p>
+<p>수치와 라운드 표를 함께 보관하려면 결과 상단의 ‘보고서 / PDF’를 누르세요. 미리보기에서 확인한 뒤 ‘인쇄 / PDF 저장’을 누르고 브라우저의 ‘PDF로 저장’을 선택할 수 있습니다. 공식 경기 총계와 검증 라운드 집계를 구분하며, 검증 보류 라운드는 표에 남기고 평균·주요 장면에서는 제외합니다. 닉네임·경기 시각이 포함되므로 공유 전에 확인하고, URL 등의 자동 표시는 브라우저 머리글·바닥글 설정에서 끌 수 있습니다.</p>
+</section>
+
+<section id="index" class="rg-card">
+<h2>4. 그래프: 경기 승리 추정치와 상황 우세 지수</h2>
+<p>랭크전 R 유형은 현재 점수와 전후반 3선승 규칙, 조기 종료·골든라운드를 반영한 <strong>경기 승리 추정치(%)</strong>를 표시합니다. 전반 3:0으로 공수교대해도 우세가 유지되며, 상대가 남은 라운드로 동점을 만들 수 없으면 승리 확정입니다. 현재 라운드는 생존 인원·C4 상태로 보정하고 이후 라운드는 동등 전력을 가정합니다. 학습·검증된 실측 승률이 아니므로 참고용으로 사용하세요. 다른 유형은 기존 상황 우세 지수(점)를 표시합니다. 아래 가상 랭크전 샘플과 홈 미리보기는 경기 승리 추정치를 사용합니다.</p>
+<p>그래프는 <strong>A팀 기준 한 개의 선</strong>으로 읽습니다. 가운데 50은 균형, 50보다 높으면 A팀 우세, 낮으면 B팀 우세입니다. 청록/빨강과 범례를 함께 확인하세요. 두 팀의 계산 기준은 그대로이며 검증이 보류된 구간은 선을 이어 그리지 않습니다.</p>
+<p>R 이외 유형의 상황 우세 지수는 현재 생존 인원 차이, 이미 끝난 라운드 점수, 기록된 폭탄 설치 상태를 정해진 규칙으로 요약한 참고 점수입니다. 실제 경기 결과로 학습·검증한 승리 확률이 아닙니다. 그래프 눈금과 별개로 계산된 표시는 5~95점 범위로 제한됩니다.</p>
+<p>분석실의 ‘샘플로 한 경기 체험’에서 1라운드를 선택하고 시간을 옮겨 보세요. 폭탄 설치가 없고 앞서 끝난 라운드도 없는 상태에서는 다음과 같이 변합니다.</p>
+<ol class="rg-states" aria-label="첫 번째 가상 샘플의 1라운드 경기 승리 추정치 변화">
+<li><span>라운드 시작</span><strong>50.0%</strong><small>A팀 5명 · B팀 5명</small></li><li><span>8초 · 상대 1명 처치</span><strong>52.3%</strong><small>A팀 5명 · B팀 4명</small></li><li><span>18초 · 아군 1명 사망</span><strong>50.0%</strong><small>A팀 4명 · B팀 4명</small></li>
+</ol>
+<p class="rg-formula">8초의 현재 라운드 가정값은 50 + 40 × (5 − 4) ÷ 5 = 58%입니다. 이를 현재 라운드 승패 이후의 남은 경기 경로에 반영하면 경기 전체 승리 추정치는 52.3%입니다. 점수가 0:0인 이 예시에서는 인원이 다시 같아지면 50%로 돌아옵니다. 앞선 점수가 있으면 새 라운드가 시작해도 그 우세를 유지합니다.</p>
+<p>실제 기록에서는 앞선 라운드 점수나 폭탄 상태가 다를 수 있어 같은 생존 인원이라고 항상 같은 점수가 나오지는 않습니다. 지수가 내려간 시점은 다시 볼 장면을 찾는 출발점이지, 특정 선수의 실수를 입증하는 결론이 아닙니다.</p>
+<p>옅은 선은 전체 기록, 진한 선은 현재 재생 시점까지의 기록입니다. ‘양 팀 전력 비교’의 예상치와 재생 그래프는 입력과 계산 방식이 다르므로 두 값을 같은 확률처럼 비교하지 마세요.</p>
+</section>
+
+<section id="reconnect" class="rg-card">
+<h2>5. 중간 이탈·재접속은 기록 근거가 있을 때 연결합니다</h2>
+<p>경기 중 나갔다가 돌아온 선수가 있으면 단순히 참가자 수가 줄었다는 이유만으로 사망 처리해서는 안 됩니다. 분석실은 확인 가능한 참가자 ID와 이탈·복귀 관련 기록으로 상태를 구분하고, 기록이 일관된 경우 재생 흐름을 복원합니다.</p>
+<div class="rg-table-wrap" role="region" tabindex="0" aria-label="이탈과 재접속 기록 해석 표">
+<table class="rg-table"><caption>한 가지 상태로 모두 합치지 않고 근거를 확인합니다</caption><thead><tr><th scope="col">보이는 상태</th><th scope="col">확인할 것</th><th scope="col">피해야 할 해석</th></tr></thead><tbody>
+<tr><th scope="row">이탈</th><td>해당 시점에 기록에서 빠진 참가자와 ID</td><td>나갔으니 반드시 사망했다고 보기</td></tr>
+<tr><th scope="row">복귀·재진입</th><td>같은 참가자로 연결되는지, 이후 상태가 확인되는지</td><td>같은 이름이니 무조건 같은 선수로 합치기</td></tr>
+<tr><th scope="row">확인 보류·인원 확인 보류</th><td>누락·충돌·모호한 순서 등 판정에 필요한 기록</td><td>빈 구간을 0점·패배나 확정적인 인원 열세로 읽기</td></tr>
+</tbody></table></div>
+<p>모든 파일의 모든 재접속을 복원할 수 있다는 뜻은 아닙니다. 근거가 부족한 구간은 임의의 생존자 수나 우세 지수를 만들지 않고 판정을 보류할 수 있습니다. 이때도 표시 가능한 사건 기록은 함께 확인하세요.</p>
+<p>그래프가 비어 있거나 상태가 보류되어 있다면 먼저 해당 라운드의 안내와 사건 기록을 보세요. 매끈한 선을 만들기 위해 확인되지 않은 구간을 이어 그리는 것보다, 어디까지 확인 가능한지 구분하는 것이 중요합니다.</p>
+</section>
+
+<section id="compare" class="rg-card">
+<h2>6. 여러 경기에서 같은 선수를 비교하는 순서</h2>
+<ol><li>‘여러 경기 비교’ 탭에서 파일 선택창을 열어 JSON 2~5개를 함께 고릅니다. PC에서는 Ctrl 또는 Shift를 사용할 수 있습니다. 새로 고른 목록은 이전 목록을 대체합니다.</li><li>공통으로 등장하는 선수 중 ‘비교할 선수’를 고릅니다. 경기 ID 중복·지원하지 않는 파일 등 제외 사유가 있으면 먼저 확인합니다.</li><li>각 행의 ‘검증 / 제공 라운드’를 확인한 뒤 처치·사망, 라운드당 처치, 생존율과 평균 생존을 비교합니다.</li><li>‘과제 전후 확인’을 열면 직접 ‘기준 경기’와 ‘이후 경기’를 지정하고 확인할 지표를 선택할 수 있습니다.</li></ol>
+<p><strong>닉네임보다 선수 ID가 기준입니다.</strong> 이름이 달라져도 ID가 같으면 연결하고, 이름이 같아도 ID가 다르면 합치지 않습니다. 두 개 이상의 서로 다른 경기에서 같은 선수 ID가 확인되어야 비교할 수 있습니다.</p>
+<p>위장 닉네임을 쓴 경기와 원래 닉네임으로 돌아온 경기를 넣더라도 ID가 같으면 같은 선수로 비교할 수 있습니다. 파일 순서나 닉네임이 같다는 것만으로 연결하는 방식은 아닙니다.</p>
+<p>기준·이후 그룹은 자동으로 날짜순 지정되지 않습니다. 비교할 시점과 목적을 확인해서 직접 구분하세요. 맵·공수·상대·라운드 길이가 다를 수 있으므로 지표가 좋아졌다는 사실만으로 훈련이나 코칭의 효과가 증명되지는 않습니다.</p>
+</section>
+
+<section id="sample" class="rg-card">
+<h2>7. 샘플 두 경기의 수치를 직접 확인해 보세요</h2>
+<aside class="rg-note"><strong>가상 샘플의 실제 계산 결과입니다.</strong><br>아래는 실사용자의 전적이나 훈련 성과가 아닙니다. 분석실의 ‘샘플로 여러 경기 비교’를 누른 뒤 ‘체험 플레이어’를 선택하면 같은 구성을 확인할 수 있습니다. 샘플 데이터가 바뀌면 표시값도 달라질 수 있습니다.</aside>
+<p>현재 두 파일은 각각 6라운드이며 12라운드 모두 집계 가능한 상태입니다. 화면의 소수점 표시는 반올림합니다. 표가 넓으면 좌우로 밀어 보세요.</p>
+<div class="rg-table-wrap" role="region" tabindex="0" aria-label="체험 플레이어의 가상 샘플 집계 표">
+<table id="sampleMetrics" class="rg-table"><caption>체험 플레이어 · 가상 경기 2개 · 2026-10-29 확인</caption><thead><tr><th scope="col">경기</th><th scope="col">검증 라운드</th><th scope="col">처치 / 사망</th><th scope="col">라운드당 처치</th><th scope="col">라운드 생존율</th><th scope="col">평균 생존</th></tr></thead><tbody>
+<tr data-sample-game="1"><th scope="row">가상-체험-1.json</th><td>6 / 6</td><td>6 / 6</td><td>1.00</td><td>0.0%</td><td>18.0초</td></tr>
+<tr data-sample-game="2"><th scope="row">가상-체험-2.json</th><td>6 / 6</td><td>27 / 1</td><td>4.50</td><td>83.3%</td><td>55.3초</td></tr>
+</tbody><tfoot><tr data-sample-game="total"><th scope="row">검증 라운드 합계</th><td>12 / 12</td><td>33 / 7</td><td>2.75</td><td>41.7%</td><td>36.7초</td></tr></tfoot></table></div>
+<h3>합계는 경기별 평균을 다시 평균한 값이 아닙니다</h3>
+<p class="rg-formula">라운드당 처치: (6 + 27) ÷ (6 + 6) = 2.75<br>라운드 생존율: 생존 5라운드 ÷ 검증 12라운드 × 100 ≈ 41.7%<br>평균 생존: 생존 시간 합계 440초 ÷ 검증 12라운드 ≈ 36.7초</p>
+<p>이 사례는 두 파일의 라운드 수가 같지만, 실제 파일의 라운드 수는 다를 수 있습니다. 합계는 검증된 라운드의 합을 기준으로 계산합니다. 검증할 수 없는 라운드나 해당 선수가 없는 경기를 성적 0으로 채우지 않습니다.</p>
+<p>두 번째 샘플의 평균 생존이 더 길다는 것만으로 실제 플레이가 좋아졌다고 판단할 수는 없습니다. 우선 라운드 수·생존 비율·공수와 사건 기록을 함께 확인하는 연습에 사용하세요.</p>
+</section>
+
+<section id="questions" class="rg-card">
+<h2>8. 사용 중 자주 막히는 부분</h2>
+<dl><dt><strong>파일은 두 개인데 비교가 안 됩니다.</strong></dt><dd>서로 다른 경기인지, 두 경기 이상에 같은 선수 ID가 있는지, 파일 형식·크기와 제외 사유를 확인하세요. 같은 파일을 이름만 바꾸어 복사하면 별도 경기로 늘어나지 않습니다.</dd>
+<dt><strong>전체 킬 수와 비교 표의 킬 수가 다릅니다.</strong></dt><dd>요약 기록과 검증 라운드 집계는 범위가 다를 수 있습니다. 비교 표의 ‘검증 / 제공 라운드’를 먼저 확인하세요.</dd>
+<dt><strong>전력 정보는 안 뜨는데 재생은 됩니다.</strong></dt><dd>두 부분의 데이터 출처가 다릅니다. 날짜·경기 유형·외부 조회 실패 안내를 확인하고 기본 분석은 계속 사용할 수 있습니다.</dd>
+<dt><strong>새로고침 후 선택한 파일이 사라졌습니다.</strong></dt><dd>파일·분석 결과·비교 설정은 서버에 저장하지 않습니다. 원본 JSON은 별도로 보관하고 다시 선택하세요. 이미지 공유는 원본 파일의 백업을 대신하지 않습니다.</dd>
+<dt><strong>그래프로 실제 시야나 사망 원인을 확정할 수 있나요?</strong></dt><dd>기록에 없는 실제 시야·음성·플레이 의도는 복원하지 않습니다. 이 기능은 JSON에 남은 사건을 정리하는 분석·이벤트 재생이며, 원본 게임 영상이나 생성형 AI의 판단이 아닙니다.</dd></dl>
+</section>
+
+<section class="rg-card">
+<h2>출처와 확인 범위</h2>
+<p>파일 출처는 <a href="https://barracks.sa.nexon.com/" target="_blank" rel="noopener noreferrer">넥슨 서든어택 공식 병영수첩</a>입니다. 표시 방식·집계 기준·샘플 계산은 Tracking SA의 현재 무료 분석 구현을 따릅니다. 가상 샘플을 실제 경기 관측 자료로 사용하지 않습니다.</p>
+<p>사용자가 선택한 JSON은 기기 안에서 읽습니다. 한 경기 전력 비교에 필요한 경기 ID·닉네임은 넥슨 OpenAPI 조회에 사용하지만 원본 JSON과 분석 결과를 서버나 DB에 별도로 저장하지 않습니다. 여러 경기 비교와 샘플 체험은 전력 조회 없이 기기 안에서 처리합니다.</p>
+<p><a href="/service-methodology/">서비스 기준</a> · <a href="/editorial-policy/">편집 원칙</a> · <a href="/privacy-policy/">개인정보처리방침</a> · <a href="/stats/sudden-attack/replay/">분석실에서 확인하기</a></p>
+</section>
+</main>
+<div class="site-footer-container"><footer class="site-footer">
+    <div class="footer-inner">
+        <div class="footer-top">
+            <div class="footer-brand">
+                <a class="footer-brand-link" href="/" aria-label="Tracking SA 홈">
+                    <svg width="36" height="36" viewBox="0 0 100 100" fill="none" aria-hidden="true" focusable="false">
+                        <circle cx="50" cy="50" r="48" stroke="currentColor" stroke-width="4"/>
+                        <path d="M25 70L40 55L50 65L75 35" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="70" cy="35" r="12" fill="currentColor"/>
+                    </svg>
+                    <strong>TRACKING <span>SA</span></strong>
+                </a>
+                <p>서든어택의 기록을,<br>더 쉽게 읽는 곳.</p>
+                <button id="pwa-install-button" class="footer-install" type="button" hidden>Tracking SA 앱 설치 <span aria-hidden="true">↗</span></button>
+            </div>
+            <nav class="footer-nav" aria-label="하단 메뉴">
+                <div class="footer-link-group">
+                    <h2>둘러보기</h2>
+                    <ul>
+                        <li><a href="/stats/sudden-attack/">서든어택 전적</a></li>
+                        <li><a href="/stats/sudden-attack/replay/">리플레이 분석실</a></li>
+                        <li><a href="/guides/">가이드</a></li>
+                    </ul>
+                </div>
+                <div class="footer-link-group">
+                    <h2>서비스 안내</h2>
+                    <ul>
+                        <li><a href="/about" data-i18n="about_us">서비스 소개</a></li>
+                        <li><a href="/service-methodology/">서비스 기준</a></li>
+                        <li><a href="/editorial-policy/">편집 원칙</a></li>
+                        <li><a href="/sitemap.xml" data-i18n="sitemap">사이트맵</a></li>
+                    </ul>
+                </div>
+                <div class="footer-link-group">
+                    <h2>이용 및 문의</h2>
+                    <ul>
+                        <li><a href="/privacy-policy" data-i18n="privacy_policy">개인정보처리방침</a></li>
+                        <li><a href="/terms" data-i18n="terms_of_service">이용약관</a></li>
+                        <li><a href="/ai-replay-pass/">AI 이용권 · 판매 준비</a></li>
+                        <li><a href="/contact/" data-i18n="contact">문의</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+        <div class="footer-business-info" aria-label="사업자 정보">
+            <details class="footer-business-details">
+                <summary class="footer-business-summary"><strong>로직 스토어</strong><span>사업자 정보</span><svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false"><path d="m4 6 4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+                <dl>
+                    <div><dt>상호</dt><dd>로직 스토어</dd></div>
+                    <div><dt>사업자등록번호</dt><dd>000-00-00000</dd></div>
+                    <div><dt>대표자</dt><dd>조한범</dd></div>
+                    <div class="footer-business-address"><dt>사업장 주소</dt><dd>경기도 수원시 인계동 992-13 크레텔 하우스 2동 302호</dd></div>
+                    <div><dt>통신판매업 신고번호</dt><dd>2026-수원팔달-0279호</dd></div>
+                </dl>
+            </details>
+            <div class="footer-business-contact" aria-label="고객 문의"><span>고객 문의</span><a href="tel:01081129691" aria-label="고객 문의 전화 010-0000-0000">010-0000-0000</a><a href="mailto:demo-15b9ce4f@example.com" aria-label="문의 이메일 demo-15b9ce4f@example.com">demo-15b9ce4f@example.com</a></div>
+        </div>
+        <div class="footer-bottom">
+            <p class="nexon-api-attribution">본 서비스는 <a href="https://openapi.nexon.com/ko/support/terms/" target="_blank" rel="noopener noreferrer">NEXON Open API</a>를 이용하여 데이터를 제공합니다. <span lang="en">This service uses NEXON Open API.</span></p>
+            <p class="footer-copyright" data-i18n="footer_copyright">&copy; 2026 TrackingSA. 서든어택 전적 검색 중심 서비스.</p>
+        </div>
+    </div>
+</footer>
+</div>
+</body>
+</html>

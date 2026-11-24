@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https://open.api.nexon.com; connect-src 'self'; base-uri 'none'; form-action 'none'">
+    <title>TrackingMaple | Tracking SA 실험실</title>
+    <meta name="description" content="메이플스토리 캐릭터, 사냥 기록과 보스 클리어를 한 곳에서 관리하세요.">
+    <link rel="stylesheet" href="./maple-theme.css?v=tracking-maple-2">
+    <link rel="stylesheet" href="./tracking-maple.css?v=tracking-maple-6">
+    <script type="module" src="./home.js?v=tracking-maple-6"></script>
+</head>
+<body>
+    <header class="topbar">
+        <div class="shell topbar-inner">
+            <a class="maple-brand" href="/maplestory/"><img src="./art/maple-leaf.png" alt="" width="24" height="24">TrackingMaple</a>
+            <nav class="maple-nav" aria-label="TrackingMaple">
+                <a href="/maplestory/" aria-current="page">홈</a><a href="/maplestory/alerts/">사냥</a><a href="/maplestory/boss/">보스</a><a id="gear-nav" href="./gear/">장비</a>
+            </nav>
+            <a class="lab-link" href="/lab/">실험실 <span aria-hidden="true">↗</span></a>
+        </div>
+    </header>
+    <main class="shell home-dashboard">
+        <section class="maple-hero" id="home-hero" aria-label="캐릭터 조회">
+            <div class="hero-content">
+                <form id="character-search" class="character-search" role="search">
+                    <label class="sr-only" for="character-name">캐릭터 닉네임</label>
+                    <input id="character-name" name="character" required maxlength="12" autocomplete="off" placeholder="캐릭터 닉네임">
+                    <button class="primary" type="submit">검색</button>
+                </form>
+                <p id="character-status" class="quiet" role="status"></p>
+                <div class="profile-layout" id="maple-profile" hidden>
+                    <div class="profile">
+                        <div class="profile-portrait" aria-hidden="true">
+                            <img id="profile-image" alt="" width="300" height="300" referrerpolicy="no-referrer" hidden>
+                        </div>
+                        <div class="profile-identity">
+                            <p id="profile-role" class="eyebrow"></p>
+                            <h1 id="profile-name"></h1>
+                            <p id="profile-details" class="quiet"></p>
+                        </div>
+                        <div class="profile-exp" id="profile-exp" hidden>
+                            <span>현재 경험치</span><strong id="profile-exp-rate"></strong>
+                            <progress id="profile-exp-bar" max="100" value="0" aria-label="캐릭터 경험치"></progress>
+                        </div>
+                        <div id="profile-actions" class="actions">
+                            <a class="primary" href="./alerts/">사냥 도우미</a>
+                            <a id="gear-link" class="secondary" href="./gear/">착용 장비</a>
+                            <button id="save-profile" class="secondary" type="button">대표로 저장</button>
+                            <button id="clear-profile" class="secondary" type="button" hidden>대표 해제</button>
+                        </div>
+                    </div>
+                    <section class="growth-card" aria-labelledby="growth-title">
+                        <div class="row">
+                            <h2 id="growth-title">최근 7일 성장</h2>
+                            <span class="growth-average" id="growth-average" hidden></span>
+                        </div>
+                        <ol class="growth-chart" id="growth-chart" aria-label="날짜별 경험치 변화" hidden></ol>
+                        <p class="quiet" id="growth-note" role="status"></p>
+                    </section>
+                </div>
+                <div id="home-intro">
+                    <h1 id="page-title">TrackingMaple</h1>
+                    <p class="quiet">캐릭터 장비, 사냥 기록과 보스 체크를 한곳에서.</p>
+                </div>
+            </div>
+        </section>
+        <section id="home-stats" aria-label="조회한 캐릭터의 주요 스탯" hidden>
+            <dl class="stat-grid">
+                <div><dt>전투력</dt><dd data-stat="power">—</dd></div>
+                <div><dt>쿨타임 감소</dt><dd data-stat="cooldown">—</dd></div>
+                <div><dt>아이템 드롭률</dt><dd data-stat="drop">—</dd></div>
+                <div><dt>메소 획득량</dt><dd data-stat="meso">—</dd></div>
+            </dl>
+            <p class="quiet source" id="home-stats-time"></p>
+        </section>
+        <section class="panel character-details" id="character-details" aria-labelledby="character-details-title" hidden>
+            <div class="row character-details-header">
+                <h2 id="character-details-title">캐릭터 상세</h2>
+                <p class="quiet" id="character-detail-time"></p>
+            </div>
+            <dl class="character-metrics" id="character-metrics" hidden>
+                <div><dt>무릉도장 최고</dt><dd data-value="dojang"></dd><dd class="detail-metric-note" data-note="dojang"></dd></div>
+                <div><dt>유니온</dt><dd data-value="union"></dd><dd class="detail-metric-note" data-note="union"></dd></div>
+                <div><dt>어센틱 포스</dt><dd data-value="authentic"></dd><dd class="detail-metric-note" data-note="authentic"></dd></div>
+                <div><dt>아케인 포스</dt><dd data-value="arcane"></dd><dd class="detail-metric-note" data-note="arcane"></dd></div>
+            </dl>
+            <div class="detail-switch" role="group" aria-label="캐릭터 상세 분류">
+                <button type="button" data-detail="progression" aria-pressed="true" aria-controls="character-detail-content">장착 심볼</button>
+                <button type="button" data-detail="hexa" aria-pressed="false" aria-controls="character-detail-content">6차 · HEXA</button>
+            </div>
+            <p class="quiet" id="character-detail-status" role="status"></p>
+            <div class="character-detail-content" id="character-detail-content"></div>
+            <button type="button" class="secondary" id="character-detail-retry" hidden>다시 불러오기</button>
+        </section>
+        <section id="profile-records" class="profile-records" aria-label="세팅 전투력과 지난 조회 비교" hidden>
+            <section class="panel setup-card" aria-labelledby="boss-setup-title" data-setup="boss">
+                <h2 id="boss-setup-title"><img src="./art/boss-sword.png" width="28" height="28" alt="">보스 세팅</h2>
+                <p class="setup-power" data-value></p>
+                <p class="quiet" data-time></p>
+                <button class="secondary" type="button" aria-label="보스 세팅에 조회한 전투력 저장" data-record>조회한 전투력 저장</button>
+            </section>
+            <section class="panel setup-card" aria-labelledby="hunt-setup-title" data-setup="hunt">
+                <h2 id="hunt-setup-title"><img src="./art/hunt-leaf.png" width="28" height="28" alt="">사냥 세팅</h2>
+                <p class="setup-power" data-value></p>
+                <p class="quiet" data-time></p>
+                <button class="secondary" type="button" aria-label="사냥 세팅에 조회한 전투력 저장" data-record>조회한 전투력 저장</button>
+            </section>
+            <section class="panel visit-card" aria-labelledby="visit-title">
+                <h2 id="visit-title">지난 조회 이후</h2>
+                <dl class="visit-changes" id="visit-changes" hidden>
+                    <div><dt>경험치</dt><dd id="visit-exp"></dd></div>
+                    <div><dt>전투력</dt><dd id="visit-power"></dd></div>
+                </dl>
+                <p class="quiet" id="visit-note"></p>
+            </section>
+            <p class="quiet" id="setup-status" role="status"></p>
+        </section>
+        <section aria-labelledby="home-reset-title">
+            <div class="section-label"><h2 id="home-reset-title">메이플 일정</h2><span class="quiet">한국 시간</span></div>
+            <dl class="reset-grid">
+                <div><dt>일일 초기화</dt><dd id="reset-daily">—</dd><small>매일 0시</small></div>
+                <div><dt>주간 초기화</dt><dd id="reset-weekly">—</dd><small>목요일 0시</small></div>
+                <div><dt>일요일까지</dt><dd id="reset-sunday">—</dd><small>일요일 0시</small></div>
+                <div><dt>월간 보스</dt><dd id="reset-monthly">—</dd><small>검은 마법사 · 매월 1일 0시</small></div>
+            </dl>
+        </section>
+        <div class="overview">
+            <div class="section-label"><h2>내 플레이</h2><span class="quiet" id="home-record-owner" hidden></span></div>
+            <div class="overview-grid">
+                <section class="panel overview-card daily-card" aria-labelledby="home-daily-title">
+                    <div class="row">
+                        <h2 id="home-daily-title"><span class="home-icon" aria-hidden="true">✓</span>오늘 할 일</h2>
+                        <strong id="daily-count">—</strong>
+                    </div>
+                    <ul class="home-list daily-list" id="daily-list"></ul>
+                    <form id="daily-form" class="home-inline-form">
+                        <label class="sr-only" for="daily-name">일일 할 일 이름</label>
+                        <input id="daily-name" maxlength="35" required placeholder="할 일 추가">
+                        <button class="secondary" type="submit">추가</button>
+                    </form>
+                    <p class="quiet" id="daily-status" role="status"></p>
+                </section>
+                <section class="panel overview-card" aria-labelledby="home-boss-title">
+                    <div class="row">
+                        <h2 id="home-boss-title"><img src="./art/boss-sword.png" width="30" height="30" alt="">이번 주 메소</h2>
+                        <a class="secondary" href="./boss/#weekly-bosses">보스 체크</a>
+                    </div>
+                    <p class="income-total" id="home-income-total">—</p>
+                    <dl class="summary-grid">
+                        <div><dt>결정석 내 몫</dt><dd id="home-boss-meso">—</dd></div>
+                        <div><dt>기록한 사냥 메소</dt><dd id="home-hunt-meso">—</dd></div>
+                    </dl>
+                    <div class="row"><strong id="home-boss-remaining">남은 주간 보스</strong><span class="quiet" id="home-boss-count"></span></div>
+                    <progress id="home-boss-progress" max="1" value="0" aria-label="이번 주 보스 클리어 진행률" hidden></progress>
+                    <ul class="home-list" id="home-boss-list" hidden></ul>
+                    <p id="home-boss-note" class="quiet"></p>
+                </section>
+                <section class="panel overview-card hunt-summary" aria-labelledby="home-hunt-title">
+                    <div class="row">
+                        <h2 id="home-hunt-title"><img src="./art/hunt-leaf.png" width="30" height="30" alt="">최근 사냥</h2>
+                        <a class="secondary" href="./alerts/#history">기록 보기</a>
+                    </div>
+                    <dl class="summary-grid">
+                        <div><dt>측정 시간</dt><dd id="home-hunt-time">—</dd></div>
+                        <div><dt>시간당 경험치</dt><dd id="home-hunt-rate">—</dd></div>
+                        <div><dt>획득 조각</dt><dd id="home-fragments">—</dd></div>
+                    </dl>
+                    <p id="home-hunt-note" class="quiet">저장한 사냥 기록이 여기에 표시돼요.</p>
+                    <div class="row hunt-week"><span>이번 주 사냥</span><strong id="home-hunt-week">—</strong></div>
+                    <div id="home-session" class="home-session" hidden>
+                        <div><strong id="home-session-state"></strong><p id="home-session-detail" class="quiet"></p></div>
+                        <a id="home-session-link" class="secondary" href="./alerts/">사냥 이어서 보기</a>
+                    </div>
+                </section>
+            </div>
+        </div>
+        <section aria-labelledby="home-news-title" id="home-news">
+            <div class="section-label"><h2 id="home-news-title">공식 소식</h2></div>
+            <div class="overview-grid">
+                <section class="panel overview-card" aria-labelledby="home-events-title">
+                    <div class="row">
+                        <h2 id="home-events-title"><span class="home-icon" aria-hidden="true">◆</span>다가오는 이벤트 마감</h2>
+                        <a class="secondary" href="https://maplestory.nexon.com/News/Event">전체 보기</a>
+                    </div>
+                    <ul class="home-list news-list" id="home-event-list" hidden></ul>
+                    <p id="home-event-status" class="quiet" role="status">이벤트를 불러오는 중이에요.</p>
+                </section>
+                <section class="panel overview-card" aria-labelledby="home-notices-title">
+                    <div class="row">
+                        <h2 id="home-notices-title">메이플스토리 공지</h2>
+                        <a class="secondary" href="https://maplestory.nexon.com/News/Notice">전체 보기</a>
+                    </div>
+                    <ul class="home-list news-list" id="home-notice-list" hidden></ul>
+                    <p id="home-notice-status" class="quiet" role="status">공지를 불러오는 중이에요.</p>
+                </section>
+            </div>
+        </section>
+        <p class="quiet source">Data based on NEXON Open API</p>
+    </main>
+</body>
+</html>

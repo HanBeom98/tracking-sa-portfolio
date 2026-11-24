@@ -5,8 +5,8 @@ service cloud.firestore {
     // Helper: Global Admin/Staff (Full Site Control)
     function isStaff() {
       return request.auth != null && (
-        request.auth.token.email == "hantiger24@naver.com" || 
-        request.auth.token.email == "admin@trackingsa.com" ||
+        request.auth.token.email == "demo-e63e3a1b@example.com" || 
+        request.auth.token.email == "demo-9249b6f9@example.com" ||
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin"
       );
     }
@@ -14,9 +14,9 @@ service cloud.firestore {
     // Helper: Sudden Attack Specific Staff (SA Crew Management Only)
     function isSaStaff() {
       return request.auth != null && (
-        request.auth.token.email == "bjs5739@naver.com" ||
-        request.auth.token.email == "jungsion98@naver.com" ||
-        request.auth.token.email == "wasd1234@naver.com"
+        request.auth.token.email == "demo-c9c4b555@example.com" ||
+        request.auth.token.email == "demo-932eccd8@example.com" ||
+        request.auth.token.email == "demo-731cb71f@example.com"
       );
     }
 
@@ -25,24 +25,133 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == userId;
     }
 
-    // Game rankings
-    match /tetris_rankings/{docId} {
-      allow read: if true;
-      allow create: if request.resource.data.score is number;
-      allow update, delete: if false;
+    function isAdminEmail() {
+      return request.auth != null && (
+        request.auth.token.email == "demo-e63e3a1b@example.com" ||
+        request.auth.token.email == "demo-9249b6f9@example.com"
+      );
     }
 
-    match /ai_evolution_rankings/{docId} {
-      allow read: if true;
-      allow create: if request.resource.data.score is number;
-      allow update, delete: if false;
+    function isValidBoardContent(data) {
+      return data.title is string && data.title.size() > 0 && data.title.size() <= 120
+        && data.content is string && data.content.size() > 0 && data.content.size() <= 10000;
     }
 
-    // News/search
-    match /posts/{document=**} {
-      allow read: if true;
-      allow delete: if isStaff();
-      allow create, update: if false;
+    function hasRegisteredBoardNickname(name) {
+      return name is string && name.matches('^[A-Za-z0-9가-힣_]{2,12}$')
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.nickname == name;
+    }
+
+    function isBoardAttachmentUrl(attachment) {
+      let objectPath = attachment.path.replace('/', '%2F');
+      let url = attachment.url.split('[?]')[0];
+      return url == 'https://firebasestorage.googleapis.com/v0/b/demo-tracking-sa-portfolio.firebasestorage.app/o/' + objectPath
+        || url == 'https://firebasestorage.googleapis.com/v0/b/demo-tracking-sa-portfolio.appspot.com/o/' + objectPath;
+    }
+
+    function isValidBoardAttachment(attachment, ownerUid) {
+      return attachment is map
+        && attachment.keys().hasOnly(['url', 'path', 'width', 'align', 'name'])
+        && attachment.url is string
+        && attachment.path is string
+        && attachment.path.split('/').size() == 3
+        && attachment.path.split('/')[0] == 'board-images'
+        && attachment.path.split('/')[1] == ownerUid
+        && attachment.path.split('/')[2].matches('^[A-Za-z0-9-]+[.]webp$')
+        && isBoardAttachmentUrl(attachment)
+        && attachment.width is number && attachment.width >= 25 && attachment.width <= 100
+        && attachment.align in ['left', 'center', 'right']
+        && attachment.name is string && attachment.name.size() <= 120;
+    }
+
+    function hasValidBoardAttachments(data, ownerUid) {
+      return !('attachments' in data) || (
+        data.attachments is list
+        && data.attachments.size() <= 3
+        && (data.attachments.size() < 1 || isValidBoardAttachment(data.attachments[0], ownerUid))
+        && (data.attachments.size() < 2 || isValidBoardAttachment(data.attachments[1], ownerUid))
+        && (data.attachments.size() < 3 || isValidBoardAttachment(data.attachments[2], ownerUid))
+      );
+    }
+
+    function isValidBoardPost(data) {
+      return isValidBoardContent(data)
+        && data.keys().hasAll(['title', 'content', 'category', 'authorUid', 'authorName', 'createdAt'])
+        && data.keys().hasOnly(['title', 'content', 'category', 'authorUid', 'authorName', 'authorPhoto', 'createdAt', 'attachments'])
+        && hasValidBoardAttachments(data, request.auth.uid)
+        && data.category in ['free', 'notice']
+        && data.authorUid is string && data.authorUid == request.auth.uid
+        && data.authorName is string && data.authorName.size() <= 80
+        && hasRegisteredBoardNickname(data.authorName)
+        && data.authorPhoto is string && data.authorPhoto.size() <= 2048
+        && data.createdAt is timestamp;
+    }
+
+    function isValidBoardComment(data) {
+      return data.keys().hasAll(['content', 'authorUid', 'authorName', 'createdAt', 'parentId', 'deleted'])
+        && data.keys().hasOnly(['content', 'authorUid', 'authorName', 'createdAt', 'parentId', 'deleted'])
+        && data.content is string && data.content.size() > 0 && data.content.size() <= 1000
+        && data.authorUid is string && data.authorUid == request.auth.uid
+        && data.authorName is string && data.authorName.size() > 0 && data.authorName.size() <= 80
+        && hasRegisteredBoardNickname(data.authorName)
+        && data.createdAt == request.time
+        && (data.parentId == null || (data.parentId is string && data.parentId.matches('^[A-Za-z0-9]{20}$')))
+        && data.deleted == false;
+    }
+
+    function hasFreshCommentRateLimit(commentId) {
+      return getAfter(/databases/$(database)/documents/comment_rate_limits/$(request.auth.uid)).data.lastCommentAt == request.time
+        && getAfter(/databases/$(database)/documents/comment_rate_limits/$(request.auth.uid)).data.commentId == commentId;
+    }
+
+    function isValidNewUserProfile(data, userId) {
+      return data.keys().hasOnly(['uid', 'email', 'displayName', 'photoURL', 'nickname', 'subscription', 'role', 'createdAt'])
+        && data.uid == userId
+        && data.email is string && data.email.size() <= 254
+        && data.displayName is string && data.displayName.size() <= 80
+        && data.photoURL is string && data.photoURL.size() <= 2048
+        && data.nickname == ''
+        && data.subscription.keys().hasOnly(['status'])
+        && data.subscription.status == 'free'
+        && data.createdAt is timestamp;
+    }
+
+    function ownsNicknameAfter(name, userId) {
+      let index = getAfter(/databases/$(database)/documents/nicknames/$(name.lower())).data;
+      return index.uid == userId && index.nickname == name;
+    }
+
+    function releasedPreviousNickname(name, userId) {
+      let old = resource.data.get('nickname', '');
+      let oldPath = /databases/$(database)/documents/nicknames/$(old == '' ? '_' : old.lower());
+      return old == '' || old.lower() == name.lower()
+        || !exists(oldPath) || get(oldPath).data.uid != userId || !existsAfter(oldPath);
+    }
+
+    function isValidNicknameChange(data, userId) {
+      let changed = data.diff(resource.data).affectedKeys();
+      let sameKey = resource.data.get('nickname', '').lower() == data.nickname.lower();
+      return data.nickname is string
+        && data.nickname.matches('^[A-Za-z0-9가-힣_]{2,12}$')
+        && data.displayName == data.nickname
+        && ownsNicknameAfter(data.nickname, userId)
+        && releasedPreviousNickname(data.nickname, userId)
+        && (
+          (sameKey && !changed.hasAny(['nicknameUpdatedAt']))
+          || (!sameKey && data.nicknameUpdatedAt == request.time
+            && (!('nicknameUpdatedAt' in resource.data)
+              || request.time >= resource.data.nicknameUpdatedAt + duration.value(24, 'h')))
+        );
+    }
+
+    function isValidUserProfileUpdate(data, userId) {
+      return data.email is string && data.email.size() <= 254
+        && data.displayName is string && data.displayName.size() <= 80
+        && data.photoURL is string && data.photoURL.size() <= 2048
+        && (
+          !data.diff(resource.data).affectedKeys().hasAny(['nickname', 'nicknameUpdatedAt'])
+          || isValidNicknameChange(data, userId)
+        );
     }
 
     // Board posts
@@ -50,37 +159,103 @@ service cloud.firestore {
       allow read: if true;
       allow create: if request.auth != null 
         && request.resource.data.authorUid == request.auth.uid
+        && isValidBoardPost(request.resource.data)
         && (request.resource.data.category != "notice" || isStaff());
       allow update: if request.auth != null 
+        && isValidBoardContent(request.resource.data)
+        && hasValidBoardAttachments(request.resource.data, resource.data.authorUid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['title', 'content', 'attachments'])
         && (
           (resource.data.authorUid == request.auth.uid && request.resource.data.authorUid == resource.data.authorUid && resource.data.category != "notice")
           || isStaff()
         );
       allow delete: if request.auth != null 
         && (resource.data.authorUid == request.auth.uid || isStaff());
+
+      match /comments/{commentId} {
+        allow read: if get(/databases/$(database)/documents/board_posts/$(postId)).data.category == "free";
+        allow create: if request.auth != null
+          && commentId.matches('^[A-Za-z0-9]{20}$')
+          && get(/databases/$(database)/documents/board_posts/$(postId)).data.category == "free"
+          && isValidBoardComment(request.resource.data)
+          && hasFreshCommentRateLimit(commentId)
+          && (
+            request.resource.data.parentId == null
+            || (
+              exists(/databases/$(database)/documents/board_posts/$(postId)/comments/$(request.resource.data.parentId))
+              && (
+                !('parentId' in get(/databases/$(database)/documents/board_posts/$(postId)/comments/$(request.resource.data.parentId)).data)
+                || get(/databases/$(database)/documents/board_posts/$(postId)/comments/$(request.resource.data.parentId)).data.parentId == null
+              )
+              && (
+                !('deleted' in get(/databases/$(database)/documents/board_posts/$(postId)/comments/$(request.resource.data.parentId)).data)
+                || get(/databases/$(database)/documents/board_posts/$(postId)/comments/$(request.resource.data.parentId)).data.deleted == false
+              )
+            )
+          );
+        allow update: if request.auth != null
+          && (resource.data.authorUid == request.auth.uid || isStaff())
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['content', 'authorName', 'deleted'])
+          && request.resource.data.content == ""
+          && request.resource.data.authorName == "Deleted"
+          && request.resource.data.deleted == true;
+        allow delete: if request.auth != null
+          && (resource.data.authorUid == request.auth.uid || isStaff());
+      }
+    }
+
+    match /comment_rate_limits/{userId} {
+      allow read: if isOwner(userId) || isStaff();
+      allow create: if isOwner(userId)
+        && request.resource.data.keys().hasOnly(['lastCommentAt', 'commentId'])
+        && request.resource.data.lastCommentAt == request.time
+        && request.resource.data.commentId.matches('^[A-Za-z0-9]{20}$');
+      allow update: if isOwner(userId)
+        && request.resource.data.keys().hasOnly(['lastCommentAt', 'commentId'])
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastCommentAt', 'commentId'])
+        && request.resource.data.lastCommentAt == request.time
+        && request.resource.data.commentId.matches('^[A-Za-z0-9]{20}$')
+        && request.time >= resource.data.lastCommentAt + duration.value(10, 's');
+      allow delete: if false;
     }
 
     // Users profile
     match /users/{userId} {
       allow read: if isOwner(userId) || isStaff();
-      allow create: if isOwner(userId) && request.resource.data.role == "free";
-      allow update: if isOwner(userId) && request.resource.data.role == resource.data.role;
+      allow create: if isOwner(userId)
+        && isValidNewUserProfile(request.resource.data, userId)
+        && (
+          request.resource.data.role == "free" ||
+          (isAdminEmail() && request.resource.data.role == "admin")
+        );
+      allow update: if isOwner(userId)
+        && isValidUserProfileUpdate(request.resource.data, userId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['email', 'displayName', 'photoURL', 'nickname', 'nicknameUpdatedAt', 'role'])
+        && (
+          request.resource.data.role == resource.data.role ||
+          (isAdminEmail() && request.resource.data.role == "admin")
+        );
       allow delete: if isOwner(userId);
     }
 
     // Nickname index
     match /nicknames/{nickname} {
+      function validClaim() {
+        let data = request.resource.data;
+        return data.keys().hasOnly(['uid', 'nickname', 'updatedAt'])
+          && data.uid == request.auth.uid
+          && data.nickname is string
+          && data.nickname.matches('^[A-Za-z0-9가-힣_]{2,12}$')
+          && nickname == data.nickname.lower()
+          && data.updatedAt == request.time
+          && getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.nickname == data.nickname;
+      }
       allow read: if true;
-      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
-      allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
-    }
-
-    // Games
-    match /games/{gameId} {
-      allow read: if true;
-      allow create: if isStaff() || (request.auth != null && request.resource.data.status == "pending");
-      allow update: if isStaff() || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['playCount']));
-      allow delete: if isStaff();
+      allow create: if request.auth != null && validClaim();
+      allow update: if request.auth != null && resource.data.uid == request.auth.uid && validClaim();
+      allow delete: if request.auth != null && resource.data.uid == request.auth.uid
+        && (!existsAfter(/databases/$(database)/documents/users/$(request.auth.uid))
+          || getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.nickname.lower() != nickname);
     }
 
     // Sudden Attack Crew Management (Using Specialized SaStaff helper)
@@ -90,8 +265,21 @@ service cloud.firestore {
     }
 
     match /sa_crew_applications/{docId} {
-      allow create: if true;
-      allow read, update, delete: if isStaff() || isSaStaff();
+      allow create: if request.auth != null
+        && docId == request.auth.uid
+        && request.resource.data.keys().hasOnly(['applicantUid', 'characterName', 'ouid', 'status', 'appliedAt'])
+        && request.resource.data.applicantUid == request.auth.uid
+        && request.resource.data.characterName is string
+        && request.resource.data.characterName.size() > 0
+        && request.resource.data.characterName.size() <= 32
+        && request.resource.data.ouid is string
+        && request.resource.data.ouid.size() > 0
+        && request.resource.data.ouid.size() <= 100
+        && request.resource.data.status == 'PENDING'
+        && request.resource.data.appliedAt is timestamp;
+      allow read: if isStaff() || isSaStaff()
+        || (request.auth != null && request.auth.uid == docId);
+      allow update, delete: if isStaff() || isSaStaff();
     }
 
     match /sa_crew_history/{docId} {
@@ -103,14 +291,39 @@ service cloud.firestore {
       allow read, write: if isStaff() || isSaStaff();
     }
 
+    match /sa_crew_match_sessions/{docId} {
+      allow read, write: if isStaff() || isSaStaff();
+    }
+
     match /sa_crew_settings/{docId} {
       allow read: if true;
       allow write: if isStaff() || isSaStaff();
     }
 
-    // Discord Bot Match Sessions
+    // Only the Discord-signature-verified backend may mutate sessions via Admin SDK.
     match /match_sessions/{guildId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow create, update: if false;
+      allow delete: if false;
+    }
+
+    // 실시간 인기 검색어
+    match /popular_searches/{nickname} {
+      allow read: if true;
+      allow create: if nickname.size() > 0 && nickname.size() <= 32
+        && request.resource.data.keys().hasOnly(['count'])
+        && request.resource.data.count == 1;
+      allow update: if request.resource.data.keys().hasOnly(['count'])
+        && request.resource.data.count is int
+        && request.resource.data.count == resource.data.count + 1;
+    }
+
+    // Server-only coaching reservations. Site admins are also denied direct access.
+    match /_replay_coaching_users/{document=**} {
+      allow read, write: if false;
+    }
+    match /_replay_coaching_months/{document=**} {
+      allow read, write: if false;
     }
 
     // Default deny

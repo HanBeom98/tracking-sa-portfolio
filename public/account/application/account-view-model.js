@@ -2,7 +2,7 @@ import {
   normalizeNickname,
   validateNickname,
   getNicknameCooldownInfo,
-} from "../domain/nickname.js";
+} from "../domain/nickname.js?v=b9e7ef699275";
 
 export function t(key, fallback) {
   const direct = typeof globalThis === "object" && globalThis ? globalThis.getTranslation : null;

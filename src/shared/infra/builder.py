@@ -3,22 +3,21 @@ import shutil
 import json
 import datetime
 import re
+import posixpath
+from pathlib import PurePosixPath
 
-from src.shared.infra.config import *
+from src.shared.infra.config import PUBLIC_DIR, BASE_URL, SITEMAP_PATH, CONSOLIDATED_GUIDES
+from src.shared.infra.deployment_manifest import DEPLOYMENT_MANIFEST
 from src.shared.infra.html_processor import process_html_file_for_common_elements
-from src.shared.infra.templates import get_build_version
-from src.domains.news.infra.news_builder import (
-    generate_news_pages,
-    snapshot_news,
-    restore_news_snapshot,
-    upgrade_cached_news_index,
-    upgrade_cached_article_pages,
-)
-from src.domains.news.application.rss_builder import build_rss_xml
+from src.shared.infra.rss_builder import build_rss_xml
+from src.shared.infra.content_metadata import read_content_dates, content_date_label
+from src.shared.infra.guide_catalog import collect_guide_items
+from src.shared.infra.templates import get_public_asset_version
 
-SKIP_COPY_NAMES = {"README.md"}
-SKIP_COPY_SUFFIXES = (".full",)
-SKIP_COPY_DIR_NAMES = {"__pycache__"}
+COPY_POLICY = DEPLOYMENT_MANIFEST["copyPolicy"]
+SKIP_COPY_NAMES = set(COPY_POLICY["excludedNames"])
+SKIP_COPY_SUFFIXES = tuple(COPY_POLICY["excludedSuffixes"])
+SKIP_COPY_DIR_NAMES = set(COPY_POLICY["excludedDirectories"])
 STATIC_JS_IMPORT_RE = re.compile(r'((?:import|export)\s+(?:[^;]*?\s+from\s+)?[\'"])(\.{1,2}/[^\'"]+?\.js)([\'"])')
 DYNAMIC_JS_IMPORT_RE = re.compile(r'(\bimport\(\s*[\'"])(\.{1,2}/[^\'"]+?\.js)([\'"]\s*\))')
 
@@ -42,33 +41,38 @@ def copy_path_filtered(src, dest):
             src,
             dest,
             dirs_exist_ok=True,
-            ignore=shutil.ignore_patterns("__pycache__", "*.full", "README.md"),
+            ignore=shutil.ignore_patterns(
+                *SKIP_COPY_DIR_NAMES, *SKIP_COPY_NAMES,
+                *(f"*{suffix}" for suffix in SKIP_COPY_SUFFIXES),
+            ),
         )
         return
     os.makedirs(os.path.dirname(dest), exist_ok=True)
     shutil.copy2(src, dest)
 
 
-def _append_version(specifier, version):
-    return specifier if "?v=" in specifier else f"{specifier}?v={version}"
+def _set_version(specifier, version):
+    raw_specifier = specifier.split("?", 1)[0]
+    return f"{raw_specifier}?v={version}"
 
 
 def version_relative_js_imports(public_dir):
-    version = get_build_version()
     for root, _, files in os.walk(public_dir):
         for filename in files:
             if not filename.endswith(".js"):
                 continue
             path = os.path.join(root, filename)
+            rel_path = os.path.relpath(path, public_dir).replace("\\", "/")
+            rel_dir = posixpath.dirname(rel_path)
             with open(path, "r", encoding="utf-8") as f:
                 original = f.read()
 
             updated = STATIC_JS_IMPORT_RE.sub(
-                lambda m: f"{m.group(1)}{_append_version(m.group(2), version)}{m.group(3)}",
+                lambda m: f"{m.group(1)}{_set_version(m.group(2), get_public_asset_version(posixpath.normpath(posixpath.join(rel_dir, m.group(2).split('?', 1)[0]))))}{m.group(3)}",
                 original,
             )
             updated = DYNAMIC_JS_IMPORT_RE.sub(
-                lambda m: f"{m.group(1)}{_append_version(m.group(2), version)}{m.group(3)}",
+                lambda m: f"{m.group(1)}{_set_version(m.group(2), get_public_asset_version(posixpath.normpath(posixpath.join(rel_dir, m.group(2).split('?', 1)[0]))))}{m.group(3)}",
                 updated,
             )
 
@@ -76,169 +80,70 @@ def version_relative_js_imports(public_dir):
                 with open(path, "w", encoding="utf-8") as f:
                     f.write(updated)
 
-def generate_public_site(incremental=False):
-    news_snapshot = snapshot_news()
-    if os.path.exists(PUBLIC_DIR) and not incremental:
+def remove_consolidated_guide_pages():
+    # Remove only generated HTML; keep source archives and unrelated assets.
+    for slug in CONSOLIDATED_GUIDES:
+        retired_page = os.path.join(PUBLIC_DIR, "guides", slug, "index.html")
+        if os.path.isfile(retired_page):
+            os.remove(retired_page)
+
+
+def _copy_destination(destination):
+    # Manifest paths stay under public even when tests replace PUBLIC_DIR.
+    relative = PurePosixPath(destination).relative_to("public")
+    return os.path.join(PUBLIC_DIR, *relative.parts)
+
+
+def generate_public_site():
+    # Every command copies the full source tree; rebuild output to retire old paths.
+    if os.path.exists(PUBLIC_DIR):
         shutil.rmtree(PUBLIC_DIR)
     os.makedirs(PUBLIC_DIR, exist_ok=True)
     
     # 1. 루트 정적 자산 복사 및 처리
     processed_files = set()
-    root_assets = ["index.html", "logo.svg", "favicon.svg", "ads.txt", "_redirects"]
-    for asset in root_assets:
+    for asset in DEPLOYMENT_MANIFEST["rootAssets"]:
         if os.path.exists(asset):
             dest = os.path.join(PUBLIC_DIR, asset)
             shutil.copy2(asset, dest)
-            if asset == "index.html":
+            if asset in DEPLOYMENT_MANIFEST["processedRootPages"]:
                 # 루트 index.html에 공통 HEAD 주입 (SEO, 테마 가드 등)
                 process_html_file_for_common_elements(dest)
                 processed_files.add(os.path.abspath(dest))
     
-    # 런타임 설정 파일 별도 배포 (src/shared/infra -> public/)
-    runtime_cfg_src = "src/shared/infra/runtime-config.js"
-    if os.path.exists(runtime_cfg_src):
-        shutil.copy2(runtime_cfg_src, os.path.join(PUBLIC_DIR, "runtime-config.js"))
-    
-    # 2. Shared Assets 복사 (src/shared/assets -> public/)
-    shared_assets_dir = "src/shared/assets"
-    if os.path.exists(shared_assets_dir):
-        for item in os.listdir(shared_assets_dir):
-            copy_path_filtered(os.path.join(shared_assets_dir, item), os.path.join(PUBLIC_DIR, item))
+    # Individual mirrors (including runtime config) use the same checker map.
+    for source, destination in DEPLOYMENT_MANIFEST["fileCopies"].items():
+        if os.path.exists(source):
+            target = _copy_destination(destination)
+            os.makedirs(os.path.dirname(target), exist_ok=True)
+            shutil.copy2(source, target)
 
-    # 3. Shared UI Components 복사 (src/shared/ui -> public/ui/)
-    shared_ui_dir = "src/shared/ui"
-    if os.path.exists(shared_ui_dir):
-        dest_ui = os.path.join(PUBLIC_DIR, "ui")
-        copy_path_filtered(shared_ui_dir, dest_ui)
-    
-    def copy_domain_variants(src, dest_ko, dest_en=None):
+    # Copy in manifest order; only domain HTML receives shared page processing.
+    def copy_root(src, destination):
         if not os.path.exists(src):
             return
 
-        if os.path.isdir(src):
-            copy_path_filtered(src, dest_ko)
-        else:
-            copy_path_filtered(src, dest_ko)
+        copy_path_filtered(src, destination)
+        if src in DEPLOYMENT_MANIFEST["htmlProcessingRoots"] and os.path.isdir(src):
+            # A root can merge into public alongside other roots and root assets.
+            # Process only its own HTML, never every HTML already at destination.
+            for root, directories, files in os.walk(src):
+                directories[:] = [name for name in directories if not should_skip_copy(os.path.join(root, name))]
+                for file in files:
+                    if not file.endswith(".html"):
+                        continue
+                    source_file = os.path.join(root, file)
+                    if should_skip_copy(source_file):
+                        continue
+                    fpath = os.path.join(destination, os.path.relpath(source_file, src))
+                    if os.path.abspath(fpath) not in processed_files:
+                        process_html_file_for_common_elements(fpath)
 
-        current_destinations = [dest_ko]
-
-        if dest_en:
-            if os.path.isdir(src):
-                copy_path_filtered(src, dest_en)
-            else:
-                copy_path_filtered(src, dest_en)
-            current_destinations.append(dest_en)
-
-        domain_trans_src = os.path.join(src, "translations.js")
-        if os.path.exists(domain_trans_src) and dest_en:
-            copy_path_filtered(domain_trans_src, os.path.join(dest_en, "translations.js"))
-
-        for current_dest in current_destinations:
-            if os.path.isdir(current_dest):
-                for root, _, files in os.walk(current_dest):
-                    for file in files:
-                        if file.endswith(".html"):
-                            fpath = os.path.join(root, file)
-                            if os.path.abspath(fpath) in processed_files:
-                                continue
-
-                            if "public/en/" in fpath.replace("\\", "/"):
-                                with open(fpath, "r", encoding="utf-8") as f:
-                                    html = f.read()
-                                for ko_txt, en_txt in static_replacements.items():
-                                    html = html.replace(ko_txt, en_txt)
-                                with open(fpath, "w", encoding="utf-8") as f:
-                                    f.write(html)
-
-                            process_html_file_for_common_elements(fpath)
-
-    # 4. 도메인 빌드
-    domains = [
-        "animal-face", "fortune", "games", "games/submit", "ai-test", "lucky-recommendation", 
-        "stats",
-        "games/ai-evolution", "games/tetris", "privacy-policy", "terms", "about", "contact",
-        "board", "board/write", "board/edit", "board/post", "inquiry", "search",
-        "auth", "auth/signup", "account", "account/domain",
-        "futures-estimate", "glossary"
-    ]
-    special_domain_mappings = [
-        {
-            "source": "stats/sudden-attack",
-            "dest_ko": "games/sudden-attack",
-            "dest_en": "en/games/sudden-attack",
-        }
-    ]
+    for source, destination in DEPLOYMENT_MANIFEST["copyRoots"].items():
+        copy_root(source, _copy_destination(destination))
     
-    from src.shared.infra.i18n_map import STATIC_REPLACEMENTS as static_replacements
-
-    for domain in domains:
-        src = f"src/domains/{domain}"
-        dest_ko = os.path.join(PUBLIC_DIR, domain)
-        dest_en = os.path.join(PUBLIC_DIR, "en", domain)
-        copy_domain_variants(src, dest_ko, dest_en)
-
-    for mapping in special_domain_mappings:
-        src = os.path.join("src", "domains", mapping["source"])
-        dest_ko = os.path.join(PUBLIC_DIR, mapping["dest_ko"])
-        dest_en = os.path.join(PUBLIC_DIR, mapping["dest_en"])
-        copy_domain_variants(src, dest_ko, dest_en)
-    
-    # 5. 루트 메인 페이지 영어 버전 별도 생성
-    main_index_src = "index.html"
-    if os.path.exists(main_index_src):
-        main_index_en = os.path.join(PUBLIC_DIR, "en", "index.html")
-        os.makedirs(os.path.dirname(main_index_en), exist_ok=True)
-        with open(main_index_src, "r", encoding="utf-8") as f:
-            html = f.read()
-        for ko_txt, en_txt in static_replacements.items():
-            html = html.replace(ko_txt, en_txt)
-        with open(main_index_en, "w", encoding="utf-8") as f:
-            f.write(html)
-        process_html_file_for_common_elements(main_index_en)
-        processed_files.add(os.path.abspath(main_index_en))
-    
-    # 뉴스 도메인 특수 빌드
-    _, db_ok = generate_news_pages()
-    # 뉴스 도메인 자산 복사 (CSS, JS, Translations)
-    news_style_src = os.path.join("src", "domains", "news", "ui", "style.css")
-    news_trans_src = os.path.join("src", "domains", "news", "translations.js")
-    
-    if os.path.exists(news_trans_src):
-        shutil.copy2(news_trans_src, os.path.join(PUBLIC_DIR, "news", "translations.js"))
-        shutil.copy2(news_trans_src, os.path.join(PUBLIC_DIR, "en", "news", "translations.js"))
-
-    news_domain_js = os.path.join("src", "domains", "news", "domain")
-    news_infra_js = os.path.join("src", "domains", "news", "infra")
-    news_ui_js = os.path.join("src", "domains", "news", "ui")
-    news_app_js = os.path.join("src", "domains", "news", "application")
-    if os.path.exists(news_style_src):
-        news_style_dest = os.path.join(PUBLIC_DIR, "news", "ui", "style.css")
-        os.makedirs(os.path.dirname(news_style_dest), exist_ok=True)
-        shutil.copy2(news_style_src, news_style_dest)
-
-        news_style_dest_en = os.path.join(PUBLIC_DIR, "en", "news", "ui", "style.css")
-        os.makedirs(os.path.dirname(news_style_dest_en), exist_ok=True)
-        shutil.copy2(news_style_src, news_style_dest_en)
-        # Backward-compat aliases for older pages linking /news/style.css or /en/news/style.css
-        news_style_alias = os.path.join(PUBLIC_DIR, "news", "style.css")
-        os.makedirs(os.path.dirname(news_style_alias), exist_ok=True)
-        shutil.copy2(news_style_src, news_style_alias)
-        news_style_alias_en = os.path.join(PUBLIC_DIR, "en", "news", "style.css")
-        os.makedirs(os.path.dirname(news_style_alias_en), exist_ok=True)
-        shutil.copy2(news_style_src, news_style_alias_en)
-    for src_dir, dest_dir in [
-        (news_domain_js, os.path.join(PUBLIC_DIR, "news", "domain")),
-        (news_infra_js, os.path.join(PUBLIC_DIR, "news", "infra")),
-        (news_ui_js, os.path.join(PUBLIC_DIR, "news", "ui")),
-        (news_app_js, os.path.join(PUBLIC_DIR, "news", "application")),
-    ]:
-        if os.path.exists(src_dir):
-            copy_path_filtered(src_dir, dest_dir)
-    if not db_ok:
-        print("⚠️ [NEWS BUILD] Restoring cached news from previous public/ build.")
-        restore_news_snapshot(news_snapshot)
-        upgrade_cached_news_index()
-        upgrade_cached_article_pages()
+    # Archived guide sources must not recreate consolidated pages.
+    remove_consolidated_guide_pages()
 
     version_relative_js_imports(PUBLIC_DIR)
 
@@ -254,75 +159,84 @@ def generate_public_site(incremental=False):
 def build_rss():
     ko_items = [
         {
+            "href": "/guides/sudden-attack-stats-guide/",
+            "title": "서든어택 전적 검색 가이드",
+            "description": "닉네임 검색부터 최근·이전 20경기, 최근 31일 활동, VS 비교까지 Tracking SA 전적 페이지를 읽는 방법을 정리했습니다.",
+        },
+        {
+            "href": "/guides/match-history-reading/",
+            "title": "최근 경기 기록 해석법",
+            "description": "승률만 보지 않고 최근 경기 기록, 맵 편차, 교전 흐름을 함께 보는 기준을 설명합니다.",
+        },
+        {
+            "href": "/guides/tracking-sa-service-guide/",
+            "title": "Tracking SA 서비스 안내",
+            "description": "Tracking SA의 서비스 목적, 전적 검색과 가이드 운영 이유, 리그 허브 분리 원칙을 설명합니다.",
+        },
+        {
             "href": "/stats/sudden-attack/",
             "title": "대표 서비스: 서든어택 전적 검색",
-            "date": datetime.datetime.utcnow().strftime("%Y-%m-%d"),
-            "description": "공식 API 기반 전적 검색, 매치 기록 조회, VS 비교, 크루 관리 기능을 제공합니다.",
+            "description": "공식 API 기반 공개 전적 검색 홈에서 최근·이전 20경기, 최근 31일 활동, VS 비교를 확인하고 리그 허브로 이동할 수 있습니다.",
         },
         {
             "href": "/",
-            "title": "게임·테스트·커뮤니티 허브 운영",
-            "date": datetime.datetime.utcnow().strftime("%Y-%m-%d"),
-            "description": "Tracking SA는 게임 유틸리티, 웹 게임, AI 테스트, 커뮤니티와 실용 도구를 함께 제공하는 멀티 서비스 허브입니다.",
+            "title": "메인 서비스 구조 업데이트",
+            "description": "Tracking SA 메인 구조는 서든어택 전적 검색과 리그 허브 중심으로 정리되어 있습니다.",
         },
     ]
-    ko_rss = build_rss_xml(ko_items, lang="ko")
+    for item in ko_items:
+        published = read_content_dates(item["href"]).get("published")
+        if published:
+            item["date"] = published.isoformat()
+    ko_rss = build_rss_xml(ko_items)
     with open(os.path.join(PUBLIC_DIR, "rss.xml"), "w", encoding="utf-8") as f:
         f.write(ko_rss)
 
-    en_items = [
-        {
-            "href": "/en/stats/sudden-attack/",
-            "title": "Featured Service: Sudden Attack Stats",
-            "date": datetime.datetime.utcnow().strftime("%Y-%m-%d"),
-            "description": "Official API-based player stats, match history, versus comparison, and crew tools.",
-        },
-        {
-            "href": "/en/",
-            "title": "Games, Tests, and Community Hub",
-            "date": datetime.datetime.utcnow().strftime("%Y-%m-%d"),
-            "description": "Tracking SA is a multi-service hub for game utilities, web games, AI tests, community pages, and practical tools.",
-        },
-    ]
-    en_rss = build_rss_xml(en_items, lang="en")
-    with open(os.path.join(PUBLIC_DIR, "en", "rss.xml"), "w", encoding="utf-8") as f:
-        f.write(en_rss)
-
-    print("📡 [RSS] Generated rss.xml and en/rss.xml")
+    print("📡 [RSS] Generated rss.xml")
 
 
 def build_sitemap():
-    noindex_exact_paths = {
-        "news/index.html",
-        "en/news/index.html",
-        "auth/signup/index.html",
-        "en/auth/signup/index.html",
-        "games/admin/index.html",
-        "en/games/admin/index.html",
-        "board/write/index.html",
-        "en/board/write/index.html",
-        "board/edit/index.html",
-        "en/board/edit/index.html",
-        "board/post/index.html",
-        "en/board/post/index.html",
+    sitemap_exact_paths = {
+        "index.html",
+        "about/index.html",
+        "contact/index.html",
+        "privacy-policy/index.html",
+        "terms/index.html",
+        "editorial-policy/index.html",
+        "service-methodology/index.html",
+        "guides/index.html",
+        "stats/index.html",
+        "stats/sudden-attack/index.html",
+        "stats/sudden-attack/league/index.html",
+        "stats/sudden-attack/replay/index.html",
+        "ai-replay-pass/index.html",
+        "updates/index.html",
     }
-
-    def is_news_article_page(rel_path):
-        return bool(
-            re.match(r'^(en/)?news-\d{10}-\d+\.html$', rel_path)
-            or re.match(r'^(en/)?20\d{2}-\d{2}-\d{2}-.+\.html$', rel_path)
-        )
+    sitemap_prefixes = (
+        "guides/",
+    )
+    noindex_exact_paths = {
+        "auth/signup/index.html",
+        "auth/index.html",
+        "account/index.html",
+        "board/write/index.html",
+        "board/edit/index.html",
+        "board/post/index.html",
+        "board/index.html",
+        "search/index.html",
+        "inquiry/index.html",
+    }
 
     def is_public_page(rel_path):
         if not rel_path.endswith(".html"):
+            return False
+        if rel_path not in sitemap_exact_paths and not rel_path.startswith(sitemap_prefixes):
             return False
         if rel_path.startswith("ui/") or "/ui/" in rel_path:
             return False
         if "/domain/" in rel_path or "/infra/" in rel_path or "/application/" in rel_path:
             return False
         if rel_path in noindex_exact_paths:
-            return False
-        if is_news_article_page(rel_path):
             return False
         return True
 
@@ -331,13 +245,6 @@ def build_sitemap():
             base = rel_path[:-len("index.html")]
             return "/" + base
         return "/" + rel_path
-
-    def lastmod_for(path):
-        try:
-            ts = os.path.getmtime(path)
-            return datetime.datetime.utcfromtimestamp(ts).date().isoformat()
-        except Exception:
-            return None
 
     def escape(value):
         return (
@@ -349,7 +256,6 @@ def build_sitemap():
         )
 
     entries = []
-    alternates = {}
 
     for root, _, files in os.walk(PUBLIC_DIR):
         for name in files:
@@ -357,40 +263,26 @@ def build_sitemap():
             if not is_public_page(rel_path):
                 continue
             url_path = to_url(rel_path)
-            lang = "en" if rel_path.startswith("en/") else "ko"
-            lastmod = lastmod_for(os.path.join(root, name))
-            entries.append({"rel_path": rel_path, "url_path": url_path, "lang": lang, "lastmod": lastmod})
-
-            key = rel_path[3:] if rel_path.startswith("en/") else rel_path
-            alternates.setdefault(key, {})[lang] = url_path
+            dates = read_content_dates(url_path)
+            lastmod = dates.get("modified") or dates.get("published")
+            lastmod = lastmod.isoformat() if lastmod else None
+            entries.append({"url_path": url_path, "lastmod": lastmod})
 
     lines = [
         '<?xml version="1.0" encoding="UTF-8"?>',
-        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
     ]
 
     base_url = BASE_URL.rstrip("/")
 
     for entry in entries:
-        rel_path = entry["rel_path"]
         url_path = entry["url_path"]
-        lang = entry["lang"]
         lastmod = entry["lastmod"]
-        key = rel_path[3:] if rel_path.startswith("en/") else rel_path
-        alt = alternates.get(key, {})
 
         lines.append("  <url>")
         lines.append(f"    <loc>{escape(base_url + url_path)}</loc>")
         if lastmod:
             lines.append(f"    <lastmod>{lastmod}</lastmod>")
-        for alt_lang, alt_path in sorted(alt.items()):
-            lines.append(
-                f'    <xhtml:link rel="alternate" hreflang="{escape(alt_lang)}" href="{escape(base_url + alt_path)}" />'
-            )
-        if "ko" in alt:
-            lines.append(
-                f'    <xhtml:link rel="alternate" hreflang="x-default" href="{escape(base_url + alt["ko"])}" />'
-            )
         lines.append("  </url>")
 
     lines.append("</urlset>")
@@ -401,84 +293,65 @@ def build_sitemap():
 
 
 def build_search_index():
-    def parse_cards(html):
-        items = []
-        if not html:
-            return items
-        card_regex = re.compile(r'<a[^>]+href="([^"]+)"[^>]*class="news-card-premium"[^>]*>([\s\S]*?)</a>|<a[^>]*class="news-card-premium"[^>]+href="([^"]+)"[^>]*>([\s\S]*?)</a>', re.I)
-        title_regex = re.compile(r'<h2[^>]*class="news-title-text"[^>]*>([\s\S]*?)</h2>', re.I)
-        date_regex = re.compile(r'<span[^>]*class="news-date"[^>]*>([\s\S]*?)</span>', re.I)
-        # 클래스명이 news-excerpt로 변경됨
-        desc_regex = re.compile(r'<p[^>]*class="(?:news-desc|news-excerpt)"[^>]*>([\s\S]*?)</p>', re.I)
-        
-        for match in card_regex.finditer(html):
-            href = match.group(1) or match.group(3) or ""
-            inner = match.group(2) or match.group(4) or ""
-            title_match = title_regex.search(inner)
-            date_match = date_regex.search(inner)
-            desc_match = desc_regex.search(inner)
-            
-            title = re.sub(r"<[^>]*>", "", title_match.group(1)).strip() if title_match else ""
-            date = re.sub(r"<[^>]*>", "", date_match.group(1)).strip() if date_match else ""
-            desc = re.sub(r"<[^>]*>", "", desc_match.group(1)).strip() if desc_match else ""
-            
-            if href and title:
-                items.append({"href": href, "title": title, "date": date, "description": desc})
-        return items
-
-    def load_html(path):
-        if not os.path.exists(path):
-            return ""
-        with open(path, "r", encoding="utf-8") as f:
-            return f.read()
+    korean_aliases = {
+        "/": ["트래킹", "트래킹에스에이", "홈", "메인", "서든어택"],
+        "/stats/": ["전적 센터", "전적 검색", "서든어택"],
+        "/stats/sudden-attack/": ["서든어택", "서든 어택", "전적", "전적 검색", "닉네임 검색", "최근 경기", "전적 비교"],
+        "/stats/sudden-attack/league/": ["서든어택 리그", "리그", "크루", "랭킹", "내전", "팀 밸런서"],
+        "/about/": ["서비스 소개", "운영자", "트래킹"],
+        "/contact/": ["연락처", "문의", "제휴"],
+        "/privacy-policy/": ["개인정보", "개인정보 처리방침"],
+        "/terms/": ["이용약관", "서비스 약관"],
+        "/guides/tracking-sa-service-guide/": ["서비스 안내", "이용 가이드", "리그 안내"],
+        "/service-methodology/": ["서비스 운영", "운영 원칙", "전적 검색 기준"],
+        "/editorial-policy/": ["편집 정책", "콘텐츠 작성 기준", "수정 정책"],
+    }
 
     def add_keywords(items):
         enriched = []
         for item in items:
             title = (item.get("title") or "").strip()
-            desc = (item.get("description") or "").strip()
-            keywords = item.get("keywords") or []
+            keywords = list(item.get("keywords") or []) + korean_aliases.get(item["href"], [])
             if title:
                 tokens = [t.strip() for t in re.split(r"\s+", title) if t.strip()]
                 keywords = list(dict.fromkeys(keywords + tokens + [title]))
-            enriched.append({**item, "keywords": keywords})
+            dates = read_content_dates(item["href"])
+            content_date = dates.get("modified") or dates.get("published")
+            enriched.append({**item, "keywords": keywords,
+                             **({"date": content_date_label(content_date)} if content_date else {})})
         return enriched
 
     static_items = {
         "ko": [
-            {"href": "/", "title": "Tracking SA 홈", "description": "게임, 커뮤니티, 테스트와 실용 도구를 모은 멀티 서비스 허브", "keywords": ["tracking sa", "홈", "허브", "포털"]},
-            {"href": "/stats/", "title": "전적 센터", "description": "게임 전적 검색과 매치 분석 기능을 모아둔 허브", "keywords": ["전적", "통계", "매치", "전적검색", "stats"]},
-            {"href": "/board?category=notice", "title": "공지사항", "description": "Tracking SA의 새로운 소식을 전해드립니다.", "keywords": ["공지", "게시판", "소식"]},
-            {"href": "/board?category=free", "title": "자유게시판", "description": "자유롭게 의견을 나누는 커뮤니티 공간", "keywords": ["커뮤니티", "자유", "게시판"]},
-            {"href": "/futures-estimate/", "title": "코스피200 지수 예측", "description": "AI 기반 KOSPI200 지수 상승/하락 예측 데이터", "keywords": ["지수", "선물", "코스피", "K200"]},
-            {"href": "/games/", "title": "게임 센터", "description": "다양한 클래식 및 AI 게임 플레이 및 등록", "keywords": ["게임", "play", "games", "오락"]},
-            {"href": "/stats/sudden-attack/", "title": "서든어택 전적", "description": "공식 API 기반 실시간 전적 및 매치 정보 조회", "keywords": ["서든", "전적", "sudden", "attack", "통계"]},
-            {"href": "/glossary/", "title": "AI 용어사전", "description": "어려운 IT/AI 용어를 쉽게 풀이한 백과사전", "keywords": ["사전", "용어", "백과사전", "IT용어"]},
-            {"href": "/ai-test/", "title": "AI 성향 테스트", "description": "나와 어울리는 AI 기술은 무엇일까요?", "keywords": ["테스트", "성향"]},
-            {"href": "/animal-face/", "title": "동물상 테스트", "description": "인공지능이 분석하는 나의 동물상 관상", "keywords": ["테스트", "동물상"]},
-            {"href": "/fortune/", "title": "AI 운세", "description": "Gemini AI가 들려주는 오늘의 운세", "keywords": ["운세", "사주"]},
-            {"href": "/account/", "title": "내 정보", "description": "프로필 관리 및 활동 내역 확인", "keywords": ["계정", "회원정보", "프로필"]},
-        ],
-        "en": [
-            {"href": "/en/", "title": "Tracking SA Home", "description": "A multi-service hub for game tools, community pages, tests, and utilities", "keywords": ["tracking sa", "hub", "portal"]},
-            {"href": "/en/stats/", "title": "Stats Center", "description": "A hub for game stat lookup and match analysis services", "keywords": ["stats", "match analysis", "game stats", "tracker"]},
-            {"href": "/board?category=notice", "title": "Notice", "description": "Official announcements and news from Tracking SA", "keywords": ["notice", "announcement", "board"]},
-            {"href": "/board?category=free", "title": "Free Board", "description": "Community space for free discussions", "keywords": ["community", "free", "board"]},
-            {"href": "/futures-estimate/", "title": "KOSPI200 Prediction", "description": "AI-based KOSPI200 index direction forecast", "keywords": ["index", "futures", "K200"]},
-            {"href": "/games/", "title": "Game Center", "description": "Play and share various classic and AI games", "keywords": ["games", "play", "entertainment"]},
-            {"href": "/en/stats/sudden-attack/", "title": "Sudden Attack Stats", "description": "Official API-based player stats, match history, versus comparison, and crew tools", "keywords": ["sudden attack", "stats", "match history", "crew"]},
-            {"href": "/glossary/", "title": "AI Glossary", "description": "Comprehensive guide to IT and AI terminology", "keywords": ["dictionary", "terms", "glossary"]},
-            {"href": "/ai-test/", "title": "AI Tendency Test", "description": "Discover which AI tech matches your personality", "keywords": ["test", "personality"]},
-            {"href": "/animal-face/", "title": "Animal Face Test", "description": "AI analysis of your face type", "keywords": ["test", "animal face"]},
-            {"href": "/fortune/", "title": "AI Fortune", "description": "Daily fortune told by Gemini AI", "keywords": ["fortune", "saju"]},
-            {"href": "/account/", "title": "Account", "description": "Manage your profile and activity", "keywords": ["account", "profile"]},
+            {"href": "/", "title": "Tracking SA Home", "description": "Main page for Tracking SA and Sudden Attack stats access", "keywords": ["tracking sa", "home", "sudden attack", "stats"]},
+            {"href": "/stats/", "title": "Stats Center", "description": "Entry page for public stats search and the league hub", "keywords": ["stats", "center", "sudden attack", "tracker"]},
+            {"href": "/board?category=notice", "title": "Notice", "description": "Operational announcements and major updates from Tracking SA", "keywords": ["notice", "announcement", "update"]},
+            {"href": "/stats/sudden-attack/", "title": "Sudden Attack Stats", "description": "Public stats search home with recent matches and versus comparison", "keywords": ["sudden attack", "stats", "public tracker", "match history"]},
+            {"href": "/stats/sudden-attack/league/", "title": "Sudden Attack League Hub", "description": "League rankings, applications, balancing, and operations hub", "keywords": ["sudden attack", "league", "crew", "ranking", "balancer"]},
+            {"href": "/stats/sudden-attack/replay/", "title": "리플레이 분석실", "description": "병영수첩 리플레이로 라운드별 처치, 사망, 생존과 투척물 기록을 분석합니다.", "keywords": ["리플레이", "리플레이 분석", "병영수첩", "JSON 분석", "사망 분석", "라운드 분석", "서든어택 리플레이"]},
+            {"href": "/about/", "title": "About Tracking SA", "description": "Operator details, service purpose, and editorial principles", "keywords": ["about", "operator", "service"]},
+            {"href": "/contact/", "title": "Contact", "description": "Contact and partnership information for Tracking SA", "keywords": ["contact", "email", "support"]},
+            {"href": "/privacy-policy/", "title": "Privacy Policy", "description": "Privacy and data usage policy for Tracking SA", "keywords": ["privacy", "policy", "data"]},
+            {"href": "/terms/", "title": "Terms of Service", "description": "Terms of service for Tracking SA", "keywords": ["terms", "policy", "service"]},
+            {"href": "/guides/tracking-sa-service-guide/", "title": "Tracking SA Service Guide", "description": "Guide to the service purpose, stats search flow, and league hub structure", "keywords": ["service guide", "tracking sa", "guide", "operations"]},
+            {"href": "/service-methodology/", "title": "Service Methodology", "description": "Document describing service purpose, user flow, and operating principles", "keywords": ["service methodology", "tracking sa", "operations", "stats search"]},
+            {"href": "/editorial-policy/", "title": "Editorial Policy", "description": "Document describing writing standards and update policy for explanatory content", "keywords": ["editorial policy", "content", "guide", "operations"]},
         ],
     }
+
+    static_items["ko"] = [item for item in static_items["ko"] if not item.get("href", "").startswith("/board")]
+    # Existing curated titles/keywords take precedence over the guide metadata.
+    # Discover after retired pages were removed so archived sources stay excluded.
+    indexed_paths = {item["href"] for item in static_items["ko"]}
+    for guide in collect_guide_items(PUBLIC_DIR):
+        if guide["href"] not in indexed_paths:
+            static_items["ko"].append(guide)
+            indexed_paths.add(guide["href"])
+
     payload = {
-        "generated_at": datetime.datetime.utcnow().isoformat() + "Z",
+        "generated_at": datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
         "items": {
             "ko": add_keywords(static_items["ko"]),
-            "en": add_keywords(static_items["en"]),
         },
     }
     out_path = os.path.join(PUBLIC_DIR, "search-index.json")

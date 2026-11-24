@@ -15,8 +15,10 @@
       ? window.createAuthActionHandlers({ getAuthService })
       : null;
     container.innerHTML = `
-      <button id="auth-login" class="auth-button primary">${t("login", "로그인")}</button>
+      <span id="auth-loading" class="auth-status" aria-live="polite">${t("auth_checking", "계정 확인 중…")}</span>
+      <button id="auth-login" class="auth-button primary" style="display:none;">${t("login", "로그인")}</button>
       <button id="auth-logout" class="auth-button" style="display:none;">${t("logout", "로그아웃")}</button>
+      <a id="auth-admin" class="auth-button" href="/admin/" style="display:none;">관리자</a>
       <span id="auth-user" class="auth-user" style="display:none;"></span>
       <div id="auth-menu" class="auth-menu">
         <div class="auth-form">
@@ -31,10 +33,10 @@
       </div>
     `;
 
+    const loadingStatus = container.querySelector("#auth-loading");
     const loginButton = container.querySelector("#auth-login");
     const logoutButton = container.querySelector("#auth-logout");
     const userLabel = container.querySelector("#auth-user");
-    const menu = container.querySelector("#auth-menu");
     const emailInput = container.querySelector("#auth-email");
     const passwordInput = container.querySelector("#auth-password");
     const emailLoginBtn = container.querySelector("#auth-email-login");
@@ -55,7 +57,7 @@
       const top = container.getBoundingClientRect().top + window.scrollY - 110;
       if (top >= 0) window.scrollTo({ top, behavior: "smooth" });
       if (emailInput) {
-        setTimeout(() => emailInput.focus(), 120);
+        emailInput.focus({ preventScroll: true });
       }
     };
 
@@ -101,21 +103,47 @@
       });
     });
 
-    document.addEventListener("click", (event) => {
+    document.addEventListener("pointerdown", (event) => {
       if (!container.contains(event.target)) {
         container.classList.remove("open");
       }
-    });
+    }, true);
 
+    let adminLinkRevision = 0;
     function setUser(user, profile) {
+      const adminRevision = ++adminLinkRevision;
+      const adminLink = container.querySelector('#auth-admin');
+      adminLink.style.display = 'none';
+      if (user) void import('/auth/domain/access-policy.js').then(({ isSiteAdministrator }) => {
+        if (adminRevision === adminLinkRevision && isSiteAdministrator(user, profile)) adminLink.style.display = 'inline-flex';
+      }).catch(() => {});
+      if (loadingStatus) loadingStatus.style.display = "none";
       if (user) {
         loginButton.style.display = "none";
         logoutButton.style.display = "inline-flex";
         userLabel.style.display = "inline-flex";
         const nickname = (profile && profile.nickname) || user.displayName || user.email || t("logged_in", "로그인됨");
         const photoURL = (profile && profile.photoURL) || user.photoURL || "";
+        userLabel.replaceChildren();
         if (photoURL) {
-          userLabel.innerHTML = `<img class="auth-avatar" src="${photoURL}" alt="profile"><span class="auth-user-label">${nickname}</span>`;
+          let safePhotoURL = "";
+          try {
+            const parsedPhotoURL = new URL(photoURL, window.location.origin);
+            if (parsedPhotoURL.protocol === "https:") safePhotoURL = parsedPhotoURL.href;
+          } catch (_) {
+            safePhotoURL = "";
+          }
+          if (safePhotoURL) {
+            const avatar = document.createElement("img");
+            avatar.className = "auth-avatar";
+            avatar.src = safePhotoURL;
+            avatar.alt = "profile";
+            userLabel.appendChild(avatar);
+          }
+          const label = document.createElement("span");
+          label.className = "auth-user-label";
+          label.textContent = nickname;
+          userLabel.appendChild(label);
         } else {
           userLabel.textContent = nickname;
         }

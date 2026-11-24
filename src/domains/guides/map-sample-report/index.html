@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>맵별 승률과 맵 편중을 읽는 방법 | Tracking SA</title>
+<meta name="description" content="맵별 승률의 작은 표본과 맵 구성의 영향을 2전 2승, 20경기 비교 예시로 계산하고 매치 목록에서 확인하는 방법을 설명합니다.">
+<!-- HEAD_INJECTION -->
+<style>
+.guide-article{max-width:960px;margin:auto;padding:40px 20px 80px;line-height:1.85;color:#334155}
+.guide-hero{padding:32px;border-radius:24px;background:linear-gradient(125deg,#0f172a,#164e63);color:#fff}
+.guide-hero h1{font-size:clamp(1.8rem,5vw,2.65rem);line-height:1.25;margin:12px 0}.guide-hero p{color:#e2e8f0}.guide-meta{font-size:.85rem;color:#cbd5e1}
+.guide-block{padding:28px;margin-top:20px;border:1px solid #cbd5e1;border-radius:20px;background:#fff}.guide-block h2{margin:0 0 14px;font-size:1.4rem;color:#0f172a}.guide-block h3{font-size:1.12rem;color:#0f172a}
+.guide-block p{margin:12px 0}.guide-block a{color:#0052cc;text-decoration:underline}.guide-block ul,.guide-block ol{padding-left:24px}.guide-block li+li{margin-top:8px}
+.guide-table-wrap{max-width:100%;overflow-x:auto;margin:18px 0;border:1px solid #cbd5e1;border-radius:12px}.guide-table{width:100%;border-collapse:collapse;font-size:.94rem;min-width:520px}.guide-table caption{text-align:left;padding:14px;background:#eff6ff;font-weight:700;color:#1e3a8a}.guide-table th,.guide-table td{padding:13px;text-align:left;border-top:1px solid #cbd5e1;vertical-align:top}.guide-table thead{background:#f1f5f9;color:#0f172a}
+.guide-callout{padding:18px;border-left:4px solid #0891b2;border-radius:8px;background:#ecfeff;color:#164e63}.guide-formula{padding:16px;border-radius:12px;background:#f1f5f9;color:#0f172a;overflow-wrap:anywhere}.guide-toc{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.guide-toc a{padding:8px 12px;border:1px solid #94a3b8;border-radius:10px;color:#0052cc;background:#fff}.guide-block[id]{scroll-margin-top:100px}
+body.dark-mode .guide-article{color:#e2e8f0}body.dark-mode .guide-block,body.dark-mode .guide-toc a{background:#111827;border-color:#475569}body.dark-mode .guide-block h2,body.dark-mode .guide-block h3{color:#f8fafc}body.dark-mode .guide-block a,body.dark-mode .guide-toc a{color:#7dd3fc}body.dark-mode .guide-table caption{background:#172554;color:#bfdbfe}body.dark-mode .guide-table thead,body.dark-mode .guide-formula{background:#1e293b;color:#f8fafc}body.dark-mode .guide-table-wrap,body.dark-mode .guide-table th,body.dark-mode .guide-table td{border-color:#475569}body.dark-mode .guide-callout{background:#083344;color:#cffafe}
+@media(max-width:640px){.guide-article{padding:24px 14px 60px}.guide-hero,.guide-block{padding:22px}.guide-table{min-width:480px}}
+</style>
+</head>
+<body>
+<!-- HEADER_INJECTION -->
+<main class="guide-article">
+<div class="guide-hero">
+<span>TRACKING SA · 데이터 읽기</span>
+<h1>맵별 승률과 맵 편중을 읽는 방법</h1>
+<p>2전 2승의 100%와 최근 20경기의 70%는 다른 무게의 기록입니다. 맵별 표본과 맵 비중을 구분해 전체 성적의 변화를 읽습니다.</p>
+<div class="guide-meta">최종 수정 2026-10-21 · 공개 전적 폭파미션 기준</div>
+</div>
+<nav class="guide-toc" aria-label="이 문서의 목차">
+<a href="#sample">작은 표본의 100%가 흔들리는 이유</a>
+<a href="#mix">맵 구성만 바뀌어도 전체 승률은 바뀝니다</a>
+<a href="#workflow">검색 화면에서 확인할 순서</a>
+<a href="#record">다음 조회와 비교할 기록을 남깁니다</a>
+</nav>
+<aside class="guide-callout">
+<strong>예시 데이터 안내</strong>
+<p>‘가상 예시’로 표시한 계산 표의 수치는 설명을 위해 만든 값입니다. 실제 플레이어의 전적이나 관측 결과가 아닙니다. 실제 조회 사례는 확인 날짜와 조회 경로를 별도로 표시합니다.</p>
+</aside>
+<section id="sample" class="guide-block">
+<h2>작은 표본의 100%가 흔들리는 이유</h2>
+<p>맵 A에서 2번 이겼다면 승률은 100%입니다. 하지만 그 뒤 한 번 지면 2 ÷ 3 × 100 = 66.7%로 바뀝니다. 처음 보인 100%는 기록된 두 경기의 결과일 뿐, 다음 경기의 승리 가능성이 100%라는 뜻은 아닙니다.</p>
+<div class="guide-table-wrap" role="region" tabindex="0" aria-label="가상 예시 1 · 같은 한 경기라도 표본에 따라 영향이 다릅니다">
+<table class="guide-table">
+<caption>가상 예시 1 · 같은 한 경기라도 표본에 따라 영향이 다릅니다</caption>
+<thead>
+<tr>
+<th scope="col">상황</th>
+<th scope="col">변경 전</th>
+<th scope="col">변경 후</th>
+<th scope="col">변화</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row">맵 A · 한 경기 추가</th>
+<td>2전 2승 · 100%</td>
+<td>3전 2승 · 66.7%</td>
+<td>−33.3%p</td>
+</tr>
+<tr>
+<th scope="row">20경기 구간 · 오래된 1승을 새 1패로 교체</th>
+<td>20전 14승 · 70%</td>
+<td>20전 13승 · 65%</td>
+<td>−5%p</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>최근 20경기는 새로운 경기가 들어오면 오래된 경기가 빠지는 이동 구간입니다. 두 번째 행은 경기 수를 21로 늘린 계산이 아니라, 같은 20경기 안에서 1승이 1패로 바뀐 경우입니다.</p>
+<p>따라서 ‘몇 경기부터 무조건 믿을 수 있다’는 숫자는 제시하지 않습니다. 같은 맵·같은 매치 유형의 기록인지, 결과가 반복되는지와 함께 보아야 합니다.</p>
+</section>
+<section id="mix" class="guide-block">
+<h2>맵 구성만 바뀌어도 전체 승률은 바뀝니다</h2>
+<p>맵별 승률이 그대로여도 자주 플레이한 맵의 비중이 달라지면 전체 승률은 달라집니다. 아래 예시에서는 A맵 80%, B맵 40%가 두 구간 모두 같습니다.</p>
+<div class="guide-table-wrap" role="region" tabindex="0" aria-label="가상 예시 2 · 맵별 성과는 같고, 플레이 비중만 달라진 두 구간">
+<table class="guide-table">
+<caption>가상 예시 2 · 맵별 성과는 같고, 플레이 비중만 달라진 두 구간</caption>
+<thead>
+<tr>
+<th scope="col">맵</th>
+<th scope="col">이전 20경기</th>
+<th scope="col">최근 20경기</th>
+<th scope="col">맵별 승률</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row">A맵</th>
+<td>5경기 · 4승</td>
+<td>15경기 · 12승</td>
+<td>두 구간 모두 80%</td>
+</tr>
+<tr>
+<th scope="row">B맵</th>
+<td>15경기 · 6승</td>
+<td>5경기 · 2승</td>
+<td>두 구간 모두 40%</td>
+</tr>
+<tr>
+<th scope="row">전체</th>
+<td>20경기 · 10승 · 50%</td>
+<td>20경기 · 14승 · 70%</td>
+<td>전체 승률 +20%p</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>전체 승률 상승을 개인 실력 향상의 증거로 바로 바꾸면 안 되는 이유입니다. 이 예시에서 확인되는 것은 유리했던 A맵의 경기 비중이 늘었다는 사실입니다. 실제 조회에서는 먼저 최근 매치 목록에 어떤 맵이 몇 번 나오는지 세어 보고, 이전 구간과 구성이 비슷한지 확인하세요.</p>
+</section>
+<section id="workflow" class="guide-block">
+<h2>검색 화면에서 확인할 순서</h2>
+<ol>
+<li>닉네임을 검색하고 ‘전체’ 또는 비교하려는 동일한 매치 유형을 선택합니다.</li>
+<li>최근 매치 목록에서 맵 이름·승패·경기 날짜를 확인합니다. 같은 맵을 묶어 승리 수와 경기 수를 기록합니다.</li>
+<li>최근 20경기와 이전 20경기를 오가며 전체 승률과 K/D, 실제 경기 수를 확인합니다.</li>
+<li>한 맵의 작은 기록인지, 여러 맵에서 반복되는 흐름인지 나누어 다음 조회에서 확인할 질문을 남깁니다.</li>
+</ol>
+<div class="guide-formula">직접 계산할 때: 맵 승률 = 해당 맵 승리 수 ÷ 해당 맵에서 확인한 경기 수 × 100</div>
+<p>이 표는 앱에 없는 맵별 통계 표가 자동으로 제공된다고 약속하는 안내가 아닙니다. 매치 목록을 바탕으로 직접 기록을 정리하는 방법입니다. 보이지 않는 경기나 상대 실력·음성 대화·전술을 추정해서 채우지 마세요.</p>
+</section>
+<section id="record" class="guide-block">
+<h2>다음 조회와 비교할 기록을 남깁니다</h2>
+<p>‘A맵을 잘한다’는 문장 대신 ‘이번 구간 A맵 3전 2승, 이전 구간 8전 5승’처럼 분모와 분자를 남기세요. 다음 조회에서 A맵 경기 수가 더 쌓였을 때도 차이가 반복되는지 볼 수 있습니다. 공개 API의 반영 시차와 매치 유형이 달라지면 같은 기간처럼 보여도 조회 결과가 달라질 수 있습니다.</p>
+<p>
+<a href="/guides/form-signal-report/">최근·이전 구간의 승률과 킬뎃 비교</a> · <a href="/guides/sample-size-report/">표본 부족을 구분하는 기준</a>
+</p>
+</section>
+<section class="guide-block">
+<h2>출처와 적용 범위</h2>
+<p>계산 기준은 Tracking SA의 공개 전적 집계 구현과 표시 방식을 따릅니다. 공식 프로필 수치와 선택한 경기 구간의 자체 집계는 데이터 범위가 다를 수 있습니다. 표본 수는 통계적 신뢰도를 보증하지 않으며, 공개 기록만으로 실력이나 경기 결과의 원인을 확정할 수 없습니다.</p>
+<p>
+<a href="/service-methodology/">서비스 기준</a> · <a href="/editorial-policy/">편집 원칙</a> · <a href="/stats/sudden-attack/">전적 검색에서 확인하기</a> · <a href="/guides/">가이드 목록</a>
+</p>
+</section>
+</main>
+<!-- FOOTER_INJECTION -->
+</body>
+</html>

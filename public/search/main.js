@@ -1,13 +1,9 @@
-import { filterSearchItems } from "./application/search-data.js";
-import { loadSearchIndex, searchFromNewsIndex, searchGamesFromFirestore } from "./infra/searchRepository.js";
-import * as renderer from "./ui/search-renderer.js";
+import { filterSearchItems, isSearchQueryValid } from "./application/search-data.js?v=51c60f362359";
+import { loadSearchIndex } from "./infra/searchRepository.js?v=058d7c48e5a3";
+import * as renderer from "./ui/search-renderer.js?v=e121c6748204";
 
 function qs(key) {
   return new URLSearchParams(window.location.search).get(key) || "";
-}
-
-function getLang() {
-  return localStorage.getItem("lang") || "ko";
 }
 
 function tr(key, fallback) {
@@ -16,11 +12,10 @@ function tr(key, fallback) {
 
 async function runSearch(query) {
   const input = document.getElementById("searchPageInput");
-  const lang = getLang();
 
   input.value = query;
 
-  if (query.trim().length < 2) {
+  if (!isSearchQueryValid(query)) {
     renderer.renderSearchMinKeyword();
     return;
   }
@@ -28,41 +23,15 @@ async function runSearch(query) {
   renderer.renderSearchLoading();
 
   try {
-    // Parallel search: Static Index + Dynamic Games
-    const [index, dynamicGames] = await Promise.all([
-      loadSearchIndex().catch(() => ({ items: {} })),
-      searchGamesFromFirestore(query).catch(() => [])
-    ]);
+    const index = await loadSearchIndex().catch(() => ({ items: {} }));
 
-    const primary = index?.items?.[lang] || [];
-    const fallbackLang = lang === "en" ? "ko" : "en";
-    const secondary = index?.items?.[fallbackLang] || [];
+    const items = filterSearchItems(index?.items?.ko || [], query);
 
-    let items = filterSearchItems(primary, query);
-    if (!items.length && secondary.length) {
-      items = filterSearchItems(secondary, query);
-    }
-
-    // Merge static and dynamic results (avoiding duplicates by href)
-    const mergedMap = new Map();
-    [...items, ...dynamicGames].forEach(item => {
-      if (!mergedMap.has(item.href)) mergedMap.set(item.href, item);
-    });
-    
-    const finalItems = Array.from(mergedMap.values());
-
-    renderer.renderSearchSummary(query, finalItems.length);
-    renderer.renderSearchResults(finalItems, query);
+    renderer.renderSearchSummary(query, items.length);
+    renderer.renderSearchResults(items, query);
   } catch (e) {
-    console.warn("Search failed, falling back to news-index:", e);
-    try {
-      const items = await searchFromNewsIndex(query, lang, 200);
-      renderer.renderSearchSummary(query, items.length);
-      renderer.renderSearchResults(items, query);
-    } catch (finalError) {
-      console.error("Search page error:", finalError);
-      renderer.renderSearchError();
-    }
+    console.error("Search page error:", e);
+    renderer.renderSearchError();
   }
 }
 

@@ -9,8 +9,24 @@ let authUiController = null;
 let authPromptKit = null;
 let inlineModalController = null;
 let authStateBus = null;
+let pendingAuthStateBusPromise = null;
+const pendingAuthSubscriptions = new Set();
+let pendingAuthStateSnapshot = null;
 let appShellRuntime = null;
 let authSessionRuntime = null;
+const commonAssetVersion = (() => {
+    try {
+        return new URL(document.currentScript?.src || "", window.location.href).searchParams.get("v") || "";
+    } catch (_) {
+        return "";
+    }
+})();
+
+function withCommonAssetVersion(src) {
+    if (!commonAssetVersion) return src;
+    const separator = src.includes("?") ? "&" : "?";
+    return `${src}${separator}v=${encodeURIComponent(commonAssetVersion)}`;
+}
 
 let _authStateResolve = null;
 window.authStateReady = new Promise((resolve) => {
@@ -70,27 +86,43 @@ async function loadAuthStateBusFactory() {
 
 async function ensureAuthStateBus() {
     if (authStateBus) return authStateBus;
-    try {
-        const factory = await loadAuthStateBusFactory();
-        if (typeof factory === "function") {
-            authStateBus = factory({
-                onListenerError(error) {
-                    console.error("AuthStateBus listener failed:", error);
-                },
-            });
+    if (pendingAuthStateBusPromise) return pendingAuthStateBusPromise;
+    pendingAuthStateBusPromise = (async () => {
+        try {
+            const factory = await loadAuthStateBusFactory();
+            if (typeof factory === "function") {
+                authStateBus = factory({
+                    onListenerError(error) {
+                        console.error("AuthStateBus listener failed:", error);
+                    },
+                });
+            }
+        } catch (error) {
+            console.error("AuthStateBus factory load failed:", error);
         }
-    } catch (error) {
-        console.error("AuthStateBus factory load failed:", error);
+        if (!authStateBus) authStateBus = createFallbackAuthStateBus();
+        for (const subscription of pendingAuthSubscriptions) {
+            subscription.unsubscribe = authStateBus.subscribe(subscription.listener);
+        }
+        pendingAuthSubscriptions.clear();
+        if (pendingAuthStateSnapshot) {
+            authStateBus.publish(pendingAuthStateSnapshot);
+            pendingAuthStateSnapshot = null;
+        }
+        return authStateBus;
+    })();
+    try {
+        return await pendingAuthStateBusPromise;
+    } finally {
+        pendingAuthStateBusPromise = null;
     }
-    if (!authStateBus) {
-        authStateBus = createFallbackAuthStateBus();
-    }
-    return authStateBus;
 }
 
 function publishAuthStateChange(user, profile) {
     if (authStateBus && typeof authStateBus.publish === "function") {
         authStateBus.publish({ user, profile });
+    } else {
+        pendingAuthStateSnapshot = { user, profile };
     }
     window.dispatchEvent(new CustomEvent("auth-state-changed", {
         detail: { user, profile }
@@ -99,8 +131,16 @@ function publishAuthStateChange(user, profile) {
 
 window.AuthStateBus = {
     subscribe(listener) {
-        if (!authStateBus || typeof authStateBus.subscribe !== "function") return () => {};
-        return authStateBus.subscribe(listener);
+        if (typeof listener !== "function") return () => {};
+        if (authStateBus && typeof authStateBus.subscribe === "function") {
+            return authStateBus.subscribe(listener);
+        }
+        const subscription = { listener, unsubscribe: null };
+        pendingAuthSubscriptions.add(subscription);
+        return () => {
+            pendingAuthSubscriptions.delete(subscription);
+            if (subscription.unsubscribe) subscription.unsubscribe();
+        };
     },
     getSnapshot() {
         if (!authStateBus || typeof authStateBus.getSnapshot !== "function") {
@@ -112,6 +152,9 @@ window.AuthStateBus = {
 
 async function getAuthService() {
     if (window.AuthService) return window.AuthService;
+    if (typeof window.ensureAuthRuntime === "function") {
+        await window.ensureAuthRuntime();
+    }
     if (window.authDomainReady) {
         const service = await window.authDomainReady;
         if (service) return service;
@@ -139,7 +182,7 @@ async function loadFactoryScript({
             return;
         }
         const script = document.createElement("script");
-        script.src = scriptSrc;
+        script.src = withCommonAssetVersion(scriptSrc);
         script.async = true;
         script.setAttribute(dataAttr, "true");
         script.onload = resolve;
@@ -255,6 +298,7 @@ async function ensureAuthPromptKit() {
             if (window.openAuthPrompt) window.openAuthPrompt();
         },
         getAuthStateReady: () => window.authStateReady,
+        getCurrentUser: () => window.getCurrentUser(),
         showAuthMenu: () => {
             if (window.showAuthMenu) window.showAuthMenu();
         },
@@ -276,6 +320,7 @@ async function ensureAuthUiController() {
                 throw new Error("Auth UI controller factory is not available.");
             }
             authUiController = factory({
+                assetVersion: commonAssetVersion,
                 getAuthService,
                 getCurrentUser: () => authUser,
                 onLogoutSuccess: () => {
@@ -423,26 +468,61 @@ window.AuthGateway = {
     waitForReady: async () => {
         return window.authStateReady;
     },
-    getCurrentUser: () => (
-        authSessionRuntime && typeof authSessionRuntime.getCurrentUser === "function"
-            ? authSessionRuntime.getCurrentUser()
-            : authUser
-    ),
-    getCurrentUserProfile: () => (
-        authSessionRuntime && typeof authSessionRuntime.getCurrentUserProfile === "function"
-            ? authSessionRuntime.getCurrentUserProfile()
-            : authProfile
-    ),
-    requireAuth: async ({ redirectTo } = {}) => {
-        const runtime = await ensureAuthSessionRuntime();
-        return runtime.requireAuth({ redirectTo });
-    },
+    getCurrentUser: window.getCurrentUser,
+    getCurrentUserProfile: window.getCurrentUserProfile,
+    requireAuth: window.requireAuth,
     getAuthService,
+    subscribe: (listener) => window.AuthStateBus.subscribe(listener),
 };
+
+let deferredAuthInitPromise = null;
+
+function startDeferredAuthRuntime() {
+    if (deferredAuthInitPromise) return deferredAuthInitPromise;
+    deferredAuthInitPromise = (async () => {
+        const sessionRuntime = await ensureAuthSessionRuntime();
+        await ensureAuthStateBus();
+        const initPromise = sessionRuntime.init();
+        await ensureAuthPromptKit();
+        await initAuthControls();
+
+        if (authPromptKit && typeof authPromptKit.initAuthGateLinks === "function") {
+            authPromptKit.initAuthGateLinks();
+        }
+
+        await initPromise;
+
+        const currentUser = sessionRuntime.getCurrentUser();
+        if (window.updateAuthControls) {
+            window.updateAuthControls(currentUser);
+        }
+    })();
+    return deferredAuthInitPromise;
+}
+
+function initDeferredAuthPlaceholder() {
+    const container = document.getElementById("auth-controls");
+    if (!container || container.querySelector("#auth-loading")) return;
+
+    const loadingStatus = document.createElement("span");
+    loadingStatus.id = "auth-loading";
+    loadingStatus.className = "auth-status";
+    loadingStatus.setAttribute("aria-live", "polite");
+    loadingStatus.textContent = window.getTranslation
+        ? window.getTranslation("auth_checking", "계정 확인 중…")
+        : "계정 확인 중…";
+    container.replaceChildren(loadingStatus);
+}
 
 async function initAll() {
     const shell = await ensureAppShellRuntime();
     shell.initShell();
+
+    if (window.AUTH_RUNTIME_DEFERRED) {
+        initDeferredAuthPlaceholder();
+        startDeferredAuthRuntime().catch((error) => console.error("Deferred auth init failed:", error));
+        return;
+    }
     
     // 인증 세션 초기화를 우선 시작하여 상태 변화를 감지할 준비를 마침
     const sessionRuntime = await ensureAuthSessionRuntime();
@@ -461,7 +541,7 @@ async function initAll() {
     
     // 초기화 직후 한 번 더 UI 강제 업데이트 (상태 유실 방지)
     const currentUser = sessionRuntime.getCurrentUser();
-    if (currentUser && window.updateAuthControls) {
+    if (window.updateAuthControls) {
         window.updateAuthControls(currentUser);
     }
 }

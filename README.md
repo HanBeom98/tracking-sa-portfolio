@@ -1,152 +1,118 @@
-# Tracking SA (Feb 2026 – Present)
+# TrackingSA — 게임 기록을 검색에서 복기까지 연결하는 서비스
 
-※ 실제 서비스 코드는 보안 및 운영 안정성을 위해 비공개 레포지토리로 관리하고 있으며,
+**서든어택 전적 검색·경기 비교·리플레이 분석을 직접 기획·개발·운영하고 있습니다.**
 
-본 레포지토리는 포트폴리오 목적으로 구조와 핵심 기능 중심으로 정리한 공개 버전입니다.
+[운영 서비스](https://trackingsa.com) · [전적 검색](https://trackingsa.com/stats/sudden-attack/) · [리플레이 체험](https://trackingsa.com/stats/sudden-attack/replay/) · [개발일지](https://blog.naver.com/PostList.naver?blogId=hantiger24&from=postList&categoryNo=33)
 
-`서든어택 전적 검색`을 핵심 제품으로 운영하면서 반복 조회가 많은 실제 사용 흐름에 맞춰 구조 재편, 검색 UX 개선, 캐시 정책 설계를 진행했습니다.
+| 기간 | 역할 | 개발 방식 |
+| --- | --- | --- |
+| 2026.02 ~ 현재 | 개인 프로젝트: 기획, 화면·서버리스 API 개발, 구조 설계, 검증·배포·운영 | Codex를 기획·구현·검증에 활용하고 문제 정의와 결과 판단을 직접 수행 |
 
-단순 기능 추가보다 `대표 제품 재정의`, `stats 도메인 분리`, `VS 비교·라이벌 분석 강화`, `운영 호환성을 고려한 공개 경로 유지`에 집중했습니다.
+이 저장소는 **2026.11.24에 확인한 최신 원본을 바탕으로 갱신한 공개 포트폴리오**입니다. 소스와 테스트를 살펴볼 수 있으며, 운영 계정·설정값은 예시값으로 바꿨습니다. 기준 커밋과 공개판의 차이는 [공개판 안내](docs/portfolio-snapshot.md)에 정리했습니다.
 
-![Tracking SA home](docs/images/sa-home.png)
+## 먼저 볼 내용
 
-## 프로젝트 역할
+1. [문제 해결 사례](docs/portfolio-case-studies.md): 캐시 무효화, 실패와 0의 구분, 리플레이 상태 관리
+2. [핵심 소스와 테스트](#핵심-소스와-테스트): 기능별 구현과 검증 코드
+3. [공개판 검증 기록](docs/portfolio-verification.md): 이번 갱신에서 실제 실행한 검사와 범위
 
-- 역할: 기획, 프론트엔드 개발, 서버리스 백엔드 연동, 구조 설계, 배포/운영
-- `서든어택 전적 검색`을 프로젝트의 대표 제품으로 재정의
-- `games` 하위 기능이던 구조를 `stats` 도메인 중심으로 재편
-- 반복 검색이 많은 서비스 특성에 맞춰 캐시 정책과 검색 UX 개선
-- `src -> public` 빌드 구조와 DDD 경계를 유지하면서 기능 확장
+## 무엇을 만들었나
 
-## 주요 기능
+| 기능 | 이용자가 할 수 있는 일 |
+| --- | --- |
+| 전적 검색 | NEXON Open API로 프로필·최근 경기·경기 유형별 기록·활동 조회 |
+| 비교와 내전 도구 | VS 비교, 최근 상대·라이벌 분석, 크루 랭킹, 팀 밸런서 |
+| 한 경기 복기 | 공식 JSON의 라운드 흐름·주요 장면·선수별 사건 확인, 재생·PNG·인쇄/PDF |
+| 여러 경기 비교 | JSON 2~5개에서 같은 선수 ID의 검증된 기록과 기준·이후 경기 지표 비교 |
+| 다시 찾기와 공유 | 최근 검색·즐겨찾기, 전적 요약 이미지, 분석 가이드 |
+| Discord 연결 | `/전적`·`/리플레이`·`/도움말` 요약과 웹 상세 분석 연결 |
 
-- 공식 API 기반 서든어택 전적 검색
-- 최근 매치 기록 / 시즌 기준 통계 / VS 비교
-- 전적 기반 라이벌 분석 / 상성 확인
-- 크루 랭킹 / 팀 밸런서 / 내전 보조 도구
-- 최근 검색 / 즐겨찾기 / 즐겨찾기 기반 VS 비교
-- 게시판, 테스트형 기능, 실용 도구를 포함한 허브 구조
+**기본 리플레이 분석은 규칙 기반 계산입니다.** 파일 분석·재생·비교는 기기 안에서 처리하며 비교 파일과 계산 결과를 서버에 저장하지 않습니다. 경기 유형·전력 등 추가 조회에는 외부 API를 사용합니다. 그래프의 추정치와 상황 지수는 실측 승률 또는 생성형 AI의 판단이 아닙니다. 실제 파일 없이 가상 샘플로도 체험할 수 있습니다.
 
-## 기술적 구현
+유료 AI·결제 관련 준비 코드는 공개 서비스의 기본 리플레이 기능과 구분합니다. 이 포트폴리오는 실제 판매·유료 AI 활성화나 매출 성과를 주장하지 않습니다.
 
-### 1. Stats Domain Migration
+## 어떤 문제를 해결했나
 
-서든어택 기능이 일반 `games` 하위 페이지 수준을 넘어서면서, 내부 소스 오브 트루스를 `src/domains/stats/sudden-attack` 으로 이동했습니다.
+### 같은 기록을 반복해서 요청하는 문제
 
-- 공식 공개 경로: `/stats/sudden-attack/`
-- 호환 경로: `/games/sudden-attack/`
-- 기존 외부 링크와 검색엔진 유입이 끊기지 않도록 호환 경로는 유지
+프로필 캐시와 경기 목록 캐시를 분리하고, 같은 요청이 진행 중이면 그 결과를 공유하도록 구성했습니다. 강제 새로고침에서는 메모리·저장소 캐시를 함께 무효화하고, 늦게 도착한 이전 응답이 새 결과를 덮지 않도록 처리했습니다.
 
-### 2. Pragmatic DDD
+날짜별 화면에서도 API가 제공하는 조회 범위는 같았습니다. 유형별 목록을 재사용하고 날짜 선택 시 필요한 상세 기록만 조회하도록 개선했습니다. [개발 기록](https://blog.naver.com/hantiger24/224468800253)의 **150회 → 5회**는 정해진 모의 조건의 목록 요청 수이며, 실서비스 전체 호출 수나 속도·비용 절감률을 뜻하지 않습니다.
 
-기능을 `domain`, `application`, `infra`, `ui` 계층으로 나누고, 비대해진 서비스 로직을 단계적으로 분리했습니다.
+### 데이터가 없는 상태가 실제 0처럼 보이는 문제
 
-예를 들어 서든어택 도메인에서는:
-- 시즌 뷰 조립
-- 탈주 처리
-- 트렌드 계산
-- 프로필 로딩
-- 캐시 조회 / query orchestration
+정상 응답의 빈 목록, 일부 조회 실패, 전체 실패를 구분했습니다. 이전 경기 기록이 없는 경우 최근 값을 복사해 비교하지 않고, 불완전한 기록으로 통계를 확정하지 않도록 했습니다. 사용자에게 보여줄 지표와 데이터 출처를 함께 정리했습니다. [관련 개발일지](https://blog.naver.com/hantiger24/224481064331)
 
-를 각각 별도 단위로 나눠 유지보수 가능성을 높였습니다.
+### 파일을 바꾼 뒤 예전 분석 결과가 도착하는 문제
 
-### 3. Search UX And Cache Policy
+리플레이 파일·분석 세션, 선택적 전력 조회, 이미지/PDF 출력의 책임을 분리했습니다. 결과를 반영하기 전에 현재 파일과 작업 번호가 유효한지 확인합니다. 파일 교체 중 늦게 끝난 요청, 반복 종료 처리, 뒤로 가기 복원 등 상태 전환을 테스트했습니다.
 
-전적 검색은 같은 유저를 반복 조회하는 패턴이 많기 때문에, 단순 검색 기능보다 재방문 UX와 캐시 정책이 중요했습니다.
+### 구현한 기능을 검증하고 배포하는 과정
 
-적용한 개선:
-- 최근 검색
-- 즐겨찾기
-- 즐겨찾기에서 바로 VS 비교
-- 프로필 캐시 5분 TTL
+`src`를 원본으로, `public`을 생성 산출물로 관리합니다. 단위·Python·로컬 브라우저 검사와 계층 경계 검사로 기능과 산출물을 확인합니다. 원본 서비스는 공통 검증 성공 후 배포하도록 구성되어 있으며, 공개판의 운영 배포 작업은 실행되지 않도록 제한했습니다.
 
-현재 캐시 정책:
-- 캐시 없음: fresh fetch
-- 캐시 5분 이내: 캐시만 반환
-- 캐시 5분 초과: 캐시 먼저 반환 후 백그라운드 재검증
+## 기술과 구조
 
-## 시스템 구조
+| 영역 | 사용 기술 |
+| --- | --- |
+| 화면 | JavaScript ES Modules, Web Components, Shadow DOM, HTML/CSS |
+| 서버리스 API | Cloudflare Pages Functions, NEXON Open API, Discord Interactions |
+| 인증·저장 | Firebase Auth, Firestore, Storage 및 보안 규칙 |
+| 별도 서버 함수 | Firebase Cloud Functions |
+| 빌드·검증 | Python 정적 사이트 빌더, Node.js 테스트, Playwright, GitHub Actions |
 
-- Frontend: JavaScript (ES Modules), Web Components, Shadow DOM
-- Serverless/API: Vercel/Cloudflare Functions, Discord Interactions, Firebase REST integration
-- Data: Firebase Firestore, Nexon Open API
-- Auth/Security: Firebase Auth, role-based access, Firestore Rules
-- Hosting: Cloudflare Pages
-- Build & Automation: Python-based static site build pipeline, GitHub Actions, Cloudflare Worker Cron
-- Content/SEO: search index, RSS, sitemap, static content generation
-- Testing: Node test, Playwright
+```text
+src/domains/       전적·리플레이·게시판 등 기능별 원본
+  .../domain/     계산 규칙·검증·지표
+  .../application/ 조회 흐름·세션·유스케이스
+  .../infra/      외부 API·저장소 연동
+  .../ui/         화면 구성과 사용자 상호작용
+src/shared/       공통 UI·자산·빌더
+functions/        같은 출처 /api 핸들러
+cloud-functions/ 별도 서버 함수
+tests/            단위·Python·브라우저·Emulator 검사
+public/           빌드로 생성한 결과
+```
 
-프로젝트 원칙:
-- `src` 를 source of truth 로 사용
-- `public` 은 빌드 산출물로 관리
-- 공개 경로 변경 시 alias 를 유지해 서비스 안정성을 우선
+## 핵심 소스와 테스트
 
-## Why This Project Matters
+| 주제 | 구현 | 테스트 |
+| --- | --- | --- |
+| 프로필 조회·캐시 | [조회 서비스](src/domains/stats/sudden-attack/application/profile-query-service.js) | [조회 테스트](tests/unit/profile-query-service.test.js) |
+| 외부 API 요청 | [NEXON 클라이언트](src/domains/stats/sudden-attack/infra/nexon-api-client.js) | [API 테스트](tests/unit/nexon-api-client.test.js) |
+| 리플레이 상황 계산 | [계산 규칙](src/domains/stats/sudden-attack/replay/domain/replay-context.js) | [상황 테스트](tests/unit/replay-context.test.js) |
+| 여러 경기 비교 | [비교 계산](src/domains/stats/sudden-attack/replay/domain/replay-comparison.js) | [비교 테스트](tests/unit/replay-comparison.test.js) |
+| 비교 세션 관리 | [세션 처리](src/domains/stats/sudden-attack/replay/application/replay-comparison-session.js) | [단위 테스트 모음](tests/unit/) |
+| 실제 화면 흐름 | [전적 검색 UI](src/domains/stats/sudden-attack/ui/) | [로컬 브라우저 검사](tests/e2e/local-smoke.spec.js) |
 
-이 프로젝트는 단순 CRUD 중심의 학습용 프로젝트가 아니라,
+설계·구현 당시 상세 기록은 [기술 문서 목차](docs/README.md)에서 확인할 수 있습니다. 과거 문서의 측정값·검증 횟수는 각각의 시점과 범위에 해당하며 이번 공개판의 재검증 결과와 구분합니다.
 
-- 실제 외부 API(Nexon Open API)를 연동한 서비스
-- 반복 조회 패턴이 존재하는 검색 제품
-- 실제 사용자 트래픽이 발생하는 운영 중 서비스
+## 로컬 실행
 
-를 기반으로 구조 개선과 기능 확장을 진행한 프로젝트입니다.
+Node.js 24와 Python 3.11 이상이 필요합니다. Windows PowerShell 기준:
 
-특히 `서든어택 전적 검색` 기능을 중심으로
+```powershell
+npm.cmd ci
+python -m pip install -r requirements.txt
+npm.cmd run build
+npm.cmd run test:unit
+npm.cmd run test:python
+npx.cmd playwright install chromium
+npm.cmd run test:e2e:ci
+python -m http.server 4173 --directory public
+```
 
-- 제품 방향 재정의
-- stats 도메인 분리
-- 캐시 정책 개선
-- 검색 UX 개선
+`http://localhost:4173`에서 화면을 볼 수 있습니다. 기본 빌드와 모의 데이터 검증에는 운영 비밀 키가 필요하지 않습니다. 실제 로그인·외부 API·Discord 연동에는 별도의 본인 계정 설정과 서버 환경변수가 필요합니다. 공개판에 포함된 예시 설정으로 운영 서비스에 접속하거나 배포하지 않습니다.
 
-을 단계적으로 수행했습니다.
+## AI 활용 방식
 
-## 실제 운영 지표
+이용자의 문제와 기대 동작을 먼저 정리하고, Codex에 관련 코드 확인·작업 분해·구현을 요청합니다. 예상과 다른 결과는 재현 조건과 함께 전달합니다. 변경 후에는 코드와 테스트 결과, 필요한 화면 동작을 확인합니다. AI가 작성한 코드도 확인 대상이며, 어떤 문제를 풀지와 완료 여부를 판단하는 역할은 직접 맡습니다.
 
-2026-03 기준 Google Analytics 최근 30일 운영 지표:
-- 활성 사용자 약 285명
-- 조회수 약 7.5K
-- 이벤트 수 약 18K
-- 디스코드 기반 실사용 흐름 존재
+## 화면과 기록
 
-특히 서든어택 전적 검색은 반복 검색과 비교 기능 수요가 실제로 발생하는 핵심 기능으로 운영 중입니다.
+현재 화면과 가상 리플레이 체험은 [운영 서비스](https://trackingsa.com)에서 확인할 수 있습니다. `docs/images/`의 기존 캡처는 과거 화면 기록이며 최신 UI를 뜻하지 않습니다.
 
-## 트러블슈팅
-
-- AI API 403 이슈
-  직접 호출 환경에서 실패하던 요청을 서버리스 경유 구조로 재정리해 안정적으로 응답하도록 조정했습니다.
-- `src -> public` 동기화 문제
-  source of truth를 `src`로 고정하고, `public`을 산출물로 관리하는 규칙과 체크 스크립트를 붙여 배포 산출물 드리프트를 줄였습니다.
-- 반복 조회 성능 문제
-  전적 검색 특성상 동일 유저 재조회가 많아 5분 TTL 캐시와 재검증 흐름을 분리해 체감 속도와 API 호출 부담을 함께 조정했습니다.
-
-## Links
-
-- Live: [https://trackingsa.com](https://trackingsa.com)
-- Main Service: [https://trackingsa.com/stats/sudden-attack/](https://trackingsa.com/stats/sudden-attack/)
-- Developer: [https://github.com/HanBeom98](https://github.com/HanBeom98)
-
-## Screenshots
-
-### Main Search Experience
-
-서든어택 전적 검색 메인 화면입니다. 검색창, 최근 검색, 즐겨찾기, 실시간 랭킹을 한 화면에서 연결했습니다.
-
-![Sudden Attack stats home](docs/images/sa-home.png)
-
-### VS Comparison
-
-두 유저의 프로필, 핵심 지표, 성장 추이를 한 번에 비교할 수 있도록 VS 모드를 구성했습니다.
-
-![Sudden Attack VS comparison](docs/images/sa-vs.png)
-
-### Crew Ranking
-
-내전 기준 랭킹과 핵심 지표를 빠르게 스캔할 수 있도록 테이블 중심으로 설계했습니다.
-
-![Tracking crew ranking](docs/images/sa-ranking.png)
-
-### Real Usage In Discord
-
-웹 기능으로 끝내지 않고, 디스코드 봇을 통해 팀 밸런서 결과가 실제 사용 흐름에 연결되도록 운영했습니다.
-
-![Discord bot real usage](docs/images/sa-discord-bot.png)
+- [개발일지 모음](https://blog.naver.com/PostList.naver?blogId=hantiger24&from=postList&categoryNo=33)
+- [전적·리플레이 가이드](https://trackingsa.com/guides/replay-analysis-guide/)
+- [공개 범위와 원본 기준](docs/portfolio-snapshot.md)
+- [이번 갱신의 검증 결과](docs/portfolio-verification.md)

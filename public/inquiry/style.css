@@ -136,40 +136,33 @@ body.dark-mode .inquiry-form button[type="submit"]:hover {
     background-color: #3b82f6;
     box-shadow: 0 6px 15px rgba(0, 82, 204, 0.3);
 }
+@media (max-width: 640px) {
+    .inquiry-form-section {
+        margin: 20px 12px 48px;
+        padding: 22px 18px;
+    }
 
-/* --- Media Queries --- */
-body.dark-mode .inquiry-form-section {
-    background-color: #1a202c;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-}
-body.dark-mode .inquiry-form-section h1 {
-    color: #60a5fa;
-}
-body.dark-mode .inquiry-form-section p {
-    color: #cccccc;
-}
-body.dark-mode .inquiry-form label {
-    color: #e0e0e0;
-}
-body.dark-mode .inquiry-form input[type="text"],
-body.dark-mode .inquiry-form input[type="email"],
-body.dark-mode .inquiry-form textarea {
-    background-color: #3b3b3b;
-    color: #e0e0e0;
-    border-color: #555;
-}
-body.dark-mode .inquiry-form input[type="text"]:focus,
-body.dark-mode .inquiry-form input[type="email"]:focus,
-body.dark-mode .inquiry-form textarea:focus {
-    border-color: #60a5fa;
-    box-shadow: 0 0 0 0.2rem rgba(0, 82, 204, 0.25);
-    outline: none;
-}
-body.dark-mode .inquiry-form button[type="submit"] {
-    background-color: #60a5fa;
-    box-shadow: 0 4px 10px rgba(0, 82, 204, 0.2);
-}
-body.dark-mode .inquiry-form button[type="submit"]:hover {
-    background-color: #3b82f6;
-    box-shadow: 0 6px 15px rgba(0, 82, 204, 0.3);
+    .inquiry-form-section h1 {
+        font-size: 2rem;
+    }
+
+    .inquiry-form-section p {
+        margin-bottom: 22px;
+        font-size: 1rem;
+    }
+
+    .inquiry-form {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 16px;
+    }
+
+    .form-field.full-width,
+    .inquiry-form button[type="submit"] {
+        grid-column: auto;
+    }
+
+    .inquiry-form button[type="submit"] {
+        width: 100%;
+        margin-top: 8px;
+    }
 }

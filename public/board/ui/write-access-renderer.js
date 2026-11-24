@@ -1,9 +1,9 @@
-import { WRITE_PATH } from "../application/write-auth.js";
+import { WRITE_PATH } from "../application/write-auth.js?v=182646496680";
+import { getBoardNickname } from "../domain/author-identity.js?v=c565b2e79da0";
 
 function applyCurrentLangTranslations() {
   if (!window.applyTranslations) return;
-  const lang = localStorage.getItem("lang") || "ko";
-  window.applyTranslations(lang);
+  window.applyTranslations("ko");
 }
 
 function createGuestMessageElement() {
@@ -46,7 +46,9 @@ function createGuestMessageElement() {
   return message;
 }
 
-function renderWriteAccess({ section, writeForm, user }) {
+function renderWriteAccess({ section, writeForm, user, profile }) {
+  const nicknameMessage = section.querySelector("#board-write-nickname-required");
+  if (nicknameMessage) nicknameMessage.remove();
   let message = section.querySelector("#board-write-login-required");
   if (!user) {
     if (!message) {
@@ -59,6 +61,16 @@ function renderWriteAccess({ section, writeForm, user }) {
   }
 
   if (message) message.remove();
+  if (!getBoardNickname(profile)) {
+    const prompt = document.createElement('div');
+    prompt.id = 'board-write-nickname-required';
+    prompt.style.textAlign = 'center';
+    prompt.style.padding = '28px 0';
+    prompt.innerHTML = '<p>게시글을 작성하려면 사이트 회원 닉네임을 설정해 주세요.</p><a class="auth-button primary" href="/account/">닉네임 설정하기</a>';
+    section.appendChild(prompt);
+    writeForm.style.display = 'none';
+    return;
+  }
   writeForm.style.display = "";
 }
 

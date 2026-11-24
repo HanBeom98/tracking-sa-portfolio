@@ -1,4 +1,7 @@
+import { escapeHtml } from '../../../shared/html.js';
+
 import { SaDiscordClient } from '../infra/discord-client.js';
+import { getCurrentUser } from '../../../auth/infra/auth-gateway.js';
 
 /**
  * Manages Admin Panel and Actions
@@ -48,10 +51,10 @@ export class AdminManager {
     }
     this.applicationList.innerHTML = apps.map(app => `
       <div class="app-item">
-        <span class="app-name">${app.characterName}</span>
+        <span class="app-name">${escapeHtml(app.characterName)}</span>
         <div class="app-actions">
-          <button class="approve-btn" data-id="${app.id}" data-name="${app.characterName}" data-ouid="${app.ouid}">승인</button>
-          <button class="reject-btn" data-id="${app.id}">거절</button>
+          <button class="approve-btn" data-id="${escapeHtml(app.id)}" data-name="${escapeHtml(app.characterName)}" data-ouid="${escapeHtml(app.ouid)}">승인</button>
+          <button class="reject-btn" data-id="${escapeHtml(app.id)}">거절</button>
         </div>
       </div>
     `).join('');
@@ -176,24 +179,24 @@ export class AdminManager {
       return `
         <div class="admin-member-item">
           <div class="m-header">
-            <span class="m-name ${isRealOuid ? 'is-valid' : 'is-legacy'}">${m.characterName} ${isRealOuid ? '' : '(ID 마이그레이션 대상)'}</span>
+            <span class="m-name ${isRealOuid ? 'is-valid' : 'is-legacy'}">${escapeHtml(m.characterName)} ${isRealOuid ? '' : '(ID 마이그레이션 대상)'}</span>
             <span class="m-score">${m.mmr} pts</span>
           </div>
           <div class="m-stats">${m.wins}승 ${m.loses}패 (킬뎃: ${m.crewKills}/${m.crewDeaths})</div>
-          <div class="m-stats">최고티어 시드: ${manualSeedTierLabel}</div>
+          <div class="m-stats">최고티어 시드: ${escapeHtml(manualSeedTierLabel)}</div>
           <div class="m-actions">
-            <select class="mini-btn manual-seed-tier-select" data-ouid="${m.id}">
+            <select class="mini-btn manual-seed-tier-select" data-ouid="${escapeHtml(m.id)}">
               <option value="">최고티어 없음</option>
               ${tierOptions.map((option) => `
-                <option value="${option.value}" ${option.value === manualSeedTier ? 'selected' : ''}>${option.label}</option>
+                <option value="${escapeHtml(option.value)}" ${option.value === manualSeedTier ? 'selected' : ''}>${escapeHtml(option.label)}</option>
               `).join('')}
             </select>
-            <button class="mini-btn update-seed-tier-btn" data-ouid="${m.id}" data-name="${m.characterName}">최고티어 저장</button>
+            <button class="mini-btn update-seed-tier-btn" data-ouid="${escapeHtml(m.id)}" data-name="${escapeHtml(m.characterName)}">최고티어 저장</button>
           </div>
           <div class="m-actions">
-            <button class="mini-btn individual-scan-btn" data-ouid="${m.id}" data-name="${m.characterName}">🔍 전적 스캔</button>
-            <button class="mini-btn update-name-btn" data-ouid="${m.id}" data-name="${m.characterName}">이름수정</button>
-            <button class="mini-btn delete-member-btn" data-ouid="${m.id}" data-name="${m.characterName}">삭제</button>
+            <button class="mini-btn individual-scan-btn" data-ouid="${escapeHtml(m.id)}" data-name="${escapeHtml(m.characterName)}">🔍 전적 스캔</button>
+            <button class="mini-btn update-name-btn" data-ouid="${escapeHtml(m.id)}" data-name="${escapeHtml(m.characterName)}">이름수정</button>
+            <button class="mini-btn delete-member-btn" data-ouid="${escapeHtml(m.id)}" data-name="${escapeHtml(m.characterName)}">삭제</button>
           </div>
         </div>
       `;
@@ -212,7 +215,7 @@ export class AdminManager {
     const options = this.currentRankings
       .slice()
       .sort((a, b) => String(a.characterName || "").localeCompare(String(b.characterName || ""), 'ko'))
-      .map((member) => `<option value="${member.id}">${member.characterName}</option>`)
+      .map((member) => `<option value="${escapeHtml(member.id)}">${escapeHtml(member.characterName)}</option>`)
       .join('');
     select.innerHTML = `<option value="">멤버 선택</option>${options}`;
     if (currentValue) select.value = currentValue;
@@ -227,8 +230,8 @@ export class AdminManager {
     try {
       const history = await this.crewRepo.getHistory(30);
       const options = history.map((item) => `
-        <option value="${item.matchId}">
-          ${this.formatHistoryOption(item)}
+        <option value="${escapeHtml(item.matchId)}">
+          ${escapeHtml(this.formatHistoryOption(item))}
         </option>
       `).join('');
       select.innerHTML = `<option value="">경기 선택</option>${options}`;
@@ -275,12 +278,12 @@ export class AdminManager {
       container.innerHTML = recentEntries.map((entry) => `
         <div class="manual-penalty-log-item">
           <div class="manual-penalty-log-title">
-            <strong>${entry.nickname || entry.ouid}</strong>
-            <span>${entry.mapName || '알 수 없음'} / ${this.formatLogDate(entry.matchDate)}</span>
+            <strong>${escapeHtml(entry.nickname || entry.ouid)}</strong>
+            <span>${escapeHtml(entry.mapName || '알 수 없음')} / ${this.formatLogDate(entry.matchDate)}</span>
           </div>
           <div class="manual-penalty-log-meta">
-            <span>사유: ${entry.reason || '미입력'}</span>
-            <span>적용자: ${entry.appliedByEmail || '기록 없음'}</span>
+            <span>사유: ${escapeHtml(entry.reason || '미입력')}</span>
+            <span>적용자: ${escapeHtml(entry.appliedByEmail || '기록 없음')}</span>
             <span>적용시각: ${this.formatLogDate(entry.appliedAt || entry.createdAt)}</span>
           </div>
         </div>
@@ -341,9 +344,7 @@ export class AdminManager {
     const originalText = btn.textContent;
     btn.textContent = '적용 중...';
     try {
-      const currentUser = typeof window !== 'undefined' && window.firebase?.auth
-        ? window.firebase.auth().currentUser
-        : null;
+      const currentUser = getCurrentUser();
       const result = await this.crewRepo.applyManualAbandonPenalty({
         ouid,
         nickname: member.characterName,
@@ -394,7 +395,7 @@ export class AdminManager {
             if (realOuid) { await this.crewRepo.migrateToOuid(targetOuid, realOuid); targetOuid = realOuid; }
             else return [];
           }
-          return this.service.getRecentMatches(targetOuid, currentNickname, 10).catch(() => []);
+          return this.service.getRecentMatches(targetOuid, currentNickname, 80).catch(() => []);
         }));
         chunkResults.flat().forEach(m => {
           if (!allFoundMatches.has(m.matchId)) { allFoundMatches.set(m.matchId, m); matchToOuids.set(m.matchId, new Set()); }
@@ -439,13 +440,13 @@ export class AdminManager {
           ${reports.map(r => `
             <div class="report-item">
               <div class="report-header">
-                <span class="map-name">${r.match.mapName}</span>
+                <span class="map-name">${escapeHtml(r.match.mapName)}</span>
                 <span class="winner-tag ${r.match.matchResult === 'WIN' ? 'red' : 'blue'}">${r.match.matchResult === 'WIN' ? 'RED' : 'BLUE'} 승</span>
               </div>
               <div class="player-changes">
                 ${r.playerChanges.map(pc => `
                   <div class="change-row">
-                    <span class="p-name">${pc.nickname}</span>
+                    <span class="p-name">${escapeHtml(pc.nickname)}</span>
                     <span class="p-mmr">MMR ${pc.mmrDiff > 0 ? '+' : ''}${pc.mmrDiff} <small>(${pc.newMmr})</small></span>
                   </div>
                 `).join('')}
@@ -484,7 +485,7 @@ export class AdminManager {
         const realOuid = await this.repository.apiClient.getOuid(currentNickname);
         if (realOuid) { await this.crewRepo.migrateToOuid(targetOuid, realOuid); targetOuid = realOuid; }
       }
-      const matches = await this.service.getRecentMatches(targetOuid, currentNickname, 20);
+      const matches = await this.service.getRecentMatches(targetOuid, currentNickname, 80);
       const crewMatches = matches.filter(m => m.isCustomMatch);
       if (crewMatches.length === 0) alert('새로운 내전 기록이 없습니다.');
       else {
@@ -516,7 +517,8 @@ export class AdminManager {
 
   async handleUpdateManualSeedTier(data) {
     const { ouid, name } = data;
-    const select = this.adminPanel?.querySelector(`.manual-seed-tier-select[data-ouid="${ouid}"]`);
+    const select = [...(this.adminPanel?.querySelectorAll('.manual-seed-tier-select') || [])]
+      .find(element => element.dataset.ouid === ouid);
     if (!select) return;
     const manualSeedTier = select.value || "";
     try {

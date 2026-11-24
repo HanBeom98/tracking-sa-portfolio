@@ -1,3 +1,6 @@
+import { resolveBoardRole } from "./admin-role.js";
+import { assertBoardNickname } from "../domain/author-identity.js";
+
 function createSubmitPostUseCase({ postService, getCurrentUser, getCurrentUserProfile }) {
   if (!postService) {
     throw new Error("postService is required");
@@ -16,10 +19,12 @@ function createSubmitPostUseCase({ postService, getCurrentUser, getCurrentUserPr
 
     // Merge profile data (role, etc.) if available
     const profile = typeof getCurrentUserProfile === "function" ? getCurrentUserProfile() : null;
+    const nickname = assertBoardNickname(profile);
     const author = {
       ...authUser,
-      role: (profile && profile.role) || "free",
-      displayName: (profile && profile.nickname) || authUser.displayName,
+      role: resolveBoardRole({ user: authUser, profile }),
+      nickname,
+      displayName: nickname,
     };
 
     await postService.createPost({ ...values, author });

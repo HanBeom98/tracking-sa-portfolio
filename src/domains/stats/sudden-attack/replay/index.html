@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>리플레이 분석실 - Tracking SA</title>
+<meta name="description" content="서든어택 병영수첩 리플레이 JSON으로 라운드별 처치, 사망, 생존과 투척물 기록을 분석해 보세요.">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- HEADER_INJECTION -->
+  <main class="replay-shell">
+    <section class="replay-hero" aria-labelledby="replayTitle">
+      <div class="replay-hero-copy">
+        <span class="eyebrow">서든어택 · 무료 기본 분석</span>
+        <h1 id="replayTitle">리플레이 분석실</h1>
+        <p>병영수첩 JSON으로 경기 흐름과 주요 장면을 확인하세요.</p>
+      </div>
+      <div class="sample-actions" aria-label="파일 없이 샘플 체험">
+        <small>파일이 없다면 가상 경기로 먼저 체험하세요.</small>
+        <button type="button" class="secondary" data-replay-sample="single">샘플로 한 경기 체험</button>
+        <button type="button" class="secondary" data-replay-sample="compare">샘플로 여러 경기 비교</button>
+      </div>
+    </section>
+
+    <div class="replay-modes" role="tablist" aria-label="리플레이 분석 방법">
+      <button type="button" id="replaySingleTab" role="tab" aria-controls="replaySinglePanel" aria-selected="true" tabindex="0" data-replay-mode="single"><span><strong>한 경기 상세 분석</strong><small>JSON 1개 · 경기 흐름과 장면 복기</small></span></button>
+      <button type="button" id="replayCompareTab" role="tab" aria-controls="replayComparePanel" aria-selected="false" tabindex="-1" data-replay-mode="compare"><span><strong>여러 경기 비교</strong><small>JSON 2~5개 · 같은 선수의 기록 비교</small></span></button>
+    </div>
+
+    <section id="replaySinglePanel" role="tabpanel" aria-labelledby="replaySingleTab">
+    <p id="replaySampleNotice" class="sample-notice" role="status" hidden>샘플 체험 중 · 가상의 경기 기록이며 내 전적이 아닙니다. 실제 JSON을 선택하면 내 경기로 분석할 수 있습니다.</p>
+    <section class="upload-card" aria-labelledby="uploadTitle">
+      <div class="section-heading"><span>1. 파일 선택</span><h2 id="uploadTitle">내 경기 분석하기</h2><p>JSON 1개를 선택한 뒤 플레이어를 고르면 됩니다.</p></div>
+      <label id="replayDropzone" class="dropzone" for="replayFile" data-file-state="idle" aria-busy="false">
+        <input id="replayFile" type="file" accept=".json,application/json" aria-describedby="replayFileHelp replayFileStatus">
+        <span class="file-icon" aria-hidden="true">JSON</span><strong data-file-title>리플레이 파일 선택</strong>
+        <span id="replaySelectedFileName" class="selected-file-name" hidden></span>
+        <small id="replayFileHelp">끌어놓거나 눌러서 선택 · JSON 최대 2MB</small>
+      </label>
+      <p class="upload-help"><a href="/guides/replay-analysis-guide/">JSON 파일 받는 방법·사용법 ↗</a><span>로그인 없이 분석</span></p>
+      <p id="replayFileStatus" class="file-status" aria-live="polite">아직 선택한 파일이 없습니다.</p>
+      <div class="privacy-banner"><span>✓</span><div><strong>파일은 기기 안에서, 전력 정보는 OpenAPI로</strong><p id="localPrivacyState">리플레이 파일은 전송하거나 저장하지 않습니다. 경기 유형과 전력 비교를 위해 경기 ID와 닉네임을 넥슨 OpenAPI 조회에 사용합니다.</p></div></div>
+      <div id="playerStep" class="player-step hidden">
+        <p id="replayPlayerHelp" class="player-next-step">다음 단계: 분석할 플레이어를 선택해 주세요.</p>
+        <div><label for="replayPlayer">분석할 플레이어</label><select id="replayPlayer" aria-describedby="replayPlayerHelp"></select></div>
+        <div><label for="replayCategory">전력 비교 기준 · 자동 확인</label><select id="replayCategory"><option value="">자동 확인 중</option><option value="solo">솔로랭크</option><option value="party">파티랭크</option><option value="clan">클랜전</option><option value="tournament">토너먼트</option></select></div>
+        <button id="analyzeReplayButton" type="button" disabled>이 플레이어 분석</button>
+        <button id="resetReplayButton" class="secondary" type="button">초기화</button>
+      </div>
+    </section>
+    <div id="replayResults" class="results hidden" tabindex="-1"></div>
+    <section id="replayDetail" class="detail hidden" tabindex="-1" aria-live="polite"></section>
+    </section>
+
+    <section id="replayComparePanel" role="tabpanel" aria-labelledby="replayCompareTab" hidden>
+    <p id="replayComparisonSampleNotice" class="sample-notice" role="status" hidden>비교 샘플 체험 중 · 두 경기는 모두 가상의 기록입니다. 실제 전적이나 실력 변화를 뜻하지 않습니다.</p>
+    <section id="replayComparison" class="panel comparison-panel">
+      <div class="section-heading"><span>여러 경기 비교 · 무료</span><h2>리플레이 2~5개 선택</h2><p>여러 경기에 공통으로 등장하는 같은 선수의 기록을 나란히 비교합니다.</p></div>
+      <ol class="comparison-steps" aria-label="경기 비교 순서"><li><b>1</b> 파일 선택창에서 JSON 2~5개를 함께 선택</li><li><b>2</b> 공통 선수 중 비교할 선수를 선택</li></ol>
+      <div class="comparison-controls"><label>비교할 리플레이 JSON<input data-comparison-files type="file" accept=".json,application/json" multiple aria-describedby="comparison-file-help"></label><label>비교할 선수<select data-comparison-player disabled aria-label="경기 비교 선수"></select></label><button type="button" class="secondary" data-comparison-clear disabled>비교 지우기</button></div>
+      <p id="comparison-file-help" class="comparison-note">파일당 최대 2MB. PC에서는 Ctrl 또는 Shift 키로 여러 파일을 선택할 수 있습니다. 새로 선택하면 이전 파일 목록이 바뀝니다.</p>
+      <p class="comparison-note">닉네임이 바뀌어도 같은 선수 ID이면 연결하고, 이름이 같아도 ID가 다르면 합치지 않습니다. 전력 조회 없이 기기 안에서 비교하며 파일·결과를 전송하거나 저장하지 않습니다.</p>
+      <p data-comparison-status role="status" aria-live="polite"></p><ul data-comparison-files-list aria-label="비교에 포함된 파일"></ul><ul data-comparison-issues aria-label="비교 제외 사유"></ul><div data-comparison-result></div>
+    </section>
+    </section>
+
+    <aside class="replay-assistance" aria-label="분석 예시와 파일 사용법">
+    <details id="replaySample" class="sample-analysis replay-help" data-replay-help>
+      <summary class="section-heading sample-heading">
+        <div><span>ANALYSIS PREVIEW</span><h2 id="sampleAnalysisTitle">리플레이에서 이런 흐름을 찾습니다</h2><p class="help-hint">분석 예시 · 내 경기 기록이 아닙니다</p></div>
+        <span class="help-toggle"><span class="help-open">접기</span><span class="help-closed">예시 보기</span></span>
+      </summary>
+      <p class="sample-note">아래 값은 분석 결과의 구성을 설명하기 위한 예시입니다. 실제 결과는 선택한 JSON 리플레이에 기록된 이벤트만 사용합니다.</p>
+      <div class="sample-scoreboard" aria-label="샘플 경기 요약">
+        <article><span>경기 결과</span><strong>8 : 6 승리</strong><small>프로방스 · 14라운드</small></article>
+        <article><span>처치 / 사망</span><strong>12 / 8</strong><small>처치가 기록된 라운드 9개</small></article>
+        <article><span>평균 생존</span><strong>47.3초</strong><small>공격 42.1초 · 수비 52.5초</small></article>
+        <article><span>투척물 사용</span><strong>7회</strong><small>투척 후 5초 내 처치 2건</small></article>
+      </div>
+      <div class="sample-findings">
+        <article data-tone="good">
+          <span>좋았던 흐름</span>
+          <h3>수비 라운드에서 생존 시간이 길었습니다</h3>
+          <p>수비 평균 생존 시간이 공격보다 10.4초 길었습니다. 결과 화면에서는 라운드별 생존 비율과 승패를 함께 비교해 어느 구간에서 차이가 생겼는지 확인합니다.</p>
+        </article>
+        <article data-tone="review">
+          <span>다시 볼 장면</span>
+          <h3>4라운드 첫 사망이 빠르게 발생했습니다</h3>
+          <p>라운드 시작 18.6초에 사망했고 가장 가까운 생존 팀원과 거리가 28m였습니다. 타임라인에서 직전 처치와 투척 이벤트를 함께 보여주되 원인을 임의로 단정하지 않습니다.</p>
+        </article>
+        <article data-tone="neutral">
+          <span>투척 기록</span>
+          <h3>공격에서 투척물 활용이 집중됐습니다</h3>
+          <p>공격 5회, 수비 2회의 사용 기록이 남았습니다. 투척 시점과 이후 5초 동안의 처치·사망을 연결해 실제 교전 흐름을 다시 찾을 수 있게 합니다.</p>
+        </article>
+      </div>
+      <div class="sample-timeline" aria-label="샘플 라운드 타임라인">
+        <div><b>4라운드 · 패배</b><span><time>11.2초</time> 연막탄 투척</span><span><time>18.6초</time> 첫 사망 · 팀원 거리 28m</span></div>
+        <div><b>9라운드 · 승리</b><span><time>24.1초</time> 첫 처치 · AK-47</span><span><time>51.8초</time> 라운드 생존</span></div>
+      </div>
+      <p class="sample-note">분석은 리플레이에 존재하는 사실을 요약하는 규칙 기반 방식입니다. 파일은 기기 안에서 읽으며 결과를 서버나 데이터베이스에 저장하지 않습니다.</p>
+    </details>
+
+    <details id="replayGuide" class="guide replay-help" data-replay-help>
+      <summary class="section-heading guide-heading">
+        <div><span>HOW TO</span><h2>파일은 어디서 받나요?</h2></div>
+        <span class="help-toggle"><span class="help-open">접기</span><span class="help-closed">사용법 보기</span></span>
+      </summary>
+      <a class="official-link" href="https://barracks.sa.nexon.com/" target="_blank" rel="noopener noreferrer">공식 병영수첩 열기 <span aria-hidden="true">↗</span></a>
+      <ol>
+        <li><b>1</b><div><strong>공식 병영수첩에서 닉네임 검색</strong><p>분석하려는 캐릭터의 기록실로 이동합니다.</p></div></li>
+        <li><b>2</b><div><strong>경기 기록에서 리플레이 찾기</strong><p>리플레이 표시가 있는 경기를 열고 파일을 저장합니다.</p></div></li>
+        <li><b>3</b><div><strong>저장된 JSON 파일 선택</strong><p>다운로드 폴더의 .json 파일을 위 선택 영역에 넣습니다.</p></div></li>
+      </ol>
+      <p class="disclaimer">Tracking SA는 넥슨 또는 서든어택의 공식 서비스가 아닙니다. 파일은 브라우저 밖으로 전송하지 않으며, 전력 비교용 경기 ID·닉네임과 조회 결과는 서버나 DB에 별도로 저장하지 않습니다.</p>
+    </details>
+    </aside>
+  </main>
+  <!-- FOOTER_INJECTION -->
+  <script type="module" src="main.js"></script>
+</body>
+</html>

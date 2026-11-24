@@ -1,3 +1,5 @@
+import { escapeHtml } from '../../../shared/html.js';
+
 /**
  * Manages Team Balancer UI and Logic
  */
@@ -82,14 +84,14 @@ export class BalancerManager {
       const isChecked = this.selectedMemberOuids.has(m.id);
       return `
         <div class="balancer-item ${isChecked ? 'selected' : ''}">
-          <input type="checkbox" id="m-${m.id}" value="${m.characterName}" data-mmr="${m.mmr}" data-hsr="${m.hsr || m.mmr}" data-ouid="${m.id}" ${isChecked ? 'checked' : ''}>
-          <label for="m-${m.id}" class="m-name">${m.characterName}</label>
+          <input type="checkbox" id="m-${escapeHtml(m.id)}" value="${escapeHtml(m.characterName)}" data-mmr="${m.mmr}" data-hsr="${m.hsr || m.mmr}" data-ouid="${escapeHtml(m.id)}" ${isChecked ? 'checked' : ''}>
+          <label for="m-${escapeHtml(m.id)}" class="m-name">${escapeHtml(m.characterName)}</label>
           <span class="m-mmr">${m.mmr} pts <small style="font-size:0.8em;color:#888;">(HSR: ${m.hsr || m.mmr})</small></span>
           <div class="pos-select">
-            <input type="radio" name="pos-${m.id}" value="rifler" id="r-${m.id}" checked>
-            <label for="r-${m.id}" title="라이플">🔫</label>
-            <input type="radio" name="pos-${m.id}" value="sniper" id="s-${m.id}">
-            <label for="s-${m.id}" title="스나이퍼">🎯</label>
+            <input type="radio" name="pos-${escapeHtml(m.id)}" value="rifler" id="r-${escapeHtml(m.id)}" checked>
+            <label for="r-${escapeHtml(m.id)}" title="라플">🔫</label>
+            <input type="radio" name="pos-${escapeHtml(m.id)}" value="sniper" id="s-${escapeHtml(m.id)}">
+            <label for="s-${escapeHtml(m.id)}" title="스나">🎯</label>
           </div>
         </div>
       `;

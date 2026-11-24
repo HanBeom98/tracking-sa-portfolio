@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; worker-src 'self'; media-src blob:; img-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'">
+    <title>보스 | TrackingMaple</title>
+    <link rel="stylesheet" href="../maple-theme.css?v=tracking-maple-2">
+    <link rel="stylesheet" href="../alerts/style.css?v=tracking-maple-2">
+    <link rel="stylesheet" href="../hub.css?v=tracking-maple-2">
+    <script type="module" src="./boss.js?v=tracking-maple-2"></script>
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a class="maple-brand" href="/maplestory/"><img src="../art/maple-leaf.png" width="24" height="24" alt="">TrackingMaple</a>
+            <nav class="maple-nav" aria-label="TrackingMaple">
+                <a href="/maplestory/">홈</a><a href="/maplestory/alerts/">사냥</a><a href="/maplestory/boss/" aria-current="page">보스</a><a href="/maplestory/gear/">장비</a>
+            </nav>
+            <a class="lab-link" href="/lab/">실험실 <span aria-hidden="true">↗</span></a>
+        </div>
+    </header>
+    <main class="maple-dashboard boss-dashboard">
+        <div class="page-heading">
+            <div><h1>보스 도우미</h1></div>
+            <div class="actions page-actions">
+                <button id="boss-pip" class="secondary" type="button" hidden>작은 창</button>
+                <a class="panel-link" href="#weekly-bosses">주간 클리어로 이동 <span aria-hidden="true">↓</span></a>
+            </div>
+        </div>
+        <div class="battle-grid">
+            <section class="panel battle-panel" aria-labelledby="battle-title">
+                <div class="section-heading"><h2 id="battle-title">보스 전투</h2><span id="battle-state" class="status" role="status">대기 중</span></div>
+                <div class="battle-clock">
+                    <div class="battle-countdown">
+                        <span>전투 남은 시간</span>
+                        <output id="battle-remaining" aria-live="off">--:--</output>
+                    </div>
+                    <div class="battle-elapsed">
+                        <span>경과 시간</span>
+                        <output id="battle-elapsed" aria-live="off">00:00</output>
+                    </div>
+                    <progress id="battle-progress" max="1" value="0" aria-label="남은 전투 시간 비율"></progress>
+                </div>
+                <form id="battle-form" class="boss-form">
+                    <label>보스<input name="boss" list="boss-names" required maxlength="24" placeholder="예: 루시드"></label>
+                    <label>난이도<select name="difficulty"><option>이지</option><option selected>노멀</option><option>하드</option><option>카오스</option><option>익스트림</option></select></label>
+                    <label>제한 시간<select name="minutes"><option value="10">10분</option><option value="15">15분</option><option value="20">20분</option><option value="30" selected>30분</option><option value="60">60분</option></select></label>
+                    <label class="check-label"><input type="checkbox" name="practice"> 연습 모드</label>
+                    <button id="battle-start" type="submit">전투 시작</button>
+                </form>
+                <div id="battle-actions" class="actions battle-actions" hidden>
+                    <button id="battle-clear" type="button" disabled>클리어 기록</button>
+                    <button id="battle-cancel" class="secondary" type="button" disabled>전투 종료</button>
+                </div>
+                <p id="battle-note" class="hint" role="status"></p>
+            </section>
+            <section class="panel burst-panel" aria-labelledby="burst-title">
+                <div class="section-heading"><h2 id="burst-title">극딜 타이머</h2><span id="boss-cooldown-badge" class="status" role="status">쿨감 조회 대기</span></div>
+                <div class="burst-next">
+                    <div><span>다음 스킬 준비</span><strong id="burst-next-name">대기 중</strong></div>
+                    <output id="burst-next-time" aria-live="off">--:--</output>
+                    <div class="actions burst-adjust">
+                        <button id="burst-earlier" class="secondary" type="button" aria-label="다음 스킬 타이머 1초 앞당기기" disabled>−1초</button>
+                        <button id="burst-later" class="secondary" type="button" aria-label="다음 스킬 타이머 1초 늦추기" disabled>+1초</button>
+                    </div>
+                </div>
+                <div class="burst-timers" id="burst-timers"></div>
+                <p id="burst-note" class="hint" role="status"></p>
+                <details class="boss-settings">
+                    <summary>쿨감 정보 · 음성 설정</summary>
+                    <div class="cooldown-source">
+                        <p id="boss-cooldown-source" class="hint">대표 캐릭터를 등록하면 쿨감을 불러와요.</p>
+                        <div class="actions"><button id="boss-refresh-cooldown" type="button" class="secondary" hidden>장비·스탯 새로고침</button><a id="boss-profile-link" class="panel-link" href="../">대표 캐릭터 등록</a></div>
+                    </div>
+                    <div class="burst-options">
+                        <label>알림 시점
+                            <select id="burst-lead"><option value="0">준비 완료</option><option value="5">5초 전</option><option value="10" selected>10초 전</option><option value="15">15초 전</option></select>
+                        </label>
+                        <label class="check-label"><input id="burst-sound" type="checkbox" checked> 음성 알림</label>
+                        <button id="burst-test" type="button" class="secondary">알림 테스트</button>
+                    </div>
+                </details>
+            </section>
+        </div>
+        <section class="panel boss-capture" aria-labelledby="boss-capture-title">
+            <div class="section-heading capture-heading">
+                <div><h2 id="boss-capture-title">퀵슬롯 자동 감지</h2><p id="boss-capture-status" class="hint" role="status">게임 창 공유 대기</p></div>
+                <div class="actions">
+                    <button id="boss-share" type="button">게임 창 공유</button>
+                    <button id="boss-stop-share" class="secondary" type="button" disabled>공유 종료</button>
+                </div>
+            </div>
+            <div id="boss-stage" class="stage" hidden>
+                <video id="boss-preview" muted playsinline></video>
+                <div id="boss-selection-layer" class="selection-layer" hidden><div id="boss-selection-box" class="selection-box" hidden></div></div>
+            </div>
+            <div id="boss-selection-tools" class="selection-tools" hidden>
+                <p id="boss-selection-help" role="status"></p>
+                <button id="boss-save-region" type="button" disabled>영역 저장</button>
+                <button id="boss-cancel-region" type="button" class="secondary">취소</button>
+            </div>
+        </section>
+        <section id="weekly-bosses" class="panel weekly-panel" aria-labelledby="weekly-title">
+            <div class="section-heading"><div><h2 id="weekly-title">주간 보스 · 결정석</h2><p class="hint" id="week-date"></p></div><span id="weekly-character" class="status"></span></div>
+            <dl class="summary-grid weekly-summary">
+                <div><dt>클리어</dt><dd id="weekly-count">0 / 0</dd></div>
+                <div><dt>내 결정석 몫</dt><dd id="weekly-meso">0 메소</dd></div>
+            </dl>
+            <form class="boss-form weekly-form" id="weekly-form">
+                <label>보스<input name="boss" list="boss-names" required maxlength="24" placeholder="보스 이름"></label>
+                <label>난이도<select name="difficulty"><option>이지</option><option selected>노멀</option><option>하드</option><option>카오스</option><option>익스트림</option></select></label>
+                <label>결정석 가격<input name="meso" type="number" min="0" max="999999999999" step="1" placeholder="메소"></label>
+                <label>파티원 수<input name="party" type="number" min="1" max="6" value="1" required></label>
+                <button type="submit">목록에 추가</button>
+            </form>
+            <p id="weekly-note" class="hint" role="status">가격은 결정석 전체 금액, 파티원 수는 본인을 포함해 입력하세요.</p>
+            <ul id="weekly-list" class="boss-list"></ul>
+        </section>
+        <section class="panel weekly-panel" aria-labelledby="boss-history-title">
+            <div class="section-heading"><h2 id="boss-history-title">전투 기록</h2><span id="boss-history-count" class="status">0회</span></div>
+            <p id="boss-history-empty" class="hint">클리어한 전투가 여기에 표시돼요.</p>
+            <ul id="boss-history" class="boss-list"></ul>
+        </section>
+        <datalist id="boss-names">
+            <option value="스우"></option><option value="데미안"></option><option value="가디언 엔젤 슬라임"></option>
+            <option value="루시드"></option><option value="윌"></option><option value="더스크"></option>
+            <option value="진 힐라"></option><option value="듄켈"></option><option value="세렌"></option>
+            <option value="칼로스"></option><option value="카링"></option><option value="림보"></option>
+            <option value="발드릭스"></option><option value="최초의 대적자"></option><option value="벨로나"></option>
+        </datalist>
+        <template id="burst-row">
+            <div class="burst-row">
+                <div class="burst-skill-label"><strong data-burst-name></strong><span data-burst-effective></span></div>
+                <output aria-live="off">대기</output>
+                <div class="actions">
+                    <button type="button" class="secondary" data-burst-start>사용</button>
+                    <button type="button" class="secondary" data-burst-slot disabled>퀵슬롯 지정</button>
+                    <button type="button" class="text-button" data-burst-reset hidden>해제</button>
+                </div>
+                <details class="burst-edit">
+                    <summary>설정</summary>
+                    <div class="burst-edit-fields">
+                        <label>기본 쿨타임 <input type="number" min="1" max="1800" data-burst-base>초</label>
+                        <label class="check-label"><input type="checkbox" data-burst-apply> 쿨감 적용</label>
+                    </div>
+                </details>
+            </div>
+        </template>
+        <template id="boss-pip-template">
+            <section class="pip-panel" aria-label="보스 전투와 다음 스킬">
+                <div class="pip-label"><span data-pip-boss>보스 전투</span><span data-pip-status>대기 중</span></div>
+                <output data-pip-time aria-label="전투 남은 시간">--:--</output>
+                <div class="pip-timers">
+                    <div><span data-pip-next>다음 스킬 대기 중</span><strong class="pip-timer-time" data-pip-remaining>--:--</strong></div>
+                </div>
+            </section>
+        </template>
+    </main>
+</body>
+</html>

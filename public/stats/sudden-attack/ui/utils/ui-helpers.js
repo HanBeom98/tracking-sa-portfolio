@@ -1,3 +1,5 @@
+import { escapeHtml } from '../../../../shared/html.js?v=d181848c5b3c';
+
 /**
  * UI Helpers for Sudden Attack Domain
  */
@@ -18,8 +20,13 @@ export function getTimeAgo(timestamp) {
 /**
  * Update SWR Status Bar UI
  */
+const swrUpdates = new WeakMap();
+
 export function updateSwrUI(swrStatus, type, timestamp = null) {
   if (!swrStatus) return;
+  const update = {};
+  swrUpdates.set(swrStatus, update);
+  swrStatus.classList.remove('hidden-out');
 
   if (type === 'stale') {
     const timeText = getTimeAgo(timestamp);
@@ -31,12 +38,18 @@ export function updateSwrUI(swrStatus, type, timestamp = null) {
     swrStatus.className = 'swr-status fresh';
     swrStatus.classList.remove('hidden');
     setTimeout(() => {
+      if (swrUpdates.get(swrStatus) !== update) return;
       swrStatus.classList.add('hidden-out');
       setTimeout(() => {
+        if (swrUpdates.get(swrStatus) !== update) return;
         swrStatus.classList.add('hidden');
         swrStatus.classList.remove('hidden-out');
       }, 500);
     }, 3000);
+  } else if (type === 'error') {
+    swrStatus.textContent = '기존 데이터를 표시 중입니다. 최신 정보 갱신은 잠시 후 다시 시도해 주세요.';
+    swrStatus.className = 'swr-status stale';
+    swrStatus.classList.remove('hidden');
   } else {
     swrStatus.classList.add('hidden');
   }
@@ -45,58 +58,108 @@ export function updateSwrUI(swrStatus, type, timestamp = null) {
 /**
  * Recent Search Management
  */
+export function normalizeSearchName(name) {
+  return String(name || '').trim().replace(/\s+/g, ' ');
+}
+
+const unsavedNames = new Map();
+
+function parseStoredNames(storageKey) {
+  if (unsavedNames.has(storageKey)) return unsavedNames.get(storageKey);
+  try {
+    const data = localStorage.getItem(storageKey);
+    const parsed = data ? JSON.parse(data) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeStoredNames(storageKey, names) {
+  unsavedNames.set(storageKey, names);
+  try {
+    localStorage.setItem(storageKey, JSON.stringify(names));
+    unsavedNames.delete(storageKey);
+  } catch {}
+}
+
+function dedupeNames(names, limit) {
+  const seen = new Set();
+  const next = [];
+  names.forEach((name) => {
+    const normalized = normalizeSearchName(name);
+    if (!normalized) return;
+    const key = normalized.toLowerCase();
+    if (seen.has(key)) return;
+    seen.add(key);
+    next.push(normalized);
+  });
+  return typeof limit === 'number' ? next.slice(0, limit) : next;
+}
+
 export function getRecentSearches(storageKey) {
-  const data = localStorage.getItem(storageKey);
-  return data ? JSON.parse(data) : [];
+  return dedupeNames(parseStoredNames(storageKey), 5);
 }
 
 export function saveSearch(storageKey, name) {
-  let searches = getRecentSearches(storageKey);
-  searches = [name, ...searches.filter(s => s !== name)].slice(0, 5);
-  localStorage.setItem(storageKey, JSON.stringify(searches));
+  const normalized = normalizeSearchName(name);
+  if (!normalized) return;
+  const searches = dedupeNames([normalized, ...getRecentSearches(storageKey)], 5);
+  writeStoredNames(storageKey, searches);
 }
 
 export function clearRecentSearches(storageKey) {
-  localStorage.removeItem(storageKey);
+  unsavedNames.set(storageKey, []);
+  try {
+    localStorage.removeItem(storageKey);
+    unsavedNames.delete(storageKey);
+  } catch {}
 }
 
 export function getFavoriteSearches(storageKey) {
-  const data = localStorage.getItem(storageKey);
-  return data ? JSON.parse(data) : [];
+  return dedupeNames(parseStoredNames(storageKey), 8);
 }
 
 export function isFavoriteSearch(storageKey, name) {
-  return getFavoriteSearches(storageKey).includes(name);
+  const normalized = normalizeSearchName(name).toLowerCase();
+  return getFavoriteSearches(storageKey).some((item) => item.toLowerCase() === normalized);
 }
 
 export function toggleFavoriteSearch(storageKey, name) {
+  const normalized = normalizeSearchName(name);
+  if (!normalized) return false;
   const favorites = getFavoriteSearches(storageKey);
-  const exists = favorites.includes(name);
+  const key = normalized.toLowerCase();
+  const exists = favorites.some((item) => item.toLowerCase() === key);
   const next = exists
-    ? favorites.filter((item) => item !== name)
-    : [name, ...favorites.filter((item) => item !== name)].slice(0, 8);
-  localStorage.setItem(storageKey, JSON.stringify(next));
+    ? favorites.filter((item) => item.toLowerCase() !== key)
+    : dedupeNames([normalized, ...favorites.filter((item) => item.toLowerCase() !== key)], 8);
+  writeStoredNames(storageKey, next);
   return !exists;
 }
 
 export function removeFavoriteSearch(storageKey, name) {
-  const favorites = getFavoriteSearches(storageKey).filter((item) => item !== name);
-  localStorage.setItem(storageKey, JSON.stringify(favorites));
+  const key = normalizeSearchName(name).toLowerCase();
+  const favorites = getFavoriteSearches(storageKey).filter((item) => item.toLowerCase() !== key);
+  writeStoredNames(storageKey, favorites);
 }
 
-export function renderRecentSearches(container, storageKey, onSearch, onClear = null) {
+export function renderRecentSearches(container, storageKey, onSearch, onClear = null, emptyMessage = '') {
   if (!container) return;
   const searches = getRecentSearches(storageKey);
+  container.dataset.hasItems = String(searches.length > 0);
   if (searches.length === 0) {
-    container.innerHTML = '';
+    container.innerHTML = emptyMessage
+      ? `<span class="search-empty-state">${escapeHtml(emptyMessage)}</span>`
+      : '';
     return;
   }
   container.innerHTML =
     `<span>최근 검색:</span>` +
-    searches.map((s) => `<button class="search-chip">${s}</button>`).join('') +
+    searches.map((s) => `<button class="search-chip" data-name="${escapeHtml(s)}">${escapeHtml(s)}</button>`).join('') +
     `<button class="chip-action-btn" data-action="clear">전체 비우기</button>`;
   container.querySelectorAll('.search-chip').forEach(btn => {
-    btn.addEventListener('click', () => { onSearch(btn.textContent); });
+    btn.addEventListener('click', () => { onSearch(btn.dataset.name || btn.textContent); });
   });
   const clearBtn = container.querySelector('[data-action="clear"]');
   if (clearBtn && typeof onClear === 'function') {
@@ -104,23 +167,26 @@ export function renderRecentSearches(container, storageKey, onSearch, onClear = 
   }
 }
 
-export function renderFavoriteSearches(container, storageKey, onSearch, onRemove = null, onCompare = null) {
+export function renderFavoriteSearches(container, storageKey, onSearch, onRemove = null, onCompare = null, emptyMessage = '') {
   if (!container) return;
   const favorites = getFavoriteSearches(storageKey);
+  container.dataset.hasItems = String(favorites.length > 0);
   if (favorites.length === 0) {
-    container.innerHTML = '';
+    container.innerHTML = emptyMessage
+      ? `<span class="search-empty-state">${escapeHtml(emptyMessage)}</span>`
+      : '';
     return;
   }
   container.innerHTML = `<span>즐겨찾기:</span>` + favorites.map((name) => `
-    <span class="search-chip chip-with-remove" data-name="${name}">
-      <button class="chip-label">★ ${name}</button>
-      <button class="chip-compare" aria-label="${name} VS 비교" title="현재 검색 유저와 VS 비교">VS</button>
-      <button class="chip-remove" aria-label="${name} 즐겨찾기 삭제" title="즐겨찾기 삭제">×</button>
+    <span class="search-chip chip-with-remove" data-name="${escapeHtml(name)}">
+      <button class="chip-label">★ ${escapeHtml(name)}</button>
+      <button class="chip-compare" aria-label="${escapeHtml(name)} VS 비교" title="현재 검색 유저와 VS 비교">VS</button>
+      <button class="chip-remove" aria-label="${escapeHtml(name)} 즐겨찾기 삭제" title="즐겨찾기 삭제">×</button>
     </span>
   `).join('');
   container.querySelectorAll('.chip-label').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const name = btn.textContent.replace(/^★\s*/, '').trim();
+      const name = btn.closest('.chip-with-remove')?.dataset.name;
       onSearch(name);
     });
   });
@@ -138,4 +204,11 @@ export function renderFavoriteSearches(container, storageKey, onSearch, onRemove
       if (name && typeof onCompare === 'function') onCompare(name);
     });
   });
+}
+
+/** Keep the public and league search favorite button presentation consistent. */
+export function renderFavoriteSearchButton(button, favorite) {
+  button.classList.remove('hidden');
+  button.classList.toggle('favorite-active', favorite);
+  button.textContent = favorite ? '★ 즐겨찾기 해제' : '☆ 즐겨찾기 추가';
 }

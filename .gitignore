@@ -23,6 +23,10 @@ playwright-report/
 .firebase/
 .firebaserc
 firebase-debug.log
+firestore-debug.log
+firestore-debug.*.log
+ui-debug.log
+storage-debug.log
 
 # IDE & OS
 .vscode/
@@ -31,16 +35,27 @@ firebase-debug.log
 
 # Secrets
 .env
+/.env.replay-coaching.local
 *.json
+!/_routes.json
+!/public/_routes.json
 !package.json
 !package-lock.json
 !firebase.json
-!vercel.json
 !firestore.indexes.json
 !firebase-config.js
 !search-index.json
+!scripts/deployment-artifacts.json
 
 # Project specific
 workdocs/
 core/serviceAccountKey.json
 .env
+
+# Local source images (optimized copies live under public/)
+5vs5rankmap/
+3vs3rankmap/
+
+# Runtime output
+logs/*
+!logs/.gitkeep

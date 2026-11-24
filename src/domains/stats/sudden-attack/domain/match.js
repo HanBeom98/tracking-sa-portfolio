@@ -1,3 +1,30 @@
+export function normalizeMatchResult(value) {
+  const result = String(value ?? '').trim().toUpperCase();
+  if (result === '1' || result === 'WIN') return 'WIN';
+  if (result === '2' || result === 'LOSE') return 'LOSE';
+  if (result === '3' || result === 'DRAW') return 'DRAW';
+  return 'UNKNOWN';
+}
+
+export function toNexonMatchResult(value) {
+  return { WIN: '1', LOSE: '2', DRAW: '3' }[normalizeMatchResult(value)] || '0';
+}
+
+// Draws give every player the same result; only team IDs can distinguish sides.
+export function getMatchTeamPlayers(match, { nickname = '', opponents = false } = {}) {
+  const players = Array.isArray(match.allPlayerStats) ? match.allPlayerStats : [];
+  const subject = players.find(p => p.isSubject)
+    || players.find(p => nickname && p.nickname?.toLowerCase().trim() === nickname.toLowerCase().trim());
+  const teamId = match.subjectTeamId ?? subject?.teamId;
+  if (teamId !== undefined && teamId !== null && String(teamId) !== '') {
+    return players.filter(p => p.teamId !== null && p.teamId !== undefined
+      && String(p.teamId) !== '' && (String(p.teamId) === String(teamId)) !== opponents);
+  }
+  if (match.matchResult !== 'WIN' && match.matchResult !== 'LOSE') return [];
+  const result = opponents ? (match.matchResult === 'WIN' ? 'LOSE' : 'WIN') : match.matchResult;
+  return players.filter(p => p.result === result);
+}
+
 export class MatchRecord {
   constructor(detail, typeName = "", targetUserName = "", crewData = { names: [], ouids: [] }, subjectInfo = null) {
     this.matchId = detail.match_id;
@@ -15,6 +42,8 @@ export class MatchRecord {
       let subjectFound = false;
       const crewNamesSet = new Set((crewData.names || []).map(n => (n || "").toLowerCase().trim()));
       const normalizedTarget = (targetUserName || "").toLowerCase().trim();
+      const subjectOuid = String(subjectInfo?.ouid || "").trim();
+      const hasSubjectOuid = !!subjectOuid && statsArray.some((row) => String(row.ouid || "").trim() === subjectOuid);
       const hasTargetName = !!normalizedTarget && statsArray.some((row) => {
         const rowName = (row.user_name || row.character_name || "").toLowerCase().trim();
         return rowName === normalizedTarget;
@@ -33,7 +62,8 @@ export class MatchRecord {
         });
       }
       
-      this.allPlayerStats = statsArray.map(p => {
+      let subjectRowIndex = -1;
+      this.allPlayerStats = statsArray.map((p, rowIndex) => {
         const nickname = p.user_name || p.character_name || "";
         const normalizedName = nickname.toLowerCase().trim();
         const killValue = parseInt(p.kill || p.kill_count || p.cnt_kill || 0);
@@ -46,10 +76,17 @@ export class MatchRecord {
 
         let isSubject = false;
         if (subjectInfo && !subjectFound) {
-          if (hasTargetName) {
+          if (hasSubjectOuid) {
+            if (String(p.ouid || "").trim() === subjectOuid) {
+              isSubject = true;
+              subjectFound = true;
+              subjectRowIndex = rowIndex;
+            }
+          } else if (hasTargetName) {
             if (normalizedName === normalizedTarget) {
               isSubject = true;
               subjectFound = true;
+              subjectRowIndex = rowIndex;
             }
           } else if (subjectSignature) {
             const currentSignature = `${killValue}|${deathValue}|${String(resultValue)}`;
@@ -57,6 +94,7 @@ export class MatchRecord {
             if (isUniqueFallback) {
               isSubject = true;
               subjectFound = true;
+              subjectRowIndex = rowIndex;
             }
           }
         }
@@ -75,8 +113,11 @@ export class MatchRecord {
           hsPercent: hsPercent,
           kd: deathValue > 0 ? (killValue / deathValue).toFixed(2) : (killValue > 0 ? killValue.toFixed(2) : "0.00"),
           kdPercent: kdPercent,
-          result: resultValue === "1" ? "WIN" : (resultValue === "2" ? "LOSE" : "UNKNOWN"),
-          isCrew: isCrew, ouid: isSubject ? subjectInfo.ouid : (p.ouid || null)
+          result: normalizeMatchResult(resultValue),
+          teamId: p.team_id === undefined || p.team_id === null ? null : String(p.team_id),
+          isCrew: isCrew,
+          isSubject,
+          ouid: isSubject ? subjectInfo.ouid : (p.ouid || null)
         };
       });
 
@@ -96,11 +137,14 @@ export class MatchRecord {
       if (this.crewParticipants.length >= 8) this.isCustomMatch = true;
       
       const target = targetUserName ? targetUserName.toLowerCase().trim() : "";
-      const playerStat = target 
-        ? (statsArray.find(p => (p.user_name || p.character_name || "").toLowerCase().trim() === target) || statsArray[0])
-        : statsArray[0];
+      const playerStat = (subjectRowIndex >= 0
+        ? statsArray[subjectRowIndex]
+        : target
+          ? (statsArray.find(p => (p.user_name || p.character_name || "").toLowerCase().trim() === target) || subjectInfo || statsArray[0])
+          : (subjectInfo || statsArray[0])) || detail;
 
-      this.matchResult = String(playerStat.match_result || playerStat.result) === "1" ? "WIN" : "LOSE";
+      this.matchResult = normalizeMatchResult(playerStat.match_result ?? playerStat.result ?? detail.match_result);
+      this.subjectTeamId = playerStat.team_id === undefined || playerStat.team_id === null ? null : String(playerStat.team_id);
       this.kill = parseInt(playerStat.kill || 0);
       this.death = parseInt(playerStat.death || 0);
       this.assist = parseInt(playerStat.assist || 0);
@@ -120,8 +164,9 @@ export class MatchRecord {
 
     const winTeam = this.allPlayerStats.filter(p => p.result === 'WIN');
     const loseTeam = this.allPlayerStats.filter(p => p.result === 'LOSE');
-    const winTeamMissing = Math.max(0, loseTeam.reduce((s, p) => s + p.kill, 0) - winTeam.reduce((s, p) => s + p.death, 0));
-    const loseTeamMissing = Math.max(0, winTeam.reduce((s, p) => s + p.kill, 0) - loseTeam.reduce((s, p) => s + p.death, 0));
+    const decisive = this.matchResult === 'WIN' || this.matchResult === 'LOSE';
+    const winTeamMissing = decisive ? Math.max(0, loseTeam.reduce((s, p) => s + p.kill, 0) - winTeam.reduce((s, p) => s + p.death, 0)) : 0;
+    const loseTeamMissing = decisive ? Math.max(0, winTeam.reduce((s, p) => s + p.kill, 0) - loseTeam.reduce((s, p) => s + p.death, 0)) : 0;
     this.laundryInfo = { isWashed: winTeamMissing > 0 || loseTeamMissing > 0, totalMissing: winTeamMissing + loseTeamMissing, winTeamMissing, loseTeamMissing };
   }
 }

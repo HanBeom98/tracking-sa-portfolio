@@ -19,22 +19,6 @@
     
     
     
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'G-TGD3WRNKPZ');
-    </script>
-    <script type="text/javascript">
-    (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-    })(window, document, "clarity", "script", "vb9q33ggpa");
-</script>
     <meta name="robots" content="noindex, nofollow">
     <link rel="canonical" href="https://trackingsa.com/board/edit/">
     <meta property="og:type" content="website">
@@ -45,65 +29,64 @@
     <meta name="twitter:image" content="https://trackingsa.com/logo.svg">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
-    <meta name="description" content="Tracking SA의 서비스 및 유틸리티 페이지입니다.">
+    <meta name="description" content="TrackingSA에서 게시물을 수정하세요. 기존 콘텐츠를 편집하고 업데이트하여 최신 정보를 반영합니다.">
     <meta property="og:title" content="글 수정 - TrackingSA">
-    <meta property="og:description" content="Tracking SA의 서비스 및 유틸리티 페이지입니다.">
-    <script>
+    <meta property="og:description" content="TrackingSA에서 게시물을 수정하세요. 기존 콘텐츠를 편집하고 업데이트하여 최신 정보를 반영합니다.">
+    <style>
+  html.dark-mode,
+  html.dark-mode body {
+    background-color: #0f172a;
+    color: #f8fafc;
+    color-scheme: dark;
+  }
+</style>
+<script>
   (function() {
-    const theme = localStorage.getItem('theme');
+    let theme = 'dark';
+    try {
+      theme = localStorage.getItem('theme') === 'light' ? 'light' : 'dark';
+    } catch {}
     if (theme === 'dark') {
       document.documentElement.classList.add('dark-mode');
       document.body && document.body.classList.add('dark-mode');
     }
   })();
 </script>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7263630893992216" crossorigin="anonymous"></script>
-<meta name="google-adsense-account" content="ca-pub-7263630893992216">
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-TGD3WRNKPZ');
-</script>
+
+<script type="module" src="/analytics-loader.js?v=86d5e62d50ed"></script>
 <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
 <meta name="naver-site-verification" content="b15b33af838280b54d31eb3c7e5c358d2836743f" />
-<script type="text/javascript">
-(function(c,l,a,r,i,t,y){
-    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-})(window, document, "clarity", "script", "vb9q33ggpa");
-</script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app-check.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script>
-  window.FIREBASE_CONFIG = {"apiKey": "AIzaSyBdHVxk9u6iG_whEIhvDzjde3BVn5gT19o", "authDomain": "tracking-sa-295db.firebaseapp.com", "projectId": "tracking-sa-295db", "storageBucket": "tracking-sa-295db.firebasestorage.app", "appId": "1:779289056217:web:cf023fc55f1a2913ffbfc8", "messagingSenderId": "779289056217"};
+  window.FIREBASE_CONFIG = {"apiKey": "", "authDomain": "demo-tracking-sa-portfolio.firebaseapp.com", "projectId": "demo-tracking-sa-portfolio", "storageBucket": "demo-tracking-sa-portfolio.firebasestorage.app", "appId": "1:000000000000:web:portfolio-example", "messagingSenderId": "779289056217", "appCheckSiteKey": ""};
 </script>
 <script>
   window.authDomainReady = window.authDomainReady || new Promise((resolve) => {
     window.__resolveAuthDomain = resolve;
   });
 </script>
-<script type="module" src="/auth/ui/auth-client.js"></script>
-
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<link rel="stylesheet" href="/style.css?v=1773274089">
+<link rel="stylesheet" href="/style.css?v=8f0895c6daf8">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#0052cc">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Tracking SA">
 <script src="/runtime-config.js"></script>
-<script src="/firebase-config.js"></script>
-<script src="/translations.js?v=1773274089"></script>
-<script src="/common.js?v=1773274089"></script>
+<script defer src="/firebase-config.js"></script>
+<script defer src="/pwa-register.js"></script>
+<script type="module" src="/auth/ui/auth-client.js"></script>
+<script src="/translations.js?v=8eb99f0dbaa9"></script>
+<script src="/common.js?v=5cfaaa0b27e3"></script>
 
 </head>
 <body><div class="site-header-container"><header>
     <div class="header-inner">
-        <a href="/" class="site-logo-link">
+        <a href="/" class="site-logo-link" aria-label="Tracking SA home">
             <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="site-logo">
                 <circle cx="50" cy="50" r="48" stroke="currentColor" stroke-width="4" fill="transparent"/>
                 <path d="M25 70L40 55L50 65L75 35" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
@@ -112,39 +95,24 @@
             </svg>
         </a>
         <div class="desktop-menu-container">
-            <nav>
+            <nav id="primary-navigation">
                 <ul>
-                    <li class="dropdown">
-                        <a href="#" class="dropbtn" data-i18n="menu_board">게시판</a>
-                        <div class="dropdown-content">
-                            <a href="/board?category=notice" data-i18n="notice">공지사항</a>
-                            <a href="/board?category=free" data-i18n="free_board">자유게시판</a>
-                        </div>
-                    </li>
-                    <li class="dropdown">
-                        <a href="#" class="dropbtn" data-i18n="menu_chart">차트</a>
-                        <div class="dropdown-content">
-                            <a href="/futures-estimate/" data-i18n="futures_estimate_index">지수</a>
-                        </div>
-                    </li>
-                    <li class="dropdown">
-                        <a href="#" class="dropbtn" data-i18n="menu_test">테스트</a>
-                        <div class="dropdown-content">
-                            <a href="/animal-face/" data-i18n="animal_face_test">동물상 테스트</a>
-                            <a href="/ai-test/" data-i18n="ai_tendency_test">AI 성향 테스트</a>
-                            <a href="/fortune/" data-i18n="saju_test">AI 실시간 오늘의 운세</a>
-                            <a href="/lucky-recommendation/" data-i18n="lucky_recommendation">행운의 추천</a>
-                        </div>
-                    </li>
-                    <li><a href="/games/" data-i18n="menu_game">게임</a></li>
+                    <li><a href="/stats/sudden-attack/" data-i18n="menu_stats_search">전적 검색</a></li>
+                    <li><a href="/stats/sudden-attack/replay/">리플레이 분석실</a></li>
+                    <li><a href="/guides/mygun2/">마이건2 도감</a></li>
+                    <li><a href="/guides/">가이드</a></li>
+                    <li><a href="/lab/">실험실</a></li>
+                    <li><a href="/board?category=notice" data-i18n="notice">공지사항</a></li>
                 </ul>
             </nav>
-            <div class="utility-controls">
-                <button id="color-change">🌙</button>
-                <div id="language-switcher"></div>
-                <div id="auth-controls" class="auth-controls"></div>
-            </div>
         </div>
+        <div class="utility-controls">
+            <button id="color-change" aria-label="테마 변경">🌙</button>
+            <div id="auth-controls" class="auth-controls"></div>
+        </div>
+        <button class="mobile-menu-toggle" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="primary-navigation">
+            <span></span><span></span><span></span>
+        </button>
     </div>
 </header>
 </div>
@@ -160,23 +128,70 @@
     
 
     <!-- 글 수정 로직을 위한 별도의 스크립트 -->
-    <script type="module" src="../ui/board-edit-form.js"></script>
-    <script type="module" src="main.js"></script>
-<div class="site-footer-container"><footer>
-    <div style="margin-bottom: 15px;">
-        <strong style="color: #0052cc; font-size: 1.2rem; font-weight: 800;">Tracking SA</strong>
+    <script type="module" src="../ui/board-edit-form.js?v=3df8207b6499"></script>
+    <script type="module" src="main.js?v=63f52df84a03"></script>
+<div class="site-footer-container"><footer class="site-footer">
+    <div class="footer-inner">
+        <div class="footer-top">
+            <div class="footer-brand">
+                <a class="footer-brand-link" href="/" aria-label="Tracking SA 홈">
+                    <svg width="36" height="36" viewBox="0 0 100 100" fill="none" aria-hidden="true" focusable="false">
+                        <circle cx="50" cy="50" r="48" stroke="currentColor" stroke-width="4"/>
+                        <path d="M25 70L40 55L50 65L75 35" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="70" cy="35" r="12" fill="currentColor"/>
+                    </svg>
+                    <strong>TRACKING <span>SA</span></strong>
+                </a>
+                <p>서든어택의 기록을,<br>더 쉽게 읽는 곳.</p>
+                <button id="pwa-install-button" class="footer-install" type="button" hidden>Tracking SA 앱 설치 <span aria-hidden="true">↗</span></button>
+            </div>
+            <nav class="footer-nav" aria-label="하단 메뉴">
+                <div class="footer-link-group">
+                    <h2>둘러보기</h2>
+                    <ul>
+                        <li><a href="/stats/sudden-attack/">서든어택 전적</a></li>
+                        <li><a href="/stats/sudden-attack/replay/">리플레이 분석실</a></li>
+                        <li><a href="/guides/">가이드</a></li>
+                    </ul>
+                </div>
+                <div class="footer-link-group">
+                    <h2>서비스 안내</h2>
+                    <ul>
+                        <li><a href="/about" data-i18n="about_us">서비스 소개</a></li>
+                        <li><a href="/service-methodology/">서비스 기준</a></li>
+                        <li><a href="/editorial-policy/">편집 원칙</a></li>
+                        <li><a href="/sitemap.xml" data-i18n="sitemap">사이트맵</a></li>
+                    </ul>
+                </div>
+                <div class="footer-link-group">
+                    <h2>이용 및 문의</h2>
+                    <ul>
+                        <li><a href="/privacy-policy" data-i18n="privacy_policy">개인정보처리방침</a></li>
+                        <li><a href="/terms" data-i18n="terms_of_service">이용약관</a></li>
+                        <li><a href="/ai-replay-pass/">AI 이용권 · 판매 준비</a></li>
+                        <li><a href="/contact/" data-i18n="contact">문의</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+        <div class="footer-business-info" aria-label="사업자 정보">
+            <details class="footer-business-details">
+                <summary class="footer-business-summary"><strong>로직 스토어</strong><span>사업자 정보</span><svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false"><path d="m4 6 4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+                <dl>
+                    <div><dt>상호</dt><dd>로직 스토어</dd></div>
+                    <div><dt>사업자등록번호</dt><dd>000-00-00000</dd></div>
+                    <div><dt>대표자</dt><dd>조한범</dd></div>
+                    <div class="footer-business-address"><dt>사업장 주소</dt><dd>경기도 수원시 인계동 992-13 크레텔 하우스 2동 302호</dd></div>
+                    <div><dt>통신판매업 신고번호</dt><dd>2026-수원팔달-0279호</dd></div>
+                </dl>
+            </details>
+            <div class="footer-business-contact" aria-label="고객 문의"><span>고객 문의</span><a href="tel:01081129691" aria-label="고객 문의 전화 010-0000-0000">010-0000-0000</a><a href="mailto:demo-15b9ce4f@example.com" aria-label="문의 이메일 demo-15b9ce4f@example.com">demo-15b9ce4f@example.com</a></div>
+        </div>
+        <div class="footer-bottom">
+            <p class="nexon-api-attribution">본 서비스는 <a href="https://openapi.nexon.com/ko/support/terms/" target="_blank" rel="noopener noreferrer">NEXON Open API</a>를 이용하여 데이터를 제공합니다. <span lang="en">This service uses NEXON Open API.</span></p>
+            <p class="footer-copyright" data-i18n="footer_copyright">&copy; 2026 TrackingSA. 서든어택 전적 검색 중심 서비스.</p>
+        </div>
     </div>
-    <p data-i18n="footer_copyright"></p>
-    <p style="margin-top: 10px;">
-        <a href="/about" data-i18n="about_us">서비스 소개</a> |
-        <a href="/contact" data-i18n="contact">문의</a> |
-        <a href="/inquiry" data-i18n="partnership_inquiry">서비스 제휴 문의</a> |
-        <a href="/privacy-policy" data-i18n="privacy_policy">개인정보처리방침</a> |
-        <a href="/terms" data-i18n="terms_of_service">이용약관</a> |
-        <a href="/glossary" data-i18n="ai_glossary">AI 용어 사전</a> |
-        <a href="/sitemap.xml" data-i18n="sitemap">사이트맵</a> |
-        <a href="/games/sudden-attack/">서든어택 전적</a>
-    </p>
 </footer>
 </div>
 </body>

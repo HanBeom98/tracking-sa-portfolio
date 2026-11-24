@@ -1,3 +1,5 @@
+import { escapeHtml } from '../../../../shared/html.js?v=d181848c5b3c';
+
 export class SaCrewHighlights extends HTMLElement {
   set data(payload) {
     const todayMvp = payload?.todayMvp || null;
@@ -6,6 +8,8 @@ export class SaCrewHighlights extends HTMLElement {
     const hotStreaks = Array.isArray(payload?.hotStreaks) ? payload.hotStreaks : [];
     const timeline = Array.isArray(payload?.timeline) ? payload.timeline : [];
 
+    this.hidden = !todayMvp && !weeklyRival && !weeklyClimbers.length && !hotStreaks.length;
+    if (this.hidden) { this.innerHTML = ''; return; }
     this.innerHTML = `
       <style>
         .highlights-card { background: #1a1d2e; border: 1px solid #2d3356; border-radius: 12px; padding: 22px; margin: 20px 0; }
@@ -30,42 +34,42 @@ export class SaCrewHighlights extends HTMLElement {
           <span class="highlights-sub">자동 생성 콘텐츠</span>
         </div>
         <div class="highlights-grid">
-          <div class="hl-box">
+          <div class="hl-box" ${!todayMvp ? 'hidden' : ''}>
             <h4>🏅 오늘의 내전 MVP</h4>
             ${todayMvp ? `
-              <div class="hl-main"><span class="name clickable-name" data-name="${todayMvp.name}">${todayMvp.name}</span></div>
+              <div class="hl-main"><span class="name clickable-name" data-name="${escapeHtml(todayMvp.name)}">${escapeHtml(todayMvp.name)}</span></div>
               <div class="hl-meta">오늘 MMR 변동 <strong>${todayMvp.diff > 0 ? '+' : ''}${todayMvp.diff}</strong> / 현재 ${todayMvp.mmr}점</div>
             ` : '<div class="hl-main">데이터 집계 중</div><div class="hl-meta">오늘 내전 기록을 기다리는 중입니다.</div>'}
           </div>
-          <div class="hl-box">
+          <div class="hl-box" ${!weeklyRival ? 'hidden' : ''}>
             <h4>⚔️ 주간 라이벌전 추천</h4>
             ${weeklyRival ? `
               <div class="hl-main">
-                <span class="name clickable-name" data-name="${weeklyRival.a.characterName}">${weeklyRival.a.characterName}</span>
+                <span class="name clickable-name" data-name="${escapeHtml(weeklyRival.a.characterName)}">${escapeHtml(weeklyRival.a.characterName)}</span>
                 vs
-                <span class="name clickable-name" data-name="${weeklyRival.b.characterName}">${weeklyRival.b.characterName}</span>
+                <span class="name clickable-name" data-name="${escapeHtml(weeklyRival.b.characterName)}">${escapeHtml(weeklyRival.b.characterName)}</span>
               </div>
               <div class="hl-meta">MMR 격차 <strong>${weeklyRival.diff}</strong>점 / 총판수 ${weeklyRival.a.totalMatches}+${weeklyRival.b.totalMatches}</div>
             ` : '<div class="hl-main">추천 대진 산출 불가</div><div class="hl-meta">활성 멤버 데이터가 부족합니다.</div>'}
           </div>
-          <div class="hl-box">
+          <div class="hl-box" ${!weeklyClimbers.length && !hotStreaks.length ? 'hidden' : ''}>
             <h4>📈 주간 급상승 TOP3 + 🔥 핫스트릭</h4>
             ${weeklyClimbers.length > 0 ? `
               <ul class="hl-list">
-                ${weeklyClimbers.map((c, idx) => `<li>${idx + 1}. <span class="name clickable-name" data-name="${c.name}">${c.name}</span> <strong>${c.diff > 0 ? '+' : ''}${c.diff}</strong></li>`).join('')}
+                ${weeklyClimbers.map((c, idx) => `<li>${idx + 1}. <span class="name clickable-name" data-name="${escapeHtml(c.name)}">${escapeHtml(c.name)}</span> <strong>${c.diff > 0 ? '+' : ''}${c.diff}</strong></li>`).join('')}
               </ul>
             ` : '<div class="hl-main">상승 데이터 집계 중</div>'}
             ${hotStreaks.length > 0 ? `
               <ul class="hl-list">
-                ${hotStreaks.map((s) => `<li>${s}</li>`).join('')}
+                ${hotStreaks.map((s) => `<li>${escapeHtml(s)}</li>`).join('')}
               </ul>
             ` : '<div class="hl-meta">핫스트릭 알림 없음</div>'}
           </div>
-          <div class="hl-box">
+          <div class="hl-box" ${!timeline.length ? 'hidden' : ''}>
             <h4>🧭 시즌 스토리 타임라인</h4>
             ${timeline.length > 0 ? `
               <ul class="hl-list">
-                ${timeline.map((line) => `<li>${line}</li>`).join('')}
+                ${timeline.map((line) => `<li>${escapeHtml(line)}</li>`).join('')}
               </ul>
             ` : '<div class="hl-main">데이터 축적 대기</div>'}
           </div>

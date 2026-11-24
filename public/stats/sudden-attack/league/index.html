@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>서든어택 리그 허브 | Tracking SA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="../ui/style.css?v=c71bfdce1fe8">
+  <script type="text/javascript" src="https://openapi.nexon.com/js/analytics.js?app_id=256854" async></script>
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://trackingsa.com/stats/sudden-attack/league/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Tracking SA">
+    <meta property="og:url" content="https://trackingsa.com/stats/sudden-attack/league/">
+    <meta property="og:image" content="https://trackingsa.com/logo.svg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://trackingsa.com/logo.svg">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
+    <meta name="description" content="서든어택 리그 허브. 현재 운영 중인 Tracking Crew League 랭킹, 멤버 검색, 신청, 팀 밸런서와 관리 기능을 제공합니다.">
+    <meta property="og:title" content="서든어택 리그 허브 | Tracking SA">
+    <meta property="og:description" content="서든어택 리그 허브. 현재 운영 중인 Tracking Crew League 랭킹, 멤버 검색, 신청, 팀 밸런서와 관리 기능을 제공합니다.">
+    <style>
+  html.dark-mode,
+  html.dark-mode body {
+    background-color: #0f172a;
+    color: #f8fafc;
+    color-scheme: dark;
+  }
+</style>
+<script>
+  (function() {
+    let theme = 'dark';
+    try {
+      theme = localStorage.getItem('theme') === 'light' ? 'light' : 'dark';
+    } catch {}
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark-mode');
+      document.body && document.body.classList.add('dark-mode');
+    }
+  })();
+</script>
+
+<script type="module" src="/analytics-loader.js?v=86d5e62d50ed"></script>
+<meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
+<meta name="naver-site-verification" content="b15b33af838280b54d31eb3c7e5c358d2836743f" />
+<script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app-check.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script>
+  window.FIREBASE_CONFIG = {"apiKey": "", "authDomain": "demo-tracking-sa-portfolio.firebaseapp.com", "projectId": "demo-tracking-sa-portfolio", "storageBucket": "demo-tracking-sa-portfolio.firebasestorage.app", "appId": "1:000000000000:web:portfolio-example", "messagingSenderId": "779289056217", "appCheckSiteKey": ""};
+</script>
+<script>
+  window.authDomainReady = window.authDomainReady || new Promise((resolve) => {
+    window.__resolveAuthDomain = resolve;
+  });
+</script>
+<link rel="stylesheet" href="/style.css?v=8f0895c6daf8">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#0052cc">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Tracking SA">
+<script src="/runtime-config.js"></script>
+<script defer src="/firebase-config.js"></script>
+<script defer src="/pwa-register.js"></script>
+<script type="module" src="/auth/ui/auth-client.js"></script>
+<script src="/translations.js?v=8eb99f0dbaa9"></script>
+<script src="/common.js?v=5cfaaa0b27e3"></script>
+
+</head>
+<body>
+  <div class="site-header-container"><header>
+    <div class="header-inner">
+        <a href="/" class="site-logo-link" aria-label="Tracking SA home">
+            <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="site-logo">
+                <circle cx="50" cy="50" r="48" stroke="currentColor" stroke-width="4" fill="transparent"/>
+                <path d="M25 70L40 55L50 65L75 35" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="70" cy="35" r="12" stroke="currentColor" stroke-width="6" fill="currentColor"/>
+                <rect x="78" y="43" width="15" height="6" rx="3" transform="rotate(45 78 43)" fill="currentColor"/>
+            </svg>
+        </a>
+        <div class="desktop-menu-container">
+            <nav id="primary-navigation">
+                <ul>
+                    <li><a href="/stats/sudden-attack/" data-i18n="menu_stats_search">전적 검색</a></li>
+                    <li><a href="/stats/sudden-attack/replay/">리플레이 분석실</a></li>
+                    <li><a href="/guides/mygun2/">마이건2 도감</a></li>
+                    <li><a href="/guides/">가이드</a></li>
+                    <li><a href="/lab/">실험실</a></li>
+                    <li><a href="/board?category=notice" data-i18n="notice">공지사항</a></li>
+                </ul>
+            </nav>
+        </div>
+        <div class="utility-controls">
+            <button id="color-change" aria-label="테마 변경">🌙</button>
+            <div id="auth-controls" class="auth-controls"></div>
+        </div>
+        <button class="mobile-menu-toggle" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="primary-navigation">
+            <span></span><span></span><span></span>
+        </button>
+    </div>
+</header>
+</div>
+  <main class="sa-container sa-league-shell">
+    <section class="sa-league-hero">
+      <div class="home-nav">
+        <a href="/stats/sudden-attack/" class="home-link">🏠 공개 전적 홈</a>
+      </div>
+      <div class="sa-home-badge subtle">LEAGUE HUB</div>
+      <h1>서든어택 리그 허브</h1>
+      <p class="sa-league-intro">
+        공개 전적 검색과 분리된 리그 전용 공간입니다. 현재는 Tracking Crew League가 운영 중이며,
+        리그 참여 안내와 운영 기준, 팀 구성 도구를 같은 허브 안에서 확인할 수 있도록 정리했습니다.
+      </p>
+      <div class="sa-league-grid">
+        <article class="sa-league-card active">
+          <div class="sa-league-card-badge">ACTIVE</div>
+          <h2>Tracking Crew League</h2>
+          <p>현재 운영 중인 메인 리그입니다. 멤버 검색, 랭킹, 내전 신청, 팀 밸런서, 운영 기능이 여기에 연결됩니다.</p>
+          <a href="#crewRanking">현재 리그 보기</a>
+        </article>
+        <article class="sa-league-card planned">
+          <div class="sa-league-card-badge">GUIDE</div>
+          <h2>리그 참여 안내</h2>
+          <p>현재 운영 중인 내전 참여 방식, 신청 흐름, 공지 확인 경로를 먼저 안내합니다. 신규 참여자는 공지사항과 운영 안내를 통해 절차를 확인할 수 있습니다.</p>
+          <a href="/board?category=notice">운영 공지 보기</a>
+        </article>
+        <article class="sa-league-card planned">
+          <div class="sa-league-card-badge">INFO</div>
+          <h2>팀 구성과 운영 원칙</h2>
+          <p>리그 허브는 멤버 검색, 팀 밸런서, 운영 메뉴를 분리해 기록 조회와 운영 기능이 섞이지 않도록 구성합니다. 서비스 소개 페이지에서 운영 원칙도 함께 확인할 수 있습니다.</p>
+          <a href="/about/">서비스 구조 보기</a>
+        </article>
+      </div>
+    </section>
+
+    <section class="search-section">
+      <h2 class="sa-league-search-title">리그 기준 멤버 전적 검색</h2>
+      <p class="sa-league-search-desc">닉네임으로 멤버 전적을 검색하고, 현재 운영 중인 리그 랭킹과 크루 전용 기능을 함께 확인할 수 있습니다.</p>
+      <div class="search-bar">
+        <input type="text" id="characterName" placeholder="캐릭터명을 입력하세요" />
+        <div class="search-btns">
+          <button id="searchBtn">검색</button>
+          <button id="refreshBtn" class="refresh-btn hidden" title="최신 데이터로 갱신">🔄</button>
+          <button id="compareBtn" class="compare-btn hidden" title="상대방과 전적 비교">⚔️ VS</button>
+        </div>
+      </div>
+      <div id="recentSearches" class="recent-searches"></div>
+      <div id="favoriteSearches" class="recent-searches favorite-searches"></div>
+      <div class="crew-actions">
+        <button id="favoriteBtn" class="sub-btn hidden">☆ 즐겨찾기 추가</button>
+        <button id="applyCrewBtn" class="sub-btn">⚔️ 내전 크루 신청</button>
+        <button id="adminMenuBtn" class="sub-btn admin-only hidden">⚙️ 크루 관리</button>
+        <button id="balancerBtn" class="sub-btn staff-only hidden">⚖️ 팀 밸런서</button>
+      </div>
+
+      <div id="balancerModal" class="modal hidden">
+        <div class="modal-content balancer-modal">
+          <h3>⚖️ AI 스마트 팀 밸런서</h3>
+          <p>오늘 내전에 참여할 멤버들을 선택하세요 (짝수 인원 권장)</p>
+          <div id="balancerMemberList" class="balancer-member-grid"></div>
+          <div id="balancerResult" class="balancer-result hidden">
+            <div class="team-split">
+              <div class="team red">
+                <h4>TEAM RED</h4>
+                <ul id="redTeamList"></ul>
+                <span class="avg" id="redAvgMMR"></span>
+              </div>
+              <div class="vs-circle">VS</div>
+              <div class="team blue">
+                <h4>TEAM BLUE</h4>
+                <ul id="blueTeamList"></ul>
+                <span class="avg" id="blueAvgMMR"></span>
+              </div>
+            </div>
+            <p class="balance-info" id="balanceDiff"></p>
+          </div>
+          <div class="modal-btns">
+            <button id="calculateBalanceBtn" class="primary">밸런스 맞추기</button>
+            <button id="closeBalancerBtn">닫기</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="loading" class="hidden">
+        <div class="spinner"></div>
+        <p id="loadingText">데이터를 불러오는 중...</p>
+      </div>
+    </section>
+
+    <div id="vsModal" class="modal hidden">
+      <div class="modal-content">
+        <h3>⚔️ 상대방 전적 비교</h3>
+        <p>현재 검색된 유저와 비교할 상대방의 캐릭터명을 입력하세요.</p>
+        <input type="text" id="vsTargetName" placeholder="비교할 캐릭터명 입력" />
+        <div class="modal-btns">
+          <button id="startVsBtn" class="primary" style="background: #bc00ff; color: #fff;">비교 시작</button>
+          <button id="closeVsModalBtn">닫기</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="crewModal" class="modal hidden">
+      <div class="modal-content">
+        <h3>내전 크루 가입 신청</h3>
+        <p>우리 크루로 등록되면 매치 기록에서 자동으로 내전이 감지됩니다.</p>
+        <input type="text" id="applyCharacterName" placeholder="정확한 캐릭터명을 입력하세요" />
+        <div class="modal-btns">
+          <button id="submitApplyBtn" class="primary">신청하기</button>
+          <button id="closeModalBtn">닫기</button>
+        </div>
+      </div>
+    </div>
+
+    <section id="adminPanel" class="admin-section hidden">
+      <h2>크루 신청 관리</h2>
+      <div id="applicationList" class="app-list"></div>
+      <button id="closeAdminBtn" class="close-panel">닫기</button>
+    </section>
+
+    <div id="swrStatus" class="swr-status hidden"></div>
+
+    <section id="playerProfile" class="profile-section hidden"></section>
+    <section id="statsSummary" class="stats-section hidden"></section>
+
+    <section id="crewRanking" class="ranking-section"></section>
+
+    <section id="matchHistory" class="history-section hidden">
+      <h2>최근 매치 기록</h2>
+    </section>
+  </main>
+
+  <div class="site-footer-container"><footer class="site-footer">
+    <div class="footer-inner">
+        <div class="footer-top">
+            <div class="footer-brand">
+                <a class="footer-brand-link" href="/" aria-label="Tracking SA 홈">
+                    <svg width="36" height="36" viewBox="0 0 100 100" fill="none" aria-hidden="true" focusable="false">
+                        <circle cx="50" cy="50" r="48" stroke="currentColor" stroke-width="4"/>
+                        <path d="M25 70L40 55L50 65L75 35" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="70" cy="35" r="12" fill="currentColor"/>
+                    </svg>
+                    <strong>TRACKING <span>SA</span></strong>
+                </a>
+                <p>서든어택의 기록을,<br>더 쉽게 읽는 곳.</p>
+                <button id="pwa-install-button" class="footer-install" type="button" hidden>Tracking SA 앱 설치 <span aria-hidden="true">↗</span></button>
+            </div>
+            <nav class="footer-nav" aria-label="하단 메뉴">
+                <div class="footer-link-group">
+                    <h2>둘러보기</h2>
+                    <ul>
+                        <li><a href="/stats/sudden-attack/">서든어택 전적</a></li>
+                        <li><a href="/stats/sudden-attack/replay/">리플레이 분석실</a></li>
+                        <li><a href="/guides/">가이드</a></li>
+                    </ul>
+                </div>
+                <div class="footer-link-group">
+                    <h2>서비스 안내</h2>
+                    <ul>
+                        <li><a href="/about" data-i18n="about_us">서비스 소개</a></li>
+                        <li><a href="/service-methodology/">서비스 기준</a></li>
+                        <li><a href="/editorial-policy/">편집 원칙</a></li>
+                        <li><a href="/sitemap.xml" data-i18n="sitemap">사이트맵</a></li>
+                    </ul>
+                </div>
+                <div class="footer-link-group">
+                    <h2>이용 및 문의</h2>
+                    <ul>
+                        <li><a href="/privacy-policy" data-i18n="privacy_policy">개인정보처리방침</a></li>
+                        <li><a href="/terms" data-i18n="terms_of_service">이용약관</a></li>
+                        <li><a href="/ai-replay-pass/">AI 이용권 · 판매 준비</a></li>
+                        <li><a href="/contact/" data-i18n="contact">문의</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+        <div class="footer-business-info" aria-label="사업자 정보">
+            <details class="footer-business-details">
+                <summary class="footer-business-summary"><strong>로직 스토어</strong><span>사업자 정보</span><svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false"><path d="m4 6 4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+                <dl>
+                    <div><dt>상호</dt><dd>로직 스토어</dd></div>
+                    <div><dt>사업자등록번호</dt><dd>000-00-00000</dd></div>
+                    <div><dt>대표자</dt><dd>조한범</dd></div>
+                    <div class="footer-business-address"><dt>사업장 주소</dt><dd>경기도 수원시 인계동 992-13 크레텔 하우스 2동 302호</dd></div>
+                    <div><dt>통신판매업 신고번호</dt><dd>2026-수원팔달-0279호</dd></div>
+                </dl>
+            </details>
+            <div class="footer-business-contact" aria-label="고객 문의"><span>고객 문의</span><a href="tel:01081129691" aria-label="고객 문의 전화 010-0000-0000">010-0000-0000</a><a href="mailto:demo-15b9ce4f@example.com" aria-label="문의 이메일 demo-15b9ce4f@example.com">demo-15b9ce4f@example.com</a></div>
+        </div>
+        <div class="footer-bottom">
+            <p class="nexon-api-attribution">본 서비스는 <a href="https://openapi.nexon.com/ko/support/terms/" target="_blank" rel="noopener noreferrer">NEXON Open API</a>를 이용하여 데이터를 제공합니다. <span lang="en">This service uses NEXON Open API.</span></p>
+            <p class="footer-copyright" data-i18n="footer_copyright">&copy; 2026 TrackingSA. 서든어택 전적 검색 중심 서비스.</p>
+        </div>
+    </div>
+</footer>
+</div>
+  <script type="module" src="../main.js?v=b8bfd026f0cd"></script>
+</body>
+</html>

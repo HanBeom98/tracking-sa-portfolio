@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <meta name="theme-color" content="#0052cc">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Tracking SA">
+    <script defer src="/pwa-register.js"></script>
+    <title>맵 분석 수치를 실제로 읽는 방법 | Tracking SA</title>
+    <meta name="description" content="서든어택 맵별 기록을 해석할 때 플레이 횟수, 전체 최근 전적과의 차이, 맵 편중을 함께 확인하는 방법을 설명합니다.">
+    <link rel="canonical" href="https://trackingsa.com/guides/map-analysis-practice/">
+    <meta name="robots" content="index, follow">
+
+
+
+
+
+
+
+
+
+
+
+
+    <link rel="stylesheet" href="/style.css?v=1777396672">
+    <style>
+        .guide-article { max-width: 920px; margin: 0 auto; padding: 44px 20px 84px; }
+        .hero { padding: 34px; border-radius: 28px; background: linear-gradient(135deg, #7c2d12 0%, #ea580c 100%); color: #fff; margin-bottom: 28px; }
+        .hero span { display: inline-flex; min-height: 30px; padding: 0 12px; align-items: center; border-radius: 999px; background: rgba(255,255,255,0.14); font-size: 0.8rem; font-weight: 800; margin-bottom: 14px; }
+        .hero h1 { margin: 0 0 12px; font-size: 2.3rem; line-height: 1.1; }
+        .hero p { margin: 0; color: rgba(255,255,255,0.9); line-height: 1.8; }
+        .section { background: #fff; border: 1px solid rgba(15, 23, 42, 0.08); border-radius: 24px; padding: 28px; box-shadow: 0 10px 26px rgba(15, 23, 42, 0.04); }
+        .section + .section { margin-top: 18px; }
+        .section h2 { margin: 0 0 12px; font-size: 1.35rem; color: #0f172a; }
+        .section p, .section li { color: #475569; line-height: 1.82; }
+        .section ul, .section ol { margin: 14px 0 0; padding-left: 20px; }
+    </style>
+    <meta name="robots" content="index, follow">
+
+
+
+
+
+
+
+
+
+
+
+
+    <style>
+  html.dark-mode,
+  html.dark-mode body {
+    background-color: #0f172a;
+    color: #f8fafc;
+    color-scheme: dark;
+  }
+</style>
+    <script>
+  (function() {
+    const theme = localStorage.getItem('theme');
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark-mode');
+      document.body && document.body.classList.add('dark-mode');
+    }
+  })();
+</script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7263630893992216" crossorigin="anonymous"></script>
+<meta name="google-adsense-account" content="ca-pub-7263630893992216">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PORTFOLIO"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-PORTFOLIO');
+</script>
+<meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
+<meta name="naver-site-verification" content="b15b33af838280b54d31eb3c7e5c358d2836743f" />
+<script type="text/javascript">
+(function(c,l,a,r,i,t,y){
+    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+})(window, document, "clarity", "script", "vb9q33ggpa");
+</script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script>
+  window.FIREBASE_CONFIG = {"apiKey": "", "authDomain": "demo-tracking-sa-portfolio.firebaseapp.com", "projectId": "demo-tracking-sa-portfolio", "storageBucket": "demo-tracking-sa-portfolio.firebasestorage.app", "appId": "1:000000000000:web:portfolio-example", "messagingSenderId": "779289056217"};
+</script>
+<script>
+  window.authDomainReady = window.authDomainReady || new Promise((resolve) => {
+    window.__resolveAuthDomain = resolve;
+  });
+</script>
+<script type="module" src="/auth/ui/auth-client.js"></script>
+
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="/style.css?v=1777396672">
+
+<script src="/runtime-config.js"></script>
+<script src="/firebase-config.js"></script>
+<script src="/translations.js?v=1777396672"></script>
+<script src="/common.js?v=1777396672"></script>
+
+</head>
+<body><div class="site-header-container"><header>
+    <div class="header-inner">
+        <a href="/" class="site-logo-link" aria-label="Tracking SA home">
+            <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="site-logo">
+                <circle cx="50" cy="50" r="48" stroke="currentColor" stroke-width="4" fill="transparent"/>
+                <path d="M25 70L40 55L50 65L75 35" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="70" cy="35" r="12" stroke="currentColor" stroke-width="6" fill="currentColor"/>
+                <rect x="78" y="43" width="15" height="6" rx="3" transform="rotate(45 78 43)" fill="currentColor"/>
+            </svg>
+        </a>
+        <div class="desktop-menu-container">
+            <nav id="primary-navigation">
+                <ul>
+                    <li><a href="/stats/" data-i18n="menu_stats">전적 센터</a></li>
+                    <li><a href="/stats/sudden-attack/" data-i18n="stats_sa_card_title">서든어택 전적 검색</a></li>
+                    <li><a href="/guides/">가이드</a></li>
+                    <li><a href="/board?category=notice" data-i18n="notice">공지사항</a></li>
+                    <li><a href="/about" data-i18n="about_us">서비스 소개</a></li>
+                    <li><a href="/contact" data-i18n="contact">문의</a></li>
+                </ul>
+            </nav>
+        </div>
+        <div class="utility-controls">
+            <button id="color-change" aria-label="테마 변경">🌙</button>
+            <div id="auth-controls" class="auth-controls"></div>
+        </div>
+        <button class="mobile-menu-toggle" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="primary-navigation">
+            <span></span><span></span><span></span>
+        </button>
+    </div>
+</header>
+</div><main class="guide-article">
+        <section class="hero">
+            <span>MAP GUIDE</span>
+            <h1>맵 분석 수치를 실제로 읽는 방법</h1>
+            <p>맵 분석은 특정 전장에서 강한지 약한지 확인하는 데 유용하지만, 표본 수가 적거나 최근 경기 흐름과 분리해서 보면 잘못 해석하기 쉽습니다. 이 문서는 맵 수치를 실전 판단에 연결하는 기준을 다룹니다.</p>
+        </section>
+        <section class="section">
+            <h2>맵 분석에서 먼저 볼 항목</h2>
+            <ol>
+                <li>그 맵을 최근에 몇 번 플레이했는지</li>
+                <li>해당 맵 성과가 전체 최근 기록보다 높은지 낮은지</li>
+                <li>최근 20경기 전체 흐름과 같은 방향인지</li>
+            </ol>
+        </section>
+        <section class="section">
+            <h2>숫자가 좋아 보여도 조심해야 하는 경우</h2>
+            <ul>
+                <li>플레이 횟수가 너무 적은 맵</li>
+                <li>특정 구간에만 몰려 나온 전장</li>
+                <li>강한 상대를 거의 만나지 않은 구간</li>
+            </ul>
+        </section>
+        <section class="section">
+            <h2>맵 분석을 최근 경기와 같이 보는 이유</h2>
+            <p>최근 20경기에서 익숙한 맵 비중이 낮아졌다면 성적이 갑자기 흔들린 것처럼 보일 수 있습니다. 반대로 익숙한 맵만 반복해서 나온 구간이라면 최근 기록이 실제보다 좋아 보일 수 있습니다. 그래서 맵 분석은 최근 경기 해석과 함께 볼 때 의미가 커집니다.</p>
+        </section>
+        <section class="section">
+            <h2>연결해서 보면 좋은 페이지</h2>
+            <ul>
+                <li><a href="/guides/recent-form-signals/">최근 폼 하락 신호 읽는 법</a></li>
+                <li><a href="/guides/vs-misread-signals/">VS 비교를 잘못 해석하는 경우</a></li>
+                <li><a href="/stats/sudden-attack/">서든어택 전적 검색</a></li>
+            </ul>
+        </section>
+    </main>
+<div class="site-footer-container"><footer>
+    <div style="margin-bottom: 15px;">
+        <strong style="color: #0052cc; font-size: 1.2rem; font-weight: 800;">Tracking SA</strong>
+    </div>
+    <p data-i18n="footer_copyright"></p>
+    <p class="nexon-api-attribution">
+        본 서비스는 <a href="https://openapi.nexon.com/ko/support/terms/" target="_blank" rel="noopener noreferrer">NEXON Open API</a>를 이용하여 데이터를 제공합니다. This service uses NEXON Open API.
+    </p>
+    <p style="margin-top: 10px;">
+        <a href="/guides/">가이드</a> |
+        <a href="/about" data-i18n="about_us">서비스 소개</a> |
+        <a href="/service-methodology/">서비스 기준</a> |
+        <a href="/editorial-policy/">편집 원칙</a> |
+        <a href="/contact" data-i18n="contact">문의</a> |
+        <a href="/privacy-policy" data-i18n="privacy_policy">개인정보처리방침</a> |
+        <a href="/terms" data-i18n="terms_of_service">이용약관</a> |
+        <a href="/sitemap.xml" data-i18n="sitemap">사이트맵</a> |
+        <a href="/stats/sudden-attack/">서든어택 전적</a>
+    </p>
+</footer>
+</div>
+</body>
+</html>

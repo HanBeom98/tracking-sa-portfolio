@@ -1,8 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import 'dotenv/config';
 
-// Using a simpler approach for API Key to avoid ESM/CJS dotenv issues in standalone script
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const META_DIR = path.join(__dirname, '../src/domains/stats/sudden-attack/infra/meta');
@@ -14,8 +14,7 @@ if (!fs.existsSync(META_DIR)) {
 const BASE_URL = 'https://open.api.nexon.com/static/suddenattack/meta';
 const files = ['grade', 'season_grade', 'tier', 'logo'];
 
-// Hardcoded live key from main.js as fallback for the script
-const API_KEY = 'live_6e6f12fbfb54d0fad8b504b3303286fb1ce29b5a4e2f456d883cc44b2af445e6efe8d04e6d233bd35cf2fabdeb93fb0d';
+const API_KEY = String(process.env.NEXON_API_KEY || '').trim();
 
 async function downloadMeta() {
   console.log('--- Downloading Sudden Attack Meta to Local ---');
@@ -42,4 +41,9 @@ async function downloadMeta() {
   }
 }
 
-downloadMeta();
+if (!API_KEY) {
+  console.error('❌ NEXON_API_KEY 환경변수가 필요합니다. .env 또는 실행 환경에 키를 설정해 주세요.');
+  process.exitCode = 1;
+} else {
+  downloadMeta();
+}

@@ -5,21 +5,37 @@
     <link>https://trackingsa.com/</link>
     <description><![CDATA[Tracking SA의 주요 서비스와 대표 기능 안내]]></description>
     <language>ko</language>
-    <lastBuildDate>Thu, 12 Mar 2026 02:15:06 GMT</lastBuildDate>
+    <lastBuildDate>Tue, 24 Nov 2026 00:36:46 GMT</lastBuildDate>
     <atom:link href="https://trackingsa.com/rss.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title><![CDATA[서든어택 전적 검색 가이드]]></title>
+      <link>https://trackingsa.com/guides/sudden-attack-stats-guide/</link>
+      <guid isPermaLink="true">https://trackingsa.com/guides/sudden-attack-stats-guide/</guid>
+      <description><![CDATA[닉네임 검색부터 최근·이전 20경기, 최근 31일 활동, VS 비교까지 Tracking SA 전적 페이지를 읽는 방법을 정리했습니다.]]></description>
+    </item>
+    <item>
+      <title><![CDATA[최근 경기 기록 해석법]]></title>
+      <link>https://trackingsa.com/guides/match-history-reading/</link>
+      <guid isPermaLink="true">https://trackingsa.com/guides/match-history-reading/</guid>
+      <description><![CDATA[승률만 보지 않고 최근 경기 기록, 맵 편차, 교전 흐름을 함께 보는 기준을 설명합니다.]]></description>
+    </item>
+    <item>
+      <title><![CDATA[Tracking SA 서비스 안내]]></title>
+      <link>https://trackingsa.com/guides/tracking-sa-service-guide/</link>
+      <guid isPermaLink="true">https://trackingsa.com/guides/tracking-sa-service-guide/</guid>
+      <description><![CDATA[Tracking SA의 서비스 목적, 전적 검색과 가이드 운영 이유, 리그 허브 분리 원칙을 설명합니다.]]></description>
+    </item>
     <item>
       <title><![CDATA[대표 서비스: 서든어택 전적 검색]]></title>
       <link>https://trackingsa.com/stats/sudden-attack/</link>
       <guid isPermaLink="true">https://trackingsa.com/stats/sudden-attack/</guid>
-      <pubDate>Thu, 12 Mar 2026 00:00:00 GMT</pubDate>
-      <description><![CDATA[공식 API 기반 전적 검색, 매치 기록 조회, VS 비교, 크루 관리 기능을 제공합니다.]]></description>
+      <description><![CDATA[공식 API 기반 공개 전적 검색 홈에서 최근·이전 20경기, 최근 31일 활동, VS 비교를 확인하고 리그 허브로 이동할 수 있습니다.]]></description>
     </item>
     <item>
-      <title><![CDATA[게임·테스트·커뮤니티 허브 운영]]></title>
+      <title><![CDATA[메인 서비스 구조 업데이트]]></title>
       <link>https://trackingsa.com/</link>
       <guid isPermaLink="true">https://trackingsa.com/</guid>
-      <pubDate>Thu, 12 Mar 2026 00:00:00 GMT</pubDate>
-      <description><![CDATA[Tracking SA는 게임 유틸리티, 웹 게임, AI 테스트, 커뮤니티와 실용 도구를 함께 제공하는 멀티 서비스 허브입니다.]]></description>
+      <description><![CDATA[Tracking SA 메인 구조는 서든어택 전적 검색과 리그 허브 중심으로 정리되어 있습니다.]]></description>
     </item>
   </channel>
 </rss>

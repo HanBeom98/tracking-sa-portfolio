@@ -1,3 +1,6 @@
+import { sortPostsWithActiveNoticesFirst } from "../domain/noticePinning.js?v=002ad1b5c716";
+import { escapeHtml } from "../domain/html.js?v=d659db8d68e4";
+
 class BoardList extends HTMLElement {
   static get observedAttributes() {
     return ["status", "category"];
@@ -28,15 +31,7 @@ class BoardList extends HTMLElement {
     if (!Array.isArray(posts)) {
       this.state.posts = [];
     } else {
-      // 공지사항(notice)을 최상단으로 올리고, 그 안에서 최신순 정렬
-      this.state.posts = [...posts].sort((a, b) => {
-        const aNotice = a.category === "notice";
-        const bNotice = b.category === "notice";
-        if (aNotice && !bNotice) return -1;
-        if (!aNotice && bNotice) return 1;
-        // 둘 다 공지거나 둘 다 일반글이면 최신순(내림차순) 정렬
-        return (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0);
-      });
+      this.state.posts = sortPostsWithActiveNoticesFirst(posts);
     }
     this.render();
   }
@@ -61,8 +56,8 @@ class BoardList extends HTMLElement {
       .tab-item {
         padding: 8px 18px;
         border-radius: 30px;
-        background: white;
-        border: 1px solid oklch(92% 0.02 260);
+        background: var(--surface-card, white);
+        border: 1px solid var(--surface-border, #dbe3ef);
         font-weight: 700;
         font-size: 0.85rem;
         cursor: pointer;
@@ -80,19 +75,19 @@ class BoardList extends HTMLElement {
 
       .list-container {
         width: 100%;
-        background: white;
+        background: var(--surface-card, white);
         border-radius: 20px;
         overflow: hidden;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-        border: 1px solid oklch(92% 0.02 260);
+        border: 1px solid var(--surface-border, #dbe3ef);
       }
 
       .list-header {
         display: grid;
         grid-template-columns: 80px 1fr 150px 120px;
         padding: 18px 24px;
-        background: oklch(98% 0.01 260);
-        border-bottom: 2px solid oklch(92% 0.02 260);
+        background: var(--surface-muted, #f3f6fb);
+        border-bottom: 2px solid var(--surface-border, #dbe3ef);
         font-weight: 800;
         color: var(--text-sub);
         font-size: 0.95rem;
@@ -103,7 +98,7 @@ class BoardList extends HTMLElement {
         display: grid;
         grid-template-columns: 80px 1fr 150px 120px;
         padding: 18px 24px;
-        border-bottom: 1px solid oklch(96% 0.01 260);
+        border-bottom: 1px solid var(--surface-border, #dbe3ef);
         text-decoration: none;
         color: inherit;
         transition: all 0.2s ease;
@@ -116,7 +111,7 @@ class BoardList extends HTMLElement {
       }
 
       .list-item:hover {
-        background: oklch(99% 0.01 260);
+        background: var(--surface-hover, #f8fafc);
         transform: scale(1.002);
       }
 
@@ -137,7 +132,7 @@ class BoardList extends HTMLElement {
       .item-date { color: var(--text-sub); font-size: 0.85rem; }
 
       .notice-row {
-        background: oklch(97% 0.02 260);
+        background: var(--surface-notice, #eff6ff);
       }
       .notice-row .item-no {
         color: var(--p-blue);
@@ -282,8 +277,8 @@ class BoardList extends HTMLElement {
   }
 
   renderRow(post, displayNo) {
-    const title = post.title || "제목 없음";
-    const nickname = post.authorName || post.nickname || "익명";
+    const title = escapeHtml(post.title || "제목 없음");
+    const nickname = escapeHtml(post.authorName || post.nickname || "익명");
     const date = this.formatDate(post.createdAt);
     const isNotice = post.category === "notice";
     const t = (key, fallback) =>

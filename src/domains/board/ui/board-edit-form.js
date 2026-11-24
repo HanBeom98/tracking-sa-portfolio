@@ -1,3 +1,6 @@
+import { escapeHtml } from "../domain/html.js";
+import './board-image-editor.js';
+
 class BoardEditForm extends HTMLElement {
   constructor() {
     super();
@@ -29,7 +32,7 @@ class BoardEditForm extends HTMLElement {
     this.shadowRoot.innerHTML = `<h1 style="text-align: center; padding: 60px 0;">${t("post_not_found", "게시물을 찾을 수 없습니다.")}</h1>`;
   }
 
-  renderForm({ title, content }) {
+  renderForm({ title, content, attachments = [] }) {
     const t = (key, fallback) =>
       typeof window !== "undefined" && window.getTranslation
         ? window.getTranslation(key, fallback)
@@ -58,21 +61,21 @@ class BoardEditForm extends HTMLElement {
         width: 100%;
         padding: 16px 20px;
         border-radius: 16px;
-        border: 2px solid oklch(92% 0.02 260);
-        background: var(--bg-main);
+        border: 2px solid var(--surface-border, #dbe3ef);
+        background: var(--surface-input, #f8fafc);
         font-size: 1.05rem;
         color: var(--text-main);
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         font-family: inherit;
       }
       input::placeholder, textarea::placeholder {
-        color: oklch(62% 0.02 260);
+        color: var(--text-placeholder, #64748b);
       }
       input:focus, textarea:focus {
         outline: none;
         border-color: var(--p-blue);
         box-shadow: 0 0 0 4px oklch(from var(--p-blue) l c h / 0.1);
-        background: white;
+        background: var(--surface-input-focus, white);
       }
       :host-context(body.dark-mode) label {
         color: #e5eefc;
@@ -128,12 +131,22 @@ class BoardEditForm extends HTMLElement {
         filter: brightness(1.1);
       }
       .btn.secondary {
-        background: oklch(94% 0.01 260);
-        color: var(--text-main);
+        background: var(--surface-muted, #f3f6fb);
+        color: var(--text-main, #0f172a);
+        border: 1px solid oklch(86% 0.02 260);
       }
       .btn.secondary:hover {
-        background: oklch(90% 0.02 260);
+        background: var(--surface-hover, #f8fafc);
         transform: translateY(-2px);
+      }
+      :host-context(body.dark-mode) .btn.secondary {
+        background: #1e293b;
+        color: #f8fafc;
+        border-color: #475569;
+      }
+      :host-context(body.dark-mode) .btn.secondary:hover {
+        background: #334155;
+        border-color: #64748b;
       }
       .btn:active {
         transform: translateY(0);
@@ -155,12 +168,12 @@ class BoardEditForm extends HTMLElement {
       <form id="edit-form">
         <div class="field-group">
           <label for="title">${t("title", "제목")}</label>
-          <input type="text" id="title" value="${title}" required>
+          <input type="text" id="title" maxlength="120" value="${escapeHtml(title)}" required>
         </div>
 
         <div class="field-group">
           <label for="content">${t("content", "내용")}</label>
-          <textarea id="content" required>${content}</textarea>
+          <board-image-editor></board-image-editor>
         </div>
 
         <div class="submit-wrap">
@@ -169,6 +182,7 @@ class BoardEditForm extends HTMLElement {
         </div>
       </form>
     `;
+    this.shadowRoot.querySelector("board-image-editor")?.setValue({ content, attachments });
   }
 
   setSubmitting(isSubmitting) {
@@ -181,7 +195,8 @@ class BoardEditForm extends HTMLElement {
   getFormValues() {
     return {
       title: this.shadowRoot.getElementById("title").value,
-      content: this.shadowRoot.getElementById("content").value,
+      content: this.shadowRoot.querySelector("board-image-editor")?.getContent() || "",
+      attachments: this.shadowRoot.querySelector("board-image-editor")?.getItems() || [],
     };
   }
 

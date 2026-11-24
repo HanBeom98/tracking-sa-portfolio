@@ -4,10 +4,10 @@ const runtimeConfig = (typeof window !== "undefined" && window.FIREBASE_CONFIG) 
 const firebaseConfig = {
   // apiKey는 런타임 주입 가능: window.FIREBASE_CONFIG.apiKey
   apiKey: runtimeConfig.apiKey || "",
-  authDomain: runtimeConfig.authDomain || "tracking-sa-295db.firebaseapp.com",
-  projectId: runtimeConfig.projectId || "tracking-sa-295db",
-  storageBucket: runtimeConfig.storageBucket || "tracking-sa-295db.firebasestorage.app",
-  appId: runtimeConfig.appId || "1:779289056217:web:cf023fc55f1a2913ffbfc8",
+  authDomain: runtimeConfig.authDomain || "demo-tracking-sa-portfolio.firebaseapp.com",
+  projectId: runtimeConfig.projectId || "demo-tracking-sa-portfolio",
+  storageBucket: runtimeConfig.storageBucket || "demo-tracking-sa-portfolio.firebasestorage.app",
+  appId: runtimeConfig.appId || "1:000000000000:web:portfolio-example",
   messagingSenderId: runtimeConfig.messagingSenderId || ""
 };
 
@@ -20,8 +20,13 @@ if (typeof firebase !== 'undefined') {
     if (!firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);
     }
+    if (runtimeConfig.appCheckSiteKey && firebase.appCheck && firebase.appCheck.ReCaptchaEnterpriseProvider) {
+      const appCheckProvider = new firebase.appCheck.ReCaptchaEnterpriseProvider(runtimeConfig.appCheckSiteKey);
+      firebase.appCheck().activate(appCheckProvider, true);
+    }
     // Firestore 인스턴스를 전역 window 객체에 할당
     window.db = firebase.firestore();
+    window.storage = firebase.storage ? firebase.storage() : null;
     if (firebase.auth) {
       window.auth = firebase.auth();
     }
@@ -29,4 +34,5 @@ if (typeof firebase !== 'undefined') {
 } else {
   console.error("Firebase SDK not loaded.");
   window.db = null;
+  window.storage = null;
 }

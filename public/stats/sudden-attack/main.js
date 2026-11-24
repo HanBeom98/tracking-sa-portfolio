@@ -1,47 +1,18 @@
-import { NexonApiClient } from './infra/nexon-api-client.js';
-import { SaRepository } from './infra/sa-repository.js';
-import { SaService } from './application/sa-service.js';
-import { ProfileQueryService } from './application/profile-query-service.js';
-import { SA_PROFILE_CACHE_PREFIX } from './application/sa-profile-cache.js';
-import { CrewHighlightsService } from './application/crew-highlights-service.js';
-import { CrewSeasonUseCases } from './application/crew-season-use-cases.js';
-import { SaPageUseCases } from './application/sa-page-use-cases.js';
-import { CrewRepository } from './infra/crew-repository.js';
-import { BalancerManager } from './ui/balancer-manager.js';
-import { AdminManager } from './ui/admin-manager.js';
-import { initSaPageRuntime } from './ui/runtime/sa-page-runtime.js';
-import { updateSwrUI, saveSearch, renderRecentSearches, renderFavoriteSearches, toggleFavoriteSearch, isFavoriteSearch, clearRecentSearches, removeFavoriteSearch } from './ui/utils/ui-helpers.js';
+import { getVsComparisonData } from './ui/runtime/public-search-presenters.js?v=6d52849561d9';
+import { escapeHtml } from '../../shared/html.js?v=d181848c5b3c';
 
-// Import Modular UI Components
-import './ui/components/player-card.js';
-import './ui/components/stats-summary.js';
-import './ui/components/radar-chart.js';
-import './ui/components/mmr-trend-chart.js';
-import './ui/components/synergy-view.js';
-import './ui/components/map-mastery.js';
-import './ui/components/crew-ranking.js';
-import './ui/components/match-list.js';
-import './ui/components/crew-mvps.js';
-import './ui/components/crew-highlights.js';
-import './ui/components/team-board.js';
+import { createSaApplication } from './application/sa-app-composition.js?v=600c653471eb';
+import { getCurrentUser, requireAuth, subscribeAuthState } from '../../auth/infra/auth-gateway.js?v=512ed5fcfa8b';
+import { resolvePlayerNotFoundMessage } from './application/search-error-messages.js?v=35de87a25884';
+import { BalancerManager } from './ui/balancer-manager.js?v=851f432755cb';
+import { AdminManager } from './ui/admin-manager.js?v=2632723df452';
+import { initSaPageRuntime } from './ui/runtime/sa-page-runtime.js?v=fdb03aab3995';
+import { createViewRequestTracker } from './ui/runtime/view-request-tracker.js?v=aaecae213a30';
+import { updateSwrUI, saveSearch, renderRecentSearches, renderFavoriteSearches, toggleFavoriteSearch, isFavoriteSearch, renderFavoriteSearchButton, clearRecentSearches, removeFavoriteSearch } from './ui/utils/ui-helpers.js?v=aa6fb8c07fa4';
 
+import './ui/components/register-league.js?v=6d0310095805';
 
-const NEXON_API_KEY = ''; 
-const client = new NexonApiClient(NEXON_API_KEY);
-const crewRepo = new CrewRepository(client);
-const repository = new SaRepository(client, crewRepo);
-const service = new SaService(repository, crewRepo);
-const profileQueryService = new ProfileQueryService(service);
-const crewHighlightsService = new CrewHighlightsService();
-const crewSeasonUseCases = new CrewSeasonUseCases(crewRepo);
-const pageUseCases = new SaPageUseCases({
-  service,
-  profileQueryService,
-  crewRepo,
-  repository,
-  highlightsService: crewHighlightsService,
-  crewSeasonUseCases
-});
+const { crewRepo, repository, service, pageUseCases } = createSaApplication();
 
 const balancerManager = new BalancerManager(crewRepo);
 const adminManager = new AdminManager(crewRepo, repository, service);
@@ -76,6 +47,7 @@ const closeVsModalBtn = document.getElementById('closeVsModalBtn');
 let currentRankings = [];
 let primaryUserData = null; 
 let activeSeasonMode = 'current';
+const viewRequests = createViewRequestTracker();
 const STORAGE_KEY = 'sa_recent_searches';
 const FAVORITES_STORAGE_KEY = 'sa_favorite_searches';
 
@@ -137,7 +109,7 @@ function renderSeasonToggle(profile) {
   const periodText = getSeasonPeriodText(profile, activeSeasonMode);
   return `
     <div class="season-toggle-bar">
-      <div class="season-toggle-group" role="tablist" aria-label="시즌 비교 토글">
+      <div class="season-toggle-group" role="tablist" aria-label="기록 구간 비교">
         <button class="season-toggle-btn ${currentCls}" data-mode="current" type="button">이번 시즌</button>
         <button class="season-toggle-btn ${previousCls}" data-mode="previous" type="button">지난 시즌</button>
       </div>
@@ -149,15 +121,19 @@ function renderSeasonToggle(profile) {
 /**
  * Main Search Logic with URL Sync
  */
-async function handleSearch(nameOverride = null, skipHistory = false) {
+async function handleSearch(nameOverride = null, skipHistory = false, forceRefresh = false) {
   const name = nameOverride || searchInput.value.trim();
   if (!name) return;
+  const isCurrent = viewRequests.start();
+  let freshProfile = null;
+  let revalidationFailed = false;
+  primaryUserData = null;
   if (nameOverride) searchInput.value = name;
   activeSeasonMode = 'current';
 
   try {
     showLoading(name);
-    swrStatus.classList.add('hidden');
+    updateSwrUI(swrStatus, 'hide');
     
     // Update URL Parameter
     if (!skipHistory) {
@@ -167,33 +143,45 @@ async function handleSearch(nameOverride = null, skipHistory = false) {
     }
 
     // Callback for background updates (SWR)
-    const onFreshData = (fresh) => {
+    const onFreshData = (fresh, update = {}) => {
+      if (!isCurrent()) return;
+      loading.classList.add('hidden');
+      if (update.error) {
+        revalidationFailed = true;
+        updateSwrUI(swrStatus, 'error');
+        return;
+      }
+      freshProfile = fresh;
       console.log(`[Main] Refreshing UI with fresh data for ${fresh.player.nickname}`);
       primaryUserData = fresh;
       renderUI(fresh);
-      loading.classList.add('hidden');
       updateSwrUI(swrStatus, 'fresh');
     };
 
     // 1. Get Profile
-    const result = await pageUseCases.loadPlayerProfile(name, currentRankings, onFreshData);
+    const result = await pageUseCases.loadPlayerProfile(name, currentRankings, onFreshData, { scope: 'league', forceRefresh });
+    if (!isCurrent()) return;
     
-    primaryUserData = result;
-    saveSearch(STORAGE_KEY, result.player.nickname);
+    const profile = freshProfile || result;
+    primaryUserData = profile;
+    saveSearch(STORAGE_KEY, profile.player.nickname);
     renderSearchCollections();
-    syncFavoriteButton(result.player.nickname);
-    renderUI(result);
+    syncFavoriteButton(profile.player.nickname);
+    if (!freshProfile) {
+      renderUI(profile);
 
-    if (result.isStale) {
-      loadingText.textContent = '최신 데이터로 업데이트 중...';
-      updateSwrUI(swrStatus, 'stale', result.cacheTime);
-    } else {
-      loading.classList.add('hidden');
-      updateSwrUI(swrStatus, 'hide');
+      if (result.isStale) {
+        loading.classList.add('hidden');
+        updateSwrUI(swrStatus, revalidationFailed ? 'error' : 'stale', result.cacheTime);
+      } else {
+        loading.classList.add('hidden');
+        updateSwrUI(swrStatus, 'hide');
+      }
     }
 
     await refreshRankings();
   } catch (error) { 
+    if (!isCurrent()) return;
     handleSearchError(error); 
     loading.classList.add('hidden');
     updateSwrUI(swrStatus, 'hide');
@@ -202,16 +190,12 @@ async function handleSearch(nameOverride = null, skipHistory = false) {
 
 async function handleRefresh() {
   if (!primaryUserData) return;
-  localStorage.removeItem(`${SA_PROFILE_CACHE_PREFIX}${primaryUserData.player.nickname.toLowerCase()}`);
-  await handleSearch(primaryUserData.player.nickname, true);
+  await handleSearch(primaryUserData.player.nickname, true, true);
 }
 
 function syncFavoriteButton(name) {
   if (!favoriteBtn || !name) return;
-  const favorite = isFavoriteSearch(FAVORITES_STORAGE_KEY, name);
-  favoriteBtn.classList.remove('hidden');
-  favoriteBtn.classList.toggle('favorite-active', favorite);
-  favoriteBtn.textContent = favorite ? '★ 즐겨찾기 해제' : '☆ 즐겨찾기 추가';
+  renderFavoriteSearchButton(favoriteBtn, isFavoriteSearch(FAVORITES_STORAGE_KEY, name));
 }
 
 function handleCompareClick() {
@@ -221,16 +205,29 @@ function handleCompareClick() {
 }
 
 async function executeVsMode() {
+  if (!primaryUserData) return;
   const targetName = vsTargetName.value.trim();
   if (!targetName) return;
   if (primaryUserData.player.nickname.toLowerCase() === targetName.toLowerCase()) { alert('자기 자신과는 비교할 수 없습니다.'); return; }
   vsModal.classList.add('hidden');
+  const primary = primaryUserData;
+  const isCurrent = viewRequests.start();
+  updateSwrUI(swrStatus, 'hide');
   try {
     loading.classList.remove('hidden');
     loadingText.textContent = `${primaryUserData.player.nickname} vs ${targetName} 비교 중...`;
     const targetData = await pageUseCases.loadPlayerProfile(targetName, currentRankings);
-    renderVSMode(primaryUserData, targetData);
-  } catch (error) { handleSearchError(error); } finally { loading.classList.add('hidden'); }
+    if (!isCurrent()) return;
+    if (primary.player.ouid && primary.player.ouid === targetData.player.ouid) {
+      alert('자기 자신과는 비교할 수 없습니다.');
+      return;
+    }
+    renderVSMode(primary, targetData);
+  } catch (error) {
+    if (isCurrent()) handleSearchError(error);
+  } finally {
+    if (isCurrent()) loading.classList.add('hidden');
+  }
 }
 
 async function runFavoriteVsCompare(targetName) {
@@ -243,29 +240,53 @@ async function runFavoriteVsCompare(targetName) {
     alert('자기 자신과는 비교할 수 없습니다.');
     return;
   }
+  const primary = primaryUserData;
+  const isCurrent = viewRequests.start();
+  updateSwrUI(swrStatus, 'hide');
   try {
     loading.classList.remove('hidden');
     loadingText.textContent = `${primaryUserData.player.nickname} vs ${targetName} 비교 중...`;
     const targetData = await pageUseCases.loadPlayerProfile(targetName, currentRankings);
-    renderVSMode(primaryUserData, targetData);
+    if (!isCurrent()) return;
+    if (primary.player.ouid && primary.player.ouid === targetData.player.ouid) {
+      alert('자기 자신과는 비교할 수 없습니다.');
+      return;
+    }
+    renderVSMode(primary, targetData);
   } catch (error) {
-    handleSearchError(error);
+    if (isCurrent()) handleSearchError(error);
   } finally {
-    loading.classList.add('hidden');
+    if (isCurrent()) loading.classList.add('hidden');
   }
+}
+
+function resetSearchState() {
+  viewRequests.invalidate();
+  primaryUserData = null;
+  activeSeasonMode = 'current';
+  profileSection.classList.add('hidden');
+  statsSection.classList.add('hidden');
+  historySection.classList.add('hidden');
+  loading.classList.add('hidden');
+  refreshBtn.classList.add('hidden');
+  compareBtn.classList.add('hidden');
+  favoriteBtn?.classList.add('hidden');
+  updateSwrUI(swrStatus, 'hide');
+  crewRankingSection.classList.remove('hidden');
+  searchInput.value = '';
 }
 
 function showLoading(name) {
   loading.classList.remove('hidden');
-  loadingText.textContent = `${name} 님의 정보를 분석 중... (최근 20경기)`;
+  loadingText.textContent = `${name} 님의 정보를 분석 중...`;
   profileSection.innerHTML = '<sa-player-card></sa-player-card>';
   profileSection.querySelector('sa-player-card').player = null; 
   profileSection.classList.remove('hidden');
   statsSection.innerHTML = '<sa-stats-summary></sa-stats-summary>';
   statsSection.querySelector('sa-stats-summary').stats = null; 
   statsSection.classList.remove('hidden');
-  historySection.innerHTML = '<h2>이번 시즌 최근 20경기 매치 기록</h2><sa-match-list></sa-match-list>';
-  historySection.querySelector('sa-match-list').matches = null; 
+  historySection.innerHTML = '<h2>이번 시즌 매치 기록</h2><sa-match-list></sa-match-list>';
+  historySection.querySelector('sa-match-list').matchRecords = null;
   historySection.classList.remove('hidden');
   crewRankingSection.classList.add('hidden');
 }
@@ -273,11 +294,15 @@ function showLoading(name) {
 function renderUI(profile) {
   const view = getSeasonView(profile, activeSeasonMode);
   const seasonLabel = view.label || (activeSeasonMode === 'previous' ? '지난 시즌' : '이번 시즌');
+  const playerCardData = {
+    ...profile.player,
+    ...(view.stats || {})
+  };
 
   refreshBtn.classList.remove('hidden');
   compareBtn.classList.remove('hidden');
   profileSection.innerHTML = '<sa-player-card></sa-player-card>';
-  profileSection.querySelector('sa-player-card').player = profile.player;
+  profileSection.querySelector('sa-player-card').player = playerCardData;
   profileSection.classList.remove('hidden');
 
   statsSection.innerHTML = `${renderSeasonToggle(profile)}<sa-stats-summary id="seasonStatsSummary"></sa-stats-summary>`;
@@ -295,32 +320,51 @@ function renderUI(profile) {
   });
   statsSection.classList.remove('hidden');
 
-  historySection.innerHTML = `<h2>${seasonLabel} 최근 20경기 매치 기록</h2><sa-match-list></sa-match-list>`;
-  historySection.querySelector('sa-match-list').matches = view.matches || [];
+  historySection.innerHTML = `<h2>${seasonLabel} 매치 기록</h2><sa-match-list></sa-match-list>`;
+  historySection.querySelector('sa-match-list').matchRecords = view.matches || [];
   historySection.classList.remove('hidden');
   crewRankingSection.classList.add('hidden');
 }
 
 function renderVSMode(primary, target) {
+  const { primaryView, targetView, comparisonLabel } = getVsComparisonData(primary, target, activeSeasonMode, 'league');
+
   profileSection.innerHTML = `
-    <div class="vs-header-banner">⚔️ VS MODE: ${primary.player.nickname} vs ${target.player.nickname} ⚔️</div>
+    <div class="vs-header-banner">⚔️ VS MODE: ${escapeHtml(primary.player.nickname)} vs ${escapeHtml(target.player.nickname)} ⚔️</div>
     <div class="vs-container">
       <sa-player-card id="primaryCard"></sa-player-card>
       <sa-player-card id="targetCard"></sa-player-card>
     </div>
   `;
-  profileSection.querySelector('#primaryCard').player = primary.player;
-  profileSection.querySelector('#targetCard').player = target.player;
+  profileSection.querySelector('#primaryCard').player = {
+    ...primary.player,
+    ...(primaryView.stats || {})
+  };
+  profileSection.querySelector('#targetCard').player = {
+    ...target.player,
+    ...(targetView.stats || {})
+  };
   statsSection.innerHTML = '<sa-stats-summary id="vsStats"></sa-stats-summary>';
-  statsSection.querySelector('#vsStats').vsModeData = { primary: primary.stats, target: target.stats };
+  statsSection.querySelector('#vsStats').vsModeData = {
+    primary: primaryView.stats,
+    target: targetView.stats,
+    comparisonLabel,
+    primaryName: primary.player.nickname,
+    targetName: target.player.nickname,
+  };
   statsSection.classList.remove('hidden');
   historySection.classList.add('hidden');
   crewRankingSection.classList.add('hidden');
 }
 
 function handleSearchError(error) {
+  const playerNotFoundMessage = resolvePlayerNotFoundMessage(error);
+  if (playerNotFoundMessage) {
+    alert(playerNotFoundMessage);
+    console.error('[SA] Search Error:', error);
+    return;
+  }
   if (error.message === 'TEST_KEY_LIMITATION') alert('현재 테스트 API 키를 사용 중입니다.\n\n[제약 사항]\n테스트 키는 본인 계정만 조회가 가능합니다.');
-  else if (error.message === 'PLAYER_NOT_FOUND') alert('캐릭터를 찾을 수 없습니다.');
   else alert('전적을 불러오는 중 오류가 발생했습니다.');
   console.error('[SA] Search Error:', error);
 }
@@ -350,12 +394,13 @@ async function initCrew() {
     await new Promise(r => setTimeout(r, 100));
   }
   await refreshRankings();
-  if (typeof window.firebase !== 'undefined' && window.firebase.auth) {
-    window.firebase.auth().onAuthStateChanged(user => {
-      if (crewRepo.isStaff(user)) { adminManager.adminMenuBtn.classList.remove('hidden'); adminManager.renderAdminExtraActions(); } 
-      else { adminManager.adminMenuBtn.classList.add('hidden'); }
-    });
-  }
+  const updateStaffControls = ({ user }) => {
+    if (crewRepo.isStaff(user)) { adminManager.adminMenuBtn.classList.remove('hidden'); adminManager.renderAdminExtraActions(); }
+    else { adminManager.adminMenuBtn.classList.add('hidden'); }
+  };
+  const unsubscribe = subscribeAuthState(updateStaffControls);
+  window.addEventListener('pagehide', unsubscribe, { once: true });
+  updateStaffControls({ user: getCurrentUser() });
 }
 
 // Global Event Listeners
@@ -375,16 +420,26 @@ startVsBtn.addEventListener('click', () => executeVsMode());
 vsTargetName.addEventListener('keypress', (e) => { if (e.key === 'Enter') executeVsMode(); });
 closeVsModalBtn.addEventListener('click', () => vsModal.classList.add('hidden'));
 
-applyCrewBtn.addEventListener('click', () => crewModal.classList.remove('hidden'));
+applyCrewBtn.addEventListener('click', async () => {
+  const user = await requireAuth({
+    redirectTo: window.location.pathname + window.location.search
+  });
+  if (!user) return;
+  crewModal.classList.remove('hidden');
+});
 closeModalBtn.addEventListener('click', () => crewModal.classList.add('hidden'));
 submitApplyBtn.addEventListener('click', async () => {
   const name = applyCharacterName.value.trim();
   if (!name) return;
+  const user = await requireAuth({
+    redirectTo: window.location.pathname + window.location.search
+  });
+  if (!user) return;
   submitApplyBtn.disabled = true;
   submitApplyBtn.textContent = 'OUID 조회 중...';
   try {
     const player = await service.searchPlayer(name);
-    await crewRepo.applyForCrew(player.nickname, player.ouid);
+    await crewRepo.applyForCrew(player.nickname, player.ouid, user.uid);
     alert('신청이 완료되었습니다! 관리자 승인 후 반영됩니다.');
     crewModal.classList.add('hidden');
     applyCharacterName.value = '';
@@ -395,6 +450,7 @@ submitApplyBtn.addEventListener('click', async () => {
 initCrew();
 initSaPageRuntime({
   handleSearch,
+  resetSearchState,
   refreshRankings,
   onRankingsUpdated: async () => {
     pageUseCases.invalidateCrewDashboardCache();

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>서비스 기준 | Tracking SA</title>
+    <meta name="description" content="Tracking SA가 어떤 목적의 사이트인지, 어떤 경로를 핵심 서비스로 운영하는지, 데이터를 어떤 기준으로 정리하는지 설명합니다.">
+    <!-- HEAD_INJECTION -->
+    <style>
+        .guide-article { max-width: 920px; margin: 0 auto; padding: 44px 20px 84px; }
+        .hero { padding: 34px; border-radius: 28px; background: linear-gradient(135deg, #0f172a 0%, #0b5cab 100%); color: #fff; margin-bottom: 28px; }
+        .hero span { display: inline-flex; min-height: 30px; padding: 0 12px; align-items: center; border-radius: 999px; background: rgba(255,255,255,0.14); font-size: 0.8rem; font-weight: 800; margin-bottom: 14px; }
+        .hero h1 { margin: 0 0 12px; font-size: 2.3rem; line-height: 1.1; letter-spacing: -0.03em; }
+        .hero p { margin: 0; color: rgba(255,255,255,0.9); line-height: 1.8; }
+        .section { background: #fff; border: 1px solid rgba(15, 23, 42, 0.08); border-radius: 24px; padding: 28px; box-shadow: 0 10px 26px rgba(15, 23, 42, 0.04); }
+        .section + .section { margin-top: 18px; }
+        .section h2 { margin: 0 0 12px; font-size: 1.35rem; color: #0f172a; }
+        .section p, .section li { color: #475569; line-height: 1.82; }
+        .section ul, .section ol { margin: 14px 0 0; padding-left: 20px; }
+        .callout { padding: 18px 20px; border-radius: 18px; background: #eef4ff; color: #1e3a8a; }
+        .link-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
+        .link-row a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border-radius: 999px; background: #0b5cab; color: #fff; text-decoration: none; font-weight: 800; }
+    </style>
+</head>
+<body>
+    <!-- HEADER_INJECTION -->
+    <main class="guide-article">
+        <section class="hero">
+            <span>SERVICE METHODOLOGY</span>
+            <h1>Tracking SA 서비스 기준</h1>
+            <p>이 문서는 Tracking SA가 어떤 사이트인지, 어떤 페이지를 핵심 서비스로 운영하는지, 전적 데이터와 설명 콘텐츠를 어떤 기준으로 정리하는지 한 번에 확인할 수 있도록 작성했습니다.</p>
+        </section>
+        <section class="section"><h2>출처와 집계 범위</h2><p>공개 전적은 NEXON Open API를 이용합니다. 공식 프로필의 최근 승률·킬뎃과 선택한 경기 구간의 자체 집계는 범위가 다를 수 있습니다. 공개 분석은 솔로랭크·파티랭크·토너먼트·클랜전(퀵매치 포함)의 폭파미션 기록을 대상으로 합니다. 최근 구간은 최신 1~20번째 경기, 이전 구간은 21~40번째 경기이며 부족하면 실제 조회된 경기 수를 사용합니다. 최근 31일 활동은 기간 기준입니다.</p></section>
+<section class="section"><h2>계산식과 반올림</h2><p>선택 구간 승률(%)=승리 경기 수÷집계된 경기 수×100이며 소수 첫째 자리까지 계산합니다. 킬뎃(%)=총 킬÷(총 킬+총 데스)×100이며 정수로 반올림합니다. 경기별 백분율의 평균이 아닙니다. 설명용 예시에서 18킬 2데스와 1킬 9데스를 합치면 19÷30×100≈63%입니다. 킬과 데스가 모두 0이면 교전 표본이 없는 상태입니다.</p></section>
+<section class="section"><h2>변화량과 표본</h2><p>승률 70→75%, 킬뎃 55→60%는 두 지표 모두 +5%p입니다. 변화의 방향과 크기를 구분하며 두 구간에 각각 7경기 이상 있어야 비교 해설을 제공합니다. 7경기는 서비스 표시 기준이며 통계적 확실성을 보증하지 않습니다. 공식 프로필 수치와 자체 집계 수치를 직접 빼서 실력 변화로 해석하지 마세요.</p></section>
+<section class="section"><h2>갱신 주기와 실패 상태</h2><p>프로필 캐시는 기본 5분을 신선한 데이터로 취급합니다. 오래된 캐시를 먼저 보여 준 뒤 백그라운드에서 다시 조회할 수 있습니다. 최신 데이터로 갱신 기능은 재조회이며 제공처의 반영 시차까지 없애지는 않습니다. 요청 제한·시간 초과·일부 경기 조회 실패와 정상적인 0경기를 구분합니다. 오류가 있으면 해당 결과만으로 전체 전적을 판단하지 마세요.</p></section>
+<section class="section"><h2>리그·리플레이·도감</h2><p>리그는 현재 시즌에 정산된 내전을 기준으로 하며 승패 기록이 없는 멤버는 미배치입니다. 기본 리플레이 분석은 사용자가 선택한 병영수첩 JSON 이벤트를 브라우저에서 읽고, 기록에 없는 원인이나 의도를 확정하지 않습니다. 샘플은 가상 경기임을 표시합니다. 마이건2 도감은 넥슨 공식 자료를 분류·비교하며 대조일 이후 패치로 조건이 달라질 수 있으므로 연결된 공식 출처도 확인하세요.</p></section>
+<section class="section"><h2>문서 변경 이력</h2><p>2026-11-15: 집계 공식, 표본 기준, 캐시와 오류 처리, 리그·리플레이·도감의 적용 범위를 보강했습니다. 설명용 계산과 실제 조회 사례를 구분하며 실제 사례에는 조회 날짜를 표시합니다.</p></section><p><a href="/guides/">가이드 목록</a> · <a href="/guides/crew-ranking-guide/">랭킹 기준</a> · <a href="/stats/sudden-attack/league/">리그 허브</a> · <a href="/service-methodology/">데이터 기준</a> · <a href="/contact/">문의</a></p></main>
+    <!-- FOOTER_INJECTION -->
+</body>
+</html>

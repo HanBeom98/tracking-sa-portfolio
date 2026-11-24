@@ -1,0 +1,91 @@
+{
+  "copyRoots": {
+    "src/shared/assets": "public",
+    "src/shared/ui": "public/ui",
+    "src/domains": "public",
+    "src/static": "public"
+  },
+  "rootAssets": [
+    "index.html",
+    "404.html",
+    "offline.html",
+    "manifest.webmanifest",
+    "sw.js",
+    "logo.svg",
+    "favicon.svg",
+    "icon-192.png",
+    "icon-512.png",
+    "apple-touch-icon.png",
+    "maskable-icon-512.png",
+    "ads.txt",
+    "robots.txt",
+    "llms.txt",
+    "_redirects",
+    "_headers",
+    "_routes.json"
+  ],
+  "requiredPages": [
+    "admin/index.html",
+    "index.html",
+    "stats/index.html",
+    "stats/sudden-attack/index.html",
+    "stats/sudden-attack/league/index.html",
+    "stats/sudden-attack/replay/index.html",
+    "ai-replay-pass/index.html",
+    "board/index.html",
+    "board/write/index.html",
+    "board/edit/index.html",
+    "board/post/index.html",
+    "auth/signup/index.html",
+    "account/index.html",
+    "search/index.html",
+    "guides/index.html",
+    "guides/mygun2/index.html",
+    "lab/index.html",
+    "about/index.html",
+    "contact/index.html",
+    "privacy-policy/index.html",
+    "terms/index.html",
+    "inquiry/index.html",
+    "editorial-policy/index.html",
+    "service-methodology/index.html",
+    "updates/index.html"
+  ],
+  "generatedFiles": [
+    "search-index.json",
+    "rss.xml",
+    "sitemap.xml",
+    "build.txt"
+  ],
+  "retiredGuides": {
+    "map-analysis-guide": "map-sample-report",
+    "map-analysis-practice": "map-sample-report",
+    "map-distribution-report": "map-sample-report",
+    "combined-signal-report": "form-signal-report",
+    "recent-form-signals": "form-signal-report",
+    "season-metrics-guide": "form-signal-report",
+    "vs-comparison-limit-report": "vs-comparison-guide",
+    "vs-misread-signals": "vs-comparison-guide"
+  },
+  "fileCopies": {
+    "src/shared/infra/runtime-config.js": "public/runtime-config.js"
+  },
+  "htmlProcessingRoots": [
+    "src/domains"
+  ],
+  "processedRootPages": [
+    "index.html",
+    "404.html"
+  ],
+  "copyPolicy": {
+    "excludedNames": [
+      "README.md"
+    ],
+    "excludedSuffixes": [
+      ".full"
+    ],
+    "excludedDirectories": [
+      "__pycache__"
+    ]
+  }
+}

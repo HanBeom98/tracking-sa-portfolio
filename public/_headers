@@ -1,0 +1,30 @@
+/*
+  Content-Security-Policy: base-uri 'self'; frame-ancestors 'none'; object-src 'none'
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+/api/*
+  Access-Control-Allow-Origin: https://trackingsa.com
+  Access-Control-Allow-Methods: GET, OPTIONS, POST
+  Access-Control-Allow-Headers: Accept, Authorization, Content-Type
+
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+  Service-Worker-Allowed: /
+
+/manifest.webmanifest
+  Cache-Control: public, max-age=3600
+  Content-Type: application/manifest+json; charset=utf-8
+
+/runtime-config.js
+  Cache-Control: no-cache, must-revalidate
+
+/maplestory/alerts/*
+  Cache-Control: no-cache, must-revalidate
+
+/admin/*
+  Cache-Control: private, no-store
+  X-Robots-Tag: noindex, nofollow

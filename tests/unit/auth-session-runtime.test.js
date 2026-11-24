@@ -108,3 +108,31 @@ test("auth session runtime applies auth state and consumes redirect", async () =
     }
   );
 });
+
+test("requireAuth uses latest state after login and logout, not initial readiness", async () => {
+  await withGlobals({
+    location: { pathname: "/board", search: "", href: "http://localhost/board" },
+    sessionStorage: createSessionStorage(),
+  }, async () => {
+    for (const initialUser of [null, { uid: "initial" }]) {
+      let listener;
+      let prompts = 0;
+      const runtime = createAuthSessionRuntime({
+        getAuthService: async () => ({ onAuthStateChanged(cb) { listener = cb; } }),
+        onAuthRequired() { prompts += 1; },
+      });
+      await runtime.init();
+      listener({ user: initialUser });
+      await runtime.waitForReady();
+      const loggedIn = { uid: "signed-in" };
+      listener({ user: loggedIn });
+      assert.equal(await runtime.requireAuth({ redirectTo: "/board/write" }), loggedIn);
+      assert.equal(prompts, 0);
+      assert.equal(sessionStorage.getItem("postLoginRedirect"), null);
+      listener({ user: null });
+      assert.equal(await runtime.requireAuth({ redirectTo: "/board/write" }), null);
+      assert.equal(prompts, 1);
+      sessionStorage.removeItem("postLoginRedirect");
+    }
+  });
+});

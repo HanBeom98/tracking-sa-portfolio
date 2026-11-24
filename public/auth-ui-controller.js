@@ -5,7 +5,10 @@
       : fallback;
   }
 
-  async function loadAuthControlsFactory() {
+  // The literal scriptSrc also connects this nested asset to the build fingerprint.
+  const controlsAsset = { scriptSrc: "/auth-controls.js" };
+
+  async function loadAuthControlsFactory(assetVersion) {
     if (typeof window.createAuthControlsController === "function") {
       return window.createAuthControlsController;
     }
@@ -18,7 +21,7 @@
         return;
       }
       const script = document.createElement("script");
-      script.src = "/auth-controls.js";
+      script.src = controlsAsset.scriptSrc + (assetVersion ? `?v=${encodeURIComponent(assetVersion)}` : "");
       script.async = true;
       script.dataset.authControls = "true";
       script.onload = resolve;
@@ -30,6 +33,7 @@
   }
 
   function createAuthUiController({
+    assetVersion = "",
     getAuthService,
     getCurrentUser,
     onLogoutSuccess,
@@ -40,7 +44,7 @@
       const container = document.getElementById("auth-controls");
       if (!container) return;
 
-      const factory = await loadAuthControlsFactory();
+      const factory = await loadAuthControlsFactory(assetVersion);
       if (typeof factory !== "function") {
         console.error("Auth controls factory is not available.");
         return;

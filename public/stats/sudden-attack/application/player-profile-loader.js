@@ -1,32 +1,66 @@
-import { buildSyntheticAbandonMatches, mergeMatchesWithSyntheticAbandons } from './abandon-match-service.js';
-import { normalizeTrendEntries } from './trend-view-builder.js';
+import { buildSyntheticAbandonMatches, mergeMatchesWithSyntheticAbandons } from './abandon-match-service.js?v=eedd32938f2e';
+import { normalizeTrendEntries } from './trend-view-builder.js?v=9d8384ab49d0';
+import { getPublicMatchCategory } from './public-match-categories.js?v=362dd6d43159';
 
-export async function loadPlayerProfileContext({ repository, crewRepository, characterName, currentRankings = [] }) {
+export async function loadPlayerProfileContext({ repository, crewRepository, characterName, currentRankings = [], scope = 'league' }) {
   const player = await repository.getPlayer(characterName);
+  const isPublic = scope === 'public';
+  const initialMatchLimit = isPublic ? 40 : 80;
+  const initialMatchOptions = isPublic
+    ? { scope, matchTypes: getPublicMatchCategory('all').matchTypes }
+    : { scope };
+  const crewMemberDataPromise = findMemberData({
+    crewRepository,
+    currentRankings,
+    ouid: player.ouid
+  });
+  const archivedTrendPromise = isPublic
+    ? Promise.resolve([])
+    : getArchivedPreviousTrendSafe(crewRepository, player.ouid);
+  const seasonStartPromise = isPublic
+    ? Promise.resolve(new Date(0))
+    : getSeasonStartDateSafe(crewRepository);
+  const seasonHistoryPromise = !isPublic && crewRepository
+    ? crewRepository.getHistory(300)
+    : Promise.resolve([]);
+  const nicknameSyncPromise = isPublic
+    ? Promise.resolve(false)
+    : syncCrewNickname({ crewRepository, player });
 
-  await syncCrewNickname({ crewRepository, player });
-
-  const allMatches = await repository.getRecentMatches(player.ouid, 80, player.nickname);
-  const memberData = await findMemberData({ crewRepository, currentRankings, ouid: player.ouid });
-  const archivedPreviousTrend = await getArchivedPreviousTrendSafe(crewRepository, player.ouid);
-  const seasonStart = await getSeasonStartDateSafe(crewRepository);
-  const seasonHistory = crewRepository ? await crewRepository.getHistory(300) : [];
-  const syntheticAbandonMatches = crewRepository
+  const [
+    allMatches,
+    crewMemberData,
+    archivedPreviousTrend,
+    seasonStart,
+    seasonHistory,
+    rawStats
+  ] = await Promise.all([
+    repository.getRecentMatches(player.ouid, initialMatchLimit, player.nickname, initialMatchOptions),
+    crewMemberDataPromise,
+    archivedTrendPromise,
+    seasonStartPromise,
+    seasonHistoryPromise,
+    repository.apiClient.getRecentInfo(player.ouid),
+    nicknameSyncPromise
+  ]);
+  if (isPublic) {
+    player.isCrew = Boolean(crewMemberData);
+  }
+  const memberData = isPublic ? null : crewMemberData;
+  const syntheticAbandonMatches = !isPublic && crewRepository
     ? buildSyntheticAbandonMatches(allMatches, seasonHistory, {
         ouid: player.ouid,
         nickname: player.nickname
       })
     : [];
   const mergedMatches = mergeMatchesWithSyntheticAbandons(allMatches, syntheticAbandonMatches);
-  const abandonSummary = crewRepository
+  const abandonSummary = !isPublic && crewRepository
     ? crewRepository.buildMemberAbandonSummary(seasonHistory, {
         ouid: player.ouid,
         nickname: player.nickname,
         seasonStart
       })
     : { current: 0, previous: 0 };
-  const rawStats = await repository.apiClient.getRecentInfo(player.ouid);
-
   return {
     player,
     memberData,

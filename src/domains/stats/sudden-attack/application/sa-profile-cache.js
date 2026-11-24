@@ -1,22 +1,31 @@
-export const SA_PROFILE_CACHE_PREFIX = 'sa_cache_';
+export const SA_PROFILE_CACHE_PREFIX = 'sa_cache_v2_';
 
 export class SaProfileCache {
-  constructor(storage = globalThis?.localStorage, prefix = SA_PROFILE_CACHE_PREFIX) {
-    this.storage = storage;
+  constructor(storage, prefix = SA_PROFILE_CACHE_PREFIX) {
+    try { this.storage = storage === undefined ? globalThis.localStorage : storage; }
+    catch { this.storage = null; }
     this.prefix = prefix;
   }
 
-  buildKey(characterName) {
-    return `${this.prefix}${String(characterName || '').toLowerCase()}`;
+  buildKey(characterName, context = 'league') {
+    return `${this.prefix}${String(context || 'league').trim().toLowerCase()}:${String(characterName || '').trim().toLowerCase()}`;
   }
 
   get(key) {
-    if (!this.storage?.getItem) return null;
-    const raw = this.storage.getItem(key);
-    if (!raw) return null;
-
     try {
+      if (!this.storage?.getItem) return null;
+      if (this.prefix === SA_PROFILE_CACHE_PREFIX && key.startsWith(this.prefix)) {
+        try { this.storage.removeItem?.(`sa_cache_${key.slice(this.prefix.length)}`); } catch {}
+      }
+      const raw = this.storage.getItem(key);
+      if (!raw) return null;
       const item = JSON.parse(raw);
+      const views = [item.data, ...Object.values(item.data?.seasonViews || {})];
+      // Older clients labeled a draw as LOSE while every participant was UNKNOWN.
+      // Re-fetch only those corrupt profiles; keep normal win/loss caches usable.
+      if (views.some(view => view?.matches?.some(match => match.matchResult === 'LOSE'
+        && match.allPlayerStats?.length > 0
+        && match.allPlayerStats.every(player => player.result === 'UNKNOWN')))) return null;
       return { data: item.data, timestamp: item.timestamp };
     } catch {
       return null;
@@ -24,8 +33,8 @@ export class SaProfileCache {
   }
 
   set(key, data, timestamp = Date.now()) {
-    if (!this.storage?.setItem) return;
     try {
+      if (!this.storage?.setItem) return;
       const item = { data, timestamp };
       this.storage.setItem(key, JSON.stringify(item));
     } catch (err) {
@@ -34,7 +43,11 @@ export class SaProfileCache {
   }
 
   remove(key) {
-    if (!this.storage?.removeItem) return;
-    this.storage.removeItem(key);
+    try {
+      if (!this.storage?.removeItem) return;
+      this.storage.removeItem(key);
+    } catch (err) {
+      console.warn('[SaProfileCache] Cache removal failed:', err);
+    }
   }
 }

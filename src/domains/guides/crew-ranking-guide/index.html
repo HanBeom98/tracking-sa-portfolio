@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>크루 랭킹 보는 법 | Tracking SA</title>
+    <meta name="description" content="리그 허브에서 크루 랭킹과 멤버 흐름을 볼 때 무엇을 먼저 확인해야 하는지 Tracking SA 기준으로 정리했습니다.">
+    <!-- HEAD_INJECTION -->
+    <style>
+        .guide-article { max-width: 920px; margin: 0 auto; padding: 44px 20px 84px; }
+        .hero { padding: 34px; border-radius: 28px; background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%); color: #fff; margin-bottom: 28px; }
+        .hero span { display: inline-flex; min-height: 30px; padding: 0 12px; align-items: center; border-radius: 999px; background: rgba(255,255,255,0.14); font-size: 0.8rem; font-weight: 800; margin-bottom: 14px; }
+        .hero h1 { margin: 0 0 12px; font-size: 2.3rem; line-height: 1.1; letter-spacing: -0.03em; }
+        .hero p { margin: 0; color: rgba(255,255,255,0.9); line-height: 1.8; }
+        .section { background: #fff; border: 1px solid rgba(15, 23, 42, 0.08); border-radius: 24px; padding: 28px; box-shadow: 0 10px 26px rgba(15, 23, 42, 0.04); }
+        .section + .section { margin-top: 18px; }
+        .section h2 { margin: 0 0 12px; font-size: 1.35rem; color: #0f172a; }
+        .section p, .section li { color: #475569; line-height: 1.82; }
+        .section ul { margin: 14px 0 0; padding-left: 20px; }
+    </style>
+</head>
+<body>
+    <!-- HEADER_INJECTION -->
+    <main class="guide-article">
+        <section class="hero">
+            <span>CREW RANKING</span>
+            <h1>크루 랭킹 보는 법</h1>
+            <p>리그 허브의 랭킹은 단순 순위표가 아니라 참가자 흐름과 운영 맥락을 함께 읽는 도구입니다. 공개 전적과 다른 시선이 필요한 이유를 정리했습니다.</p>
+        </section>
+        <section class="section"><h2>순위와 미배치 기준</h2><p>정산된 승패가 한 경기 이상 있는 멤버만 MMR 순위를 표시합니다. 0승 0패 멤버는 미배치이며, 기본값 1200점은 실력이 확인됐다는 뜻이 아닙니다. 미배치의 MMR·승률·킬뎃은 대시로 표시합니다. 같은 MMR은 공동 순위입니다. 예를 들어 1300점 두 명과 1250점 한 명은 1위·1위·3위이며, 동점 안에서는 경기 수가 많은 멤버를 먼저 보여 줍니다.</p></section>
+<section class="section"><h2>점수 계산과 예시</h2><p>MMR 기본 변화는 승리 +20, 패배 −20입니다. MVP +3, 피해량 1500 이상 +2, 헤드샷 7회 이상 +2의 보너스를 합치되 최대 5점을 적용합니다. 최종 변화는 (기본 변화+보너스)×보정 배율을 정수로 반올림합니다. 보정이 1배인 가상 예시에서 MVP와 피해량 조건을 충족한 승리는 +25점, 같은 보너스를 받은 패배는 −15점입니다.</p></section>
+<section class="section"><h2>보정 배율과 탈주</h2><p>HSR은 경기 성적에 따라 별도로 갱신하는 내부 지표입니다. 경기 전 HSR−MMR이 150 이상이면 승리 1.5배·패배 0.5배, 80 이상 150 미만이면 1.2배·0.8배입니다. −150 이하이면 승리 0.5배·패배 1.5배, −150 초과 −80 이하이면 0.8배·1.2배이며 나머지는 1배입니다. 탈주 처리에는 별도 MMR −30·HSR −20 감점 규칙이 적용됩니다.</p></section>
+<section class="section"><h2>집계 기간과 기록 확인</h2><p>리그 화면에 표시된 시즌 시작 이후 정산된 내전 기록이 대상입니다. 시즌 시작 이전 기록과 이미 정산한 경기 ID는 제외합니다. 공개 검색에서 확인되는 일반 경기 전체가 리그 점수에 반영되는 것은 아닙니다. 경기를 했는데 미배치라면 닉네임·경기 시각·경기 ID와 시즌 시작일을 운영자에게 전달해 정산 여부를 확인하세요. 화면에 기록이 없다고 실제 미참여나 API 장애를 단정하지 않습니다.</p></section>
+<section class="section"><h2>승률과 킬뎃</h2><p>승률은 승수÷(승수+패수)×100, 킬뎃은 누적 킬÷(누적 킬+누적 데스)×100이며 정수로 반올림합니다. 예를 들어 3승 2패는 승률 60%, 40킬 60데스는 킬뎃 40%입니다. 서로 다른 질문에 답하는 수치이므로 하나만으로 팀 기여도를 단정하지 마세요.</p></section><p><a href="/guides/">가이드 목록</a> · <a href="/guides/crew-ranking-guide/">랭킹 기준</a> · <a href="/stats/sudden-attack/league/">리그 허브</a> · <a href="/service-methodology/">데이터 기준</a> · <a href="/contact/">문의</a></p></main>
+    <!-- FOOTER_INJECTION -->
+</body>
+</html>

@@ -2,9 +2,14 @@ export function buildAuthService({ authRepository }) {
   if (!authRepository) {
     throw new Error("authRepository is required");
   }
+  const subscriptions = new Set();
 
-  function signInWithProvider(providerId) {
-    return authRepository.signInWithProvider(providerId);
+  function deliver(subscription, state) {
+    try {
+      subscription.callback(state);
+    } catch (error) {
+      console.error("Auth state listener failed:", error);
+    }
   }
 
   function signInWithEmail(email, password) {
@@ -15,6 +20,10 @@ export function buildAuthService({ authRepository }) {
     return authRepository.signUpWithEmail(email, password);
   }
 
+  function changePassword({ currentPassword, newPassword } = {}) {
+    return authRepository.changePassword({ currentPassword, newPassword });
+  }
+
   function signOut() {
     return authRepository.signOut();
   }
@@ -23,8 +32,14 @@ export function buildAuthService({ authRepository }) {
     return authRepository.checkNicknameAvailability(nickname);
   }
 
-  function updateProfile({ nickname, photoURL } = {}) {
-    return authRepository.updateProfile({ nickname, photoURL });
+  async function updateProfile({ nickname, photoURL } = {}) {
+    const profile = await authRepository.updateProfile({ nickname, photoURL });
+    for (const subscription of subscriptions) {
+      if (subscription.user?.uid !== profile?.uid) continue;
+      subscription.version++;
+      deliver(subscription, { user: subscription.user, profile });
+    }
+    return profile;
   }
 
   function deleteAccount({ password } = {}) {
@@ -32,25 +47,34 @@ export function buildAuthService({ authRepository }) {
   }
 
   function onAuthStateChanged(callback) {
-    return authRepository.onAuthStateChanged(async (user) => {
+    const subscription = { callback, user: null, version: 0 };
+    subscriptions.add(subscription);
+    const unsubscribe = authRepository.onAuthStateChanged(async (user) => {
+      subscription.user = user;
+      const version = ++subscription.version;
       if (!user) {
-        callback({ user: null, profile: null });
+        deliver(subscription, { user: null, profile: null });
         return;
       }
       try {
         const profile = await authRepository.ensureUserProfile(user);
-        callback({ user, profile });
+        if (subscriptions.has(subscription) && version === subscription.version) deliver(subscription, { user, profile });
       } catch (error) {
         console.error("Failed to load user profile:", error);
-        callback({ user, profile: null });
+        if (subscriptions.has(subscription) && version === subscription.version) deliver(subscription, { user, profile: null });
       }
     });
+    return () => {
+      subscriptions.delete(subscription);
+      subscription.version++;
+      unsubscribe();
+    };
   }
 
   return {
-    signInWithProvider,
     signInWithEmail,
     signUpWithEmail,
+    changePassword,
     signOut,
     checkNicknameAvailability,
     updateProfile,

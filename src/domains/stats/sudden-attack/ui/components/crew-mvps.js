@@ -1,3 +1,5 @@
+import { escapeHtml } from '../../../../shared/html.js';
+
 /**
  * Weekly MVP Cards Component
  */
@@ -111,19 +113,19 @@ export class SaCrewMvps extends HTMLElement {
       <div class="mvp-container">
         <div class="mvp-card leader">
           <span class="mvp-badge">🏆 최강의 실력자</span>
-          <div class="mvp-name" data-name="${mvps.topMmr.characterName}">${mvps.topMmr.characterName}</div>
+          <div class="mvp-name" data-name="${escapeHtml(mvps.topMmr.characterName)}">${escapeHtml(mvps.topMmr.characterName)}</div>
           <div class="mvp-stat">현재 점수: <b>${mvps.topMmr.mmr} pts</b></div>
           <div class="mvp-icon">🏆</div>
         </div>
         <div class="mvp-card killer">
           <span class="mvp-badge">🔥 무자비한 킬러</span>
-          <div class="mvp-name" data-name="${mvps.topKd.characterName}">${mvps.topKd.characterName}</div>
+          <div class="mvp-name" data-name="${escapeHtml(mvps.topKd.characterName)}">${escapeHtml(mvps.topKd.characterName)}</div>
           <div class="mvp-stat">내전 K/D: <b>${getKd(mvps.topKd)}</b></div>
           <div class="mvp-icon">🔥</div>
         </div>
         <div class="mvp-card professional">
           <span class="mvp-badge">🛡️ 승리의 보증수표</span>
-          <div class="mvp-name" data-name="${mvps.topWins.characterName}">${mvps.topWins.characterName}</div>
+          <div class="mvp-name" data-name="${escapeHtml(mvps.topWins.characterName)}">${escapeHtml(mvps.topWins.characterName)}</div>
           <div class="mvp-stat">총 승리: <b>${mvps.topWins.wins}승</b></div>
           <div class="mvp-icon">🛡️</div>
         </div>

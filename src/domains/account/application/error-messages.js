@@ -34,3 +34,26 @@ export function resolveDeleteAccountError(error) {
   }
   return { key: "delete_account_failed", fallback: "회원탈퇴에 실패했습니다." };
 }
+
+export function resolvePasswordChangeError(error) {
+  const code = error && error.code ? String(error.code) : "";
+  if (code === "auth/wrong-password" || code === "auth/invalid-credential") {
+    return { key: "password_change_wrong_current", fallback: "현재 비밀번호가 올바르지 않습니다." };
+  }
+  if (code === "auth/weak-password") {
+    return { key: "password_change_weak", fallback: "새 비밀번호는 6자 이상이어야 합니다." };
+  }
+  if (code === "auth/too-many-requests") {
+    return { key: "password_change_too_many", fallback: "요청이 너무 많습니다. 잠시 후 다시 시도해주세요." };
+  }
+  if (code === "auth/network-request-failed") {
+    return { key: "password_change_network_error", fallback: "네트워크 연결을 확인한 후 다시 시도해주세요." };
+  }
+  if (code === "auth/not-authenticated") {
+    return { key: "password_change_auth_required", fallback: "비밀번호 변경은 로그인 후 이용할 수 있습니다." };
+  }
+  if (code === "auth/service-unavailable") {
+    return { key: "password_change_service_unavailable", fallback: "비밀번호 변경 기능을 불러오지 못했습니다." };
+  }
+  return { key: "password_change_failed", fallback: "비밀번호 변경에 실패했습니다." };
+}

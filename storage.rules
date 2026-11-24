@@ -1,0 +1,28 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isStaff() {
+      return request.auth != null && (
+        request.auth.token.email == "demo-e63e3a1b@example.com" ||
+        request.auth.token.email == "demo-9249b6f9@example.com" ||
+        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == "admin"
+      );
+    }
+
+    match /board-images/{userId}/{imageId} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && (request.auth.uid == userId || isStaff())
+        && imageId.matches('^[A-Za-z0-9-]+[.]webp$')
+        && request.resource.size <= 5 * 1024 * 1024
+        && request.resource.contentType == 'image/webp'
+        && request.resource.metadata.get('ownerUid', '') == userId;
+      allow update: if false;
+      allow delete: if request.auth != null && (request.auth.uid == userId || isStaff());
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

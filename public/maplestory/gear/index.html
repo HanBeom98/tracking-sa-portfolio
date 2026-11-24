@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https://open.api.nexon.com; connect-src 'self'; base-uri 'none'; form-action 'none'">
+    <title>장비 | TrackingMaple</title>
+    <meta name="description" content="메이플스토리 캐릭터의 착용 장비, 스탯과 프리셋을 확인하세요.">
+    <link rel="stylesheet" href="../maple-theme.css?v=tracking-maple-2">
+    <link rel="stylesheet" href="../tracking-maple.css?v=tracking-maple-2">
+    <script type="module" src="./gear.js?v=tracking-maple-1"></script>
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a class="maple-brand" href="../"><img src="../art/maple-leaf.png" width="24" height="24" alt="">TrackingMaple</a>
+            <nav class="maple-nav" aria-label="TrackingMaple">
+                <a href="../" id="gear-home">홈</a><a href="../alerts/">사냥</a><a href="../boss/">보스</a><a href="./" aria-current="page" id="gear-self">장비</a>
+            </nav>
+            <a class="lab-link" href="/lab/">실험실 <span aria-hidden="true">↗</span></a>
+        </div>
+    </header>
+    <main class="shell">
+        <div class="row">
+            <div>
+                <p class="eyebrow" id="gear-name"></p>
+                <h1>장비</h1>
+                <p class="quiet" id="gear-profile"></p>
+            </div>
+            <a class="secondary" href="../#character-search">다른 캐릭터 검색</a>
+        </div>
+        <div class="actions" id="gear-feedback">
+            <p class="quiet" id="gear-status" role="status"></p>
+            <button class="secondary" id="gear-retry" type="button" hidden>다시 조회</button>
+        </div>
+        <section id="gear-stats" aria-label="현재 장착 기준 주요 스탯" hidden>
+            <dl class="stat-grid">
+                <div><dt>전투력</dt><dd data-stat="power">—</dd></div>
+                <div><dt>쿨타임 감소</dt><dd data-stat="cooldown">—</dd></div>
+                <div><dt>아이템 드롭률</dt><dd data-stat="drop">—</dd></div>
+                <div><dt>메소 획득량</dt><dd data-stat="meso">—</dd></div>
+            </dl>
+            <p class="quiet source" id="gear-stat-source"></p>
+        </section>
+        <div class="gear-layout" id="gear-content" hidden>
+            <section class="panel" aria-labelledby="gear-slots-title">
+                <div class="row">
+                    <h2 id="gear-slots-title">착용 장비</h2>
+                    <div class="actions" role="group" id="gear-presets" aria-label="장비 프리셋" hidden></div>
+                </div>
+                <p id="gear-compare" class="quiet" hidden>현재 착용과 다른 슬롯에 ‘변경’을 표시해요.</p>
+                <ul class="gear-slots" id="gear-slots"></ul>
+            </section>
+            <section class="panel gear-detail" id="gear-detail" aria-label="선택한 장비" aria-live="polite">
+                <div class="gear-detail-title">
+                    <img id="item-icon" alt="" width="52" height="52" referrerpolicy="no-referrer" hidden>
+                    <div><h2 id="item-name"></h2><p class="eyebrow" id="item-stars"></p></div>
+                </div>
+                <p class="quiet" id="item-change" hidden></p>
+                <dl class="gear-details" id="item-details"></dl>
+            </section>
+        </div>
+        <section class="panel" aria-labelledby="gear-sets-title" id="gear-sets" hidden>
+            <h2 id="gear-sets-title">현재 적용 중인 세트 효과</h2>
+            <div class="gear-set-list" id="gear-set-list"></div>
+        </section>
+        <p class="quiet source">Data based on NEXON Open API</p>
+    </main>
+</body>
+</html>

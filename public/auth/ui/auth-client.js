@@ -1,5 +1,5 @@
-import { buildAuthService } from "../application/authService.js";
-import { createFirebaseAuthRepository } from "../infra/firebaseAuthRepository.js";
+import { buildAuthService } from "../application/authService.js?v=8673a2a5ca02";
+import { createFirebaseAuthRepository } from "../infra/firebaseAuthRepository.js?v=c0a3d9c8b8ca";
 
 function bootAuthDomain() {
   try {
@@ -22,4 +22,8 @@ function bootAuthDomain() {
   }
 }
 
-bootAuthDomain();
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", bootAuthDomain, { once: true });
+} else {
+  bootAuthDomain();
+}

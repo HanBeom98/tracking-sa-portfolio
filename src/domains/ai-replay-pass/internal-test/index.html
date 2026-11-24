@@ -1,0 +1,21 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow"><meta name="referrer" content="no-referrer"><title>이전 TEST 기록 관리 - Tracking SA</title><link rel="stylesheet" href="../style.css"></head><body><main class="pass-layout"><div class="pass-content"><h1>운영 TEST 기록 관리</h1><p>이전 TEST 거래 확인·복구를 위한 운영 도구입니다. 상품 구매는 <a href="/ai-replay-pass/">이용권 페이지</a>에서 진행하세요.</p>      <section class="pass-test" aria-labelledby="test-title" id="merchant-test">
+        <h2 id="test-title">심사용 TEST 결제</h2>
+        <p>별도로 전달받은 심사용 접근코드가 필요합니다. 로그인 없이 상품을 확인할 수 있고, TEST 진행만 접근코드로 제한합니다. 표시 금액은 3,300원이며 TEST 승인 결과는 실제 이용권 잔액에 반영되지 않습니다.</p>
+        <ol><li>아래 접근코드를 입력하고 TEST 확인 항목을 선택합니다.</li><li>TEST 주문 준비 → TEST 결제창 준비 → 토스 TEST 결제창으로 이동합니다.</li><li>심사 담당자 본인의 토스 앱에서 구매자 인증을 완료하고 사이트로 돌아옵니다.</li><li>같은 코드를 입력한 뒤 기존 주문 확인 → 구매자 인증 후 TEST 승인 확인을 누릅니다. 새 탭이면 보관된 TEST 주문 복구부터 진행합니다.</li></ol>
+        <p class="pass-muted">하루에 준비할 수 있는 TEST 주문 수와 전체 한도를 제한하고 있습니다. 한도 안내가 나오면 운영자에게 문의해 주세요. 새 주문·승인은 자동으로 반복 요청하지 않습니다.</p>
+        <label for="review-access">심사용 접근코드</label>
+        <input id="review-access" type="password" maxlength="64" autocomplete="off" spellcheck="false" placeholder="별도로 전달받은 코드">
+        <p class="pass-muted">접근코드는 저장하지 않습니다. 주문 복구 정보는 이 코드로 암호화하여 같은 브라우저에 저장하며, 24시간 안에만 복구할 수 있습니다. 토스에서 돌아오거나 새 탭을 열면 같은 코드를 다시 입력해 주세요. 브라우저 데이터 삭제·복구 기간 경과 후에는 운영자에게 문의하세요.</p>
+        <label class="pass-agreement"><input id="review-accept" type="checkbox"> 실제 판매가 아닌 TEST이며 운영 이용권이 지급되지 않음을 확인했습니다.</label>
+        <div class="pass-actions">
+          <button type="button" data-review="create" disabled>TEST 주문 준비</button>
+          <button type="button" data-review="get" disabled>기존 TEST 주문 확인</button>
+          <button type="button" data-review="recover" disabled>보관된 TEST 주문 복구</button>
+          <button type="button" data-review="checkout" disabled>TEST 결제창 준비</button>
+          <button type="button" data-review="complete" disabled>구매자 인증 후 TEST 승인 확인</button>
+        </div>
+        <p id="review-status" role="status" aria-live="polite" data-state="ready">접근코드와 TEST 확인 항목을 입력한 후 주문 준비를 누르세요. 현재는 실제 결제가 아닌 TEST입니다.</p>
+        <dl id="review-order" hidden></dl>
+        <a id="review-handoff" class="pass-handoff" hidden rel="noreferrer" referrerpolicy="no-referrer">토스 TEST 결제창으로 이동</a>
+        <noscript>TEST 결제에는 JavaScript가 필요합니다. 위 상품 안내는 그대로 확인할 수 있습니다.</noscript>
+      </section></div></main><script type="module" src="../main.js"></script></body></html>

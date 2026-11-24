@@ -19,22 +19,6 @@
     <meta name="twitter:title" content="게시물 - TrackingSA">
     <meta property="twitter:description" content="TrackingSA에 게시된 게시물을 확인하세요. 다양한 주제의 글을 읽고 의견을 공유할 수 있습니다.">
     <meta name="twitter:image" content="https://trackingsa.com/logo.svg">
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'G-TGD3WRNKPZ');
-    </script>
-    <script type="text/javascript">
-    (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-    })(window, document, "clarity", "script", "vb9q33ggpa");
-</script>
 </head>
 <body>
 
@@ -42,6 +26,7 @@
     <main>
         <section class="section-card">
             <board-post-view></board-post-view>
+            <board-comments hidden></board-comments>
         </section>
     </main>
 
@@ -49,6 +34,7 @@
 
     <!-- 게시물 상세 로직을 위한 별도의 스크립트 -->
     <script type="module" src="../ui/board-post-view.js"></script>
+    <script type="module" src="../ui/board-comments.js"></script>
     <script type="module" src="main.js"></script>
 </body>
 </html>

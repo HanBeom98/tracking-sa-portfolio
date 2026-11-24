@@ -7,26 +7,6 @@
   }
 
   function createAuthActionHandlers({ getAuthService }) {
-    async function signInWithProvider(providerId, { onSuccess, onError } = {}) {
-      const authService = await getAuthService();
-      if (!authService) {
-        const message = t("auth_service_unavailable", "로그인 기능이 아직 준비되지 않았습니다.");
-        if (typeof onError === "function") onError(message);
-        return false;
-      }
-
-      try {
-        await authService.signInWithProvider(providerId);
-        if (typeof onSuccess === "function") onSuccess();
-        return true;
-      } catch (error) {
-        console.error("Provider login failed:", error);
-        const message = t("auth_login_retry", "로그인에 실패했습니다. 다시 시도해주세요.");
-        if (typeof onError === "function") onError(message, error);
-        return false;
-      }
-    }
-
     async function signInWithEmail(
       { email, password },
       { onSuccess, onValidationError, onError } = {}
@@ -75,7 +55,6 @@
     }
 
     return {
-      signInWithProvider,
       signInWithEmail,
       signOut,
       goToSignup,

@@ -42,60 +42,47 @@ function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-test("firestore rules: posts allow only public read + admin delete", () => {
-  const rules = readRules();
-  const block = normalize(extractMatchBlock(rules, "/posts/{document=**}"));
-
-  assert.ok(block.includes("allow read: if true;"));
-  assert.ok(block.includes("allow delete: if isStaff();"));
-  assert.ok(block.includes("allow create, update: if false;"));
-});
-
 test("firestore rules: board_posts enforce author ownership and immutability", () => {
   const rules = readRules();
   const block = normalize(extractMatchBlock(rules, "/board_posts/{postId}"));
 
   assert.ok(block.includes("allow read: if true;"));
-  assert.ok(block.includes("allow create: if request.auth != null && request.resource.data.authorUid == request.auth.uid && (request.resource.data.category != \"notice\" || isStaff());"));
+  assert.ok(block.includes("allow create: if request.auth != null"));
+  assert.ok(block.includes("isValidBoardPost(request.resource.data)"));
+  assert.ok(block.includes("request.resource.data.category != \"notice\" || isStaff()"));
+  assert.ok(block.includes("affectedKeys().hasOnly(['title', 'content', 'attachments'])"));
+  assert.ok(block.includes("hasValidBoardAttachments(request.resource.data, resource.data.authorUid)"));
   assert.ok(block.includes("resource.data.authorUid == request.auth.uid && request.resource.data.authorUid == resource.data.authorUid && resource.data.category != \"notice\"")); // immutability and category check
   assert.ok(block.includes("|| isStaff()"));
 });
 
-test("firestore rules: users profile use isOwner helper and forces free role", () => {
+test("firestore rules: users profile allow free role and admin email promotion", () => {
   const rules = readRules();
   const block = normalize(extractMatchBlock(rules, "/users/{userId}"));
 
-  assert.ok(block.includes("allow create: if isOwner(userId) && request.resource.data.role == \"free\";"));
-  assert.ok(block.includes("allow update: if isOwner(userId) && request.resource.data.role == resource.data.role;"));
+  assert.ok(block.includes("allow create: if isOwner(userId)"));
+  assert.ok(block.includes("isValidNewUserProfile(request.resource.data, userId)"));
+  assert.ok(block.includes("request.resource.data.role == \"free\""));
+  assert.ok(block.includes("(isAdminEmail() && request.resource.data.role == \"admin\")"));
+  assert.ok(block.includes("allow update: if isOwner(userId)"));
+  assert.ok(block.includes("affectedKeys().hasOnly(['email', 'displayName', 'photoURL', 'nickname', 'nicknameUpdatedAt', 'role'])"));
+  assert.ok(block.includes("request.resource.data.role == resource.data.role"));
 });
 
-test("firestore rules: nicknames allow guarded create/delete only", () => {
+test("firestore rules: nickname ownership is coupled to the committed profile", () => {
   const rules = readRules();
   const block = normalize(extractMatchBlock(rules, "/nicknames/{nickname}"));
 
   assert.ok(block.includes("allow read: if true;"));
   assert.ok(block.includes("allow create: if request.auth != null"));
-  assert.ok(block.includes("request.resource.data.uid == request.auth.uid"));
-  assert.ok(block.includes("allow delete: if request.auth != null && resource.data.uid == request.auth.uid;"));
-});
-
-test("firestore rules: game rankings are create-only with valid score", () => {
-  const rules = readRules();
-  const block = normalize(extractMatchBlock(rules, "/tetris_rankings/{docId}"));
-
-  assert.ok(block.includes("allow read: if true;"));
-  assert.ok(block.includes("allow create: if request.resource.data.score is number;"));
-  assert.ok(block.includes("allow update, delete: if false;"));
-});
-
-test("firestore rules: games allow public read, authenticated pending create, and admin management", () => {
-  const rules = readRules();
-  const block = normalize(extractMatchBlock(rules, "/games/{gameId}"));
-
-  assert.ok(block.includes("allow read: if true;"));
-  assert.ok(block.includes("allow create: if isStaff() || (request.auth != null && request.resource.data.status == \"pending\");"));
-  assert.ok(block.includes("allow update: if isStaff() || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['playCount']));"));
-  assert.ok(block.includes("allow delete: if isStaff();"));
+  assert.ok(block.includes("data.uid == request.auth.uid"));
+  assert.ok(block.includes("keys().hasOnly(['uid', 'nickname', 'updatedAt'])"));
+  assert.ok(block.includes("nickname == data.nickname.lower()"));
+  assert.ok(block.includes("getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.nickname == data.nickname"));
+  assert.ok(block.includes("allow update: if request.auth != null && resource.data.uid == request.auth.uid && validClaim()"));
+  assert.ok(block.includes("allow delete: if request.auth != null && resource.data.uid == request.auth.uid"));
+  assert.ok(rules.includes("ownsNicknameAfter(data.nickname, userId)"));
+  assert.ok(rules.includes("releasedPreviousNickname(data.nickname, userId)"));
 });
 
 test("firestore rules: default deny exists", () => {
@@ -103,4 +90,61 @@ test("firestore rules: default deny exists", () => {
   const block = normalize(extractMatchBlock(rules, "/{document=**}"));
 
   assert.ok(block.includes("allow read, write: if false;"));
+});
+
+test("firestore rules: comment writes require an atomic ten-second rate limit", () => {
+  const rules = readRules();
+  const comments = normalize(extractMatchBlock(rules, "/comments/{commentId}"));
+  const limits = normalize(extractMatchBlock(rules, "/comment_rate_limits/{userId}"));
+
+  assert.ok(comments.includes("hasFreshCommentRateLimit(commentId)"));
+  assert.ok(rules.includes("getAfter(/databases/$(database)/documents/comment_rate_limits/$(request.auth.uid))"));
+  assert.ok(rules.includes("data.commentId == commentId"));
+  assert.ok(limits.includes("request.time >= resource.data.lastCommentAt + duration.value(10, 's')"));
+  assert.ok(limits.includes("allow delete: if false;"));
+});
+
+test("firestore rules: comments are limited to free posts and immutable", () => {
+  const rules = readRules();
+  const block = normalize(extractMatchBlock(rules, "/comments/{commentId}"));
+
+  assert.ok(block.includes('data.category == "free"'));
+  assert.ok(block.includes("isValidBoardComment(request.resource.data)"));
+  assert.ok(block.includes("data.parentId == null"));
+  assert.ok(rules.includes("data.createdAt == request.time"));
+  assert.ok(block.includes("commentId.matches('^[A-Za-z0-9]{20}$')"));
+  assert.ok(rules.includes("data.parentId.matches('^[A-Za-z0-9]{20}$')"));
+  assert.ok(block.includes("affectedKeys().hasOnly(['content', 'authorName', 'deleted'])"));
+  assert.ok(block.includes("resource.data.authorUid == request.auth.uid"));
+  assert.ok(block.includes("|| isStaff()"));
+});
+
+test("storage rules: board images enforce ownership, type and size", () => {
+  const rules = normalize(readFileSync("storage.rules", "utf8"));
+
+  assert.ok(rules.includes("match /board-images/{userId}/{imageId}"));
+  assert.ok(rules.includes("request.auth.uid == userId"));
+  assert.ok(rules.includes("request.resource.size <= 5 * 1024 * 1024"));
+  assert.ok(rules.includes("request.resource.contentType == 'image/webp'"));
+  assert.ok(rules.includes("allow update: if false;"));
+  assert.ok(rules.includes("allow read, write: if false;"));
+});
+
+test("firestore rules: applications are bounded and session client writes are denied", () => {
+  const rules = readRules();
+  const applications = normalize(extractMatchBlock(rules, "/sa_crew_applications/{docId}"));
+  const sessions = normalize(extractMatchBlock(rules, "/match_sessions/{guildId}"));
+  const searches = normalize(extractMatchBlock(rules, "/popular_searches/{nickname}"));
+
+  assert.ok(applications.includes("allow create: if request.auth != null"));
+  assert.ok(applications.includes("docId == request.auth.uid"));
+  assert.ok(applications.includes("keys().hasOnly(['applicantUid', 'characterName', 'ouid', 'status', 'appliedAt'])"));
+  assert.ok(applications.includes("request.resource.data.applicantUid == request.auth.uid"));
+  assert.ok(applications.includes("request.resource.data.status == 'PENDING'"));
+  assert.ok(applications.includes("request.auth.uid == docId"));
+  assert.ok(!sessions.includes("allow read, write: if true;"));
+  assert.ok(sessions.includes("allow create, update: if false;"));
+  assert.ok(!sessions.includes("request.auth"));
+  assert.ok(sessions.includes("allow delete: if false;"));
+  assert.ok(searches.includes("request.resource.data.count == resource.data.count + 1"));
 });

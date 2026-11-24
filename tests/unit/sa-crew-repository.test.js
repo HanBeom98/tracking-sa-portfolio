@@ -2,6 +2,139 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { CrewRepository } from "../../src/domains/stats/sudden-attack/infra/crew-repository.js";
 
+test("CrewRepository limits history reads in the Firestore query", async () => {
+  const calls = [];
+  const query = {
+    orderBy(field, direction) {
+      calls.push(["orderBy", field, direction]);
+      return this;
+    },
+    limit(value) {
+      calls.push(["limit", value]);
+      return this;
+    },
+    async get() {
+      calls.push(["get"]);
+      return {
+        docs: [{
+          id: "match-1",
+          data: () => ({ matchDate: "2026-07-25T00:00:00.000Z", map: "제3보급창고" })
+        }]
+      };
+    }
+  };
+  const previousWindow = globalThis.window;
+  globalThis.window = {
+    db: {
+      collection(name) {
+        calls.push(["collection", name]);
+        return query;
+      }
+    }
+  };
+
+  try {
+    const history = await new CrewRepository(null).getHistory(30);
+    assert.deepEqual(calls, [
+      ["collection", "sa_crew_history"],
+      ["orderBy", "matchDate", "desc"],
+      ["limit", 30],
+      ["get"]
+    ]);
+    assert.equal(history.length, 1);
+    assert.equal(history[0].matchId, "match-1");
+  } finally {
+    globalThis.window = previousWindow;
+  }
+});
+
+test("CrewRepository stores one crew application under the authenticated uid", async () => {
+  const calls = [];
+  const previousWindow = globalThis.window;
+  const memberRef = {
+    async get() {
+      return { exists: false };
+    }
+  };
+  const applicationRef = {
+    async get() {
+      return { exists: false };
+    },
+    async set(payload) {
+      calls.push(["set", payload]);
+    }
+  };
+  globalThis.window = {
+    firebase: {
+      firestore: {
+        FieldValue: {
+          serverTimestamp: () => "server-time"
+        }
+      }
+    },
+    db: {
+      collection(name) {
+        return {
+          doc(id) {
+            calls.push(["doc", name, id]);
+            return name === "sa_crew_members" ? memberRef : applicationRef;
+          }
+        };
+      }
+    }
+  };
+
+  try {
+    await new CrewRepository(null).applyForCrew("Tracking", "ouid-1", "uid-1");
+    assert.deepEqual(calls, [
+      ["doc", "sa_crew_members", "ouid-1"],
+      ["doc", "sa_crew_applications", "uid-1"],
+      ["set", {
+        applicantUid: "uid-1",
+        characterName: "Tracking",
+        ouid: "ouid-1",
+        status: "PENDING",
+        appliedAt: "server-time"
+      }]
+    ]);
+  } finally {
+    globalThis.window = previousWindow;
+  }
+});
+
+test("CrewRepository rejects anonymous and duplicate crew applications", async () => {
+  const repo = new CrewRepository(null);
+  await assert.rejects(
+    () => repo.applyForCrew("Tracking", "ouid-1", ""),
+    /로그인 후 신청/
+  );
+
+  const previousWindow = globalThis.window;
+  globalThis.window = {
+    db: {
+      collection(name) {
+        return {
+          doc() {
+            return {
+              async get() {
+                return { exists: name === "sa_crew_applications" };
+              }
+            };
+          }
+        };
+      }
+    }
+  };
+  try {
+    await assert.rejects(
+      () => repo.applyForCrew("Tracking", "ouid-1", "uid-1"),
+      /이미 제출한 신청/
+    );
+  } finally {
+    globalThis.window = previousWindow;
+  }
+});
+
 test("CrewRepository calculates season seed from recent and older archives", () => {
   const repo = new CrewRepository(null);
   const recentArchive = {

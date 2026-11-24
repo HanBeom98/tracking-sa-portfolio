@@ -1,3 +1,5 @@
+import { escapeHtml } from '../../../../shared/html.js?v=d181848c5b3c';
+
 /**
  * UI Component for Map Mastery Analytics
  */
@@ -46,7 +48,7 @@ export class SaMapMastery extends HTMLElement {
             return `
               <div class="map-stat-row">
                 <div class="map-info">
-                  <span class="map-name">${m.name}</span>
+                  <span class="map-name">${escapeHtml(m.name)}</span>
                   <span class="map-count">${m.total}전 ${m.wins}승</span>
                 </div>
                 <div class="map-bar-wrapper">

@@ -1,3 +1,5 @@
+import { getCurrentUser } from '../../../auth/infra/auth-gateway.js?v=512ed5fcfa8b';
+
 /**
  * Infra Client for sending Sudden Attack match notifications to Discord
  */
@@ -13,6 +15,9 @@ export class SaDiscordClient {
    */
   async notifyMatchSettled(match, playerChanges) {
     try {
+      const currentUser = getCurrentUser();
+      if (!currentUser) throw new Error('관리자 로그인이 필요합니다.');
+      const idToken = await currentUser.getIdToken();
       const winColor = match.matchResult === 'WIN' ? 0xFF0000 : 0x00AAFF; // Red or Blue
 
       const embed = {
@@ -55,7 +60,10 @@ export class SaDiscordClient {
 
       const response = await fetch(this.endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
         body: JSON.stringify({ embeds: [embed] })
       });
 

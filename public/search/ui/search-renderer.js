@@ -1,3 +1,5 @@
+import { isSearchQueryValid } from "../application/search-data.js?v=51c60f362359";
+
 function tr(key, fallback) {
   return window.getTranslation ? window.getTranslation(key, fallback) : fallback;
 }
@@ -12,7 +14,7 @@ export function renderSearchSummary(query, count) {
   const summary = document.getElementById("searchSummary");
   if (!summary) return;
   
-  if (query.trim().length < 2) {
+  if (!isSearchQueryValid(query)) {
     summary.textContent = tr("search_enter_keyword", "2글자 이상 입력해주세요.");
     return;
   }
@@ -38,9 +40,7 @@ export function renderSearchResults(items, query = "") {
         <div style="margin-top: 30px; text-align: left; max-width: 500px; margin-left: auto; margin-right: auto;">
           <h4 style="font-size: 1rem; margin-bottom: 15px; color: var(--text-main);">${tr("recommended_for_you", "이런 서비스는 어때요?")}</h4>
           <div style="display: flex; flex-direction: column; gap: 10px;">
-            <a href="/games/" style="text-decoration:none; color:var(--p-blue); font-weight:700;">➔ ${tr("game_center_menu", "게임 센터")}</a>
-            <a href="/glossary/" style="text-decoration:none; color:var(--p-blue); font-weight:700;">➔ ${tr("ai_glossary", "AI 용어사전")}</a>
-            <a href="/futures-estimate/" style="text-decoration:none; color:var(--p-blue); font-weight:700;">➔ ${tr("futures_estimate_index", "지수 예측")}</a>
+            <a href="/stats/" style="text-decoration:none; color:var(--p-blue); font-weight:700;">➔ ${tr("stats_hub_h1", "전적 센터")}</a>
             <a href="/about/" style="text-decoration:none; color:var(--p-blue); font-weight:700;">➔ ${tr("about_us", "서비스 소개")}</a>
           </div>
         </div>

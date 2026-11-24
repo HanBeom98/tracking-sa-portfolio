@@ -1,3 +1,5 @@
+import { escapeHtml } from '../../../../shared/html.js';
+
 /**
  * Interactive Team Draft Board Component
  */
@@ -43,7 +45,7 @@ ${res.blue.map(m => `- ${m.characterName} (${m.position === 'sniper' ? '스나' 
       <div class="draft-card">
         <div class="card-top">
           <span class="pos-icon">${m.position === 'sniper' ? '🎯' : '🔫'}</span>
-          <span class="name">${m.characterName}</span>
+          <span class="name">${escapeHtml(m.characterName)}</span>
         </div>
         <div class="card-bottom">
           <span class="mmr">${m.mmr} pts <span style="font-size:0.8em;color:var(--text-dim);">(HSR: ${m.hsr || m.mmr})</span></span>

@@ -15,12 +15,23 @@
     <meta name="twitter:image" content="https://trackingsa.com/logo.svg">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
-    <meta name="description" content="서든어택 전적 검색을 포함한 게임 전적 조회와 매치 분석 서비스를 모아둔 전적 센터입니다.">
+    <meta name="description" content="Tracking SA의 대표 서비스인 서든어택 전적 검색과 리그 허브 진입을 정리한 전적 센터입니다.">
     <meta property="og:title" content="전적 센터 | Tracking SA">
-    <meta property="og:description" content="서든어택 전적 검색을 포함한 게임 전적 조회와 매치 분석 서비스를 모아둔 전적 센터입니다.">
+    <meta property="og:description" content="Tracking SA의 대표 서비스인 서든어택 전적 검색과 리그 허브 진입을 정리한 전적 센터입니다.">
+<style>
+  html.dark-mode,
+  html.dark-mode body {
+    background-color: #0f172a;
+    color: #f8fafc;
+    color-scheme: dark;
+  }
+</style>
 <script>
   (function() {
-    const theme = localStorage.getItem('theme');
+    let theme = 'dark';
+    try {
+      theme = localStorage.getItem('theme') === 'light' ? 'light' : 'dark';
+    } catch {}
     if (theme === 'dark') {
       document.documentElement.classList.add('dark-mode');
       document.body && document.body.classList.add('dark-mode');
@@ -29,69 +40,56 @@
 </script>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7263630893992216" crossorigin="anonymous"></script>
 <meta name="google-adsense-account" content="ca-pub-7263630893992216">
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-TGD3WRNKPZ');
-</script>
+<script type="module" src="/analytics-loader.js?v=86d5e62d50ed"></script>
 <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
 <meta name="naver-site-verification" content="b15b33af838280b54d31eb3c7e5c358d2836743f" />
-<script type="text/javascript">
-(function(c,l,a,r,i,t,y){
-    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-})(window, document, "clarity", "script", "vb9q33ggpa");
-</script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 <script>
-  window.FIREBASE_CONFIG = {"apiKey": "AIzaSyBdHVxk9u6iG_whEIhvDzjde3BVn5gT19o", "authDomain": "tracking-sa-295db.firebaseapp.com", "projectId": "tracking-sa-295db", "storageBucket": "tracking-sa-295db.firebasestorage.app", "appId": "1:779289056217:web:cf023fc55f1a2913ffbfc8", "messagingSenderId": "779289056217"};
+  window.FIREBASE_CONFIG = {"apiKey": "", "authDomain": "demo-tracking-sa-portfolio.firebaseapp.com", "projectId": "demo-tracking-sa-portfolio", "storageBucket": "demo-tracking-sa-portfolio.firebasestorage.app", "appId": "1:000000000000:web:portfolio-example", "messagingSenderId": "779289056217", "appCheckSiteKey": ""};
 </script>
 <script>
   window.authDomainReady = window.authDomainReady || new Promise((resolve) => {
     window.__resolveAuthDomain = resolve;
   });
 </script>
-<script type="module" src="/auth/ui/auth-client.js"></script>
-
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<link rel="stylesheet" href="/style.css?v=1773279943">
+<link rel="stylesheet" href="/style.css?v=8f0895c6daf8">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#0052cc">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Tracking SA">
 <script src="/runtime-config.js"></script>
-<script src="/firebase-config.js"></script>
-<script src="/translations.js?v=1773279943"></script>
-<script src="/common.js?v=1773279943"></script>
+<script>window.AUTH_RUNTIME_DEFERRED = true;</script>
+<script defer src="/deferred-auth-loader.js?v=7c4177555bdb"></script>
+<script defer src="/pwa-register.js"></script>
+<script src="/translations.js?v=8eb99f0dbaa9"></script>
+<script src="/common.js?v=5cfaaa0b27e3"></script>
 
     <style>
         .stats-hub {
-            max-width: 1200px;
+            max-width: 1100px;
             margin: 0 auto;
             padding: 40px 20px 80px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
         }
         .stats-hero {
-            padding: 36px;
+            padding: 34px;
             border-radius: 28px;
             background: linear-gradient(135deg, #0f172a 0%, #111827 48%, #0052cc 100%);
             color: white;
-            box-shadow: 0 24px 48px rgba(15, 23, 42, 0.2);
-            margin-bottom: 32px;
+            box-shadow: 0 24px 48px rgba(15, 23, 42, 0.18);
         }
         .stats-hero-badge {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 6px 12px;
+            min-height: 32px;
+            padding: 0 12px;
             border-radius: 999px;
-            background: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.18);
             font-size: 0.8rem;
             font-weight: 800;
             margin-bottom: 16px;
@@ -104,18 +102,18 @@
         }
         .stats-hero p {
             margin: 0;
-            max-width: 720px;
-            line-height: 1.7;
-            color: rgba(255, 255, 255, 0.9);
+            max-width: 760px;
+            color: rgba(255,255,255,0.9);
+            line-height: 1.75;
         }
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 24px;
         }
         .stats-card {
             background: white;
-            border: 1px solid oklch(92% 0.02 260);
+            border: 1px solid rgba(15, 23, 42, 0.08);
             border-radius: 24px;
             padding: 28px;
             box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
@@ -124,21 +122,11 @@
             gap: 16px;
             text-decoration: none;
             color: inherit;
-            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
         .stats-card:hover {
-            transform: translateY(-6px);
-            border-color: var(--p-blue-soft);
+            transform: translateY(-4px);
             box-shadow: 0 20px 40px rgba(0, 82, 204, 0.12);
-        }
-        .stats-card.disabled {
-            opacity: 0.72;
-            cursor: default;
-        }
-        .stats-card.disabled:hover {
-            transform: none;
-            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
-            border-color: oklch(92% 0.02 260);
         }
         .stats-card-badge {
             display: inline-flex;
@@ -150,31 +138,25 @@
             border-radius: 999px;
             font-size: 0.78rem;
             font-weight: 800;
-        }
-        .stats-card-badge.live {
-            background: oklch(95% 0.05 240);
-            color: var(--p-blue);
-        }
-        .stats-card-badge.planned {
-            background: oklch(96% 0.01 260);
-            color: var(--text-sub);
+            background: #eef4ff;
+            color: #0052cc;
         }
         .stats-card h2 {
             margin: 0;
-            font-size: 1.5rem;
+            font-size: 1.45rem;
             font-weight: 900;
             color: var(--text-main);
         }
         .stats-card p {
             margin: 0;
             color: var(--text-sub);
-            line-height: 1.6;
+            line-height: 1.7;
         }
         .stats-card ul {
             margin: 0;
             padding-left: 18px;
             color: var(--text-sub);
-            line-height: 1.6;
+            line-height: 1.7;
         }
         .stats-card-footer {
             margin-top: auto;
@@ -184,18 +166,134 @@
             gap: 12px;
             font-size: 0.92rem;
             font-weight: 800;
-            color: var(--p-blue);
+            color: #0052cc;
         }
-        @media (max-width: 768px) {
-            .stats-hero { padding: 28px; }
-            .stats-hero h1 { font-size: 1.9rem; }
+        .stats-guide-panel {
+            padding: 28px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            display: grid;
+            gap: 16px;
+        }
+        .stats-guide-panel h2 {
+            margin: 0;
+            font-size: 1.4rem;
+            color: var(--text-main);
+        }
+        .stats-guide-panel p {
+            margin: 0;
+            color: var(--text-sub);
+            line-height: 1.75;
+        }
+        .stats-guide-links {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+        .stats-guide-links a {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 18px;
+            border-radius: 18px;
+            background: #fff;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            text-decoration: none;
+            color: inherit;
+        }
+        .stats-guide-links strong {
+            color: #0f172a;
+        }
+        .stats-guide-links span {
+            color: #64748b;
+            line-height: 1.65;
+            font-size: 0.92rem;
+        }
+        .stats-faq {
+            background: #fff;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            border-radius: 24px;
+            padding: 28px;
+            box-shadow: 0 10px 26px rgba(15, 23, 42, 0.04);
+        }
+        .stats-faq h2 {
+            margin: 0 0 12px;
+            font-size: 1.4rem;
+            color: #0f172a;
+        }
+        .stats-faq p {
+            margin: 0;
+            color: #475569;
+            line-height: 1.75;
+        }
+        .stats-faq-list {
+            display: grid;
+            gap: 14px;
+            margin-top: 18px;
+        }
+        .stats-faq-item {
+            padding: 18px;
+            border-radius: 18px;
+            background: #f8fafc;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+        }
+        .stats-faq-item strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #0f172a;
+        }
+        .stats-faq-item span {
+            color: #64748b;
+            line-height: 1.7;
+        }
+        body.dark-mode .stats-card,
+        body.dark-mode .stats-guide-panel,
+        body.dark-mode .stats-guide-links a,
+        body.dark-mode .stats-faq,
+        body.dark-mode .stats-faq-item {
+            background: #111827;
+            border-color: #334155;
+        }
+        body.dark-mode .stats-card {
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.24);
+        }
+        body.dark-mode .stats-card-badge {
+            background: #172554;
+            color: #93c5fd;
+        }
+        body.dark-mode .stats-guide-links strong,
+        body.dark-mode .stats-faq h2,
+        body.dark-mode .stats-faq-item strong {
+            color: #f8fafc;
+        }
+        body.dark-mode .stats-guide-links span,
+        body.dark-mode .stats-faq p,
+        body.dark-mode .stats-faq-item span {
+            color: #cbd5e1;
+        }
+        @media (max-width: 1050px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+        @media (max-width: 820px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .stats-guide-links {
+                grid-template-columns: 1fr;
+            }
+            .stats-hero h1 {
+                font-size: 1.95rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="site-header-container"><header>
     <div class="header-inner">
-        <a href="/" class="site-logo-link">
+        <a href="/" class="site-logo-link" aria-label="Tracking SA home">
             <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="site-logo">
                 <circle cx="50" cy="50" r="48" stroke="currentColor" stroke-width="4" fill="transparent"/>
                 <path d="M25 70L40 55L50 65L75 35" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
@@ -204,39 +302,24 @@
             </svg>
         </a>
         <div class="desktop-menu-container">
-            <nav>
+            <nav id="primary-navigation">
                 <ul>
-                    <li class="dropdown">
-                        <a href="#" class="dropbtn" data-i18n="menu_board">게시판</a>
-                        <div class="dropdown-content">
-                            <a href="/board?category=notice" data-i18n="notice">공지사항</a>
-                            <a href="/board?category=free" data-i18n="free_board">자유게시판</a>
-                        </div>
-                    </li>
-                    <li class="dropdown">
-                        <a href="#" class="dropbtn" data-i18n="menu_chart">차트</a>
-                        <div class="dropdown-content">
-                            <a href="/futures-estimate/" data-i18n="futures_estimate_index">지수</a>
-                        </div>
-                    </li>
-                    <li class="dropdown">
-                        <a href="#" class="dropbtn" data-i18n="menu_test">테스트</a>
-                        <div class="dropdown-content">
-                            <a href="/animal-face/" data-i18n="animal_face_test">동물상 테스트</a>
-                            <a href="/ai-test/" data-i18n="ai_tendency_test">AI 성향 테스트</a>
-                            <a href="/fortune/" data-i18n="saju_test">AI 실시간 오늘의 운세</a>
-                            <a href="/lucky-recommendation/" data-i18n="lucky_recommendation">행운의 추천</a>
-                        </div>
-                    </li>
-                    <li><a href="/games/" data-i18n="menu_game">게임</a></li>
+                    <li><a href="/stats/sudden-attack/" data-i18n="menu_stats_search">전적 검색</a></li>
+                    <li><a href="/stats/sudden-attack/replay/">리플레이 분석실</a></li>
+                    <li><a href="/guides/mygun2/">마이건2 도감</a></li>
+                    <li><a href="/guides/">가이드</a></li>
+                    <li><a href="/lab/">실험실</a></li>
+                    <li><a href="/board?category=notice" data-i18n="notice">공지사항</a></li>
                 </ul>
             </nav>
-            <div class="utility-controls">
-                <button id="color-change">🌙</button>
-                <div id="language-switcher"></div>
-                <div id="auth-controls" class="auth-controls"></div>
-            </div>
         </div>
+        <div class="utility-controls">
+            <button id="color-change" aria-label="테마 변경">🌙</button>
+            <div id="auth-controls" class="auth-controls"></div>
+        </div>
+        <button class="mobile-menu-toggle" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="primary-navigation">
+            <span></span><span></span><span></span>
+        </button>
     </div>
 </header>
 </div>
@@ -244,18 +327,18 @@
         <section class="stats-hero">
             <div class="stats-hero-badge" data-i18n="stats_hub_badge">STATS DOMAIN</div>
             <h1 data-i18n="stats_hub_h1">전적 센터</h1>
-            <p data-i18n="stats_hub_desc">Tracking SA의 게임 전적 검색과 매치 분석 기능을 모아둔 허브입니다. 현재는 서든어택 전적 검색이 대표 서비스이며, 앞으로 다른 게임 전적검색도 이 영역 아래에서 확장할 예정입니다.</p>
+            <p data-i18n="stats_hub_desc">전적 센터는 서든어택 공개 전적 검색과 리그 허브로 이어지는 대표 진입 영역입니다. 플레이어가 바로 전적을 조회하고 필요한 운영 기능으로 자연스럽게 이동할 수 있도록 핵심 흐름만 정리했습니다.</p>
         </section>
 
         <section class="stats-grid">
             <a href="/stats/sudden-attack/" class="stats-card">
-                <span class="stats-card-badge live" data-i18n="stats_live_badge">LIVE</span>
+                <span class="stats-card-badge" data-i18n="stats_live_badge">LIVE</span>
                 <h2 data-i18n="stats_sa_card_title">서든어택 전적 검색</h2>
-                <p data-i18n="stats_sa_card_desc">공식 API 기반 전적 조회, 최근 매치 기록, VS 비교, 크루 랭킹과 운영 도구를 제공하는 대표 전적 서비스입니다.</p>
+                <p data-i18n="stats_sa_card_desc">공개 전적 검색 홈에서 닉네임 조회, 최근·이전 20경기 비교, 최근 31일 활동과 VS 비교를 제공하는 대표 서비스입니다.</p>
                 <ul>
-                    <li data-i18n="stats_sa_feature_1">실시간 전적 및 최근 매치 기록</li>
-                    <li data-i18n="stats_sa_feature_2">VS 비교와 시즌별 추이 확인</li>
-                    <li data-i18n="stats_sa_feature_3">크루 랭킹, 신청, 밸런서 기능</li>
+                    <li data-i18n="stats_sa_feature_1">공개 전적 및 최근 매치 기록</li>
+                    <li data-i18n="stats_sa_feature_2">VS 비교와 최근·이전 20경기 변화 확인</li>
+                    <li data-i18n="stats_sa_feature_3">리그 허브로 분리된 랭킹과 운영 기능</li>
                 </ul>
                 <div class="stats-card-footer">
                     <span data-i18n="stats_open_service">서비스 열기</span>
@@ -263,37 +346,136 @@
                 </div>
             </a>
 
-            <div class="stats-card disabled">
-                <span class="stats-card-badge planned" data-i18n="stats_planned_badge">PLANNED</span>
-                <h2 data-i18n="stats_next_card_title">다음 전적검색 슬롯</h2>
-                <p data-i18n="stats_next_card_desc">새로운 게임 전적검색 기능을 추가할 때 이 구조를 그대로 재사용할 수 있도록 `stats` 도메인 기준을 먼저 정리했습니다.</p>
+            <a href="/stats/sudden-attack/league/" class="stats-card">
+                <span class="stats-card-badge">LEAGUE</span>
+                <h2>서든어택 리그 허브</h2>
+                <p>공개 검색 홈과 분리된 리그 전용 허브입니다. 크루 랭킹, 신청, 운영 흐름을 별도 진입으로 유지해 메인 검색 경험을 가볍게 보존합니다.</p>
                 <ul>
-                    <li data-i18n="stats_next_feature_1">공통 도메인 위치: `src/domains/stats/`</li>
-                    <li data-i18n="stats_next_feature_2">공개 경로와 내부 소스 분리 가능</li>
-                    <li data-i18n="stats_next_feature_3">확장 시 검색/빌드 흐름 재사용</li>
+                    <li>크루 랭킹과 운영 동선 분리</li>
+                    <li>공개 검색과 리그 기능 역할 구분</li>
+                    <li>반복 방문 사용자를 위한 별도 허브</li>
                 </ul>
                 <div class="stats-card-footer">
-                    <span data-i18n="stats_architecture_ready">구조 준비 완료</span>
-                    <span aria-hidden="true">•</span>
+                    <span>리그 허브 열기</span>
+                    <span aria-hidden="true">→</span>
                 </div>
+            </a>
+
+            <a href="/stats/sudden-attack/replay/" class="stats-card">
+                <span class="stats-card-badge">REPLAY</span>
+                <h2>리플레이 분석실</h2>
+                <p>병영수첩에서 저장한 리플레이로 라운드별 처치, 사망, 생존과 투척물 기록을 확인하는 분석 도구입니다.</p>
+                <ul>
+                    <li>파일 선택 즉시 기기 안에서 분석</li>
+                    <li>라운드별 주요 장면 타임라인</li>
+                    <li>사망·팀플레이·투척물 상세 분석</li>
+                </ul>
+                <div class="stats-card-footer">
+                    <span>리플레이 분석실 열기</span>
+                    <span aria-hidden="true">→</span>
+                </div>
+            </a>
+        </section>
+
+        <section class="stats-guide-panel">
+            <h2>전적 해석 가이드</h2>
+            <p>최근 경기와 VS 비교를 어떤 순서로 읽어야 하는지 관련 가이드에서 확인할 수 있습니다.</p>
+            <div class="stats-guide-links">
+                <a href="/guides/sudden-attack-stats-guide/">
+                    <strong>전적 검색 가이드</strong>
+                    <span>닉네임 검색부터 최근·이전 20경기와 31일 활동을 읽는 순서</span>
+                </a>
+                <a href="/guides/match-history-reading/">
+                    <strong>최근 경기 해석법</strong>
+                    <span>승률, 흐름, 표본을 같이 읽는 기준</span>
+                </a>
+                <a href="/guides/vs-comparison-guide/">
+                    <strong>VS 비교 보는 법</strong>
+                    <span>상대와의 지표 차이를 실제로 해석하는 방법</span>
+                </a>
+                <a href="/guides/league-guide/">
+                    <strong>리그 허브 가이드</strong>
+                    <span>공개 검색과 운영 허브를 구분해서 쓰는 이유</span>
+                </a>
+            </div>
+        </section>
+        <section class="stats-faq">
+            <h2>전적 센터 안내</h2>
+            <p>전적 검색과 크루 리그를 이용할 때 자주 찾는 경로입니다.</p>
+            <div class="stats-faq-list">
+                <article class="stats-faq-item">
+                    <strong>리그 허브를 왜 따로 분리했나요?</strong>
+                    <span>공개 전적 검색 사용자와 리그 운영 사용자의 목적이 다르기 때문입니다. 검색 경로를 가볍게 유지하고 운영 기능은 별도 허브로 분리해 탐색 흐름을 단순하게 만들었습니다.</span>
+                </article>
+                <article class="stats-faq-item">
+                    <strong>숫자 해석이 어려우면 어디를 봐야 하나요?</strong>
+                    <span><a href="/guides/">가이드 허브</a>에서 최근 경기 해석, 기록 범위 읽는 법, VS 비교 순서 같은 설명 문서를 바로 확인할 수 있습니다.</span>
+                </article>
             </div>
         </section>
     </main>
-    <div class="site-footer-container"><footer>
-    <div style="margin-bottom: 15px;">
-        <strong style="color: #0052cc; font-size: 1.2rem; font-weight: 800;">Tracking SA</strong>
+    <div class="site-footer-container"><footer class="site-footer">
+    <div class="footer-inner">
+        <div class="footer-top">
+            <div class="footer-brand">
+                <a class="footer-brand-link" href="/" aria-label="Tracking SA 홈">
+                    <svg width="36" height="36" viewBox="0 0 100 100" fill="none" aria-hidden="true" focusable="false">
+                        <circle cx="50" cy="50" r="48" stroke="currentColor" stroke-width="4"/>
+                        <path d="M25 70L40 55L50 65L75 35" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="70" cy="35" r="12" fill="currentColor"/>
+                    </svg>
+                    <strong>TRACKING <span>SA</span></strong>
+                </a>
+                <p>서든어택의 기록을,<br>더 쉽게 읽는 곳.</p>
+                <button id="pwa-install-button" class="footer-install" type="button" hidden>Tracking SA 앱 설치 <span aria-hidden="true">↗</span></button>
+            </div>
+            <nav class="footer-nav" aria-label="하단 메뉴">
+                <div class="footer-link-group">
+                    <h2>둘러보기</h2>
+                    <ul>
+                        <li><a href="/stats/sudden-attack/">서든어택 전적</a></li>
+                        <li><a href="/stats/sudden-attack/replay/">리플레이 분석실</a></li>
+                        <li><a href="/guides/">가이드</a></li>
+                    </ul>
+                </div>
+                <div class="footer-link-group">
+                    <h2>서비스 안내</h2>
+                    <ul>
+                        <li><a href="/about" data-i18n="about_us">서비스 소개</a></li>
+                        <li><a href="/service-methodology/">서비스 기준</a></li>
+                        <li><a href="/editorial-policy/">편집 원칙</a></li>
+                        <li><a href="/sitemap.xml" data-i18n="sitemap">사이트맵</a></li>
+                    </ul>
+                </div>
+                <div class="footer-link-group">
+                    <h2>이용 및 문의</h2>
+                    <ul>
+                        <li><a href="/privacy-policy" data-i18n="privacy_policy">개인정보처리방침</a></li>
+                        <li><a href="/terms" data-i18n="terms_of_service">이용약관</a></li>
+                        <li><a href="/ai-replay-pass/">AI 이용권 · 판매 준비</a></li>
+                        <li><a href="/contact/" data-i18n="contact">문의</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+        <div class="footer-business-info" aria-label="사업자 정보">
+            <details class="footer-business-details">
+                <summary class="footer-business-summary"><strong>로직 스토어</strong><span>사업자 정보</span><svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false"><path d="m4 6 4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+                <dl>
+                    <div><dt>상호</dt><dd>로직 스토어</dd></div>
+                    <div><dt>사업자등록번호</dt><dd>000-00-00000</dd></div>
+                    <div><dt>대표자</dt><dd>조한범</dd></div>
+                    <div class="footer-business-address"><dt>사업장 주소</dt><dd>경기도 수원시 인계동 992-13 크레텔 하우스 2동 302호</dd></div>
+                    <div><dt>통신판매업 신고번호</dt><dd>2026-수원팔달-0279호</dd></div>
+                </dl>
+            </details>
+            <div class="footer-business-contact" aria-label="고객 문의"><span>고객 문의</span><a href="tel:01081129691" aria-label="고객 문의 전화 010-0000-0000">010-0000-0000</a><a href="mailto:demo-15b9ce4f@example.com" aria-label="문의 이메일 demo-15b9ce4f@example.com">demo-15b9ce4f@example.com</a></div>
+        </div>
+        <div class="footer-bottom">
+            <p class="nexon-api-attribution">본 서비스는 <a href="https://openapi.nexon.com/ko/support/terms/" target="_blank" rel="noopener noreferrer">NEXON Open API</a>를 이용하여 데이터를 제공합니다. <span lang="en">This service uses NEXON Open API.</span></p>
+            <p class="footer-copyright" data-i18n="footer_copyright">&copy; 2026 TrackingSA. 서든어택 전적 검색 중심 서비스.</p>
+        </div>
     </div>
-    <p data-i18n="footer_copyright"></p>
-    <p style="margin-top: 10px;">
-        <a href="/about" data-i18n="about_us">서비스 소개</a> |
-        <a href="/contact" data-i18n="contact">문의</a> |
-        <a href="/inquiry" data-i18n="partnership_inquiry">서비스 제휴 문의</a> |
-        <a href="/privacy-policy" data-i18n="privacy_policy">개인정보처리방침</a> |
-        <a href="/terms" data-i18n="terms_of_service">이용약관</a> |
-        <a href="/glossary" data-i18n="ai_glossary">AI 용어 사전</a> |
-        <a href="/sitemap.xml" data-i18n="sitemap">사이트맵</a> |
-        <a href="/stats/sudden-attack/">서든어택 전적</a>
-    </p>
 </footer>
 </div>
     <script src="/translations.js"></script>

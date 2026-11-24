@@ -1,4 +1,5 @@
-import { DEFAULT_ROLE } from "../domain/roles.js";
+import { ADMIN_EMAILS, DEFAULT_ROLE, Roles } from "../domain/roles.js?v=cc62ffce2faf";
+import { normalizeAccessEmail } from '../domain/access-policy.js?v=0d740c688852';
 
 export function createFirebaseAuthRepository({ firebaseApp = window.firebase, db = window.db } = {}) {
   if (!firebaseApp || !firebaseApp.auth) {
@@ -18,8 +19,12 @@ export function createFirebaseAuthRepository({ firebaseApp = window.firebase, db
     return null;
   }
 
-  async function signInWithProvider(providerId) {
-    throw new Error(`Social login is no longer supported. Please use email login.`);
+  function resolveRoleForUser(user, existingRole = DEFAULT_ROLE) {
+    const email = normalizeAccessEmail(user && user.email);
+    if (email && ADMIN_EMAILS.includes(email)) {
+      return Roles.ADMIN;
+    }
+    return existingRole || DEFAULT_ROLE;
   }
 
   function signInWithEmail(email, password) {
@@ -30,6 +35,32 @@ export function createFirebaseAuthRepository({ firebaseApp = window.firebase, db
     return auth.createUserWithEmailAndPassword(email, password);
   }
 
+  async function changePassword({ currentPassword, newPassword } = {}) {
+    const user = auth.currentUser;
+    if (!user || !user.email) {
+      const error = new Error("Not authenticated");
+      error.code = "auth/not-authenticated";
+      throw error;
+    }
+    if (!currentPassword) {
+      const error = new Error("Current password is required");
+      error.code = "auth/current-password-required";
+      throw error;
+    }
+    if (!newPassword || newPassword.length < 6) {
+      const error = new Error("New password is too weak");
+      error.code = "auth/weak-password";
+      throw error;
+    }
+
+    const credential = firebaseApp.auth.EmailAuthProvider.credential(
+      user.email,
+      currentPassword
+    );
+    await user.reauthenticateWithCredential(credential);
+    await user.updatePassword(newPassword);
+  }
+
   function signOut() {
     return auth.signOut();
   }
@@ -38,9 +69,29 @@ export function createFirebaseAuthRepository({ firebaseApp = window.firebase, db
     return (value || "").trim().toLowerCase();
   }
 
+  function profileError(code, message) {
+    return Object.assign(new Error(message), { code });
+  }
+
+  // Firestore owns the profile. Auth's display fields are a repairable copy;
+  // an Auth outage after a committed transaction must not report a failed save.
+  async function syncAuthProfile(user, profile) {
+    if (auth.currentUser?.uid !== user.uid) return;
+    const updates = {};
+    const displayName = profile.nickname || profile.displayName || "";
+    if ((user.displayName || "") !== displayName) updates.displayName = displayName;
+    if ((user.photoURL || "") !== (profile.photoURL || "")) updates.photoURL = profile.photoURL || "";
+    if (!Object.keys(updates).length) return;
+    try {
+      await user.updateProfile(updates);
+    } catch (error) {
+      console.warn("Saved profile; Auth display sync will retry on next profile load:", error.code || "unknown");
+    }
+  }
+
   async function checkNicknameAvailability(nickname) {
     const key = normalizeNickname(nickname);
-    if (!key) {
+    if (!/^[A-Za-z0-9가-힣_]{2,12}$/.test((nickname || "").trim())) {
       return { available: false, key, reason: "invalid" };
     }
     const snapshot = await nicknamesCollection.doc(key).get();
@@ -58,65 +109,66 @@ export function createFirebaseAuthRepository({ firebaseApp = window.firebase, db
   async function updateProfile({ nickname, photoURL } = {}) {
     const user = auth.currentUser;
     if (!user) {
-      throw new Error("Not authenticated");
+      throw profileError("auth/not-authenticated", "Not authenticated");
     }
-
-    const updates = {};
+    const nextNickname = typeof nickname === "string" ? nickname.trim() : null;
+    if (nextNickname !== null && !/^[A-Za-z0-9가-힣_]{2,12}$/.test(nextNickname)) {
+      throw profileError("auth/invalid-nickname", "Invalid nickname");
+    }
     const profileRef = db.collection("users").doc(user.uid);
-    const profileSnap = await profileRef.get();
-    const currentProfile = profileSnap.exists ? profileSnap.data() : {};
-    const currentNickname = currentProfile.nickname || "";
-    const lastNicknameUpdatedAt = currentProfile.nicknameUpdatedAt;
-    const now = Date.now();
-    const cooldownMs = 24 * 60 * 60 * 1000;
+    const committed = await db.runTransaction(async (transaction) => {
+      const profileSnap = await transaction.get(profileRef);
+      if (!profileSnap.exists) throw profileError("auth/profile-unavailable", "User profile is not ready");
+      const current = profileSnap.data();
+      const updates = {};
+      let changedAt = null;
 
-    if (typeof nickname === "string") {
-      const key = normalizeNickname(nickname);
-      if (!key) {
-        const error = new Error("Invalid nickname");
-        error.code = "auth/invalid-nickname";
-        throw error;
-      }
-      const lastTs = lastNicknameUpdatedAt && typeof lastNicknameUpdatedAt.toMillis === "function"
-        ? lastNicknameUpdatedAt.toMillis()
-        : (lastNicknameUpdatedAt ? new Date(lastNicknameUpdatedAt).getTime() : null);
-      if (lastTs && now - lastTs < cooldownMs && normalizeNickname(currentNickname) !== key) {
-        const error = new Error("Nickname change cooldown");
-        error.code = "auth/nickname-cooldown";
-        error.retryAfterMs = cooldownMs - (now - lastTs);
-        throw error;
-      }
-      const availability = await checkNicknameAvailability(nickname);
-      if (!availability.available) {
-        const error = new Error("Nickname already taken");
-        error.code = "auth/nickname-taken";
-        throw error;
-      }
-      if (normalizeNickname(currentNickname) !== key) {
-        if (currentNickname) {
-          await nicknamesCollection.doc(normalizeNickname(currentNickname)).delete().catch(() => {});
+      if (nextNickname !== null) {
+        const key = normalizeNickname(nextNickname);
+        const oldKey = normalizeNickname(current.nickname);
+        const changed = oldKey !== key;
+        const now = Date.now();
+        const last = current.nicknameUpdatedAt;
+        const lastMs = last?.toMillis ? last.toMillis() : (last ? new Date(last).getTime() : 0);
+        const remaining = lastMs + 24 * 60 * 60 * 1000 - now;
+        if (changed && remaining > 0) {
+          throw Object.assign(profileError("auth/nickname-cooldown", "Nickname change cooldown"), { retryAfterMs: remaining });
         }
-        await nicknamesCollection.doc(key).set({
-          uid: user.uid,
-          nickname,
-          updatedAt: getServerTimestamp(),
-        });
+
+        const nextRef = nicknamesCollection.doc(key);
+        const nextSnap = await transaction.get(nextRef);
+        const oldRef = changed && oldKey ? nicknamesCollection.doc(oldKey) : null;
+        const oldSnap = oldRef ? await transaction.get(oldRef) : null;
+        if (nextSnap.exists && nextSnap.data().uid !== user.uid) {
+          throw profileError("auth/nickname-taken", "Nickname already taken");
+        }
+        // All reads precede writes. Each retry rechecks ownership and cooldown.
+        if (oldSnap?.exists && oldSnap.data().uid === user.uid) transaction.delete(oldRef);
+        if (!nextSnap.exists || nextSnap.data().nickname !== nextNickname) {
+          transaction.set(nextRef, { uid: user.uid, nickname: nextNickname, updatedAt: getServerTimestamp() });
+        }
+        if (current.nickname !== nextNickname) updates.nickname = nextNickname;
+        if (current.displayName !== nextNickname) updates.displayName = nextNickname;
+        if (changed) {
+          updates.nicknameUpdatedAt = getServerTimestamp();
+          changedAt = new Date(now);
+        }
       }
-      updates.nickname = nickname;
-      updates.nicknameUpdatedAt = getServerTimestamp();
-      await user.updateProfile({ displayName: nickname });
-    }
+      if (typeof photoURL === "string" && current.photoURL !== photoURL) updates.photoURL = photoURL;
+      if (Object.keys(updates).length) transaction.set(profileRef, updates, { merge: true });
+      // Only used if the post-commit read is unavailable; server time remains
+      // authoritative in storage. The Date is an approximate UI cooldown hint.
+      return { uid: user.uid, ...current, ...updates, ...(changedAt ? { nicknameUpdatedAt: changedAt } : {}) };
+    });
 
-    if (typeof photoURL === "string") {
-      updates.photoURL = photoURL;
-      await user.updateProfile({ photoURL: photoURL || "" });
+    let profile = committed;
+    try {
+      profile = await getUserProfile(user.uid) || committed;
+    } catch (error) {
+      console.warn("Profile saved; using committed values until the next load:", error.code || "unknown");
     }
-
-    if (Object.keys(updates).length) {
-      await profileRef.set(updates, { merge: true });
-    }
-
-    return getUserProfile(user.uid);
+    await syncAuthProfile(user, profile);
+    return profile;
   }
 
 
@@ -157,22 +209,41 @@ export function createFirebaseAuthRepository({ firebaseApp = window.firebase, db
 
   async function ensureUserProfile(user) {
     const docRef = db.collection("users").doc(user.uid);
-    const snapshot = await docRef.get();
-    if (snapshot.exists) {
-      return { uid: user.uid, ...snapshot.data() };
-    }
+    const profile = await db.runTransaction(async (transaction) => {
+      const snapshot = await transaction.get(docRef);
+      if (snapshot.exists) {
+        const existing = snapshot.data() || {};
+        const resolvedRole = resolveRoleForUser(user, existing.role);
+        const updates = {};
 
-    const profile = {
-      uid: user.uid,
-      email: user.email || "",
-      displayName: user.displayName || "",
-      photoURL: user.photoURL || "",
-      nickname: "",
-      subscription: { status: "free" },
-      role: DEFAULT_ROLE,
-      createdAt: getServerTimestamp(),
-    };
-    await docRef.set(profile);
+        if ((existing.email || "") !== (user.email || "")) updates.email = user.email || "";
+        const displayName = existing.nickname || existing.displayName || user.displayName || "";
+        if (existing.displayName !== displayName) updates.displayName = displayName;
+        if (typeof existing.photoURL !== "string") updates.photoURL = user.photoURL || "";
+        if ((existing.role || DEFAULT_ROLE) !== resolvedRole) updates.role = resolvedRole;
+
+        if (Object.keys(updates).length) {
+          transaction.set(docRef, updates, { merge: true });
+        }
+
+        return { uid: user.uid, ...existing, ...updates, role: resolvedRole };
+      }
+
+      const resolvedRole = resolveRoleForUser(user, DEFAULT_ROLE);
+      const profile = {
+        uid: user.uid,
+        email: user.email || "",
+        displayName: user.displayName || "",
+        photoURL: user.photoURL || "",
+        nickname: "",
+        subscription: { status: "free" },
+        role: resolvedRole,
+        createdAt: getServerTimestamp(),
+      };
+      transaction.set(docRef, profile);
+      return profile;
+    });
+    await syncAuthProfile(user, profile);
     return profile;
   }
 
@@ -183,9 +254,9 @@ export function createFirebaseAuthRepository({ firebaseApp = window.firebase, db
   }
 
   return {
-    signInWithProvider,
     signInWithEmail,
     signUpWithEmail,
+    changePassword,
     signOut,
     checkNicknameAvailability,
     updateProfile,

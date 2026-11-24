@@ -22,4 +22,8 @@ function bootAuthDomain() {
   }
 }
 
-bootAuthDomain();
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", bootAuthDomain, { once: true });
+} else {
+  bootAuthDomain();
+}

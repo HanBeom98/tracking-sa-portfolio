@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>마이건2 도감 · 총기 이미지와 기능 비교 | Tracking SA</title>
+<meta name="description" content="서든어택 마이건2 12개 시리즈의 총기 이미지, 발동 조건, 레벨별 혜택과 세트 효과를 찾아보고 비교하세요. 이온·에보·서클·헌트·제노·노바·로얄·럼블·더블·이블·마블·노블.">
+  <meta name="keywords" content="마이건2,서든어택,이온,에보,서클,헌트,제노,노바,로얄,럼블,더블,이블,마블,노블,무기 도감">
+<!-- HEAD_INJECTION -->
+  <link rel="stylesheet" href="mygun2.css">
+</head>
+<body>
+<!-- HEADER_INJECTION -->
+<main class="mg-page">
+  <a class="mg-back" href="/guides/">← 가이드 모음</a>
+  <section class="mg-hero" aria-labelledby="mg-title">
+    <div><p class="mg-eyebrow">TRACKING SA · WEAPON ARCHIVE</p><h1 id="mg-title">마이건2,<br><span>차이를 한눈에.</span></h1>
+      <p class="mg-lead">이름은 많아져도, 차이는 쉽게.<br>총기 이미지부터 기능이 발동하는 순간까지 찾아보세요.</p>
+      <div class="mg-stats"><span><b>12</b> 시리즈</span><span><b>151</b> 총기 이미지</span><span>로그인 없이 이용</span></div>
+      <a class="mg-primary" href="#mg-browser">도감 살펴보기 ↘</a>
+    </div>
+    <figure class="mg-hero-image"><span class="mg-hero-label">EON · 이온</span><img src="images/eon-01.webp" width="310" height="150" alt="이온 GAL-1_v2 공식 총기 대표 이미지" fetchpriority="high"><figcaption>피해량 스택을 채우면, 빠른 재장전.<br><small>공식 가이드의 대표 외형 예시</small></figcaption></figure>
+  </section>
+  <section id="mg-browser" class="mg-browser" aria-labelledby="mg-browser-title">
+    <div class="mg-section-heading"><div><p class="mg-eyebrow">FIND YOUR SERIES</p><h2 id="mg-browser-title">어떤 차이가 궁금한가요?</h2></div><p>시리즈는 기능으로, 총기는 이름으로 찾아보세요.</p></div>
+    <form id="mg-filters" class="mg-filters" role="search">
+      <label class="mg-query">시리즈·총기·기능 검색<input id="mg-query" type="search" placeholder="이온, AWP, 스택, 빠른 재장전…" maxlength="120" autocomplete="off" disabled></label>
+      <label>기능별<select id="mg-feature" disabled><option value="">모든 기능</option></select></label>
+      <label>총기별<select id="mg-weapon" disabled><option value="">모든 총기</option></select></label>
+      <button class="mg-button" type="reset">필터 초기화</button>
+    </form>
+    <p id="mg-count" class="mg-count" role="status" aria-live="polite">도감 정보를 준비하고 있어요.</p>
+    <p id="mg-feedback" class="mg-feedback" role="status" aria-live="polite"></p>
+    <section id="mg-detail" class="mg-detail" aria-labelledby="mg-detail-title" hidden></section>
+    <div id="mg-cards" class="mg-cards"></div>
+    <div id="mg-empty" class="mg-empty" hidden><h3>조건에 맞는 시리즈가 없어요.</h3><p>다른 총기 이름을 검색하거나 필터를 초기화해 보세요.</p><button type="button" class="mg-button" id="mg-empty-reset">필터 초기화</button></div>
+    <noscript><p>검색·비교에는 JavaScript가 필요합니다. <a href="https://guide.sa.nexon.com/guide/45">넥슨 공식 마이건2 가이드에서 전체 정보를 확인하세요.</a></p></noscript>
+  </section>
+  <aside class="mg-source"><p class="mg-eyebrow">SOURCES & NOTES</p><h2>조건과 예외를 함께 확인하세요.</h2><p>세트 효과는 공식 세트 구성의 활성화 기준으로 적용됩니다. 도감의 총기 이미지 151개는 외형별 안내 수량이며 세트 수를 뜻하지 않습니다. 총기별 기본 성능, 시리즈 기능, 세트 보상은 구분해서 보세요.</p><p>사진은 해당 공식 총기의 대표 외형입니다. 한 이미지가 표기된 모든 변형·레벨의 외형을 의미하지는 않습니다. 원본의 무기 형태를 바꾸지 않고 무손실 WebP로 저장했습니다.</p><p>공식 가이드 대조: <time datetime="2026-11-05">2026.11.05</time> · 이온 신규 무기 공지 대조: <time datetime="2026-11-19">2026.11.19</time>. 패치 이후 조건이나 구성이 달라질 수 있습니다. 노블 개조는 기본 레벨 안내와 구분하며 개조 대상 총기는 공식 안내를 확인하세요.</p><a href="https://guide.sa.nexon.com/guide/45" target="_blank" rel="noopener noreferrer">넥슨 공식 마이건2 가이드 ↗</a> · <a href="https://sa.nexon.com/news/update/view.aspx?n4ArticleSN=881" target="_blank" rel="noopener noreferrer">11/19 이온 신규 무기 안내 ↗</a> · <a href="https://sa.nexon.com/news/update/view.aspx?n4ArticleCategorySN=0&amp;n4ArticleSN=738" target="_blank" rel="noopener noreferrer">노블 개조 시스템 안내 ↗</a><p>총기 이미지·게임 정보: NEXON. 설명·분류·비교 화면: Tracking SA. 보유 무기 조회나 실시간 시세를 제공하는 페이지는 아닙니다.</p></aside>
+</main>
+<aside class="mg-tray" id="mg-tray" aria-label="비교할 시리즈" hidden><div><strong id="mg-selection">비교할 시리즈</strong><span>최대 3개 · 선택은 필터를 바꿔도 유지돼요</span></div><button type="button" class="mg-button" id="mg-clear">선택 지우기</button><button type="button" class="mg-primary" id="mg-compare" disabled>비교하기</button></aside>
+<dialog id="mg-compare-dialog" class="mg-dialog" aria-labelledby="mg-compare-title"><div class="mg-dialog-heading"><div><p class="mg-eyebrow">SIDE BY SIDE</p><h2 id="mg-compare-title">시리즈 비교</h2></div><button type="button" class="mg-button" data-close>닫기</button></div><p class="mg-scroll-hint">표가 화면보다 넓으면 표 안에서 좌우로 이동하세요. 총기 자체 성능의 우열을 매기는 표가 아닙니다.</p><div class="mg-table-scroll" tabindex="0" role="region" aria-label="선택한 시리즈 비교표"><table id="mg-comparison"></table></div></dialog>
+<dialog id="mg-image-dialog" class="mg-image-dialog mg-weapon-dialog" aria-labelledby="mg-image-title"><div class="mg-dialog-heading"><div><p class="mg-eyebrow">WEAPON DETAILS</p><h2 id="mg-image-title"></h2></div><button type="button" class="mg-button" data-close>닫기</button></div><div id="mg-weapon-content"></div></dialog>
+<!-- FOOTER_INJECTION -->
+<script type="module" src="main.js"></script>
+</body>
+</html>

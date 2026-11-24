@@ -13,32 +13,38 @@ function createRepositoryStub() {
     repo: {
       add: async (payload) => calls.add.push(payload),
       getById: async (id) => ({ id, title: "t", content: "c", authorUid: "u1", category: "free" }),
-      list: async ({ limit, category }) => [{ id: "p1", limit, category }],
+      list: async ({ limit, category }) => [{
+        id: category === "notice" ? "notice-1" : "p1",
+        limit,
+        category,
+        createdAt: { seconds: Math.floor(Date.now() / 1000) },
+      }],
       update: async (id, payload) => calls.update.push({ id, payload }),
       remove: async (id) => calls.remove.push({ id }),
     },
   };
 }
 
-test("postService createPost uses displayName or email for authorName and supports category", async () => {
+test("postService createPost uses registered nickname without exposing email and supports category", async () => {
   const { repo, calls } = createRepositoryStub();
   const service = buildPostService({ postRepository: repo });
 
   await service.createPost({
     title: "제목",
     content: "내용",
-    author: { uid: "u1", displayName: "Tracking", email: "a@b.com", photoURL: "p" },
+    author: { uid: "u1", nickname: "Tracking", displayName: "stale", email: "demo-fb98d44a@example.com", photoURL: "p" },
     category: "free"
   });
   await service.createPost({
     title: "공지",
     content: "내용2",
-    author: { uid: "admin1", role: "admin", email: "admin@test.com" },
+    author: { uid: "admin1", role: "admin", nickname: "Admin", email: "admin@test.com" },
     category: "notice"
   });
 
   assert.equal(calls.add.length, 2);
   assert.equal(calls.add[0].authorName, "Tracking");
+  assert.equal("authorEmail" in calls.add[0], false);
   assert.equal(calls.add[0].category, "free");
   assert.equal(calls.add[1].category, "notice");
 });
@@ -90,4 +96,18 @@ test("postService canEditPost returns true for author or admin", async () => {
   // Notice post: only admin can edit
   assert.equal(service.canEditPost({ user: { uid: "u1", role: "free" }, post: noticePost }), false);
   assert.equal(service.canEditPost({ user: { uid: "admin1", role: "admin" }, post: noticePost }), true);
+});
+
+test("postService rejects content beyond the board limits", async () => {
+  const { repo } = createRepositoryStub();
+  const service = buildPostService({ postRepository: repo });
+
+  await assert.rejects(
+    service.createPost({
+      title: "title",
+      content: "x".repeat(10001),
+      author: { uid: "u1", role: "free" },
+    }),
+    (error) => error && error.code === "POST_TOO_LONG"
+  );
 });

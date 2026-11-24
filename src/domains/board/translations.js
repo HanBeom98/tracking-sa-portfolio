@@ -17,19 +17,5 @@ window.domainTranslations = {
         'content': '내용',
         'enter_content': '내용을 입력하세요',
         'back_to_list': '목록으로'
-    },
-    'en': {
-        'notice': 'Notice',
-        'notice_desc': 'Latest announcements from Tracking SA.',
-        'free_board': 'Free Board',
-        'free_board_desc': 'A space to discuss tech investments and trends.',
-        'post_title': 'Post',
-        'loading_post': 'Loading...',
-        'write_post_title': 'Write',
-        'title': 'Title',
-        'enter_title': 'Enter title',
-        'content': 'Content',
-        'enter_content': 'Enter content',
-        'back_to_list': 'Back'
     }
 };

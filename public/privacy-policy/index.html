@@ -17,9 +17,20 @@
     <meta name="description" content="Tracking SA 개인정보 처리 및 데이터 이용 정책 안내.">
     <meta property="og:title" content="개인정보처리방침 - Tracking SA">
     <meta property="og:description" content="Tracking SA 개인정보 처리 및 데이터 이용 정책 안내.">
-    <script>
+    <style>
+  html.dark-mode,
+  html.dark-mode body {
+    background-color: #0f172a;
+    color: #f8fafc;
+    color-scheme: dark;
+  }
+</style>
+<script>
   (function() {
-    const theme = localStorage.getItem('theme');
+    let theme = 'dark';
+    try {
+      theme = localStorage.getItem('theme') === 'light' ? 'light' : 'dark';
+    } catch {}
     if (theme === 'dark') {
       document.documentElement.classList.add('dark-mode');
       document.body && document.body.classList.add('dark-mode');
@@ -28,51 +39,36 @@
 </script>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7263630893992216" crossorigin="anonymous"></script>
 <meta name="google-adsense-account" content="ca-pub-7263630893992216">
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-TGD3WRNKPZ');
-</script>
+<script type="module" src="/analytics-loader.js?v=86d5e62d50ed"></script>
 <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
 <meta name="naver-site-verification" content="b15b33af838280b54d31eb3c7e5c358d2836743f" />
-<script type="text/javascript">
-(function(c,l,a,r,i,t,y){
-    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-})(window, document, "clarity", "script", "vb9q33ggpa");
-</script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 <script>
-  window.FIREBASE_CONFIG = {"apiKey": "AIzaSyBdHVxk9u6iG_whEIhvDzjde3BVn5gT19o", "authDomain": "tracking-sa-295db.firebaseapp.com", "projectId": "tracking-sa-295db", "storageBucket": "tracking-sa-295db.firebasestorage.app", "appId": "1:779289056217:web:cf023fc55f1a2913ffbfc8", "messagingSenderId": "779289056217"};
+  window.FIREBASE_CONFIG = {"apiKey": "", "authDomain": "demo-tracking-sa-portfolio.firebaseapp.com", "projectId": "demo-tracking-sa-portfolio", "storageBucket": "demo-tracking-sa-portfolio.firebasestorage.app", "appId": "1:000000000000:web:portfolio-example", "messagingSenderId": "779289056217", "appCheckSiteKey": ""};
 </script>
 <script>
   window.authDomainReady = window.authDomainReady || new Promise((resolve) => {
     window.__resolveAuthDomain = resolve;
   });
 </script>
-<script type="module" src="/auth/ui/auth-client.js"></script>
-
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<link rel="stylesheet" href="/style.css?v=1773274089">
+<link rel="stylesheet" href="/style.css?v=8f0895c6daf8">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#0052cc">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Tracking SA">
 <script src="/runtime-config.js"></script>
-<script src="/firebase-config.js"></script>
-<script src="/translations.js?v=1773274089"></script>
-<script src="/common.js?v=1773274089"></script>
+<script>window.AUTH_RUNTIME_DEFERRED = true;</script>
+<script defer src="/deferred-auth-loader.js?v=7c4177555bdb"></script>
+<script defer src="/pwa-register.js"></script>
+<script src="/translations.js?v=8eb99f0dbaa9"></script>
+<script src="/common.js?v=5cfaaa0b27e3"></script>
 
 </head>
 <body><div class="site-header-container"><header>
     <div class="header-inner">
-        <a href="/" class="site-logo-link">
+        <a href="/" class="site-logo-link" aria-label="Tracking SA home">
             <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="site-logo">
                 <circle cx="50" cy="50" r="48" stroke="currentColor" stroke-width="4" fill="transparent"/>
                 <path d="M25 70L40 55L50 65L75 35" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
@@ -81,87 +77,142 @@
             </svg>
         </a>
         <div class="desktop-menu-container">
-            <nav>
+            <nav id="primary-navigation">
                 <ul>
-                    <li class="dropdown">
-                        <a href="#" class="dropbtn" data-i18n="menu_board">게시판</a>
-                        <div class="dropdown-content">
-                            <a href="/board?category=notice" data-i18n="notice">공지사항</a>
-                            <a href="/board?category=free" data-i18n="free_board">자유게시판</a>
-                        </div>
-                    </li>
-                    <li class="dropdown">
-                        <a href="#" class="dropbtn" data-i18n="menu_chart">차트</a>
-                        <div class="dropdown-content">
-                            <a href="/futures-estimate/" data-i18n="futures_estimate_index">지수</a>
-                        </div>
-                    </li>
-                    <li class="dropdown">
-                        <a href="#" class="dropbtn" data-i18n="menu_test">테스트</a>
-                        <div class="dropdown-content">
-                            <a href="/animal-face/" data-i18n="animal_face_test">동물상 테스트</a>
-                            <a href="/ai-test/" data-i18n="ai_tendency_test">AI 성향 테스트</a>
-                            <a href="/fortune/" data-i18n="saju_test">AI 실시간 오늘의 운세</a>
-                            <a href="/lucky-recommendation/" data-i18n="lucky_recommendation">행운의 추천</a>
-                        </div>
-                    </li>
-                    <li><a href="/games/" data-i18n="menu_game">게임</a></li>
+                    <li><a href="/stats/sudden-attack/" data-i18n="menu_stats_search">전적 검색</a></li>
+                    <li><a href="/stats/sudden-attack/replay/">리플레이 분석실</a></li>
+                    <li><a href="/guides/mygun2/">마이건2 도감</a></li>
+                    <li><a href="/guides/">가이드</a></li>
+                    <li><a href="/lab/">실험실</a></li>
+                    <li><a href="/board?category=notice" data-i18n="notice">공지사항</a></li>
                 </ul>
             </nav>
-            <div class="utility-controls">
-                <button id="color-change">🌙</button>
-                <div id="language-switcher"></div>
-                <div id="auth-controls" class="auth-controls"></div>
-            </div>
         </div>
+        <div class="utility-controls">
+            <button id="color-change" aria-label="테마 변경">🌙</button>
+            <div id="auth-controls" class="auth-controls"></div>
+        </div>
+        <button class="mobile-menu-toggle" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="primary-navigation">
+            <span></span><span></span><span></span>
+        </button>
     </div>
 </header>
 </div>
     <main>
         <section class="container">
-            <div class="news-card-premium" style="margin-top: 40px; padding: 60px; text-align: left;">
+            <div style="margin-top: 40px; padding: 60px; text-align: left;">
                 <h1 data-i18n="privacy_policy_title" style="font-size: 2.5rem; font-weight: 950; margin-bottom: 40px; color: var(--p-blue); text-align: center;">개인정보처리방침</h1>
                 <div style="font-size: 1.1rem; line-height: 1.8; color: var(--text-main); display: flex; flex-direction: column; gap: 30px;">
-                    <p data-i18n="privacy_policy_intro"></p>
+                    <p>Tracking SA는 회원 기능, 전적 검색, 게시판 운영, 서비스 보안과 광고 제공에 필요한 범위에서 개인정보와 기술 정보를 처리합니다. 처리 목적과 이용 서비스를 아래와 같이 공개합니다.</p>
                     <div style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
                         <p style="margin: 0 0 8px 0;"><strong data-i18n="privacy_operator_label">운영 주체:</strong> <span data-i18n="privacy_operator_value">Tracking SA Team</span></p>
-                        <p style="margin: 0 0 8px 0;"><strong data-i18n="privacy_contact_label">문의 이메일:</strong> <a href="mailto:Carry9691@gmail.com" style="color: #0052cc; font-weight: 700;">Carry9691@gmail.com</a></p>
-                        <p style="margin: 0;"><strong data-i18n="privacy_effective_label">시행일:</strong> <span>2026-03-09</span></p>
+                        <p style="margin: 0 0 8px 0;"><strong data-i18n="privacy_contact_label">문의 이메일:</strong> <a href="mailto:demo-15b9ce4f@example.com" style="color: #0052cc; font-weight: 700;">demo-15b9ce4f@example.com</a></p>
+                        <p style="margin: 0;"><strong data-i18n="privacy_effective_label">시행일:</strong> <span>2026-07-29</span></p>
                     </div>
                     
                     <div style="padding: 20px; background: var(--p-blue-soft); border-radius: 15px;">
-                        <h2 data-i18n="information_we_collect" style="color: var(--p-blue); font-size: 1.5rem; margin-bottom: 15px;"></h2>
-                        <p data-i18n="no_direct_collection"></p>
+                        <h2 style="color: var(--p-blue); font-size: 1.5rem; margin-bottom: 15px;">처리하는 정보</h2>
+                        <ul style="margin: 0; padding-left: 22px;">
+                            <li><strong>회원 기능:</strong> Firebase Authentication을 통해 이메일 주소, 인증 식별자와 로그인 상태를 처리합니다.</li>
+                            <li><strong>프로필과 게시판:</strong> 사용자가 설정한 닉네임, 작성한 게시물·댓글과 작성 시각을 처리합니다.</li>
+                            <li><strong>전적 검색:</strong> 사용자가 입력한 서든어택 닉네임과 경기 식별자를 NEXON Open API 조회에 사용합니다.</li>
+                            <li><strong>자동 생성 정보:</strong> 접속 시각, 브라우저·기기 유형, IP 주소를 포함할 수 있는 보안 및 접속 로그가 호스팅·분석 서비스에서 생성될 수 있습니다.</li>
+                        </ul>
                     </div>
 
                     <div>
-                        <h2 data-i18n="log_data_title" style="color: var(--p-blue); font-size: 1.5rem; margin-bottom: 15px; border-bottom: 2px solid var(--p-blue-soft); padding-bottom: 10px;"></h2>
-                        <p data-i18n="log_data_description"></p>
+                        <h2 style="color: var(--p-blue); font-size: 1.5rem; margin-bottom: 15px; border-bottom: 2px solid var(--p-blue-soft); padding-bottom: 10px;">이용 목적과 보관</h2>
+                        <p>회원 인증, 닉네임 중복 방지, 게시판 제공, 서비스 오류 분석, 부정 이용 방지, 이용 현황 측정과 광고 제공을 위해 정보를 사용합니다. 회원 정보와 작성 콘텐츠는 회원 탈퇴 또는 삭제 요청 시 관계 법령과 보안상 필요한 범위를 제외하고 삭제합니다. 접속·보안 로그는 각 호스팅 및 분석 서비스의 보관 설정과 정책에 따라 처리됩니다.</p>
                     </div>
 
                     <div>
-                        <h2 data-i18n="cookies_title" style="color: var(--p-blue); font-size: 1.5rem; margin-bottom: 15px; border-bottom: 2px solid var(--p-blue-soft); padding-bottom: 10px;"></h2>
-                        <p data-i18n="cookies_description"></p>
+                        <h2 style="color: var(--p-blue); font-size: 1.5rem; margin-bottom: 15px; border-bottom: 2px solid var(--p-blue-soft); padding-bottom: 10px;">제3자 서비스와 쿠키</h2>
+                        <p>Tracking SA는 Firebase, Google Analytics, Google AdSense, Microsoft Clarity, Cloudflare와 NEXON Open API를 사용합니다. 이들 서비스는 인증, 보안, 이용 통계, 광고 표시와 성과 측정을 위해 쿠키, 로컬 저장소, IP 주소 또는 기기·접속 정보를 처리할 수 있습니다.</p>
+                        <p>
+                            Google의 광고 쿠키 사용 방식과 맞춤 광고 설정은
+                            <a href="https://myadcenter.google.com/" target="_blank" rel="noopener noreferrer" style="color: #0052cc; font-weight: 700;">Google 광고 센터</a>에서
+                            확인하거나 변경할 수 있습니다.
+                        </p>
+                    </div>
+
+                    <div id="payment-test">
+                        <h2 style="color: var(--p-blue); font-size: 1.5rem; margin-bottom: 15px; border-bottom: 2px solid var(--p-blue-soft); padding-bottom: 10px;">TEST 결제와 복구 정보</h2>
+                        <p>AI 이용권의 TEST 결제는 토스페이에서 구매자 인증을 진행합니다. 구매자는 인증 정보와 결제 비밀번호를 토스 화면에 직접 입력하며, 사이트 문의에 보내지 않습니다. 서버는 TEST 주문번호·결제 식별 정보·처리 상태를 실제 회원 구매 원장과 분리해 처리합니다. TEST 완료로 실제 대금이나 회원 이용권이 발생하지 않고 유료 AI 분석도 실행하지 않습니다.</p>
+                        <p>일반 상품 구매 TEST는 기존 Firebase 회원 인증을 사용하며, 서버는 인증된 계정에 묶인 TEST 주문만 처리합니다. 같은 브라우저의 계정별 복구 사본에는 주문번호와 24시간 복구 기한만 보관합니다. 이 결제 복구 사본에는 인증 토큰·결제 API 키·접근코드를 저장하지 않습니다.</p><p>이전 운영 TEST 도구의 새 탭 복귀 정보는 입력한 접근코드로 암호화하여 같은 브라우저에 보관하며 24시간 안에만 복구할 수 있습니다. 접근코드 원문은 브라우저 저장소에 보관하지 않습니다. 브라우저 데이터 삭제 시 복구 사본도 삭제됩니다. 브라우저의 24시간 복구 기한과 서버 TEST 기록의 보관은 별개입니다.</p>
+                        <p>가맹 심사 기간에는 비회원도 TEST 결제창을 확인할 수 있습니다. 동의 후 TEST 버튼을 누르면 임의로 생성한 방문자 식별값이 담긴 서버 서명 쿠키를 발급하며, 같은 방문자의 TEST 주문 확인에만 사용합니다. 쿠키는 Secure·HttpOnly·SameSite=Lax로 설정하고 발급 후 24시간 동안 유효합니다. 비회원 복구 사본에는 주문번호·복구 기한·개인을 직접 식별하지 않는 임시 식별값만 저장합니다. 회원가입이나 유료 AI 제공은 발생하지 않습니다. 쿠키·브라우저 저장소 삭제 또는 유효기간 경과 시 비회원 주문 복구가 제한됩니다. 서버 TEST 기록의 보관은 브라우저의 24시간 복구 기한과 별개입니다.</p>
+                        <p>정식 판매 전에는 실제 결제·환불 및 AI 제공에 필요한 처리 정보와 보관 기준을 별도로 안내합니다. 현재 유료 AI 제공자에게 회원 리플레이를 자동 전송하는 판매 기능은 열지 않았습니다. <a href="/ai-replay-pass/#purchase">현재 TEST 안내</a>를 확인할 수 있습니다.</p>
+                    </div>
+
+                    <div>
+                        <h2 style="color: var(--p-blue); font-size: 1.5rem; margin-bottom: 15px; border-bottom: 2px solid var(--p-blue-soft); padding-bottom: 10px;">이용자 선택과 문의</h2>
+                        <p>브라우저 설정과 Google 광고 설정에서 쿠키 또는 맞춤 광고를 제한할 수 있습니다. 회원은 내 정보 화면에서 계정 정보를 확인·수정하거나 탈퇴할 수 있으며, 개인정보 처리와 삭제 요청은 <a href="mailto:demo-15b9ce4f@example.com" style="color: #0052cc; font-weight: 700;">demo-15b9ce4f@example.com</a>으로 문의할 수 있습니다.</p>
                     </div>
                 </div>
             </div>
         </section>
     </main>
-<div class="site-footer-container"><footer>
-    <div style="margin-bottom: 15px;">
-        <strong style="color: #0052cc; font-size: 1.2rem; font-weight: 800;">Tracking SA</strong>
+<div class="site-footer-container"><footer class="site-footer">
+    <div class="footer-inner">
+        <div class="footer-top">
+            <div class="footer-brand">
+                <a class="footer-brand-link" href="/" aria-label="Tracking SA 홈">
+                    <svg width="36" height="36" viewBox="0 0 100 100" fill="none" aria-hidden="true" focusable="false">
+                        <circle cx="50" cy="50" r="48" stroke="currentColor" stroke-width="4"/>
+                        <path d="M25 70L40 55L50 65L75 35" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="70" cy="35" r="12" fill="currentColor"/>
+                    </svg>
+                    <strong>TRACKING <span>SA</span></strong>
+                </a>
+                <p>서든어택의 기록을,<br>더 쉽게 읽는 곳.</p>
+                <button id="pwa-install-button" class="footer-install" type="button" hidden>Tracking SA 앱 설치 <span aria-hidden="true">↗</span></button>
+            </div>
+            <nav class="footer-nav" aria-label="하단 메뉴">
+                <div class="footer-link-group">
+                    <h2>둘러보기</h2>
+                    <ul>
+                        <li><a href="/stats/sudden-attack/">서든어택 전적</a></li>
+                        <li><a href="/stats/sudden-attack/replay/">리플레이 분석실</a></li>
+                        <li><a href="/guides/">가이드</a></li>
+                    </ul>
+                </div>
+                <div class="footer-link-group">
+                    <h2>서비스 안내</h2>
+                    <ul>
+                        <li><a href="/about" data-i18n="about_us">서비스 소개</a></li>
+                        <li><a href="/service-methodology/">서비스 기준</a></li>
+                        <li><a href="/editorial-policy/">편집 원칙</a></li>
+                        <li><a href="/sitemap.xml" data-i18n="sitemap">사이트맵</a></li>
+                    </ul>
+                </div>
+                <div class="footer-link-group">
+                    <h2>이용 및 문의</h2>
+                    <ul>
+                        <li><a href="/privacy-policy" data-i18n="privacy_policy">개인정보처리방침</a></li>
+                        <li><a href="/terms" data-i18n="terms_of_service">이용약관</a></li>
+                        <li><a href="/ai-replay-pass/">AI 이용권 · 판매 준비</a></li>
+                        <li><a href="/contact/" data-i18n="contact">문의</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+        <div class="footer-business-info" aria-label="사업자 정보">
+            <details class="footer-business-details">
+                <summary class="footer-business-summary"><strong>로직 스토어</strong><span>사업자 정보</span><svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false"><path d="m4 6 4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+                <dl>
+                    <div><dt>상호</dt><dd>로직 스토어</dd></div>
+                    <div><dt>사업자등록번호</dt><dd>000-00-00000</dd></div>
+                    <div><dt>대표자</dt><dd>조한범</dd></div>
+                    <div class="footer-business-address"><dt>사업장 주소</dt><dd>경기도 수원시 인계동 992-13 크레텔 하우스 2동 302호</dd></div>
+                    <div><dt>통신판매업 신고번호</dt><dd>2026-수원팔달-0279호</dd></div>
+                </dl>
+            </details>
+            <div class="footer-business-contact" aria-label="고객 문의"><span>고객 문의</span><a href="tel:01081129691" aria-label="고객 문의 전화 010-0000-0000">010-0000-0000</a><a href="mailto:demo-15b9ce4f@example.com" aria-label="문의 이메일 demo-15b9ce4f@example.com">demo-15b9ce4f@example.com</a></div>
+        </div>
+        <div class="footer-bottom">
+            <p class="nexon-api-attribution">본 서비스는 <a href="https://openapi.nexon.com/ko/support/terms/" target="_blank" rel="noopener noreferrer">NEXON Open API</a>를 이용하여 데이터를 제공합니다. <span lang="en">This service uses NEXON Open API.</span></p>
+            <p class="footer-copyright" data-i18n="footer_copyright">&copy; 2026 TrackingSA. 서든어택 전적 검색 중심 서비스.</p>
+        </div>
     </div>
-    <p data-i18n="footer_copyright"></p>
-    <p style="margin-top: 10px;">
-        <a href="/about" data-i18n="about_us">서비스 소개</a> |
-        <a href="/contact" data-i18n="contact">문의</a> |
-        <a href="/inquiry" data-i18n="partnership_inquiry">서비스 제휴 문의</a> |
-        <a href="/privacy-policy" data-i18n="privacy_policy">개인정보처리방침</a> |
-        <a href="/terms" data-i18n="terms_of_service">이용약관</a> |
-        <a href="/glossary" data-i18n="ai_glossary">AI 용어 사전</a> |
-        <a href="/sitemap.xml" data-i18n="sitemap">사이트맵</a> |
-        <a href="/games/sudden-attack/">서든어택 전적</a>
-    </p>
 </footer>
 </div>
 </body>

@@ -26,7 +26,14 @@ function parseMap() {
 
 function sameFile(a, b) {
   if (!fs.existsSync(a) || !fs.existsSync(b)) return false;
-  return fs.readFileSync(a, "utf8") === fs.readFileSync(b, "utf8");
+  return normalizeGeneratedVersions(fs.readFileSync(a, "utf8"))
+    === normalizeGeneratedVersions(fs.readFileSync(b, "utf8"));
+}
+
+function normalizeGeneratedVersions(content) {
+  return content
+    .replace(/\r\n/g, "\n")
+    .replace(/(\.(?:js|css))\?v=[a-zA-Z0-9._-]+/g, "$1");
 }
 
 function main() {
@@ -59,11 +66,12 @@ function main() {
       continue;
     }
 
-    if (!sameFile(srcPath, pubPath)) {
+    const mirrorMatches = sameFile(srcPath, pubPath);
+    if (!mirrorMatches) {
       violations.push(`public mirror drift: ${file} != ${src}`);
     }
 
-    if (!isSyncCommit && !changedSet.has(src)) {
+    if (!isSyncCommit && !changedSet.has(src) && !mirrorMatches) {
       violations.push(`public file changed without source in same commit: ${file} (expected ${src})`);
     }
   }

@@ -30,6 +30,7 @@ function createEditPostUseCases({ postService }) {
       id: postId,
       title: values.title,
       content: values.content,
+      attachments: values.attachments || [],
       user,
       post,
     });

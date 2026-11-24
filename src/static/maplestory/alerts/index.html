@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; worker-src 'self'; img-src 'self'; media-src blob:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+    <meta name="description" content="메이플스토리 사냥 시간 측정과 기록, 룬·스킬 음성 알림, 재획 타이머를 한 화면에서 사용하세요.">
+    <title>사냥 | TrackingMaple</title>
+    <link rel="stylesheet" href="../maple-theme.css?v=tracking-maple-2">
+    <link rel="stylesheet" href="./style.css?v=tracking-maple-2">
+    <script type="module" src="./main.js?v=tracking-maple-2"></script>
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a class="maple-brand" href="/maplestory/"><img src="../art/maple-leaf.png" width="24" height="24" alt="">TrackingMaple</a>
+            <nav class="maple-nav" aria-label="TrackingMaple">
+                <a href="/maplestory/">홈</a><a href="/maplestory/alerts/" aria-current="page">사냥</a><a href="/maplestory/boss/">보스</a><a href="/maplestory/gear/">장비</a>
+            </nav>
+            <a class="lab-link" href="/lab/">실험실 <span aria-hidden="true">↗</span></a>
+        </div>
+    </header>
+    <main>
+        <div class="hunt-page-heading">
+            <h1 id="page-title">사냥 도우미</h1>
+            <nav class="section-nav" aria-label="사냥 도우미 메뉴">
+                <a href="#hunt-live">게임 화면</a>
+                <a href="#alert-settings">알림</a>
+                <a href="#hunt-presets">타이머</a>
+                <a href="#hunt-record">결과 입력</a>
+                <a href="#history">지난 기록</a>
+            </nav>
+        </div>
+
+        <section class="hunt-dashboard panel" aria-label="현재 사냥 상태">
+            <div class="dashboard-top">
+                <div class="dashboard-clock">
+                    <div class="dashboard-clock-heading">
+                        <span>사냥 시간</span><span id="hunt-session-state" class="status" role="status">대기 중</span>
+                    </div>
+                    <output id="hunt-elapsed" aria-live="off">00:00:00</output>
+                    <p id="capture-unavailable" class="capture-unavailable" hidden>자동 감지는 PC용 Chrome·Edge에서 사용할 수 있어요.</p>
+                    <label class="field" id="capture-mode-field" hidden>공유 대상
+                        <select id="capture-mode" aria-describedby="capture-mode-help">
+                            <option value="window">게임 창</option>
+                            <option value="monitor">모니터 전체</option>
+                        </select>
+                    </label>
+                    <p id="capture-mode-help" class="hint" hidden>Alt+Enter로 화면 모드를 바꿀 때는 모니터 전체 공유를 선택하세요.</p>
+                    <div class="actions dashboard-actions">
+                        <button id="hunt-share-start" type="button" hidden>게임 창 공유하고 시작</button>
+                        <button id="hunt-start" type="button" class="secondary">공유 없이 시작</button>
+                        <button id="hunt-finish" type="button" class="secondary" hidden>끝내고 기록</button>
+                        <button id="hunt-pip" type="button" class="text-button" hidden>작은 창</button>
+                    </div>
+                </div>
+                <div class="dashboard-status" aria-label="화면 공유와 자동 감지 상태">
+                    <a class="live-status" href="#hunt-live">
+                        <span class="live-label">게임 화면</span>
+                        <strong id="capture-state" class="live-value" role="status">공유 꺼짐</strong>
+                    </a>
+                    <a class="live-status" id="rune-status-link" href="#alert-settings">
+                        <span class="live-label">룬 감지</span>
+                        <strong id="rune-state" class="live-value" role="status">공유 대기</strong>
+                    </a>
+                    <a class="live-status live-wealth" href="#preset-wealth">
+                        <span class="live-label">재획비</span>
+                        <output id="wealth-status" class="live-value" aria-live="off">대기</output>
+                    </a>
+                </div>
+            </div>
+            <div class="metrics" aria-label="현재 사냥 결과">
+                <div class="metric">
+                    <span class="metric-label">시간당 경험치</span>
+                    <output id="hunt-metric-exp" aria-live="off">—</output>
+                    <p id="hunt-exp-source" class="hint"></p>
+                    <p id="hunt-exp-two-hours" class="hint" title="현재 사냥 속도를 2시간으로 환산한 값" hidden></p>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">시간당 메소</span>
+                    <output id="hunt-metric-meso" aria-live="off">—</output>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">솔 에르다 조각</span>
+                    <output id="hunt-metric-fragments" aria-live="off">—</output>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel alert-panel" id="alert-settings" aria-labelledby="alert-heading">
+            <h2 id="alert-heading">사냥 알림</h2>
+            <ul id="alert-switches" class="alert-switches">
+                <li class="alert-switch-row" id="rune-alert-row">
+                    <label>
+                        <span class="alert-icon rune-icon" aria-hidden="true"></span>
+                        <span class="alert-tile-info">
+                            <strong class="alert-label">룬 등장</strong>
+                            <span class="alert-tile-value" id="rune-tile-state">미니맵 대기</span>
+                        </span>
+                        <input id="rune-alert-enabled" class="alert-switch" type="checkbox" role="switch" aria-label="룬 등장 알림" checked>
+                        <span class="alert-chip" aria-hidden="true"></span>
+                    </label>
+                </li>
+            </ul>
+            <p id="last-alert" class="hint recent-alert" role="status"></p>
+            <details class="alert-options">
+                <summary>알림 소리 · 반복</summary>
+                <div class="alert-option-controls">
+                    <label class="field rune-alert-option">룬 재알림
+                        <select id="rune-repeat">
+                            <option value="short">5초 간격으로 두 번 더</option>
+                            <option value="once">한 번만 알림</option>
+                            <option value="30">30초마다</option>
+                            <option value="60">1분마다</option>
+                            <option value="120">2분마다</option>
+                        </select>
+                    </label>
+                    <div class="actions">
+                        <button id="test-sound" type="button" class="secondary">룬 음성 테스트</button>
+                        <button id="notifications" type="button" class="secondary">시스템 알림 켜기</button>
+                    </div>
+                </div>
+            </details>
+        </section>
+
+        <div class="workspace" id="hunt-live">
+            <section class="panel capture" aria-labelledby="capture-heading">
+                <div class="section-heading capture-heading">
+                    <h2 id="capture-heading">게임 화면</h2>
+                    <div class="actions capture-actions" id="capture-actions">
+                        <button id="share" type="button" class="secondary" hidden>게임 창 공유하고 시작</button>
+                        <button id="choose-monitor-view" type="button" class="secondary" hidden>창 모드 영역 지정</button>
+                        <div class="actions" id="rune-settings" hidden>
+                            <button id="choose-map" type="button" class="secondary" disabled>미니맵 직접 지정</button>
+                            <button id="clear-map" type="button" class="text-button" aria-label="미니맵 초기화" hidden>초기화</button>
+                        </div>
+                        <button id="capture-guide-toggle" type="button" class="secondary" aria-controls="capture-guide" aria-pressed="false" hidden>인식 위치</button>
+                        <button id="stop" type="button" class="text-button" hidden>공유 종료</button>
+                    </div>
+                </div>
+                <div id="stage" class="stage">
+                    <video id="preview" muted playsinline hidden></video>
+                    <div id="capture-guide" class="capture-guide" role="img" aria-label="게임 화면의 미니맵, 버프칸, 경험치 바 인식 위치">
+                        <div id="guide-map" class="guide-spot guide-map"><span>미니맵</span><i aria-hidden="true"></i></div>
+                        <div class="guide-spot guide-buffs"><span>버프칸</span><i aria-hidden="true"></i></div>
+                        <div class="guide-spot guide-exp"><span>경험치 바</span><i aria-hidden="true"></i></div>
+                    </div>
+                    <div id="selection-layer" class="selection-layer" hidden>
+                        <div id="selection-box" class="selection-box" hidden></div>
+                    </div>
+                </div>
+                <div id="selection-tools" class="selection-tools" hidden>
+                    <p id="selection-help" role="status"></p>
+                    <button id="save-selection" type="button" disabled>영역 저장</button>
+                    <button id="cancel-selection" type="button" class="secondary">취소</button>
+                </div>
+                <p id="capture-detail" class="hint">Chrome 또는 Edge의 ‘창’ 탭에서 메이플스토리를 선택하세요.</p>
+                <div id="capture-inputs" hidden>
+                    <p id="rune-setup-note" class="hint setup-note" role="status"></p>
+                    <div class="experience-capture">
+                        <div>
+                            <strong>경험치 읽기</strong>
+                            <p id="exp-state" class="hint" role="status">게임 창 공유 대기</p>
+                        </div>
+                        <div class="actions">
+                            <button id="choose-exp" class="secondary" type="button" disabled>영역 조정</button>
+                            <button id="clear-exp" class="text-button" type="button" hidden>기본 위치</button>
+                        </div>
+                    </div>
+                    <div class="experience-capture">
+                        <div>
+                            <strong>솔 에르다 읽기</strong>
+                            <p id="erda-state" class="hint" role="status">게임에서 솔 에르다 통합 UI를 열어 주세요.</p>
+                        </div>
+                        <div class="actions">
+                            <button id="choose-erda" class="secondary" type="button" disabled>솔 에르다 창 지정</button>
+                            <button id="clear-erda" class="text-button" type="button" hidden>지정 해제</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <section class="panel preset-panel" id="hunt-presets" aria-labelledby="preset-heading">
+            <div class="section-heading timer-panel-heading">
+                <h2 id="preset-heading">사냥 타이머</h2>
+                <div class="next-timer" id="next-timer" hidden><span id="next-timer-name"></span><output id="next-timer-remaining" aria-live="off">—</output></div>
+            </div>
+            <div id="preset-list" class="timer-groups">
+                <section aria-labelledby="install-timers-heading">
+                    <h3 id="install-timers-heading">설치기</h3>
+                    <ul id="install-preset-list" class="reminder-list preset-timer-list"></ul>
+                </section>
+                <section aria-labelledby="buff-timers-heading">
+                    <h3 id="buff-timers-heading">도핑</h3>
+                    <ul id="buff-preset-list" class="reminder-list preset-timer-list"></ul>
+                </section>
+            </div>
+            <div class="rune-cooldown">
+                <h3 id="timer-heading">룬 재사용</h3>
+                <output id="remaining" aria-labelledby="timer-heading" aria-live="off">—</output>
+                <button id="start-timer" type="button" class="secondary">15분 시작</button>
+                <button id="reset-timer" type="button" class="text-button" aria-label="룬 타이머 초기화" disabled>초기화</button>
+            </div>
+            <div class="quick-panel">
+                <h3 id="quick-heading">빠른 타이머</h3>
+                <div class="actions" id="quick-timers" role="group" aria-labelledby="quick-heading">
+                    <button class="secondary" type="button" data-quick-minutes="1">1분</button>
+                    <button class="secondary" type="button" data-quick-minutes="3">3분</button>
+                    <button class="secondary" type="button" data-quick-minutes="15">15분</button>
+                    <button class="secondary" type="button" data-quick-minutes="30">30분</button>
+                </div>
+                <p id="quick-note" class="hint" role="status"></p>
+            </div>
+            <ul id="quick-timer-list" class="reminder-list"></ul>
+            <details class="timer-settings" id="timers">
+                <summary>스킬·버프 및 일반 타이머 추가</summary>
+                <div class="reminder-panels">
+                    <section class="reminder-panel" aria-labelledby="skill-heading">
+                        <h3 id="skill-heading">스킬·버프 알림</h3>
+                        <form id="skill-form" class="reminder-form">
+                            <label class="field">스킬 이름 <input name="label" maxlength="32" placeholder="예: 에르다 샤워" required></label>
+                            <label class="field">알림 기준
+                                <select name="mode">
+                                    <option value="reuse">퀵슬롯 · 재사용</option>
+                                    <option value="install">퀵슬롯 · 설치 종료</option>
+                                    <option value="buff">버프칸 · 종료</option>
+                                </select>
+                            </label>
+                            <label class="field">시간(초) <input type="number" name="seconds" min="1" max="86400" value="60" required></label>
+                            <label class="field">미리 알림(초 전) <input type="number" name="lead" min="0" max="3600" value="0" required></label>
+                            <button type="submit" class="secondary">스킬 추가</button>
+                        </form>
+                        <p id="skill-note" class="hint" role="status"></p>
+                        <ul id="skill-list" class="reminder-list"></ul>
+                    </section>
+                    <section class="reminder-panel" aria-labelledby="custom-timer-heading">
+                        <h3 id="custom-timer-heading">일반 타이머</h3>
+                        <form id="custom-timer-form" class="reminder-form">
+                            <label class="field">타이머 이름 <input name="label" maxlength="32" placeholder="예: 사냥 점검" required></label>
+                            <label class="field">분 <input type="number" name="minutes" min="0" max="1440" value="5" required></label>
+                            <label class="field">초 <input type="number" name="seconds" min="0" max="59" value="0" required></label>
+                            <label class="check-field"><input type="checkbox" name="repeat"> 반복</label>
+                            <button type="submit" class="secondary">타이머 추가</button>
+                        </form>
+                        <p id="custom-timer-note" class="hint" role="status"></p>
+                        <ul id="custom-timer-list" class="reminder-list"></ul>
+                    </section>
+                </div>
+            </details>
+        </section>
+
+        <template id="reminder-row">
+            <li class="reminder-row">
+                <div class="section-heading">
+                    <div>
+                        <strong data-name></strong>
+                        <p class="hint" data-summary></p>
+                    </div>
+                    <div class="timer-reading">
+                        <output data-remaining aria-live="off"></output>
+                        <span class="timer-state" data-timer-state hidden></span>
+                    </div>
+                </div>
+                <progress class="timer-progress" data-progress aria-hidden="true" hidden></progress>
+                <div class="timer-cooldown" data-cooldown-row hidden>
+                    <span>재사용 대기</span><output data-cooldown aria-live="off"></output>
+                </div>
+                <p class="timer-recognition" data-monitor-note hidden></p>
+                <div class="actions">
+                    <button type="button" class="secondary" data-start>시작</button>
+                    <button type="button" class="text-button" data-restart hidden>다시 시작</button>
+                    <button type="button" class="text-button" data-reset>초기화</button>
+                    <button type="button" class="text-button" data-remove>삭제</button>
+                </div>
+                <label class="field preset-choice" data-choice-field hidden><span data-choice-label>지속 시간</span><select data-choice></select></label>
+                <details class="skill-settings" data-skill-settings hidden>
+                    <summary>인식 설정</summary>
+                    <div class="actions skill-actions">
+                        <button type="button" class="secondary" data-region>아이콘 지정</button>
+                        <label class="check-field"><input type="checkbox" data-monitor> 지정한 아이콘 감지</label>
+                        <button type="button" class="text-button" data-restore-auto hidden>자동 감지로 복귀</button>
+                    </div>
+                    <p class="hint" data-region-guide></p>
+                </details>
+            </li>
+        </template>
+
+        <template id="preset-alert-switch">
+            <li class="alert-switch-row">
+                <label>
+                    <img class="alert-icon" width="28" height="28" alt="">
+                    <span class="alert-tile-info"><strong class="alert-label"></strong><span class="alert-tile-value" data-alert-value></span></span>
+                    <input class="alert-switch" type="checkbox" role="switch">
+                    <span class="alert-chip" aria-hidden="true"></span>
+                </label>
+            </li>
+        </template>
+
+        <section class="panel journal-panel" id="hunt-record" aria-labelledby="record-heading">
+            <h2 id="record-heading">사냥 결과 입력</h2>
+            <p class="hint">공유 화면에서 읽은 경험치와 솔 에르다 조각을 기록해요. 메소는 선택 입력이에요.</p>
+            <form id="hunt-record-form">
+                <div class="record-fields">
+                    <label class="field">캐릭터 <input name="character" maxlength="32" placeholder="선택 입력" autocomplete="off"></label>
+                    <label class="field">사냥터 <input name="map" maxlength="45" placeholder="선택 입력" autocomplete="off"></label>
+                    <label class="field">획득 메소 <input name="meso" maxlength="35" inputmode="numeric" placeholder="예: 9,800,000"></label>
+                </div>
+                <details class="exp-adjustment">
+                    <summary>획득량 직접 입력 또는 보정 (선택)</summary>
+                    <div class="record-fields">
+                        <label class="field">배틀 분석 경험치 <input name="exp" maxlength="35" inputmode="numeric" placeholder="예: 125,000,000"></label>
+                        <label class="field">솔 에르다 조각 <input name="fragments" maxlength="35" inputmode="numeric" placeholder="예: 12"></label>
+                    </div>
+                </details>
+                <div class="actions record-actions">
+                    <button id="hunt-save" type="submit" disabled>기록 저장</button>
+                    <button id="hunt-discard" type="button" class="text-button" hidden>측정 초기화</button>
+                    <p id="hunt-note" class="hint" role="status"></p>
+                </div>
+            </form>
+        </section>
+
+        <section class="panel journal-panel" id="history" aria-labelledby="history-heading">
+            <div class="section-heading"><h2 id="history-heading">지난 사냥 기록</h2><span id="history-count" class="history-count">0회</span></div>
+            <p id="history-empty" class="empty-history">첫 사냥을 마치고 저장하면 여기에 기록이 쌓여요.</p>
+            <ul class="history-list" id="history-list"></ul>
+        </section>
+
+        <template id="history-row">
+            <li class="history-row">
+                <div><strong data-history-name></strong><p class="hint" data-history-detail></p></div>
+                <div class="history-stat"><span>시간당 경험치</span><b data-history-exp></b></div>
+                <div class="history-stat"><span>메소/시간</span><b data-history-meso></b></div>
+                <div class="history-stat"><span>조각</span><b data-history-fragments></b></div>
+                <button class="text-button" type="button" data-history-remove>삭제</button>
+            </li>
+        </template>
+
+        <template id="hunt-pip-template">
+            <section class="pip-panel" aria-label="사냥 진행 상황">
+                <div class="pip-label"><span>사냥 시간</span><span data-pip-status>대기 중</span></div>
+                <output data-pip-time aria-live="off">00:00:00</output>
+                <div class="pip-metrics pip-live-status">
+                    <div><span>게임 화면</span><strong data-pip-capture>공유 꺼짐</strong></div>
+                    <div><span>룬 감지</span><strong data-pip-rune-status>공유 대기</strong></div>
+                    <div><span>재획비</span><strong data-pip-wealth>대기</strong></div>
+                </div>
+                <div class="pip-timers">
+                    <div><span>룬 재사용</span><strong data-pip-rune>—</strong></div>
+                    <div><span data-pip-next-timer>실행 중인 타이머 없음</span><strong data-pip-remaining>—</strong></div>
+                </div>
+                <div class="pip-metrics pip-results">
+                    <div><span>시간당 경험치</span><strong data-pip-exp>—</strong></div>
+                    <div><span>획득 조각</span><strong data-pip-fragments>—</strong></div>
+                </div>
+            </section>
+        </template>
+
+        <p class="privacy">공유 화면은 브라우저에서 처리해요. 설정과 사냥 기록은 이 브라우저에 저장됩니다.</p>
+    </main>
+</body>
+</html>

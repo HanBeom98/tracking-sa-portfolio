@@ -4,33 +4,66 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title data-i18n="about_us">서비스 소개 - Tracking SA</title>
+    <style>
+        .about-content { font-size: 1.1rem; line-height: 1.8; display: flex; flex-direction: column; gap: 20px; max-width: 800px; margin: 0 auto; }
+        .about-info-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px 20px; }
+        .about-section-title { font-size: 1.25rem; margin: 0 0 8px; color: #0f172a; }
+        .about-list { margin: 0; padding-left: 22px; color: #334155; }
+        .about-links { font-size: 0.95rem; color: #64748b; }
+        .about-docs-card { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 14px; padding: 18px 20px; max-width: 800px; margin: 20px auto 0; }
+        .about-docs-card p { color: #334155; }
+        body.dark-mode .about-info-card,
+        body.dark-mode .about-docs-card { background: #1e293b; border-color: #475569; }
+        body.dark-mode .about-section-title,
+        body.dark-mode .about-list,
+        body.dark-mode .about-docs-card p { color: #f8fafc; }
+        body.dark-mode .about-links { color: #cbd5e1; }
+    </style>
 </head>
 <body>
     <app-layout 
       data-i18n-attr="page-title:about_us"
       page-title="서비스 소개">
-        <div style="font-size: 1.1rem; line-height: 1.8; display: flex; flex-direction: column; gap: 20px; max-width: 800px; margin: 0 auto;">
-            <p data-i18n="about_us_intro1">TrackingSA는 게임 유틸리티, 커뮤니티, AI 테스트, 실험형 도구를 한곳에서 제공하는 멀티 서비스 허브입니다. 방문자가 필요한 기능을 빠르게 찾고 바로 사용할 수 있는 구조를 지향합니다.</p>
-            <p data-i18n="about_us_intro2">현재는 서든어택 전적 검색 서비스를 중심으로, 반복 방문이 발생하는 실용 기능과 가볍게 즐길 수 있는 인터랙티브 페이지를 함께 운영하고 있습니다. 과장보다 실제 사용성과 접근성을 우선합니다.</p>
-            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px 20px;">
+        <div class="about-content">
+            <p data-i18n="about_us_intro1">Tracking SA는 NEXON Open API 기반 서든어택 공개 전적과 SOOP 공식 API 기반 라이브 방송 정보를 한곳에서 제공하는 게임 데이터 서비스입니다.</p>
+            <p data-i18n="about_us_intro2">전적 검색, 최근 기록 분석, 라이브 방송 시청과 크루 리그 운영 기능을 목적에 따라 분리해 빠르게 이용할 수 있도록 구성합니다.</p>
+            <div class="about-info-card">
                 <p style="margin: 0 0 8px 0;"><strong data-i18n="about_operator_label">운영 주체:</strong> <span data-i18n="about_operator_value">Tracking SA Team</span></p>
-                <p style="margin: 0 0 8px 0;"><strong data-i18n="about_contact_label">연락처:</strong> <a href="mailto:Carry9691@gmail.com" style="color: #0052cc; font-weight: 700;">Carry9691@gmail.com</a></p>
-                <p style="margin: 0;"><strong data-i18n="about_updated_label">최종 업데이트:</strong> <span>2026-03-09</span></p>
+                <p style="margin: 0;"><strong data-i18n="about_contact_label">연락처:</strong> <a href="mailto:demo-15b9ce4f@example.com" style="color: var(--link-color, #0052cc); font-weight: 700;">demo-15b9ce4f@example.com</a></p>
             </div>
             <div>
-                <h2 data-i18n="about_editorial_title" style="font-size: 1.25rem; margin: 0 0 8px 0; color: #0f172a;">편집 및 콘텐츠 원칙</h2>
-                <ul style="margin: 0; padding-left: 22px; color: #334155;">
+                <h2 class="about-section-title">서비스 구성</h2>
+                <ul class="about-list">
+                    <li>NEXON Open API 기반 프로필과 폭파미션 매치 유형별 최근 최대 20경기를 제공합니다.</li>
+                    <li>최근·이전 20경기 변화, 최근 31일 날짜별 활동, VS 비교와 즐겨찾기를 제공합니다.</li>
+                    <li>SOOP 공식 API를 통해 현재 방송 중인 서든어택 라이브 정보를 제공합니다.</li>
+                    <li>리그 허브는 크루 랭킹, 신청, 팀 밸런서, 운영 기능을 별도 흐름으로 제공합니다.</li>
+                    <li>공지사항 페이지를 통해 구조 변경, 운영 일정, 주요 업데이트를 안내합니다.</li>
+                </ul>
+            </div>
+            <div>
+                <h2 class="about-section-title" data-i18n="about_editorial_title">편집 및 콘텐츠 원칙</h2>
+                <ul class="about-list">
                     <li data-i18n="about_editorial_li1">출처 기반 사실 요약과 관점 분석을 분리합니다.</li>
                     <li data-i18n="about_editorial_li2">추정·의견은 명확히 구분하고 과장 표현을 지양합니다.</li>
                     <li data-i18n="about_editorial_li3">법률·의료·투자 판단의 최종 책임은 사용자에게 있습니다.</li>
                 </ul>
             </div>
-            <p style="font-size: 0.95rem; color: #64748b;">
+            <p class="about-links">
                 <a href="/privacy-policy" data-i18n="privacy_policy">개인정보처리방침</a> ·
                 <a href="/terms" data-i18n="terms_of_service">이용약관</a> ·
-                <a href="/contact" data-i18n="contact">문의</a>
+                <a href="/contact/" data-i18n="contact">문의</a>
             </p>
-            <p data-i18n="about_us_thanks" style="font-weight: 800; color: #0052cc; text-align: center; font-size: 1.2rem;">방문해 주셔서 감사합니다!</p>
+            <p data-i18n="about_us_thanks" style="font-weight: 800; color: var(--link-color, #0052cc); text-align: center; font-size: 1.2rem;">방문해 주셔서 감사합니다!</p>
+        </div>
+        <div class="about-docs-card">
+            <h2 class="about-section-title">운영 문서</h2>
+            <p style="margin: 0;">Tracking SA가 어떤 목적의 서비스인지, 어떤 기준으로 문서를 작성하는지 별도 문서로 공개합니다. 서비스 이용과 운영 기준이 궁금한 경우 아래 문서를 확인할 수 있습니다.</p>
+            <p style="margin: 12px 0 0 0;">
+                <a href="/service-methodology/" style="color: var(--link-color, #0052cc); font-weight: 700;">서비스 기준</a>
+                ·
+                <a href="/editorial-policy/" style="color: var(--link-color, #0052cc); font-weight: 700;">편집 원칙</a>
+            </p>
         </div>
     </app-layout>
 

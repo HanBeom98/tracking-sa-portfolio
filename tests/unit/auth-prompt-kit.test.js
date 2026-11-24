@@ -165,3 +165,58 @@ test("auth prompt kit blocks auth-gated link and stores redirect when user missi
     }
   );
 });
+
+test("auth-gated link uses current signed-in user after initially anonymous session", async () => {
+  const link = createElement("a");
+  link.href = "/board/write";
+  await withGlobals({ window: globalThis, document: { querySelectorAll: () => [link] },
+    sessionStorage: createSessionStorage() }, async () => {
+    const kit = (await loadFactory())({
+      getAuthStateReady: () => Promise.resolve(null),
+      getCurrentUser: () => ({ uid: "signed-in" }),
+      showAuthMenu() { assert.fail("signed-in users must not see login prompt"); },
+    });
+    kit.initAuthGateLinks();
+    await link.trigger("click", { preventDefault() { assert.fail("allow normal navigation"); } });
+    assert.equal(sessionStorage.getItem("postLoginRedirect"), null);
+  });
+});
+
+test("auth-gated link cancels synchronously and resumes navigation after session restoration", async () => {
+  const link = createElement("a");
+  link.href = "/board/write?category=notice";
+  const fakeWindow = { location: { href: "/board" } };
+  let finishReady;
+  let user = null;
+  await withGlobals({ window: globalThis, document: { querySelectorAll: () => [link] },
+    sessionStorage: createSessionStorage() }, async () => {
+    const factory = await loadFactory();
+    globalThis.window = fakeWindow;
+    const ready = new Promise(resolve => { finishReady = resolve; });
+    const kit = factory({ getAuthStateReady: () => ready, getCurrentUser: () => user,
+      showAuthMenu() { assert.fail("restored users must not see login prompt"); } });
+    kit.initAuthGateLinks();
+    let prevented = false;
+    const click = link.trigger("click", { preventDefault() { prevented = true; } });
+    assert.equal(prevented, true);
+    user = { uid: "restored" };
+    finishReady(null);
+    await click;
+    assert.equal(fakeWindow.location.href, link.href);
+  });
+});
+
+test("auth-gated link requires login after logout even if initial session was signed in", async () => {
+  const link = createElement("a");
+  link.href = "/board/write";
+  let shown = 0;
+  await withGlobals({ window: globalThis, document: { querySelectorAll: () => [link] },
+    sessionStorage: createSessionStorage() }, async () => {
+    const kit = (await loadFactory())({ getAuthStateReady: () => Promise.resolve({ uid: "old" }),
+      getCurrentUser: () => null, showAuthMenu() { shown++; } });
+    kit.initAuthGateLinks();
+    await link.trigger("click", { preventDefault() {} });
+    assert.equal(shown, 1);
+    assert.equal(sessionStorage.getItem("postLoginRedirect"), link.href);
+  });
+});

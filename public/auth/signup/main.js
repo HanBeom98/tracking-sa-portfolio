@@ -1,18 +1,11 @@
+import { getAuthService } from '../infra/auth-gateway.js?v=512ed5fcfa8b';
+
 function qs(key) {
   return new URLSearchParams(window.location.search).get(key) || '';
 }
 
 function t(key, fallback) {
   return window.getTranslation ? window.getTranslation(key, fallback) : fallback;
-}
-
-async function getAuthService() {
-  if (window.AuthService) return window.AuthService;
-  if (window.authDomainReady) {
-    const service = await window.authDomainReady;
-    if (service) return service;
-  }
-  return null;
 }
 
 function initSignup() {

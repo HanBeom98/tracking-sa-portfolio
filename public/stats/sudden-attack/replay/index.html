@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>리플레이 분석실 - Tracking SA</title>
+
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="style.css?v=ef1552143739">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://trackingsa.com/stats/sudden-attack/replay/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Tracking SA">
+    <meta property="og:url" content="https://trackingsa.com/stats/sudden-attack/replay/">
+    <meta property="og:image" content="https://trackingsa.com/logo.svg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://trackingsa.com/logo.svg">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
+    <meta name="description" content="서든어택 병영수첩 리플레이 JSON으로 라운드별 처치, 사망, 생존과 투척물 기록을 분석해 보세요.">
+    <meta property="og:title" content="리플레이 분석실 - Tracking SA">
+    <meta property="og:description" content="서든어택 병영수첩 리플레이 JSON으로 라운드별 처치, 사망, 생존과 투척물 기록을 분석해 보세요.">
+    <style>
+  html.dark-mode,
+  html.dark-mode body {
+    background-color: #0f172a;
+    color: #f8fafc;
+    color-scheme: dark;
+  }
+</style>
+<script>
+  (function() {
+    let theme = 'dark';
+    try {
+      theme = localStorage.getItem('theme') === 'light' ? 'light' : 'dark';
+    } catch {}
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark-mode');
+      document.body && document.body.classList.add('dark-mode');
+    }
+  })();
+</script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7263630893992216" crossorigin="anonymous"></script>
+<meta name="google-adsense-account" content="ca-pub-7263630893992216">
+<script type="module" src="/analytics-loader.js?v=86d5e62d50ed"></script>
+<meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
+<meta name="naver-site-verification" content="b15b33af838280b54d31eb3c7e5c358d2836743f" />
+<script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app-check.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script>
+  window.FIREBASE_CONFIG = {"apiKey": "", "authDomain": "demo-tracking-sa-portfolio.firebaseapp.com", "projectId": "demo-tracking-sa-portfolio", "storageBucket": "demo-tracking-sa-portfolio.firebasestorage.app", "appId": "1:000000000000:web:portfolio-example", "messagingSenderId": "779289056217", "appCheckSiteKey": ""};
+</script>
+<script>
+  window.authDomainReady = window.authDomainReady || new Promise((resolve) => {
+    window.__resolveAuthDomain = resolve;
+  });
+</script>
+<link rel="stylesheet" href="/style.css?v=8f0895c6daf8">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#0052cc">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Tracking SA">
+<script src="/runtime-config.js"></script>
+<script defer src="/firebase-config.js"></script>
+<script defer src="/pwa-register.js"></script>
+<script type="module" src="/auth/ui/auth-client.js"></script>
+<script src="/translations.js?v=8eb99f0dbaa9"></script>
+<script src="/common.js?v=5cfaaa0b27e3"></script>
+
+</head>
+<body>
+  <div class="site-header-container"><header>
+    <div class="header-inner">
+        <a href="/" class="site-logo-link" aria-label="Tracking SA home">
+            <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="site-logo">
+                <circle cx="50" cy="50" r="48" stroke="currentColor" stroke-width="4" fill="transparent"/>
+                <path d="M25 70L40 55L50 65L75 35" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="70" cy="35" r="12" stroke="currentColor" stroke-width="6" fill="currentColor"/>
+                <rect x="78" y="43" width="15" height="6" rx="3" transform="rotate(45 78 43)" fill="currentColor"/>
+            </svg>
+        </a>
+        <div class="desktop-menu-container">
+            <nav id="primary-navigation">
+                <ul>
+                    <li><a href="/stats/sudden-attack/" data-i18n="menu_stats_search">전적 검색</a></li>
+                    <li><a href="/stats/sudden-attack/replay/">리플레이 분석실</a></li>
+                    <li><a href="/guides/mygun2/">마이건2 도감</a></li>
+                    <li><a href="/guides/">가이드</a></li>
+                    <li><a href="/lab/">실험실</a></li>
+                    <li><a href="/board?category=notice" data-i18n="notice">공지사항</a></li>
+                </ul>
+            </nav>
+        </div>
+        <div class="utility-controls">
+            <button id="color-change" aria-label="테마 변경">🌙</button>
+            <div id="auth-controls" class="auth-controls"></div>
+        </div>
+        <button class="mobile-menu-toggle" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="primary-navigation">
+            <span></span><span></span><span></span>
+        </button>
+    </div>
+</header>
+</div>
+  <main class="replay-shell">
+    <section class="replay-hero" aria-labelledby="replayTitle">
+      <div class="replay-hero-copy">
+        <span class="eyebrow">서든어택 · 무료 기본 분석</span>
+        <h1 id="replayTitle">리플레이 분석실</h1>
+        <p>병영수첩 JSON으로 경기 흐름과 주요 장면을 확인하세요.</p>
+      </div>
+      <div class="sample-actions" aria-label="파일 없이 샘플 체험">
+        <small>파일이 없다면 가상 경기로 먼저 체험하세요.</small>
+        <button type="button" class="secondary" data-replay-sample="single">샘플로 한 경기 체험</button>
+        <button type="button" class="secondary" data-replay-sample="compare">샘플로 여러 경기 비교</button>
+      </div>
+    </section>
+
+    <div class="replay-modes" role="tablist" aria-label="리플레이 분석 방법">
+      <button type="button" id="replaySingleTab" role="tab" aria-controls="replaySinglePanel" aria-selected="true" tabindex="0" data-replay-mode="single"><span><strong>한 경기 상세 분석</strong><small>JSON 1개 · 경기 흐름과 장면 복기</small></span></button>
+      <button type="button" id="replayCompareTab" role="tab" aria-controls="replayComparePanel" aria-selected="false" tabindex="-1" data-replay-mode="compare"><span><strong>여러 경기 비교</strong><small>JSON 2~5개 · 같은 선수의 기록 비교</small></span></button>
+    </div>
+
+    <section id="replaySinglePanel" role="tabpanel" aria-labelledby="replaySingleTab">
+    <p id="replaySampleNotice" class="sample-notice" role="status" hidden>샘플 체험 중 · 가상의 경기 기록이며 내 전적이 아닙니다. 실제 JSON을 선택하면 내 경기로 분석할 수 있습니다.</p>
+    <section class="upload-card" aria-labelledby="uploadTitle">
+      <div class="section-heading"><span>1. 파일 선택</span><h2 id="uploadTitle">내 경기 분석하기</h2><p>JSON 1개를 선택한 뒤 플레이어를 고르면 됩니다.</p></div>
+      <label id="replayDropzone" class="dropzone" for="replayFile" data-file-state="idle" aria-busy="false">
+        <input id="replayFile" type="file" accept=".json,application/json" aria-describedby="replayFileHelp replayFileStatus">
+        <span class="file-icon" aria-hidden="true">JSON</span><strong data-file-title>리플레이 파일 선택</strong>
+        <span id="replaySelectedFileName" class="selected-file-name" hidden></span>
+        <small id="replayFileHelp">끌어놓거나 눌러서 선택 · JSON 최대 2MB</small>
+      </label>
+      <p class="upload-help"><a href="/guides/replay-analysis-guide/">JSON 파일 받는 방법·사용법 ↗</a><span>로그인 없이 분석</span></p>
+      <p id="replayFileStatus" class="file-status" aria-live="polite">아직 선택한 파일이 없습니다.</p>
+      <div class="privacy-banner"><span>✓</span><div><strong>파일은 기기 안에서, 전력 정보는 OpenAPI로</strong><p id="localPrivacyState">리플레이 파일은 전송하거나 저장하지 않습니다. 경기 유형과 전력 비교를 위해 경기 ID와 닉네임을 넥슨 OpenAPI 조회에 사용합니다.</p></div></div>
+      <div id="playerStep" class="player-step hidden">
+        <p id="replayPlayerHelp" class="player-next-step">다음 단계: 분석할 플레이어를 선택해 주세요.</p>
+        <div><label for="replayPlayer">분석할 플레이어</label><select id="replayPlayer" aria-describedby="replayPlayerHelp"></select></div>
+        <div><label for="replayCategory">전력 비교 기준 · 자동 확인</label><select id="replayCategory"><option value="">자동 확인 중</option><option value="solo">솔로랭크</option><option value="party">파티랭크</option><option value="clan">클랜전</option><option value="tournament">토너먼트</option></select></div>
+        <button id="analyzeReplayButton" type="button" disabled>이 플레이어 분석</button>
+        <button id="resetReplayButton" class="secondary" type="button">초기화</button>
+      </div>
+    </section>
+    <div id="replayResults" class="results hidden" tabindex="-1"></div>
+    <section id="replayDetail" class="detail hidden" tabindex="-1" aria-live="polite"></section>
+    </section>
+
+    <section id="replayComparePanel" role="tabpanel" aria-labelledby="replayCompareTab" hidden>
+    <p id="replayComparisonSampleNotice" class="sample-notice" role="status" hidden>비교 샘플 체험 중 · 두 경기는 모두 가상의 기록입니다. 실제 전적이나 실력 변화를 뜻하지 않습니다.</p>
+    <section id="replayComparison" class="panel comparison-panel">
+      <div class="section-heading"><span>여러 경기 비교 · 무료</span><h2>리플레이 2~5개 선택</h2><p>여러 경기에 공통으로 등장하는 같은 선수의 기록을 나란히 비교합니다.</p></div>
+      <ol class="comparison-steps" aria-label="경기 비교 순서"><li><b>1</b> 파일 선택창에서 JSON 2~5개를 함께 선택</li><li><b>2</b> 공통 선수 중 비교할 선수를 선택</li></ol>
+      <div class="comparison-controls"><label>비교할 리플레이 JSON<input data-comparison-files type="file" accept=".json,application/json" multiple aria-describedby="comparison-file-help"></label><label>비교할 선수<select data-comparison-player disabled aria-label="경기 비교 선수"></select></label><button type="button" class="secondary" data-comparison-clear disabled>비교 지우기</button></div>
+      <p id="comparison-file-help" class="comparison-note">파일당 최대 2MB. PC에서는 Ctrl 또는 Shift 키로 여러 파일을 선택할 수 있습니다. 새로 선택하면 이전 파일 목록이 바뀝니다.</p>
+      <p class="comparison-note">닉네임이 바뀌어도 같은 선수 ID이면 연결하고, 이름이 같아도 ID가 다르면 합치지 않습니다. 전력 조회 없이 기기 안에서 비교하며 파일·결과를 전송하거나 저장하지 않습니다.</p>
+      <p data-comparison-status role="status" aria-live="polite"></p><ul data-comparison-files-list aria-label="비교에 포함된 파일"></ul><ul data-comparison-issues aria-label="비교 제외 사유"></ul><div data-comparison-result></div>
+    </section>
+    </section>
+
+    <aside class="replay-assistance" aria-label="분석 예시와 파일 사용법">
+    <details id="replaySample" class="sample-analysis replay-help" data-replay-help>
+      <summary class="section-heading sample-heading">
+        <div><span>ANALYSIS PREVIEW</span><h2 id="sampleAnalysisTitle">리플레이에서 이런 흐름을 찾습니다</h2><p class="help-hint">분석 예시 · 내 경기 기록이 아닙니다</p></div>
+        <span class="help-toggle"><span class="help-open">접기</span><span class="help-closed">예시 보기</span></span>
+      </summary>
+      <p class="sample-note">아래 값은 분석 결과의 구성을 설명하기 위한 예시입니다. 실제 결과는 선택한 JSON 리플레이에 기록된 이벤트만 사용합니다.</p>
+      <div class="sample-scoreboard" aria-label="샘플 경기 요약">
+        <article><span>경기 결과</span><strong>8 : 6 승리</strong><small>프로방스 · 14라운드</small></article>
+        <article><span>처치 / 사망</span><strong>12 / 8</strong><small>처치가 기록된 라운드 9개</small></article>
+        <article><span>평균 생존</span><strong>47.3초</strong><small>공격 42.1초 · 수비 52.5초</small></article>
+        <article><span>투척물 사용</span><strong>7회</strong><small>투척 후 5초 내 처치 2건</small></article>
+      </div>
+      <div class="sample-findings">
+        <article data-tone="good">
+          <span>좋았던 흐름</span>
+          <h3>수비 라운드에서 생존 시간이 길었습니다</h3>
+          <p>수비 평균 생존 시간이 공격보다 10.4초 길었습니다. 결과 화면에서는 라운드별 생존 비율과 승패를 함께 비교해 어느 구간에서 차이가 생겼는지 확인합니다.</p>
+        </article>
+        <article data-tone="review">
+          <span>다시 볼 장면</span>
+          <h3>4라운드 첫 사망이 빠르게 발생했습니다</h3>
+          <p>라운드 시작 18.6초에 사망했고 가장 가까운 생존 팀원과 거리가 28m였습니다. 타임라인에서 직전 처치와 투척 이벤트를 함께 보여주되 원인을 임의로 단정하지 않습니다.</p>
+        </article>
+        <article data-tone="neutral">
+          <span>투척 기록</span>
+          <h3>공격에서 투척물 활용이 집중됐습니다</h3>
+          <p>공격 5회, 수비 2회의 사용 기록이 남았습니다. 투척 시점과 이후 5초 동안의 처치·사망을 연결해 실제 교전 흐름을 다시 찾을 수 있게 합니다.</p>
+        </article>
+      </div>
+      <div class="sample-timeline" aria-label="샘플 라운드 타임라인">
+        <div><b>4라운드 · 패배</b><span><time>11.2초</time> 연막탄 투척</span><span><time>18.6초</time> 첫 사망 · 팀원 거리 28m</span></div>
+        <div><b>9라운드 · 승리</b><span><time>24.1초</time> 첫 처치 · AK-47</span><span><time>51.8초</time> 라운드 생존</span></div>
+      </div>
+      <p class="sample-note">분석은 리플레이에 존재하는 사실을 요약하는 규칙 기반 방식입니다. 파일은 기기 안에서 읽으며 결과를 서버나 데이터베이스에 저장하지 않습니다.</p>
+    </details>
+
+    <details id="replayGuide" class="guide replay-help" data-replay-help>
+      <summary class="section-heading guide-heading">
+        <div><span>HOW TO</span><h2>파일은 어디서 받나요?</h2></div>
+        <span class="help-toggle"><span class="help-open">접기</span><span class="help-closed">사용법 보기</span></span>
+      </summary>
+      <a class="official-link" href="https://barracks.sa.nexon.com/" target="_blank" rel="noopener noreferrer">공식 병영수첩 열기 <span aria-hidden="true">↗</span></a>
+      <ol>
+        <li><b>1</b><div><strong>공식 병영수첩에서 닉네임 검색</strong><p>분석하려는 캐릭터의 기록실로 이동합니다.</p></div></li>
+        <li><b>2</b><div><strong>경기 기록에서 리플레이 찾기</strong><p>리플레이 표시가 있는 경기를 열고 파일을 저장합니다.</p></div></li>
+        <li><b>3</b><div><strong>저장된 JSON 파일 선택</strong><p>다운로드 폴더의 .json 파일을 위 선택 영역에 넣습니다.</p></div></li>
+      </ol>
+      <p class="disclaimer">Tracking SA는 넥슨 또는 서든어택의 공식 서비스가 아닙니다. 파일은 브라우저 밖으로 전송하지 않으며, 전력 비교용 경기 ID·닉네임과 조회 결과는 서버나 DB에 별도로 저장하지 않습니다.</p>
+    </details>
+    </aside>
+  </main>
+  <div class="site-footer-container"><footer class="site-footer">
+    <div class="footer-inner">
+        <div class="footer-top">
+            <div class="footer-brand">
+                <a class="footer-brand-link" href="/" aria-label="Tracking SA 홈">
+                    <svg width="36" height="36" viewBox="0 0 100 100" fill="none" aria-hidden="true" focusable="false">
+                        <circle cx="50" cy="50" r="48" stroke="currentColor" stroke-width="4"/>
+                        <path d="M25 70L40 55L50 65L75 35" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="70" cy="35" r="12" fill="currentColor"/>
+                    </svg>
+                    <strong>TRACKING <span>SA</span></strong>
+                </a>
+                <p>서든어택의 기록을,<br>더 쉽게 읽는 곳.</p>
+                <button id="pwa-install-button" class="footer-install" type="button" hidden>Tracking SA 앱 설치 <span aria-hidden="true">↗</span></button>
+            </div>
+            <nav class="footer-nav" aria-label="하단 메뉴">
+                <div class="footer-link-group">
+                    <h2>둘러보기</h2>
+                    <ul>
+                        <li><a href="/stats/sudden-attack/">서든어택 전적</a></li>
+                        <li><a href="/stats/sudden-attack/replay/">리플레이 분석실</a></li>
+                        <li><a href="/guides/">가이드</a></li>
+                    </ul>
+                </div>
+                <div class="footer-link-group">
+                    <h2>서비스 안내</h2>
+                    <ul>
+                        <li><a href="/about" data-i18n="about_us">서비스 소개</a></li>
+                        <li><a href="/service-methodology/">서비스 기준</a></li>
+                        <li><a href="/editorial-policy/">편집 원칙</a></li>
+                        <li><a href="/sitemap.xml" data-i18n="sitemap">사이트맵</a></li>
+                    </ul>
+                </div>
+                <div class="footer-link-group">
+                    <h2>이용 및 문의</h2>
+                    <ul>
+                        <li><a href="/privacy-policy" data-i18n="privacy_policy">개인정보처리방침</a></li>
+                        <li><a href="/terms" data-i18n="terms_of_service">이용약관</a></li>
+                        <li><a href="/ai-replay-pass/">AI 이용권 · 판매 준비</a></li>
+                        <li><a href="/contact/" data-i18n="contact">문의</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+        <div class="footer-business-info" aria-label="사업자 정보">
+            <details class="footer-business-details">
+                <summary class="footer-business-summary"><strong>로직 스토어</strong><span>사업자 정보</span><svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false"><path d="m4 6 4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+                <dl>
+                    <div><dt>상호</dt><dd>로직 스토어</dd></div>
+                    <div><dt>사업자등록번호</dt><dd>000-00-00000</dd></div>
+                    <div><dt>대표자</dt><dd>조한범</dd></div>
+                    <div class="footer-business-address"><dt>사업장 주소</dt><dd>경기도 수원시 인계동 992-13 크레텔 하우스 2동 302호</dd></div>
+                    <div><dt>통신판매업 신고번호</dt><dd>2026-수원팔달-0279호</dd></div>
+                </dl>
+            </details>
+            <div class="footer-business-contact" aria-label="고객 문의"><span>고객 문의</span><a href="tel:01081129691" aria-label="고객 문의 전화 010-0000-0000">010-0000-0000</a><a href="mailto:demo-15b9ce4f@example.com" aria-label="문의 이메일 demo-15b9ce4f@example.com">demo-15b9ce4f@example.com</a></div>
+        </div>
+        <div class="footer-bottom">
+            <p class="nexon-api-attribution">본 서비스는 <a href="https://openapi.nexon.com/ko/support/terms/" target="_blank" rel="noopener noreferrer">NEXON Open API</a>를 이용하여 데이터를 제공합니다. <span lang="en">This service uses NEXON Open API.</span></p>
+            <p class="footer-copyright" data-i18n="footer_copyright">&copy; 2026 TrackingSA. 서든어택 전적 검색 중심 서비스.</p>
+        </div>
+    </div>
+</footer>
+</div>
+  <script type="module" src="main.js?v=e800aff1d595"></script>
+</body>
+</html>

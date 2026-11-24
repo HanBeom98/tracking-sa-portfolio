@@ -39,8 +39,26 @@
         document.body.style.overflow = "";
       };
 
+      let backdropPointerDown = false;
+      let backdropPointerUp = false;
+
+      modal.addEventListener("pointerdown", (event) => {
+        backdropPointerDown = event.target === modal;
+        backdropPointerUp = false;
+      });
+      modal.addEventListener("pointerup", (event) => {
+        backdropPointerUp = event.target === modal;
+      });
+      modal.addEventListener("pointercancel", () => {
+        backdropPointerDown = false;
+        backdropPointerUp = false;
+      });
       modal.addEventListener("click", (event) => {
-        if (event.target === modal) close();
+        if (backdropPointerDown && backdropPointerUp && event.target === modal) {
+          close();
+        }
+        backdropPointerDown = false;
+        backdropPointerUp = false;
       });
       document.addEventListener("keydown", (event) => {
         if (event.key === "Escape" && modal.classList.contains("open")) close();
@@ -61,7 +79,7 @@
       modal.classList.add("open");
       document.body.style.overflow = "hidden";
       const emailEl = modal.querySelector("#inline-login-email");
-      if (emailEl) setTimeout(() => emailEl.focus(), 80);
+      if (emailEl) emailEl.focus();
     }
 
     async function open({ redirectTo = "/" } = {}) {
@@ -71,28 +89,36 @@
 
       const emailBtn = modal.querySelector("#inline-login-email-submit");
       const signupBtn = modal.querySelector("#inline-login-signup");
+      const passwordEl = modal.querySelector("#inline-login-password");
 
-      if (emailBtn) {
-        emailBtn.onclick = async () => {
-          if (!actionHandlers) return;
-          await actionHandlers.signInWithEmail(
-            {
-              email: (modal.querySelector("#inline-login-email")?.value || "").trim(),
-              password: modal.querySelector("#inline-login-password")?.value || "",
+      const submitEmailLogin = async () => {
+        if (!actionHandlers) return;
+        await actionHandlers.signInWithEmail(
+          {
+            email: (modal.querySelector("#inline-login-email")?.value || "").trim(),
+            password: passwordEl?.value || "",
+          },
+          {
+            onSuccess() {
+              modal.classList.remove("open");
+              document.body.style.overflow = "";
             },
-            {
-              onSuccess() {
-                modal.classList.remove("open");
-                document.body.style.overflow = "";
-              },
-              onValidationError(message) {
-                setError(message);
-              },
-              onError(message) {
-                setError(message);
-              },
-            }
-          );
+            onValidationError(message) {
+              setError(message);
+            },
+            onError(message) {
+              setError(message);
+            },
+          }
+        );
+      };
+
+      if (emailBtn) emailBtn.onclick = submitEmailLogin;
+      if (passwordEl) {
+        passwordEl.onkeydown = (event) => {
+          if (event.key !== "Enter" || event.isComposing) return;
+          event.preventDefault();
+          submitEmailLogin();
         };
       }
 

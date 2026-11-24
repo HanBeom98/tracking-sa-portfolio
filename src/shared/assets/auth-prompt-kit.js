@@ -3,6 +3,7 @@
     ensureInlineLoginModalController,
     openAuthPrompt,
     getAuthStateReady,
+    getCurrentUser,
     showAuthMenu,
     getTranslation,
   }) {
@@ -65,12 +66,26 @@
 
       links.forEach((link) => {
         link.addEventListener("click", async (event) => {
+          if (getCurrentUser && getCurrentUser()) return;
           const authReady = getAuthStateReady ? getAuthStateReady() : null;
           if (!authReady) return;
-          const user = await authReady;
-          if (user) return;
+          // Cancel before awaiting: the browser does not wait for async listeners.
           event.preventDefault();
-          sessionStorage.setItem("postLoginRedirect", link.getAttribute("href") || "/");
+          const initialUser = await authReady;
+          const user = getCurrentUser ? getCurrentUser() : initialUser;
+          if (user) {
+            window.location.href = link.getAttribute("href") || "/";
+            return;
+          }
+          const redirectTo = link.getAttribute("href") || "/";
+          try {
+            sessionStorage.setItem("postLoginRedirect", redirectTo);
+          } catch {
+            if (typeof window.requireAuth === "function") {
+              await window.requireAuth({ redirectTo });
+              return;
+            }
+          }
           if (typeof showAuthMenu === "function") {
             showAuthMenu();
           }

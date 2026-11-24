@@ -23,15 +23,15 @@ test("auth action handlers signInWithEmail validates required fields", async () 
   assert.ok(validationMessage.length > 0);
 });
 
-test("auth action handlers signInWithProvider invokes success callback", async () => {
+test("auth action handlers signInWithEmail invokes success callback", async () => {
   let called = false;
   const handlers = createAuthActionHandlers({
     getAuthService: async () => ({
-      signInWithProvider: async () => {},
+      signInWithEmail: async () => {},
     }),
   });
 
-  const ok = await handlers.signInWithProvider("google", {
+  const ok = await handlers.signInWithEmail({ email: "member@example.test", password: "example-password" }, {
     onSuccess() {
       called = true;
     },

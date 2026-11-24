@@ -8,6 +8,7 @@
   } = {}) {
     let currentUser = null;
     let currentProfile = null;
+    let pendingRedirect = null;
     let readyResolved = false;
     let readyResolve = null;
     const readyPromise = new Promise((resolve) => {
@@ -29,9 +30,19 @@
         onStateChanged({ user: currentUser, profile: currentProfile });
       }
       if (currentUser) {
-        const redirectTo = globalScope.sessionStorage.getItem(redirectStorageKey);
+        let redirectTo = pendingRedirect;
+        pendingRedirect = null;
+        let canReload = false;
+        try {
+          const storedRedirect = globalScope.sessionStorage.getItem(redirectStorageKey);
+          if (storedRedirect) {
+            // Consume before using persisted targets so failed removal cannot loop.
+            globalScope.sessionStorage.removeItem(redirectStorageKey);
+            redirectTo = redirectTo || storedRedirect;
+            canReload = true;
+          }
+        } catch {}
         if (redirectTo) {
-          globalScope.sessionStorage.removeItem(redirectStorageKey);
           
           try {
             const targetUrl = new URL(redirectTo, globalScope.location.href);
@@ -40,8 +51,8 @@
             // Only redirect if target is different from current
             if (targetUrl.pathname !== currentUrl.pathname || targetUrl.search !== currentUrl.search) {
               globalScope.location.href = redirectTo;
-            } else {
-              // If target is same as current, force a reload to refresh data/UI
+            } else if (canReload) {
+              // Keep the normal reload; storage-blocked sessions use live UI updates.
               globalScope.location.reload();
             }
           } catch (e) {
@@ -52,7 +63,9 @@
     }
 
     async function init() {
-      const authService = await getAuthService();
+      let authService = null;
+      try { authService = await getAuthService(); }
+      catch (error) { console.error("Auth session initialization failed:", error); }
       if (!authService) {
         applyState(null, null);
         return;
@@ -75,9 +88,11 @@
     }
 
     async function requireAuth({ redirectTo } = {}) {
-      const user = await waitForReady();
+      await waitForReady();
+      const user = getCurrentUser();
       if (user) return user;
-      globalScope.sessionStorage.setItem(redirectStorageKey, redirectTo || getCurrentPath());
+      pendingRedirect = redirectTo || getCurrentPath();
+      try { globalScope.sessionStorage.setItem(redirectStorageKey, pendingRedirect); } catch {}
       if (typeof onAuthRequired === "function") {
         onAuthRequired();
       }

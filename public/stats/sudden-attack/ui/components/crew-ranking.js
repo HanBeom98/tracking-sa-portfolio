@@ -1,3 +1,5 @@
+import { escapeHtml } from '../../../../shared/html.js?v=d181848c5b3c';
+
 /**
  * UI Component for Crew Rankings Table
  */
@@ -17,25 +19,28 @@ export class SaCrewRanking extends HTMLElement {
       return;
     }
 
+    const played = (m) => Number(m.wins || 0) + Number(m.loses || 0) > 0;
+    const ranked = list.filter(played).sort((a, b) => b.mmr - a.mmr || (Number(b.wins || 0) + Number(b.loses || 0)) - (Number(a.wins || 0) + Number(a.loses || 0)));
+    list = [...ranked, ...list.filter(m => !played(m))];
     const startDateStr = this.getAttribute('season-start') || '알 수 없음';
 
     this.innerHTML = `
       <style>
-        .ranking-card { background: #1a1d2e; border: 1px solid #2d3356; border-radius: 12px; padding: 25px; margin: 40px 0; box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow-x: auto; }
-        .ranking-header { margin-bottom: 25px; border-bottom: 1px solid #2d3356; padding-bottom: 15px; }
-        .ranking-header h3 { margin: 0 0 10px 0; font-size: 24px; color: #fff; text-shadow: 0 0 10px rgba(0, 210, 255, 0.3); }
-        .ranking-header .sub-info { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #666; }
+        .ranking-card { background: var(--sa-surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 25px; margin: 40px 0; box-shadow: var(--sa-shadow); overflow-x: auto; }
+        .ranking-header { margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+        .ranking-header h3 { margin: 0 0 10px 0; font-size: 24px; color: var(--sa-text-strong); text-shadow: none; }
+        .ranking-header .sub-info { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--text-dim); }
         .ranking-table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        .ranking-table th { text-align: center; padding: 15px 10px; color: #888; font-size: 13px; border-bottom: 2px solid #2d3356; text-transform: uppercase; letter-spacing: 1px; }
-        .ranking-table td { padding: 18px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; text-align: center; }
+        .ranking-table th { text-align: center; padding: 15px 10px; color: var(--text-dim); font-size: 13px; border-bottom: 2px solid var(--border); text-transform: uppercase; letter-spacing: 1px; }
+        .ranking-table td { padding: 18px 10px; border-bottom: 1px solid var(--sa-line-soft); vertical-align: middle; text-align: center; }
         .rank-row { transition: background 0.2s; }
-        .rank-row:hover { background: rgba(255, 255, 255, 0.02); }
-        .rank-row.top-rank { background: rgba(0, 210, 255, 0.02); }
+        .rank-row:hover { background: var(--sa-line-soft); }
+        .rank-row.top-rank { background: var(--sa-accent-soft); }
         .rank-row.top-rank .pos { font-size: 22px; font-weight: 900; color: #ffcc00; font-style: italic; }
-        .ranking-table td.name { text-align: left; padding-left: 20px; font-weight: 600; color: #fff; }
-        .mmr-val { font-weight: 800; color: #00d2ff; font-size: 18px; font-family: 'Roboto Mono', monospace; }
-        .stats { color: #e0e0e0; font-size: 14px; font-weight: 500; }
-        .stats small { display: block; font-size: 11px; color: #666; margin-top: 4px; }
+        .ranking-table td.name { text-align: left; padding-left: 20px; font-weight: 600; color: var(--sa-text-strong); }
+        .mmr-val { font-weight: 800; color: var(--primary); font-size: 18px; font-family: 'Roboto Mono', monospace; }
+        .stats { color: var(--text-main); font-size: 14px; font-weight: 500; }
+        .stats small { display: block; font-size: 11px; color: var(--text-dim); margin-top: 4px; }
         .tier { font-weight: bold; font-size: 14px; white-space: nowrap; }
         .tier-wrapper { display: inline-flex; align-items: center; gap: 6px; vertical-align: middle; }
         .tier.t-dia { color: #00ffff; text-shadow: 0 0 10px rgba(0, 255, 255, 0.5); }
@@ -45,7 +50,7 @@ export class SaCrewRanking extends HTMLElement {
         .tier.t-bro { color: #cd7f32; }
         .tier.t-iron { color: #8b4513; opacity: 0.7; }
         .clickable-name { cursor: pointer; transition: color 0.2s; }
-        .clickable-name:hover { color: #00d2ff; text-decoration: underline; }
+        .clickable-name:hover { color: var(--primary); text-decoration: underline; }
         @media (max-width: 768px) { .ranking-table th, .ranking-table td { padding: 12px 5px; font-size: 12px; } .mmr-val { font-size: 16px; } }
       </style>
       <div class="ranking-card">
@@ -53,9 +58,10 @@ export class SaCrewRanking extends HTMLElement {
           <h3>🔥 TRACKING CREW 실시간 랭킹</h3>
           <div class="sub-info">
             <span>내전(8인↑) 결과 기반 MMR</span>
-            <span style="color: #ffcc00; font-weight: bold;">시즌 시작: ${startDateStr}</span>
+            <span style="color: #ffcc00; font-weight: bold;">시즌 시작: ${escapeHtml(startDateStr)}</span>
           </div>
         </div>
+        <p class="ranking-status">${ranked.length ? '정산된 승패가 있는 멤버만 순위를 표시합니다. 같은 MMR은 공동 순위입니다.' : '현재 정산된 승패 기록이 없습니다. 등록 멤버는 미배치로 표시합니다.'}</p>
         <table class="ranking-table">
           <thead>
             <tr>
@@ -69,7 +75,9 @@ export class SaCrewRanking extends HTMLElement {
           </thead>
           <tbody>
             ${list.map((m, idx) => {
-              const tier = this.getTierInfo(m.mmr);
+              const eligible = played(m);
+              const rank = eligible ? ranked.findIndex(member => Number(member.mmr) === Number(m.mmr)) + 1 : null;
+              const tier = eligible ? this.getTierInfo(m.mmr) : { name: '미배치', icon: '—', class: '' };
               const totalGames = (m.wins || 0) + (m.loses || 0);
               const winRate = totalGames > 0 ? Math.round((m.wins / totalGames) * 100) : 0;
               const ck = m.crewKills || 0;
@@ -77,15 +85,15 @@ export class SaCrewRanking extends HTMLElement {
               const crewKdPercent = (ck + cd > 0) ? Math.round((ck / (ck + cd)) * 100) : 0;
 
               return `
-                <tr class="rank-row ${idx < 3 ? 'top-rank' : ''}">
-                  <td class="pos" style="font-family: 'Roboto Mono', monospace;">#${idx + 1}</td>
+                <tr class="rank-row ${eligible && rank <= 3 ? 'top-rank' : ''}">
+                  <td class="pos" style="font-family: 'Roboto Mono', monospace;">${eligible ? '#' + rank : '미배치'}</td>
                   <td class="tier ${tier.class}">
                     <span class="tier-wrapper"><span>${tier.icon}</span><span>${tier.name}</span></span>
                   </td>
-                  <td class="name clickable-name" data-name="${m.characterName}">${m.characterName}</td>
-                  <td class="mmr-val">${m.mmr}</td>
-                  <td class="stats">${crewKdPercent}%</td>
-                  <td class="stats">${winRate}% <small style="display:inline; margin-left:5px; color:#666;">(${m.wins}승 ${m.loses}패)</small></td>
+                  <td class="name clickable-name" data-name="${escapeHtml(m.characterName)}">${escapeHtml(m.characterName)}</td>
+                  <td class="mmr-val">${eligible ? m.mmr : '—'}</td>
+                  <td class="stats">${eligible && ck + cd > 0 ? crewKdPercent + '%' : '—'}</td>
+                  <td class="stats">${eligible ? winRate + '%' : '—'} <small style="display:inline; margin-left:5px; color:var(--text-dim);">(${Number(m.wins || 0)}승 ${Number(m.loses || 0)}패)</small></td>
                 </tr>
               `;
             }).join('')}

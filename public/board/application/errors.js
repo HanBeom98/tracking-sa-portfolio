@@ -1,5 +1,1 @@
-export function makeError(code) {
-  const error = new Error(code);
-  error.code = code;
-  return error;
-}
+export { makeError } from '../domain/errors.js?v=b5a12b75bd51';

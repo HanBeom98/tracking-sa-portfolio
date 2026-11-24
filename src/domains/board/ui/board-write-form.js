@@ -1,3 +1,7 @@
+import { BoardWriteSubmitController } from './board-write-submit-controller.js';
+import { shouldShowNoticeCategory } from '../application/admin-role.js';
+import './board-image-editor.js';
+
 class BoardWriteForm extends HTMLElement {
   static get observedAttributes() {
     return ["user-role", "initial-category"];
@@ -10,6 +14,9 @@ class BoardWriteForm extends HTMLElement {
       userRole: "free",
       initialCategory: "free"
     };
+    this.submitController = new BoardWriteSubmitController();
+    this.draft = null;
+    this.isSubmitting = false;
   }
 
   connectedCallback() {
@@ -17,6 +24,7 @@ class BoardWriteForm extends HTMLElement {
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
+    if (oldValue === newValue) return;
     if (name === "user-role") this.state.userRole = newValue;
     if (name === "initial-category") this.state.initialCategory = newValue;
     this.render();
@@ -51,21 +59,21 @@ class BoardWriteForm extends HTMLElement {
         width: 100%;
         padding: 16px 20px;
         border-radius: 16px;
-        border: 2px solid oklch(92% 0.02 260);
-        background: var(--bg-main);
+        border: 2px solid var(--surface-border, #dbe3ef);
+        background: var(--surface-input, #f8fafc);
         font-size: 1.05rem;
         color: var(--text-main);
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         font-family: inherit;
       }
       input::placeholder, textarea::placeholder {
-        color: oklch(62% 0.02 260);
+        color: var(--text-placeholder, #64748b);
       }
       select:focus, input:focus, textarea:focus {
         outline: none;
         border-color: var(--p-blue);
         box-shadow: 0 0 0 4px oklch(from var(--p-blue) l c h / 0.1);
-        background: white;
+        background: var(--surface-input-focus, white);
       }
       :host-context(body.dark-mode) label {
         color: #e5eefc;
@@ -96,11 +104,22 @@ class BoardWriteForm extends HTMLElement {
       select {
         cursor: pointer;
         appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='Length 19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
         background-repeat: no-repeat;
         background-position: right 16px center;
         background-size: 20px;
         padding-right: 45px;
+      }
+      select option {
+        background: var(--surface-card, #ffffff);
+        color: var(--text-main, #172033);
+      }
+      :host-context(body.dark-mode) select {
+        color-scheme: dark;
+      }
+      :host-context(body.dark-mode) select option {
+        background: #111a2b;
+        color: #f8fbff;
       }
       .submit-wrap {
         margin-top: 12px;
@@ -135,8 +154,13 @@ class BoardWriteForm extends HTMLElement {
       }
     `;
 
-    const isAdmin = this.state.userRole === "admin";
     const currentCategory = this.state.initialCategory || "free";
+    // Keep the requested notice option visible while the async profile role is resolving.
+    // Submission authorization is still enforced by postService and Firestore rules.
+    const canShowNotice = shouldShowNoticeCategory({
+      role: this.state.userRole,
+      initialCategory: currentCategory
+    });
 
     this.shadowRoot.innerHTML = `
       <style>${style}</style>
@@ -145,47 +169,79 @@ class BoardWriteForm extends HTMLElement {
           <label for="category">${t("category", "카테고리")}</label>
           <select id="category">
             <option value="free" ${currentCategory === "free" ? "selected" : ""}>${t("free_board", "자유게시판")}</option>
-            ${isAdmin ? `<option value="notice" ${currentCategory === "notice" ? "selected" : ""}>${t("notice", "공지사항")}</option>` : ""}
+            ${canShowNotice ? `<option value="notice" ${currentCategory === "notice" ? "selected" : ""}>${t("notice", "공지사항")}</option>` : ""}
           </select>
         </div>
         
         <div class="field-group">
           <label for="title">${t("title", "제목")}</label>
-          <input type="text" id="title" placeholder="${t("enter_title", "제목을 입력하세요")}" required>
+          <input type="text" id="title" maxlength="120" placeholder="${t("enter_title", "제목을 입력하세요")}" required>
         </div>
 
         <div class="field-group">
           <label for="content">${t("content", "내용")}</label>
-          <textarea id="content" placeholder="${t("enter_content", "내용을 입력하세요")}" required></textarea>
+          <board-image-editor></board-image-editor>
         </div>
 
         <div class="submit-wrap">
-          <button type="submit" id="submit-button" class="submit-btn">${t("register", "등록하기")}</button>
+          <button type="submit" id="submit-button" class="submit-btn" ${this.isSubmitting ? "disabled" : ""}>${this.isSubmitting ? "등록 중..." : t("register", "등록하기")}</button>
         </div>
       </form>
     `;
+
+    this.restoreDraft();
+    this.bindDraftTracking();
+    this.submitController.bind(
+      this.shadowRoot.getElementById("write-form"),
+      () => this.getFormValues()
+    );
+  }
+
+  bindDraftTracking() {
+    const form = this.shadowRoot.getElementById("write-form");
+    if (!form) return;
+    form.addEventListener("input", () => {
+      this.draft = this.getFormValues();
+    });
+    form.addEventListener("change", () => {
+      this.draft = this.getFormValues();
+    });
+  }
+
+  restoreDraft() {
+    if (!this.draft) return;
+    const category = this.shadowRoot.getElementById("category");
+    const title = this.shadowRoot.getElementById("title");
+    const editor = this.shadowRoot.querySelector("board-image-editor");
+    const allowedCategory = [...category.options].some((option) => option.value === this.draft.category)
+      ? this.draft.category
+      : "free";
+    category.value = allowedCategory;
+    title.value = this.draft.title || "";
+    editor?.setValue({ content: this.draft.content || "", attachments: this.draft.attachments || [] });
   }
 
   getFormValues() {
     return {
       category: this.shadowRoot.getElementById("category").value,
       title: this.shadowRoot.getElementById("title").value,
-      content: this.shadowRoot.getElementById("content").value,
+      content: this.shadowRoot.querySelector("board-image-editor")?.getContent() || "",
+      attachments: this.shadowRoot.querySelector("board-image-editor")?.getItems() || [],
     };
   }
 
   setSubmitting(isSubmitting) {
+    this.isSubmitting = Boolean(isSubmitting);
     const button = this.shadowRoot.getElementById("submit-button");
-    button.disabled = isSubmitting;
-    button.textContent = isSubmitting ? "등록 중..." : "등록하기";
+    if (!button) return;
+    button.disabled = this.isSubmitting;
+    button.textContent = this.isSubmitting ? "등록 중..." : "등록하기";
   }
 
   onSubmit(handler) {
     const form = this.shadowRoot.getElementById("write-form");
-    form.addEventListener("submit", (event) => {
-      event.preventDefault();
-      handler(this.getFormValues());
-    });
+    this.submitController.setHandler(handler);
+    this.submitController.bind(form, () => this.getFormValues());
   }
 }
 

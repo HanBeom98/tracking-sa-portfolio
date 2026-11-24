@@ -1,98 +1,71 @@
 #!/usr/bin/env node
-
 import fs from "node:fs";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
+import manifest from "./deployment-artifacts.js";
 
-const ROOT_DIR = process.cwd();
-const SRC_DOMAINS_DIR = path.join(ROOT_DIR, "src", "domains");
-const SRC_SHARED_ASSETS_DIR = path.join(ROOT_DIR, "src", "shared", "assets");
+export const deploymentManifest = manifest;
 
-const TRACKED_EXTENSIONS = new Set([".js", ".css"]);
-function walkFiles(dirPath, result = []) {
-  if (!fs.existsSync(dirPath)) return result;
-  const entries = fs.readdirSync(dirPath, { withFileTypes: true });
-  for (const entry of entries) {
-    const fullPath = path.join(dirPath, entry.name);
-    if (entry.isDirectory()) {
-      walkFiles(fullPath, result);
-      continue;
-    }
-    if (!entry.isFile()) continue;
-    if (!TRACKED_EXTENSIONS.has(path.extname(entry.name))) continue;
-    result.push(fullPath);
+export function walkFiles(root, directory, errors) {
+  const absolute = path.join(root, directory);
+  if (!fs.existsSync(absolute) || !fs.statSync(absolute).isDirectory()) {
+    errors.push(`Missing source directory: ${directory}`);
+    return [];
+  }
+  const result = [];
+  for (const entry of fs.readdirSync(absolute, { withFileTypes: true })) {
+    const policy = deploymentManifest.copyPolicy;
+    if (policy.excludedDirectories.includes(entry.name) || policy.excludedNames.includes(entry.name)
+      || policy.excludedSuffixes.some(suffix => entry.name.endsWith(suffix))) continue;
+    const relative = `${directory}/${entry.name}`;
+    if (entry.isDirectory()) result.push(...walkFiles(root, relative, errors));
+    else if (entry.isFile()) result.push(relative);
   }
   return result;
 }
 
-function toRepoPath(absPath) {
-  return path.relative(ROOT_DIR, absPath).replace(/\\/g, "/");
+export function normalizeGeneratedVersions(buffer) {
+  return buffer.toString("utf8").replace(/\r\n/g, "\n")
+    .replace(/(\.(?:js|css))\?v=[a-zA-Z0-9._-]+/g, "$1");
 }
 
-function readFileBuffer(absPath) {
-  return fs.readFileSync(absPath);
-}
-
-function buffersEqual(a, b) {
-  return a.length === b.length && a.equals(b);
-}
-
-function resolveMirrorCandidates(srcRepoPath) {
-  if (srcRepoPath.startsWith("src/domains/stats/sudden-attack/")) {
-    const rel = srcRepoPath.slice("src/domains/stats/sudden-attack/".length);
-    return [
-      `public/stats/sudden-attack/${rel}`,
-      `public/en/stats/sudden-attack/${rel}`,
-    ];
+export function checkSourceOfTruth(root = process.cwd()) {
+  const errors = [];
+  const mirrors = new Map();
+  for (const [sourceRoot, destination] of Object.entries(deploymentManifest.copyRoots)) {
+    const sources = walkFiles(root, sourceRoot, errors).filter((file) => /\.(js|css)$/.test(file));
+    if (sources.length === 0 && sourceRoot !== "src/static") errors.push(`No JS/CSS sources: ${sourceRoot}`);
+    for (const source of sources) mirrors.set(source, `${destination}/${source.slice(sourceRoot.length + 1)}`);
   }
-  if (srcRepoPath.startsWith("src/domains/")) {
-    const rel = srcRepoPath.slice("src/domains/".length);
-    return [`public/${rel}`, `public/en/${rel}`];
-  }
-  if (srcRepoPath.startsWith("src/shared/assets/")) {
-    const rel = srcRepoPath.slice("src/shared/assets/".length);
-    return [`public/${rel}`, `public/en/${rel}`];
-  }
-  return [];
-}
+  for (const [source, destination] of Object.entries(deploymentManifest.fileCopies)) mirrors.set(source, destination);
 
-function main() {
-  const srcFiles = [
-    ...walkFiles(SRC_DOMAINS_DIR),
-    ...walkFiles(SRC_SHARED_ASSETS_DIR),
-  ];
-
-  if (srcFiles.length === 0) {
-    console.log("[source-of-truth] no tracked src files found. Skip.");
-    process.exit(0);
+  // Explicit mappings must also fail if their source disappears or their destination changes.
+  const mapPath = path.join(root, "scripts/public_sync_map.txt");
+  if (!fs.existsSync(mapPath)) errors.push("Missing source map: scripts/public_sync_map.txt");
+  else for (const line of fs.readFileSync(mapPath, "utf8").split(/\r?\n/)) {
+    if (!line.trim() || line.trim().startsWith("#")) continue;
+    const [source, destination, extra] = line.trim().split("|");
+    if (!source || !destination || extra !== undefined) errors.push(`Invalid source map entry: ${line}`);
+    else if (mirrors.has(source) && mirrors.get(source) !== destination) errors.push(`Conflicting source map: ${source}`);
+    else mirrors.set(source, destination);
   }
 
-  const mismatches = [];
-
-  for (const srcAbsPath of srcFiles) {
-    const srcRepoPath = toRepoPath(srcAbsPath);
-    const srcBuffer = readFileBuffer(srcAbsPath);
-    const mirrorPaths = resolveMirrorCandidates(srcRepoPath);
-
-    for (const mirrorRepoPath of mirrorPaths) {
-      const mirrorAbsPath = path.join(ROOT_DIR, mirrorRepoPath);
-      if (!fs.existsSync(mirrorAbsPath)) continue;
-      const mirrorBuffer = readFileBuffer(mirrorAbsPath);
-      if (!buffersEqual(srcBuffer, mirrorBuffer)) {
-        mismatches.push({ srcRepoPath, mirrorRepoPath });
-      }
+  for (const [source, destination] of mirrors) {
+    const sourcePath = path.join(root, source);
+    const mirrorPath = path.join(root, destination);
+    if (!fs.existsSync(sourcePath) || !fs.statSync(sourcePath).isFile()) errors.push(`Missing source: ${source}`);
+    else if (!fs.existsSync(mirrorPath) || !fs.statSync(mirrorPath).isFile()) errors.push(`Missing public mirror: ${source} -> ${destination}`);
+    else if (normalizeGeneratedVersions(fs.readFileSync(sourcePath)) !== normalizeGeneratedVersions(fs.readFileSync(mirrorPath))) {
+      errors.push(`Out-of-sync mirror: ${source} != ${destination}`);
     }
   }
-
-  if (mismatches.length > 0) {
-    console.error("[source-of-truth] out-of-sync mirrored files detected:");
-    for (const item of mismatches) {
-      console.error(`- ${item.srcRepoPath} != ${item.mirrorRepoPath}`);
-    }
-    console.error("\nRun: npm run sync:public (and rebuild if needed).");
-    process.exit(1);
-  }
-
-  console.log(`[source-of-truth] OK: ${srcFiles.length} src files validated.`);
+  return { errors, checked: mirrors.size };
 }
 
-main();
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+  const result = checkSourceOfTruth();
+  if (result.errors.length) {
+    console.error(`[source-of-truth] FAILED:\n${result.errors.join("\n")}\nRun: npm run build`);
+    process.exitCode = 1;
+  } else console.log(`[source-of-truth] OK: ${result.checked} src files validated.`);
+}

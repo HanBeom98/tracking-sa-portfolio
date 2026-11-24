@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>실험실 | Tracking SA</title>
+    <meta name="description" content="Tracking SA에서 시험 중인 도구를 써볼 수 있는 곳입니다."><!-- HEAD_INJECTION -->
+    <style>
+        .lab-page { max-width: 920px; margin: 0 auto; padding: 40px 20px 64px; }
+        .lab-page h1 { margin: 0 0 22px; font-size: clamp(1.8rem, 4vw, 2.5rem); letter-spacing: -.04em; }
+        .lab-tool {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 16px;
+            max-width: 620px;
+            padding: 20px;
+            border: 1px solid var(--surface-border);
+            border-radius: 16px;
+            background: var(--surface-card);
+            color: var(--text-main);
+            text-decoration: none;
+        }
+        .lab-tool h2 { margin: 0 0 6px; font-size: 1.08rem; }
+        .lab-tool p { margin: 0; color: var(--text-sub); font-size: .88rem; line-height: 1.65; }
+        .lab-tool > span { color: var(--link-color); }
+        .lab-tool:hover { border-color: var(--link-color); }
+        .lab-tool:focus-visible { outline: 2px solid var(--link-color); outline-offset: 4px; }
+    </style>
+</head>
+<body>
+    <!-- HEADER_INJECTION -->
+    <main class="lab-page">
+        <h1>실험실</h1>
+        <a class="lab-tool" href="/maplestory/" aria-labelledby="maple-tool-title" aria-describedby="maple-tool-description">
+            <div>
+                <h2 id="maple-tool-title">TrackingMaple</h2>
+                <p id="maple-tool-description">닉네임으로 장비를 확인하고, 사냥 기록과 주간 보스를 관리하세요.</p>
+            </div>
+            <span aria-hidden="true">→</span>
+        </a>
+    </main>
+    <!-- FOOTER_INJECTION -->
+</body>
+</html>

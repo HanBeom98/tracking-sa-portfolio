@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>서든어택 가이드와 마이건2 도감 | Tracking SA</title>
+    
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://trackingsa.com/guides/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Tracking SA">
+    <meta property="og:url" content="https://trackingsa.com/guides/">
+    <meta property="og:image" content="https://trackingsa.com/logo.svg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://trackingsa.com/logo.svg">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
+    <meta name="description" content="마이건2 도감에서 총기 기능을 바로 비교하고, 리플레이·전적 검색 이용법과 승률·킬뎃·맵별 기록의 해석 방법을 주제별로 확인하세요.">
+    <meta property="og:title" content="서든어택 가이드와 마이건2 도감 | Tracking SA">
+    <meta property="og:description" content="마이건2 도감에서 총기 기능을 바로 비교하고, 리플레이·전적 검색 이용법과 승률·킬뎃·맵별 기록의 해석 방법을 주제별로 확인하세요.">
+<style>
+  html.dark-mode,
+  html.dark-mode body {
+    background-color: #0f172a;
+    color: #f8fafc;
+    color-scheme: dark;
+  }
+</style>
+<script>
+  (function() {
+    let theme = 'dark';
+    try {
+      theme = localStorage.getItem('theme') === 'light' ? 'light' : 'dark';
+    } catch {}
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark-mode');
+      document.body && document.body.classList.add('dark-mode');
+    }
+  })();
+</script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7263630893992216" crossorigin="anonymous"></script>
+<meta name="google-adsense-account" content="ca-pub-7263630893992216">
+<script type="module" src="/analytics-loader.js?v=86d5e62d50ed"></script>
+<meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
+<meta name="naver-site-verification" content="b15b33af838280b54d31eb3c7e5c358d2836743f" />
+<script>
+  window.FIREBASE_CONFIG = {"apiKey": "", "authDomain": "demo-tracking-sa-portfolio.firebaseapp.com", "projectId": "demo-tracking-sa-portfolio", "storageBucket": "demo-tracking-sa-portfolio.firebasestorage.app", "appId": "1:000000000000:web:portfolio-example", "messagingSenderId": "779289056217", "appCheckSiteKey": ""};
+</script>
+<script>
+  window.authDomainReady = window.authDomainReady || new Promise((resolve) => {
+    window.__resolveAuthDomain = resolve;
+  });
+</script>
+<link rel="stylesheet" href="/style.css?v=8f0895c6daf8">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#0052cc">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Tracking SA">
+<script src="/runtime-config.js"></script>
+<script>window.AUTH_RUNTIME_DEFERRED = true;</script>
+<script defer src="/deferred-auth-loader.js?v=7c4177555bdb"></script>
+<script defer src="/pwa-register.js"></script>
+<script src="/translations.js?v=8eb99f0dbaa9"></script>
+<script src="/common.js?v=5cfaaa0b27e3"></script>
+
+    <style>
+        .guide-hub { --guide-bg:#fff; --guide-line:#dce3ec; --guide-ink:#0f172a; --guide-muted:#475569; --guide-accent:#0052cc; max-width:1120px; margin:auto; padding:36px 20px 72px; display:grid; gap:28px; color:var(--guide-ink); }
+        body.dark-mode .guide-hub { --guide-bg:#111827; --guide-line:#334155; --guide-ink:#f8fafc; --guide-muted:#cbd5e1; --guide-accent:#60a5fa; }
+        .guide-hub * { box-sizing:border-box; }
+        .guide-hero { padding:8px 0 0; }
+        .guide-eyebrow { margin:0 0 10px; color:var(--guide-accent); font-size:.7rem; font-weight:800; letter-spacing:.12em; }
+        .guide-hero h1 { margin:0 0 12px; font-size:clamp(1.8rem,4vw,2.5rem); line-height:1.2; letter-spacing:-.04em; }
+        .guide-hero>p:last-child { margin:0; color:var(--guide-muted); font-size:.9rem; line-height:1.8; }
+        .guide-featured { display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:28px; align-items:center; padding:24px 28px; border:1px solid var(--guide-line); border-radius:22px; background:radial-gradient(ellipse at 80% 50%,#39c7df22,transparent 60%),var(--guide-bg); color:var(--guide-ink); text-decoration:none; }
+        .guide-featured:hover { border-color:var(--guide-accent); }
+        .guide-featured h2 { margin:0; font-size:1.65rem; letter-spacing:-.03em; }
+        .guide-featured p:not(.guide-eyebrow) { color:var(--guide-muted); font-size:.85rem; line-height:1.8; margin:10px 0 16px; }
+        .guide-featured strong { color:var(--guide-accent); font-size:.85rem; }
+        .guide-featured img { display:block; width:100%; height:145px; object-fit:contain; }
+        .guide-topic-nav { display:flex; gap:8px; flex-wrap:wrap; }
+        .guide-topic-nav a { display:inline-flex; align-items:center; min-height:44px; padding:9px 14px; border:1px solid var(--guide-line); border-radius:999px; color:var(--guide-ink); background:var(--guide-bg); font-size:.8rem; text-decoration:none; font-weight:650; }
+        .guide-topic-nav a:hover { color:var(--guide-accent); border-color:var(--guide-accent); }
+        .guide-topic { scroll-margin-top:100px; }
+        .guide-topic-heading { display:flex; align-items:baseline; gap:16px; margin:4px 0 14px; }
+        .guide-topic-heading h2 { margin:0; font-size:1.25rem; letter-spacing:-.03em; }
+        .guide-topic-heading p { margin:0; color:var(--guide-muted); font-size:.8rem; line-height:1.7; }
+        .guide-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+        .guide-card { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:6px 16px; padding:18px 20px; border:1px solid var(--guide-line); border-radius:14px; background:#fff; color:#0f172a; text-decoration:none; }
+        .guide-card:hover { border-color:var(--guide-accent); }
+        .guide-card h3 { margin:0; font-size:.95rem; line-height:1.5; color:#0f172a; }
+        .guide-card p { grid-column:1; margin:0; color:#475569; font-size:.78rem; line-height:1.7; }
+        .guide-card>span { grid-column:2; grid-row:1/3; align-self:center; color:var(--guide-accent); }
+        body.dark-mode .guide-card { background:#111827; color:#f8fafc; }
+        body.dark-mode .guide-card h3 { color:#f8fafc; }
+        body.dark-mode .guide-card p { color:#cbd5e1; }
+        .guide-hub a:focus-visible { outline:3px solid var(--guide-accent); outline-offset:4px; }
+        .guide-note { margin:0; padding-top:20px; border-top:1px solid var(--guide-line); color:var(--guide-muted); font-size:.8rem; line-height:1.8; }
+        @media(max-width:640px) { .guide-hub { padding:24px 16px 56px; gap:24px; } .guide-featured { grid-template-columns:minmax(0,1fr) 120px; padding:20px; gap:12px; } .guide-featured h2 { font-size:1.3rem; } .guide-featured img { height:100px; } .guide-grid { grid-template-columns:1fr; } .guide-topic-heading { display:block; } .guide-topic-heading p { margin-top:6px; } }
+        @media(max-width:360px) { .guide-featured { grid-template-columns:minmax(0,1fr) 90px; padding:16px; } }
+    </style>
+</head>
+<body>
+    <div class="site-header-container"><header>
+    <div class="header-inner">
+        <a href="/" class="site-logo-link" aria-label="Tracking SA home">
+            <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="site-logo">
+                <circle cx="50" cy="50" r="48" stroke="currentColor" stroke-width="4" fill="transparent"/>
+                <path d="M25 70L40 55L50 65L75 35" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="70" cy="35" r="12" stroke="currentColor" stroke-width="6" fill="currentColor"/>
+                <rect x="78" y="43" width="15" height="6" rx="3" transform="rotate(45 78 43)" fill="currentColor"/>
+            </svg>
+        </a>
+        <div class="desktop-menu-container">
+            <nav id="primary-navigation">
+                <ul>
+                    <li><a href="/stats/sudden-attack/" data-i18n="menu_stats_search">전적 검색</a></li>
+                    <li><a href="/stats/sudden-attack/replay/">리플레이 분석실</a></li>
+                    <li><a href="/guides/mygun2/">마이건2 도감</a></li>
+                    <li><a href="/guides/">가이드</a></li>
+                    <li><a href="/lab/">실험실</a></li>
+                    <li><a href="/board?category=notice" data-i18n="notice">공지사항</a></li>
+                </ul>
+            </nav>
+        </div>
+        <div class="utility-controls">
+            <button id="color-change" aria-label="테마 변경">🌙</button>
+            <div id="auth-controls" class="auth-controls"></div>
+        </div>
+        <button class="mobile-menu-toggle" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="primary-navigation">
+            <span></span><span></span><span></span>
+        </button>
+    </div>
+</header>
+</div>
+    <main class="guide-hub">
+        <section class="guide-hero" aria-labelledby="guide-title">
+            <p class="guide-eyebrow">GUIDES & WEAPON ARCHIVE</p>
+            <h1 id="guide-title">필요한 정보로, 바로.</h1>
+            <p>총기 기능이 궁금하면 도감으로, 사이트 사용법과 전적 해석은 아래 주제별 가이드로.</p>
+        </section>
+        <a class="guide-featured" href="/guides/mygun2/" aria-labelledby="guideMygunTitle" aria-describedby="guideMygunDescription">
+            <div><p class="guide-eyebrow">WEAPON ARCHIVE</p><h2 id="guideMygunTitle">마이건2 도감</h2><p id="guideMygunDescription">총기 사진·발동 조건·레벨 혜택·세트 효과.<br>12개 시리즈를 찾아보고 나란히 비교하세요.</p><strong>도감 열기 →</strong></div>
+            <img src="/guides/mygun2/images/eon-04.webp" width="310" height="150" alt="이온 AWP 대표 외형" decoding="async">
+        </a>
+        <nav class="guide-topic-nav" aria-label="가이드 주제 바로가기"><a href="#getting-started">처음 이용한다면</a><a href="#reading-stats">전적 지표 이해하기</a><a href="#league-service">리그와 서비스</a></nav>
+        <section class="guide-topic" id="getting-started" aria-labelledby="getting-started-title">
+            <div class="guide-topic-heading"><h2 id="getting-started-title">처음 이용한다면</h2><p>파일 준비와 검색 방법부터 확인하세요.</p></div>
+            <div class="guide-grid">
+                <a class="guide-card" href="/guides/replay-analysis-guide/"><h3>리플레이 분석·비교 가이드</h3><p>JSON 받기, 한 경기 분석, 여러 경기 비교와 샘플 체험.</p><span aria-hidden="true">↗</span></a>
+                <a class="guide-card" href="/guides/sudden-attack-stats-guide/"><h3>전적 검색 가이드</h3><p>닉네임 검색부터 최근 기록·즐겨찾기·VS 비교까지.</p><span aria-hidden="true">↗</span></a>
+                <a class="guide-card" href="/guides/search-tips/"><h3>닉네임 검색 팁</h3><p>특수문자·공백과 비슷한 닉네임을 구분하는 방법.</p><span aria-hidden="true">↗</span></a>
+            </div>
+        </section>
+        <section class="guide-topic" id="reading-stats" aria-labelledby="reading-stats-title">
+            <div class="guide-topic-heading"><h2 id="reading-stats-title">전적 지표 이해하기</h2><p>궁금한 숫자에 맞는 글을 골라 읽으세요.</p></div>
+            <div class="guide-grid">
+                <a class="guide-card" href="/guides/match-history-reading/"><h3>최근 경기 기록 해석법</h3><p>승률과 함께 살펴볼 상대·맵·경기 수의 맥락.</p><span aria-hidden="true">↗</span></a>
+                <a class="guide-card" href="/guides/form-signal-report/"><h3>최근·이전 20경기 비교</h3><p>승률과 킬뎃이 다르게 움직이는 사례와 계산법.</p><span aria-hidden="true">↗</span></a>
+                <a class="guide-card" href="/guides/map-sample-report/"><h3>맵별 승률과 맵 편중</h3><p>적은 경기 수와 맵 구성에 따라 달라지는 승률.</p><span aria-hidden="true">↗</span></a>
+                <a class="guide-card" href="/guides/vs-comparison-guide/"><h3>VS 비교 읽는 법</h3><p>두 사람의 기록을 같은 기준으로 비교하는 방법.</p><span aria-hidden="true">↗</span></a>
+                <a class="guide-card" href="/guides/recheck-report/"><h3>전적을 다시 조회할 때</h3><p>경기 수·승률·K/D·맵 구성의 변화를 확인하는 순서.</p><span aria-hidden="true">↗</span></a>
+                <a class="guide-card" href="/guides/sample-size-report/"><h3>표본이 부족할 때</h3><p>기록이 적어 결론을 미뤄야 하는 상황.</p><span aria-hidden="true">↗</span></a>
+                <a class="guide-card" href="/guides/window-comparison-report/"><h3>최근 5·10·20경기의 차이</h3><p>짧은 연승과 긴 기록 구간을 구분해서 보는 기준.</p><span aria-hidden="true">↗</span></a>
+            </div>
+        </section>
+        <section class="guide-topic" id="league-service" aria-labelledby="league-service-title">
+            <div class="guide-topic-heading"><h2 id="league-service-title">리그와 서비스</h2><p>크루 활동과 사이트 운영 기준을 확인하세요.</p></div>
+            <div class="guide-grid">
+                <a class="guide-card" href="/guides/league-guide/"><h3>리그 허브 이용 가이드</h3><p>공지 확인·멤버 검색·신청으로 이어지는 흐름.</p><span aria-hidden="true">↗</span></a>
+                <a class="guide-card" href="/guides/crew-ranking-guide/"><h3>크루 랭킹 보는 법</h3><p>공개 전적과 리그 순위를 함께 살펴보는 방법.</p><span aria-hidden="true">↗</span></a>
+                <a class="guide-card" href="/guides/tracking-sa-service-guide/"><h3>Tracking SA 서비스 안내</h3><p>사이트의 목적, 데이터 출처와 운영 범위.</p><span aria-hidden="true">↗</span></a>
+            </div>
+        </section>
+        <p class="guide-note">전적은 경기 수와 조회 범위를 함께 확인하세요. 각 가이드에서 계산 예시와 해석의 한계를 설명합니다. 마이건2의 기능·예외와 최신 변경 사항은 도감 안의 넥슨 공식 출처를 함께 확인하세요.</p>
+    </main>
+    <div class="site-footer-container"><footer class="site-footer">
+    <div class="footer-inner">
+        <div class="footer-top">
+            <div class="footer-brand">
+                <a class="footer-brand-link" href="/" aria-label="Tracking SA 홈">
+                    <svg width="36" height="36" viewBox="0 0 100 100" fill="none" aria-hidden="true" focusable="false">
+                        <circle cx="50" cy="50" r="48" stroke="currentColor" stroke-width="4"/>
+                        <path d="M25 70L40 55L50 65L75 35" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="70" cy="35" r="12" fill="currentColor"/>
+                    </svg>
+                    <strong>TRACKING <span>SA</span></strong>
+                </a>
+                <p>서든어택의 기록을,<br>더 쉽게 읽는 곳.</p>
+                <button id="pwa-install-button" class="footer-install" type="button" hidden>Tracking SA 앱 설치 <span aria-hidden="true">↗</span></button>
+            </div>
+            <nav class="footer-nav" aria-label="하단 메뉴">
+                <div class="footer-link-group">
+                    <h2>둘러보기</h2>
+                    <ul>
+                        <li><a href="/stats/sudden-attack/">서든어택 전적</a></li>
+                        <li><a href="/stats/sudden-attack/replay/">리플레이 분석실</a></li>
+                        <li><a href="/guides/">가이드</a></li>
+                    </ul>
+                </div>
+                <div class="footer-link-group">
+                    <h2>서비스 안내</h2>
+                    <ul>
+                        <li><a href="/about" data-i18n="about_us">서비스 소개</a></li>
+                        <li><a href="/service-methodology/">서비스 기준</a></li>
+                        <li><a href="/editorial-policy/">편집 원칙</a></li>
+                        <li><a href="/sitemap.xml" data-i18n="sitemap">사이트맵</a></li>
+                    </ul>
+                </div>
+                <div class="footer-link-group">
+                    <h2>이용 및 문의</h2>
+                    <ul>
+                        <li><a href="/privacy-policy" data-i18n="privacy_policy">개인정보처리방침</a></li>
+                        <li><a href="/terms" data-i18n="terms_of_service">이용약관</a></li>
+                        <li><a href="/ai-replay-pass/">AI 이용권 · 판매 준비</a></li>
+                        <li><a href="/contact/" data-i18n="contact">문의</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+        <div class="footer-business-info" aria-label="사업자 정보">
+            <details class="footer-business-details">
+                <summary class="footer-business-summary"><strong>로직 스토어</strong><span>사업자 정보</span><svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false"><path d="m4 6 4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+                <dl>
+                    <div><dt>상호</dt><dd>로직 스토어</dd></div>
+                    <div><dt>사업자등록번호</dt><dd>000-00-00000</dd></div>
+                    <div><dt>대표자</dt><dd>조한범</dd></div>
+                    <div class="footer-business-address"><dt>사업장 주소</dt><dd>경기도 수원시 인계동 992-13 크레텔 하우스 2동 302호</dd></div>
+                    <div><dt>통신판매업 신고번호</dt><dd>2026-수원팔달-0279호</dd></div>
+                </dl>
+            </details>
+            <div class="footer-business-contact" aria-label="고객 문의"><span>고객 문의</span><a href="tel:01081129691" aria-label="고객 문의 전화 010-0000-0000">010-0000-0000</a><a href="mailto:demo-15b9ce4f@example.com" aria-label="문의 이메일 demo-15b9ce4f@example.com">demo-15b9ce4f@example.com</a></div>
+        </div>
+        <div class="footer-bottom">
+            <p class="nexon-api-attribution">본 서비스는 <a href="https://openapi.nexon.com/ko/support/terms/" target="_blank" rel="noopener noreferrer">NEXON Open API</a>를 이용하여 데이터를 제공합니다. <span lang="en">This service uses NEXON Open API.</span></p>
+            <p class="footer-copyright" data-i18n="footer_copyright">&copy; 2026 TrackingSA. 서든어택 전적 검색 중심 서비스.</p>
+        </div>
+    </div>
+</footer>
+</div>
+</body>
+</html>

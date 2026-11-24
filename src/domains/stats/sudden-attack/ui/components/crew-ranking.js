@@ -1,3 +1,5 @@
+import { escapeHtml } from '../../../../shared/html.js';
+
 /**
  * UI Component for Crew Rankings Table
  */
@@ -17,6 +19,9 @@ export class SaCrewRanking extends HTMLElement {
       return;
     }
 
+    const played = (m) => Number(m.wins || 0) + Number(m.loses || 0) > 0;
+    const ranked = list.filter(played).sort((a, b) => b.mmr - a.mmr || (Number(b.wins || 0) + Number(b.loses || 0)) - (Number(a.wins || 0) + Number(a.loses || 0)));
+    list = [...ranked, ...list.filter(m => !played(m))];
     const startDateStr = this.getAttribute('season-start') || '알 수 없음';
 
     this.innerHTML = `
@@ -53,9 +58,10 @@ export class SaCrewRanking extends HTMLElement {
           <h3>🔥 TRACKING CREW 실시간 랭킹</h3>
           <div class="sub-info">
             <span>내전(8인↑) 결과 기반 MMR</span>
-            <span style="color: #ffcc00; font-weight: bold;">시즌 시작: ${startDateStr}</span>
+            <span style="color: #ffcc00; font-weight: bold;">시즌 시작: ${escapeHtml(startDateStr)}</span>
           </div>
         </div>
+        <p class="ranking-status">${ranked.length ? '정산된 승패가 있는 멤버만 순위를 표시합니다. 같은 MMR은 공동 순위입니다.' : '현재 정산된 승패 기록이 없습니다. 등록 멤버는 미배치로 표시합니다.'}</p>
         <table class="ranking-table">
           <thead>
             <tr>
@@ -69,7 +75,9 @@ export class SaCrewRanking extends HTMLElement {
           </thead>
           <tbody>
             ${list.map((m, idx) => {
-              const tier = this.getTierInfo(m.mmr);
+              const eligible = played(m);
+              const rank = eligible ? ranked.findIndex(member => Number(member.mmr) === Number(m.mmr)) + 1 : null;
+              const tier = eligible ? this.getTierInfo(m.mmr) : { name: '미배치', icon: '—', class: '' };
               const totalGames = (m.wins || 0) + (m.loses || 0);
               const winRate = totalGames > 0 ? Math.round((m.wins / totalGames) * 100) : 0;
               const ck = m.crewKills || 0;
@@ -77,15 +85,15 @@ export class SaCrewRanking extends HTMLElement {
               const crewKdPercent = (ck + cd > 0) ? Math.round((ck / (ck + cd)) * 100) : 0;
 
               return `
-                <tr class="rank-row ${idx < 3 ? 'top-rank' : ''}">
-                  <td class="pos" style="font-family: 'Roboto Mono', monospace;">#${idx + 1}</td>
+                <tr class="rank-row ${eligible && rank <= 3 ? 'top-rank' : ''}">
+                  <td class="pos" style="font-family: 'Roboto Mono', monospace;">${eligible ? '#' + rank : '미배치'}</td>
                   <td class="tier ${tier.class}">
                     <span class="tier-wrapper"><span>${tier.icon}</span><span>${tier.name}</span></span>
                   </td>
-                  <td class="name clickable-name" data-name="${m.characterName}">${m.characterName}</td>
-                  <td class="mmr-val">${m.mmr}</td>
-                  <td class="stats">${crewKdPercent}%</td>
-                  <td class="stats">${winRate}% <small style="display:inline; margin-left:5px; color:var(--text-dim);">(${m.wins}승 ${m.loses}패)</small></td>
+                  <td class="name clickable-name" data-name="${escapeHtml(m.characterName)}">${escapeHtml(m.characterName)}</td>
+                  <td class="mmr-val">${eligible ? m.mmr : '—'}</td>
+                  <td class="stats">${eligible && ck + cd > 0 ? crewKdPercent + '%' : '—'}</td>
+                  <td class="stats">${eligible ? winRate + '%' : '—'} <small style="display:inline; margin-left:5px; color:var(--text-dim);">(${Number(m.wins || 0)}승 ${Number(m.loses || 0)}패)</small></td>
                 </tr>
               `;
             }).join('')}

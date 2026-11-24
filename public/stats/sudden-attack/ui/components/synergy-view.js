@@ -1,9 +1,10 @@
+import { escapeHtml } from '../../../../shared/html.js?v=d181848c5b3c';
+
 /**
  * UI Component for Teammate Synergy Analysis View
  */
 export class SaSynergyView extends HTMLElement {
-  constructor() {
-    super();
+  connectedCallback() {
     this.style.display = 'block'; // Ensure block layout for grid alignment
   }
 
@@ -17,10 +18,10 @@ export class SaSynergyView extends HTMLElement {
 
     this.innerHTML = `
       <div class="rel-grid">
-        <div class="rel-card best clickable-card" data-name="${bestPartner.nickname}">
+        <div class="rel-card best clickable-card" data-name="${escapeHtml(bestPartner.nickname)}">
           <span class="rel-tag">환상의 짝꿍</span>
           <div class="rel-body">
-            <span class="rel-name">${bestPartner.nickname}</span>
+            <span class="rel-name">${escapeHtml(bestPartner.nickname)}</span>
             <div class="rel-stats">
               <span>승률<strong>${bestPartner.winRate}%</strong></span>
               <span class="dot">·</span>
@@ -30,10 +31,10 @@ export class SaSynergyView extends HTMLElement {
           <div class="rel-footer">함께할 때 승률이 가장 높습니다! 🔥</div>
         </div>
         ${worstPartner ? `
-          <div class="rel-card worst clickable-card" data-name="${worstPartner.nickname}">
+          <div class="rel-card worst clickable-card" data-name="${escapeHtml(worstPartner.nickname)}">
             <span class="rel-tag">노력이 필요한 사이</span>
             <div class="rel-body">
-              <span class="rel-name">${worstPartner.nickname}</span>
+              <span class="rel-name">${escapeHtml(worstPartner.nickname)}</span>
               <div class="rel-stats">
                 <span>승률<strong>${worstPartner.winRate}%</strong></span>
                 <span class="dot">·</span>

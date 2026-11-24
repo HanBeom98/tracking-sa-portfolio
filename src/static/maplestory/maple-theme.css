@@ -1,0 +1,52 @@
+:root {
+    color-scheme: light;
+    font-family: "Nunito", "Malgun Gothic", system-ui, sans-serif;
+    color: var(--ink);
+    background: var(--paper);
+    --paper: #fcfaf5;
+    --surface: #fffefa;
+    --soft-surface: #f8f4f9;
+    --ink: #2d263b;
+    --muted: #655a72;
+    --line: #e4dbe9;
+    --control-line: #b6a8c5;
+    --plum: #6246a5;
+    --plum-hover: #51358d;
+    --lavender: #eee7fa;
+    --peach: #fae1cf;
+    --green: #e1ebdb;
+    --active: #315e45;
+    --active-line: #9fbea7;
+    --warning: #8b4311;
+    --warning-surface: #fbe9d9;
+    --warning-line: #d4ad8b;
+}
+
+.topbar { background: var(--surface); border-bottom: 1px solid var(--line); }
+.topbar .topbar-inner {
+    width: min(1100px, calc(100% - 40px));
+    margin-inline: auto;
+    display: flex; align-items: center; gap: 26px; min-height: 63px; padding-block: 8px;
+}
+.maple-brand {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 1.06rem; font-weight: 850; letter-spacing: -.04em;
+}
+.maple-brand img {
+    width: 32px; height: 32px; padding: 3px; border-radius: 9px;
+    background: var(--peach); image-rendering: pixelated;
+}
+.lab-link { color: var(--muted); font-size: .86rem; margin-inline-start: auto; white-space: nowrap; }
+.maple-nav { display: flex; gap: 3px; }
+.maple-nav a { padding: 8px 13px; border-radius: 8px; white-space: nowrap; color: var(--muted); font-size: .9rem; }
+.maple-nav a:hover, .lab-link:hover { color: var(--plum); }
+.maple-nav a[aria-current=page] { background: var(--lavender); color: var(--plum); font-weight: 800; }
+
+@media (max-width: 670px) {
+    .topbar .topbar-inner { width: calc(100% - 28px); flex-wrap: wrap; gap: 4px 12px; }
+    .maple-nav { order: 2; width: 100%; }
+    .maple-nav a { flex: 1; text-align: center; }
+}
+@media (pointer: coarse) {
+    .maple-nav a { min-height: 44px; }
+}

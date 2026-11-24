@@ -1,0 +1,33 @@
+# Tracking SA
+
+> Tracking SA는 넥슨 Open API의 공개 데이터를 바탕으로 서든어택 전적, 최근 경기, 활동 기록, 비교 지표와 크루 리그 도구를 제공하는 한국어 게임 데이터 서비스입니다.
+
+Tracking SA is an independent service and is not the official website of Nexon or Sudden Attack. Statistics can vary with the public API data range and update timing. SOOP live integration is not currently active and will be provided only after official API access is approved.
+
+## Main Services
+
+- [Tracking SA 홈](https://trackingsa.com/): 서비스 개요, 빠른 닉네임 검색과 주요 기능 안내
+- [서든어택 전적 검색](https://trackingsa.com/stats/sudden-attack/): 공개 전적, 최근 경기, 최근 31일 활동과 비교 지표 조회
+- [크루 리그 허브](https://trackingsa.com/stats/sudden-attack/league/): 크루 랭킹, 멤버 검색, 리그 신청과 운영 도구
+- [전적 센터](https://trackingsa.com/stats/): Tracking SA가 제공하는 전적 서비스 모음
+
+## Guides and Interpretation
+
+- [가이드 허브](https://trackingsa.com/guides/): 전적과 경기 기록을 해석하는 전체 가이드
+- [서든어택 전적 검색 가이드](https://trackingsa.com/guides/sudden-attack-stats-guide/): 검색 결과와 주요 지표를 읽는 방법
+- [최근 경기 기록 해석](https://trackingsa.com/guides/match-history-reading/): 최근 경기 흐름과 표본을 과장 없이 해석하는 방법
+- [VS 비교 가이드](https://trackingsa.com/guides/vs-comparison-guide/): 두 플레이어의 공개 지표를 비교할 때의 기준과 한계
+- [리그 허브 가이드](https://trackingsa.com/guides/league-guide/): 공개 전적과 크루 리그 기능의 차이 및 이용 방법
+
+## Data and Editorial Policies
+
+- [서비스 기준](https://trackingsa.com/service-methodology/): 데이터 출처, 계산 기준, 갱신 범위와 서비스 한계
+- [편집 원칙](https://trackingsa.com/editorial-policy/): 가이드와 분석 콘텐츠의 작성 및 검토 원칙
+- [서비스 소개](https://trackingsa.com/about/): Tracking SA의 목적과 제공 기능
+
+## Support and Legal
+
+- [문의](https://trackingsa.com/contact/): 서비스 문의와 제휴 연락
+- [개인정보처리방침](https://trackingsa.com/privacy-policy/): 개인정보 및 서비스 데이터 처리 정책
+- [이용약관](https://trackingsa.com/terms/): 서비스 이용 조건
+- [사이트맵](https://trackingsa.com/sitemap.xml): 공개 URL 목록

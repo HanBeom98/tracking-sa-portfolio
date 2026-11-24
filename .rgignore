@@ -1,0 +1,18 @@
+# Generated deployment output. Search src/ unless generated HTML/assets are the target.
+public/
+
+# Dependency and tool output.
+node_modules/
+**/node_modules/
+.next/
+**/.next/
+test-results/
+playwright-report/
+*.tsbuildinfo
+
+# Runtime output and binary reference material.
+logs/
+docs/images/
+3vs3rankmap/
+5vs5rankmap/
+

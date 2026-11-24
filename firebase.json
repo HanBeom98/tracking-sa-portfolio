@@ -3,12 +3,177 @@
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
   },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "functions": {
+    "source": "cloud-functions",
+    "runtime": "nodejs22",
+    "predeploy": ["node scripts/sync-replay-coaching-modules.mjs --check"]
+  },
   "hosting": {
     "public": "public",
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
+    ],
+    "redirects": [
+      {
+        "source": "/guides/map-analysis-guide",
+        "destination": "/guides/map-sample-report/",
+        "type": 301
+      },
+      {
+        "source": "/guides/map-analysis-guide/**",
+        "destination": "/guides/map-sample-report/",
+        "type": 301
+      },
+      {
+        "source": "/guides/map-analysis-practice",
+        "destination": "/guides/map-sample-report/",
+        "type": 301
+      },
+      {
+        "source": "/guides/map-analysis-practice/**",
+        "destination": "/guides/map-sample-report/",
+        "type": 301
+      },
+      {
+        "source": "/guides/map-distribution-report",
+        "destination": "/guides/map-sample-report/",
+        "type": 301
+      },
+      {
+        "source": "/guides/map-distribution-report/**",
+        "destination": "/guides/map-sample-report/",
+        "type": 301
+      },
+      {
+        "source": "/guides/combined-signal-report",
+        "destination": "/guides/form-signal-report/",
+        "type": 301
+      },
+      {
+        "source": "/guides/combined-signal-report/**",
+        "destination": "/guides/form-signal-report/",
+        "type": 301
+      },
+      {
+        "source": "/guides/recent-form-signals",
+        "destination": "/guides/form-signal-report/",
+        "type": 301
+      },
+      {
+        "source": "/guides/recent-form-signals/**",
+        "destination": "/guides/form-signal-report/",
+        "type": 301
+      },
+      {
+        "source": "/guides/season-metrics-guide",
+        "destination": "/guides/form-signal-report/",
+        "type": 301
+      },
+      {
+        "source": "/guides/season-metrics-guide/**",
+        "destination": "/guides/form-signal-report/",
+        "type": 301
+      },
+      {
+        "source": "/guides/vs-comparison-limit-report",
+        "destination": "/guides/vs-comparison-guide/",
+        "type": 301
+      },
+      {
+        "source": "/guides/vs-comparison-limit-report/**",
+        "destination": "/guides/vs-comparison-guide/",
+        "type": 301
+      },
+      {
+        "source": "/guides/vs-misread-signals",
+        "destination": "/guides/vs-comparison-guide/",
+        "type": 301
+      },
+      {
+        "source": "/guides/vs-misread-signals/**",
+        "destination": "/guides/vs-comparison-guide/",
+        "type": 301
+      },
+      {
+        "source": "/animal_face_test",
+        "destination": "/stats/sudden-attack/",
+        "type": 301
+      },
+      {
+        "source": "/animal_face_test/**",
+        "destination": "/stats/sudden-attack/",
+        "type": 301
+      },
+      {
+        "source": "/animal-face",
+        "destination": "/stats/sudden-attack/",
+        "type": 301
+      },
+      {
+        "source": "/animal-face/**",
+        "destination": "/stats/sudden-attack/",
+        "type": 301
+      },
+      {
+        "source": "/fortune",
+        "destination": "/stats/sudden-attack/",
+        "type": 301
+      },
+      {
+        "source": "/fortune/**",
+        "destination": "/stats/sudden-attack/",
+        "type": 301
+      },
+      {
+        "source": "/futures-estimate",
+        "destination": "/stats/sudden-attack/",
+        "type": 301
+      },
+      {
+        "source": "/futures-estimate/**",
+        "destination": "/stats/sudden-attack/",
+        "type": 301
+      },
+      {
+        "source": "/lucky-recommendation",
+        "destination": "/stats/sudden-attack/",
+        "type": 301
+      },
+      {
+        "source": "/lucky-recommendation/**",
+        "destination": "/stats/sudden-attack/",
+        "type": 301
+      },
+      {
+        "source": "/page-14",
+        "destination": "/",
+        "type": 301
+      },
+      {
+        "source": "/page-14.html",
+        "destination": "/",
+        "type": 301
+      },
+      {
+        "source": "/page-14/**",
+        "destination": "/",
+        "type": 301
+      },
+      {
+        "source": "/en",
+        "destination": "/",
+        "type": 301
+      },
+      {
+        "source": "/en/**",
+        "destination": "/",
+        "type": 301
+      }
     ],
     "cleanUrls": false
   }

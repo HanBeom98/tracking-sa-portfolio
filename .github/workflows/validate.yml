@@ -1,0 +1,109 @@
+name: Project Validation
+
+on:
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validation-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - name: Enforce Public Edit Policy
+        run: npm run check:public-edit-policy
+      - name: Enforce Source Of Truth
+        run: npm run check:source-of-truth
+      - name: Check Application Browser Patterns
+        run: npm run check:application-browser-boundary
+      - name: Check Browser Source Connections And Layer Imports
+        run: npm run check:source-graph
+      - name: Run All Unit Tests
+        run: npm run test:unit
+
+  build-and-browser:
+    needs: test
+    # Playwright in the lockfile supports Ubuntu 24.04, not the rolling latest image.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: npm ci
+      - run: python -m pip install -r requirements.txt
+      - name: Build local site without production credentials
+        run: npm run build
+      - name: Verify Build Artifacts
+        run: npm run check:build-artifacts
+      - name: Run Python Tests
+        run: npm run test:python
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run Local Browser Smoke Tests
+        run: npm run test:e2e:ci
+
+  rules:
+    needs: test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+      - run: npm ci
+      - name: Install tested emulator tools without changing manifests
+        run: npm install --prefix tests/emulator --no-save --package-lock=false firebase-tools@15.34.0 @firebase/rules-unit-testing@6.0.0 firebase@13.0.0
+      - name: Install Functions dependencies for server-backed emulator tests
+        run: npm ci --prefix cloud-functions
+      - name: Run Local Firestore and Storage Authorization Tests
+        env:
+          CI: "true"
+          FIREBASE_CLI_DISABLE_UPDATE_CHECK: "true"
+        run: npm run test:emulator
+      - name: Install production Firebase browser SDK locally
+        run: npm install --prefix tests/e2e/sdk --no-save --package-lock=false firebase@8.10.1
+      - name: Install Chromium for authenticated flows
+        run: npx playwright install --with-deps chromium
+      - name: Run Local Auth and Writing Flows
+        run: npm run test:e2e:auth:local
+      - name: Preserve local authenticated-flow diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: local-auth-failure
+          path: test-results/
+          retention-days: 3
+          if-no-files-found: ignore

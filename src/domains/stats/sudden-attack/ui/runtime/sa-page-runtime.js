@@ -1,5 +1,6 @@
 export function initSaPageRuntime({
   handleSearch,
+  resetSearchState = null,
   refreshRankings,
   onRankingsUpdated = null,
   profileSection,
@@ -21,6 +22,10 @@ export function initSaPageRuntime({
     const name = urlParams.get('n');
     if (name) {
       handleSearch(name, true);
+      return;
+    }
+    if (typeof resetSearchState === 'function') {
+      resetSearchState();
       return;
     }
     profileSection.classList.add('hidden');

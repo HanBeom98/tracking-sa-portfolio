@@ -1,0 +1,53 @@
+name: Send Threads Development Note
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: threads-development-note-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  send-note:
+    # Operator paused automatic generation/publication. Keep pushes from sending notes.
+    if: ${{ false }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Build public-safe development note
+        id: note
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/build-threads-development-note.js > "$RUNNER_TEMP/threads-note.json"
+          node -e 'const fs=require("fs"); const p=JSON.parse(fs.readFileSync(process.argv[1],"utf8")); console.log(`Prepared note for ${p.source} with ${p.summary.length} public facts.`)' "$RUNNER_TEMP/threads-note.json"
+
+      - name: Send note to Threads bot
+        env:
+          THREADS_NOTES_ENDPOINT: ${{ secrets.THREADS_NOTES_ENDPOINT }}
+          THREADS_NOTES_SECRET: ${{ secrets.THREADS_NOTES_SECRET }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$THREADS_NOTES_ENDPOINT"
+          test -n "$THREADS_NOTES_SECRET"
+          curl --fail-with-body --silent --show-error \
+            --retry 2 \
+            --request POST \
+            --header "Authorization: Bearer $THREADS_NOTES_SECRET" \
+            --header "Content-Type: application/json" \
+            --data-binary "@$RUNNER_TEMP/threads-note.json" \
+            "$THREADS_NOTES_ENDPOINT"

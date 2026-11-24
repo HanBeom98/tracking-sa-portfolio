@@ -6,6 +6,4 @@ export const Roles = Object.freeze({
 
 export const DEFAULT_ROLE = Roles.FREE;
 
-export function isValidRole(role) {
-  return Object.values(Roles).includes(role);
-}
+export { PROFILE_ADMIN_EMAILS as ADMIN_EMAILS } from './access-policy.js?v=0d740c688852';

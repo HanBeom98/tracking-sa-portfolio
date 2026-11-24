@@ -22,3 +22,13 @@ test("account error messages map delete account errors", async () => {
   assert.equal(m.resolveDeleteAccountError({ code: "auth/service-unavailable" }).key, "account_delete_service_unavailable");
   assert.equal(m.resolveDeleteAccountError({ code: "unknown" }).key, "delete_account_failed");
 });
+
+test("account error messages map password change errors", async () => {
+  const m = await loadAccountErrorMessages();
+  assert.equal(m.resolvePasswordChangeError({ code: "auth/wrong-password" }).key, "password_change_wrong_current");
+  assert.equal(m.resolvePasswordChangeError({ code: "auth/invalid-credential" }).key, "password_change_wrong_current");
+  assert.equal(m.resolvePasswordChangeError({ code: "auth/weak-password" }).key, "password_change_weak");
+  assert.equal(m.resolvePasswordChangeError({ code: "auth/too-many-requests" }).key, "password_change_too_many");
+  assert.equal(m.resolvePasswordChangeError({ code: "auth/network-request-failed" }).key, "password_change_network_error");
+  assert.equal(m.resolvePasswordChangeError({ code: "unknown" }).key, "password_change_failed");
+});

@@ -1,30 +1,35 @@
+import { assertBoardAttachmentOwnership } from '../domain/attachment-ownership.js';
 import { makeError } from "./errors.js";
-import { generateRandomNickname } from "../domain/nickname.js";
-import { assertAuthor, assertPostExists, assertRequiredFields } from "../domain/validators.js";
+import { assertBoardNickname } from "../domain/author-identity.js";
+import { assertAuthor, assertPostExists, assertPostFieldLengths, assertRequiredFields } from "../domain/validators.js";
+import { isActivePinnedNotice } from "../domain/noticePinning.js";
+import { NOTICE_DISPLAY_LIMIT } from '../domain/notice-policy.js';
 
 export function buildPostService({ postRepository }) {
   if (!postRepository) {
     throw new Error("postRepository is required");
   }
 
-  async function createPost({ title, content, author, category = "free" }) {
+  async function createPost({ title, content, author, category = "free", attachments = [] }) {
     assertRequiredFields({ title, content });
+    assertPostFieldLengths({ title, content });
     assertAuthor(author);
 
     if (category === "notice" && author.role !== "admin") {
       throw makeError("NOT_AUTHORIZED");
     }
 
-    const nickname = author.displayName || author.email || generateRandomNickname();
+    const nickname = assertBoardNickname(author);
 
+    assertBoardAttachmentOwnership(attachments, author.uid);
     await postRepository.add({
       title,
       content,
       category,
       authorUid: author.uid,
       authorName: nickname,
-      authorEmail: author.email || "",
       authorPhoto: author.photoURL || "",
+      attachments,
     });
   }
 
@@ -39,14 +44,15 @@ export function buildPostService({ postRepository }) {
     // 자유게시판(free) 조회 시 공지사항(notice)도 함께 가져와서 합침
     if (category === "free") {
       const [notices, freePosts] = await Promise.all([
-        postRepository.list({ limit: 5, category: "notice" }),
+        postRepository.list({ limit: NOTICE_DISPLAY_LIMIT, category: "notice" }),
         postRepository.list({ limit, category: "free" })
       ]);
       
       const seenIds = new Set();
       const merged = [];
       
-      const allPosts = [...(notices || []), ...(freePosts || [])];
+      const activeNotices = (notices || []).filter((post) => isActivePinnedNotice(post));
+      const allPosts = [...activeNotices, ...(freePosts || [])];
       allPosts.forEach(post => {
         if (post && post.id && !seenIds.has(post.id)) {
           seenIds.add(post.id);
@@ -59,8 +65,9 @@ export function buildPostService({ postRepository }) {
     return postRepository.list({ limit, category });
   }
 
-  async function updatePost({ id, title, content, user, post }) {
+  async function updatePost({ id, title, content, attachments = [], user, post }) {
     assertRequiredFields({ title, content });
+    assertPostFieldLengths({ title, content });
     assertPostExists(post);
     assertAuthor(user);
 
@@ -69,7 +76,8 @@ export function buildPostService({ postRepository }) {
       throw makeError("NOT_AUTHORIZED");
     }
 
-    await postRepository.update(id, { title, content });
+    assertBoardAttachmentOwnership(attachments, post.authorUid);
+    await postRepository.update(id, { title, content, attachments });
   }
 
   async function deletePost({ id, user, post }) {

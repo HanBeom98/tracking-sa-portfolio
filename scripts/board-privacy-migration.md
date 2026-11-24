@@ -1,0 +1,11 @@
+# Legacy board email cleanup
+
+Run `node scripts/migrate-board-privacy.mjs` to audit, or add `--apply` to back up and clean existing identity fields. The normal entry point requires `FIREBASE_SERVICE_ACCOUNT_JSON` for the existing `demo-tracking-sa-portfolio` project. Do not save or print credentials locally. The Site Deploy workflow exposes `board_privacy_cleanup` (`none` by default, `audit`, or `apply`) and uses its existing secret on the runner.
+
+Only `board_posts` documents and their `comments` subcollections are processed, including missing parent documents that still have comments. Cleanup removes `authorEmail` and replaces email-shaped `authorName` values with the author's current valid site nickname. Historical authors without a valid nickname receive a stable `미설정회원_<12-character hash>` label; this does not assign an account nickname or grant new posting access. Other existing display names are preserved.
+
+Before each change, the affected identity fields are backed up under `_board_privacy_backups/board-privacy-v1_<document hash>`. The default-deny Firestore rule blocks every client, including browser site-admin accounts, from reading or writing this collection. No post body or attachment is copied into the backup. Backup creation and the restricted-field update commit atomically with the source document's update-time precondition. Concurrent edits cause a safe stop; review and rerun. Repeated runs preserve the original backup and skip already-clean documents. Logs contain counts only.
+
+For a privileged recovery, read the private backup's `source` and `original` fields and restore only the backed-up identity fields after reviewing current data; never replace an entire public document with the backup. Restoring an email field would expose it publicly again and is not part of normal deployment.
+
+The CLI audits first, optionally applies, then audits again and fails if targeted fields remain. The emulator suite exercises the actual REST commits. Authentication and atomic update semantics follow [Google's service-account OAuth flow](https://developers.google.com/identity/protocols/oauth2/service-account) and [Firestore's commit API](https://firebase.google.com/docs/firestore/reference/rest/v1/projects.databases.documents/commit).

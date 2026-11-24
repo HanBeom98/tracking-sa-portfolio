@@ -2,11 +2,11 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>Sudden Attack Statistics - TrackingSA</title>
+  <title>서든어택 전적 검색 | Tracking SA</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <link rel="stylesheet" href="/style.css">
-  <link rel="stylesheet" href="ui/style.css">
+  <link rel="stylesheet" href="ui/style.css?v=c71bfdce1fe8">
+  <link rel="stylesheet" href="ui/result-workspace.css?v=da1e96c4f9c9">
   
   <!-- Firebase SDKs are loaded via global layout/main system -->
   <script type="text/javascript" src="https://openapi.nexon.com/js/analytics.js?app_id=256854" async></script>
@@ -20,66 +20,65 @@
     <meta name="twitter:image" content="https://trackingsa.com/logo.svg">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
-    <meta name="description" content="Tracking SA의 서비스 및 유틸리티 페이지입니다.">
-    <meta property="og:title" content="Sudden Attack Statistics - TrackingSA">
-    <meta property="og:description" content="Tracking SA의 서비스 및 유틸리티 페이지입니다.">
-    <script>
+    <meta name="description" content="공식 API 기반 서든어택 전적 검색 홈. 닉네임 검색, 최근·이전 20경기 비교, 최근 31일 활동, VS 비교와 리그 허브 진입을 제공합니다.">
+    <meta property="og:title" content="서든어택 전적 검색 | Tracking SA">
+    <meta property="og:description" content="공식 API 기반 서든어택 전적 검색 홈. 닉네임 검색, 최근·이전 20경기 비교, 최근 31일 활동, VS 비교와 리그 허브 진입을 제공합니다.">
+    <style>
+  html.dark-mode,
+  html.dark-mode body {
+    background-color: #0f172a;
+    color: #f8fafc;
+    color-scheme: dark;
+  }
+</style>
+<script>
   (function() {
-    const theme = localStorage.getItem('theme');
+    let theme = 'dark';
+    try {
+      theme = localStorage.getItem('theme') === 'light' ? 'light' : 'dark';
+    } catch {}
     if (theme === 'dark') {
       document.documentElement.classList.add('dark-mode');
       document.body && document.body.classList.add('dark-mode');
     }
   })();
 </script>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7263630893992216" crossorigin="anonymous"></script>
-<meta name="google-adsense-account" content="ca-pub-7263630893992216">
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-TGD3WRNKPZ"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-TGD3WRNKPZ');
-</script>
+
+<script type="module" src="/analytics-loader.js?v=86d5e62d50ed"></script>
 <meta name="google-site-verification" content="UutJ4-ti1UsLczEuiR85D-gDNWjA16nl3whr0TBqR4k" />
 <meta name="naver-site-verification" content="b15b33af838280b54d31eb3c7e5c358d2836743f" />
-<script type="text/javascript">
-(function(c,l,a,r,i,t,y){
-    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-})(window, document, "clarity", "script", "vb9q33ggpa");
-</script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app-check.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script>
-  window.FIREBASE_CONFIG = {"apiKey": "AIzaSyBdHVxk9u6iG_whEIhvDzjde3BVn5gT19o", "authDomain": "tracking-sa-295db.firebaseapp.com", "projectId": "tracking-sa-295db", "storageBucket": "tracking-sa-295db.firebasestorage.app", "appId": "1:779289056217:web:cf023fc55f1a2913ffbfc8", "messagingSenderId": "779289056217"};
+  window.FIREBASE_CONFIG = {"apiKey": "", "authDomain": "demo-tracking-sa-portfolio.firebaseapp.com", "projectId": "demo-tracking-sa-portfolio", "storageBucket": "demo-tracking-sa-portfolio.firebasestorage.app", "appId": "1:000000000000:web:portfolio-example", "messagingSenderId": "779289056217", "appCheckSiteKey": ""};
 </script>
 <script>
   window.authDomainReady = window.authDomainReady || new Promise((resolve) => {
     window.__resolveAuthDomain = resolve;
   });
 </script>
-<script type="module" src="/auth/ui/auth-client.js"></script>
-
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<link rel="stylesheet" href="/style.css?v=1773279943">
+<link rel="stylesheet" href="/style.css?v=8f0895c6daf8">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#0052cc">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Tracking SA">
 <script src="/runtime-config.js"></script>
-<script src="/firebase-config.js"></script>
-<script src="/translations.js?v=1773279943"></script>
-<script src="/common.js?v=1773279943"></script>
+<script defer src="/firebase-config.js"></script>
+<script defer src="/pwa-register.js"></script>
+<script type="module" src="/auth/ui/auth-client.js"></script>
+<script src="/translations.js?v=8eb99f0dbaa9"></script>
+<script src="/common.js?v=5cfaaa0b27e3"></script>
 
 </head>
-<body class="dark-mode">
+<body>
   <div class="site-header-container"><header>
     <div class="header-inner">
-        <a href="/" class="site-logo-link">
+        <a href="/" class="site-logo-link" aria-label="Tracking SA home">
             <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="site-logo">
                 <circle cx="50" cy="50" r="48" stroke="currentColor" stroke-width="4" fill="transparent"/>
                 <path d="M25 70L40 55L50 65L75 35" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
@@ -88,112 +87,142 @@
             </svg>
         </a>
         <div class="desktop-menu-container">
-            <nav>
+            <nav id="primary-navigation">
                 <ul>
-                    <li class="dropdown">
-                        <a href="#" class="dropbtn" data-i18n="menu_board">게시판</a>
-                        <div class="dropdown-content">
-                            <a href="/board?category=notice" data-i18n="notice">공지사항</a>
-                            <a href="/board?category=free" data-i18n="free_board">자유게시판</a>
-                        </div>
-                    </li>
-                    <li class="dropdown">
-                        <a href="#" class="dropbtn" data-i18n="menu_chart">차트</a>
-                        <div class="dropdown-content">
-                            <a href="/futures-estimate/" data-i18n="futures_estimate_index">지수</a>
-                        </div>
-                    </li>
-                    <li class="dropdown">
-                        <a href="#" class="dropbtn" data-i18n="menu_test">테스트</a>
-                        <div class="dropdown-content">
-                            <a href="/animal-face/" data-i18n="animal_face_test">동물상 테스트</a>
-                            <a href="/ai-test/" data-i18n="ai_tendency_test">AI 성향 테스트</a>
-                            <a href="/fortune/" data-i18n="saju_test">AI 실시간 오늘의 운세</a>
-                            <a href="/lucky-recommendation/" data-i18n="lucky_recommendation">행운의 추천</a>
-                        </div>
-                    </li>
-                    <li><a href="/games/" data-i18n="menu_game">게임</a></li>
+                    <li><a href="/stats/sudden-attack/" data-i18n="menu_stats_search">전적 검색</a></li>
+                    <li><a href="/stats/sudden-attack/replay/">리플레이 분석실</a></li>
+                    <li><a href="/guides/mygun2/">마이건2 도감</a></li>
+                    <li><a href="/guides/">가이드</a></li>
+                    <li><a href="/lab/">실험실</a></li>
+                    <li><a href="/board?category=notice" data-i18n="notice">공지사항</a></li>
                 </ul>
             </nav>
-            <div class="utility-controls">
-                <button id="color-change">🌙</button>
-                <div id="language-switcher"></div>
-                <div id="auth-controls" class="auth-controls"></div>
-            </div>
         </div>
+        <div class="utility-controls">
+            <button id="color-change" aria-label="테마 변경">🌙</button>
+            <div id="auth-controls" class="auth-controls"></div>
+        </div>
+        <button class="mobile-menu-toggle" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="primary-navigation">
+            <span></span><span></span><span></span>
+        </button>
     </div>
 </header>
 </div>
-  <main class="sa-container">
-    <section class="search-section">
-      <div class="home-nav">
-        <a href="/stats/sudden-attack/" class="home-link">🏠 서든전적 홈</a>
+  <main class="sa-home-shell">
+    <svg class="sa-icon-sprite" aria-hidden="true">
+      <symbol id="sa-icon-trend" viewBox="0 0 24 24"><path d="M4 18 10 12l4 3 6-8"/><path d="M15 7h5v5"/></symbol>
+      <symbol id="sa-icon-compare" viewBox="0 0 24 24"><path d="M4 8h14m-4-4 4 4-4 4M20 16H6m4 4-4-4 4-4"/></symbol>
+      <symbol id="sa-icon-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4m8-4v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></symbol>
+      <symbol id="sa-icon-versus" viewBox="0 0 24 24"><circle cx="7" cy="8" r="3"/><circle cx="17" cy="8" r="3"/><path d="M2 20a5 5 0 0 1 10 0m0 0a5 5 0 0 1 10 0M10 12l4 4m0-4-4 4"/></symbol>
+      <symbol id="sa-icon-replay" viewBox="0 0 24 24"><path d="M4 10a8 8 0 1 1 2 7M4 10V5m0 5h5"/><path d="M10 9v6l5-3-5-3Z"/></symbol>
+      <symbol id="sa-icon-live" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M7 7a7 7 0 0 0 0 10m10-10a7 7 0 0 1 0 10M4 4a11 11 0 0 0 0 16m16-16a11 11 0 0 1 0 16"/></symbol>
+      <symbol id="sa-icon-crew" viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.8 2.9 8.1 7 10 4.1-1.9 7-5.2 7-10V6l-7-3Z"/><circle cx="12" cy="10" r="2.5"/><path d="M8.5 17a3.5 3.5 0 0 1 7 0"/></symbol>
+      <symbol id="sa-icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5"/></symbol>
+    </svg>
+    <section class="sa-home-hero">
+      <div class="sa-home-hero-copy">
+        <div class="sa-home-badge">공개 전적 검색</div>
+        <h1>서든어택 전적 검색</h1>
+        <p>닉네임으로 최근 전적과 31일 활동을 확인하세요.</p>
+        <div class="sa-home-hero-meta">
+          <span>NEXON Open API 이용</span>
+        </div>
       </div>
-      <h1>서든어택 전적 검색</h1>
+    </section>
+
+    <div id="publicSearchSlot" class="sa-home-search-slot">
+    <section class="search-section sa-home-search-card">
+      <div class="sa-search-eyebrow">플레이어 검색</div>
+      <h2>플레이어 전적을 검색하세요</h2>
+      <p class="sa-home-search-desc">공개 전적 조회는 폭파미션 기록을 기준으로 하며, 매치 유형별 최근 최대 20경기를 확인할 수 있습니다. 검색한 뒤 즐겨찾기 추가와 VS 비교를 이어서 사용할 수 있습니다.</p>
       <div class="search-bar">
-        <input type="text" id="characterName" placeholder="캐릭터명을 입력하세요" />
+        <input type="text" aria-label="검색할 닉네임" id="characterName" placeholder="캐릭터명을 입력하세요" />
         <div class="search-btns">
           <button id="searchBtn">검색</button>
           <button id="refreshBtn" class="refresh-btn hidden" title="최신 데이터로 갱신">🔄</button>
           <button id="compareBtn" class="compare-btn hidden" title="상대방과 전적 비교">⚔️ VS</button>
+          <button id="searchToolsToggle" class="sa-compact-tools-toggle" type="button" hidden aria-expanded="false" aria-controls="publicSearchTools" aria-label="즐겨찾기와 검색 도구">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9Z"/></svg><span>즐겨찾기</span>
+          </button>
         </div>
       </div>
+      <div class="sa-discovery-strip" aria-label="&#44160;&#49353; &#54980; &#51228;&#44277;&#46104;&#45716; &#51204;&#51201; &#48516;&#49437;">
+        <div><b aria-hidden="true"><svg><use href="#sa-icon-trend"></use></svg></b><strong>최근 폼</strong><span>승률·K/D</span></div>
+        <div><b aria-hidden="true"><svg><use href="#sa-icon-compare"></use></svg></b><strong>변화 비교</strong><span>이전 20경기</span></div>
+        <div><b aria-hidden="true"><svg><use href="#sa-icon-calendar"></use></svg></b><strong>활동 캘린더</strong><span>최근 31일</span></div>
+        <div><b aria-hidden="true"><svg><use href="#sa-icon-versus"></use></svg></b><strong>상대 비교</strong><span>두 선수 전적</span></div>
+      </div>
+      <details class="sa-data-note">
+        <summary>&#45936;&#51060;&#53552; &#44592;&#51456;</summary>
+        <p>&#51204;&#51201;&#51008; &#44160;&#49353; &#49884;&#51216;&#50640; NEXON Open API&#47196; &#51312;&#54924;&#54616;&#47728;, &#51064;&#44592; &#49692;&#50948;&#47484; &#50948;&#54620; &#48324;&#46020; DB&#47484; &#49324;&#50857;&#54616;&#51648; &#50506;&#49845;&#45768;&#45796;.</p>
+      </details>
       <div id="recentSearches" class="recent-searches">
         <!-- Search chips will be here -->
       </div>
+      <div id="publicSearchTools" class="sa-search-tools">
+      <div class="sa-search-tools-heading"><span>즐겨찾기 · 검색 도구</span><div id="compactRefreshSlot"></div></div>
       <div id="favoriteSearches" class="recent-searches favorite-searches">
         <!-- Favorite chips will be here -->
       </div>
-      <div class="crew-actions">
-        <button id="favoriteBtn" class="sub-btn hidden">☆ 즐겨찾기 추가</button>
-        <button id="applyCrewBtn" class="sub-btn">⚔️ 내전 크루 신청</button>
-        <button id="adminMenuBtn" class="sub-btn admin-only hidden">⚙️ 크루 관리</button>
-        <button id="balancerBtn" class="sub-btn staff-only hidden">⚖️ 팀 밸런서</button>
-      </div>
-
-      <!-- Team Balancer Modal -->
-      <div id="balancerModal" class="modal hidden">
-        <div class="modal-content balancer-modal">
-          <h3>⚖️ AI 스마트 팀 밸런서</h3>
-          <p>오늘 내전에 참여할 멤버들을 선택하세요 (짝수 인원 권장)</p>
-          <div id="balancerMemberList" class="balancer-member-grid">
-            <!-- Crew members with checkboxes will be here -->
-          </div>
-          <div id="balancerResult" class="balancer-result hidden">
-            <div class="team-split">
-              <div class="team red">
-                <h4>TEAM RED</h4>
-                <ul id="redTeamList"></ul>
-                <span class="avg" id="redAvgMMR"></span>
-              </div>
-              <div class="vs-circle">VS</div>
-              <div class="team blue">
-                <h4>TEAM BLUE</h4>
-                <ul id="blueTeamList"></ul>
-                <span class="avg" id="blueAvgMMR"></span>
-              </div>
-            </div>
-            <p class="balance-info" id="balanceDiff"></p>
-          </div>
-          <div class="modal-btns">
-            <button id="calculateBalanceBtn" class="primary">밸런스 맞추기</button>
-            <button id="closeBalancerBtn">닫기</button>
+      <div id="searchGuide" class="sa-search-guide">
+        <div class="sa-search-guide-card">
+          <div class="sa-search-guide-kicker">처음 이용하기</div>
+          <strong>닉네임 검색으로 폭파미션 최근 경기 흐름을 바로 확인</strong>
+          <p>처음엔 닉네임만 검색해 보세요. 공개 검색은 매치 유형별 최근 최대 20경기로 정리되며, 결과 화면에서 즐겨찾기 추가, 새로고침, VS 비교로 자연스럽게 이어집니다.</p>
+          <div class="sa-search-guide-points">
+            <span>1. 닉네임 검색</span>
+            <span>2. 매치 유형별 최근 기록 확인</span>
+            <span>3. 즐겨찾기 또는 VS 비교</span>
           </div>
         </div>
       </div>
+      <div class="sa-home-search-actions">
+        <button id="favoriteBtn" class="sub-btn hidden">☆ 즐겨찾기 추가</button>
+        <button id="resetSearchBtn" class="sub-btn hidden">검색 초기화</button>
+      </div>
+
+      </div>
+
+      <div id="searchError" class="sa-search-error hidden" role="alert" aria-atomic="true">
+        <h2 id="searchErrorTitle"></h2>
+        <p id="searchErrorMessage"></p>
+        <p>입력한 닉네임은 유지됩니다. 위 검색창에서 다시 검색할 수 있습니다.</p>
+      </div>
 
       <div id="loading" class="hidden">
-        <div class="spinner"></div>
-        <p id="loadingText">데이터를 불러오는 중...</p>
+        <div class="sa-loading-head">
+          <span class="sa-loading-pulse" aria-hidden="true"></span>
+          <p id="loadingText">데이터를 불러오는 중...</p>
+        </div>
+        <div
+          id="loadingProgress"
+          class="sa-loading-progress"
+          role="progressbar"
+          aria-label="전적 데이터 불러오는 중"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow="8"
+        >
+          <span id="loadingProgressBar"></span>
+        </div>
+        <p id="loadingHint" class="sa-loading-hint" aria-live="polite">플레이어 정보를 확인하고 있어요.</p>
       </div>
     </section>
 
+    </div>
+
+    <nav class="sa-service-launchpad" aria-label="Tracking SA 주요 도구">
+      <a href="/stats/sudden-attack/replay/"><span class="sa-service-icon replay" aria-hidden="true"><svg><use href="#sa-icon-replay"></use></svg></span><span><strong>리플레이 분석</strong><small>라운드와 교전 흐름 확인</small></span><b aria-hidden="true"><svg><use href="#sa-icon-arrow"></use></svg></b></a>
+      <a href="/#soop-live"><span class="sa-service-icon live" aria-hidden="true"><svg><use href="#sa-icon-live"></use></svg></span><span><strong>SOOP 라이브</strong><small>현재 방송 중인 스트리머</small></span><b aria-hidden="true"><svg><use href="#sa-icon-arrow"></use></svg></b></a>
+      <a href="/stats/sudden-attack/league/"><span class="sa-service-icon league" aria-hidden="true"><svg><use href="#sa-icon-crew"></use></svg></span><span><strong>크루 리그</strong><small>랭킹과 리그 운영 도구</small></span><b aria-hidden="true"><svg><use href="#sa-icon-arrow"></use></svg></b></a>
+    </nav>
+
     <!-- VS Mode Modal -->
-    <div id="vsModal" class="modal hidden">
+    <div id="vsModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="vsModalTitle" aria-describedby="vsModalDescription">
       <div class="modal-content">
-        <h3>⚔️ 상대방 전적 비교</h3>
-        <p>현재 검색된 유저와 비교할 상대방의 캐릭터명을 입력하세요.</p>
-        <input type="text" id="vsTargetName" placeholder="비교할 캐릭터명 입력" />
+        <h3 id="vsModalTitle">⚔️ 상대방 전적 비교</h3>
+        <p id="vsModalDescription">현재 검색된 유저와 비교할 상대방의 캐릭터명을 입력하세요.</p>
+        <input type="text" id="vsTargetName" aria-label="비교할 캐릭터명" placeholder="비교할 캐릭터명 입력" />
         <div class="modal-btns">
           <button id="startVsBtn" class="primary" style="background: #bc00ff; color: #fff;">비교 시작</button>
           <button id="closeVsModalBtn">닫기</button>
@@ -201,65 +230,227 @@
       </div>
     </div>
 
-    <!-- Crew Application Modal -->
-    <div id="crewModal" class="modal hidden">
-      <div class="modal-content">
-        <h3>내전 크루 가입 신청</h3>
-        <p>우리 크루로 등록되면 매치 기록에서 자동으로 내전이 감지됩니다.</p>
-        <input type="text" id="applyCharacterName" placeholder="정확한 캐릭터명을 입력하세요" />
-        <div class="modal-btns">
-          <button id="submitApplyBtn" class="primary">신청하기</button>
-          <button id="closeModalBtn">닫기</button>
+    <section id="resultsShell" class="sa-results-shell hidden">
+      <div class="sa-results-header">
+        <h2 class="sa-results-loading-title">검색 결과</h2>
+        <div id="resultsMeta" class="sa-results-meta hidden"></div>
+      </div>
+
+      <div id="swrStatus" class="swr-status hidden"></div>
+
+      <div class="sa-result-tools">
+      <a class="sa-results-attribution" href="https://openapi.nexon.com/ko/support/terms/" target="_blank" rel="noopener noreferrer" aria-label="서든어택 전적 데이터는 NEXON Open API를 이용합니다">NEXON Open API</a>
+      <details id="shareCardPanel" class="sa-share-panel hidden">
+        <summary class="sa-share-toggle">전적 공유</summary>
+        <div class="sa-share-content">
+        <div class="sa-share-copy">
+          <span class="sa-share-kicker">전적 공유</span>
+          <h3 id="shareCardTitle">전적을 한 장으로 공유하세요</h3>
+          <p>카드를 눌러 3D 플립을 확인하고, 현재 전적을 이미지나 링크로 공유할 수 있습니다.</p>
+          <div class="sa-share-actions">
+            <button id="shareCardBtn" type="button" class="sa-share-primary">이미지 복사</button>
+            <button id="copyResultLinkBtn" type="button" class="sa-share-secondary">결과 링크 복사</button>
+            <button id="downloadShareImageBtn" type="button" class="sa-share-secondary hidden">PNG 저장</button>
+          </div>
+          <div class="sa-share-profile-controls">
+            <label for="shareProfileImageInput" class="sa-share-secondary">프로필 사진 선택</label>
+            <input id="shareProfileImageInput" type="file" accept="image/png,image/jpeg,image/webp">
+            <button id="resetShareProfileImageBtn" type="button" class="sa-share-secondary hidden">기본 이미지로</button>
+          </div>
+          <div id="shareProfileAdjustments" class="sa-share-profile-adjustments hidden">
+            <label for="shareProfileZoom">사진 확대 <output id="shareProfileZoomValue">100%</output></label>
+            <input id="shareProfileZoom" type="range" min="50" max="300" step="5" value="100">
+            <button id="resetShareProfilePositionBtn" type="button" class="sa-share-secondary">위치 초기화</button>
+          </div>
+          <small class="sa-share-profile-note">카드의 사진을 드래그해 위치를 조절하세요. 선택한 사진과 조정값은 서버에 저장되거나 다른 사람에게 공개되지 않습니다.</small>
+          <span id="shareCardStatus" class="sa-share-status" aria-live="polite"></span>
+        </div>
+        <button id="shareCardPreview" class="sa-share-card" type="button" aria-label="클릭하여 전적 카드 공개">
+          <span class="sa-share-card-inner">
+            <span class="sa-share-card-face sa-share-card-front">
+              <span class="sa-share-profile-layout">
+                <span class="sa-share-emblem" data-share-profile-frame>
+                  <img data-share-profile-image alt="현재 카드에만 적용된 임시 프로필 사진" hidden>
+                  <strong>TrackingSA</strong>
+                </span>
+                <span class="sa-share-profile-body">
+                  <span class="sa-share-clan" data-share-clan>공개 전적</span>
+                  <span class="sa-share-nickname-row">
+                    <span class="sa-share-rank-image"><img data-share-rank-image alt=""></span>
+                    <strong data-share-nickname>PLAYER</strong>
+                  </span>
+                  <span class="sa-share-tier-grid">
+                    <span class="sa-share-tier-card"><small>솔랭</small><b><img data-share-solo-image alt=""><span data-share-solo-tier>UNRANK</span></b></span>
+                    <span class="sa-share-tier-card"><small>파랭</small><b><img data-share-party-image alt=""><span data-share-party-tier>UNRANK</span></b></span>
+                  </span>
+                  <span class="sa-share-metrics">
+                    <span><small><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8v3a4 4 0 0 1-8 0V4Zm0 2H4v1a4 4 0 0 0 4 4m8-5h4v1a4 4 0 0 1-4 4m-4 0v5m-3 4h6m-5-4h4"/></svg>승률</small><b data-share-win-rate>0%</b></span>
+                    <span><small><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/></svg>킬뎃</small><b data-share-kd>0%</b></span>
+                    <span><small><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="4"/><path d="M6 21c0-4 2.7-7 6-7s6 3 6 7M15 5l4-3m-1 0h1v1"/></svg>헤드샷</small><b data-share-headshot>0%</b></span>
+                    <span><small><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9h12l3 3h3v3H10l-2 5H5l1-5H3V9Zm5 0V6h5v3m1 6 2 4"/></svg>라플</small><b data-share-assault>0%</b></span>
+                    <span><small><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 10h16l3 2v3H9l-2 5H4l1-5H2v-5Zm7 0V7h6v3m2-3h4m-2-2v4"/></svg>스나</small><b data-share-sniper>0%</b></span>
+                    <span><small><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8h14l4 3v4H10l-2 5H5l1-5H3V8Zm4 0V5h7v3m0 7 2 4M17 11h4"/></svg>특수</small><b data-share-special>0%</b></span>
+                  </span>
+                </span>
+              </span>
+              <small class="sa-share-site-mark">TrackingSA.com</small>
+            </span>
+            <span class="sa-share-card-face sa-share-card-back" aria-hidden="true">
+              <span class="sa-share-back-grid"></span>
+              <span class="sa-share-back-mark">TRACKING <b>SA</b></span>
+              <span class="sa-share-back-ring"><i></i></span>
+              <strong>CLICK TO REVEAL</strong>
+              <small>클릭하여 전적 공개</small>
+            </span>
+          </span>
+        </button>
+        </div>
+      </details>
+      </div>
+
+      <section id="playerProfile" class="profile-section hidden">
+        <!-- Official profile and provider metrics stay visible across result tabs. -->
+      </section>
+
+      <div id="resultNavigation" class="sa-result-tabs" role="tablist" aria-label="전적 결과 보기" hidden>
+        <button id="resultOverviewTab" type="button" role="tab" data-result-tab="overview" aria-controls="resultContent" aria-selected="true">전적 요약 · 경기</button>
+        <button id="resultAnalysisTab" type="button" role="tab" data-result-tab="analysis" aria-controls="resultContent" aria-selected="false" tabindex="-1">상세 분석 · 관계</button>
+        <button id="resultActivityTab" type="button" role="tab" data-result-tab="activity" aria-controls="resultContent" aria-selected="false" tabindex="-1">최근 31일 활동</button>
+      </div>
+
+      <div id="resultContent" class="sa-result-content">
+        <section id="statsSummary" class="stats-section hidden">
+          <!-- sa-stats-summary will be injected here -->
+        </section>
+
+        <section id="formInsightSection" class="form-insight-section hidden"></section>
+
+        <section id="matchHistory" class="history-section hidden">
+          <h2>최근 매치 기록</h2>
+          <!-- sa-match-list will be injected here -->
+        </section>
+        <section id="playerActivity" class="sa-result-activity" aria-label="최근 31일 활동" hidden></section>
+      </div>
+    </section>
+    <section class="content-card" style="margin-top: 24px;">
+      <h2>이 페이지가 제공하는 정보</h2>
+      <p>이 전적 검색 페이지는 서든어택 공개 전적을 닉네임 기준으로 확인할 수 있도록 구성되어 있습니다. 검색 결과에서는 최근·이전 20경기 비교, 최근 31일 활동과 VS 비교 흐름을 확인할 수 있고, 해석이 필요한 부분은 별도 가이드 문서로 연결합니다.</p>
+      <div class="quick-links">
+        <a class="quick-link" href="/guides/sudden-attack-stats-guide/">
+          <strong>전적 검색 가이드</strong>
+          <span>최근·이전 20경기와 최근 31일 활동을 읽는 순서를 문서로 정리했습니다.</span>
+        </a>
+        <a class="quick-link" href="/guides/match-history-reading/">
+          <strong>최근 경기 해석</strong>
+          <span>최근 20경기 기록을 어떤 순서로 읽어야 하는지 설명합니다.</span>
+        </a>
+        <a class="quick-link" href="/stats/sudden-attack/replay/">
+          <strong>실제 플레이도 분석해 보세요</strong>
+          <span>병영수첩 리플레이로 라운드 흐름과 사망 장면, 투척물 기록을 확인할 수 있습니다.</span>
+        </a>
+      </div>
+    </section>
+    <section class="content-card" style="margin-top: 24px;">
+      <h2>운영 정보와 데이터 기준</h2>
+      <p>Tracking SA는 검색 기능만 노출하는 단일 페이지가 아니라, 운영 주체와 문서 기준을 함께 공개하는 구조로 운영합니다. 서비스 목적과 핵심 동선은 <a href="/service-methodology/">서비스 기준</a>, 설명 문서 작성 기준은 <a href="/editorial-policy/">편집 원칙</a>에서 확인할 수 있습니다.</p>
+      <div class="ops-list">
+        <div class="ops-item">
+          <strong>운영 주체</strong>
+          <span>Tracking SA Team</span>
+        </div>
+        <div class="ops-item">
+          <strong>문의</strong>
+          <span><a href="mailto:demo-15b9ce4f@example.com">demo-15b9ce4f@example.com</a> · <a href="/contact/">문의 페이지</a></span>
+        </div>
+        <div class="ops-item">
+          <strong>정책 문서</strong>
+          <span><a href="/privacy-policy/">개인정보처리방침</a>, <a href="/terms/">이용약관</a>, <a href="/about/">서비스 소개</a></span>
         </div>
       </div>
-    </div>
-
-    <!-- Admin Panel (Inline) -->
-    <section id="adminPanel" class="admin-section hidden">
-      <h2>크루 신청 관리</h2>
-      <div id="applicationList" class="app-list">
-        <!-- Pending applications will be injected here -->
+    </section>
+    <section class="content-card" style="margin-top: 24px;">
+      <h2>자주 묻는 질문</h2>
+      <div class="ops-list">
+        <div class="ops-item">
+          <strong>검색 결과가 바로 보이지 않으면 어떻게 하나요?</strong>
+          <span>공개 데이터 반영 시차가 있을 수 있습니다. 잠시 후 다시 조회하거나 새로고침 버튼으로 최신 데이터를 다시 불러오면 됩니다.</span>
+        </div>
+        <div class="ops-item">
+          <strong>왜 가이드 문서를 따로 운영하나요?</strong>
+          <span>전적 숫자는 맥락 없이 보면 오해가 생기기 쉽기 때문입니다. 검색 화면은 빠르게, 가이드 문서는 해석 중심으로 역할을 분리했습니다.</span>
+        </div>
+        <div class="ops-item">
+          <strong>리그 기능은 어디서 보나요?</strong>
+          <span>리그 운영 기능은 <a href="/stats/sudden-attack/league/">리그 허브</a>에서 분리해 제공합니다. 공개 전적 검색과 운영성 기능을 한 화면에 섞지 않는 것이 기본 원칙입니다.</span>
+        </div>
       </div>
-      <button id="closeAdminBtn" class="close-panel">닫기</button>
-    </section>
-
-    <div id="swrStatus" class="swr-status hidden"></div>
-
-    <section id="playerProfile" class="profile-section hidden">
-      <!-- sa-player-card will be injected here -->
-    </section>
-
-    <section id="statsSummary" class="stats-section hidden">
-      <!-- sa-stats-summary will be injected here -->
-    </section>
-
-    <section id="crewRanking" class="ranking-section">
-      <!-- sa-crew-ranking will be injected here -->
-    </section>
-
-    <section id="matchHistory" class="history-section hidden">
-      <h2>최근 매치 기록</h2>
-      <!-- sa-match-list will be injected here -->
     </section>
   </main>
 
-  <div class="site-footer-container"><footer>
-    <div style="margin-bottom: 15px;">
-        <strong style="color: #0052cc; font-size: 1.2rem; font-weight: 800;">Tracking SA</strong>
+  <div class="site-footer-container"><footer class="site-footer">
+    <div class="footer-inner">
+        <div class="footer-top">
+            <div class="footer-brand">
+                <a class="footer-brand-link" href="/" aria-label="Tracking SA 홈">
+                    <svg width="36" height="36" viewBox="0 0 100 100" fill="none" aria-hidden="true" focusable="false">
+                        <circle cx="50" cy="50" r="48" stroke="currentColor" stroke-width="4"/>
+                        <path d="M25 70L40 55L50 65L75 35" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="70" cy="35" r="12" fill="currentColor"/>
+                    </svg>
+                    <strong>TRACKING <span>SA</span></strong>
+                </a>
+                <p>서든어택의 기록을,<br>더 쉽게 읽는 곳.</p>
+                <button id="pwa-install-button" class="footer-install" type="button" hidden>Tracking SA 앱 설치 <span aria-hidden="true">↗</span></button>
+            </div>
+            <nav class="footer-nav" aria-label="하단 메뉴">
+                <div class="footer-link-group">
+                    <h2>둘러보기</h2>
+                    <ul>
+                        <li><a href="/stats/sudden-attack/">서든어택 전적</a></li>
+                        <li><a href="/stats/sudden-attack/replay/">리플레이 분석실</a></li>
+                        <li><a href="/guides/">가이드</a></li>
+                    </ul>
+                </div>
+                <div class="footer-link-group">
+                    <h2>서비스 안내</h2>
+                    <ul>
+                        <li><a href="/about" data-i18n="about_us">서비스 소개</a></li>
+                        <li><a href="/service-methodology/">서비스 기준</a></li>
+                        <li><a href="/editorial-policy/">편집 원칙</a></li>
+                        <li><a href="/sitemap.xml" data-i18n="sitemap">사이트맵</a></li>
+                    </ul>
+                </div>
+                <div class="footer-link-group">
+                    <h2>이용 및 문의</h2>
+                    <ul>
+                        <li><a href="/privacy-policy" data-i18n="privacy_policy">개인정보처리방침</a></li>
+                        <li><a href="/terms" data-i18n="terms_of_service">이용약관</a></li>
+                        <li><a href="/ai-replay-pass/">AI 이용권 · 판매 준비</a></li>
+                        <li><a href="/contact/" data-i18n="contact">문의</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+        <div class="footer-business-info" aria-label="사업자 정보">
+            <details class="footer-business-details">
+                <summary class="footer-business-summary"><strong>로직 스토어</strong><span>사업자 정보</span><svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false"><path d="m4 6 4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+                <dl>
+                    <div><dt>상호</dt><dd>로직 스토어</dd></div>
+                    <div><dt>사업자등록번호</dt><dd>000-00-00000</dd></div>
+                    <div><dt>대표자</dt><dd>조한범</dd></div>
+                    <div class="footer-business-address"><dt>사업장 주소</dt><dd>경기도 수원시 인계동 992-13 크레텔 하우스 2동 302호</dd></div>
+                    <div><dt>통신판매업 신고번호</dt><dd>2026-수원팔달-0279호</dd></div>
+                </dl>
+            </details>
+            <div class="footer-business-contact" aria-label="고객 문의"><span>고객 문의</span><a href="tel:01081129691" aria-label="고객 문의 전화 010-0000-0000">010-0000-0000</a><a href="mailto:demo-15b9ce4f@example.com" aria-label="문의 이메일 demo-15b9ce4f@example.com">demo-15b9ce4f@example.com</a></div>
+        </div>
+        <div class="footer-bottom">
+            <p class="nexon-api-attribution">본 서비스는 <a href="https://openapi.nexon.com/ko/support/terms/" target="_blank" rel="noopener noreferrer">NEXON Open API</a>를 이용하여 데이터를 제공합니다. <span lang="en">This service uses NEXON Open API.</span></p>
+            <p class="footer-copyright" data-i18n="footer_copyright">&copy; 2026 TrackingSA. 서든어택 전적 검색 중심 서비스.</p>
+        </div>
     </div>
-    <p data-i18n="footer_copyright"></p>
-    <p style="margin-top: 10px;">
-        <a href="/about" data-i18n="about_us">서비스 소개</a> |
-        <a href="/contact" data-i18n="contact">문의</a> |
-        <a href="/inquiry" data-i18n="partnership_inquiry">서비스 제휴 문의</a> |
-        <a href="/privacy-policy" data-i18n="privacy_policy">개인정보처리방침</a> |
-        <a href="/terms" data-i18n="terms_of_service">이용약관</a> |
-        <a href="/glossary" data-i18n="ai_glossary">AI 용어 사전</a> |
-        <a href="/sitemap.xml" data-i18n="sitemap">사이트맵</a> |
-        <a href="/stats/sudden-attack/">서든어택 전적</a>
-    </p>
 </footer>
 </div>
-  <script type="module" src="main.js"></script>
+  <script type="module" src="home-main.js?v=81f2b070c018"></script>
 </body>
 </html>

@@ -1,0 +1,51 @@
+name: Firebase Functions Deploy
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: firebase-functions-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: cloud-functions/package.json
+
+      - name: Test functions and runtime configuration
+        env:
+          TRACKING_SA_FUNCTIONS_NODE_CHECK: "1"
+        run: |
+          npm ci
+          npm run test:unit
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Install and audit function dependencies
+        working-directory: cloud-functions
+        run: |
+          npm ci
+          npm audit
+
+      - name: Deploy Firebase Functions
+        env:
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+        run: |
+          set -euo pipefail
+          umask 077
+          trap 'rm -f "$HOME/firebase-sa-key.json" "$RUNNER_TEMP/tracking-sa-functions.json"' EXIT
+          echo "$FIREBASE_SERVICE_ACCOUNT_JSON" > "$HOME/firebase-sa-key.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$HOME/firebase-sa-key.json"
+          # Explicit targets also redeploy when only the runtime configuration changes.
+          firebase deploy --only functions:cleanupBoardPostComments,functions:discordMatchSession --project demo-tracking-sa-portfolio --non-interactive --force
+          firebase functions:list --project demo-tracking-sa-portfolio --json > "$RUNNER_TEMP/tracking-sa-functions.json"
+          node scripts/verify-functions-runtime.mjs "$RUNNER_TEMP/tracking-sa-functions.json"

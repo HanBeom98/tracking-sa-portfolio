@@ -2,7 +2,5 @@
   "name": "tracking-sa-functions",
   "version": "1.0.0",
   "type": "module",
-  "dependencies": {
-    "tweetnacl": "^1.0.3"
-  }
+  "dependencies": {}
 }
